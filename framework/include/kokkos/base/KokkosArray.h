@@ -880,6 +880,12 @@ dataStore(std::ostream & stream, Array<T, dimension> & array, void * context)
   if (!is_alloc)
     return;
 
+  bool is_host_alloc = array.isHostAlloc();
+  dataStore(stream, is_host_alloc, nullptr);
+
+  bool is_device_alloc = array.isDeviceAlloc();
+  dataStore(stream, is_device_alloc, nullptr);
+
   std::string type = typeid(T).name();
   dataStore(stream, type, nullptr);
 
@@ -924,6 +930,12 @@ dataLoad(std::istream & stream, Array<T, dimension> & array, void * context)
   if (!is_alloc)
     return;
 
+  bool is_host_alloc;
+  dataLoad(stream, is_host_alloc, nullptr);
+
+  bool is_device_alloc;
+  dataLoad(stream, is_device_alloc, nullptr);
+
   std::string from_type_name;
   dataLoad(stream, from_type_name, nullptr);
 
@@ -945,20 +957,34 @@ dataLoad(std::istream & stream, Array<T, dimension> & array, void * context)
                "D.");
 
   std::vector<dof_id_type> from_n(dimension);
-  std::vector<dof_id_type> n(dimension);
 
   for (unsigned int dim = 0; dim < dimension; ++dim)
-  {
     dataLoad(stream, from_n[dim], nullptr);
-    n[dim] = array.n(dim);
-  }
 
-  if (from_n != n)
-    mooseError("Kokkos array error: cannot load an array because the stored array has dimensions (",
-               Moose::stringify(from_n),
-               ") but the loading array has dimensions (",
-               Moose::stringify(n),
-               ").");
+  if (array.isAlloc())
+  {
+    std::vector<dof_id_type> n(dimension);
+
+    for (unsigned int dim = 0; dim < dimension; ++dim)
+      n[dim] = array.n(dim);
+
+    if (from_n != n)
+      mooseError(
+          "Kokkos array error: cannot load an array because the stored array has dimensions (",
+          Moose::stringify(from_n),
+          ") but the loading array has dimensions (",
+          Moose::stringify(n),
+          ").");
+  }
+  else
+  {
+    if (is_host_alloc && !is_device_alloc)
+      array.createHost(from_n);
+    else if (!is_host_alloc && is_device_alloc)
+      array.createDevice(from_n);
+    else
+      array.create(from_n);
+  }
 
   if (array.isHostAlloc())
   {

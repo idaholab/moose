@@ -37,22 +37,15 @@ Assembly::init()
 {
   // Cache mesh information
 
-  auto num_subdomains = _mesh.meshSubdomains().size();
-
-  _coord_type.create(num_subdomains);
-
   for (auto subdomain : _mesh.meshSubdomains())
-    _coord_type[kokkosMesh().getSubdomainID(subdomain)] = _mesh.getCoordSystem(subdomain);
+    _coord_type[subdomain] = _mesh.getCoordSystem(subdomain);
 
   _coord_type.copyToDevice();
 
   if (_mesh.usingGeneralAxisymmetricCoordAxes())
   {
-    _rz_axis.create(num_subdomains);
-
     for (auto subdomain : _mesh.meshSubdomains())
-      _rz_axis[kokkosMesh().getSubdomainID(subdomain)] =
-          _mesh.getGeneralAxisymmetricCoordAxis(subdomain);
+      _rz_axis[subdomain] = _mesh.getGeneralAxisymmetricCoordAxis(subdomain);
 
     _rz_axis.copyToDevice();
   }
@@ -69,20 +62,7 @@ Assembly::init()
 void
 Assembly::initQuadrature()
 {
-  auto num_subdomains = _mesh.meshSubdomains().size();
   auto num_elem_types = kokkosMesh().getElementTypeMap().size();
-
-  _q_points.create(num_subdomains, num_elem_types);
-  _q_points_face.create(num_subdomains, num_elem_types);
-  _weights.create(num_subdomains, num_elem_types);
-  _weights_face.create(num_subdomains, num_elem_types);
-
-  _n_qps.create(num_subdomains);
-  _n_qps_face.create(num_subdomains);
-  _qp_offset.create(num_subdomains);
-  _qp_offset_face.create(num_subdomains);
-  _max_qps_per_elem.create(num_subdomains + 1);
-  _max_qps_per_elem = 0;
 
   // Find boundaries where material properties should be computed
 
@@ -102,10 +82,10 @@ Assembly::initQuadrature()
 
   // Cache quadrature data
 
+  _max_qps_per_elem = 0;
+
   for (auto subdomain : _mesh.meshSubdomains())
   {
-    auto sid = kokkosMesh().getSubdomainID(subdomain);
-
     std::map<ElemType, unsigned int> n_qps;
     std::map<ElemType, std::vector<unsigned int>> n_qps_face;
 
@@ -113,26 +93,24 @@ Assembly::initQuadrature()
     auto qrule = assembly.writeableQRule(_dimension, subdomain, {});
     auto qrule_face = assembly.writeableQRuleFace(_dimension, subdomain, {});
 
+    _weights[subdomain].create(num_elem_types);
+    _weights_face[subdomain].create(num_elem_types);
+
     for (auto & [elem_type, elem_type_id] : kokkosMesh().getElementTypeMap())
     {
       auto elem = &libMesh::ReferenceElem::get(elem_type);
 
-      _q_points_face(sid, elem_type_id).create(elem->n_sides());
-      _weights_face(sid, elem_type_id).create(elem->n_sides());
+      _weights_face[subdomain][elem_type_id].create(elem->n_sides());
 
       // Cache volume quadrature of each reference element
 
       qrule->init(*elem, /* p-level */ 0);
       n_qps[elem_type] = qrule->n_points();
 
-      _q_points(sid, elem_type_id).create(qrule->n_points());
-      _weights(sid, elem_type_id).create(qrule->n_points());
+      _weights[subdomain][elem_type_id].create(qrule->n_points());
 
       for (unsigned int qp = 0; qp < qrule->n_points(); ++qp)
-      {
-        _q_points(sid, elem_type_id)[qp] = qrule->qp(qp);
-        _weights(sid, elem_type_id)[qp] = qrule->w(qp);
-      }
+        _weights[subdomain][elem_type_id][qp] = qrule->w(qp);
 
       // Cache face quadrature of each reference element
 
@@ -141,41 +119,38 @@ Assembly::initQuadrature()
         qrule_face->init(*elem->side_ptr(side), /* p-level */ 0);
         n_qps_face[elem_type].push_back(qrule_face->n_points());
 
-        _q_points_face(sid, elem_type_id)[side].create(qrule_face->n_points());
-        _weights_face(sid, elem_type_id)[side].create(qrule_face->n_points());
+        _weights_face[subdomain][elem_type_id][side].create(qrule_face->n_points());
 
         for (unsigned int qp = 0; qp < qrule_face->n_points(); ++qp)
-        {
-          _q_points_face(sid, elem_type_id)[side][qp] = qrule_face->qp(qp);
-          _weights_face(sid, elem_type_id)[side][qp] = qrule_face->w(qp);
-        }
+          _weights_face[subdomain][elem_type_id][side][qp] = qrule_face->w(qp);
       }
     }
 
     auto & map = kokkosMesh().getSubdomainLocalElementMap(subdomain);
 
-    _n_qps[sid].create(map.size());
-    _n_qps_face[sid].create(_mesh.getMaxSidesPerElem(), map.size());
-    _n_qps_face[sid] = 0;
+    _n_qps[subdomain].create(map.size());
+    _n_qps_face[subdomain].create(_mesh.getMaxSidesPerElem(), map.size());
+    _n_qps_face[subdomain] = 0;
 
-    _qp_offset[sid].create(map.size() + 1);
-    _qp_offset_face[sid].create(_mesh.getMaxSidesPerElem(), map.size() + 1);
-    _qp_offset_face[sid] = 0;
+    _qp_offset[subdomain].create(map.size() + 1);
+    _qp_offset_face[subdomain].create(_mesh.getMaxSidesPerElem(), map.size() + 1);
+    _qp_offset_face[subdomain] = 0;
 
     for (auto & [elem, eid] : map)
     {
-      _n_qps[sid][eid] = n_qps[elem->type()];
-      _qp_offset[sid][eid] = n_qps[elem->type()];
+      _n_qps[subdomain][eid] = n_qps[elem->type()];
+      _qp_offset[subdomain][eid] = n_qps[elem->type()];
 
       for (unsigned int side = 0; side < elem->n_sides(); ++side)
-        _n_qps_face[sid](side, eid) = n_qps_face[elem->type()][side];
+        _n_qps_face[subdomain](side, eid) = n_qps_face[elem->type()][side];
 
-      _max_qps_per_elem[sid] = std::max(_max_qps_per_elem[sid], _n_qps[sid][eid]);
+      _max_qps_per_elem = std::max(_max_qps_per_elem, _n_qps[subdomain][eid]);
     }
 
-    _max_qps_per_elem.last() = std::max(_max_qps_per_elem.last(), _max_qps_per_elem[sid]);
-
-    std::exclusive_scan(_qp_offset[sid].begin(), _qp_offset[sid].end(), _qp_offset[sid].begin(), 0);
+    std::exclusive_scan(_qp_offset[subdomain].begin(),
+                        _qp_offset[subdomain].end(),
+                        _qp_offset[subdomain].begin(),
+                        0);
   }
 
   for (auto boundary : _material_boundaries)
@@ -185,7 +160,7 @@ Assembly::initQuadrature()
 
       if (elem->processor_id() == _problem.processor_id())
       {
-        auto sid = kokkosMesh().getSubdomainID(elem->subdomain_id());
+        auto sid = elem->subdomain_id();
         auto eid = kokkosMesh().getSubdomainLocalElementID(elem);
         auto side = _mesh.sideWithBoundaryID(elem, boundary);
 
@@ -194,15 +169,11 @@ Assembly::initQuadrature()
     }
 
   for (auto subdomain : _mesh.meshSubdomains())
-  {
-    auto sid = kokkosMesh().getSubdomainID(subdomain);
+    std::exclusive_scan(_qp_offset_face[subdomain].begin(),
+                        _qp_offset_face[subdomain].end(),
+                        _qp_offset_face[subdomain].begin(),
+                        0);
 
-    std::exclusive_scan(
-        _qp_offset_face[sid].begin(), _qp_offset_face[sid].end(), _qp_offset_face[sid].begin(), 0);
-  }
-
-  _q_points.copyToDeviceNested();
-  _q_points_face.copyToDeviceNested();
   _weights.copyToDeviceNested();
   _weights_face.copyToDeviceNested();
 
@@ -210,7 +181,6 @@ Assembly::initQuadrature()
   _n_qps_face.copyToDeviceNested();
   _qp_offset.copyToDeviceNested();
   _qp_offset_face.copyToDeviceNested();
-  _max_qps_per_elem.copyToDevice();
 }
 
 void
@@ -238,31 +208,28 @@ Assembly::initShape()
 
   // Cache reference shape data
 
-  auto num_subdomains = _mesh.meshSubdomains().size();
   auto num_elem_types = kokkosMesh().getElementTypeMap().size();
-
-  _phi.create(num_subdomains, num_elem_types, _fe_type_map.size());
-  _phi_face.create(num_subdomains, num_elem_types, _fe_type_map.size());
-  _grad_phi.create(num_subdomains, num_elem_types, _fe_type_map.size());
-  _grad_phi_face.create(num_subdomains, num_elem_types, _fe_type_map.size());
-
-  _map_phi.create(num_subdomains, num_elem_types);
-  _map_phi_face.create(num_subdomains, num_elem_types);
-  _map_psi_face.create(num_subdomains, num_elem_types);
-  _map_grad_phi.create(num_subdomains, num_elem_types);
-  _map_grad_phi_face.create(num_subdomains, num_elem_types);
-  _map_grad_psi_face.create(num_subdomains, num_elem_types);
 
   _n_dofs.create(num_elem_types, _fe_type_map.size());
   _n_dofs = 0;
 
   for (auto subdomain : _mesh.meshSubdomains())
   {
-    auto sid = kokkosMesh().getSubdomainID(subdomain);
-
     auto & assembly = _problem.assembly(0, 0);
     auto qrule = assembly.writeableQRule(_dimension, subdomain, {});
     auto qrule_face = assembly.writeableQRuleFace(_dimension, subdomain, {});
+
+    _phi[subdomain].create(num_elem_types, _fe_type_map.size());
+    _phi_face[subdomain].create(num_elem_types, _fe_type_map.size());
+    _grad_phi[subdomain].create(num_elem_types, _fe_type_map.size());
+    _grad_phi_face[subdomain].create(num_elem_types, _fe_type_map.size());
+
+    _map_phi[subdomain].create(num_elem_types);
+    _map_phi_face[subdomain].create(num_elem_types);
+    _map_psi_face[subdomain].create(num_elem_types);
+    _map_grad_phi[subdomain].create(num_elem_types);
+    _map_grad_phi_face[subdomain].create(num_elem_types);
+    _map_grad_psi_face[subdomain].create(num_elem_types);
 
     for (auto & [fe_type, fe_type_id] : _fe_type_map)
     {
@@ -283,18 +250,18 @@ Assembly::initShape()
 
         _n_dofs(elem_type_id, fe_type_id) = phi.size();
 
-        _phi(sid, elem_type_id, fe_type_id).create(phi.size(), qrule->n_points());
-        _grad_phi(sid, elem_type_id, fe_type_id).create(phi.size(), qrule->n_points());
+        _phi[subdomain](elem_type_id, fe_type_id).create(phi.size(), qrule->n_points());
+        _grad_phi[subdomain](elem_type_id, fe_type_id).create(phi.size(), qrule->n_points());
 
         for (unsigned int i = 0; i < phi.size(); ++i)
           for (unsigned int qp = 0; qp < qrule->n_points(); ++qp)
           {
-            _phi(sid, elem_type_id, fe_type_id)(i, qp) = phi[i][qp];
-            _grad_phi(sid, elem_type_id, fe_type_id)(i, qp) = grad_phi[i][qp];
+            _phi[subdomain](elem_type_id, fe_type_id)(i, qp) = phi[i][qp];
+            _grad_phi[subdomain](elem_type_id, fe_type_id)(i, qp) = grad_phi[i][qp];
           }
 
-        _phi_face(sid, elem_type_id, fe_type_id).create(elem->n_sides());
-        _grad_phi_face(sid, elem_type_id, fe_type_id).create(elem->n_sides());
+        _phi_face[subdomain](elem_type_id, fe_type_id).create(elem->n_sides());
+        _grad_phi_face[subdomain](elem_type_id, fe_type_id).create(elem->n_sides());
 
         for (unsigned int side = 0; side < elem->n_sides(); ++side)
         {
@@ -303,15 +270,16 @@ Assembly::initShape()
 
           fe_face->reinit(elem, side);
 
-          _phi_face(sid, elem_type_id, fe_type_id)(side).create(phi.size(), qrule_face->n_points());
-          _grad_phi_face(sid, elem_type_id, fe_type_id)(side).create(phi.size(),
-                                                                     qrule_face->n_points());
+          _phi_face[subdomain](elem_type_id, fe_type_id)(side).create(phi.size(),
+                                                                      qrule_face->n_points());
+          _grad_phi_face[subdomain](elem_type_id, fe_type_id)(side).create(phi.size(),
+                                                                           qrule_face->n_points());
 
           for (unsigned int i = 0; i < phi.size(); ++i)
             for (unsigned int qp = 0; qp < qrule_face->n_points(); ++qp)
             {
-              _phi_face(sid, elem_type_id, fe_type_id)(side)(i, qp) = phi[i][qp];
-              _grad_phi_face(sid, elem_type_id, fe_type_id)(side)(i, qp) = grad_phi[i][qp];
+              _phi_face[subdomain](elem_type_id, fe_type_id)(side)(i, qp) = phi[i][qp];
+              _grad_phi_face[subdomain](elem_type_id, fe_type_id)(side)(i, qp) = grad_phi[i][qp];
             }
         }
       }
@@ -334,20 +302,20 @@ Assembly::initShape()
 
       fe->reinit(elem);
 
-      _map_phi(sid, elem_type_id).create(phi.size(), qrule->n_points());
-      _map_grad_phi(sid, elem_type_id).create(phi.size(), qrule->n_points());
+      _map_phi[subdomain][elem_type_id].create(phi.size(), qrule->n_points());
+      _map_grad_phi[subdomain][elem_type_id].create(phi.size(), qrule->n_points());
 
       for (unsigned int i = 0; i < phi.size(); ++i)
         for (unsigned int qp = 0; qp < qrule->n_points(); ++qp)
         {
-          _map_phi(sid, elem_type_id)(i, qp) = phi[i][qp];
-          _map_grad_phi(sid, elem_type_id)(i, qp) = grad_phi[i][qp];
+          _map_phi[subdomain][elem_type_id](i, qp) = phi[i][qp];
+          _map_grad_phi[subdomain][elem_type_id](i, qp) = grad_phi[i][qp];
         }
 
-      _map_phi_face(sid, elem_type_id).create(elem->n_sides());
-      _map_grad_phi_face(sid, elem_type_id).create(elem->n_sides());
-      _map_psi_face(sid, elem_type_id).create(elem->n_sides());
-      _map_grad_psi_face(sid, elem_type_id).create(elem->n_sides());
+      _map_phi_face[subdomain][elem_type_id].create(elem->n_sides());
+      _map_grad_phi_face[subdomain][elem_type_id].create(elem->n_sides());
+      _map_psi_face[subdomain][elem_type_id].create(elem->n_sides());
+      _map_grad_psi_face[subdomain][elem_type_id].create(elem->n_sides());
 
       for (unsigned int side = 0; side < elem->n_sides(); ++side)
       {
@@ -356,31 +324,33 @@ Assembly::initShape()
 
         fe_face->reinit(elem, side);
 
-        _map_phi_face(sid, elem_type_id)(side).create(phi.size(), qrule_face->n_points());
-        _map_grad_phi_face(sid, elem_type_id)(side).create(phi.size(), qrule_face->n_points());
+        _map_phi_face[subdomain][elem_type_id][side].create(phi.size(), qrule_face->n_points());
+        _map_grad_phi_face[subdomain][elem_type_id][side].create(phi.size(),
+                                                                 qrule_face->n_points());
 
         for (unsigned int i = 0; i < phi.size(); ++i)
           for (unsigned int qp = 0; qp < qrule_face->n_points(); ++qp)
           {
-            _map_phi_face(sid, elem_type_id)(side)(i, qp) = phi[i][qp];
-            _map_grad_phi_face(sid, elem_type_id)(side)(i, qp) = grad_phi[i][qp];
+            _map_phi_face[subdomain][elem_type_id][side](i, qp) = phi[i][qp];
+            _map_grad_phi_face[subdomain][elem_type_id][side](i, qp) = grad_phi[i][qp];
           }
 
         auto & psi = fe_face->get_fe_map().get_psi();
         auto & dpsidxi = fe_face->get_fe_map().get_dpsidxi();
         auto & dpsideta = fe_face->get_fe_map().get_dpsideta();
 
-        _map_psi_face(sid, elem_type_id)(side).create(psi.size(), qrule_face->n_points());
-        _map_grad_psi_face(sid, elem_type_id)(side).create(psi.size(), qrule_face->n_points());
+        _map_psi_face[subdomain][elem_type_id][side].create(psi.size(), qrule_face->n_points());
+        _map_grad_psi_face[subdomain][elem_type_id][side].create(psi.size(),
+                                                                 qrule_face->n_points());
 
         for (unsigned int i = 0; i < psi.size(); ++i)
           for (unsigned int qp = 0; qp < qrule_face->n_points(); ++qp)
           {
-            _map_psi_face(sid, elem_type_id)(side)(i, qp) = psi[i][qp];
+            _map_psi_face[subdomain][elem_type_id][side](i, qp) = psi[i][qp];
             if (elem->dim() > 1)
-              _map_grad_psi_face(sid, elem_type_id)(side)(i, qp)(0) = dpsidxi[i][qp];
+              _map_grad_psi_face[subdomain][elem_type_id][side](i, qp)(0) = dpsidxi[i][qp];
             if (elem->dim() > 2)
-              _map_grad_psi_face(sid, elem_type_id)(side)(i, qp)(1) = dpsideta[i][qp];
+              _map_grad_psi_face[subdomain][elem_type_id][side](i, qp)(1) = dpsideta[i][qp];
           }
       }
     }
@@ -404,25 +374,18 @@ Assembly::initShape()
 void
 Assembly::cachePhysicalMap()
 {
-  auto num_subdomains = _mesh.meshSubdomains().size();
   auto num_elems = kokkosMesh().getLocalElementMap().size();
-
-  _jacobian.create(num_subdomains);
-  _jxw.create(num_subdomains);
-  _xyz.create(num_subdomains);
 
   for (auto subdomain : _mesh.meshSubdomains())
   {
-    auto sid = kokkosMesh().getSubdomainID(subdomain);
-
-    _jacobian[sid].createDevice(_qp_offset[sid].last());
-    _jxw[sid].createDevice(_qp_offset[sid].last());
-    _xyz[sid].createDevice(_qp_offset[sid].last());
+    _jacobian[subdomain].createDevice(_qp_offset[subdomain].last());
+    _jxw[subdomain].createDevice(_qp_offset[subdomain].last());
+    _xyz[subdomain].createDevice(_qp_offset[subdomain].last());
   }
 
-  _jacobian.copyToDeviceNested();
-  _jxw.copyToDeviceNested();
-  _xyz.copyToDeviceNested();
+  _jacobian.copyToDevice();
+  _jxw.copyToDevice();
+  _xyz.copyToDevice();
 
   ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<dof_id_type>> policy(0, num_elems);
   ::Kokkos::parallel_for(policy, *this);

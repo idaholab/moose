@@ -41,9 +41,6 @@ System::System(SystemBase & system)
     setupSparsity();
     checkNodalBCs();
   }
-
-  _qp_solutions.create(MAX_TAG);
-  _qp_solutions_grad.create(MAX_TAG);
 }
 
 void
@@ -52,19 +49,20 @@ System::setupVariables()
   auto & sys = _system.system();
 
   _var_fe_types.create(_num_vars);
-  _var_subdomain_active.create(_num_vars, _mesh.meshSubdomains().size());
 
   for (unsigned int var = 0; var < _num_vars; ++var)
-  {
     _var_fe_types[var] = kokkosAssembly().getFETypeID(sys.variable_type(var));
 
-    for (auto subdomain : _mesh.meshSubdomains())
-      _var_subdomain_active(var, kokkosMesh().getSubdomainID(subdomain)) =
-          sys.variable(var).active_on_subdomain(subdomain);
+  for (auto subdomain : _mesh.meshSubdomains())
+  {
+    _var_subdomain_active[subdomain].create(_num_vars);
+
+    for (unsigned int var = 0; var < _num_vars; ++var)
+      _var_subdomain_active[subdomain][var] = sys.variable(var).active_on_subdomain(subdomain);
   }
 
   _var_fe_types.copyToDevice();
-  _var_subdomain_active.copyToDevice();
+  _var_subdomain_active.copyToDeviceNested();
 
   // Set coupling
 
@@ -102,9 +100,6 @@ System::setupDofs()
 
   _matrix_tag_active.create(MAX_TAG);
   _matrix_tag_active = false;
-
-  _vectors.create(MAX_TAG);
-  _matrices.create(MAX_TAG);
 
   _local_elem_dof_index.create(_num_vars);
   _local_node_dof_index.create(_num_vars);
@@ -259,9 +254,6 @@ void
 System::checkNodalBCs()
 {
   auto & nl_system = static_cast<NonlinearSystemBase &>(_system);
-
-  _nbc_residual_tag_dof.create(MAX_TAG);
-  _nbc_matrix_tag_dof.create(MAX_TAG);
 
   for (auto bc : nl_system.getKokkosNodalBCWarehouse().getActiveObjects())
   {
@@ -468,27 +460,29 @@ System::reinit()
 {
   for (auto tag : _active_variable_tags)
   {
-    if (!_qp_solutions[tag].isAlloc())
-      _qp_solutions[tag].create(_mesh.meshSubdomains().size(), _num_vars);
-
-    if (!_qp_solutions_grad[tag].isAlloc())
-      _qp_solutions_grad[tag].create(_mesh.meshSubdomains().size(), _num_vars);
-
     for (auto subdomain : _mesh.meshSubdomains())
     {
-      auto sid = kokkosMesh().getSubdomainID(subdomain);
+      if (!_qp_solutions[tag][subdomain].isAlloc())
+        _qp_solutions[tag][subdomain].create(_num_vars);
+
+      if (!_qp_solutions_grad[tag][subdomain].isAlloc())
+        _qp_solutions_grad[tag][subdomain].create(_num_vars);
 
       for (auto var : _active_variables)
       {
-        if (!_var_subdomain_active(var, sid))
+        if (!_var_subdomain_active[subdomain][var])
           continue;
 
-        if (!_qp_solutions[tag](sid, var).isAlloc())
-          _qp_solutions[tag](sid, var).createDevice(kokkosAssembly().getNumQps(sid));
+        if (!_qp_solutions[tag][subdomain][var].isAlloc())
+          _qp_solutions[tag][subdomain][var].createDevice(kokkosAssembly().getNumQps(subdomain));
 
-        if (!_qp_solutions_grad[tag](sid, var).isAlloc())
-          _qp_solutions_grad[tag](sid, var).createDevice(kokkosAssembly().getNumQps(sid));
+        if (!_qp_solutions_grad[tag][subdomain][var].isAlloc())
+          _qp_solutions_grad[tag][subdomain][var].createDevice(
+              kokkosAssembly().getNumQps(subdomain));
       }
+
+      _qp_solutions[tag][subdomain].copyToDevice();
+      _qp_solutions_grad[tag][subdomain].copyToDevice();
     }
 
     _qp_solutions[tag].copyToDevice();
@@ -522,7 +516,7 @@ System::operator()(const dof_id_type tid) const
   auto sid = info.subdomain;
   auto elem_type = info.type;
 
-  if (!_var_subdomain_active(var, sid))
+  if (!_var_subdomain_active[sid][var])
     return;
 
   auto fe_type = _var_fe_types[var];

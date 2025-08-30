@@ -146,7 +146,7 @@ public:
    */
   KOKKOS_FUNCTION bool isVariableActive(unsigned int var, SubdomainID subdomain) const
   {
-    return _var_subdomain_active(var, subdomain);
+    return _var_subdomain_active[subdomain][var];
   }
   /**
    * Check whether a residual tag is active
@@ -177,7 +177,7 @@ public:
    */
   KOKKOS_FUNCTION bool hasNodalBCResidualTag(dof_id_type dof, TagID tag) const
   {
-    return _nbc_residual_tag_dof[tag].isAlloc() && _nbc_residual_tag_dof[tag][dof];
+    return _nbc_residual_tag_dof.exists(tag) && _nbc_residual_tag_dof[tag][dof];
   }
   /**
    * Check whether a local DOF index is associated with a nodal BC for an extra matrix tag
@@ -187,7 +187,7 @@ public:
    */
   KOKKOS_FUNCTION bool hasNodalBCMatrixTag(dof_id_type dof, TagID tag) const
   {
-    return _nbc_matrix_tag_dof[tag].isAlloc() && _nbc_matrix_tag_dof[tag][dof];
+    return _nbc_matrix_tag_dof.exists(tag) && _nbc_matrix_tag_dof[tag][dof];
   }
   /**
    * Get the FE type ID of a variable
@@ -313,7 +313,7 @@ public:
   KOKKOS_FUNCTION Real &
   getVectorQpValue(ElementInfo info, dof_id_type qp, unsigned int var, TagID tag) const
   {
-    return _qp_solutions[tag](info.subdomain, var)[qp];
+    return _qp_solutions[tag][info.subdomain][var][qp];
   }
   /**
    * Get the quadrature gradient of a variable from a tagged vector
@@ -326,7 +326,7 @@ public:
   KOKKOS_FUNCTION Real3 &
   getVectorQpGrad(ElementInfo info, dof_id_type qp, unsigned int var, TagID tag) const
   {
-    return _qp_solutions_grad[tag](info.subdomain, var)[qp];
+    return _qp_solutions_grad[tag][info.subdomain][var][qp];
   }
   /**
    * Get the face quadrature value of a variable from a tagged vector
@@ -447,15 +447,15 @@ private:
    * Kokkos vectors and matrices on device
    */
   ///@{
-  Array<Vector> _vectors;
-  Array<Matrix> _matrices;
+  Map<TagID, Vector> _vectors;
+  Map<TagID, Matrix> _matrices;
   ///@}
   /**
    * Cached elemental quadrature values and gradients
    */
   ///@{
-  Array<Array2D<Array<Real>>> _qp_solutions;
-  Array<Array2D<Array<Real3>>> _qp_solutions_grad;
+  Map<TagID, Map<SubdomainID, Array<Array<Real>>>> _qp_solutions;
+  Map<TagID, Map<SubdomainID, Array<Array<Real3>>>> _qp_solutions_grad;
   ///@}
   /**
    * Local DOF index of each variable
@@ -479,7 +479,7 @@ private:
   /**
    * Whether each variable is active on subdomains
    */
-  Array2D<bool> _var_subdomain_active;
+  Map<SubdomainID, Array<bool>> _var_subdomain_active;
   /**
    * Off-diagonal coupled variable numbers of each variable
    */
@@ -512,8 +512,8 @@ private:
    * Flag whether each DOF is covered by a nodal BC for extra residual tags
    */
   ///@{
-  Array<Array<bool>> _nbc_residual_tag_dof;
-  Array<Array<bool>> _nbc_matrix_tag_dof;
+  Map<TagID, Array<bool>> _nbc_residual_tag_dof;
+  Map<TagID, Array<bool>> _nbc_matrix_tag_dof;
   ///@}
   /**
    * List of DOFs to send and receive

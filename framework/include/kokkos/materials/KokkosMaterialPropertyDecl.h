@@ -10,12 +10,11 @@
 #pragma once
 
 #include "KokkosArray.h"
+#include "KokkosMap.h"
 
 #include "MoosePassKey.h"
 
 #include <typeindex>
-
-class MooseMesh;
 
 namespace Moose
 {
@@ -137,13 +136,11 @@ public:
 
   /**
    * Allocate the data storage
-   * @param mesh The MOOSE mesh
    * @param assembly The Kokkos assembly
-   * @param subdomains The MOOSE subdomain IDs
+   * @param subdomains The subdomain IDs
    * @param bnd Whether this property is a face property
    */
-  virtual void allocate(const MooseMesh & mesh,
-                        const Assembly & assembly,
+  virtual void allocate(const Assembly & assembly,
                         const std::set<SubdomainID> & subdomains,
                         const bool bnd,
                         StorageKey) = 0;
@@ -242,8 +239,7 @@ public:
   virtual void init(const PropRecord & record, const StorageKey & key) override;
 
 #ifdef MOOSE_KOKKOS_SCOPE
-  virtual void allocate(const MooseMesh & mesh,
-                        const Assembly & assembly,
+  virtual void allocate(const Assembly & assembly,
                         const std::set<SubdomainID> & subdomains,
                         const bool bnd,
                         StorageKey) override;
@@ -265,7 +261,7 @@ private:
   /**
    * Data storage
    */
-  Array<Array<T, dimension + 1>> _data;
+  Map<SubdomainID, Array<T, dimension + 1>> _data;
   /**
    * Default value
    */

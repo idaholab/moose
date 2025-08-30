@@ -82,18 +82,6 @@ public:
   void update();
 
   /**
-   * Get the serialized subdomain ID of a subdomain
-   * @param subdomain The MOOSE subdomain ID
-   * @returns The subdomain ID
-   */
-  SubdomainID getSubdomainID(const SubdomainID subdomain) const;
-  /**
-   * Get the serialized boundary ID of a boundary
-   * @param boundary The MOOSE boundary ID
-   * @returns The boundary ID
-   */
-  BoundaryID getBoundaryID(const BoundaryID boundary) const;
-  /**
    * Get the serialized element type ID of an element
    * @param elem The libMesh element
    * @returns The element type ID
@@ -124,7 +112,7 @@ public:
   const auto & getLocalElementMap() const { return _maps->_local_elem_id_mapping; }
   /**
    * Get the serialized element ID map for a subdomain
-   * @param subdomain The MOOSE subdomain ID
+   * @param subdomain The subdomain ID
    * @returns The element ID map for the subdomain
    */
   const auto & getSubdomainElementMap(const SubdomainID subdomain) const
@@ -133,7 +121,7 @@ public:
   }
   /**
    * Get the serialized subdomain-local element ID map
-   * @param subdomain The MOOSE subdomain ID
+   * @param subdomain The subdomain ID
    * @returns The subdomain-local element ID map for the subdomain
    */
   const auto & getSubdomainLocalElementMap(const SubdomainID subdomain) const
@@ -142,7 +130,7 @@ public:
   }
   /**
    * Get the list of serialized element IDs for a subdomain
-   * @param subdomain The MOOSE subdomain ID
+   * @param subdomain The subdomain ID
    * @returns The list of element IDs in the subdomain
    */
   const auto & getSubdomainElementIDs(const SubdomainID subdomain) const
@@ -164,7 +152,7 @@ public:
   /**
    * Get the list of serialized node IDs for a subdomain
    * This list strictly contains the nodes local to the current process
-   * @param subdomain The MOOSE subdomain ID
+   * @param subdomain The subdomain ID
    * @returns The list of node IDs in the subdomain
    */
   const auto & getSubdomainNodeIDs(const SubdomainID subdomain) const
@@ -247,14 +235,6 @@ private:
   struct MeshMap
   {
     /**
-     * Map from the MOOSE subdomain ID to the serialized subdomain ID
-     */
-    std::unordered_map<SubdomainID, SubdomainID> _subdomain_id_mapping;
-    /**
-     * Map from the MOOSE boundary ID to the serialized boundary ID
-     */
-    std::unordered_map<BoundaryID, BoundaryID> _boundary_id_mapping;
-    /**
      * Map from the MOOSE element type to the serialized element type ID
      */
     std::unordered_map<ElemType, unsigned int> _elem_type_id_mapping;
@@ -314,7 +294,7 @@ private:
   /**
    * Node IDs on each boundary
    */
-  Array<Array<dof_id_type>> _boundary_nodes;
+  Map<BoundaryID, Array<dof_id_type>> _boundary_nodes;
 };
 
 #ifdef MOOSE_KOKKOS_SCOPE

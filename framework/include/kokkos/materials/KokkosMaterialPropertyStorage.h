@@ -28,9 +28,6 @@ namespace Kokkos
  */
 class MaterialPropertyStorage : protected ::MaterialPropertyStorage
 {
-  friend void ::dataStore(std::ostream &, MaterialPropertyStorage &, void *);
-  friend void ::dataLoad(std::istream &, MaterialPropertyStorage &, void *);
-
 public:
   /**
    * Constructor
@@ -146,6 +143,9 @@ private:
   static std::unordered_map<std::type_index, PropertyStore> _store_functions;
   static std::unordered_map<std::type_index, PropertyLoad> _load_functions;
   ///@}
+
+  friend void ::dataStore(std::ostream &, MaterialPropertyStorage &, void *);
+  friend void ::dataLoad(std::istream &, MaterialPropertyStorage &, void *);
 };
 
 } // namespace Kokkos

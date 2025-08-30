@@ -123,7 +123,6 @@ MaterialPropertyStorage::getKokkosProperty(std::string prop_name, unsigned int s
 void
 MaterialPropertyStorage::allocateKokkosProperties()
 {
-  auto & mesh = _problem.mesh();
   auto & assembly = _problem.kokkosAssembly();
 
   for (unsigned int state = 0; state < numStates(); ++state)
@@ -136,7 +135,7 @@ MaterialPropertyStorage::allocateKokkosProperties()
         auto & blocks =
             declarer->boundaryRestricted() ? declarer->meshBlockIDs() : declarer->blockIDs();
 
-        prop->allocate(mesh, assembly, blocks, record.bnd, {});
+        prop->allocate(assembly, blocks, record.bnd, {});
       }
     }
 }

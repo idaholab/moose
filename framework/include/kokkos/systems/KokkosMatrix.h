@@ -64,7 +64,7 @@ public:
    * Zero a row
    * @param i The row index local to this process to be zeroed
    */
-  KOKKOS_FUNCTION void zero(PetscInt i)
+  KOKKOS_FUNCTION void zero(PetscInt i) const
   {
     for (PetscInt j = _row_ptr[i]; j < _row_ptr[i + 1]; ++j)
       _val[j] = 0;

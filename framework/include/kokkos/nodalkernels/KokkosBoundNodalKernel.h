@@ -69,7 +69,7 @@ KokkosBoundNodalKernel<Derived>::KokkosBoundNodalKernel(const InputParameters & 
 
   const auto & bnd_names = this->template getParam<std::vector<BoundaryName>>("exclude_boundaries");
   for (const auto & bnd_id : this->_mesh.getBoundaryIDs(bnd_names))
-    bnd_ids.insert(this->kokkosMesh().getBoundaryID(bnd_id));
+    bnd_ids.insert(bnd_id);
 
   _bnd_ids = bnd_ids;
 }

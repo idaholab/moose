@@ -29,8 +29,6 @@ Mesh::initMap()
   if (!_maps)
     _maps = std::make_shared<MeshMap>();
 
-  _maps->_subdomain_id_mapping.clear();
-  _maps->_boundary_id_mapping.clear();
   _maps->_elem_type_id_mapping.clear();
   _maps->_local_elem_id_mapping.clear();
   _maps->_local_node_id_mapping.clear();
@@ -41,7 +39,6 @@ Mesh::initMap()
 
   for (auto subdomain : _mesh.meshSubdomains())
   {
-    _maps->_subdomain_id_mapping[subdomain] = _maps->_subdomain_id_mapping.size();
     _maps->_subdomain_elem_id_mapping[subdomain];
     _maps->_subdomain_local_elem_id_mapping[subdomain];
     _maps->_subdomain_elem_ids[subdomain];
@@ -71,9 +68,6 @@ Mesh::initMap()
       }
     }
   }
-
-  for (auto boundary : _mesh.meshBoundaryIds())
-    _maps->_boundary_id_mapping[boundary] = _maps->_boundary_id_mapping.size();
 }
 
 void
@@ -89,8 +83,6 @@ Mesh::initElement()
 
   for (auto subdomain : _mesh.meshSubdomains())
   {
-    auto sid = getSubdomainID(subdomain);
-
     for (auto & [elem, local_id] : getSubdomainLocalElementMap(subdomain))
     {
       auto eid = getElementID(elem);
@@ -99,7 +91,7 @@ Mesh::initElement()
       _elem_info[eid].type = elem_type;
       _elem_info[eid].id = eid;
       _elem_info[eid].local_id = local_id;
-      _elem_info[eid].subdomain = sid;
+      _elem_info[eid].subdomain = subdomain;
       _elem_info[eid].n_sides = elem->n_sides();
       _elem_info[eid].n_nodes = elem->n_nodes();
 
@@ -118,7 +110,6 @@ Mesh::initElement()
   _points.create(num_nodes);
   _nodes.create(_mesh.getMaxNodesPerElem(), num_elems);
   _nodes_face.create(_mesh.getMaxNodesPerSide(), _mesh.getMaxSidesPerElem(), num_elems);
-  _boundary_nodes.create(_mesh.meshBoundaryIds().size());
 
   for (auto & [node, nid] : getLocalNodeMap())
     _points[nid] = *node;
@@ -142,31 +133,13 @@ Mesh::initElement()
       if (node->processor_id() == _mesh.processor_id())
         nodes.insert(getNodeID(node));
 
-    _boundary_nodes[getBoundaryID(boundary)] = nodes;
+    _boundary_nodes[boundary] = nodes;
   }
 
   _points.copyToDevice();
   _nodes.copyToDevice();
   _nodes_face.copyToDevice();
   _boundary_nodes.copyToDevice();
-}
-
-SubdomainID
-Mesh::getSubdomainID(const SubdomainID subdomain) const
-{
-  if (!_maps->_subdomain_id_mapping.count(subdomain))
-    mooseError("Subdomain ", subdomain, " does not have Kokkos subdomain ID");
-
-  return _maps->_subdomain_id_mapping.at(subdomain);
-}
-
-BoundaryID
-Mesh::getBoundaryID(const BoundaryID boundary) const
-{
-  if (!_maps->_boundary_id_mapping.count(boundary))
-    mooseError("Boundary ", boundary, " does not have Kokkos boundary ID");
-
-  return _maps->_boundary_id_mapping.at(boundary);
 }
 
 unsigned int

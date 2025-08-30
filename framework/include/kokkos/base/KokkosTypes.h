@@ -12,6 +12,7 @@
 #include "KokkosThread.h"
 #include "KokkosScalar.h"
 #include "KokkosArray.h"
+#include "KokkosMap.h"
 
 #include "MooseError.h"
 #include "MooseUtils.h"

@@ -48,19 +48,10 @@ public:
    */
   unsigned int getFETypeID(FEType type) const { return libmesh_map_find(_fe_type_map, type); }
   /**
-   * Get the maximum number of quadrature points per element across the entire mesh
+   * Get the maximum number of quadrature points per element for the current partition
    * @returns The maximum number of quadrature points per element
    */
-  KOKKOS_FUNCTION unsigned int getMaxQpsPerElem() const { return _max_qps_per_elem.last(); }
-  /**
-   * Get the maximum number of quadrature points per element for a subdomain
-   * @param subdomain The subdomain ID
-   * @returns The maximum number of quadrature points per element
-   */
-  KOKKOS_FUNCTION unsigned int getMaxQpsPerElem(SubdomainID subdomain) const
-  {
-    return _max_qps_per_elem[subdomain];
-  }
+  KOKKOS_FUNCTION unsigned int getMaxQpsPerElem() const { return _max_qps_per_elem; }
   /**
    * Get the total number of elemental quadrature points in a subdomain
    * @param subdomain The subdomain ID
@@ -141,7 +132,7 @@ public:
   KOKKOS_FUNCTION const auto &
   getPhi(SubdomainID subdomain, unsigned int elem_type, unsigned int fe_type) const
   {
-    return _phi(subdomain, elem_type, fe_type);
+    return _phi[subdomain](elem_type, fe_type);
   }
   /**
    * Get the face shape functions of a FE type for an element type and subdomain
@@ -153,7 +144,7 @@ public:
   KOKKOS_FUNCTION const auto &
   getPhiFace(SubdomainID subdomain, unsigned int elem_type, unsigned int fe_type) const
   {
-    return _phi_face(subdomain, elem_type, fe_type);
+    return _phi_face[subdomain](elem_type, fe_type);
   }
   /**
    * Get the gradient of shape functions of a FE type for an element type and subdomain
@@ -165,7 +156,7 @@ public:
   KOKKOS_FUNCTION const auto &
   getGradPhi(SubdomainID subdomain, unsigned int elem_type, unsigned int fe_type) const
   {
-    return _grad_phi(subdomain, elem_type, fe_type);
+    return _grad_phi[subdomain](elem_type, fe_type);
   }
   /**
    * Get the gradient of face shape functions of a FE type for an element type and subdomain
@@ -177,7 +168,7 @@ public:
   KOKKOS_FUNCTION const auto &
   getGradPhiFace(SubdomainID subdomain, unsigned int elem_type, unsigned int fe_type) const
   {
-    return _grad_phi_face(subdomain, elem_type, fe_type);
+    return _grad_phi_face[subdomain](elem_type, fe_type);
   }
   /**
    * Get the inverse of Jacobian matrix of an element quadrature point
@@ -292,7 +283,7 @@ private:
   /**
    * Coordinate system type of each subdomain
    */
-  Array<Moose::CoordinateSystemType> _coord_type;
+  Map<SubdomainID, Moose::CoordinateSystemType> _coord_type;
   /**
    * Radial coordinate index in cylindrical coordinate system
    */
@@ -300,60 +291,58 @@ private:
   /**
    * General axisymmetric axis of each subdomain in cylindrical coordinate system
    */
-  Array<Pair<Real3, Real3>> _rz_axis;
+  Map<SubdomainID, Pair<Real3, Real3>> _rz_axis;
 
   /**
    * Starting offset into the global quadrature point index
    */
   ///@{
-  Array<Array<dof_id_type>> _qp_offset;
-  Array<Array2D<dof_id_type>> _qp_offset_face;
+  Map<SubdomainID, Array<dof_id_type>> _qp_offset;
+  Map<SubdomainID, Array2D<dof_id_type>> _qp_offset_face;
   ///@}
   /**
    * Number of quadrature points
    */
   ///@{
-  Array<Array<unsigned int>> _n_qps;
-  Array<Array2D<unsigned int>> _n_qps_face;
-  Array<unsigned int> _max_qps_per_elem;
+  Map<SubdomainID, Array<unsigned int>> _n_qps;
+  Map<SubdomainID, Array2D<unsigned int>> _n_qps_face;
+  unsigned int _max_qps_per_elem = 0;
   ///@}
   /**
-   * Quadrature points and weights for reference elements
+   * Quadrature weights for reference elements
    */
   ///@{
-  Array2D<Array<Real3>> _q_points;
-  Array2D<Array<Array<Real3>>> _q_points_face;
-  Array2D<Array<Real>> _weights;
-  Array2D<Array<Array<Real>>> _weights_face;
+  Map<SubdomainID, Array<Array<Real>>> _weights;
+  Map<SubdomainID, Array<Array<Array<Real>>>> _weights_face;
   ///@}
   /**
    * Shape functions for reference elements
    */
   ///@{
-  Array3D<Array2D<Real>> _phi;
-  Array3D<Array<Array2D<Real>>> _phi_face;
-  Array3D<Array2D<Real3>> _grad_phi;
-  Array3D<Array<Array2D<Real3>>> _grad_phi_face;
+  Map<SubdomainID, Array2D<Array2D<Real>>> _phi;
+  Map<SubdomainID, Array2D<Array<Array2D<Real>>>> _phi_face;
+  Map<SubdomainID, Array2D<Array2D<Real3>>> _grad_phi;
+  Map<SubdomainID, Array2D<Array<Array2D<Real3>>>> _grad_phi_face;
   Array2D<unsigned int> _n_dofs;
   ///@}
   /**
    * Shape functions for computing reference-to-physical maps
    */
   ///@{
-  Array2D<Array2D<Real>> _map_phi;
-  Array2D<Array<Array2D<Real>>> _map_phi_face;
-  Array2D<Array<Array2D<Real>>> _map_psi_face;
-  Array2D<Array2D<Real3>> _map_grad_phi;
-  Array2D<Array<Array2D<Real3>>> _map_grad_phi_face;
-  Array2D<Array<Array2D<Real3>>> _map_grad_psi_face;
+  Map<SubdomainID, Array<Array2D<Real>>> _map_phi;
+  Map<SubdomainID, Array<Array<Array2D<Real>>>> _map_phi_face;
+  Map<SubdomainID, Array<Array<Array2D<Real>>>> _map_psi_face;
+  Map<SubdomainID, Array<Array2D<Real3>>> _map_grad_phi;
+  Map<SubdomainID, Array<Array<Array2D<Real3>>>> _map_grad_phi_face;
+  Map<SubdomainID, Array<Array<Array2D<Real3>>>> _map_grad_psi_face;
   ///@}
   /**
    * Cached physical maps on element quadrature points
    */
   ///@{
-  Array<Array<Real33>> _jacobian;
-  Array<Array<Real>> _jxw;
-  Array<Array<Real3>> _xyz;
+  Map<SubdomainID, Array<Real33>> _jacobian;
+  Map<SubdomainID, Array<Real>> _jxw;
+  Map<SubdomainID, Array<Real3>> _xyz;
   ///@}
 
   /**
@@ -394,8 +383,8 @@ Assembly::computePhysicalMap(const ElementInfo info,
   auto eid = info.id;
   auto elem_type = info.type;
 
-  auto & phi = _map_phi(sid, elem_type);
-  auto & grad_phi = _map_grad_phi(sid, elem_type);
+  auto & phi = _map_phi[sid][elem_type];
+  auto & grad_phi = _map_grad_phi[sid][elem_type];
 
   Real33 J;
   Real3 xyz;
@@ -414,7 +403,7 @@ Assembly::computePhysicalMap(const ElementInfo info,
     *jacobian = J.inverse(_dimension);
   if (JxW)
     *JxW =
-        J.determinant(_dimension) * _weights(sid, elem_type)[qp] * coordTransformFactor(sid, xyz);
+        J.determinant(_dimension) * _weights[sid][elem_type][qp] * coordTransformFactor(sid, xyz);
   if (q_points)
     *q_points = xyz;
 }
@@ -431,8 +420,8 @@ Assembly::computePhysicalMap(const ElementInfo info,
   auto eid = info.id;
   auto elem_type = info.type;
 
-  auto & phi = _map_phi_face(sid, elem_type)(side);
-  auto & grad_phi = _map_grad_phi_face(sid, elem_type)(side);
+  auto & phi = _map_phi_face[sid][elem_type][side];
+  auto & grad_phi = _map_grad_phi_face[sid][elem_type][side];
 
   Real33 J;
   Real3 xyz;
@@ -457,7 +446,7 @@ Assembly::computePhysicalMap(const ElementInfo info,
   {
     Real33 J;
 
-    auto & grad_psi = _map_grad_psi_face(sid, elem_type)(side);
+    auto & grad_psi = _map_grad_psi_face[sid][elem_type][side];
 
     for (unsigned int node = 0; node < info.n_nodes_side[side]; ++node)
     {
@@ -467,7 +456,7 @@ Assembly::computePhysicalMap(const ElementInfo info,
     }
 
     *JxW = ::Kokkos::sqrt((J * J.transpose()).determinant(_dimension - 1)) *
-           _weights_face(sid, elem_type)[side][qp] * coordTransformFactor(sid, xyz);
+           _weights_face[sid][elem_type][side][qp] * coordTransformFactor(sid, xyz);
   }
 }
 #endif

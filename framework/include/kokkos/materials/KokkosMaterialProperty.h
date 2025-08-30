@@ -77,9 +77,9 @@ MaterialProperty<T, dimension>::copy(const MaterialPropertyBase & prop, StorageK
 
   mooseAssert(prop_cast, "The property to copy should be of the same type and dimension.");
 
-  for (const auto i : index_range(prop_cast->_data))
-    if (prop_cast->_data[i].isAlloc())
-      _data[i].deepCopy(prop_cast->_data[i]);
+  for (const auto & [subdomain, data] : prop_cast->_data)
+    if (data.isAlloc())
+      _data[subdomain].deepCopy(data);
 
   _data.copyToDevice();
 }
@@ -110,28 +110,22 @@ MaterialProperty<T, dimension>::shallowCopy(const MaterialProperty<T, dimension>
 
 template <typename T, unsigned int dimension>
 void
-MaterialProperty<T, dimension>::allocate(const MooseMesh & mesh,
-                                         const Assembly & assembly,
+MaterialProperty<T, dimension>::allocate(const Assembly & assembly,
                                          const std::set<SubdomainID> & subdomains,
                                          const bool bnd,
                                          StorageKey)
 {
-  if (!_data.isAlloc())
-    _data.create(mesh.meshSubdomains().size());
-
   for (const auto subdomain : subdomains)
   {
-    auto sid = mesh.getKokkosMesh()->getSubdomainID(subdomain);
-
     std::vector<dof_id_type> n;
 
     for (unsigned int i = 0; i < dimension; ++i)
       n.push_back(_record->dims[i]);
 
-    n.push_back(bnd ? assembly.getNumFaceQps(sid) : assembly.getNumQps(sid));
+    n.push_back(bnd ? assembly.getNumFaceQps(subdomain) : assembly.getNumQps(subdomain));
 
-    if (!_data[sid].isAlloc())
-      _data[sid].createDevice(n);
+    if (!_data[subdomain].isAlloc())
+      _data[subdomain].createDevice(n);
   }
 
   _data.copyToDevice();
