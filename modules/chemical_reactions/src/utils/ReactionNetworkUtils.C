@@ -1,0 +1,206 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "ReactionNetworkUtils.h"
+#include "peglib.h"
+
+namespace ReactionNetworkUtils
+{
+
+std::vector<Reaction>
+parseReactionNetwork(const std::string & reaction_network_string, bool output_to_cout)
+{
+  using namespace peg;
+  parser parser(R"(
+    ReactionNetwork <- (_ Reaction _ Newline?)* _
+    Reaction        <- _ TermList _ '->' _ TermList _ Metadata?
+    TermList        <- Term (_ '+' _ Term)*
+    Term            <- Coefficient? Species
+    Coefficient     <- Float
+    Float           <- [0-9]+ ('.' [0-9]+)?
+    Species         <- BaseSpecies State? Charge?
+    BaseSpecies     <- [A-Z][a-zA-Z0-9_]*
+    State           <- '(' [a-z]{1,3} ')'
+    Charge          <- ('^'? [0-9]* [+-])
+    Metadata        <- '[' _ Pair (_ ',' _ Pair)* _ ']'
+    Pair            <- Key _ '=' _ Value
+    Key             <- [A-Za-z_][A-Za-z0-9_]*
+    Value           <- [A-Za-z0-9_.-]+
+    ~_              <- [ \t]*
+  )");
+
+  // Rules for how to parse each type
+  parser["ReactionNetwork"] = [](const SemanticValues & vs)
+  {
+    std::vector<Reaction> reactions;
+    for (const auto & v : vs)
+    {
+      if (v.type() == typeid(Reaction))
+      {
+        reactions.push_back(std::any_cast<Reaction>(v));
+      }
+    }
+    return reactions;
+  };
+
+  parser["Float"] = [](const SemanticValues & vs) { return std::stod(std::string(vs.token())); };
+
+  parser["Coefficient"] = [](const SemanticValues & vs) { return std::any_cast<double>(vs[0]); };
+
+  parser["BaseSpecies"] = [](const SemanticValues & vs) { return vs.token(); };
+
+  parser["State"] = [](const SemanticValues & vs)
+  {
+    std::string s = std::string(vs.token());
+    return s.substr(1, s.length() - 2); // remove parentheses
+  };
+
+  parser["Charge"] = [](const SemanticValues & vs) { return vs.token(); };
+
+  parser["Species"] = [](const SemanticValues & vs)
+  {
+    std::string base = std::any_cast<std::string>(vs[0]);
+    std::optional<std::string> state;
+    std::optional<std::string> charge;
+
+    if (vs.size() >= 2)
+    {
+      for (size_t i = 1; i < vs.size(); ++i)
+      {
+        if (vs[i].type() == typeid(std::string))
+        {
+          std::string val = std::any_cast<std::string>(vs[i]);
+          if (val.front() == '(' && val.back() == ')')
+            state = val.substr(1, val.length() - 2);
+          else
+            charge = val;
+        }
+      }
+    }
+
+    return Term{1.0, base, state, charge}; // default coefficient = 1.0
+  };
+
+  parser["Term"] = [](const SemanticValues & vs)
+  {
+    if (vs.size() == 2)
+    {
+      double coeff = std::any_cast<double>(vs[0]);
+      Term term = std::any_cast<Term>(vs[1]);
+      term.coefficient = coeff;
+      return term;
+    }
+    else
+    {
+      return std::any_cast<Term>(vs[0]);
+    }
+  };
+
+  parser["TermList"] = [](const SemanticValues & vs)
+  {
+    TermList terms;
+    for (const auto & v : vs)
+    {
+      if (v.type() == typeid(Term))
+        terms.push_back(std::any_cast<Term>(v));
+      else if (v.type() == typeid(std::vector<Term>))
+      {
+        const auto & more = std::any_cast<std::vector<Term>>(v);
+        terms.insert(terms.end(), more.begin(), more.end());
+      }
+    }
+    return terms;
+  };
+
+  parser["Key"] = [](const SemanticValues & vs) { return vs.token(); };
+
+  parser["Value"] = [](const SemanticValues & vs) { return vs.token(); };
+
+  parser["Pair"] = [](const SemanticValues & vs)
+  { return std::make_pair(std::any_cast<std::string>(vs[0]), std::any_cast<std::string>(vs[1])); };
+
+  parser["Metadata"] = [](const SemanticValues & vs)
+  {
+    Metadata meta;
+    for (const auto & v : vs)
+    {
+      if (v.type() == typeid(std::pair<std::string, std::string>))
+      {
+        const auto & [k, val] = std::any_cast<std::pair<std::string, std::string>>(v);
+        meta[k] = val;
+      }
+      else if (v.type() == typeid(std::vector<std::pair<std::string, std::string>>))
+      {
+        const auto & pairs = std::any_cast<std::vector<std::pair<std::string, std::string>>>(v);
+        for (const auto & [k, val] : pairs)
+          meta[k] = val;
+      }
+    }
+    return meta;
+  };
+
+  parser["Reaction"] = [](const SemanticValues & vs)
+  {
+    Reaction r;
+    r.reactants = std::any_cast<TermList>(vs[0]);
+    r.products = std::any_cast<TermList>(vs[1]);
+    if (vs.size() == 3)
+      r.metadata = std::any_cast<Metadata>(vs[2]);
+    return r;
+  };
+
+  parser.enable_packrat_parsing();
+
+  std::vector<Reaction> reactions;
+  if (!parser.parse(reaction_network_string, reactions))
+  {
+    throw std::runtime_error("Failed to parse reaction.");
+  }
+
+  // Output the reaction network
+  if (output_to_cout)
+  {
+    for (size_t i = 0; i < reactions.size(); ++i)
+    {
+      const auto & r = reactions[i];
+      std::cout << "Reaction " << i + 1 << ":\n";
+      std::cout << "  Reactants:\n";
+      for (const auto & t : r.reactants)
+      {
+        std::cout << "    " << t.coefficient << " " << t.species;
+        if (t.charge)
+          std::cout << t.charge.value();
+        if (t.state)
+          std::cout << " (" << t.state.value() << ")";
+        std::cout << "\n";
+      }
+      std::cout << "  Products:\n";
+      for (const auto & t : r.products)
+      {
+        std::cout << "    " << t.coefficient << " " << t.species;
+        if (t.charge)
+          std::cout << t.charge.value();
+        if (t.state)
+          std::cout << " (" << t.state.value() << ")";
+        std::cout << "\n";
+      }
+      if (!r.metadata.empty())
+      {
+        std::cout << "  Metadata:\n";
+        for (const auto & [k, v] : r.metadata)
+          std::cout << "    " << k << " = " << v << "\n";
+      }
+    }
+  }
+
+  return reactions;
+}
+
+// namespace ReactionNetworkUtils
+}
