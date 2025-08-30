@@ -41,12 +41,18 @@ ChemicalReactionsApp::registerAll(Factory & f, ActionFactory & af, Syntax & synt
   Registry::registerObjectsTo(f, {"ChemicalReactionsApp"});
   Registry::registerActionsTo(af, {"ChemicalReactionsApp"});
 
+  // Legacy chemical reactions network capability
   registerSyntax("AddPrimarySpeciesAction", "ReactionNetwork/AqueousEquilibriumReactions");
   registerSyntax("AddPrimarySpeciesAction", "ReactionNetwork/SolidKineticReactions");
   registerSyntax("AddSecondarySpeciesAction", "ReactionNetwork/AqueousEquilibriumReactions");
   registerSyntax("AddSecondarySpeciesAction", "ReactionNetwork/SolidKineticReactions");
   registerSyntax("AddCoupledEqSpeciesAction", "ReactionNetwork/AqueousEquilibriumReactions");
   registerSyntax("AddCoupledSolidKinSpeciesAction", "ReactionNetwork/SolidKineticReactions");
+
+  // Physics-based reaction kinetics
+  registerSyntax("AqueousReactionKinetics", "Physics/AqueousReactionKinetics/*");
+
+  // Thermochimica-based equilibrium search
   registerSyntax("CommonChemicalCompositionAction", "ChemicalComposition");
   registerSyntax("ChemicalCompositionAction", "ChemicalComposition/*");
 }
