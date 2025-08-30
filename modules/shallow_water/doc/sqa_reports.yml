@@ -1,0 +1,30 @@
+Applications:
+    shallow_water:
+        exe_directory: ${MOOSE_DIR}/modules/shallow_water
+        content_directory: ${MOOSE_DIR}/modules/shallow_water/doc/content
+        unregister:
+            - ${MOOSE_DIR}/framework/doc/unregister.yml
+        remove:
+            - ${MOOSE_DIR}/framework/doc/remove.yml
+        log_default: WARNING
+        show_warning: false
+
+Documents:
+    software_requirements_specification: sqa/shallow_water_srs.md
+    software_design_description: sqa/shallow_water_sdd.md
+    software_test_plan: sqa/shallow_water_stp.md
+    requirements_traceability_matrix: sqa/shallow_water_rtm.md
+    verification_validation_report: sqa/shallow_water_vvr.md
+    failure_analysis_report: sqa/shallow_water_far.md
+    software_library_list: sqa/shallow_water_sll.md
+    communication_and_contact_information: sqa/framework_cci.md
+    software_coding_standards: sqa/framework_scs.md
+    log_default: WARNING
+    show_warning: false
+
+Requirements:
+    shallow_water:
+        directories:
+            - ${MOOSE_DIR}/modules/shallow_water/test
+        log_default: WARNING
+        show_warning: false
