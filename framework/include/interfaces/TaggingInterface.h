@@ -27,6 +27,14 @@ class MooseObject;
 class SubProblem;
 class Assembly;
 
+namespace Moose
+{
+namespace Kokkos
+{
+class ResidualObject;
+} // namespace Kokkos
+} // namespace Moose
+
 template <typename T>
 InputParameters validParams();
 
@@ -49,6 +57,7 @@ class TaggingInterface
 {
 public:
   TaggingInterface(const MooseObject * moose_object);
+
   virtual ~TaggingInterface();
 
   static InputParameters validParams();
@@ -64,6 +73,7 @@ public:
     friend class LinearSystemContributionObject;
     template <typename>
     friend class MooseObjectTagWarehouse;
+    friend class Moose::Kokkos::ResidualObject;
 
     VectorTagsKey() {}
     VectorTagsKey(const VectorTagsKey &) {}
@@ -80,6 +90,7 @@ public:
     friend class LinearSystemContributionObject;
     template <typename>
     friend class MooseObjectTagWarehouse;
+    friend class Moose::Kokkos::ResidualObject;
 
     MatrixTagsKey() {}
     MatrixTagsKey(const MatrixTagsKey &) {}

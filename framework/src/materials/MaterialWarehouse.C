@@ -105,7 +105,7 @@ MaterialWarehouse::updateActive(THREAD_ID tid /*=0*/)
 }
 
 void
-MaterialWarehouse::sort(THREAD_ID tid /*=0*/)
+MaterialWarehouse::sort(THREAD_ID tid /*=0*/, bool sort_all_objects /*=false*/)
 {
   checkThreadID(tid);
 
@@ -123,6 +123,13 @@ MaterialWarehouse::sort(THREAD_ID tid /*=0*/)
     sortHelper(object_pair.second);
   for (auto & object_pair : _face_materials._all_boundary_objects[tid])
     sortHelper(object_pair.second);
+
+  if (sort_all_objects)
+  {
+    sortHelper(_all_objects[tid]);
+    sortHelper(_neighbor_materials._all_objects[tid]);
+    sortHelper(_face_materials._all_objects[tid]);
+  }
 
   updateActive(tid);
 }
