@@ -14,6 +14,8 @@
 #include "WCNSFVCoupledAdvectionPhysicsHelper.h"
 #include "WCNSLinearFVTurbulencePhysics.h"
 #include "kEpsilonViscosityAux.h"
+#include "INSFVTKESourceSink.h"
+#include "INSFVTurbulentViscosityWallFunction.h"
 #include "NSFVBase.h"
 
 InputParameters

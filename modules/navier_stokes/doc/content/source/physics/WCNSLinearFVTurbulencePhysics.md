@@ -6,10 +6,7 @@
 
 The `WCNSLinearFVTurbulencePhysics` can be set to create the standard k-epsilon two-equation model.
 
-The turbulent viscosity is then computed with:
-
-- a [kEpsilonViscosityAux.md] if [!param](/Physics/NavierStokes/TurbulenceSegregated/WCNSLinearFVTurbulencePhysics/mu_t_as_aux_variable) is set to true
-- a [INSFVkEpsilonViscosityFunctorMaterial.md] otherwise
+The turbulent viscosity is then computed with a [kEpsilonViscosityAux.md].
 
 
 The k equation is created with:
@@ -30,7 +27,7 @@ The epsilon equation is created with:
 
 The boundary conditions are not set in this object for the `TKE` and `TKED` variables, as they
 are computed by the wall-functions in the relevant kernels. A boundary condition is set for the turbulent
-viscosity when using an auxiliary variable, with a [LinearFVTurbulentViscosityWallFunction.md].
+viscosity when using an auxiliary variable, with a [LinearFVTurbulentViscosityWallFunctionBC.md].
 
 
 ## Coupling with other Physics
@@ -38,7 +35,7 @@ viscosity when using an auxiliary variable, with a [LinearFVTurbulentViscosityWa
 A turbulence model can be added to a heat advection solve by using both a `WCNSLinearFVTurbulencePhysics` and a [WCNSLinearFVFluidHeatTransferPhysics.md].
 The following input performs this coupling for incompressible flow for the standard k-epsilon turbulence model in a 2D channel.
 
-!listing test/tests/finite_volume/wcns/channel-flow/linear-segregated/channel_heated-physics.i block=Physics
+!listing test/tests/finite_volume/ins/turbulence/channel/linear-segregated/channel_heated-physics.i block=Physics
 
 A turbulence model can be added to a scalar advection solve by using both a `WCNSLinearFVTurbulencePhysics` and a [WCNSLinearFVScalarTransportPhysics.md].
 The following input performs this coupling for incompressible flow for the mixing length turbulence model in a 2D channel.

@@ -76,8 +76,9 @@
   []
   [channel_ERCOFTAC_linear_scalar_physics]
     design = 'WCNSLinearFVFlowPhysics.md WCNSLinearFVTurbulencePhysics.md WCNSLinearFVScalarTransportPhysics.md'
+    issues = '#29846 #29175'
     type = 'CSVDiff'
-    input = 'channel_scalar-physics.i'
+    input = 'channel_scalars-physics.i'
     csvdiff = 'channel_scalars-physics_out.csv'
     abs_zero = 1e-6
     recover = false # we don't support recovery for SIMPLE yet
