@@ -35,7 +35,6 @@ Mesh::initMap()
   _maps->_local_elem_id_mapping.clear();
   _maps->_local_node_id_mapping.clear();
   _maps->_subdomain_elem_id_mapping.clear();
-  _maps->_subdomain_local_elem_id_mapping.clear();
   _maps->_subdomain_elem_ids.clear();
   _maps->_subdomain_node_ids.clear();
 
@@ -43,11 +42,8 @@ Mesh::initMap()
   {
     _maps->_subdomain_id_mapping[subdomain] = _maps->_subdomain_id_mapping.size();
     _maps->_subdomain_elem_id_mapping[subdomain];
-    _maps->_subdomain_local_elem_id_mapping[subdomain];
     _maps->_subdomain_elem_ids[subdomain];
     _maps->_subdomain_node_ids[subdomain];
-
-    dof_id_type subdomain_local_id = 0;
 
     for (const auto elem : _mesh.getMesh().active_local_subdomain_elements_ptr_range(subdomain))
     {
@@ -58,7 +54,6 @@ Mesh::initMap()
 
       _maps->_local_elem_id_mapping[elem] = eid;
       _maps->_subdomain_elem_id_mapping[subdomain][elem] = eid;
-      _maps->_subdomain_local_elem_id_mapping[subdomain][elem] = subdomain_local_id++;
       _maps->_subdomain_elem_ids[subdomain].insert(eid);
 
       for (const auto & node : elem->node_ref_range())
@@ -87,25 +82,18 @@ Mesh::initElement()
   _elem_neighbor.create(_mesh.getMaxSidesPerElem(), num_elems);
   _elem_neighbor = libMesh::DofObject::invalid_id;
 
-  for (auto subdomain : _mesh.meshSubdomains())
+  for (auto & [elem, eid] : getLocalElementMap())
   {
-    auto sid = getSubdomainID(subdomain);
+    auto elem_type = getElementTypeID(elem);
 
-    for (auto & [elem, local_id] : getSubdomainLocalElementMap(subdomain))
-    {
-      auto eid = getElementID(elem);
-      auto elem_type = getElementTypeID(elem);
+    _elem_info[eid].type = elem_type;
+    _elem_info[eid].id = eid;
+    _elem_info[eid].subdomain = getSubdomainID(elem->subdomain_id());
+    _elem_info[eid].n_sides = elem->n_sides();
+    _elem_info[eid].n_nodes = elem->n_nodes();
 
-      _elem_info[eid].type = elem_type;
-      _elem_info[eid].id = eid;
-      _elem_info[eid].local_id = local_id;
-      _elem_info[eid].subdomain = sid;
-      _elem_info[eid].n_sides = elem->n_sides();
-      _elem_info[eid].n_nodes = elem->n_nodes();
-
-      for (unsigned int side = 0; side < elem->n_sides(); ++side)
-        _elem_info[eid].n_nodes_side[side] = elem->side_ptr(side)->n_nodes();
-    }
+    for (unsigned int side = 0; side < elem->n_sides(); ++side)
+      _elem_info[eid].n_nodes_side[side] = elem->side_ptr(side)->n_nodes();
   }
 
   _elem_info.copyToDevice();
@@ -189,17 +177,6 @@ Mesh::getElementID(const Elem * elem) const
     mooseError("Element ", elem->id(), " does not have Kokkos element ID");
 
   return _maps->_local_elem_id_mapping.at(elem);
-}
-
-dof_id_type
-Mesh::getSubdomainLocalElementID(const Elem * elem) const
-{
-  mooseAssert(elem, "Element pointer is null");
-
-  if (!_maps->_subdomain_local_elem_id_mapping.at(elem->subdomain_id()).count(elem))
-    mooseError("Element ", elem->id(), " does not have Kokkos element ID");
-
-  return _maps->_subdomain_local_elem_id_mapping.at(elem->subdomain_id()).at(elem);
 }
 
 dof_id_type

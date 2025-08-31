@@ -48,19 +48,10 @@ public:
    */
   unsigned int getFETypeID(FEType type) const { return libmesh_map_find(_fe_type_map, type); }
   /**
-   * Get the maximum number of quadrature points per element across the entire mesh
+   * Get the maximum number of quadrature points per element in the current partition
    * @returns The maximum number of quadrature points per element
    */
-  KOKKOS_FUNCTION unsigned int getMaxQpsPerElem() const { return _max_qps_per_elem.last(); }
-  /**
-   * Get the maximum number of quadrature points per element for a subdomain
-   * @param subdomain The subdomain ID
-   * @returns The maximum number of quadrature points per element
-   */
-  KOKKOS_FUNCTION unsigned int getMaxQpsPerElem(SubdomainID subdomain) const
-  {
-    return _max_qps_per_elem[subdomain];
-  }
+  KOKKOS_FUNCTION unsigned int getMaxQpsPerElem() const { return _max_qps_per_elem; }
   /**
    * Get the total number of elemental quadrature points in a subdomain
    * @param subdomain The subdomain ID
@@ -68,17 +59,14 @@ public:
    */
   KOKKOS_FUNCTION dof_id_type getNumQps(SubdomainID subdomain) const
   {
-    return _qp_offset[subdomain].last();
+    return _n_subdomain_qps[subdomain];
   }
   /**
    * Get the number of quadrature points of an element
    * @param info The element information object
    * @returns The number of quadrature points
    */
-  KOKKOS_FUNCTION unsigned int getNumQps(ElementInfo info) const
-  {
-    return _n_qps[info.subdomain][info.local_id];
-  }
+  KOKKOS_FUNCTION unsigned int getNumQps(ElementInfo info) const { return _n_qps[info.id]; }
   /**
    * Get the total number of facial quadrature points in a subdomain
    * Note: this number does not represent the real number of facial quadrature points but only
@@ -88,7 +76,7 @@ public:
    */
   KOKKOS_FUNCTION dof_id_type getNumFaceQps(SubdomainID subdomain) const
   {
-    return _qp_offset_face[subdomain].last();
+    return _n_subdomain_qps_face[subdomain];
   }
   /**
    * Get the number of quadrature points of a side of an element
@@ -98,7 +86,7 @@ public:
    */
   KOKKOS_FUNCTION unsigned int getNumFaceQps(ElementInfo info, unsigned int side) const
   {
-    return _n_qps_face[info.subdomain](side, info.local_id);
+    return _n_qps_face(side, info.id);
   }
   /**
    * Get the starting offset of quadrature points of an element into the global quadrature point
@@ -106,10 +94,7 @@ public:
    * @param info The element information object
    * @returns The starting offset
    */
-  KOKKOS_FUNCTION dof_id_type getQpOffset(ElementInfo info) const
-  {
-    return _qp_offset[info.subdomain][info.local_id];
-  }
+  KOKKOS_FUNCTION dof_id_type getQpOffset(ElementInfo info) const { return _qp_offset[info.id]; }
   /**
    * Get the starting offset of quadrature points of a side of an element into the global quadrature
    * point index
@@ -119,7 +104,7 @@ public:
    */
   KOKKOS_FUNCTION dof_id_type getQpFaceOffset(ElementInfo info, unsigned int side) const
   {
-    return _qp_offset_face[info.subdomain](side, info.local_id);
+    return _qp_offset_face(side, info.id);
   }
   /**
    * Get the number of DOFs of a FE type for an element type
@@ -279,7 +264,7 @@ private:
   /**
    * Reference of the MOOSE mesh
    */
-  const MooseMesh & _mesh;
+  MooseMesh & _mesh;
   /**
    * FE type ID map
    */
@@ -306,16 +291,20 @@ private:
    * Starting offset into the global quadrature point index
    */
   ///@{
-  Array<Array<dof_id_type>> _qp_offset;
-  Array<Array2D<dof_id_type>> _qp_offset_face;
+  Array<dof_id_type> _qp_offset;
+  Array2D<dof_id_type> _qp_offset_face;
   ///@}
   /**
    * Number of quadrature points
    */
   ///@{
-  Array<Array<unsigned int>> _n_qps;
-  Array<Array2D<unsigned int>> _n_qps_face;
-  Array<unsigned int> _max_qps_per_elem;
+  Array<unsigned int> _n_qps;
+  Array2D<unsigned int> _n_qps_face;
+
+  unsigned int _max_qps_per_elem = 0;
+
+  Array<dof_id_type> _n_subdomain_qps;
+  Array<dof_id_type> _n_subdomain_qps_face;
   ///@}
   /**
    * Quadrature points and weights for reference elements
