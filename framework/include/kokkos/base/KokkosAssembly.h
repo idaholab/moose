@@ -382,6 +382,7 @@ Assembly::computePhysicalMap(const ElementInfo info,
   auto sid = info.subdomain;
   auto eid = info.id;
   auto elem_type = info.type;
+  auto num_nodes = kokkosMesh().getNumNodes(elem_type);
 
   auto & phi = _map_phi(sid, elem_type);
   auto & grad_phi = _map_grad_phi(sid, elem_type);
@@ -389,7 +390,7 @@ Assembly::computePhysicalMap(const ElementInfo info,
   Real33 J;
   Real3 xyz;
 
-  for (unsigned int node = 0; node < info.n_nodes; ++node)
+  for (unsigned int node = 0; node < num_nodes; ++node)
   {
     auto points = kokkosMesh().getNodePoint(kokkosMesh().getNodeID(eid, node));
 
@@ -419,6 +420,8 @@ Assembly::computePhysicalMap(const ElementInfo info,
   auto sid = info.subdomain;
   auto eid = info.id;
   auto elem_type = info.type;
+  auto num_nodes = kokkosMesh().getNumNodes(elem_type);
+  auto num_side_nodes = kokkosMesh().getNumNodes(elem_type, side);
 
   auto & phi = _map_phi_face(sid, elem_type)(side);
   auto & grad_phi = _map_grad_phi_face(sid, elem_type)(side);
@@ -426,7 +429,7 @@ Assembly::computePhysicalMap(const ElementInfo info,
   Real33 J;
   Real3 xyz;
 
-  for (unsigned int node = 0; node < info.n_nodes; ++node)
+  for (unsigned int node = 0; node < num_nodes; ++node)
   {
     auto points = kokkosMesh().getNodePoint(kokkosMesh().getNodeID(eid, node));
 
@@ -448,7 +451,7 @@ Assembly::computePhysicalMap(const ElementInfo info,
 
     auto & grad_psi = _map_grad_psi_face(sid, elem_type)(side);
 
-    for (unsigned int node = 0; node < info.n_nodes_side[side]; ++node)
+    for (unsigned int node = 0; node < num_side_nodes; ++node)
     {
       auto points = kokkosMesh().getNodePoint(kokkosMesh().getNodeID(eid, side, node));
 
