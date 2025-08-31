@@ -39,10 +39,6 @@ struct ElementInfo
    */
   dof_id_type id;
   /**
-   * Subdomain-local element ID
-   */
-  dof_id_type local_id;
-  /**
    * Subdomain ID
    */
   SubdomainID subdomain;
@@ -106,13 +102,6 @@ public:
    */
   dof_id_type getElementID(const Elem * elem) const;
   /**
-   * Get the serialized subdomain-local element ID of an element
-   * The ID starts from zero in each subdomain
-   * @param elem The libMesh element
-   * @returns The subdomain-local element ID
-   */
-  dof_id_type getSubdomainLocalElementID(const Elem * elem) const;
-  /**
    * Get the serialized element type ID map
    * @returns The element type ID map
    */
@@ -130,15 +119,6 @@ public:
   const auto & getSubdomainElementMap(const SubdomainID subdomain) const
   {
     return _maps->_subdomain_elem_id_mapping.at(subdomain);
-  }
-  /**
-   * Get the serialized subdomain-local element ID map
-   * @param subdomain The MOOSE subdomain ID
-   * @returns The subdomain-local element ID map for the subdomain
-   */
-  const auto & getSubdomainLocalElementMap(const SubdomainID subdomain) const
-  {
-    return _maps->_subdomain_local_elem_id_mapping.at(subdomain);
   }
   /**
    * Get the list of serialized element IDs for a subdomain
@@ -267,11 +247,6 @@ private:
      */
     std::unordered_map<SubdomainID, std::unordered_map<const Elem *, dof_id_type>>
         _subdomain_elem_id_mapping;
-    /**
-     * Map from the libMesh element to the serialized subdomain-local element ID for each subdomain
-     */
-    std::unordered_map<SubdomainID, std::unordered_map<const Elem *, dof_id_type>>
-        _subdomain_local_elem_id_mapping;
     /**
      * Map from the libMesh node to the serialized node ID
      * This list contains the nodes of local elements, so some nodes may belong to other processes

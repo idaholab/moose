@@ -37,7 +37,7 @@ Assembly::init()
 {
   // Cache mesh information
 
-  auto num_subdomains = _mesh.meshSubdomains().size();
+  auto num_subdomains = _mesh.nSubdomains();
 
   _coord_type.create(num_subdomains);
 
@@ -69,20 +69,13 @@ Assembly::init()
 void
 Assembly::initQuadrature()
 {
-  auto num_subdomains = _mesh.meshSubdomains().size();
+  auto num_subdomains = _mesh.nSubdomains();
   auto num_elem_types = kokkosMesh().getElementTypeMap().size();
 
   _q_points.create(num_subdomains, num_elem_types);
   _q_points_face.create(num_subdomains, num_elem_types);
   _weights.create(num_subdomains, num_elem_types);
   _weights_face.create(num_subdomains, num_elem_types);
-
-  _n_qps.create(num_subdomains);
-  _n_qps_face.create(num_subdomains);
-  _qp_offset.create(num_subdomains);
-  _qp_offset_face.create(num_subdomains);
-  _max_qps_per_elem.create(num_subdomains + 1);
-  _max_qps_per_elem = 0;
 
   // Find boundaries where material properties should be computed
 
@@ -102,12 +95,14 @@ Assembly::initQuadrature()
 
   // Cache quadrature data
 
+  std::map<SubdomainID, std::map<ElemType, unsigned int>> n_qps;
+  std::map<SubdomainID, std::map<ElemType, std::vector<unsigned int>>> n_qps_face;
+
+  _max_qps_per_elem = 0;
+
   for (auto subdomain : _mesh.meshSubdomains())
   {
     auto sid = kokkosMesh().getSubdomainID(subdomain);
-
-    std::map<ElemType, unsigned int> n_qps;
-    std::map<ElemType, std::vector<unsigned int>> n_qps_face;
 
     auto & assembly = _problem.assembly(0, 0);
     auto qrule = assembly.writeableQRule(_dimension, subdomain, {});
@@ -123,7 +118,7 @@ Assembly::initQuadrature()
       // Cache volume quadrature of each reference element
 
       qrule->init(*elem, /* p-level */ 0);
-      n_qps[elem_type] = qrule->n_points();
+      n_qps[subdomain][elem_type] = qrule->n_points();
 
       _q_points(sid, elem_type_id).create(qrule->n_points());
       _weights(sid, elem_type_id).create(qrule->n_points());
@@ -139,7 +134,7 @@ Assembly::initQuadrature()
       for (unsigned int side = 0; side < elem->n_sides(); ++side)
       {
         qrule_face->init(*elem->side_ptr(side), /* p-level */ 0);
-        n_qps_face[elem_type].push_back(qrule_face->n_points());
+        n_qps_face[subdomain][elem_type].push_back(qrule_face->n_points());
 
         _q_points_face(sid, elem_type_id)[side].create(qrule_face->n_points());
         _weights_face(sid, elem_type_id)[side].create(qrule_face->n_points());
@@ -150,32 +145,37 @@ Assembly::initQuadrature()
           _weights_face(sid, elem_type_id)[side][qp] = qrule_face->w(qp);
         }
       }
+
+      _max_qps_per_elem = std::max(_max_qps_per_elem, n_qps[subdomain][elem_type]);
     }
+  }
 
-    auto & map = kokkosMesh().getSubdomainLocalElementMap(subdomain);
+  auto num_elems = _mesh.nActiveLocalElem();
 
-    _n_qps[sid].create(map.size());
-    _n_qps_face[sid].create(_mesh.getMaxSidesPerElem(), map.size());
-    _n_qps_face[sid] = 0;
+  _n_subdomain_qps.create(num_subdomains);
+  _n_subdomain_qps_face.create(num_subdomains);
+  _n_subdomain_qps = 0;
+  _n_subdomain_qps_face = 0;
 
-    _qp_offset[sid].create(map.size() + 1);
-    _qp_offset_face[sid].create(_mesh.getMaxSidesPerElem(), map.size() + 1);
-    _qp_offset_face[sid] = 0;
+  _n_qps.create(num_elems);
+  _n_qps_face.create(_mesh.getMaxSidesPerElem(), num_elems);
+  _n_qps_face = 0;
 
-    for (auto & [elem, eid] : map)
-    {
-      _n_qps[sid][eid] = n_qps[elem->type()];
-      _qp_offset[sid][eid] = n_qps[elem->type()];
+  _qp_offset.create(num_elems);
+  _qp_offset_face.create(_mesh.getMaxSidesPerElem(), num_elems);
+  _qp_offset_face = libMesh::DofObject::invalid_id;
 
-      for (unsigned int side = 0; side < elem->n_sides(); ++side)
-        _n_qps_face[sid](side, eid) = n_qps_face[elem->type()][side];
+  for (auto elem : *_mesh.getActiveLocalElementRange())
+  {
+    auto eid = kokkosMesh().getElementID(elem);
+    auto sid = kokkosMesh().getSubdomainID(elem->subdomain_id());
 
-      _max_qps_per_elem[sid] = std::max(_max_qps_per_elem[sid], _n_qps[sid][eid]);
-    }
+    _n_qps[eid] = n_qps[elem->subdomain_id()][elem->type()];
+    _qp_offset[eid] = _n_subdomain_qps[sid];
+    _n_subdomain_qps[sid] += _n_qps[eid];
 
-    _max_qps_per_elem.last() = std::max(_max_qps_per_elem.last(), _max_qps_per_elem[sid]);
-
-    std::exclusive_scan(_qp_offset[sid].begin(), _qp_offset[sid].end(), _qp_offset[sid].begin(), 0);
+    for (unsigned int side = 0; side < elem->n_sides(); ++side)
+      _n_qps_face(side, eid) = n_qps_face[elem->subdomain_id()][elem->type()][side];
   }
 
   for (auto boundary : _material_boundaries)
@@ -186,31 +186,25 @@ Assembly::initQuadrature()
       if (elem->processor_id() == _problem.processor_id())
       {
         auto sid = kokkosMesh().getSubdomainID(elem->subdomain_id());
-        auto eid = kokkosMesh().getSubdomainLocalElementID(elem);
+        auto eid = kokkosMesh().getElementID(elem);
         auto side = _mesh.sideWithBoundaryID(elem, boundary);
 
-        _qp_offset_face[sid](side, eid) = _n_qps_face[sid](side, eid);
+        _qp_offset_face(side, eid) = _n_subdomain_qps_face[sid];
+        _n_subdomain_qps_face[sid] += _n_qps_face(side, eid);
       }
     }
-
-  for (auto subdomain : _mesh.meshSubdomains())
-  {
-    auto sid = kokkosMesh().getSubdomainID(subdomain);
-
-    std::exclusive_scan(
-        _qp_offset_face[sid].begin(), _qp_offset_face[sid].end(), _qp_offset_face[sid].begin(), 0);
-  }
 
   _q_points.copyToDeviceNested();
   _q_points_face.copyToDeviceNested();
   _weights.copyToDeviceNested();
   _weights_face.copyToDeviceNested();
 
-  _n_qps.copyToDeviceNested();
-  _n_qps_face.copyToDeviceNested();
-  _qp_offset.copyToDeviceNested();
-  _qp_offset_face.copyToDeviceNested();
-  _max_qps_per_elem.copyToDevice();
+  _n_qps.copyToDevice();
+  _n_qps_face.copyToDevice();
+  _n_subdomain_qps.copyToDevice();
+  _n_subdomain_qps_face.copyToDevice();
+  _qp_offset.copyToDevice();
+  _qp_offset_face.copyToDevice();
 }
 
 void
@@ -404,8 +398,8 @@ Assembly::initShape()
 void
 Assembly::cachePhysicalMap()
 {
-  auto num_subdomains = _mesh.meshSubdomains().size();
-  auto num_elems = kokkosMesh().getLocalElementMap().size();
+  auto num_subdomains = _mesh.nSubdomains();
+  auto num_elems = _mesh.nActiveLocalElem();
 
   _jacobian.create(num_subdomains);
   _jxw.create(num_subdomains);
@@ -415,9 +409,9 @@ Assembly::cachePhysicalMap()
   {
     auto sid = kokkosMesh().getSubdomainID(subdomain);
 
-    _jacobian[sid].createDevice(_qp_offset[sid].last());
-    _jxw[sid].createDevice(_qp_offset[sid].last());
-    _xyz[sid].createDevice(_qp_offset[sid].last());
+    _jacobian[sid].createDevice(_n_subdomain_qps[sid]);
+    _jxw[sid].createDevice(_n_subdomain_qps[sid]);
+    _xyz[sid].createDevice(_n_subdomain_qps[sid]);
   }
 
   _jacobian.copyToDeviceNested();
