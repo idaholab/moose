@@ -1,4 +1,4 @@
-# Shallow-water agitated surface with flat bathimetry
+# Shallow-water flat/agitated surface with flat/bump bathymetry
 #
 # Variables and meaning:
 # - h  : water depth (m), the conservative height variable
@@ -8,11 +8,9 @@
 # Water surface elevation (free-surface level) is
 #   eta = h + b
 # where b is the bathymetry (bed elevation). In this input, b is provided
-# by the SWEBathymetry Material from the ParsedFunction 'bump' below.
+# by as the b_field AuxVariable.
 #
-# To visualize the water level eta, we create two AuxVariables:
-#   - b_field: outputs the material property 'b' to a field via MaterialRealAux
-#   - eta    : computes h + b_field via ParsedAux
+# To visualize the water level eta, we compute h + b_field via ParsedAux
 
 [Mesh]
   type = GeneratedMesh
@@ -37,26 +35,40 @@
   []
 []
 
+# override these in cli_args
+flux=hll
+surface=flat
+bathymetry=bump
+
 [Functions]
-  [bump]
-    type = ParsedFunction
-    value = "0"
+  [flat_bathymetry]
+    type = ConstantFunction
+    value = 0
   []
-  [eta]
+  [bump_bathymetry]
+    type = ParsedFunction
+    value = "0.1*exp(-100*((x-0.5)^2 + (y-0.5)^2))"
+  []
+
+  [flat_surface]
+    type = ConstantFunction
+    value = 1
+  []
+  [bump_surface]
     type = ParsedFunction
     value = "1 + 0.1*exp(-100*((x-0.5)^2 + (y-0.5)^2))"
-    # value = "1 + 0.1*x - 0.05"
   []
+
   [h_init]
     type = ParsedFunction
     value = "max(eta-bump, 0)"
-    vars = 'eta bump'
-    vals = 'eta bump'
+    symbol_names = 'eta bump'
+    symbol_values = '${surface}_surface ${bathymetry}_bathymetry'
   []
 []
 
 [UserObjects]
-  [flux]
+  [flux_hll]
     type = SWENumericalFluxHLL
     gravity = 9.81
     dry_depth = 1e-6
@@ -112,8 +124,8 @@
   [b_out]
     type = FunctionAux
     variable = b_field
-    function = bump
-    execute_on = 'INITIAL TIMESTEP_END'
+    function = ${bathymetry}_bathymetry
+    execute_on = 'INITIAL'
   []
   # Compute water surface elevation eta = h + b
   [eta_aux]
@@ -132,7 +144,7 @@
     h = h
     hu = hu
     hv = hv
-    numerical_flux = flux
+    numerical_flux = flux_${flux}
     b_var = b_field
   []
   [flux_hu]
@@ -141,7 +153,7 @@
     h = h
     hu = hu
     hv = hv
-    numerical_flux = flux
+    numerical_flux = flux_${flux}
     b_var = b_field
   []
   [flux_hv]
@@ -150,7 +162,7 @@
     h = h
     hu = hu
     hv = hv
-    numerical_flux = flux
+    numerical_flux = flux_${flux}
     b_var = b_field
   []
   # Hydrostatic correction to preserve eta = const
@@ -225,11 +237,27 @@
 [Executioner]
   type = Transient
   dt = 1e-2
-  num_steps = 150
+  num_steps = 10
   nl_abs_tol = 1e-12
 []
 
+[Postprocessors]
+  [min_eta]
+    type = ElementExtremeValue
+    variable = eta
+    value_type = min
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+  [max_eta]
+    type = ElementExtremeValue
+    variable = eta
+    value_type = max
+    execute_on = 'INITIAL TIMESTEP_END'
+  []
+[]
+
 [Outputs]
-  exodus = true
+  file_base = still_water_${surface}_on_${bathymetry}_${flux}
+  csv = true
   print_linear_residuals = false
 []

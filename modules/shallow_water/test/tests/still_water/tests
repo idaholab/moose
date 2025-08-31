@@ -1,0 +1,19 @@
+[Tests]
+  issues = '#31408'
+  design = shallow_water/index.md
+
+  [still_water_flat_on_flat_hll]
+    type = CSVDiff
+    input = still_water.i
+    csvdiff = still_water_flat_on_flat_hll.csv
+    cli_args = 'flux=hll surface=flat bathymetry=flat'
+    requirement = 'The system shall be able to model a lake at rest with a flat bathymetry using the HLL Riemann solver.'
+  []
+  [still_water_flat_on_bump_hll]
+    type = CSVDiff
+    input = still_water.i
+    csvdiff = still_water_flat_on_bump_hll.csv
+    cli_args = 'flux=hll surface=flat bathymetry=bump'
+    requirement = 'The system shall be able to model a lake at rest with a bump bathymetry using the HLL Riemann solver.'
+  []
+[]

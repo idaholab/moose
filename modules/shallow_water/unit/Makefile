@@ -24,7 +24,7 @@ include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
 ################################## MODULES ####################################
-SCALLOW_WATER := yes
+SHALLOW_WATER := yes
 include           $(MOOSE_DIR)/modules/modules.mk
 ###############################################################################
 
