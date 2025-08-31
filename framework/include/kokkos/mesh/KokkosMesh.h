@@ -42,18 +42,6 @@ struct ElementInfo
    * Subdomain ID
    */
   SubdomainID subdomain;
-  /**
-   * Number of sides
-   */
-  unsigned int n_sides;
-  /**
-   * Number of nodes
-   */
-  unsigned int n_nodes;
-  /**
-   * Number of nodes on each side
-   */
-  unsigned int n_nodes_side[6];
 };
 
 /**
@@ -112,15 +100,6 @@ public:
    */
   const auto & getLocalElementMap() const { return _maps->_local_elem_id_mapping; }
   /**
-   * Get the serialized element ID map for a subdomain
-   * @param subdomain The MOOSE subdomain ID
-   * @returns The element ID map for the subdomain
-   */
-  const auto & getSubdomainElementMap(const SubdomainID subdomain) const
-  {
-    return _maps->_subdomain_elem_id_mapping.at(subdomain);
-  }
-  /**
    * Get the list of serialized element IDs for a subdomain
    * @param subdomain The MOOSE subdomain ID
    * @returns The list of element IDs in the subdomain
@@ -168,6 +147,34 @@ public:
   KOKKOS_FUNCTION dof_id_type getNeighbor(dof_id_type elem, unsigned int side) const
   {
     return _elem_neighbor(side, elem);
+  }
+  /**
+   * Get the number of sides of an element type
+   * @param elem_type The element type ID
+   * @returns The number of sides of the element type
+   */
+  KOKKOS_FUNCTION unsigned int getNumSides(unsigned int elem_type) const
+  {
+    return _num_sides[elem_type];
+  }
+  /**
+   * Get the number of nodes of an element type
+   * @param elem_type The element type ID
+   * @returns The number of nodes of the element type
+   */
+  KOKKOS_FUNCTION unsigned int getNumNodes(unsigned int elem_type) const
+  {
+    return _num_nodes[elem_type];
+  }
+  /**
+   * Get the number of nodes on a side of an element type
+   * @param elem_type The element type ID
+   * @param side The side index
+   * @returns The number of nodes on the side of the element type
+   */
+  KOKKOS_FUNCTION unsigned int getNumNodes(unsigned int elem_type, unsigned int side) const
+  {
+    return _num_side_nodes[elem_type][side];
   }
   /**
    * Get the node ID for an element
@@ -243,11 +250,6 @@ private:
      */
     std::unordered_map<const Elem *, dof_id_type> _local_elem_id_mapping;
     /**
-     * Map from the libMesh element to the serialized element ID for each subdomain
-     */
-    std::unordered_map<SubdomainID, std::unordered_map<const Elem *, dof_id_type>>
-        _subdomain_elem_id_mapping;
-    /**
      * Map from the libMesh node to the serialized node ID
      * This list contains the nodes of local elements, so some nodes may belong to other processes
      */
@@ -275,6 +277,18 @@ private:
    * Neighbor element IDs of each element
    */
   Array2D<dof_id_type> _elem_neighbor;
+  /**
+   * Number of sides of each element type
+   */
+  Array<unsigned int> _num_sides;
+  /**
+   * Number of nodes of each element type
+   */
+  Array<unsigned int> _num_nodes;
+  /**
+   * number of nodes per side of each element side
+   */
+  Array<Array<unsigned int>> _num_side_nodes;
   /**
    * Node coordinates
    */
