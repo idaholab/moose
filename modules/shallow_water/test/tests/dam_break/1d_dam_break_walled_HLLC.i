@@ -1,7 +1,9 @@
+N = 50
+
 [Mesh]
   type = GeneratedMesh
   dim = 1
-  nx = 200
+  nx = ${N}
   xmax = 1.0
 []
 
@@ -34,20 +36,15 @@
   []
   [h_init]
     type = ParsedFunction
-    value = "if(x<0.5, hL, hR)"
-    # expression = 'tanh((x-0.5)*10)*0.25+0.75'
-    vars = 'hL hR'
-    vals = 'hL hR'
+    expression = "if(x<0.5, hL, hR)"
+    symbol_names = 'hL hR'
+    symbol_values = 'hL hR'
   []
 []
 
 [UserObjects]
   [flux]
-    type = SWENumericalFluxHLLC
-    use_pvrs = true
-    degeneracy_eps = 1e-10
-    blend_alpha = 0.0
-    log_debug = true
+    type = SWENumericalFluxHLL
   []
   [limiter]
     type = SlopeLimitingOneDSWE
@@ -93,8 +90,6 @@
 
 [AuxVariables]
   [b_field]
-    family = MONOMIAL
-    order = CONSTANT
   []
 []
 
@@ -185,31 +180,28 @@
 [VectorPostprocessors]
   [h]
     type = LineValueSampler
-    end_point = '${fparse 1-1/400} 0 0'
-    num_points = 200
+    end_point = '${fparse 1-0.5/N} 0 0'
+    num_points = ${N}
     sort_by = x
-    start_point = '${fparse 1/400} 0 0'
+    start_point = '${fparse 0.5/N} 0 0'
     variable = h
+    execute_on = 'INITIAL TIMESTEP_END'
   []
 []
 
-# [Preconditioning]
-#   [fdp]
-#     type = FDP
-#     full = true
-#   []
-# []
-
 [Executioner]
   type = Transient
+
   dt = 1e-3
   nl_abs_tol = 1e-12
-  num_steps = 100
+  num_steps = 50
   petsc_options_iname = '-pc_type'
   petsc_options_value = 'lu'
 []
 
 [Outputs]
-  csv = true
   print_linear_residuals = false
+  csv = true
+  execute_on = 'FINAL'
 []
+

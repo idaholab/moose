@@ -1,0 +1,17 @@
+[Tests]
+  issues = '#31408'
+  design = shallow_water/index.md
+
+  [1d_dam_break_HLL]
+    type = CSVDiff
+    input = 1d_dam_break_walled_HLL.i
+    csvdiff = 1d_dam_break_walled_HLL_out_h_0051.csv
+    requirement = 'The system shall be able to model a 1D dam break with an HLL Riemann solver.'
+  []
+  [1d_dam_break_HLLC]
+    type = CSVDiff
+    input = 1d_dam_break_walled_HLLC.i
+    csvdiff = 1d_dam_break_walled_HLLC_out_h_0051.csv
+    requirement = 'The system shall be able to model a 1D dam break with an HLLC Riemann solver.'
+  []
+[]
