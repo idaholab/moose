@@ -48,10 +48,13 @@ BlockRestrictable::initializeKokkosBlockRestrictable(const Moose::Kokkos::Mesh *
   {
     std::set<Moose::Kokkos::Pair<dof_id_type, unsigned int>> element_side_ids;
 
-    for (auto block : blocks)
-      for (const auto & [elem, id] : mesh->getSubdomainElementMap(block))
-        for (unsigned int side = 0; side < elem->n_sides(); ++side)
-          element_side_ids.insert({id, side});
+    for (const auto eid : element_ids)
+    {
+      auto type = mesh->getElementInfo(eid).type;
+
+      for (unsigned int side = 0; side < mesh->getNumSides(type); ++side)
+        element_side_ids.insert({eid, side});
+    }
 
     _kokkos_element_side_ids = element_side_ids;
   }

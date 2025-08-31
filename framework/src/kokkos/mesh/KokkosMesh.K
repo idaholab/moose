@@ -11,6 +11,8 @@
 
 #include "MooseMesh.h"
 
+#include "libmesh/reference_elem.h"
+
 namespace Moose
 {
 namespace Kokkos
@@ -34,14 +36,12 @@ Mesh::initMap()
   _maps->_elem_type_id_mapping.clear();
   _maps->_local_elem_id_mapping.clear();
   _maps->_local_node_id_mapping.clear();
-  _maps->_subdomain_elem_id_mapping.clear();
   _maps->_subdomain_elem_ids.clear();
   _maps->_subdomain_node_ids.clear();
 
   for (auto subdomain : _mesh.meshSubdomains())
   {
     _maps->_subdomain_id_mapping[subdomain] = _maps->_subdomain_id_mapping.size();
-    _maps->_subdomain_elem_id_mapping[subdomain];
     _maps->_subdomain_elem_ids[subdomain];
     _maps->_subdomain_node_ids[subdomain];
 
@@ -53,7 +53,6 @@ Mesh::initMap()
       auto eid = _maps->_local_elem_id_mapping.size();
 
       _maps->_local_elem_id_mapping[elem] = eid;
-      _maps->_subdomain_elem_id_mapping[subdomain][elem] = eid;
       _maps->_subdomain_elem_ids[subdomain].insert(eid);
 
       for (const auto & node : elem->node_ref_range())
@@ -74,6 +73,31 @@ Mesh::initMap()
 void
 Mesh::initElement()
 {
+  // Cache reference element data
+
+  auto num_elem_types = getElementTypeMap().size();
+
+  _num_sides.create(num_elem_types);
+  _num_nodes.create(num_elem_types);
+  _num_side_nodes.create(num_elem_types);
+
+  for (auto & [elem_type, elem_type_id] : getElementTypeMap())
+  {
+    auto elem = &libMesh::ReferenceElem::get(elem_type);
+
+    _num_sides[elem_type_id] = elem->n_sides();
+    _num_nodes[elem_type_id] = elem->n_nodes();
+
+    _num_side_nodes[elem_type_id].create(elem->n_sides());
+
+    for (unsigned int side = 0; side < elem->n_sides(); ++side)
+      _num_side_nodes[elem_type_id][side] = elem->side_ptr(side)->n_nodes();
+  }
+
+  _num_sides.copyToDevice();
+  _num_nodes.copyToDevice();
+  _num_side_nodes.copyToDeviceNested();
+
   // Cache element data
 
   auto num_elems = getLocalElementMap().size();
@@ -89,11 +113,6 @@ Mesh::initElement()
     _elem_info[eid].type = elem_type;
     _elem_info[eid].id = eid;
     _elem_info[eid].subdomain = getSubdomainID(elem->subdomain_id());
-    _elem_info[eid].n_sides = elem->n_sides();
-    _elem_info[eid].n_nodes = elem->n_nodes();
-
-    for (unsigned int side = 0; side < elem->n_sides(); ++side)
-      _elem_info[eid].n_nodes_side[side] = elem->side_ptr(side)->n_nodes();
   }
 
   _elem_info.copyToDevice();
