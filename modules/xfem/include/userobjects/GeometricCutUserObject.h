@@ -12,6 +12,7 @@
 // MOOSE includes
 #include "CrackFrontPointsProvider.h"
 #include "XFEMAppTypes.h"
+#include "SolidMechanicsAppTypes.h"
 
 #include "libmesh/libmesh_common.h"
 #include "libmesh/libmesh.h" // libMesh::invalid_uint

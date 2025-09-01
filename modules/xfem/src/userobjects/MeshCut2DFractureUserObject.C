@@ -94,6 +94,7 @@ MeshCut2DFractureUserObject::initialize()
 {
   _is_mesh_modified = false;
   findActiveBoundaryGrowth();
+
   growFront();
   addNucleatedCracksToMesh();
   // update _crack_front_definition with nucleated nodes
@@ -149,6 +150,7 @@ MeshCut2DFractureUserObject::findActiveBoundaryGrowth()
       Real k_squared = _ki_vpp->at(i) * _ki_vpp->at(i) + _kii_vpp->at(i) * _kii_vpp->at(i);
       if (k_squared > (k_crit * k_crit) && _ki_vpp->at(i) > 0)
       {
+
         // growth direction in crack front coord (cfc) system based on the  max hoop stress
         // criterion
         Real ki = _ki_vpp->at(i);
