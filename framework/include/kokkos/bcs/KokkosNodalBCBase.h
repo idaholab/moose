@@ -37,10 +37,10 @@ public:
   NodalBCBase(const NodalBCBase & object);
 
   /**
-   * Get the list of node IDs this object is operating on
-   * @returns The list of node IDs
+   * Get the list of contiguous node IDs this object is operating on
+   * @returns The list of contiguous node IDs
    */
-  std::vector<dof_id_type> getNodes() const;
+  std::vector<ContiguousNodeID> getContiguousNodes() const;
 
   /**
    * For use in Dirichlet boundary conditions only

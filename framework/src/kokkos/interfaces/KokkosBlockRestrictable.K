@@ -26,15 +26,15 @@ BlockRestrictable::initializeKokkosBlockRestrictable(const Moose::Kokkos::Mesh *
 
   auto & blocks = blockRestricted() ? blockIDs() : meshBlockIDs();
 
-  std::set<dof_id_type> element_ids;
-  std::set<dof_id_type> node_ids;
+  std::set<ContiguousElementID> element_ids;
+  std::set<ContiguousNodeID> node_ids;
 
   for (auto block : blocks)
   {
-    element_ids.insert(mesh->getSubdomainElementIDs(block).begin(),
-                       mesh->getSubdomainElementIDs(block).end());
-    node_ids.insert(mesh->getSubdomainNodeIDs(block).begin(),
-                    mesh->getSubdomainNodeIDs(block).end());
+    element_ids.insert(mesh->getSubdomainContiguousElementIDs(block).begin(),
+                       mesh->getSubdomainContiguousElementIDs(block).end());
+    node_ids.insert(mesh->getSubdomainContiguousNodeIDs(block).begin(),
+                    mesh->getSubdomainContiguousNodeIDs(block).end());
   }
 
   _kokkos_element_ids = element_ids;
@@ -46,7 +46,7 @@ BlockRestrictable::initializeKokkosBlockRestrictable(const Moose::Kokkos::Mesh *
       _moose_object->getParam<Moose::MaterialDataType>("_material_data_type") !=
           Moose::BOUNDARY_MATERIAL_DATA)
   {
-    std::set<Moose::Kokkos::Pair<dof_id_type, unsigned int>> element_side_ids;
+    std::set<Moose::Kokkos::Pair<ContiguousElementID, unsigned int>> element_side_ids;
 
     for (const auto eid : element_ids)
     {

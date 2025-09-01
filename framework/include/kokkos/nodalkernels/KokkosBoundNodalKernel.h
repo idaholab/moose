@@ -21,10 +21,10 @@ public:
 
   KokkosBoundNodalKernel(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeQpResidual(const dof_id_type node) const;
-  KOKKOS_FUNCTION Real computeQpJacobian(const dof_id_type node) const;
+  KOKKOS_FUNCTION Real computeQpResidual(const ContiguousNodeID node) const;
+  KOKKOS_FUNCTION Real computeQpJacobian(const ContiguousNodeID node) const;
   KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int jvar,
-                                                const dof_id_type node) const;
+                                                const ContiguousNodeID node) const;
 
 protected:
   /// The number of the coupled variable
@@ -34,10 +34,10 @@ protected:
   const Moose::Kokkos::VariableNodalValue _v;
 
 private:
-  KOKKOS_FUNCTION bool skipOnBoundary(const dof_id_type node) const;
+  KOKKOS_FUNCTION bool skipOnBoundary(const ContiguousNodeID node) const;
 
   /// Boundaries on which we should not execute this object
-  Moose::Kokkos::Array<BoundaryID> _bnd_ids;
+  Moose::Kokkos::Array<ContiguousBoundaryID> _bnd_ids;
 };
 
 template <typename Derived>
@@ -65,18 +65,18 @@ KokkosBoundNodalKernel<Derived>::KokkosBoundNodalKernel(const InputParameters & 
   if (_var.number() == _v_var)
     this->paramError("v", "Coupled variable needs to be different from 'variable'");
 
-  std::set<BoundaryID> bnd_ids;
+  std::set<ContiguousBoundaryID> bnd_ids;
 
   const auto & bnd_names = this->template getParam<std::vector<BoundaryName>>("exclude_boundaries");
   for (const auto & bnd_id : this->_mesh.getBoundaryIDs(bnd_names))
-    bnd_ids.insert(this->kokkosMesh().getBoundaryID(bnd_id));
+    bnd_ids.insert(this->kokkosMesh().getContiguousBoundaryID(bnd_id));
 
   _bnd_ids = bnd_ids;
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION bool
-KokkosBoundNodalKernel<Derived>::skipOnBoundary(const dof_id_type node) const
+KokkosBoundNodalKernel<Derived>::skipOnBoundary(const ContiguousNodeID node) const
 {
   for (dof_id_type b = 0; b < _bnd_ids.size(); ++b)
     if (this->kokkosMesh().isBoundaryNode(node, _bnd_ids[b]))
@@ -87,7 +87,7 @@ KokkosBoundNodalKernel<Derived>::skipOnBoundary(const dof_id_type node) const
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosBoundNodalKernel<Derived>::computeQpResidual(const dof_id_type node) const
+KokkosBoundNodalKernel<Derived>::computeQpResidual(const ContiguousNodeID node) const
 {
   if (skipOnBoundary(node))
     return _u(node);
@@ -97,7 +97,7 @@ KokkosBoundNodalKernel<Derived>::computeQpResidual(const dof_id_type node) const
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosBoundNodalKernel<Derived>::computeQpJacobian(const dof_id_type node) const
+KokkosBoundNodalKernel<Derived>::computeQpJacobian(const ContiguousNodeID node) const
 {
   if (skipOnBoundary(node))
     return 1;
@@ -108,7 +108,7 @@ KokkosBoundNodalKernel<Derived>::computeQpJacobian(const dof_id_type node) const
 template <typename Derived>
 KOKKOS_FUNCTION Real
 KokkosBoundNodalKernel<Derived>::computeQpOffDiagJacobian(const unsigned int jvar,
-                                                          const dof_id_type node) const
+                                                          const ContiguousNodeID node) const
 {
   if (skipOnBoundary(node))
     return 0;

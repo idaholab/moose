@@ -15,7 +15,7 @@ namespace Kokkos
 {
 
 void
-Thread::resize(std::vector<dof_id_type> dims)
+Thread::resize(std::vector<ThreadID> dims)
 {
   _size = 1;
   _dim = dims.size();
