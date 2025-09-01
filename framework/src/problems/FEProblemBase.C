@@ -4097,6 +4097,8 @@ FEProblemBase::reinitMaterialsFace(const SubdomainID blk_id,
                                    const bool swap_stateful,
                                    const std::deque<MaterialBase *> * const reinit_mats)
 {
+  // we reinit more often than needed here because we dont have a way to check whether
+  // we need to compute the face materials on that particular (possibly external) face
   if (hasActiveMaterialProperties(tid))
   {
     auto && elem = _assembly[tid][0]->elem();
@@ -4167,7 +4169,7 @@ FEProblemBase::reinitMaterialsBoundary(const BoundaryID boundary_id,
                                        const bool swap_stateful,
                                        const std::deque<MaterialBase *> * const reinit_mats)
 {
-  if (hasActiveMaterialProperties(tid))
+  if (hasActiveMaterialProperties(tid) && needBoundaryMaterialOnSide(boundary_id, tid))
   {
     auto && elem = _assembly[tid][0]->elem();
     unsigned int side = _assembly[tid][0]->side();
@@ -4194,7 +4196,7 @@ FEProblemBase::reinitMaterialsInterface(BoundaryID boundary_id,
                                         const THREAD_ID tid,
                                         bool swap_stateful)
 {
-  if (hasActiveMaterialProperties(tid))
+  if (hasActiveMaterialProperties(tid) && needInterfaceMaterialOnSide(boundary_id, tid))
   {
     const Elem * const & elem = _assembly[tid][0]->elem();
     unsigned int side = _assembly[tid][0]->side();
@@ -8812,6 +8814,7 @@ FEProblemBase::needInterfaceMaterialOnSide(BoundaryID bnd_id, const THREAD_ID ti
     auto & interface_mat_side_cache = _interface_mat_side_cache[tid][bnd_id];
     interface_mat_side_cache = false;
 
+    // Aux-system has not needed interface materials so far
     for (auto & nl : _nl)
       if (nl->needInterfaceMaterialOnSide(bnd_id, tid))
       {
@@ -8819,6 +8822,7 @@ FEProblemBase::needInterfaceMaterialOnSide(BoundaryID bnd_id, const THREAD_ID ti
         return true;
       }
 
+    // TODO: these objects should be checked for whether they actually consume materials
     if (theWarehouse()
             .query()
             .condition<AttribThread>(tid)
@@ -8853,6 +8857,7 @@ FEProblemBase::needSubdomainMaterialOnSide(SubdomainID subdomain_id, const THREA
         return true;
       }
 
+    // TODO: these objects should be checked for whether they actually consume materials
     if (theWarehouse()
             .query()
             .condition<AttribThread>(tid)
