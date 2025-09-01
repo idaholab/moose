@@ -122,6 +122,7 @@ extern const ExecFlagType EXEC_LINEAR_CONVERGENCE;
 extern const ExecFlagType EXEC_LINEAR;
 extern const ExecFlagType EXEC_NONLINEAR_CONVERGENCE;
 extern const ExecFlagType EXEC_NONLINEAR;
+extern const ExecFlagType EXEC_XFEM_MARK;
 extern const ExecFlagType EXEC_POSTCHECK;
 extern const ExecFlagType EXEC_TIMESTEP_END;
 extern const ExecFlagType EXEC_TIMESTEP_BEGIN;
