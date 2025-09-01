@@ -108,7 +108,7 @@ ComplexEquationSystem::ApplyDomainBLFIntegrators(
       mfem::BilinearFormIntegrator * integ_real = kernel->getRealBFIntegrator();
       mfem::BilinearFormIntegrator * integ_imag = kernel->getImagBFIntegrator();
 
-      if (integ_real != nullptr && integ_imag != nullptr)
+      if (integ_real != nullptr || integ_imag != nullptr)
       {
         kernel->isSubdomainRestricted()
             ? form->AddDomainIntegrator(
@@ -162,7 +162,7 @@ ComplexEquationSystem::ApplyBoundaryBLFIntegrators(
       mfem::BilinearFormIntegrator * integ_real = bc->getRealBFIntegrator();
       mfem::BilinearFormIntegrator * integ_imag = bc->getImagBFIntegrator();
 
-      if (integ_real != nullptr && integ_imag != nullptr)
+      if (integ_real != nullptr || integ_imag != nullptr)
       {
         bc->isBoundaryRestricted()
             ? form->AddBoundaryIntegrator(
