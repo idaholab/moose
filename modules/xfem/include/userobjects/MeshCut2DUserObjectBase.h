@@ -81,7 +81,7 @@ protected:
 
   /// user object for communicating between solid_mechanics interaction integrals and xfem cutter mesh
   CrackFrontDefinition * _crack_front_definition;
-
+øø
   /**
   Find growth direction at each active node
   */

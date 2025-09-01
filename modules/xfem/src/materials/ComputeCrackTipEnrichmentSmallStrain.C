@@ -32,12 +32,13 @@ ComputeCrackTipEnrichmentSmallStrain::validParams()
 ComputeCrackTipEnrichmentSmallStrain::ComputeCrackTipEnrichmentSmallStrain(
     const InputParameters & parameters)
   : ComputeStrainBase(parameters),
-    EnrichmentFunctionCalculation(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
     _enrich_disp(3),
     _grad_enrich_disp(3),
     _enrich_variable(4),
     _phi(_assembly.phi()),
     _grad_phi(_assembly.gradPhi()),
+    _crack_front_definition(nullptr),
+
     _B(4),
     _dBX(4),
     _dBx(4)
@@ -67,16 +68,24 @@ ComputeCrackTipEnrichmentSmallStrain::ComputeCrackTipEnrichmentSmallStrain(
   for (unsigned int i = 0; i < _BI.size(); ++i)
     _BI[i].resize(4);
 }
-
+void
+ComputeCrackTipEnrichmentSmallStrain::initialSetup()
+{
+  const auto uo_name = getParam<UserObjectName>("crack_front_definition");
+  _crack_front_definition = &_fe_problem.getUserObject<CrackFrontDefinition>(uo_name);
+}
 void
 ComputeCrackTipEnrichmentSmallStrain::computeQpProperties()
 {
-  crackTipEnrichementFunctionAtPoint(_q_point[_qp], _B);
+  EnrichFunctionUtility::crackTipEnrichementFunctionAtPoint(
+      _crack_front_definition, _q_point[_qp], _B);
   unsigned int crack_front_point_index =
-      crackTipEnrichementFunctionDerivativeAtPoint(_q_point[_qp], _dBx);
+      EnrichFunctionUtility::crackTipEnrichementFunctionDerivativeAtPoint(
+          _crack_front_definition, _q_point[_qp], _dBx);
 
   for (unsigned int i = 0; i < 4; ++i)
-    rotateFromCrackFrontCoordsToGlobal(_dBx[i], _dBX[i], crack_front_point_index);
+    EnrichFunctionUtility::rotateFromCrackFrontCoordsToGlobal(
+        _crack_front_definition, _dBx[i], _dBX[i], crack_front_point_index);
 
   _sln = _nl->currentSolution();
 
@@ -135,7 +144,8 @@ ComputeCrackTipEnrichmentSmallStrain::computeProperties()
     fe->reinit(_current_elem);
 
   for (unsigned int i = 0; i < _BI.size(); ++i)
-    crackTipEnrichementFunctionAtPoint(*(_current_elem->node_ptr(i)), _BI[i]);
+    EnrichFunctionUtility::crackTipEnrichementFunctionAtPoint(
+        _crack_front_definition, *(_current_elem->node_ptr(i)), _BI[i]);
 
   ComputeStrainBase::computeProperties();
 }
