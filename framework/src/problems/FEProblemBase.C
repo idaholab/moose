@@ -8775,23 +8775,24 @@ FEProblemBase::needBoundaryMaterialOnSide(BoundaryID bnd_id, const THREAD_ID tid
     auto & bnd_mat_side_cache = _bnd_mat_side_cache[tid][bnd_id];
     bnd_mat_side_cache = false;
 
+    // Check systems
     if (_aux->needMaterialOnSide(bnd_id))
     {
       bnd_mat_side_cache = true;
       return true;
     }
-    else
-      for (auto & nl : _nl)
-        if (nl->needBoundaryMaterialOnSide(bnd_id, tid))
-        {
-          bnd_mat_side_cache = true;
-          return true;
-        }
+    for (auto & nl : _nl)
+      if (nl->needBoundaryMaterialOnSide(bnd_id, tid))
+      {
+        bnd_mat_side_cache = true;
+        return true;
+      }
 
+    // TODO: these objects should be checked for whether they actually consume materials
     if (theWarehouse()
             .query()
             .condition<AttribThread>(tid)
-            .condition<AttribInterfaces>(Interfaces::SideUserObject)
+            .condition<AttribInterfaces>(Interfaces::SideUserObject | Interfaces::DomainUserObject)
             .condition<AttribBoundaries>(bnd_id)
             .count() > 0)
     {
@@ -8821,7 +8822,8 @@ FEProblemBase::needInterfaceMaterialOnSide(BoundaryID bnd_id, const THREAD_ID ti
     if (theWarehouse()
             .query()
             .condition<AttribThread>(tid)
-            .condition<AttribInterfaces>(Interfaces::InterfaceUserObject)
+            .condition<AttribInterfaces>(Interfaces::InterfaceUserObject |
+                                         Interfaces::DomainUserObject)
             .condition<AttribBoundaries>(bnd_id)
             .count() > 0)
     {
@@ -8854,7 +8856,8 @@ FEProblemBase::needSubdomainMaterialOnSide(SubdomainID subdomain_id, const THREA
     if (theWarehouse()
             .query()
             .condition<AttribThread>(tid)
-            .condition<AttribInterfaces>(Interfaces::InternalSideUserObject)
+            .condition<AttribInterfaces>(Interfaces::InternalSideUserObject |
+                                         Interfaces::DomainUserObject)
             .condition<AttribSubdomains>(subdomain_id)
             .count() > 0)
     {
