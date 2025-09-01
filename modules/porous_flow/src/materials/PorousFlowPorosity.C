@@ -258,8 +258,27 @@ PorousFlowPorosity::decayQp() const
 
   if (_fluid)
   {
-    const Moose::ElemQpArg space_arg = {_current_elem, _qp, _qrule, _q_point[_qp]};
-    const auto solid_bulk = (*_solid_bulk)(space_arg, Moose::currentState());
+    Real solid_bulk;
+    // Using Qp 0 can leverage the functor caching
+    // TODO: Find a way to effectively use subdomain-constant-ness
+    unsigned int qp_used = (_constant_option == ConstantTypeEnum::NONE) ? _qp : 0;
+    if (_nodal_material)
+    {
+      const std::set<SubdomainID> subdomain_set = {_current_elem->subdomain_id()};
+      const Moose::NodeArg space_arg = {_current_elem->node_ptr(qp_used), &subdomain_set};
+      solid_bulk = (*_solid_bulk)(space_arg, Moose::currentState());
+    }
+    else if (_bnd)
+    {
+      const Moose::ElemSideQpArg space_arg = {
+          _current_elem, _current_side, qp_used, _qrule, _q_point[qp_used]};
+      solid_bulk = (*_solid_bulk)(space_arg, Moose::currentState());
+    }
+    else
+    {
+      const Moose::ElemQpArg space_arg = {_current_elem, qp_used, _qrule, _q_point[qp_used]};
+      solid_bulk = (*_solid_bulk)(space_arg, Moose::currentState());
+    }
     if (solid_bulk <= 0)
       mooseError("PorousFlowPorosity: solid_bulk must be larger than Zero");
     result += _coeff / solid_bulk * ((*_pf)[_qp] - _p_reference[_qp]);
@@ -289,8 +308,27 @@ PorousFlowPorosity::ddecayQp_dvar(unsigned pvar) const
 
   if (_fluid)
   {
-    const Moose::ElemQpArg space_arg = {_current_elem, _qp, _qrule, _q_point[_qp]};
-    const auto solid_bulk = (*_solid_bulk)(space_arg, Moose::currentState());
+    Real solid_bulk;
+    // Using Qp 0 can leverage the functor caching
+    // TODO: Find a way to effectively use subdomain-constant-ness
+    unsigned int qp_used = (_constant_option == ConstantTypeEnum::NONE) ? _qp : 0;
+    if (_nodal_material)
+    {
+      const std::set<SubdomainID> subdomain_set = {_current_elem->subdomain_id()};
+      const Moose::NodeArg space_arg = {_current_elem->node_ptr(qp_used), &subdomain_set};
+      solid_bulk = (*_solid_bulk)(space_arg, Moose::currentState());
+    }
+    else if (_bnd)
+    {
+      const Moose::ElemSideQpArg space_arg = {
+          _current_elem, _current_side, qp_used, _qrule, _q_point[qp_used]};
+      solid_bulk = (*_solid_bulk)(space_arg, Moose::currentState());
+    }
+    else
+    {
+      const Moose::ElemQpArg space_arg = {_current_elem, qp_used, _qrule, _q_point[qp_used]};
+      solid_bulk = (*_solid_bulk)(space_arg, Moose::currentState());
+    }
     if (solid_bulk <= 0)
       mooseError("PorousFlowPorosity: solid_bulk must be larger than Zero.");
     result += _coeff / solid_bulk * (*_dpf_dvar)[_qp][pvar];
