@@ -51,6 +51,8 @@ public:
 
   MeshBase & getCutterMesh() const;
 
+  bool pointOnEdgeBoundary(const Point & point, Real tolerance = 1e-10);
+
 protected:
   /// The FE solution mesh
   MooseMesh & _mesh;
