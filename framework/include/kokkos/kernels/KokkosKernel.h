@@ -112,9 +112,9 @@ public:
    * The parallel computation entry functions called by Kokkos
    */
   ///@{
-  KOKKOS_FUNCTION void operator()(ResidualLoop, const dof_id_type tid) const;
-  KOKKOS_FUNCTION void operator()(JacobianLoop, const dof_id_type tid) const;
-  KOKKOS_FUNCTION void operator()(OffDiagJacobianLoop, const dof_id_type tid) const;
+  KOKKOS_FUNCTION void operator()(ResidualLoop, const ThreadID tid) const;
+  KOKKOS_FUNCTION void operator()(JacobianLoop, const ThreadID tid) const;
+  KOKKOS_FUNCTION void operator()(OffDiagJacobianLoop, const ThreadID tid) const;
   ///@}
 
   /**
@@ -214,7 +214,7 @@ template <typename Derived>
 void
 Kernel<Derived>::computeResidual()
 {
-  ::Kokkos::RangePolicy<ResidualLoop, ExecSpace, ::Kokkos::IndexType<dof_id_type>> policy(
+  ::Kokkos::RangePolicy<ResidualLoop, ExecSpace, ::Kokkos::IndexType<ThreadID>> policy(
       0, numKokkosBlockElements());
   ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
   ::Kokkos::fence();
@@ -226,7 +226,7 @@ Kernel<Derived>::computeJacobian()
 {
   if (!defaultJacobian())
   {
-    ::Kokkos::RangePolicy<JacobianLoop, ExecSpace, ::Kokkos::IndexType<dof_id_type>> policy(
+    ::Kokkos::RangePolicy<JacobianLoop, ExecSpace, ::Kokkos::IndexType<ThreadID>> policy(
         0, numKokkosBlockElements());
     ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
     ::Kokkos::fence();
@@ -238,7 +238,7 @@ Kernel<Derived>::computeJacobian()
 
     _thread.resize({sys.getCoupling(_kokkos_var.var()).size(), numKokkosBlockElements()});
 
-    ::Kokkos::RangePolicy<OffDiagJacobianLoop, ExecSpace, ::Kokkos::IndexType<dof_id_type>> policy(
+    ::Kokkos::RangePolicy<OffDiagJacobianLoop, ExecSpace, ::Kokkos::IndexType<ThreadID>> policy(
         0, _thread.size());
     ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
     ::Kokkos::fence();
@@ -247,7 +247,7 @@ Kernel<Derived>::computeJacobian()
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-Kernel<Derived>::operator()(ResidualLoop, const dof_id_type tid) const
+Kernel<Derived>::operator()(ResidualLoop, const ThreadID tid) const
 {
   auto kernel = static_cast<const Derived *>(this);
   auto elem = kokkosBlockElementID(tid);
@@ -259,7 +259,7 @@ Kernel<Derived>::operator()(ResidualLoop, const dof_id_type tid) const
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-Kernel<Derived>::operator()(JacobianLoop, const dof_id_type tid) const
+Kernel<Derived>::operator()(JacobianLoop, const ThreadID tid) const
 {
   auto kernel = static_cast<const Derived *>(this);
   auto elem = kokkosBlockElementID(tid);
@@ -271,7 +271,7 @@ Kernel<Derived>::operator()(JacobianLoop, const dof_id_type tid) const
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-Kernel<Derived>::operator()(OffDiagJacobianLoop, const dof_id_type tid) const
+Kernel<Derived>::operator()(OffDiagJacobianLoop, const ThreadID tid) const
 {
   auto kernel = static_cast<const Derived *>(this);
   auto elem = kokkosBlockElementID(_thread(tid, 1));

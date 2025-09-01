@@ -21,18 +21,18 @@ public:
 
   KokkosJacobianCheck(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeQpResidual(const dof_id_type node) const;
-  KOKKOS_FUNCTION Real computeQpJacobian(const dof_id_type node) const;
+  KOKKOS_FUNCTION Real computeQpResidual(const ContiguousNodeID node) const;
+  KOKKOS_FUNCTION Real computeQpJacobian(const ContiguousNodeID node) const;
 };
 
 KOKKOS_FUNCTION inline Real
-KokkosJacobianCheck::computeQpResidual(const dof_id_type node) const
+KokkosJacobianCheck::computeQpResidual(const ContiguousNodeID node) const
 {
   return -5.0 * _u(node);
 }
 
 KOKKOS_FUNCTION inline Real
-KokkosJacobianCheck::computeQpJacobian(const dof_id_type /* node */) const
+KokkosJacobianCheck::computeQpJacobian(const ContiguousNodeID /* node */) const
 {
   return -5.0;
 }

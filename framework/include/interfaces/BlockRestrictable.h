@@ -276,29 +276,29 @@ protected:
     return _kokkos_element_side_ids.size();
   }
   /**
-   * Get the element ID this Kokkos thread is operating on
+   * Get the contiguous element ID this Kokkos thread is operating on
    * @param tid The thread ID
-   * @returns The element ID
+   * @returns The contiguous element ID
    */
-  KOKKOS_FUNCTION dof_id_type kokkosBlockElementID(dof_id_type tid) const
+  KOKKOS_FUNCTION ContiguousElementID kokkosBlockElementID(ThreadID tid) const
   {
     return _kokkos_element_ids[tid];
   }
   /**
-   * Get the node index this Kokkos thread is operating on
+   * Get the contiguous node index this Kokkos thread is operating on
    * @param tid The thread ID
-   * @returns the node ID
+   * @returns the contiguous node ID
    */
-  KOKKOS_FUNCTION dof_id_type kokkosBlockNodeID(dof_id_type tid) const
+  KOKKOS_FUNCTION ContiguousElementID kokkosBlockNodeID(ThreadID tid) const
   {
     return _kokkos_node_ids[tid];
   }
   /**
-   * Get the element ID - side index pair this Kokkos thread is operating on
+   * Get the contiguous element ID - side index pair this Kokkos thread is operating on
    * @param tid The thread ID
-   * @returns The element ID - side index pair
+   * @returns The contiguous element ID - side index pair
    */
-  KOKKOS_FUNCTION auto kokkosBlockElementSideID(dof_id_type tid) const
+  KOKKOS_FUNCTION auto kokkosBlockElementSideID(ThreadID tid) const
   {
     return _kokkos_element_side_ids[tid];
   }
@@ -343,17 +343,18 @@ private:
 
 #ifdef MOOSE_KOKKOS_ENABLED
   /**
-   * List of element IDs this Kokkos object is operating on
+   * List of contiguous element IDs this Kokkos object is operating on
    */
-  Moose::Kokkos::Array<dof_id_type> _kokkos_element_ids;
+  Moose::Kokkos::Array<ContiguousElementID> _kokkos_element_ids;
   /**
-   * List of node IDs this Kokkos object is operating on
+   * List of contiguous node IDs this Kokkos object is operating on
    */
-  Moose::Kokkos::Array<dof_id_type> _kokkos_node_ids;
+  Moose::Kokkos::Array<ContiguousNodeID> _kokkos_node_ids;
   /**
-   * List of local element ID - side index pairs this Kokkos object is operating on
+   * List of contiguous local element ID - side index pairs this Kokkos object is operating on
    */
-  Moose::Kokkos::Array<Moose::Kokkos::Pair<dof_id_type, unsigned int>> _kokkos_element_side_ids;
+  Moose::Kokkos::Array<Moose::Kokkos::Pair<ContiguousElementID, unsigned int>>
+      _kokkos_element_side_ids;
 #endif
 };
 

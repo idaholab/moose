@@ -59,7 +59,7 @@ System::setupVariables()
     _var_fe_types[var] = kokkosAssembly().getFETypeID(sys.variable_type(var));
 
     for (auto subdomain : _mesh.meshSubdomains())
-      _var_subdomain_active(var, kokkosMesh().getSubdomainID(subdomain)) =
+      _var_subdomain_active(var, kokkosMesh().getContiguousSubdomainID(subdomain)) =
           sys.variable(var).active_on_subdomain(subdomain);
   }
 
@@ -94,8 +94,8 @@ System::setupDofs()
 {
   auto & sys = _system.system();
 
-  auto num_elems = kokkosMesh().getLocalElementMap().size();
-  auto num_nodes = kokkosMesh().getLocalNodeMap().size();
+  auto num_elems = kokkosMesh().getContiguousElementMap().size();
+  auto num_nodes = kokkosMesh().getContiguousNodeMap().size();
 
   _residual_tag_active.create(MAX_TAG);
   _residual_tag_active = false;
@@ -119,7 +119,7 @@ System::setupDofs()
 
   for (unsigned int var = 0; var < _num_vars; ++var)
   {
-    for (auto & [elem, id] : kokkosMesh().getLocalElementMap())
+    for (auto & [elem, id] : kokkosMesh().getContiguousElementMap())
     {
       _dof_map.dof_indices(elem, dof_indices, var);
 
@@ -133,7 +133,7 @@ System::setupDofs()
     _local_node_dof_index[var].create(num_nodes);
     _local_node_dof_index[var] = libMesh::DofObject::invalid_id;
 
-    for (auto & [elem, id] : kokkosMesh().getLocalElementMap())
+    for (auto & [elem, id] : kokkosMesh().getContiguousElementMap())
     {
       _dof_map.dof_indices(elem, dof_indices, var);
 
@@ -144,7 +144,7 @@ System::setupDofs()
       }
     }
 
-    for (auto & [node, id] : kokkosMesh().getLocalNodeMap())
+    for (auto & [node, id] : kokkosMesh().getContiguousNodeMap())
       if (node->processor_id() == _comm.rank())
       {
         _dof_map.dof_indices(node, dof_indices, var);
@@ -303,7 +303,7 @@ System::getNodalBCDofs(const NodalBCBase * nbc, Array<bool> & dofs)
     dofs = false;
   }
 
-  for (auto node : nbc->getNodes())
+  for (auto node : nbc->getContiguousNodes())
     dofs[_local_node_dof_index[var][node]] = true;
 
   // Let remote processes know about ghost DOFs associated with nodal BCs not to compute
@@ -476,7 +476,7 @@ System::reinit()
 
     for (auto subdomain : _mesh.meshSubdomains())
     {
-      auto sid = kokkosMesh().getSubdomainID(subdomain);
+      auto sid = kokkosMesh().getContiguousSubdomainID(subdomain);
 
       for (auto var : _active_variables)
       {
@@ -498,20 +498,20 @@ System::reinit()
   _qp_solutions.copyToDevice();
   _qp_solutions_grad.copyToDevice();
 
-  dof_id_type num_elems = kokkosMesh().getLocalElementMap().size();
+  dof_id_type num_elems = kokkosMesh().getContiguousElementMap().size();
 
   _thread.resize({kokkosAssembly().getMaxQpsPerElem(),
                   num_elems,
                   _active_variables.size(),
                   _active_variable_tags.size()});
 
-  ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<dof_id_type>> policy(0, _thread.size());
+  ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>> policy(0, _thread.size());
   ::Kokkos::parallel_for(policy, *this);
   ::Kokkos::fence();
 }
 
 KOKKOS_FUNCTION void
-System::operator()(const dof_id_type tid) const
+System::operator()(const ThreadID tid) const
 {
   auto qp = _thread(tid, 0);
   auto elem = _thread(tid, 1);

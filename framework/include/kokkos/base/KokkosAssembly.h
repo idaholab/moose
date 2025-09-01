@@ -54,10 +54,10 @@ public:
   KOKKOS_FUNCTION unsigned int getMaxQpsPerElem() const { return _max_qps_per_elem; }
   /**
    * Get the total number of elemental quadrature points in a subdomain
-   * @param subdomain The subdomain ID
+   * @param subdomain The contiguous subdomain ID
    * @returns The number of quadrature points
    */
-  KOKKOS_FUNCTION dof_id_type getNumQps(SubdomainID subdomain) const
+  KOKKOS_FUNCTION dof_id_type getNumQps(ContiguousSubdomainID subdomain) const
   {
     return _n_subdomain_qps[subdomain];
   }
@@ -71,10 +71,10 @@ public:
    * Get the total number of facial quadrature points in a subdomain
    * Note: this number does not represent the real number of facial quadrature points but only
    * counts the facial quadrature points that need global caching, such as face material properties
-   * @param subdomain The subdomain ID
+   * @param subdomain The contiguous subdomain ID
    * @returns The number of quadrature points
    */
-  KOKKOS_FUNCTION dof_id_type getNumFaceQps(SubdomainID subdomain) const
+  KOKKOS_FUNCTION dof_id_type getNumFaceQps(ContiguousSubdomainID subdomain) const
   {
     return _n_subdomain_qps_face[subdomain];
   }
@@ -118,49 +118,50 @@ public:
   }
   /**
    * Get the shape functions of a FE type for an element type and subdomain
-   * @param subdomain The subdomain ID
+   * @param subdomain The contiguous subdomain ID
    * @param elem_type The element type ID
    * @param fe_type The FE type ID
    * @returns The shape functions at quadrature points
    */
   KOKKOS_FUNCTION const auto &
-  getPhi(SubdomainID subdomain, unsigned int elem_type, unsigned int fe_type) const
+  getPhi(ContiguousSubdomainID subdomain, unsigned int elem_type, unsigned int fe_type) const
   {
     return _phi(subdomain, elem_type, fe_type);
   }
   /**
    * Get the face shape functions of a FE type for an element type and subdomain
-   * @param subdomain The subdomain ID
+   * @param subdomain The contiguous subdomain ID
    * @param elem_type The element type ID
    * @param fe_type The FE type ID
    * @returns The shape functions of all sides at quadrature points
    */
   KOKKOS_FUNCTION const auto &
-  getPhiFace(SubdomainID subdomain, unsigned int elem_type, unsigned int fe_type) const
+  getPhiFace(ContiguousSubdomainID subdomain, unsigned int elem_type, unsigned int fe_type) const
   {
     return _phi_face(subdomain, elem_type, fe_type);
   }
   /**
    * Get the gradient of shape functions of a FE type for an element type and subdomain
-   * @param subdomain The subdomain ID
+   * @param subdomain The contiguous subdomain ID
    * @param elem_type The element type ID
    * @param fe_type The FE type ID
    * @returns The gradient of shape functions at quadrature points
    */
   KOKKOS_FUNCTION const auto &
-  getGradPhi(SubdomainID subdomain, unsigned int elem_type, unsigned int fe_type) const
+  getGradPhi(ContiguousSubdomainID subdomain, unsigned int elem_type, unsigned int fe_type) const
   {
     return _grad_phi(subdomain, elem_type, fe_type);
   }
   /**
    * Get the gradient of face shape functions of a FE type for an element type and subdomain
-   * @param subdomain The subdomain ID
+   * @param subdomain The contiguous subdomain ID
    * @param elem_type The element type ID
    * @param fe_type The FE type ID
    * @returns The gradient of shape functions of all sides at quadrature points
    */
-  KOKKOS_FUNCTION const auto &
-  getGradPhiFace(SubdomainID subdomain, unsigned int elem_type, unsigned int fe_type) const
+  KOKKOS_FUNCTION const auto & getGradPhiFace(ContiguousSubdomainID subdomain,
+                                              unsigned int elem_type,
+                                              unsigned int fe_type) const
   {
     return _grad_phi_face(subdomain, elem_type, fe_type);
   }
@@ -197,11 +198,12 @@ public:
 
   /**
    * Get the coordinate transform factor for a point in a subdomain
-   * @param subdomain The subdomain ID
+   * @param subdomain The contiguous subdomain ID
    * @param point The point coordinate
    * @returns The coordinate transform factor
    */
-  KOKKOS_FUNCTION Real coordTransformFactor(const SubdomainID subdomain, const Real3 point) const;
+  KOKKOS_FUNCTION Real coordTransformFactor(const ContiguousSubdomainID subdomain,
+                                            const Real3 point) const;
   /**
    * Compute physical transformation data for an element
    * @param info The element information object
@@ -234,7 +236,7 @@ public:
   /**
    * Kokkos function for caching physical maps on element quadrature points
    */
-  KOKKOS_FUNCTION void operator()(const dof_id_type tid) const;
+  KOKKOS_FUNCTION void operator()(const ThreadID tid) const;
 
   /**
    * Get the list of boundaries to cache face material properties
@@ -353,7 +355,7 @@ private:
 
 #ifdef MOOSE_KOKKOS_SCOPE
 KOKKOS_FUNCTION inline Real
-Assembly::coordTransformFactor(const SubdomainID subdomain, const Real3 point) const
+Assembly::coordTransformFactor(const ContiguousSubdomainID subdomain, const Real3 point) const
 {
   switch (_coord_type[subdomain])
   {
@@ -392,7 +394,7 @@ Assembly::computePhysicalMap(const ElementInfo info,
 
   for (unsigned int node = 0; node < num_nodes; ++node)
   {
-    auto points = kokkosMesh().getNodePoint(kokkosMesh().getNodeID(eid, node));
+    auto points = kokkosMesh().getNodePoint(kokkosMesh().getContiguousNodeID(eid, node));
 
     if (jacobian || JxW)
       J += grad_phi(node, qp).cartesian_product(points);
@@ -431,7 +433,7 @@ Assembly::computePhysicalMap(const ElementInfo info,
 
   for (unsigned int node = 0; node < num_nodes; ++node)
   {
-    auto points = kokkosMesh().getNodePoint(kokkosMesh().getNodeID(eid, node));
+    auto points = kokkosMesh().getNodePoint(kokkosMesh().getContiguousNodeID(eid, node));
 
     if (jacobian)
       J += grad_phi(node, qp).cartesian_product(points);
@@ -453,7 +455,7 @@ Assembly::computePhysicalMap(const ElementInfo info,
 
     for (unsigned int node = 0; node < num_side_nodes; ++node)
     {
-      auto points = kokkosMesh().getNodePoint(kokkosMesh().getNodeID(eid, side, node));
+      auto points = kokkosMesh().getNodePoint(kokkosMesh().getContiguousNodeID(eid, side, node));
 
       J += grad_psi(node, qp).cartesian_product(points);
     }

@@ -112,9 +112,9 @@ public:
    * The parallel computation entry functions called by Kokkos
    */
   ///@{
-  KOKKOS_FUNCTION void operator()(ResidualLoop, const dof_id_type tid) const;
-  KOKKOS_FUNCTION void operator()(JacobianLoop, const dof_id_type tid) const;
-  KOKKOS_FUNCTION void operator()(OffDiagJacobianLoop, const dof_id_type tid) const;
+  KOKKOS_FUNCTION void operator()(ResidualLoop, const ThreadID tid) const;
+  KOKKOS_FUNCTION void operator()(JacobianLoop, const ThreadID tid) const;
+  KOKKOS_FUNCTION void operator()(OffDiagJacobianLoop, const ThreadID tid) const;
   ///@}
 
   /**
@@ -214,7 +214,7 @@ template <typename Derived>
 void
 IntegratedBC<Derived>::computeResidual()
 {
-  ::Kokkos::RangePolicy<ResidualLoop, ExecSpace, ::Kokkos::IndexType<dof_id_type>> policy(
+  ::Kokkos::RangePolicy<ResidualLoop, ExecSpace, ::Kokkos::IndexType<ThreadID>> policy(
       0, numKokkosBoundarySides());
   ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
   ::Kokkos::fence();
@@ -226,7 +226,7 @@ IntegratedBC<Derived>::computeJacobian()
 {
   if (!defaultJacobian())
   {
-    ::Kokkos::RangePolicy<JacobianLoop, ExecSpace, ::Kokkos::IndexType<dof_id_type>> policy(
+    ::Kokkos::RangePolicy<JacobianLoop, ExecSpace, ::Kokkos::IndexType<ThreadID>> policy(
         0, numKokkosBoundarySides());
     ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
     ::Kokkos::fence();
@@ -238,7 +238,7 @@ IntegratedBC<Derived>::computeJacobian()
 
     _thread.resize({sys.getCoupling(_kokkos_var.var()).size(), numKokkosBoundarySides()});
 
-    ::Kokkos::RangePolicy<OffDiagJacobianLoop, ExecSpace, ::Kokkos::IndexType<dof_id_type>> policy(
+    ::Kokkos::RangePolicy<OffDiagJacobianLoop, ExecSpace, ::Kokkos::IndexType<ThreadID>> policy(
         0, _thread.size());
     ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
     ::Kokkos::fence();
@@ -247,7 +247,7 @@ IntegratedBC<Derived>::computeJacobian()
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-IntegratedBC<Derived>::operator()(ResidualLoop, const dof_id_type tid) const
+IntegratedBC<Derived>::operator()(ResidualLoop, const ThreadID tid) const
 {
   auto bc = static_cast<const Derived *>(this);
   auto [elem, side] = kokkosBoundaryElementSideID(tid);
@@ -260,7 +260,7 @@ IntegratedBC<Derived>::operator()(ResidualLoop, const dof_id_type tid) const
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-IntegratedBC<Derived>::operator()(JacobianLoop, const dof_id_type tid) const
+IntegratedBC<Derived>::operator()(JacobianLoop, const ThreadID tid) const
 {
   auto bc = static_cast<const Derived *>(this);
   auto [elem, side] = kokkosBoundaryElementSideID(tid);
@@ -273,7 +273,7 @@ IntegratedBC<Derived>::operator()(JacobianLoop, const dof_id_type tid) const
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-IntegratedBC<Derived>::operator()(OffDiagJacobianLoop, const dof_id_type tid) const
+IntegratedBC<Derived>::operator()(OffDiagJacobianLoop, const ThreadID tid) const
 {
   auto bc = static_cast<const Derived *>(this);
   auto [elem, side] = kokkosBoundaryElementSideID(_thread(tid, 1));

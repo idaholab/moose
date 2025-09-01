@@ -100,19 +100,19 @@ Mesh::initElement()
 
   // Cache element data
 
-  auto num_elems = getLocalElementMap().size();
+  auto num_elems = getContiguousElementMap().size();
 
   _elem_info.create(num_elems);
   _elem_neighbor.create(_mesh.getMaxSidesPerElem(), num_elems);
   _elem_neighbor = libMesh::DofObject::invalid_id;
 
-  for (auto & [elem, eid] : getLocalElementMap())
+  for (auto & [elem, eid] : getContiguousElementMap())
   {
     auto elem_type = getElementTypeID(elem);
 
     _elem_info[eid].type = elem_type;
     _elem_info[eid].id = eid;
-    _elem_info[eid].subdomain = getSubdomainID(elem->subdomain_id());
+    _elem_info[eid].subdomain = getContiguousSubdomainID(elem->subdomain_id());
   }
 
   _elem_info.copyToDevice();
@@ -120,36 +120,36 @@ Mesh::initElement()
 
   // Cache node data
 
-  auto num_nodes = getLocalNodeMap().size();
+  auto num_nodes = getContiguousNodeMap().size();
 
   _points.create(num_nodes);
   _nodes.create(_mesh.getMaxNodesPerElem(), num_elems);
   _nodes_face.create(_mesh.getMaxNodesPerSide(), _mesh.getMaxSidesPerElem(), num_elems);
   _boundary_nodes.create(_mesh.meshBoundaryIds().size());
 
-  for (auto & [node, nid] : getLocalNodeMap())
+  for (auto & [node, nid] : getContiguousNodeMap())
     _points[nid] = *node;
 
-  for (auto & [elem, eid] : getLocalElementMap())
+  for (auto & [elem, eid] : getContiguousElementMap())
   {
     for (unsigned int node = 0; node < elem->n_nodes(); ++node)
-      _nodes(node, eid) = getNodeID(elem->node_ptr(node));
+      _nodes(node, eid) = getContiguousNodeID(elem->node_ptr(node));
 
     for (unsigned int side = 0; side < elem->n_sides(); ++side)
       for (unsigned int node = 0; node < elem->side_ptr(side)->n_nodes(); ++node)
-        _nodes_face(node, side, eid) = getNodeID(elem->side_ptr(side)->node_ptr(node));
+        _nodes_face(node, side, eid) = getContiguousNodeID(elem->side_ptr(side)->node_ptr(node));
   }
 
   for (auto boundary : _mesh.meshBoundaryIds())
   {
-    std::set<dof_id_type> nodes;
+    std::set<ContiguousNodeID> nodes;
 
     for (const auto node : as_range(_mesh.getMesh().bid_nodes_begin(boundary),
                                     _mesh.getMesh().bid_nodes_end(boundary)))
       if (node->processor_id() == _mesh.processor_id())
-        nodes.insert(getNodeID(node));
+        nodes.insert(getContiguousNodeID(node));
 
-    _boundary_nodes[getBoundaryID(boundary)] = nodes;
+    _boundary_nodes[getContiguousBoundaryID(boundary)] = nodes;
   }
 
   _points.copyToDevice();
@@ -158,20 +158,20 @@ Mesh::initElement()
   _boundary_nodes.copyToDevice();
 }
 
-SubdomainID
-Mesh::getSubdomainID(const SubdomainID subdomain) const
+ContiguousSubdomainID
+Mesh::getContiguousSubdomainID(const SubdomainID subdomain) const
 {
   if (!_maps->_subdomain_id_mapping.count(subdomain))
-    mooseError("Subdomain ", subdomain, " does not have Kokkos subdomain ID");
+    mooseError("Subdomain ", subdomain, " does not have Kokkos contiguous subdomain ID");
 
   return _maps->_subdomain_id_mapping.at(subdomain);
 }
 
-BoundaryID
-Mesh::getBoundaryID(const BoundaryID boundary) const
+ContiguousBoundaryID
+Mesh::getContiguousBoundaryID(const BoundaryID boundary) const
 {
   if (!_maps->_boundary_id_mapping.count(boundary))
-    mooseError("Boundary ", boundary, " does not have Kokkos boundary ID");
+    mooseError("Boundary ", boundary, " does not have Kokkos contiguous boundary ID");
 
   return _maps->_boundary_id_mapping.at(boundary);
 }
@@ -187,24 +187,24 @@ Mesh::getElementTypeID(const Elem * elem) const
   return _maps->_elem_type_id_mapping.at(elem->type());
 }
 
-dof_id_type
-Mesh::getElementID(const Elem * elem) const
+ContiguousElementID
+Mesh::getContiguousElementID(const Elem * elem) const
 {
   mooseAssert(elem, "Element pointer is null");
 
   if (!_maps->_local_elem_id_mapping.count(elem))
-    mooseError("Element ", elem->id(), " does not have Kokkos element ID");
+    mooseError("Element ", elem->id(), " does not have Kokkos contiguous element ID");
 
   return _maps->_local_elem_id_mapping.at(elem);
 }
 
-dof_id_type
-Mesh::getNodeID(const Node * node) const
+ContiguousNodeID
+Mesh::getContiguousNodeID(const Node * node) const
 {
   mooseAssert(node, "Node pointer is null");
 
   if (!_maps->_local_node_id_mapping.count(node))
-    mooseError("Node ", node->id(), " does not have Kokkos node ID");
+    mooseError("Node ", node->id(), " does not have Kokkos contiguous node ID");
 
   return _maps->_local_node_id_mapping.at(node);
 }

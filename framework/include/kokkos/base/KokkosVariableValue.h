@@ -203,11 +203,11 @@ public:
 
   /**
    * Get the current variable nodal value
-   * @param node The current node ID
+   * @param node The current contiguous node ID
    * @param comp The variable component
    * @returns The variable nodal value
    */
-  KOKKOS_FUNCTION Real operator()(dof_id_type node, unsigned int comp = 0) const
+  KOKKOS_FUNCTION Real operator()(ContiguousNodeID node, unsigned int comp = 0) const
   {
     if (_var.coupled())
     {
