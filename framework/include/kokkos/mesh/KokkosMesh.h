@@ -15,6 +15,11 @@
 #include "KokkosUtils.h"
 #endif
 
+using ContiguousSubdomainID = SubdomainID;
+using ContiguousBoundaryID = BoundaryID;
+using ContiguousElementID = dof_id_type;
+using ContiguousNodeID = dof_id_type;
+
 class MooseMesh;
 
 namespace Moose
@@ -24,9 +29,8 @@ namespace Kokkos
 
 /**
  * The Kokkos object that contains the information of an element
- * The IDs used in Kokkos objects are different from the MOOSE or libMesh IDs and are serialized to
- * start from zero to allow index-based access
- * The serialized IDs are local to each process
+ * The IDs used in Kokkos are different from the MOOSE or libMesh IDs
+ * The Kokkos IDs start from zero in each process and are contiguous
  */
 struct ElementInfo
 {
@@ -35,13 +39,13 @@ struct ElementInfo
    */
   unsigned int type;
   /**
-   * Element ID
+   * Contiguous element ID
    */
-  dof_id_type id;
+  ContiguousElementID id;
   /**
-   * Subdomain ID
+   * Contiguous subdomain ID
    */
-  SubdomainID subdomain;
+  ContiguousSubdomainID subdomain;
 };
 
 /**
@@ -66,67 +70,67 @@ public:
   void update();
 
   /**
-   * Get the serialized subdomain ID of a subdomain
+   * Get the contiguous subdomain ID of a MOOSE subdomain
    * @param subdomain The MOOSE subdomain ID
-   * @returns The subdomain ID
+   * @returns The contiguous subdomain ID
    */
-  SubdomainID getSubdomainID(const SubdomainID subdomain) const;
+  ContiguousSubdomainID getContiguousSubdomainID(const SubdomainID subdomain) const;
   /**
-   * Get the serialized boundary ID of a boundary
+   * Get the contiguous boundary ID of a boundary
    * @param boundary The MOOSE boundary ID
-   * @returns The boundary ID
+   * @returns The contiguous boundary ID
    */
-  BoundaryID getBoundaryID(const BoundaryID boundary) const;
+  ContiguousBoundaryID getContiguousBoundaryID(const BoundaryID boundary) const;
   /**
-   * Get the serialized element type ID of an element
+   * Get the element type ID of an element
    * @param elem The libMesh element
    * @returns The element type ID
    */
   unsigned int getElementTypeID(const Elem * elem) const;
   /**
-   * Get the serialized element ID of an element
+   * Get the contiguous element ID of an element
    * @param elem The libMesh element
-   * @returns The element ID
+   * @returns The contiguous element ID
    */
-  dof_id_type getElementID(const Elem * elem) const;
+  ContiguousElementID getContiguousElementID(const Elem * elem) const;
   /**
-   * Get the serialized element type ID map
+   * Get the element type ID map
    * @returns The element type ID map
    */
   const auto & getElementTypeMap() const { return _maps->_elem_type_id_mapping; }
   /**
-   * Get the serialized element ID map
-   * @returns The element ID map
+   * Get the contiguous element ID map
+   * @returns The contiguous element ID map
    */
-  const auto & getLocalElementMap() const { return _maps->_local_elem_id_mapping; }
+  const auto & getContiguousElementMap() const { return _maps->_local_elem_id_mapping; }
   /**
-   * Get the list of serialized element IDs for a subdomain
+   * Get the list of contiguous element IDs for a subdomain
    * @param subdomain The MOOSE subdomain ID
-   * @returns The list of element IDs in the subdomain
+   * @returns The list of contiguous element IDs in the subdomain
    */
-  const auto & getSubdomainElementIDs(const SubdomainID subdomain) const
+  const auto & getSubdomainContiguousElementIDs(const SubdomainID subdomain) const
   {
     return _maps->_subdomain_elem_ids.at(subdomain);
   }
   /**
-   * Get the serialized node ID of a node
+   * Get the contiguous node ID of a node
    * @param node The libMesh node
-   * @returns The serialized node ID that starts from zero in each process
+   * @returns The contiguous node ID that starts from zero in each process
    */
-  dof_id_type getNodeID(const Node * node) const;
+  ContiguousNodeID getContiguousNodeID(const Node * node) const;
   /**
-   * Get the serialized node ID map
+   * Get the contiguous node ID map
    * This list contains the nodes of local elements, so some nodes may belong to other processes
-   * @returns The node ID map
+   * @returns The contiguous node ID map
    */
-  const auto & getLocalNodeMap() const { return _maps->_local_node_id_mapping; }
+  const auto & getContiguousNodeMap() const { return _maps->_local_node_id_mapping; }
   /**
-   * Get the list of serialized node IDs for a subdomain
+   * Get the list of contiguous node IDs for a subdomain
    * This list strictly contains the nodes local to the current process
    * @param subdomain The MOOSE subdomain ID
-   * @returns The list of node IDs in the subdomain
+   * @returns The list of contiguous node IDs in the subdomain
    */
-  const auto & getSubdomainNodeIDs(const SubdomainID subdomain) const
+  const auto & getSubdomainContiguousNodeIDs(const SubdomainID subdomain) const
   {
     return _maps->_subdomain_node_ids.at(subdomain);
   }
@@ -134,17 +138,20 @@ public:
 #ifdef MOOSE_KOKKOS_SCOPE
   /**
    * Get the element information object
-   * @param elem The element ID
+   * @param elem The contiguous element ID
    * @returns The element information object
    */
-  KOKKOS_FUNCTION const auto & getElementInfo(dof_id_type elem) const { return _elem_info[elem]; }
+  KOKKOS_FUNCTION const auto & getElementInfo(ContiguousElementID elem) const
+  {
+    return _elem_info[elem];
+  }
   /**
-   * Get the neighbor element ID
-   * @param elem The element ID
+   * Get the neighbor contiguous element ID
+   * @param elem The contiguous element ID
    * @param side The side index
-   * @returns The neighbor element ID
+   * @returns The neighbor contiguous element ID
    */
-  KOKKOS_FUNCTION dof_id_type getNeighbor(dof_id_type elem, unsigned int side) const
+  KOKKOS_FUNCTION ContiguousElementID getNeighbor(ContiguousElementID elem, unsigned int side) const
   {
     return _elem_neighbor(side, elem);
   }
@@ -177,41 +184,42 @@ public:
     return _num_side_nodes[elem_type][side];
   }
   /**
-   * Get the node ID for an element
-   * @param elem The element ID
+   * Get the contiguous node ID for an element
+   * @param elem The contiguous element ID
    * @param node The node index
-   * @returns The node ID
+   * @returns The contiguous node ID
    */
-  KOKKOS_FUNCTION dof_id_type getNodeID(dof_id_type elem, unsigned int node) const
+  KOKKOS_FUNCTION ContiguousNodeID getContiguousNodeID(ContiguousElementID elem,
+                                                       unsigned int node) const
   {
     return _nodes(node, elem);
   }
   /**
-   * Get the node ID for a side
-   * @param elem The element ID
+   * Get the contiguous node ID for a side
+   * @param elem The contiguous element ID
    * @param side The side index
    * @param node The node index
-   * @returns The node ID
+   * @returns The contiguous node ID
    */
-  KOKKOS_FUNCTION dof_id_type getNodeID(dof_id_type elem,
-                                        unsigned int side,
-                                        unsigned int node) const
+  KOKKOS_FUNCTION ContiguousNodeID getContiguousNodeID(ContiguousElementID elem,
+                                                       unsigned int side,
+                                                       unsigned int node) const
   {
     return _nodes_face(node, side, elem);
   }
   /**
    * Get the coordinate of a node
-   * @param node The node ID
+   * @param node The contiguous node ID
    * @returns The node coordinate
    */
-  KOKKOS_FUNCTION Real3 getNodePoint(dof_id_type node) const { return _points[node]; }
+  KOKKOS_FUNCTION Real3 getNodePoint(ContiguousNodeID node) const { return _points[node]; }
   /**
    * Get whether a node is on a boundary
-   * @param node The node ID
-   * @param boundary The boundary ID
+   * @param node The contiguous node ID
+   * @param boundary The contiguous boundary ID
    * @returns Whether the node is on the boundary
    */
-  KOKKOS_FUNCTION bool isBoundaryNode(dof_id_type node, BoundaryID boundary) const;
+  KOKKOS_FUNCTION bool isBoundaryNode(ContiguousNodeID node, ContiguousBoundaryID boundary) const;
 #endif
 
 private:
@@ -234,35 +242,35 @@ private:
   struct MeshMap
   {
     /**
-     * Map from the MOOSE subdomain ID to the serialized subdomain ID
+     * Map from the MOOSE subdomain ID to the contiguous subdomain ID
      */
-    std::unordered_map<SubdomainID, SubdomainID> _subdomain_id_mapping;
+    std::unordered_map<SubdomainID, ContiguousSubdomainID> _subdomain_id_mapping;
     /**
-     * Map from the MOOSE boundary ID to the serialized boundary ID
+     * Map from the MOOSE boundary ID to the contiguous boundary ID
      */
-    std::unordered_map<BoundaryID, BoundaryID> _boundary_id_mapping;
+    std::unordered_map<BoundaryID, ContiguousBoundaryID> _boundary_id_mapping;
     /**
-     * Map from the MOOSE element type to the serialized element type ID
+     * Map from the MOOSE element type to the element type ID
      */
     std::unordered_map<ElemType, unsigned int> _elem_type_id_mapping;
     /**
-     * Map from the libMesh element to the serialized element ID
+     * Map from the libMesh element to the contiguous element ID
      */
-    std::unordered_map<const Elem *, dof_id_type> _local_elem_id_mapping;
+    std::unordered_map<const Elem *, ContiguousElementID> _local_elem_id_mapping;
     /**
-     * Map from the libMesh node to the serialized node ID
+     * Map from the libMesh node to the contiguous node ID
      * This list contains the nodes of local elements, so some nodes may belong to other processes
      */
-    std::unordered_map<const Node *, dof_id_type> _local_node_id_mapping;
+    std::unordered_map<const Node *, ContiguousNodeID> _local_node_id_mapping;
     /**
-     * List of the serialized element IDs in each subdomain
+     * List of the contiguous element IDs in each subdomain
      */
-    std::unordered_map<SubdomainID, std::unordered_set<dof_id_type>> _subdomain_elem_ids;
+    std::unordered_map<SubdomainID, std::unordered_set<ContiguousElementID>> _subdomain_elem_ids;
     /**
-     * List of the serialized node IDs in each subdomain
+     * List of the contiguous node IDs in each subdomain
      * This list strictly contains the nodes local to the current process
      */
-    std::unordered_map<SubdomainID, std::unordered_set<dof_id_type>> _subdomain_node_ids;
+    std::unordered_map<SubdomainID, std::unordered_set<ContiguousNodeID>> _subdomain_node_ids;
   };
   /**
    * A shared pointer holding all the host maps to avoid deep copy
@@ -274,9 +282,9 @@ private:
    */
   Array<ElementInfo> _elem_info;
   /**
-   * Neighbor element IDs of each element
+   * Neighbor contiguous element IDs of each element
    */
-  Array2D<dof_id_type> _elem_neighbor;
+  Array2D<ContiguousElementID> _elem_neighbor;
   /**
    * Number of sides of each element type
    */
@@ -294,21 +302,21 @@ private:
    */
   Array<Real3> _points;
   /**
-   * Node IDs of each element and side
+   * Contiguous node IDs of each element and side
    */
   ///@{
-  Array2D<dof_id_type> _nodes;
-  Array3D<dof_id_type> _nodes_face;
+  Array2D<ContiguousNodeID> _nodes;
+  Array3D<ContiguousNodeID> _nodes_face;
   ///@}
   /**
-   * Node IDs on each boundary
+   * Contiguous node IDs on each boundary
    */
-  Array<Array<dof_id_type>> _boundary_nodes;
+  Array<Array<ContiguousNodeID>> _boundary_nodes;
 };
 
 #ifdef MOOSE_KOKKOS_SCOPE
 KOKKOS_FUNCTION inline bool
-Mesh::isBoundaryNode(dof_id_type node, BoundaryID boundary) const
+Mesh::isBoundaryNode(ContiguousNodeID node, ContiguousBoundaryID boundary) const
 {
   if (!_boundary_nodes[boundary].size())
     return false;

@@ -47,14 +47,14 @@ public:
   /**
    * The preset function called by Kokkos
    */
-  KOKKOS_FUNCTION void operator()(const dof_id_type tid) const;
+  KOKKOS_FUNCTION void operator()(const ThreadID tid) const;
 
   /**
    * Compute residual contribution on a node
-   * @param node The node ID
+   * @param node The contiguous node ID
    * @returns The residual contribution
    */
-  KOKKOS_FUNCTION Real computeQpResidual(const dof_id_type node) const;
+  KOKKOS_FUNCTION Real computeQpResidual(const ContiguousNodeID node) const;
 
 private:
   /**
@@ -89,14 +89,14 @@ DirichletBCBase<Derived>::presetSolution(TagID tag)
 {
   _solution_tag = tag;
 
-  ::Kokkos::parallel_for(::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<dof_id_type>>(
+  ::Kokkos::parallel_for(::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>>(
                              0, this->numKokkosBoundaryNodes()),
                          *static_cast<Derived *>(this));
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-DirichletBCBase<Derived>::operator()(const dof_id_type tid) const
+DirichletBCBase<Derived>::operator()(const ThreadID tid) const
 {
   auto bc = static_cast<const Derived *>(this);
   auto node = kokkosBoundaryNodeID(tid);
@@ -111,7 +111,7 @@ DirichletBCBase<Derived>::operator()(const dof_id_type tid) const
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-DirichletBCBase<Derived>::computeQpResidual(const dof_id_type node) const
+DirichletBCBase<Derived>::computeQpResidual(const ContiguousNodeID node) const
 {
   auto bc = static_cast<const Derived *>(this);
 

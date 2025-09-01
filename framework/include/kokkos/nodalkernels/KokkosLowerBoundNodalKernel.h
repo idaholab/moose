@@ -21,9 +21,10 @@ public:
 
   KokkosLowerBoundNodalKernel(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real getResidual(const dof_id_type node) const;
-  KOKKOS_FUNCTION Real getJacobian(const dof_id_type node) const;
-  KOKKOS_FUNCTION Real getOffDiagJacobian(const unsigned int jvar, const dof_id_type node) const;
+  KOKKOS_FUNCTION Real getResidual(const ContiguousNodeID node) const;
+  KOKKOS_FUNCTION Real getJacobian(const ContiguousNodeID node) const;
+  KOKKOS_FUNCTION Real getOffDiagJacobian(const unsigned int jvar,
+                                          const ContiguousNodeID node) const;
 
 private:
   /// The lower bound on the coupled variable
@@ -31,13 +32,13 @@ private:
 };
 
 KOKKOS_FUNCTION inline Real
-KokkosLowerBoundNodalKernel::getResidual(const dof_id_type node) const
+KokkosLowerBoundNodalKernel::getResidual(const ContiguousNodeID node) const
 {
   return ::Kokkos::min(_u(node), _v(node) - _lower_bound);
 }
 
 KOKKOS_FUNCTION inline Real
-KokkosLowerBoundNodalKernel::getJacobian(const dof_id_type node) const
+KokkosLowerBoundNodalKernel::getJacobian(const ContiguousNodeID node) const
 {
   if (_u(node) <= _v(node) - _lower_bound)
     return 1;
@@ -47,7 +48,7 @@ KokkosLowerBoundNodalKernel::getJacobian(const dof_id_type node) const
 
 KOKKOS_FUNCTION inline Real
 KokkosLowerBoundNodalKernel::getOffDiagJacobian(const unsigned int jvar,
-                                                const dof_id_type node) const
+                                                const ContiguousNodeID node) const
 {
   if (jvar == _v_var)
     if (_v(node) - _lower_bound < _u(node))

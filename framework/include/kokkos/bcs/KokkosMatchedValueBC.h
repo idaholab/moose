@@ -21,9 +21,9 @@ public:
 
   KokkosMatchedValueBC(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeQpResidual(const dof_id_type node) const;
+  KOKKOS_FUNCTION Real computeQpResidual(const ContiguousNodeID node) const;
   KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int jvar,
-                                                const dof_id_type node) const;
+                                                const ContiguousNodeID node) const;
 
 protected:
   const Moose::Kokkos::VariableNodalValue _v;
@@ -37,14 +37,14 @@ protected:
 };
 
 KOKKOS_FUNCTION inline Real
-KokkosMatchedValueBC::computeQpResidual(const dof_id_type node) const
+KokkosMatchedValueBC::computeQpResidual(const ContiguousNodeID node) const
 {
   return _u_coeff * _u(node) - _v_coeff * _v(node);
 }
 
 KOKKOS_FUNCTION inline Real
 KokkosMatchedValueBC::computeQpOffDiagJacobian(const unsigned int jvar,
-                                               const dof_id_type /* node */) const
+                                               const ContiguousNodeID /* node */) const
 {
   if (jvar == _v_num)
     return -_v_coeff;

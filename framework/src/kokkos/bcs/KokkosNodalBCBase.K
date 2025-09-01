@@ -33,10 +33,10 @@ NodalBCBase::NodalBCBase(const NodalBCBase & object)
 {
 }
 
-std::vector<dof_id_type>
-NodalBCBase::getNodes() const
+std::vector<ContiguousNodeID>
+NodalBCBase::getContiguousNodes() const
 {
-  std::vector<dof_id_type> nodes(numKokkosBoundaryNodes());
+  std::vector<ContiguousNodeID> nodes(numKokkosBoundaryNodes());
 
   for (unsigned int i = 0; i < numKokkosBoundaryNodes(); ++i)
     nodes[i] = kokkosBoundaryNodeID(i);

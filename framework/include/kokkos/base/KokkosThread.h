@@ -15,6 +15,8 @@
 
 #include "MooseTypes.h"
 
+using ThreadID = dof_id_type;
+
 namespace Moose
 {
 namespace Kokkos
@@ -32,19 +34,19 @@ public:
    * Set the thread pool size and dimension
    * @param dims The vector containing the size of each dimension
    */
-  void resize(std::vector<dof_id_type> dims);
+  void resize(std::vector<ThreadID> dims);
   /**
    * Get the total thread pool size
    * @returns The total thread pool size
    */
-  dof_id_type size() const { return _size; }
+  ThreadID size() const { return _size; }
   /**
    * Get the multi-dimensional thread index of a dimension given a one-dimensional thread index
    * @param tid The one-dimensional thread index
    * @param dim for which the multi-dimensional thread index is to be returned
    * @returns The multi-dimensional thread index of the dimension
    */
-  KOKKOS_FUNCTION dof_id_type operator()(dof_id_type tid, unsigned int dim) const
+  KOKKOS_FUNCTION ThreadID operator()(ThreadID tid, unsigned int dim) const
   {
     KOKKOS_ASSERT(dim < _dim);
 
@@ -56,7 +58,7 @@ protected:
   /**
    * Total thread pool size
    */
-  dof_id_type _size = 0;
+  ThreadID _size = 0;
   /**
    * Thread pool dimension
    */
@@ -64,11 +66,11 @@ protected:
   /**
    * Thread pool size of each dimension
    */
-  dof_id_type _dims[10];
+  ThreadID _dims[10];
   /**
    * Thread pool stride of each dimension
    */
-  dof_id_type _strides[10];
+  ThreadID _strides[10];
 };
 
 } // namespace Kokkos

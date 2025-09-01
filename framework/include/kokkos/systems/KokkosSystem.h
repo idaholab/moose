@@ -141,10 +141,10 @@ public:
   /**
    * Check whether a variable is active on a subdomain
    * @param var The variable number
-   * @param subdomain The subdomain ID
+   * @param subdomain The contiguous subdomain ID
    * @returns Whether the variable is active
    */
-  KOKKOS_FUNCTION bool isVariableActive(unsigned int var, SubdomainID subdomain) const
+  KOKKOS_FUNCTION bool isVariableActive(unsigned int var, ContiguousSubdomainID subdomain) const
   {
     return _var_subdomain_active(var, subdomain);
   }
@@ -217,12 +217,12 @@ public:
   }
   /**
    * Get the local DOF index of a variable for an element
-   * @param elem The element ID
+   * @param elem The contiguous element ID
    * @param i The element-local DOF index
    * @param var The variable number
    * @returns The local DOF index
    */
-  KOKKOS_FUNCTION dof_id_type getElemLocalDofIndex(dof_id_type elem,
+  KOKKOS_FUNCTION dof_id_type getElemLocalDofIndex(ContiguousElementID elem,
                                                    unsigned int i,
                                                    unsigned int var) const
   {
@@ -230,22 +230,22 @@ public:
   }
   /**
    * Get the local DOF index of a variable for a node
-   * @param node The node ID
+   * @param node The contiguous node ID
    * @param var The variable number
    * @returns The local DOF index
    */
-  KOKKOS_FUNCTION dof_id_type getNodeLocalDofIndex(dof_id_type node, unsigned int var) const
+  KOKKOS_FUNCTION dof_id_type getNodeLocalDofIndex(ContiguousNodeID node, unsigned int var) const
   {
     return _local_node_dof_index[var][node];
   }
   /**
    * Get the global DOF index of a variable for an element
-   * @param elem The element ID
+   * @param elem The contiguous element ID
    * @param i The element-local DOF index
    * @param var The variable number
    * @returns The global DOF index
    */
-  KOKKOS_FUNCTION dof_id_type getElemGlobalDofIndex(dof_id_type elem,
+  KOKKOS_FUNCTION dof_id_type getElemGlobalDofIndex(ContiguousElementID elem,
                                                     unsigned int i,
                                                     unsigned int var) const
   {
@@ -253,11 +253,11 @@ public:
   }
   /**
    * Get the global DOF index of a variable for a node
-   * @param node The node ID
+   * @param node The contiguous node ID
    * @param var The variable number
    * @returns The global DOF index
    */
-  KOKKOS_FUNCTION dof_id_type getNodeGlobalDofIndex(dof_id_type node, unsigned int var) const
+  KOKKOS_FUNCTION dof_id_type getNodeGlobalDofIndex(ContiguousNodeID node, unsigned int var) const
   {
     return _local_to_global_dof_index[_local_node_dof_index[var][node]];
   }
@@ -272,11 +272,11 @@ public:
   }
   /**
    * Get whether a variable is defined on a node
-   * @param node The node ID
+   * @param node The contiguous node ID
    * @param var The variable number
    * @returns Whether the variable is defined on the node
    */
-  KOKKOS_FUNCTION bool isNodalDefined(dof_id_type node, unsigned int var) const
+  KOKKOS_FUNCTION bool isNodalDefined(ContiguousNodeID node, unsigned int var) const
   {
     return _local_node_dof_index[var][node] != libMesh::DofObject::invalid_id;
   }
@@ -373,7 +373,7 @@ public:
   /**
    * Kokkos function for caching variable values on element quadrature points
    */
-  KOKKOS_FUNCTION void operator()(const dof_id_type tid) const;
+  KOKKOS_FUNCTION void operator()(const ThreadID tid) const;
 #endif
 
   /**

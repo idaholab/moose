@@ -121,7 +121,7 @@ MaterialProperty<T, dimension>::allocate(const MooseMesh & mesh,
 
   for (const auto subdomain : subdomains)
   {
-    auto sid = mesh.getKokkosMesh()->getSubdomainID(subdomain);
+    auto sid = mesh.getKokkosMesh()->getContiguousSubdomainID(subdomain);
 
     std::vector<dof_id_type> n;
 

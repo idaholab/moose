@@ -102,11 +102,11 @@ MaterialBase::initialSetup()
 {
   if (materialDataType() == Moose::BLOCK_MATERIAL_DATA)
   {
-    std::set<dof_id_type> element_ids;
+    std::set<ContiguousElementID> element_ids;
 
     for (auto block : blockIDs())
-      element_ids.insert(_mesh.getKokkosMesh()->getSubdomainElementIDs(block).begin(),
-                         _mesh.getKokkosMesh()->getSubdomainElementIDs(block).end());
+      element_ids.insert(_mesh.getKokkosMesh()->getSubdomainContiguousElementIDs(block).begin(),
+                         _mesh.getKokkosMesh()->getSubdomainContiguousElementIDs(block).end());
 
     _element_ids = element_ids;
   }
@@ -124,7 +124,7 @@ MaterialBase::initialSetup()
                           material_boundaries.end(),
                           std::back_inserter(boundaries));
 
-    std::set<Pair<dof_id_type, unsigned int>> element_side_ids;
+    std::set<Pair<ContiguousElementID, unsigned int>> element_side_ids;
 
     for (auto boundary : boundaries)
       for (auto elem_id : _mesh.getBoundaryActiveSemiLocalElemIds(boundary))
@@ -133,7 +133,7 @@ MaterialBase::initialSetup()
 
         if (elem->processor_id() == processor_id() &&
             restricted_blocks.find(elem->subdomain_id()) != restricted_blocks.end())
-          element_side_ids.insert({_mesh.getKokkosMesh()->getElementID(elem),
+          element_side_ids.insert({_mesh.getKokkosMesh()->getContiguousElementID(elem),
                                    _mesh.sideWithBoundaryID(elem, boundary)});
       }
 

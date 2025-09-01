@@ -259,20 +259,20 @@ protected:
     return _kokkos_element_side_ids.size();
   }
   /**
-   * Get the node ID this Kokkos thread is operating on
+   * Get the contiguous node ID this Kokkos thread is operating on
    * @param tid The thread ID
-   * @returns The node ID
+   * @returns The contiguous node ID
    */
-  KOKKOS_FUNCTION dof_id_type kokkosBoundaryNodeID(dof_id_type tid) const
+  KOKKOS_FUNCTION ContiguousNodeID kokkosBoundaryNodeID(ThreadID tid) const
   {
     return _kokkos_node_ids[tid];
   }
   /**
-   * Get the element ID - side index pair this Kokkos thread is operating on
+   * Get the contiguous element ID - side index pair this Kokkos thread is operating on
    * @param tid The thread ID
-   * @returns The element ID - side index pair
+   * @returns The contiguous element ID - side index pair
    */
-  KOKKOS_FUNCTION auto kokkosBoundaryElementSideID(dof_id_type tid) const
+  KOKKOS_FUNCTION auto kokkosBoundaryElementSideID(ThreadID tid) const
   {
     return _kokkos_element_side_ids[tid];
   }
@@ -281,13 +281,14 @@ protected:
 #ifdef MOOSE_KOKKOS_ENABLED
 private:
   /**
-   * List of node IDs this Kokkos object is operating on
+   * List of contiguous node IDs this Kokkos object is operating on
    */
-  Moose::Kokkos::Array<dof_id_type> _kokkos_node_ids;
+  Moose::Kokkos::Array<ContiguousNodeID> _kokkos_node_ids;
   /**
-   * List of element ID - side index pairs this Kokkos object is operating on
+   * List of contiguous element ID - side index pairs this Kokkos object is operating on
    */
-  Moose::Kokkos::Array<Moose::Kokkos::Pair<dof_id_type, unsigned int>> _kokkos_element_side_ids;
+  Moose::Kokkos::Array<Moose::Kokkos::Pair<ContiguousElementID, unsigned int>>
+      _kokkos_element_side_ids;
 #endif
 };
 
