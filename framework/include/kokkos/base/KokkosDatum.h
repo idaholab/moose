@@ -27,13 +27,13 @@ class Datum
 public:
   /**
    * Constructor
-   * @param elem The element ID of the current thread
+   * @param elem The contiguous element ID of the current thread
    * @param side The side index of the current thread
    * @param assembly The Kokkos assembly
    * @param systems The Kokkos systems
    */
   KOKKOS_FUNCTION
-  Datum(const dof_id_type elem,
+  Datum(const ContiguousElementID elem,
         const unsigned int side,
         const Assembly & assembly,
         const Array<System> & systems)
@@ -51,12 +51,12 @@ public:
   }
   /**
    * Constructor for elemental data
-   * @param elem The element ID of the current thread
+   * @param elem The contiguous element ID of the current thread
    * @param assembly The Kokkos assembly
    * @param systems The Kokkos systems
    */
   KOKKOS_FUNCTION
-  Datum(const dof_id_type elem, const Assembly & assembly, const Array<System> & systems)
+  Datum(const ContiguousElementID elem, const Assembly & assembly, const Array<System> & systems)
     : Datum(elem, libMesh::invalid_uint, assembly, systems)
   {
   }
@@ -79,10 +79,10 @@ public:
    */
   KOKKOS_FUNCTION const ElementInfo & elem() const { return _elem; }
   /**
-   * Get the subdomain ID
-   * @returns The subdomain ID
+   * Get the contiguous subdomain ID
+   * @returns The contiguous subdomain ID
    */
-  KOKKOS_FUNCTION SubdomainID subdomain() const { return _elem.subdomain; }
+  KOKKOS_FUNCTION ContiguousSubdomainID subdomain() const { return _elem.subdomain; }
   /**
    * Get the side index
    * @returns The side index
@@ -164,9 +164,9 @@ protected:
    */
   const unsigned int _side;
   /**
-   * Current element ID of neighbor
+   * Current contiguous element ID of neighbor
    */
-  const dof_id_type _neighbor;
+  const ContiguousElementID _neighbor;
   /**
    * Number of local quadrature points
    */
@@ -224,7 +224,7 @@ class ResidualDatum : public Datum
 public:
   /**
    * Constructor
-   * @param elem The element ID of the current thread
+   * @param elem The contiguous element ID of the current thread
    * @param side The side index of the current thread
    * @param assembly The Kokkos assembly
    * @param systems The Kokkos systems
@@ -233,7 +233,7 @@ public:
    * @param comp The variable component
    */
   KOKKOS_FUNCTION
-  ResidualDatum(const dof_id_type elem,
+  ResidualDatum(const ContiguousElementID elem,
                 const unsigned int side,
                 const Assembly & assembly,
                 const Array<System> & systems,
@@ -252,7 +252,7 @@ public:
   }
   /**
    * Constructor for elemental data
-   * @param elem The element ID of the current thread
+   * @param elem The contiguous element ID of the current thread
    * @param assembly The Kokkos assembly
    * @param systems The Kokkos systems
    * @param ivar The Kokkos variable
@@ -260,7 +260,7 @@ public:
    * @param comp The variable component
    */
   KOKKOS_FUNCTION
-  ResidualDatum(const dof_id_type elem,
+  ResidualDatum(const ContiguousElementID elem,
                 const Assembly & assembly,
                 const Array<System> & systems,
                 const Variable & ivar,

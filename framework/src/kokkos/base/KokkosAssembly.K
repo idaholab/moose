@@ -42,7 +42,7 @@ Assembly::init()
   _coord_type.create(num_subdomains);
 
   for (auto subdomain : _mesh.meshSubdomains())
-    _coord_type[kokkosMesh().getSubdomainID(subdomain)] = _mesh.getCoordSystem(subdomain);
+    _coord_type[kokkosMesh().getContiguousSubdomainID(subdomain)] = _mesh.getCoordSystem(subdomain);
 
   _coord_type.copyToDevice();
 
@@ -51,7 +51,7 @@ Assembly::init()
     _rz_axis.create(num_subdomains);
 
     for (auto subdomain : _mesh.meshSubdomains())
-      _rz_axis[kokkosMesh().getSubdomainID(subdomain)] =
+      _rz_axis[kokkosMesh().getContiguousSubdomainID(subdomain)] =
           _mesh.getGeneralAxisymmetricCoordAxis(subdomain);
 
     _rz_axis.copyToDevice();
@@ -102,7 +102,7 @@ Assembly::initQuadrature()
 
   for (auto subdomain : _mesh.meshSubdomains())
   {
-    auto sid = kokkosMesh().getSubdomainID(subdomain);
+    auto sid = kokkosMesh().getContiguousSubdomainID(subdomain);
 
     auto & assembly = _problem.assembly(0, 0);
     auto qrule = assembly.writeableQRule(_dimension, subdomain, {});
@@ -167,8 +167,8 @@ Assembly::initQuadrature()
 
   for (auto elem : *_mesh.getActiveLocalElementRange())
   {
-    auto eid = kokkosMesh().getElementID(elem);
-    auto sid = kokkosMesh().getSubdomainID(elem->subdomain_id());
+    auto eid = kokkosMesh().getContiguousElementID(elem);
+    auto sid = kokkosMesh().getContiguousSubdomainID(elem->subdomain_id());
 
     _n_qps[eid] = n_qps[elem->subdomain_id()][elem->type()];
     _qp_offset[eid] = _n_subdomain_qps[sid];
@@ -185,8 +185,8 @@ Assembly::initQuadrature()
 
       if (elem->processor_id() == _problem.processor_id())
       {
-        auto sid = kokkosMesh().getSubdomainID(elem->subdomain_id());
-        auto eid = kokkosMesh().getElementID(elem);
+        auto sid = kokkosMesh().getContiguousSubdomainID(elem->subdomain_id());
+        auto eid = kokkosMesh().getContiguousElementID(elem);
         auto side = _mesh.sideWithBoundaryID(elem, boundary);
 
         _qp_offset_face(side, eid) = _n_subdomain_qps_face[sid];
@@ -252,7 +252,7 @@ Assembly::initShape()
 
   for (auto subdomain : _mesh.meshSubdomains())
   {
-    auto sid = kokkosMesh().getSubdomainID(subdomain);
+    auto sid = kokkosMesh().getContiguousSubdomainID(subdomain);
 
     auto & assembly = _problem.assembly(0, 0);
     auto qrule = assembly.writeableQRule(_dimension, subdomain, {});
@@ -407,7 +407,7 @@ Assembly::cachePhysicalMap()
 
   for (auto subdomain : _mesh.meshSubdomains())
   {
-    auto sid = kokkosMesh().getSubdomainID(subdomain);
+    auto sid = kokkosMesh().getContiguousSubdomainID(subdomain);
 
     _jacobian[sid].createDevice(_n_subdomain_qps[sid]);
     _jxw[sid].createDevice(_n_subdomain_qps[sid]);
@@ -418,13 +418,13 @@ Assembly::cachePhysicalMap()
   _jxw.copyToDeviceNested();
   _xyz.copyToDeviceNested();
 
-  ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<dof_id_type>> policy(0, num_elems);
+  ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>> policy(0, num_elems);
   ::Kokkos::parallel_for(policy, *this);
   ::Kokkos::fence();
 }
 
 KOKKOS_FUNCTION void
-Assembly::operator()(const dof_id_type tid) const
+Assembly::operator()(const ThreadID tid) const
 {
   auto info = kokkosMesh().getElementInfo(tid);
   auto offset = getQpOffset(info);

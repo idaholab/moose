@@ -114,36 +114,36 @@ protected:
   /**
    * Accumulate local elemental residual contribution to tagged vectors
    * @param local_re The local elemental residual contribution
-   * @param elem The element ID
+   * @param elem The contiguous element ID
    * @param i The test function index
    * @param comp The variable component
    */
   KOKKOS_FUNCTION void accumulateTaggedElementalResidual(const Real local_re,
-                                                         const dof_id_type elem,
+                                                         const ContiguousElementID elem,
                                                          const unsigned int i,
                                                          const unsigned int comp = 0) const;
   /**
    * Accumulate or set local nodal residual contribution to tagged vectors
    * @param add The flag whether to add or set the local residual
    * @param local_re The local nodal residual contribution
-   * @param node The node ID
+   * @param node The contiguous node ID
    * @param comp The variable component
    */
   KOKKOS_FUNCTION void accumulateTaggedNodalResidual(const bool add,
                                                      const Real local_re,
-                                                     const dof_id_type node,
+                                                     const ContiguousNodeID node,
                                                      const unsigned int comp = 0) const;
   /**
    * Accumulate local elemental Jacobian contribution to tagged matrices
    * @param local_ke The local elemental Jacobian contribution
-   * @param elem The element ID
+   * @param elem The contiguous element ID
    * @param i The test function DOF index
    * @param j The trial function DOF index
    * @param jvar The variable number for column
    * @param comp The variable component
    */
   KOKKOS_FUNCTION void accumulateTaggedElementalMatrix(const Real local_ke,
-                                                       const dof_id_type elem,
+                                                       const ContiguousElementID elem,
                                                        const unsigned int i,
                                                        const unsigned int j,
                                                        const unsigned int jvar,
@@ -152,13 +152,13 @@ protected:
    * Accumulate or set local nodal Jacobian contribution to tagged matrices
    * @param add The flag whether to add or set the local residual
    * @param local_ke The local nodal Jacobian contribution
-   * @param node The node ID
+   * @param node The contiguous node ID
    * @param jvar The variable number for column
    * @param comp The Variable component
    */
   KOKKOS_FUNCTION void accumulateTaggedNodalMatrix(const bool add,
                                                    const Real local_ke,
-                                                   const dof_id_type node,
+                                                   const ContiguousNodeID node,
                                                    const unsigned int jvar,
                                                    const unsigned int comp = 0) const;
 
@@ -196,7 +196,7 @@ private:
 
 KOKKOS_FUNCTION inline void
 ResidualObject::accumulateTaggedElementalResidual(const Real local_re,
-                                                  const dof_id_type elem,
+                                                  const ContiguousElementID elem,
                                                   const unsigned int i,
                                                   const unsigned int comp) const
 {
@@ -224,7 +224,7 @@ ResidualObject::accumulateTaggedElementalResidual(const Real local_re,
 KOKKOS_FUNCTION inline void
 ResidualObject::accumulateTaggedNodalResidual(const bool add,
                                               const Real local_re,
-                                              const dof_id_type node,
+                                              const ContiguousNodeID node,
                                               const unsigned int comp) const
 {
   if (!local_re)
@@ -249,7 +249,7 @@ ResidualObject::accumulateTaggedNodalResidual(const bool add,
 
 KOKKOS_FUNCTION inline void
 ResidualObject::accumulateTaggedElementalMatrix(const Real local_ke,
-                                                const dof_id_type elem,
+                                                const ContiguousElementID elem,
                                                 const unsigned int i,
                                                 const unsigned int j,
                                                 const unsigned int jvar,
@@ -280,7 +280,7 @@ ResidualObject::accumulateTaggedElementalMatrix(const Real local_ke,
 KOKKOS_FUNCTION inline void
 ResidualObject::accumulateTaggedNodalMatrix(const bool add,
                                             const Real local_ke,
-                                            const dof_id_type node,
+                                            const ContiguousNodeID node,
                                             const unsigned int jvar,
                                             const unsigned int comp) const
 {

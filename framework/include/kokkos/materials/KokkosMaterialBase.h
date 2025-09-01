@@ -114,17 +114,20 @@ protected:
    */
   KOKKOS_FUNCTION dof_id_type numKokkosElementSides() const { return _element_side_ids.size(); }
   /**
-   * Get the element ID for a thread
+   * Get the contiguous element ID for a thread
    * @param tid The thread ID
-   * @returns The element ID
+   * @returns The contiguous element ID
    */
-  KOKKOS_FUNCTION dof_id_type kokkosElementID(dof_id_type tid) const { return _element_ids[tid]; }
+  KOKKOS_FUNCTION ContiguousElementID kokkosElementID(ThreadID tid) const
+  {
+    return _element_ids[tid];
+  }
   /**
-   * Get the element ID - side index pair for a thread
+   * Get the contiguous element ID - side index pair for a thread
    * @param tid The thread ID
-   * @returns The element ID - side index pair
+   * @returns The contiguous element ID - side index pair
    */
-  KOKKOS_FUNCTION auto kokkosElementSideID(dof_id_type tid) const { return _element_side_ids[tid]; }
+  KOKKOS_FUNCTION auto kokkosElementSideID(ThreadID tid) const { return _element_side_ids[tid]; }
 
   /**
    * TODO: Move to TransientInterface
@@ -158,13 +161,14 @@ private:
   virtual void computeQpProperties() override final {}
 
   /**
-   * Element IDs this material operates on for element material property evaluation
+   * Contiguous element IDs this material operates on for element material property evaluation
    */
-  Array<dof_id_type> _element_ids;
+  Array<ContiguousElementID> _element_ids;
   /**
-   * Element ID - side index pairs this material operates on for face material property evaluation
+   * Contiguous element ID - side index pairs this material operates on for face material property
+   * evaluation
    */
-  Array<Pair<dof_id_type, unsigned int>> _element_side_ids;
+  Array<Pair<ContiguousElementID, unsigned int>> _element_side_ids;
 };
 
 template <typename T, unsigned int dimension>

@@ -32,19 +32,19 @@ BoundaryRestrictable::initializeKokkosBoundaryRestrictable(MooseMesh * mesh)
 
   if (_bnd_nodal)
   {
-    std::set<dof_id_type> node_ids;
+    std::set<ContiguousNodeID> node_ids;
 
     for (auto boundary : boundaries)
       for (const auto node : as_range(mesh->getMesh().bid_nodes_begin(boundary),
                                       mesh->getMesh().bid_nodes_end(boundary)))
         if (node->processor_id() == _moose_object.processor_id())
-          node_ids.insert(kokkos_mesh->getNodeID(node));
+          node_ids.insert(kokkos_mesh->getContiguousNodeID(node));
 
     _kokkos_node_ids = node_ids;
   }
   else
   {
-    std::set<Moose::Kokkos::Pair<dof_id_type, unsigned int>> element_side_ids;
+    std::set<Moose::Kokkos::Pair<ContiguousElementID, unsigned int>> element_side_ids;
 
     for (auto boundary : boundaries)
       for (auto elem_id : mesh->getBoundaryActiveSemiLocalElemIds(boundary))
@@ -52,8 +52,8 @@ BoundaryRestrictable::initializeKokkosBoundaryRestrictable(MooseMesh * mesh)
         const auto elem = mesh->elemPtr(elem_id);
 
         if (elem->processor_id() == _moose_object.processor_id())
-          element_side_ids.insert(
-              {kokkos_mesh->getElementID(elem), mesh->sideWithBoundaryID(elem, boundary)});
+          element_side_ids.insert({kokkos_mesh->getContiguousElementID(elem),
+                                   mesh->sideWithBoundaryID(elem, boundary)});
       }
 
     _kokkos_element_side_ids = element_side_ids;

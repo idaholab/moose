@@ -27,10 +27,10 @@ public:
 
   KokkosCoupledDirichletBC(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeQpResidual(const dof_id_type node) const;
-  KOKKOS_FUNCTION Real computeQpJacobian(const dof_id_type node) const;
+  KOKKOS_FUNCTION Real computeQpResidual(const ContiguousNodeID node) const;
+  KOKKOS_FUNCTION Real computeQpJacobian(const ContiguousNodeID node) const;
   KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int jvar,
-                                                const dof_id_type node) const;
+                                                const ContiguousNodeID node) const;
 
 protected:
   // The coupled variable
@@ -44,20 +44,20 @@ protected:
 };
 
 KOKKOS_FUNCTION inline Real
-KokkosCoupledDirichletBC::computeQpResidual(const dof_id_type node) const
+KokkosCoupledDirichletBC::computeQpResidual(const ContiguousNodeID node) const
 {
   return _c * _u(node) + _u(node) * _u(node) + _v(node) * _v(node) - _value;
 }
 
 KOKKOS_FUNCTION inline Real
-KokkosCoupledDirichletBC::computeQpJacobian(const dof_id_type node) const
+KokkosCoupledDirichletBC::computeQpJacobian(const ContiguousNodeID node) const
 {
   return _c + 2 * _u(node);
 }
 
 KOKKOS_FUNCTION inline Real
 KokkosCoupledDirichletBC::computeQpOffDiagJacobian(const unsigned int jvar,
-                                                   const dof_id_type node) const
+                                                   const ContiguousNodeID node) const
 {
   if (jvar == _v_num)
     return 2 * _v(node);
