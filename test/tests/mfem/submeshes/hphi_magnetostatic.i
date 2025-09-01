@@ -107,19 +107,19 @@ vacuum_permeability = 1.0
   []
   [magnetic_potential]
     type = MFEMVariable
-    fespace = H1FESpace
+    fespace = VacuumH1FESpace
   []
   [background_h_field]
     type = MFEMVariable
-    fespace = HCurlFESpace
+    fespace = VacuumHCurlFESpace
   []
   [cut_function_field]
     type = MFEMVariable
-    fespace = HCurlFESpace
+    fespace = VacuumHCurlFESpace
   []
-  [h_field]
+  [vacuum_h_field]
     type = MFEMVariable
-    fespace = HCurlFESpace
+    fespace = VacuumHCurlFESpace
   []
 []
 
@@ -140,7 +140,7 @@ vacuum_permeability = 1.0
   []
   [update_total_h_field]
     type = MFEMSumAux
-    variable = h_field
+    variable = vacuum_h_field
     first_source_variable = background_h_field
     second_source_variable = cut_function_field
     execute_on = TIMESTEP_END
@@ -216,9 +216,10 @@ vacuum_permeability = 1.0
   [MagneticEnergy]
     type = MFEMVectorFEInnerProductIntegralPostprocessor
     coefficient = ${fparse 0.5*vacuum_permeability}
-    dual_variable = h_field
-    primal_variable = h_field
+    dual_variable = vacuum_h_field
+    primal_variable = vacuum_h_field
     execution_order_group = 4
+    block = 'Exterior'
   []
 []
 
@@ -231,5 +232,6 @@ vacuum_permeability = 1.0
     type = MFEMParaViewDataCollection
     file_base = OutputData/HPhiMagnetostaticClosedCoil
     vtk_format = ASCII
+    submesh = vacuum
   []
 []
