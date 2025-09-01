@@ -116,7 +116,7 @@ ComputeMaterialsObjectThread::onBoundary(const Elem * elem,
   if (_fe_problem.needBoundaryMaterialOnSide(bnd_id, _tid))
   {
     _fe_problem.reinitElemFace(elem, side, _tid);
-    unsigned int face_n_points = _assembly[_tid][0]->qRuleFace()->n_points();
+    const auto face_n_points = _assembly[_tid][/*system_index*/ 0]->qRuleFace()->n_points();
 
     _bnd_material_props.getMaterialData(_tid).resize(face_n_points);
 
