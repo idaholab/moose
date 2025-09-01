@@ -3837,11 +3837,19 @@ NonlinearSystemBase::timeKernelVariableNames()
 bool
 NonlinearSystemBase::needBoundaryMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid) const
 {
-  // IntegratedBCs are for now the only objects we consider to be consuming matprops on boundaries
-  // But there could be others... HDGKernels?
+  // IntegratedBCs are for now the only objects we consider to be consuming
+  // matprops on boundaries.
   if (_integrated_bcs.hasActiveBoundaryObjects(bnd_id, tid))
     for (const auto & bc : _integrated_bcs.getActiveBoundaryObjects(bnd_id, tid))
       if (std::static_pointer_cast<MaterialPropertyInterface>(bc)->getMaterialPropertyCalled())
+        return true;
+
+  // Because MortarConstraints do not inherit from BoundaryRestrictable, they are not sorted
+  // by boundary in the MooseObjectWarehouse. So for now, we return true for all boundaries
+  if (_constraints.hasActiveObjects(tid))
+    for (const auto & ct : _constraints.getActiveObjects(tid))
+      if (std::dynamic_pointer_cast<MaterialPropertyInterface>(ct) &&
+          std::dynamic_pointer_cast<MaterialPropertyInterface>(ct)->getMaterialPropertyCalled())
         return true;
   return false;
 }
@@ -3850,7 +3858,7 @@ bool
 NonlinearSystemBase::needInterfaceMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid) const
 {
   // InterfaceKernels are for now the only objects we consider to be consuming matprops on internal
-  // boundaries But there could be others... HDGKernels?
+  // boundaries.
   if (_interface_kernels.hasActiveBoundaryObjects(bnd_id, tid))
     for (const auto & ik : _interface_kernels.getActiveBoundaryObjects(bnd_id, tid))
       if (std::static_pointer_cast<MaterialPropertyInterface>(ik)->getMaterialPropertyCalled())
@@ -3862,7 +3870,7 @@ bool
 NonlinearSystemBase::needSubdomainMaterialOnSide(SubdomainID subdomain_id, THREAD_ID tid) const
 {
   // DGKernels and HDGKernels are for now the only objects we consider to be consuming matprops on
-  // internal sides But there could be others... They just don't exist yet
+  // internal sides.
   if (_dg_kernels.hasActiveBlockObjects(subdomain_id, tid))
     for (const auto & dg : _dg_kernels.getActiveBlockObjects(subdomain_id, tid))
       if (std::static_pointer_cast<MaterialPropertyInterface>(dg)->getMaterialPropertyCalled())
