@@ -49,16 +49,6 @@ vacuum_permeability = 1.0
 []
 
 [FESpaces]
-  [H1FESpace]
-    type = MFEMScalarFESpace
-    fec_type = H1
-    fec_order = FIRST
-  []
-  [HCurlFESpace]
-    type = MFEMVectorFESpace
-    fec_type = ND
-    fec_order = FIRST
-  []
   [VacuumH1FESpace]
     type = MFEMScalarFESpace
     fec_type = H1
@@ -105,10 +95,6 @@ vacuum_permeability = 1.0
     type = MFEMVariable
     fespace = TransitionHCurlFESpace
   []
-  [magnetic_potential]
-    type = MFEMVariable
-    fespace = VacuumH1FESpace
-  []
   [background_h_field]
     type = MFEMVariable
     fespace = VacuumHCurlFESpace
@@ -127,7 +113,7 @@ vacuum_permeability = 1.0
   [update_background_h_field]
     type = MFEMGradAux
     variable = background_h_field
-    source = magnetic_potential
+    source = vacuum_magnetic_potential
     scale_factor = -1.0
     execute_on = TIMESTEP_END
   []
@@ -191,12 +177,6 @@ vacuum_permeability = 1.0
 []
 
 [Transfers]
-  [submesh_transfer_from_vacuum]
-    type = MFEMSubMeshTransfer
-    from_variable = vacuum_magnetic_potential
-    to_variable = magnetic_potential
-    execute_on = TIMESTEP_END
-  []
   [submesh_transfer_to_transition]
     type = MFEMSubMeshTransfer
     from_variable = vacuum_cut_potential
