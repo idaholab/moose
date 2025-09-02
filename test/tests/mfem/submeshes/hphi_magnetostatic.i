@@ -73,6 +73,11 @@ vacuum_permeability = 1.0
     fec_order = FIRST
     submesh = cut
   []
+  [HCurlFESpace]
+    type = MFEMVectorFESpace
+    fec_type = ND
+    fec_order = FIRST
+  []
 []
 
 [Variables]
@@ -106,6 +111,10 @@ vacuum_permeability = 1.0
   [vacuum_h_field]
     type = MFEMVariable
     fespace = VacuumHCurlFESpace
+  []
+  [h_field]
+    type = MFEMVariable
+    fespace = HCurlFESpace
   []
 []
 
@@ -189,6 +198,13 @@ vacuum_permeability = 1.0
     to_variable = cut_function_field
     execute_on = TIMESTEP_END
     execution_order_group = 2
+  []
+  [submesh_transfer_from_vacuum]
+    type = MFEMSubMeshTransfer
+    from_variable = vacuum_h_field
+    to_variable = h_field
+    execute_on = TIMESTEP_END
+    execution_order_group = 4
   []
 []
 
