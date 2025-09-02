@@ -1,0 +1,119 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "gtest/gtest.h"
+
+#include "CSGPlane.h"
+#include "CSGRegion.h"
+
+#include "MooseUnitUtils.h"
+
+using namespace CSG;
+
+// Test each type of CSGRegion operator
+TEST(CSGRegionTest, testRegionOperators)
+{
+  // surfaces to use for regions:
+  CSGPlane surf1("s1", 1.0, 0.0, 0.0, 1.0);
+  CSGPlane surf2("s2", 1.0, 0.0, 0.0, 2.0);
+
+  // positive (+) and negative (-) halfspaces
+  auto pos_half = +surf1;
+  auto neg_half = -surf2;
+  // intersection of two halspaces (&)
+  auto inter = pos_half & neg_half;
+  // intersection with existing region (&=)
+  auto new_reg_int = +surf1;
+  new_reg_int &= neg_half;
+  // union of two halfspaces (|)
+  auto uni = pos_half | neg_half;
+  // union with existing region (|=)
+  auto new_reg_uni = +surf1;
+  new_reg_uni |= neg_half;
+  // empty region (initialized only)
+  CSGRegion empty;
+  // complement (~)
+  auto complement = ~inter;
+
+  // assert each region is of the correct type and string matches
+
+  // halfspaces
+  {
+    std::string pos_string = "+s1";
+    std::string neg_string = "-s2";
+    ASSERT_EQ(CSGRegion::RegionType::HALFSPACE, pos_half.getRegionType());
+    ASSERT_EQ(CSGRegion::RegionType::HALFSPACE, neg_half.getRegionType());
+    ASSERT_EQ(pos_string, pos_half.toString());
+    ASSERT_EQ(neg_string, neg_half.toString());
+  }
+  // intersections
+  {
+    std::string inter_string = "(+s1 & -s2)";
+    ASSERT_EQ(CSGRegion::RegionType::INTERSECTION, inter.getRegionType());
+    ASSERT_EQ(CSGRegion::RegionType::INTERSECTION, new_reg_int.getRegionType());
+    ASSERT_EQ(inter_string, inter.toString());
+    ASSERT_EQ(inter_string, new_reg_int.toString());
+  }
+  // unions
+  {
+    std::string union_string = "(+s1 | -s2)";
+    ASSERT_EQ(CSGRegion::RegionType::UNION, uni.getRegionType());
+    ASSERT_EQ(CSGRegion::RegionType::UNION, new_reg_uni.getRegionType());
+    ASSERT_EQ(union_string, uni.toString());
+    ASSERT_EQ(union_string, new_reg_uni.toString());
+  }
+  // initialized but empty
+  {
+    ASSERT_EQ(CSGRegion::RegionType::EMPTY, empty.getRegionType());
+  }
+  // complement
+  {
+    std::string comp_string = "~(+s1 & -s2)";
+    ASSERT_EQ(CSGRegion::RegionType::COMPLEMENT, complement.getRegionType());
+    ASSERT_EQ(comp_string, complement.toString());
+  }
+}
+
+// Tests errors are caught with using wrong region type with operators
+TEST(CSGRegionTest, testRegionEmptyError)
+{
+  // empty region (initialized only)
+  CSGRegion empty1;
+  CSGRegion empty2;
+  // expect error if trying to union or intersect empty region(s)
+  Moose::UnitUtils::assertThrows(
+      [&empty1, &empty2]() { empty1 & empty2; },
+      "Region operation INTERSECTION cannot be performed on an empty region");
+  Moose::UnitUtils::assertThrows([&empty1, &empty2]() { empty1 | empty2; },
+                                 "Region operation UNION cannot be performed on an empty region");
+}
+
+// Tests stripRegionString function
+TEST(CSGRegionTest, testStripRegionString)
+{
+  // strip - single operator intersection (with and without white space padding)
+  {
+    std::string reg_str_valid = "((s1 & s2) & s3)";
+    std::string exp_str_strip = "s1 & s2 & s3";
+    ASSERT_EQ(exp_str_strip, stripRegionString(reg_str_valid, " & "));
+    ASSERT_EQ(exp_str_strip, stripRegionString(reg_str_valid, "&"));
+  }
+  // strip - single operator union (with and without white space padding)
+  {
+    std::string reg_str_valid = "((s1 | s2) | s3)";
+    std::string exp_str_strip = "s1 | s2 | s3";
+    ASSERT_EQ(exp_str_strip, stripRegionString(reg_str_valid, " | "));
+    ASSERT_EQ(exp_str_strip, stripRegionString(reg_str_valid, "|"));
+  }
+  // strip - mixed operators (won't strip)
+  {
+    std::string reg_str_valid = "(s1 & s2 & (s3 | s4))";
+    ASSERT_EQ(reg_str_valid, stripRegionString(reg_str_valid, " & "));
+  }
+}
