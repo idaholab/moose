@@ -868,7 +868,11 @@ MaterialPropertyInterface::getPossiblyConstantGenericMaterialPropertyByName(
 {
   // Check if it's just a constant
   if (const auto * default_property = defaultGenericMaterialProperty<T, is_ad>(prop_name))
+  {
+    // This status is used to decide which object requested material properties
+    _get_material_property_called = true;
     return *default_property;
+  }
 
   if (state > 0 && !_stateful_allowed)
     mooseError("Stateful material properties not allowed for this object."

@@ -95,6 +95,7 @@
   show_var_residual_norms = 1
 []
 
+# This is the consumer of material properties, through its default diffusivity parameters
 [Constraints]
   [./mortar]
     type = EqualValueConstraint
