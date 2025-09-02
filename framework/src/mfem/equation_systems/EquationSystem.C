@@ -343,7 +343,27 @@ EquationSystem::ApplyEssVals(const mfem::Vector &w, const mfem::Array<int> & con
 }
 
 void
-EquationSystem::UpdateEssDerivativeVals(const mfem::real_t & dt, const mfem::Vector & x_old)
+EquationSystem::Mult(const mfem::Vector & x, mfem::Vector & residual) const
+{
+  mfem::BlockVector block_x;
+  block_x.Update(*_block_true_offsets);
+  block_x = dynamic_cast<mfem::BlockVector&>(const_cast<mfem::Vector&>(x));
+  
+  for (int i = 0; i < _trial_var_names.size(); i++)
+  {
+    auto & trial_var_name = _trial_var_names.at(i);
+    ApplyEssVals(*(_var_ess_constraints.at(i)), _ess_tdof_lists.at(i), block_x.GetBlock(i));
+    _gfuncs->Get(trial_var_name)->Distribute(&(block_x.GetBlock(i)));
+  }
+  UpdateJacobian();
+  const_cast<EquationSystem*>(this)->FormLinearSystem(_jacobian,  block_x, _trueBlockRHS);
+  _jacobian->Mult(block_x, residual);
+  x.HostRead();
+  residual.HostRead();
+}
+
+void
+TimeDependentEquationSystem::UpdateEssDerivativeVals(const mfem::real_t & dt, const mfem::Vector & x_old)
 {
   //Update the old vector
   mfem::BlockVector block_x_old;
@@ -362,27 +382,6 @@ EquationSystem::UpdateEssDerivativeVals(const mfem::real_t & dt, const mfem::Vec
     *(_var_ess_constraints.at(i)) /= dt;
   }
 };
-
-
-void
-EquationSystem::Mult(const mfem::Vector & x, mfem::Vector & residual) const
-{
-  mfem::BlockVector block_x;
-  block_x.Update(*_block_true_offsets);
-  block_x = dynamic_cast<mfem::BlockVector&>(const_cast<mfem::Vector&>(x));
-
-  for (int i = 0; i < _trial_var_names.size(); i++)
-  {
-    auto & trial_var_name = _trial_var_names.at(i);
-    ApplyEssVals(*(_var_ess_constraints.at(i)), _ess_tdof_lists.at(i), block_x.GetBlock(i));
-    _gfuncs->Get(trial_var_name)->Distribute(&(block_x.GetBlock(i)));
-  }
-  UpdateJacobian();
-  const_cast<EquationSystem*>(this)->FormLinearSystem(_jacobian,  block_x, _trueBlockRHS);
-  _jacobian->Mult(block_x, residual);
-  x.HostRead();
-  residual.HostRead();
-}
 
 void
 TimeDependentEquationSystem::Mult(const mfem::Vector & dXdt, mfem::Vector & residual) const
