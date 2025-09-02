@@ -462,9 +462,6 @@ EquationSystem::BuildLinearForms()
     _lfs.GetRef(test_var_name) = 0.0;
   }
 
-  // Apply boundary conditions
-  ApplyEssentialBCs();
-
   for (auto & test_var_name : _test_var_names)
   {
     // Apply kernels
