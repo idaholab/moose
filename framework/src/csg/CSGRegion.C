@@ -57,7 +57,7 @@ CSGRegion::CSGRegion(const CSGRegion & region, std::string region_type)
 {
   _region_type = region_type;
   if (getRegionType() != RegionType::COMPLEMENT && getRegionType() != RegionType::EMPTY)
-    mooseError("Region type " + getRegionTypeString() + " is not supported for a single region");
+    mooseError("Region type " + getRegionTypeString() + " is not supported for a single region.");
 
   if (getRegionType() == RegionType::COMPLEMENT)
   {
