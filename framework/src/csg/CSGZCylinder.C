@@ -15,6 +15,7 @@ namespace CSG
 CSGZCylinder::CSGZCylinder(const std::string & name, const Real x0, const Real y0, const Real r)
   : CSGSurface(name, MooseUtils::prettyCppType<CSGZCylinder>()), _x0(x0), _y0(y0), _r(r)
 {
+  checkRadius();
 }
 
 std::unordered_map<std::string, Real>
@@ -33,4 +34,12 @@ CSGZCylinder::evaluateSurfaceEquationAtPoint(const Point & p) const
 
   return dist_sq - Utility::pow<2>(_r);
 }
+
+void
+CSGZCylinder::checkRadius() const
+{
+  if (_r <= 0.0)
+    mooseError("Radius of z-cylinder must be positive.");
+}
+
 } // namespace CSG

@@ -55,6 +55,9 @@ public:
   virtual Real evaluateSurfaceEquationAtPoint(const Point & p) const override;
 
 protected:
+  // check that radius is positive
+  void checkRadius() const;
+
   /// Value of y0 in equation of an x-axis aligned cylinder
   Real _y0;
 
