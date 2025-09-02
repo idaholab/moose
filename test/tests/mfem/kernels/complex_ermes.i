@@ -155,7 +155,7 @@
     port_width_vector = "0.0 12.38e-2 0.0"
     frequency = 900e6
     electric_permittivity = 8.8541878176e-12
-    magnetic_permeability = 1.256637061435917e-06     
+    magnetic_permeability = 1.256637061435917e-06
   []
   [WaveguidePortOut]
     type = MFEMRWTE10IntegratedBC
@@ -166,7 +166,7 @@
     port_width_vector = "0.0 12.38e-2 0.0"
     frequency = 900e6
     electric_permittivity = 8.8541878176e-12
-    magnetic_permeability = 1.256637061435917e-06     
+    magnetic_permeability = 1.256637061435917e-06
   []
 []
 

@@ -29,8 +29,8 @@ ComplexEquationSystem::Init(GridFunctions & gridfunctions,
     // Store pointers to test FESpaces
     _test_pfespaces.push_back(cpx_gridfunctions.Get(test_var_name)->ParFESpace());
     // Create auxiliary gridfunctions for storing essential constraints from Dirichlet conditions
-    _cpx_var_ess_constraints.emplace_back(
-        std::make_unique<mfem::ParComplexGridFunction>(cpx_gridfunctions.Get(test_var_name)->ParFESpace()));
+    _cpx_var_ess_constraints.emplace_back(std::make_unique<mfem::ParComplexGridFunction>(
+        cpx_gridfunctions.Get(test_var_name)->ParFESpace()));
   }
 
   // Store pointers to FESpaces of all coupled variables
@@ -40,11 +40,11 @@ ComplexEquationSystem::Init(GridFunctions & gridfunctions,
   // Extract which coupled variables are to be trivially eliminated and which are trial variables
   SetTrialVariableNames();
 
-  // Store pointers to coupled variable ComplexGridFunctions that are to be eliminated prior to forming the
-  // jacobian
+  // Store pointers to coupled variable ComplexGridFunctions that are to be eliminated prior to
+  // forming the jacobian
   for (auto & eliminated_var_name : _eliminated_var_names)
     _cpx_eliminated_variables.Register(eliminated_var_name,
-                                   cpx_gridfunctions.GetShared(eliminated_var_name));
+                                       cpx_gridfunctions.GetShared(eliminated_var_name));
 }
 
 void
@@ -254,7 +254,8 @@ ComplexEquationSystem::FormSystem(mfem::OperatorHandle & op,
   mfem::BlockVector aux_x, aux_rhs;
   mfem::OperatorPtr aux_a;
 
-  slf->FormLinearSystem(_ess_tdof_lists.at(0), *(_cpx_var_ess_constraints.at(0)), *clf, aux_a, aux_x, aux_rhs);
+  slf->FormLinearSystem(
+      _ess_tdof_lists.at(0), *(_cpx_var_ess_constraints.at(0)), *clf, aux_a, aux_x, aux_rhs);
 
   trueX.GetBlock(0) = aux_x;
   trueRHS.GetBlock(0) = aux_rhs;
@@ -283,7 +284,8 @@ ComplexEquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
     auto clf = _clfs.Get(test_var_name);
     mfem::Vector aux_x, aux_rhs;
     mfem::OperatorHandle aux_a;
-    slf->FormLinearSystem(_ess_tdof_lists.at(i), *(_cpx_var_ess_constraints.at(i)), *clf, aux_a, aux_x, aux_rhs);
+    slf->FormLinearSystem(
+        _ess_tdof_lists.at(i), *(_cpx_var_ess_constraints.at(i)), *clf, aux_a, aux_x, aux_rhs);
     _h_blocks(i, i) = aux_a.As<mfem::ComplexHypreParMatrix>()->GetSystemMatrix();
 
     trueX.GetBlock(i) = aux_x;
