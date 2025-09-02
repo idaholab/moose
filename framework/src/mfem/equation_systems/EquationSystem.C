@@ -358,10 +358,8 @@ EquationSystem::UpdateEssDerivativeVals(const mfem::real_t & dt, const mfem::Vec
   // Update the dxdts boundary conditions
   for (int i = 0; i < _test_var_names.size(); i++)
   {
-    auto & test_var_name = _trial_var_names.at(i);
-    CopyVec( *(_var_ess_constraints.at(i)), *(_dvardt_ess_constraints.at(i)) );
-    *(_dvardt_ess_constraints.at(i)) -= block_x_old.GetBlock(i);
-    *(_dvardt_ess_constraints.at(i)) /= dt;
+    *(_var_ess_constraints.at(i)) -= block_x_old.GetBlock(i);
+    *(_var_ess_constraints.at(i)) /= dt;
   }
 };
 
@@ -394,7 +392,7 @@ TimeDependentEquationSystem::Mult(const mfem::Vector & dXdt, mfem::Vector & resi
   for (int i = 0; i < _trial_var_names.size(); i++)
   {
     auto & trial_var_name = _trial_var_names.at(i);
-    ApplyEssVals(*(_dvardt_ess_constraints.at(i)), _ess_tdof_lists.at(i), _trueBlockdXdt.GetBlock(i));
+    ApplyEssVals(*(_var_ess_constraints.at(i)), _ess_tdof_lists.at(i), _trueBlockdXdt.GetBlock(i));
     _gfuncs->Get(trial_var_name)->Distribute(&(_trueBlockdXdt.GetBlock(i)));
   }
   UpdateJacobian();
@@ -707,7 +705,7 @@ TimeDependentEquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
 
     // Form linear system for operator acting on vector of du/dt
     mfem::HypreParMatrix * aux_a = new mfem::HypreParMatrix;
-    td_blf->FormLinearSystem(_ess_tdof_lists.at(i), *(_dvardt_ess_constraints.at(i)), *lf, *aux_a, aux_x, aux_rhs);
+    td_blf->FormLinearSystem(_ess_tdof_lists.at(i), *(_var_ess_constraints.at(i)), *lf, *aux_a, aux_x, aux_rhs);
     _h_blocks(i, i) = aux_a;
     truedXdt.GetBlock(i) = aux_x;
     trueRHS.GetBlock(i) = aux_rhs;
@@ -745,7 +743,7 @@ TimeDependentEquationSystem::FormSystem(mfem::OperatorHandle & op,
 
   // Form linear system for operator acting on vector of du/dt
   mfem::OperatorPtr aux_a;
-  td_blf->FormLinearSystem(_ess_tdof_lists.at(0), *(_dvardt_ess_constraints.at(0)), *lf, aux_a, aux_x, aux_rhs);
+  td_blf->FormLinearSystem(_ess_tdof_lists.at(0), *(_var_ess_constraints.at(0)), *lf, aux_a, aux_x, aux_rhs);
 
   truedXdt.GetBlock(0) = aux_x;
   trueRHS.GetBlock(0) = aux_rhs;
