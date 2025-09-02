@@ -14,12 +14,10 @@ registerMooseObject("SolidMechanicsApp", ComputeHomogenizedLagrangianStrain);
 InputParameters
 ComputeHomogenizedLagrangianStrain::validParams()
 {
-  InputParameters params = Material::validParams();
+  InputParameters params = HomogenizationInterface<Material>::validParams();
   params.addClassDescription("Calculate eigenstrain-like contribution from the homogenization "
                              "strain used to satisfy the homogenization constraints.");
   params.addParam<std::string>("base_name", "Material property base name");
-  params.addRequiredParam<UserObjectName>(
-      "homogenization_constraint", "The UserObject for defining the homogenization constraint");
   params.addParam<MaterialPropertyName>("homogenization_gradient_name",
                                         "homogenization_gradient",
                                         "Name of the constant gradient field");
@@ -31,10 +29,8 @@ ComputeHomogenizedLagrangianStrain::validParams()
 
 ComputeHomogenizedLagrangianStrain::ComputeHomogenizedLagrangianStrain(
     const InputParameters & parameters)
-  : Material(parameters),
+  : HomogenizationInterface<Material>(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
-    _constraint(getUserObject<HomogenizationConstraint>("homogenization_constraint")),
-    _cmap(_constraint.getConstraintMap()),
     _macro_gradient(coupledScalarValue("macro_gradient")),
     _homogenization_contribution(
         declareProperty<RankTwoTensor>(_base_name + "homogenization_gradient_name"))
@@ -46,9 +42,9 @@ ComputeHomogenizedLagrangianStrain::computeQpProperties()
 {
   _homogenization_contribution[_qp].zero();
   unsigned int count = 0;
-  for (auto && indices : _cmap)
+  for (const auto & [indices, constraint] : cmap())
   {
-    auto && [i, j] = indices.first;
+    const auto [i, j] = indices;
     _homogenization_contribution[_qp](i, j) = _macro_gradient[count++];
   }
 }

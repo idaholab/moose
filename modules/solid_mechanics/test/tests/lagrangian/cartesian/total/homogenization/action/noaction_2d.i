@@ -3,8 +3,6 @@
 [GlobalParams]
   displacements = 'disp_x disp_y'
   large_kinematics = false
-  macro_gradient = hvar
-  homogenization_constraint = homogenization
 []
 
 [Mesh]
@@ -22,15 +20,6 @@
                 0 1 0'
     fixed_normal = true
     new_boundary = 'left right bottom top'
-  []
-[]
-
-[UserObjects]
-  [homogenization]
-    type = HomogenizationConstraint
-    constraint_types = 'stress none none stress strain none none none none'
-    targets = 'stress11 stress12 strain22'
-    execute_on = 'INITIAL LINEAR NONLINEAR'
   []
 []
 
@@ -256,18 +245,17 @@
     type = HomogenizedTotalLagrangianStressDivergence
     variable = disp_x
     component = 0
+    scalar_variable = hvar
+    constraint_types = 'stress none none stress strain none none none none'
+    targets = 'stress11 stress12 strain22'
   []
   [sdy]
     type = HomogenizedTotalLagrangianStressDivergence
     variable = disp_y
     component = 1
-  []
-[]
-
-[ScalarKernels]
-  [enforce]
-    type = HomogenizationConstraintScalarKernel
-    variable = hvar
+    scalar_variable = hvar
+    constraint_types = 'stress none none stress strain none none none none'
+    targets = 'stress11 stress12 strain22'
   []
 []
 
@@ -347,6 +335,9 @@
   []
   [compute_homogenization_gradient]
     type = ComputeHomogenizedLagrangianStrain
+    constraint_types = 'stress none none stress strain none none none none'
+    targets = 'stress11 stress12 strain22'
+    macro_gradient = hvar
   []
 []
 

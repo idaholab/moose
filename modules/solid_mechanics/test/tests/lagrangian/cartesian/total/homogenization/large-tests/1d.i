@@ -4,7 +4,8 @@
   displacements = 'disp_x'
   large_kinematics = true
   macro_gradient = hvar
-  homogenization_constraint = homogenization
+  constraint_types = ${constraint_types}
+  targets = ${targets}
 []
 
 [Mesh]
@@ -236,27 +237,12 @@
   []
 []
 
-[UserObjects]
-  [homogenization]
-    type = HomogenizationConstraint
-    constraint_types = ${constraint_types}
-    targets = ${targets}
-    execute_on = 'INITIAL LINEAR NONLINEAR'
-  []
-[]
-
 [Kernels]
   [sdx]
     type = HomogenizedTotalLagrangianStressDivergence
     variable = disp_x
     component = 0
-  []
-[]
-
-[ScalarKernels]
-  [enforce]
-    type = HomogenizationConstraintScalarKernel
-    variable = hvar
+    scalar_variable = hvar
   []
 []
 

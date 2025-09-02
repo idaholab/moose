@@ -48,6 +48,9 @@ public:
    */
   void computeOffDiagJacobianScalar(unsigned int svar_num) override;
 
+  /// Compute the residual and Jacobian together
+  virtual void computeResidualAndJacobian() override;
+
 protected:
   /**
    * Precalculate method that is executed prior to scalar coupled variable loop
