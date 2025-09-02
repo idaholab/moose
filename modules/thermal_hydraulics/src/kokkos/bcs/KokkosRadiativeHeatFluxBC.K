@@ -9,13 +9,14 @@
 
 #include "KokkosRadiativeHeatFluxBC.h"
 
-registerMooseObject("HeatTransferApp", KokkosRadiativeHeatFluxBC);
+registerMooseObject("ThermalHydraulicsApp", KokkosRadiativeHeatFluxBC);
 
 InputParameters
 KokkosRadiativeHeatFluxBC::validParams()
 {
   InputParameters params = KokkosRadiativeHeatFluxBCBase::validParams();
 
+  params.addRequiredParam<Real>("boundary_emissivity", "Emissivity of the boundary.");
   params.addParam<PostprocessorName>(
       "scale_pp", 1.0, "Post-processor by which to scale boundary condition");
 
@@ -26,6 +27,8 @@ KokkosRadiativeHeatFluxBC::validParams()
 }
 
 KokkosRadiativeHeatFluxBC::KokkosRadiativeHeatFluxBC(const InputParameters & parameters)
-  : KokkosRadiativeHeatFluxBCBase(parameters), _scale_pp(getPostprocessorValue("scale_pp"))
+  : KokkosRadiativeHeatFluxBCBase(parameters),
+    _eps_boundary(getParam<Real>("boundary_emissivity")),
+    _scale_pp(getPostprocessorValue("scale_pp"))
 {
 }
