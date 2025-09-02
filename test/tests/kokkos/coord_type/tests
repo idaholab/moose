@@ -1,0 +1,24 @@
+[Tests]
+  issues = '#30655'
+  design = 'KokkosDiffusion.md'
+
+  [coord]
+    requirement = 'The Kokkos system shall provide an ability to change the coordinate type to'
+    [rz]
+      type = 'Exodiff'
+      input = 'kokkos_diffusion_rz.i'
+      exodiff = 'kokkos_diffusion_rz_out.e'
+      detail = 'R-Z,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [rspherical]
+      type = 'Exodiff'
+      input = 'kokkos_diffusion_rspherical.i'
+      exodiff = 'kokkos_diffusion_rspherical_out.e'
+      detail = 'R-Spherical.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+  []
+[]
