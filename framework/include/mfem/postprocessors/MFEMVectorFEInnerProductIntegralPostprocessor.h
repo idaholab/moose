@@ -25,8 +25,6 @@ public:
 
   MFEMVectorFEInnerProductIntegralPostprocessor(const InputParameters & parameters);
 
-  virtual void initialize() override;
-
   /**
    * Evaluate integral.
    */
