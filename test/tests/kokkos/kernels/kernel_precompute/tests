@@ -1,6 +1,6 @@
 [Tests]
   issues = '#30655'
-  design = '/kernels/Kernel.md'
+  design = 'KokkosKernels/index.md'
 
   [test]
     type = 'Exodiff'

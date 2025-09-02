@@ -1,6 +1,6 @@
 [Tests]
   issues = '#30655'
-  design = 'syntax/Materials/index.md'
+  design = 'KokkosMaterials/index.md'
 
   [stateful]
     requirement = 'The Kokkos material system shall be able to generate current, old, and older states of material properties and '

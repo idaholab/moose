@@ -1,6 +1,6 @@
 [Tests]
   issues = '#30655'
-  design = 'syntax/Materials/index.md'
+  design = 'KokkosMaterials/index.md'
 
   [error]
     requirement = 'The Kokkos material system shall issue an error when '

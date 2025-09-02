@@ -1,10 +1,9 @@
 [Tests]
-  design = 'DataIO.md Restartable.md'
   issues = '#30655'
+  design = 'DataIO.md Restartable.md'
 
   [kernel]
-    requirement = "The Kokkos system shall support the ability to"
-
+    requirement = 'The Kokkos system shall support the ability to'
     [test]
       type = 'Exodiff'
       input = 'kokkos_kernel_restartable.i'
@@ -13,7 +12,6 @@
       capabilities = 'kokkos'
       compute_devices = 'cpu cuda'
     []
-
     [test2]
       type = 'Exodiff'
       input = 'kokkos_kernel_restartable_second.i'

@@ -15,6 +15,9 @@ InputParameters
 KokkosBodyForceKernel::validParams()
 {
   InputParameters params = KokkosBodyForce::validParams();
+  params.addClassDescription("Demonstrates the two ways that scalar values can be introduced "
+                             "into kernels, e.g. (controllable) constants and postprocessors. "
+                             "Implements the weak form $(\\psi_i, -f)$.");
   return params;
 }
 
