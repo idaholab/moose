@@ -8875,10 +8875,12 @@ FEProblemBase::needBoundaryMaterialOnSide(BoundaryID bnd_id, const THREAD_ID tid
       }
 
     // TODO: these objects should be checked for whether they actually consume materials
+    // NOTE: InterfaceUO can use use boundary properties too
     if (theWarehouse()
             .query()
             .condition<AttribThread>(tid)
-            .condition<AttribInterfaces>(Interfaces::SideUserObject | Interfaces::DomainUserObject)
+            .condition<AttribInterfaces>(Interfaces::SideUserObject | Interfaces::DomainUserObject |
+                                         Interfaces::InterfaceUserObject)
             .condition<AttribBoundaries>(bnd_id)
             .count() > 0)
     {
