@@ -42,7 +42,7 @@ MFEMDivAux::MFEMDivAux(const InputParameters & parameters)
 void
 MFEMDivAux::execute()
 {
-  _div.AddMult(_source_var, _result_var, _scale_factor);
+  _div.AddMult(_source_var, _result_var = 0, _scale_factor);
 }
 
 #endif
