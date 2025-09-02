@@ -92,6 +92,12 @@ CSGRegion::operator|=(const CSGRegion & other_region)
 const std::string
 stripRegionString(std::string region_str, std::string op)
 {
+  // add expected spacing around operator if not provided
+  if (op == "|")
+    op = " | ";
+  if (op == "&")
+    op = " & ";
+
   std::vector<std::string> ops_list = {" | ", " & ", "~"};
   if (op.compare(" | ") && op.compare(" & "))
   { // compare() returns non zero if strings are not equal
