@@ -33,7 +33,6 @@ public:
 
   /**
    * Constructor for Material Cell
-   * TODO: mat_name will be replaced with material object when available
    *
    * @param name name of cell
    * @param mat_name name of material to use as the cell fill
@@ -70,8 +69,7 @@ public:
   const CSGUniverse & getFillUniverse() const;
 
   /**
-   * @brief Get the cell fill material name if fill fype is MATERIAL
-   * TODO: update to return material object when materials are implemented
+   * @brief Get the cell fill material name if fill fype is CSG_MATERIAL
    *
    * @return const std::string
    */

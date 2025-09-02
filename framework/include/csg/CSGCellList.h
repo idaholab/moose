@@ -87,7 +87,7 @@ protected:
   CSGCell & getCell(const std::string & name) const;
 
   /**
-   * @brief add a cell to the CellList. Ownership of cell will be trasnferred to cell list object
+   * @brief add a cell to the CellList. Ownership of cell will be transferred to cell list object
    * that calls this function
    *
    * @param cell cell to add to the CellList.
