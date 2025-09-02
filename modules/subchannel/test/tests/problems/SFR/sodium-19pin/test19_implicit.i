@@ -268,7 +268,7 @@ P_out = 2.0e5 # Pa
     block = subchannel
   []
   [Total_power_SCMDuctPowerPostprocessor]
-    type = SCMDuctPowerPostprocessor
+    type = SCMDuctHeatRatePostprocessor
   []
   [Total_power_SCMTHPowerPostprocessor]
     type = SCMTHPowerPostprocessor

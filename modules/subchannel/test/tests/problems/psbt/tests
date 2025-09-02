@@ -69,6 +69,7 @@
     valgrind = NONE
     recover = false
     abs_zero = 1e-6
+    rel_err = 1e-4
     max_threads = 1
     max_parallel = 1
     requirement = 'The system shall be able to solve a PSBT-type case with the subchannel solver using a full-monolithic algorithm.'

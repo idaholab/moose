@@ -19,8 +19,9 @@ InputParameters
 SCMPinPowerPostprocessor::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
-  params.addClassDescription("Calculates the power that goes into the coolant from the fuel-pins "
-                             "based on aux variable q_prime");
+  params.addClassDescription(
+      "Calculates the total heat rate that goes into the coolant from all the heated fuel-pins "
+      "based on aux variable q_prime");
   return params;
 }
 

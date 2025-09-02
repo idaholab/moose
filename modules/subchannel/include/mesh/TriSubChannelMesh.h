@@ -132,11 +132,6 @@ public:
    */
   void setChannelToDuctMaps(const std::vector<Node *> & duct_nodes);
 
-  virtual Node * getChanNodeFromDuct(Node * duct_node) override
-  {
-    return _duct_node_to_chan_map[duct_node];
-  }
-
   /**
    * Function that gets the duct node from the channel node
    */

@@ -461,7 +461,7 @@ QuadSubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsigned int
 }
 
 Real
-QuadSubChannel1PhaseProblem::getSubChannelWidth(unsigned int i_ch)
+QuadSubChannel1PhaseProblem::getSubChannelPeripheralDuctWidth(unsigned int i_ch)
 {
   auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
   if (subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER)
@@ -473,7 +473,7 @@ QuadSubChannel1PhaseProblem::getSubChannelWidth(unsigned int i_ch)
   }
   else
   {
-    mooseError(name(), "Not a perimetric subchannel ");
+    mooseError("Channel is not a perimetric subchannel ");
   }
 }
 
