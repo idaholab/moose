@@ -18,7 +18,7 @@ outward facing unit normal vector on the boundary.
 
 ## Example Input File Syntax
 
-!listing test/tests/mfem/kernels/complexmouse.i block=BCs
+!listing test/tests/mfem/kernels/complex_ermes_.i block=BCs
 
 !syntax parameters /BCs/MFEMVectorFEBoundaryTangentIntegratedBC
 
