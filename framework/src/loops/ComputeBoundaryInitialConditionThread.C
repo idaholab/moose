@@ -17,19 +17,25 @@
 
 ComputeBoundaryInitialConditionThread::ComputeBoundaryInitialConditionThread(
     FEProblemBase & fe_problem)
-  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem)
+  : ThreadedNodeLoop<ConstBndNodeRange,
+                     ConstBndNodeRange::const_iterator,
+                     ComputeBoundaryInitialConditionThread>(fe_problem)
 {
 }
 
 ComputeBoundaryInitialConditionThread::ComputeBoundaryInitialConditionThread(
     ComputeBoundaryInitialConditionThread & x, Threads::split split)
-  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split)
+  : ThreadedNodeLoop<ConstBndNodeRange,
+                     ConstBndNodeRange::const_iterator,
+                     ComputeBoundaryInitialConditionThread>(x, split)
 {
 }
 
 ComputeBoundaryInitialConditionThread::ComputeBoundaryInitialConditionThread(
     FEProblemBase & fe_problem, const std::set<VariableName> * target_vars)
-  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
+  : ThreadedNodeLoop<ConstBndNodeRange,
+                     ConstBndNodeRange::const_iterator,
+                     ComputeBoundaryInitialConditionThread>(fe_problem),
     _target_vars(target_vars)
 {
 }
@@ -42,14 +48,14 @@ ComputeBoundaryInitialConditionThread::onNode(ConstBndNodeRange::const_iterator 
   Node * node = bnode->_node;
   BoundaryID boundary_id = bnode->_bnd_id;
 
-  for (const auto nl_sys_num : make_range(_fe_problem.numNonlinearSystems()))
-    _fe_problem.assembly(_tid, nl_sys_num).reinit(node);
+  for (const auto nl_sys_num : make_range(this->_fe_problem.numNonlinearSystems()))
+    this->_fe_problem.assembly(this->_tid, nl_sys_num).reinit(node);
 
-  const InitialConditionWarehouse & warehouse = _fe_problem.getInitialConditionWarehouse();
+  const InitialConditionWarehouse & warehouse = this->_fe_problem.getInitialConditionWarehouse();
 
-  if (warehouse.hasActiveBoundaryObjects(boundary_id, _tid))
+  if (warehouse.hasActiveBoundaryObjects(boundary_id, this->_tid))
   {
-    const auto & ics = warehouse.getActiveBoundaryObjects(boundary_id, _tid);
+    const auto & ics = warehouse.getActiveBoundaryObjects(boundary_id, this->_tid);
     for (const auto & ic : ics)
     {
       // Skip or include initial conditions based on target variable usage
@@ -57,7 +63,7 @@ ComputeBoundaryInitialConditionThread::onNode(ConstBndNodeRange::const_iterator 
       if (_target_vars && !_target_vars->count(var_name))
         continue;
 
-      if (node->processor_id() == _fe_problem.processor_id())
+      if (node->processor_id() == this->_fe_problem.processor_id())
         ic->computeNodal(*node);
     }
   }

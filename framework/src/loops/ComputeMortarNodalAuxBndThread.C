@@ -21,7 +21,9 @@ ComputeMortarNodalAuxBndThread<AuxKernelType>::ComputeMortarNodalAuxBndThread(
     const MooseObjectWarehouse<AuxKernelType> & storage,
     const BoundaryID bnd_id,
     const std::size_t object_container_index)
-  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
+  : ThreadedNodeLoop<ConstBndNodeRange,
+                     ConstBndNodeRange::const_iterator,
+                     ComputeMortarNodalAuxBndThread<AuxKernelType>>(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
     _storage(storage),
     _bnd_id(bnd_id),
@@ -33,7 +35,9 @@ ComputeMortarNodalAuxBndThread<AuxKernelType>::ComputeMortarNodalAuxBndThread(
 template <typename AuxKernelType>
 ComputeMortarNodalAuxBndThread<AuxKernelType>::ComputeMortarNodalAuxBndThread(
     ComputeMortarNodalAuxBndThread & x, Threads::split split)
-  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
+  : ThreadedNodeLoop<ConstBndNodeRange,
+                     ConstBndNodeRange::const_iterator,
+                     ComputeMortarNodalAuxBndThread<AuxKernelType>>(x, split),
     _aux_sys(x._aux_sys),
     _storage(x._storage),
     _bnd_id(x._bnd_id),
@@ -52,12 +56,13 @@ ComputeMortarNodalAuxBndThread<AuxKernelType>::onNode(ConstBndNodeRange::const_i
 
   Node * node = bnode->_node;
 
-  if (node->processor_id() == _fe_problem.processor_id())
+  if (node->processor_id() == this->_fe_problem.processor_id())
   {
-    const auto & kernel = _storage.getActiveBoundaryObjects(_bnd_id, _tid)[_object_container_index];
+    const auto & kernel =
+        _storage.getActiveBoundaryObjects(_bnd_id, this->_tid)[_object_container_index];
     mooseAssert(dynamic_cast<MortarNodalAuxKernel *>(kernel.get()),
                 "This should be a mortar nodal aux kernel");
-    _fe_problem.reinitNodeFace(node, _bnd_id, _tid);
+    this->_fe_problem.reinitNodeFace(node, _bnd_id, this->_tid);
     kernel->compute();
     // This is the same conditional check that the aux kernel performs internally before calling
     // computeValue and _var.setNodalValue. We don't want to attempt to insert into the solution if

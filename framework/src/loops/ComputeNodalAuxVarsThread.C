@@ -23,7 +23,9 @@ Threads::spin_mutex ComputeNodalAuxVarsThread<AuxKernelType>::writable_variable_
 template <typename AuxKernelType>
 ComputeNodalAuxVarsThread<AuxKernelType>::ComputeNodalAuxVarsThread(
     FEProblemBase & fe_problem, const MooseObjectWarehouse<AuxKernelType> & storage)
-  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
+  : ThreadedNodeLoop<ConstNodeRange,
+                     ConstNodeRange::const_iterator,
+                     ComputeNodalAuxVarsThread<AuxKernelType>>(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
     _storage(storage)
 {
@@ -33,7 +35,9 @@ ComputeNodalAuxVarsThread<AuxKernelType>::ComputeNodalAuxVarsThread(
 template <typename AuxKernelType>
 ComputeNodalAuxVarsThread<AuxKernelType>::ComputeNodalAuxVarsThread(ComputeNodalAuxVarsThread & x,
                                                                     Threads::split split)
-  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
+  : ThreadedNodeLoop<ConstNodeRange,
+                     ConstNodeRange::const_iterator,
+                     ComputeNodalAuxVarsThread<AuxKernelType>>(x, split),
     _aux_sys(x._aux_sys),
     _storage(x._storage)
 {
@@ -46,7 +50,7 @@ ComputeNodalAuxVarsThread<AuxKernelType>::subdomainChanged()
   std::set<TagID> needed_vector_tags;
   std::set<TagID> needed_matrix_tags;
 
-  const auto & block_kernels = _storage.getActiveBlockObjects(_tid);
+  const auto & block_kernels = _storage.getActiveBlockObjects(this->_tid);
 
   for (const auto & block : _block_ids)
   {
@@ -62,8 +66,8 @@ ComputeNodalAuxVarsThread<AuxKernelType>::subdomainChanged()
       }
   }
 
-  _fe_problem.setActiveFEVariableCoupleableMatrixTags(needed_matrix_tags, _tid);
-  _fe_problem.setActiveFEVariableCoupleableVectorTags(needed_vector_tags, _tid);
+  this->_fe_problem.setActiveFEVariableCoupleableMatrixTags(needed_matrix_tags, this->_tid);
+  this->_fe_problem.setActiveFEVariableCoupleableVectorTags(needed_vector_tags, this->_tid);
 }
 
 template <typename AuxKernelType>
@@ -81,10 +85,10 @@ ComputeNodalAuxVarsThread<AuxKernelType>::onNode(ConstNodeRange::const_iterator 
     subdomainChanged();
   }
 
-  _fe_problem.reinitNode(node, _tid);
+  this->_fe_problem.reinitNode(node, this->_tid);
 
   // Get a map of all active block restricted AuxKernel objects
-  const auto & block_kernels = _storage.getActiveBlockObjects(_tid);
+  const auto & block_kernels = _storage.getActiveBlockObjects(this->_tid);
 
   // Loop over all SubdomainIDs for the current node, if an AuxKernel is active on this block then
   // compute it.
@@ -111,7 +115,7 @@ ComputeNodalAuxVarsThread<AuxKernelType>::onNode(ConstNodeRange::const_iterator 
               var->insert(_aux_sys.solution());
 
           // make solution values available for dependent AuxKernels
-          _fe_problem.reinitNode(node, _tid);
+          this->_fe_problem.reinitNode(node, this->_tid);
         }
       }
   }
@@ -121,8 +125,8 @@ template <typename AuxKernelType>
 void
 ComputeNodalAuxVarsThread<AuxKernelType>::post()
 {
-  _fe_problem.clearActiveFEVariableCoupleableVectorTags(_tid);
-  _fe_problem.clearActiveFEVariableCoupleableMatrixTags(_tid);
+  this->_fe_problem.clearActiveFEVariableCoupleableVectorTags(this->_tid);
+  this->_fe_problem.clearActiveFEVariableCoupleableMatrixTags(this->_tid);
 }
 
 template <typename AuxKernelType>
@@ -135,11 +139,11 @@ template <typename AuxKernelType>
 void
 ComputeNodalAuxVarsThread<AuxKernelType>::printGeneralExecutionInformation() const
 {
-  if (!_fe_problem.shouldPrintExecution(_tid) || !_storage.hasActiveObjects())
+  if (!this->_fe_problem.shouldPrintExecution(this->_tid) || !_storage.hasActiveObjects())
     return;
 
-  const auto & console = _fe_problem.console();
-  const auto & execute_on = _fe_problem.getCurrentExecuteOnFlag();
+  const auto & console = this->_fe_problem.console();
+  const auto & execute_on = this->_fe_problem.getCurrentExecuteOnFlag();
   console << "[DBG] Beginning nodal loop of nodal auxiliary kernels on " << execute_on << std::endl;
   console << "[DBG] Ordering of the kernels on each block they are defined on:" << std::endl;
   // TODO Check that all objects are active at this point

@@ -21,7 +21,8 @@ Threads::spin_mutex ComputeNodalUserObjectsThread::writable_variable_mutex;
 
 ComputeNodalUserObjectsThread::ComputeNodalUserObjectsThread(FEProblemBase & fe_problem,
                                                              const TheWarehouse::Query & query)
-  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator, ComputeNodalUserObjectsThread>(
+        fe_problem),
     _query(query),
     _aux_sys(fe_problem.getAuxiliarySystem())
 {
@@ -30,7 +31,8 @@ ComputeNodalUserObjectsThread::ComputeNodalUserObjectsThread(FEProblemBase & fe_
 // Splitting Constructor
 ComputeNodalUserObjectsThread::ComputeNodalUserObjectsThread(ComputeNodalUserObjectsThread & x,
                                                              Threads::split split)
-  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator, ComputeNodalUserObjectsThread>(
+        x, split),
     _query(x._query),
     _aux_sys(x._aux_sys)
 {
@@ -43,7 +45,7 @@ ComputeNodalUserObjectsThread::subdomainChanged()
 {
   std::vector<NodalUserObject *> objs;
   _query.clone()
-      .condition<AttribThread>(_tid)
+      .condition<AttribThread>(this->_tid)
       .condition<AttribInterfaces>(Interfaces::NodalUserObject)
       .queryInto(objs);
 
@@ -53,7 +55,7 @@ ComputeNodalUserObjectsThread::subdomainChanged()
     auto & vector_tags = obj->getFEVariableCoupleableVectorTags();
     needed_vector_tags.insert(vector_tags.begin(), vector_tags.end());
   }
-  _fe_problem.setActiveFEVariableCoupleableVectorTags(needed_vector_tags, _tid);
+  this->_fe_problem.setActiveFEVariableCoupleableVectorTags(needed_vector_tags, this->_tid);
 }
 
 void
@@ -69,17 +71,17 @@ ComputeNodalUserObjectsThread::onNode(ConstNodeRange::const_iterator & node_it)
     subdomainChanged();
   }
 
-  _fe_problem.reinitNode(node, _tid);
+  this->_fe_problem.reinitNode(node, this->_tid);
 
   std::vector<NodalUserObject *> objs;
 
   // Boundary Restricted
   std::vector<BoundaryID> nodeset_ids;
-  _fe_problem.mesh().getMesh().get_boundary_info().boundary_ids(node, nodeset_ids);
+  this->_fe_problem.mesh().getMesh().get_boundary_info().boundary_ids(node, nodeset_ids);
   for (const auto & bnd : nodeset_ids)
   {
     _query.clone()
-        .condition<AttribThread>(_tid)
+        .condition<AttribThread>(this->_tid)
         .condition<AttribInterfaces>(Interfaces::NodalUserObject)
         .condition<AttribBoundaries>(bnd, true)
         .queryInto(objs);
@@ -108,7 +110,7 @@ ComputeNodalUserObjectsThread::onNode(ConstNodeRange::const_iterator & node_it)
   for (const auto & block : block_ids)
   {
     _query.clone()
-        .condition<AttribThread>(_tid)
+        .condition<AttribThread>(this->_tid)
         .condition<AttribInterfaces>(Interfaces::NodalUserObject)
         .condition<AttribSubdomains>(block)
         .queryInto(objs);
@@ -139,20 +141,20 @@ ComputeNodalUserObjectsThread::join(const ComputeNodalUserObjectsThread & /*y*/)
 void
 ComputeNodalUserObjectsThread::printGeneralExecutionInformation() const
 {
-  if (!_fe_problem.shouldPrintExecution(_tid))
+  if (!this->_fe_problem.shouldPrintExecution(this->_tid))
     return;
 
   // Get all nodal UOs
   std::vector<MooseObject *> nodal_uos;
   _query.clone()
-      .condition<AttribThread>(_tid)
+      .condition<AttribThread>(this->_tid)
       .condition<AttribInterfaces>(Interfaces::NodalUserObject)
       .queryInto(nodal_uos);
 
   if (nodal_uos.size())
   {
-    const auto & console = _fe_problem.console();
-    const auto & execute_on = _fe_problem.getCurrentExecuteOnFlag();
+    const auto & console = this->_fe_problem.console();
+    const auto & execute_on = this->_fe_problem.getCurrentExecuteOnFlag();
     console << "[DBG] Computing nodal user objects on " << execute_on << std::endl;
     mooseDoOnce(
         console << "[DBG] Ordering on nodes:" << std::endl;

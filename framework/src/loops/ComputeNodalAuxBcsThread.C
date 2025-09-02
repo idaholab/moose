@@ -18,7 +18,9 @@
 template <typename AuxKernelType>
 ComputeNodalAuxBcsThread<AuxKernelType>::ComputeNodalAuxBcsThread(
     FEProblemBase & fe_problem, const MooseObjectWarehouse<AuxKernelType> & storage)
-  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
+  : ThreadedNodeLoop<ConstBndNodeRange,
+                     ConstBndNodeRange::const_iterator,
+                     ComputeNodalAuxBcsThread<AuxKernelType>>(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
     _storage(storage)
 {
@@ -28,7 +30,9 @@ ComputeNodalAuxBcsThread<AuxKernelType>::ComputeNodalAuxBcsThread(
 template <typename AuxKernelType>
 ComputeNodalAuxBcsThread<AuxKernelType>::ComputeNodalAuxBcsThread(ComputeNodalAuxBcsThread & x,
                                                                   Threads::split split)
-  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
+  : ThreadedNodeLoop<ConstBndNodeRange,
+                     ConstBndNodeRange::const_iterator,
+                     ComputeNodalAuxBcsThread<AuxKernelType>>(x, split),
     _aux_sys(x._aux_sys),
     _storage(x._storage)
 {
@@ -44,16 +48,16 @@ ComputeNodalAuxBcsThread<AuxKernelType>::onNode(ConstBndNodeRange::const_iterato
 
   Node * node = bnode->_node;
 
-  if (node->processor_id() == _fe_problem.processor_id())
+  if (node->processor_id() == this->_fe_problem.processor_id())
   {
     // Get a map of all active block restricted AuxKernel objects
-    const auto & kernels = _storage.getActiveBoundaryObjects(_tid);
+    const auto & kernels = _storage.getActiveBoundaryObjects(this->_tid);
 
     // Operate on the node BoundaryID only
     const auto iter = kernels.find(boundary_id);
     if (iter != kernels.end())
     {
-      _fe_problem.reinitNodeFace(node, boundary_id, _tid);
+      this->_fe_problem.reinitNodeFace(node, boundary_id, this->_tid);
 
       for (const auto & aux : iter->second)
       {
@@ -78,11 +82,11 @@ template <typename AuxKernelType>
 void
 ComputeNodalAuxBcsThread<AuxKernelType>::printGeneralExecutionInformation() const
 {
-  if (!_fe_problem.shouldPrintExecution(_tid) || !_storage.hasActiveObjects())
+  if (!this->_fe_problem.shouldPrintExecution(this->_tid) || !_storage.hasActiveObjects())
     return;
 
-  const auto & console = _fe_problem.console();
-  const auto & execute_on = _fe_problem.getCurrentExecuteOnFlag();
+  const auto & console = this->_fe_problem.console();
+  const auto & execute_on = this->_fe_problem.getCurrentExecuteOnFlag();
   console << "[DBG] Executing nodal auxiliary kernels on boundary nodes on " << execute_on
           << std::endl;
   console << "[DBG] Ordering of the kernels on each boundary they are defined on:" << std::endl;
