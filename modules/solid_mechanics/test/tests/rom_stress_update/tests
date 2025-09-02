@@ -67,7 +67,7 @@
       csvdiff = 'nonad_verification_heavy_out.csv'
       heavy = true
       max_time = 500
-      cli_args = 'Executioner/dt=1e-5 Outputs/file_base=nonad_verification_heavy_out Outputs/interval=100'
+      cli_args = 'Executioner/dt=1e-5 Outputs/file_base=nonad_verification_heavy_out Outputs/time_step_interval=100'
       max_parallel = 1
       allow_test_objects = true
       detail = 'in isolation (i.e. without a full displacement solve), and match with code-to-code comparison with a large set of input parameters not using AD.'
@@ -248,7 +248,7 @@
       csvdiff = 'ad_verification_heavy_out.csv'
       heavy = true
       max_time = 500
-      cli_args = 'Executioner/dt=1e-5 Outputs/file_base=ad_verification_heavy_out Outputs/interval=100'
+      cli_args = 'Executioner/dt=1e-5 Outputs/file_base=ad_verification_heavy_out Outputs/time_step_interval=100'
       max_parallel = 1
       allow_test_objects = true
       detail = 'in isolation (i.e. without a full displacement solve), and match with code-to-code comparison with a large set of input parameters using AD.'

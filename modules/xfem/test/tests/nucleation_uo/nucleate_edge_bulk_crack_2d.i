@@ -56,7 +56,7 @@
     bottom_left = '-2.21 0.89 0'
     top_right = '-1.79 1.01 0'
     boundary_new = top_mid_left_ss
-    boundaries_old = top
+    included_boundaries = top
   []
   [top_mid_ss]
     type = SideSetsFromBoundingBoxGenerator
@@ -64,7 +64,7 @@
     bottom_left = '-0.21 0.89 0'
     top_right = '0.21 1.01 0'
     boundary_new = top_mid_ss
-    boundaries_old = top
+    included_boundaries = top
   []
   [top_mid_right_ss]
     type = SideSetsFromBoundingBoxGenerator
@@ -72,7 +72,7 @@
     bottom_left = '1.79 0.89 0'
     top_right = '2.21 1.01 0'
     boundary_new = top_mid_right_ss
-    boundaries_old = top
+    included_boundaries = top
   []
 
   [nucleation_strip]

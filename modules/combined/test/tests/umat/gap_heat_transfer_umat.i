@@ -129,7 +129,7 @@
   [temp_dependent_elasticity_tensor]
     type = CompositeElasticityTensor
     block = '1 2'
-    args = temp
+    coupled_variables = temp
     tensors = 'base'
     weights = 'prefactor_material'
   []

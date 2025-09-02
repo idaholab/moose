@@ -199,7 +199,7 @@ P_out = 2.0e5 # Pa
   [DP_Planar_mean]
     type = ParsedPostprocessor
     pp_names = 'Pin_Planar_Mean Pout_Planar_Mean'
-    function = 'Pin_Planar_Mean - Pout_Planar_Mean'
+    expression = 'Pin_Planar_Mean - Pout_Planar_Mean'
   []
   [DP_SubchannelDelta]
     type = SubChannelDelta

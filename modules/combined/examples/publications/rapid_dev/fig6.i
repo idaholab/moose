@@ -247,7 +247,7 @@
     gi_name   = g1
     eta_i     = eta1
     wi        = 1.0
-    args      = 'c1 c2 c3 eta2 eta3'
+    coupled_variables = 'c1 c2 c3 eta2 eta3'
   [../]
   [./ACBulkC1]
     type = KKSMultiACBulkC
@@ -256,7 +256,7 @@
     hj_names  = 'h1 h2 h3'
     cj_names  = 'c1 c2 c3'
     eta_i     = eta1
-    args      = 'eta2 eta3'
+    coupled_variables = 'eta2 eta3'
   [../]
   [./ACInterface1]
     type = ACInterface
@@ -283,7 +283,7 @@
     gi_name   = g2
     eta_i     = eta2
     wi        = 1.0
-    args      = 'c1 c2 c3 eta1 eta3'
+    coupled_variables = 'c1 c2 c3 eta1 eta3'
   [../]
   [./ACBulkC2]
     type = KKSMultiACBulkC
@@ -292,7 +292,7 @@
     hj_names  = 'h1 h2 h3'
     cj_names  = 'c1 c2 c3'
     eta_i     = eta2
-    args      = 'eta1 eta3'
+    coupled_variables = 'eta1 eta3'
   [../]
   [./ACInterface2]
     type = ACInterface
@@ -321,7 +321,7 @@
     eta_i     = eta1
     wi        = 1.0
     mob_name  = 1
-    args      = 'c1 c2 c3 eta2 eta3'
+    coupled_variables = 'c1 c2 c3 eta2 eta3'
   [../]
   [./mult_ACBulkC_1]
     type = KKSMultiACBulkC
@@ -330,7 +330,7 @@
     hj_names  = 'h1 h2 h3'
     cj_names  = 'c1 c2 c3'
     eta_i     = eta1
-    args      = 'eta2 eta3'
+    coupled_variables = 'eta2 eta3'
     mob_name  = 1
   [../]
   [./mult_CoupledACint_1]
@@ -349,7 +349,7 @@
     eta_i     = eta2
     wi        = 1.0
     mob_name  = 1
-    args      = 'c1 c2 c3 eta1 eta3'
+    coupled_variables = 'c1 c2 c3 eta1 eta3'
   [../]
   [./mult_ACBulkC_2]
     type = KKSMultiACBulkC
@@ -358,7 +358,7 @@
     hj_names  = 'h1 h2 h3'
     cj_names  = 'c1 c2 c3'
     eta_i     = eta2
-    args      = 'eta1 eta3'
+    coupled_variables = 'eta1 eta3'
     mob_name  = 1
   [../]
   [./mult_CoupledACint_2]
@@ -377,7 +377,7 @@
     eta_i     = eta3
     wi        = 1.0
     mob_name  = 1
-    args      = 'c1 c2 c3 eta1 eta2'
+    coupled_variables = 'c1 c2 c3 eta1 eta2'
   [../]
   [./mult_ACBulkC_3]
     type = KKSMultiACBulkC
@@ -386,7 +386,7 @@
     hj_names  = 'h1 h2 h3'
     cj_names  = 'c1 c2 c3'
     eta_i     = eta3
-    args      = 'eta1 eta2'
+    coupled_variables = 'eta1 eta2'
     mob_name  = 1
   [../]
   [./mult_CoupledACint_3]

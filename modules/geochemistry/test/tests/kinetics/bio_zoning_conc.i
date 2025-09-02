@@ -151,16 +151,16 @@ rate_CH3COO_diffuse = 13.3333E-9 # 4E-6 mol.m^-3.yr^-1 = 4E-9 mol.litre^-1.yr^-1
 [AuxKernels]
   [rate_CH3COO_per_1l_with_source]
     type = ParsedAux
-    args = 'rate_CH3COO_per_1l'
+    coupled_variables = 'rate_CH3COO_per_1l'
     variable = rate_CH3COO_per_1l_with_source
-    function = 'rate_CH3COO_per_1l + ${rate_CH3COO_diffuse}'
+    expression = 'rate_CH3COO_per_1l + ${rate_CH3COO_diffuse}'
     execute_on = 'timestep_begin timestep_end'
   []
   [rate_Ca_per_1l_with_source]
     type = ParsedAux
-    args = 'rate_Ca_per_1l'
+    coupled_variables = 'rate_Ca_per_1l'
     variable = rate_Ca_per_1l_with_source
-    function = 'rate_Ca_per_1l + ${rate_Ca_diffuse}'
+    expression = 'rate_Ca_per_1l + ${rate_Ca_diffuse}'
     execute_on = 'timestep_begin timestep_end'
   []
   [transported_H2O]

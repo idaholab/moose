@@ -19,7 +19,7 @@
     type = ParsedAux
     variable = u
     use_xyzt = true
-    function = 't'
+    expression = 't'
   []
 []
 
