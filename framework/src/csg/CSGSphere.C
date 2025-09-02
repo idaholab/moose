@@ -45,4 +45,11 @@ CSGSphere::evaluateSurfaceEquationAtPoint(const Point & p) const
 
   return dist_sq - Utility::pow<2>(_r);
 }
+
+void CSGSphere::checkRadius() const
+{
+  if (_r <= 0.0)
+    mooseError("Radius of sphere must be positive.");
+}
+
 } // namespace CSG
