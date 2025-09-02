@@ -89,8 +89,6 @@ public:
 
   /// Complex Gridfunctions holding essential constraints from Dirichlet BCs
   std::vector<std::unique_ptr<mfem::ParComplexGridFunction>> _cpx_var_ess_constraints;
-
-
 };
 
 template <class FormType>

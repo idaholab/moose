@@ -124,7 +124,6 @@ private:
   using mfem::Operator::RecoverFEMSolution;
 
 protected:
-
   /// Set trial variable names from subset of coupled variables that have an associated test variable.
   virtual void SetTrialVariableNames();
 
@@ -378,7 +377,6 @@ protected:
 
   /// Set trial variable names from subset of coupled variables that have an associated test variable.
   virtual void SetTrialVariableNames() override;
-
 };
 
 } // namespace Moose::MFEM
