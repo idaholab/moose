@@ -145,8 +145,6 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
     // Create auxiliary gridfunctions for storing essential constraints from Dirichlet conditions
     _var_ess_constraints.emplace_back(
         std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));
-    _dvardt_ess_constraints.emplace_back(
-        std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));
   }
 
   // Store pointers to FESpaces of all coupled variables
@@ -343,22 +341,20 @@ EquationSystem::ApplyEssVals(const mfem::Vector &w, const mfem::Array<int> & con
 }
 
 void
-EquationSystem::Mult(const mfem::Vector & x, mfem::Vector & residual) const
+EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
 {
-  mfem::BlockVector block_x;
-  block_x.Update(*_block_true_offsets);
-  block_x = dynamic_cast<mfem::BlockVector&>(const_cast<mfem::Vector&>(x));
+  const_cast<EquationSystem*>(this)->CopyVec(sol,_trueBlockSol);
   
   for (int i = 0; i < _trial_var_names.size(); i++)
   {
     auto & trial_var_name = _trial_var_names.at(i);
-    ApplyEssVals(*(_var_ess_constraints.at(i)), _ess_tdof_lists.at(i), block_x.GetBlock(i));
-    _gfuncs->Get(trial_var_name)->Distribute(&(block_x.GetBlock(i)));
+    ApplyEssVals(*(_var_ess_constraints.at(i)), _ess_tdof_lists.at(i), _trueBlockSol.GetBlock(i));
+    _gfuncs->Get(trial_var_name)->Distribute(&(_trueBlockSol.GetBlock(i)));
   }
   UpdateJacobian();
-  const_cast<EquationSystem*>(this)->FormLinearSystem(_jacobian,  block_x, _trueBlockRHS);
-  _jacobian->Mult(block_x, residual);
-  x.HostRead();
+  const_cast<EquationSystem*>(this)->FormLinearSystem(_jacobian,  _trueBlockSol, _trueBlockRHS);
+  _jacobian->Mult(_trueBlockSol, residual);
+  sol.HostRead();
   residual.HostRead();
 }
 
@@ -382,24 +378,6 @@ TimeDependentEquationSystem::UpdateEssDerivativeVals(const mfem::real_t & dt, co
     *(_var_ess_constraints.at(i)) /= dt;
   }
 };
-
-void
-TimeDependentEquationSystem::Mult(const mfem::Vector & dXdt, mfem::Vector & residual) const
-{
-  const_cast<TimeDependentEquationSystem*>(this)->CopyVec(dXdt,_trueBlockdXdt);
-  
-  for (int i = 0; i < _trial_var_names.size(); i++)
-  {
-    auto & trial_var_name = _trial_var_names.at(i);
-    ApplyEssVals(*(_var_ess_constraints.at(i)), _ess_tdof_lists.at(i), _trueBlockdXdt.GetBlock(i));
-    _gfuncs->Get(trial_var_name)->Distribute(&(_trueBlockdXdt.GetBlock(i)));
-  }
-  UpdateJacobian();
-  const_cast<TimeDependentEquationSystem*>(this)->FormLinearSystem(_jacobian,  _trueBlockdXdt, _trueBlockRHS);
-  _jacobian->Mult(_trueBlockdXdt, residual);
-  dXdt.HostRead();
-  residual.HostRead();
-}
 
 void
 EquationSystem::UpdateJacobian() const
@@ -538,7 +516,7 @@ EquationSystem::BuildEquationSystem(Moose::MFEM::GridFunctions & gridfunctions, 
   _gfuncs = &gridfunctions;
   _block_true_offsets = &btoffsets;
   _trueBlockRHS.Update(*_block_true_offsets);
-  _trueBlockdXdt.Update(*_block_true_offsets);
+  _trueBlockSol.Update(*_block_true_offsets);
   BuildBilinearForms();
   BuildMixedBilinearForms();
   BuildLinearForms();

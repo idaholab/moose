@@ -178,7 +178,6 @@ protected:
 
   /// Gridfunctions holding essential constraints from Dirichlet BCs
   std::vector<std::unique_ptr<mfem::ParGridFunction>> _var_ess_constraints;
-  std::vector<std::unique_ptr<mfem::ParGridFunction>> _dvardt_ess_constraints;
 
   mfem::Array2D<const mfem::HypreParMatrix *> _h_blocks;
 
@@ -197,7 +196,7 @@ protected:
 
   mutable mfem::OperatorHandle _jacobian;
   mutable mfem::Vector _trueRHS;
-  mutable mfem::BlockVector _trueBlockRHS, _trueBlockdXdt;
+  mutable mfem::BlockVector _trueBlockRHS, _trueBlockSol;
 
   Moose::MFEM::GridFunctions * _gfuncs;
   mfem::Array<int> * _block_true_offsets;
@@ -329,9 +328,6 @@ public:
                           mfem::BlockVector & trueRHS) override;
 
   void UpdateEssDerivativeVals(const mfem::real_t & dt, const mfem::Vector & x_old);
-  
-  /// Compute residual y = Mu
-  void Mult(const mfem::Vector & u, mfem::Vector & residual) const override;
 
 protected:
   /// Coefficient for timestep scaling
