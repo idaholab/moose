@@ -97,10 +97,11 @@ private:
   /// Disallowed inherited method
   using mfem::Operator::RecoverFEMSolution;
 
+protected:
+
   /// Set trial variable names from subset of coupled variables that have an associated test variable.
   virtual void SetTrialVariableNames();
 
-protected:
   /// Deletes the HypreParMatrix associated with any pointer stored in _h_blocks,
   /// and then proceeds to delete all dynamically allocated memory for _h_blocks
   /// itself, resetting all dimensions to zero.
@@ -312,11 +313,10 @@ protected:
   NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> _td_kernels_map;
   /// Container to store contributions to weak form of the form (F du/dt, v)
   NamedFieldsMap<mfem::ParBilinearForm> _td_blfs;
-};
 
-private:
   /// Set trial variable names from subset of coupled variables that have an associated test variable.
   virtual void SetTrialVariableNames() override;
+
 };
 
 } // namespace Moose::MFEM

@@ -7,30 +7,44 @@ namespace Moose::MFEM
 {
 
 void
-ComplexEquationSystem::Init(GridFunctions & /*gridfunctions*/,
+ComplexEquationSystem::Init(GridFunctions & gridfunctions,
                             ComplexGridFunctions & cpx_gridfunctions,
                             const FESpaces & /*fespaces*/,
                             mfem::AssemblyLevel assembly_level)
 {
   _assembly_level = assembly_level;
 
+  if (gridfunctions.size())
+    mooseError("Mixing real and complex variables is currently not supported.");
+
   for (auto & test_var_name : _test_var_names)
   {
     if (!cpx_gridfunctions.Has(test_var_name))
     {
-      MFEM_ABORT("Test variable " << test_var_name
-                                  << " requested by equation system during initialisation was "
-                                     "not found in gridfunctions");
+      mooseError("MFEM complex variable ",
+                 test_var_name,
+                 " requested by equation system during initialisation was "
+                 "not found in gridfunctions");
     }
-    // Store pointers to variable FESpaces
+    // Store pointers to test FESpaces
     _test_pfespaces.push_back(cpx_gridfunctions.Get(test_var_name)->ParFESpace());
-    // Create auxiliary gridfunctions for applying Dirichlet conditions
-    _cxs.emplace_back(std::make_unique<mfem::ParComplexGridFunction>(
-        cpx_gridfunctions.Get(test_var_name)->ParFESpace()));
-    _cdxdts.emplace_back(std::make_unique<mfem::ParComplexGridFunction>(
-        cpx_gridfunctions.Get(test_var_name)->ParFESpace()));
-    _cpx_trial_variables.Register(test_var_name, cpx_gridfunctions.GetShared(test_var_name));
+    // Create auxiliary gridfunctions for storing essential constraints from Dirichlet conditions
+    _cpx_var_ess_constraints.emplace_back(
+        std::make_unique<mfem::ParComplexGridFunction>(cpx_gridfunctions.Get(test_var_name)->ParFESpace()));
   }
+
+  // Store pointers to FESpaces of all coupled variables
+  for (auto & coupled_var_name : _coupled_var_names)
+    _coupled_pfespaces.push_back(cpx_gridfunctions.Get(coupled_var_name)->ParFESpace());
+
+  // Extract which coupled variables are to be trivially eliminated and which are trial variables
+  SetTrialVariableNames();
+
+  // Store pointers to coupled variable ComplexGridFunctions that are to be eliminated prior to forming the
+  // jacobian
+  for (auto & eliminated_var_name : _eliminated_var_names)
+    _cpx_eliminated_variables.Register(eliminated_var_name,
+                                   cpx_gridfunctions.GetShared(eliminated_var_name));
 }
 
 void
@@ -98,19 +112,13 @@ ComplexEquationSystem::ApplyEssentialBCs()
 
     // Set default value of gridfunction used in essential BC. Values
     // overwritten in applyEssentialBCs
-    mfem::ParComplexGridFunction & trial_gf(*(_cxs.at(i)));
-    mfem::ParComplexGridFunction & trial_gf_time_derivatives(*(_cdxdts.at(i)));
-
+    mfem::ParComplexGridFunction & trial_gf(*(_cpx_var_ess_constraints.at(i)));
     auto * const pmesh = _test_pfespaces.at(i)->GetParMesh();
-
     mooseAssert(pmesh, "parallel mesh is null");
-    trial_gf = 0.0;
-    trial_gf_time_derivatives = 0.0;
 
     auto bcs = _cpx_essential_bc_map.GetRef(test_var_name);
     mfem::Array<int> global_ess_markers(pmesh->bdr_attributes.Max());
     global_ess_markers = 0;
-
     for (auto & bc : bcs)
     {
       bc->ApplyBC(trial_gf);
@@ -129,7 +137,7 @@ void
 ComplexEquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
 {
   AddTestVariableNameIfMissing(kernel->getTestVariableName());
-  AddTrialVariableNameIfMissing(kernel->getTrialVariableName());
+  AddCoupledVariableNameIfMissing(kernel->getTrialVariableName());
   auto trial_var_name = kernel->getTrialVariableName();
   auto test_var_name = kernel->getTestVariableName();
 
@@ -177,7 +185,7 @@ void
 ComplexEquationSystem::AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> bc)
 {
   AddTestVariableNameIfMissing(bc->getTestVariableName());
-  AddTrialVariableNameIfMissing(bc->getTrialVariableName());
+  AddCoupledVariableNameIfMissing(bc->getTrialVariableName());
   auto trial_var_name = bc->getTrialVariableName();
   auto test_var_name = bc->getTestVariableName();
 
@@ -246,7 +254,7 @@ ComplexEquationSystem::FormSystem(mfem::OperatorHandle & op,
   mfem::BlockVector aux_x, aux_rhs;
   mfem::OperatorPtr aux_a;
 
-  slf->FormLinearSystem(_ess_tdof_lists.at(0), *(_cxs.at(0)), *clf, aux_a, aux_x, aux_rhs);
+  slf->FormLinearSystem(_ess_tdof_lists.at(0), *(_cpx_var_ess_constraints.at(0)), *clf, aux_a, aux_x, aux_rhs);
 
   trueX.GetBlock(0) = aux_x;
   trueRHS.GetBlock(0) = aux_rhs;
@@ -275,7 +283,7 @@ ComplexEquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
     auto clf = _clfs.Get(test_var_name);
     mfem::Vector aux_x, aux_rhs;
     mfem::OperatorHandle aux_a;
-    slf->FormLinearSystem(_ess_tdof_lists.at(i), *(_cxs.at(i)), *clf, aux_a, aux_x, aux_rhs);
+    slf->FormLinearSystem(_ess_tdof_lists.at(i), *(_cpx_var_ess_constraints.at(i)), *clf, aux_a, aux_x, aux_rhs);
     _h_blocks(i, i) = aux_a.As<mfem::ComplexHypreParMatrix>()->GetSystemMatrix();
 
     trueX.GetBlock(i) = aux_x;
