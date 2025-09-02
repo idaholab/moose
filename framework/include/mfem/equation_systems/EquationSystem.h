@@ -93,8 +93,6 @@ public:
 
   void CopyVec(const mfem::Vector & x, mfem::Vector & y){ y = x;}
 
-  void UpdateEssDerivativeVals(const mfem::real_t & dt, const mfem::Vector & x_old);
-
   std::vector<mfem::Array<int>> _ess_tdof_lists;
 
   const std::vector<std::string> & TrialVarNames() const { return _trial_var_names; }
@@ -329,6 +327,8 @@ public:
   virtual void FormSystem(mfem::OperatorHandle & op,
                           mfem::BlockVector & truedXdt,
                           mfem::BlockVector & trueRHS) override;
+
+  void UpdateEssDerivativeVals(const mfem::real_t & dt, const mfem::Vector & x_old);
   
   /// Compute residual y = Mu
   void Mult(const mfem::Vector & u, mfem::Vector & residual) const override;
