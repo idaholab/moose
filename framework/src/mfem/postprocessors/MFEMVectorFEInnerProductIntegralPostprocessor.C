@@ -42,11 +42,6 @@ MFEMVectorFEInnerProductIntegralPostprocessor::MFEMVectorFEInnerProductIntegralP
     _scaled_dual_var_coef(_scalar_coef, _dual_var_coef),
     _subdomain_integrator(_primal_var.ParFESpace())
 {
-}
-
-void
-MFEMVectorFEInnerProductIntegralPostprocessor::initialize()
-{
   if (isSubdomainRestricted())
   {
     _subdomain_integrator.AddDomainIntegrator(
