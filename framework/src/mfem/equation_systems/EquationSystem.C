@@ -704,13 +704,13 @@ TimeDependentEquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
     // }
     mfem::Vector aux_x, aux_rhs;
     // Update solution values on Dirichlet values to be in terms of du/dt instead of u
-    mfem::Vector bc_x = *(_var_ess_constraints.at(i).get());
-    bc_x -= *_eliminated_variables.Get(test_var_name);
-    bc_x /= _dt_coef.constant;
+    //mfem::Vector bc_x = *(_var_ess_constraints.at(i).get());
+    //bc_x -= *_eliminated_variables.Get(test_var_name);
+    //bc_x /= _dt_coef.constant;
 
     // Form linear system for operator acting on vector of du/dt
     mfem::HypreParMatrix * aux_a = new mfem::HypreParMatrix;
-    td_blf->FormLinearSystem(_ess_tdof_lists.at(i), bc_x, *lf, *aux_a, aux_x, aux_rhs);
+    td_blf->FormLinearSystem(_ess_tdof_lists.at(i), *(_dvardt_ess_constraints.at(i)), *lf, *aux_a, aux_x, aux_rhs);
     _h_blocks(i, i) = aux_a;
     truedXdt.GetBlock(i) = aux_x;
     trueRHS.GetBlock(i) = aux_rhs;
@@ -742,13 +742,13 @@ TimeDependentEquationSystem::FormSystem(mfem::OperatorHandle & op,
   // }
   mfem::Vector aux_x, aux_rhs;
   // Update solution values on Dirichlet values to be in terms of du/dt instead of u
-  mfem::Vector bc_x = *(_var_ess_constraints.at(0).get());
-  bc_x -= *_eliminated_variables.Get(test_var_name);
-  bc_x /= _dt_coef.constant;
+  //mfem::Vector bc_x = *(_var_ess_constraints.at(0).get());
+  //bc_x -= *_eliminated_variables.Get(test_var_name);
+  //bc_x /= _dt_coef.constant;
 
   // Form linear system for operator acting on vector of du/dt
   mfem::OperatorPtr aux_a;
-  td_blf->FormLinearSystem(_ess_tdof_lists.at(0), bc_x, *lf, aux_a, aux_x, aux_rhs);
+  td_blf->FormLinearSystem(_ess_tdof_lists.at(0), *(_dvardt_ess_constraints.at(0)), *lf, aux_a, aux_x, aux_rhs);
 
   truedXdt.GetBlock(0) = aux_x;
   trueRHS.GetBlock(0) = aux_rhs;
