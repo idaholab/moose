@@ -1,0 +1,27 @@
+[Tests]
+  issues = '#30655'
+  design = 'interfaces/TaggingInterface.md'
+
+  [petsc_gpu]
+    requirement = 'The Kokkos system shall support the ability to leverage PETSc GPU computing capabilities with'
+    [tag_vector_pjfnk]
+      type = 'Exodiff'
+      input = 'kokkos_2d_diffusion_tag_vector.i'
+      cli_args = 'Executioner/solve_type=PJFNK'
+      exodiff = 'kokkos_2d_diffusion_tag_vector_out.e'
+      detail = 'tagged vectors and PJFNK,'
+      capabilities = 'kokkos'
+      compute_devices = 'cuda'
+      abs_zero = 1e-8
+    []
+    [tag_vector_newton]
+      type = 'Exodiff'
+      input = 'kokkos_2d_diffusion_tag_vector.i'
+      exodiff = 'kokkos_2d_diffusion_tag_vector_out.e'
+      detail = 'tagged vectors and Newton.'
+      capabilities = 'kokkos'
+      compute_devices = 'cuda'
+      prereq = 'petsc_gpu/tag_vector_pjfnk'
+    []
+  []
+[]
