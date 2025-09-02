@@ -70,8 +70,8 @@ GrainGrowthAction::validParams()
                         "The mobility is a function of any MOOSE variable (if "
                         "this is set to false, L must be constant over the "
                         "entire domain!)");
-  params.addCoupledVar("args", "Vector of nonlinear variable arguments that L depends on");
-  params.deprecateCoupledVar("args", "coupled_variables", "02/09/2024");
+  params.addCoupledVar("coupled_variables",
+                       "Vector of nonlinear variable arguments that L depends on");
 
   params.addParam<bool>("implicit", true, "Whether kernels are implicit or not");
   params.addParam<bool>(

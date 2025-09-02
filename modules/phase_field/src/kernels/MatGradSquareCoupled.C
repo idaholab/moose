@@ -17,8 +17,7 @@ MatGradSquareCoupled::validParams()
   InputParameters params = Kernel::validParams();
   params.addClassDescription("Gradient square of a coupled variable.");
   params.addCoupledVar("elec_potential", "Electric potential");
-  params.addCoupledVar("args", "Vector of variable arguments to prefactor");
-  params.deprecateCoupledVar("args", "coupled_variables", "02/27/2024");
+  params.addCoupledVar("coupled_variables", "Vector of variable arguments to prefactor");
   params.addParam<MaterialPropertyName>(
       "prefactor",
       "prefactor",

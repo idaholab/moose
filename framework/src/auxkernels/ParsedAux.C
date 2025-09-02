@@ -20,10 +20,8 @@ ParsedAux::validParams()
       "Sets a field variable value to the evaluation of a parsed expression.");
 
   params.addRequiredCustomTypeParam<std::string>(
-      "function", "FunctionExpression", "Parsed function expression to compute");
-  params.deprecateParam("function", "expression", "02/07/2024");
-  params.addCoupledVar("args", "Vector of coupled variable names");
-  params.deprecateCoupledVar("args", "coupled_variables", "02/07/2024");
+      "expression", "FunctionExpression", "Parsed function expression to compute");
+  params.addCoupledVar("coupled_variables", "Vector of coupled variable names");
 
   params.addParam<std::vector<MaterialPropertyName>>(
       "material_properties", {}, "Material properties (Real-valued) in the expression");
