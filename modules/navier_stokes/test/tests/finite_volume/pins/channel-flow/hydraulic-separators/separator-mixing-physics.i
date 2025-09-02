@@ -101,14 +101,14 @@ cp=5.5
         # Boundary conditions
         inlet_boundaries = 'left'
         momentum_inlet_types = 'fixed-velocity'
-        momentum_inlet_function = '0.1 0'
+        momentum_inlet_functors = '0.1 0'
 
         wall_boundaries = 'top bottom'
         momentum_wall_types = 'slip slip'
 
         outlet_boundaries = 'right'
         momentum_outlet_types = 'fixed-pressure'
-        pressure_function = '0.4'
+        pressure_functors = '0.4'
 
         hydraulic_separator_sidesets = 'separator-1 separator-2'
       []
@@ -124,10 +124,10 @@ cp=5.5
 
         # Boundary conditions
         energy_inlet_types = 'fixed-temperature'
-        energy_inlet_function = 300.0
+        energy_inlet_functors = 300.0
 
         energy_wall_types = 'heatflux heatflux'
-        energy_wall_function = '0 0'
+        energy_wall_functors = '0 0'
 
         # Heat source
         external_heat_source = heating

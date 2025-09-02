@@ -56,7 +56,7 @@ temp_ref = '${fparse hot_temp / 2.}'
       initial_temperature = 0.0
 
       energy_inlet_types = 'heatflux'
-      energy_inlet_function = '0'
+      energy_inlet_functors = '0'
 
       energy_wall_types = 'fixed-temperature fixed-temperature heatflux'
       energy_wall_functors = '${hot_temp} 0 0'
