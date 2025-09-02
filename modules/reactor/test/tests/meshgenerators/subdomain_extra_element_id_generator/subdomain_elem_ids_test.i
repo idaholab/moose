@@ -26,7 +26,7 @@
                    2 9 10 11;
                    0 8 1 2
                  '
-    default_extra_element_ids = '-1 0 0'
+    default_extra_element_ids = '0 12 13'
   []
 []
 
