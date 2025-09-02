@@ -130,29 +130,29 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
                      mfem::AssemblyLevel assembly_level)
 {
   _assembly_level = assembly_level;
+  
+  // Extract which coupled variables are to be trivially eliminated and which are trial variables
+  SetTrialVariableNames();
 
-  for (auto & test_var_name : _test_var_names)
+  for (auto & trial_var_name : _trial_var_names)
   {
-    if (!gridfunctions.Has(test_var_name))
+    if (!gridfunctions.Has(trial_var_name))
     {
       mooseError("MFEM variable ",
-                 test_var_name,
+                 trial_var_name,
                  " requested by equation system during initialisation was "
                  "not found in gridfunctions");
     }
     // Store pointers to test FESpaces
-    _test_pfespaces.push_back(gridfunctions.Get(test_var_name)->ParFESpace());
+    _test_pfespaces.push_back(gridfunctions.Get(trial_var_name)->ParFESpace());
     // Create auxiliary gridfunctions for storing essential constraints from Dirichlet conditions
     _var_ess_constraints.emplace_back(
-        std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));
+        std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(trial_var_name)->ParFESpace()));
   }
 
   // Store pointers to FESpaces of all coupled variables
   for (auto & coupled_var_name : _coupled_var_names)
     _coupled_pfespaces.push_back(gridfunctions.Get(coupled_var_name)->ParFESpace());
-
-  // Extract which coupled variables are to be trivially eliminated and which are trial variables
-  SetTrialVariableNames();
 
   // Store pointers to coupled variable GridFunctions that are to be eliminated prior to forming the
   // jacobian
