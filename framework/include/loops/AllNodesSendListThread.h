@@ -20,8 +20,8 @@ template <typename T>
 class NumericVector;
 }
 
-class AllNodesSendListThread
-  : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
+class AllNodesSendListThread final
+  : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator, AllNodesSendListThread>
 {
 public:
   AllNodesSendListThread(FEProblemBase & fe_problem,
@@ -31,7 +31,7 @@ public:
 
   AllNodesSendListThread(AllNodesSendListThread & x, Threads::split split);
 
-  virtual void onNode(ConstNodeRange::const_iterator & nd) override;
+  void onNode(ConstNodeRange::const_iterator & nd);
 
   void join(const AllNodesSendListThread & y);
 

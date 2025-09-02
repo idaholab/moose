@@ -17,8 +17,10 @@
 // Forward declarations
 class FEProblemBase;
 
-class ComputeBoundaryInitialConditionThread
-  : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
+class ComputeBoundaryInitialConditionThread final
+  : public ThreadedNodeLoop<ConstBndNodeRange,
+                            ConstBndNodeRange::const_iterator,
+                            ComputeBoundaryInitialConditionThread>
 {
 public:
   // Set IC on all variables

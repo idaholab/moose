@@ -20,8 +20,9 @@ class MooseObjectWarehouse;
 class NodalDamper;
 class NonlinearSystemBase;
 
-class ComputeNodalDampingThread
-  : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
+class ComputeNodalDampingThread final : public ThreadedNodeLoop<ConstNodeRange,
+                                                                ConstNodeRange::const_iterator,
+                                                                ComputeNodalDampingThread>
 {
 public:
   ComputeNodalDampingThread(FEProblemBase & feproblem, NonlinearSystemBase & nl);
@@ -31,16 +32,16 @@ public:
 
   virtual ~ComputeNodalDampingThread();
 
-  virtual void onNode(ConstNodeRange::const_iterator & node_it) override;
+  void onNode(ConstNodeRange::const_iterator & node_it);
 
   void join(const ComputeNodalDampingThread & y);
 
   Real damping();
 
-protected:
   /// Print information about the loop, mostly order of execution of objects
-  void printGeneralExecutionInformation() const override;
+  void printGeneralExecutionInformation() const;
 
+protected:
   Real _damping;
   NonlinearSystemBase & _nl;
   const MooseObjectWarehouse<NodalDamper> & _nodal_dampers;

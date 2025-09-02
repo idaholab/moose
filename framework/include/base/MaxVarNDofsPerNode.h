@@ -15,7 +15,11 @@
 
 class SolverSystem;
 
-class MaxVarNDofsPerNode : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
+/**
+ * Computes the maximum number of DoFs on any node for all variables
+ */
+class MaxVarNDofsPerNode final
+  : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator, MaxVarNDofsPerNode>
 {
 public:
   MaxVarNDofsPerNode(FEProblemBase & feproblem, SolverSystem & sys);
@@ -25,7 +29,7 @@ public:
 
   virtual ~MaxVarNDofsPerNode();
 
-  virtual void onNode(ConstNodeRange::const_iterator & node_it) override;
+  virtual void onNode(ConstNodeRange::const_iterator & node_it);
 
   void join(const MaxVarNDofsPerNode &);
 

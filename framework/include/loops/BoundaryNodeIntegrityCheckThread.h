@@ -21,8 +21,10 @@ class MooseObjectTagWarehouse;
 template <typename>
 class ExecuteMooseObjectWarehouse;
 
-class BoundaryNodeIntegrityCheckThread
-  : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
+class BoundaryNodeIntegrityCheckThread final
+  : public ThreadedNodeLoop<ConstBndNodeRange,
+                            ConstBndNodeRange::const_iterator,
+                            BoundaryNodeIntegrityCheckThread>
 {
 public:
   BoundaryNodeIntegrityCheckThread(FEProblemBase & fe_problem, const TheWarehouse::Query & query);
@@ -30,7 +32,7 @@ public:
   // Splitting Constructor
   BoundaryNodeIntegrityCheckThread(BoundaryNodeIntegrityCheckThread & x, Threads::split split);
 
-  virtual void onNode(ConstBndNodeRange::const_iterator & node_it) override;
+  void onNode(ConstBndNodeRange::const_iterator & node_it);
 
   void join(const BoundaryNodeIntegrityCheckThread & /*y*/);
 
