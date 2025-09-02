@@ -1,6 +1,6 @@
 [Tests]
   issues = '#30655'
-  design = 'syntax/Materials/index.md'
+  design = 'KokkosMaterials/index.md'
 
   [var_coupling]
     type = 'Exodiff'

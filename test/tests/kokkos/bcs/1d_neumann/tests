@@ -1,6 +1,6 @@
 [Tests]
   issues = '#30655'
-  design = 'bcs/NeumannBC.md'
+  design = 'KokkosNeumannBC.md'
 
   [test]
     type = 'Exodiff'
