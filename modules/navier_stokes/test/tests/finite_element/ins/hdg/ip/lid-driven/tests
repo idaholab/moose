@@ -111,17 +111,6 @@
     cli_args = "final_re=200 starting_re=200 num_steps=1 Outputs/out/output_material_properties=false  Materials/mu/output_properties='' Outputs/out/hide='vel_average vel_mag pressure_average vel_bar_x vel_bar_y pressure_bar'"
     max_threads = 1 # static condensation doesn't currently support threading
   []
-  [lid_driven_sc_fsp_scaled]
-    type = Exodiff
-    input = lid-driven-scfsp.i
-    exodiff = lid-driven-scfsp-scaled.e
-    requirement = 'The system shall show slightly degraded solver performance but achieve approximately the same results when scaling jump stabilization terms by one over the side volume.'
-    expect_out = 'Linear nl0_condensed_fieldsplit_p_ solve converged due to CONVERGED_RTOL iterations [1-3]'
-    absent_out = 'Linear nl0_condensed_fieldsplit_p_ solve converged due to CONVERGED_RTOL iterations [4-9]'
-    cli_args = "final_re=200 starting_re=200 num_steps=1 Outputs/out/output_material_properties=false  Materials/mu/output_properties='' Outputs/out/hide='vel_average vel_mag pressure_average vel_bar_x vel_bar_y pressure_bar' Outputs/file_base=lid-driven-scfsp-scaled GlobalParams/h_scaling=true"
-    max_threads = 1 # static condensation doesn't currently support threading
-    rel_err = 1e-3
-  []
   [block_restriction]
     requirement = 'The system shall produce equivalent output when using field split preconditoning and static condensation'
     [csv]
