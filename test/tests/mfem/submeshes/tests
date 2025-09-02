@@ -70,5 +70,16 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
+  []
+  [MFEMDomainSubMeshBoundary]
+    design = 'syntax/MFEM/ClosedCoilMagnetostatic.md'
+    issues = '#31404'
+    type = CSVDiff
+    input = hphi_magnetodynamic.i
+    csvdiff = 'OutputData/HPhiMagnetodynamicClosedCoilCSV.csv'    
+    requirement = 'MOOSE shall have the ability to apply boundary conditions on boundaries of embedded volumetric subdomains.'
+    capabilities = 'mfem'
+    compute_devices = 'cpu cuda'
+    recover = false
   []  
 []
