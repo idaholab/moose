@@ -42,7 +42,7 @@ MFEMCurlAux::MFEMCurlAux(const InputParameters & parameters)
 void
 MFEMCurlAux::execute()
 {
-  _curl.AddMult(_source_var, _result_var, _scale_factor);
+  _curl.AddMult(_source_var, _result_var = 0, _scale_factor);
 }
 
 #endif
