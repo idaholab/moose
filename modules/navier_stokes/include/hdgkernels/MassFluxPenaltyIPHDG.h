@@ -47,8 +47,6 @@ protected:
   const MooseArray<std::vector<Real>> & _vel_y_face_phi;
   const unsigned short _comp;
   const Real _gamma;
-  /// Whether to scale by 1/h
-  const bool _h_scaling;
 
   std::vector<Real> _residuals;
   std::vector<ADReal> _ad_residuals;

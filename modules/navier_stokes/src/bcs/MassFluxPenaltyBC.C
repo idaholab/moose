@@ -25,7 +25,6 @@ MassFluxPenaltyBC::validParams()
                              "velocity variable in one component of the momentum equations.");
   params.addRequiredParam<FunctionName>("dirichlet_value",
                                         "The velocity Dirichlet value on the boundary");
-  params.addParam<bool>("h_scaling", false, "Whether to scale by 1/h");
   return params;
 }
 
@@ -36,8 +35,7 @@ MassFluxPenaltyBC::MassFluxPenaltyBC(const InputParameters & parameters)
     _comp(getParam<unsigned short>("component")),
     _matrix_only(getParam<bool>("matrix_only")),
     _gamma(getParam<Real>("gamma")),
-    _dirichlet_func(isParamValid("dirichlet_value") ? &getFunction("dirichlet_value") : nullptr),
-    _h_scaling(getParam<bool>("h_scaling"))
+    _dirichlet_func(isParamValid("dirichlet_value") ? &getFunction("dirichlet_value") : nullptr)
 {
   if (_mesh.dimension() > 2)
     mooseError("This class only supports 2D simulations at this time");
@@ -57,8 +55,5 @@ MassFluxPenaltyBC::computeQpResidual()
   if (_dirichlet_func)
     soln_jump -= _dirichlet_func->vectorValue(_t, _q_point[_qp]);
 
-  auto coeff = _gamma;
-  if (_h_scaling)
-    coeff /= _current_side_volume;
-  return coeff * soln_jump * _normals[_qp] * _test[_i][_qp] * _normals[_qp](_comp);
+  return _gamma * soln_jump * _normals[_qp] * _test[_i][_qp] * _normals[_qp](_comp);
 }

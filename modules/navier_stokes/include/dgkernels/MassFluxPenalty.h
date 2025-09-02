@@ -37,6 +37,4 @@ protected:
   const bool _matrix_only;
   /// Stabilization magnitude parameter
   const Real _gamma;
-  /// Whether to scale by 1/h
-  const bool _h_scaling;
 };
