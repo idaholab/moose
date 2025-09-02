@@ -674,7 +674,7 @@ TriSubChannel1PhaseProblem::computeAddedHeatPin(unsigned int i_ch, unsigned int 
 }
 
 Real
-TriSubChannel1PhaseProblem::getSubChannelWidth(unsigned int i_ch)
+TriSubChannel1PhaseProblem::getSubChannelPeripheralDuctWidth(unsigned int i_ch)
 {
   auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
   if (subch_type == EChannelType::EDGE || subch_type == EChannelType::CORNER)
@@ -686,9 +686,7 @@ TriSubChannel1PhaseProblem::getSubChannelWidth(unsigned int i_ch)
     return width;
   }
   else
-  {
-    mooseError(name(), "Not a perimetric subchannel ");
-  }
+    mooseError("Channel is not a perimetric subchannel ");
 }
 
 void

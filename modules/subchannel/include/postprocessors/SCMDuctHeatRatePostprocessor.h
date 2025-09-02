@@ -13,14 +13,14 @@
 #include "SubChannelMesh.h"
 
 /**
- * Calculates the total power [W] that goes into the coolant from the fuel pins based on
- * the variable q_prime
+ * Calculates the total heat flow $[W]$ that goes into the coolant through the duct based on
+ * the variable duct_heat_flux
  */
-class SCMDuctPowerPostprocessor : public GeneralPostprocessor
+class SCMDuctHeatRatePostprocessor : public GeneralPostprocessor
 {
 public:
   static InputParameters validParams();
-  SCMDuctPowerPostprocessor(const InputParameters & params);
+  SCMDuctHeatRatePostprocessor(const InputParameters & params);
   virtual void initialize() override {}
   virtual void execute() override;
   virtual void finalize() override {}

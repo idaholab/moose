@@ -20,8 +20,9 @@ InputParameters
 SCMTHPowerPostprocessor::validParams()
 {
   InputParameters params = GeneralPostprocessor::validParams();
-  params.addClassDescription("Calculates the power that goes into the coolant considering the "
-                             "thermal-hydraulic balance of inlet and outlet.");
+  params.addClassDescription(
+      "Calculates the total power of the subchannel assembly $[W]$ via the "
+      "thermal-hydraulic enthalpy flow rate balance between inlet and outlet.");
   return params;
 }
 

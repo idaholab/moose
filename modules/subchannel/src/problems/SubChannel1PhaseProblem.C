@@ -1875,6 +1875,7 @@ SubChannel1PhaseProblem::petscSnesSolver(int iblock,
 Real
 SubChannel1PhaseProblem::computeAddedHeatDuct(unsigned int i_ch, unsigned int iz)
 {
+  mooseAssert(iz > 0, "Trapezoidal rule requires starting at index 1 at least");
   if (_duct_mesh_exist)
   {
     auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
@@ -1887,7 +1888,7 @@ SubChannel1PhaseProblem::computeAddedHeatDuct(unsigned int i_ch, unsigned int iz
       auto * node_out_duct = _subchannel_mesh.getDuctNodeFromChannel(node_out_chan);
       auto heat_rate_in = (*_duct_heat_flux_soln)(node_in_duct);
       auto heat_rate_out = (*_duct_heat_flux_soln)(node_out_duct);
-      auto width = getSubChannelWidth(i_ch);
+      auto width = getSubChannelPeripheralDuctWidth(i_ch);
       return 0.5 * (heat_rate_in + heat_rate_out) * dz * width;
     }
     else
@@ -2678,10 +2679,10 @@ SubChannel1PhaseProblem::externalSolve()
       auto k = _fp->k_from_p_T((*_P_soln)(node_chan) + _P_out, (*_T_soln)(node_chan));
       auto cp = _fp->cp_from_p_T((*_P_soln)(node_chan) + _P_out, (*_T_soln)(node_chan));
       auto Pr = (*_mu_soln)(node_chan)*cp / k;
+      /// FIXME - model assumes HTC calculation via Dittus-Boelter correlation
       auto Nu = 0.023 * std::pow(Re, 0.8) * std::pow(Pr, 0.4);
       auto hw = Nu * k / Dh_i;
-      auto T_chan = (*_duct_heat_flux_soln)(dn) / (_subchannel_mesh.getPinDiameter() * M_PI * hw) +
-                    (*_T_soln)(node_chan);
+      auto T_chan = (*_duct_heat_flux_soln)(dn) / hw + (*_T_soln)(node_chan);
       _Tduct_soln->set(dn, T_chan);
     }
   }
