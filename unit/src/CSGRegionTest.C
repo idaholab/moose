@@ -80,18 +80,40 @@ TEST(CSGRegionTest, testRegionOperators)
   }
 }
 
-// Tests errors are caught with using wrong region type with operators
-TEST(CSGRegionTest, testRegionEmptyError)
+// Tests errors are caught with using wrong region types
+TEST(CSGRegionTest, testRegionErrors)
 {
-  // empty region (initialized only)
-  CSGRegion empty1;
-  CSGRegion empty2;
+  CSGPlane surf1("s1", 1.0, 0.0, 0.0, 1.0);
+  CSGPlane surf2("s2", 1.0, 0.0, 0.0, 2.0);
+  auto reg1 = +surf1;
+  auto reg2 = -surf2;
+  CSGRegion empty;
+
   // expect error if trying to union or intersect empty region(s)
-  Moose::UnitUtils::assertThrows(
-      [&empty1, &empty2]() { empty1 & empty2; },
-      "Region operation INTERSECTION cannot be performed on an empty region");
-  Moose::UnitUtils::assertThrows([&empty1, &empty2]() { empty1 | empty2; },
-                                 "Region operation UNION cannot be performed on an empty region");
+  {
+    Moose::UnitUtils::assertThrows(
+        [&empty, &reg1]() { empty & reg1; },
+        "Region operation INTERSECTION cannot be performed on an empty region.");
+    Moose::UnitUtils::assertThrows(
+        [&empty, &reg1]() { reg1 | empty; },
+        "Region operation UNION cannot be performed on an empty region.");
+  }
+  // expect error if wrong number of regions are called with the different region types
+  {
+    Moose::UnitUtils::assertThrows([&reg1, &reg2]() { CSGRegion(reg1, reg2, "HALFSPACE"); },
+                                   "Region type HALFSPACE is not supported for two regions.");
+    Moose::UnitUtils::assertThrows([&reg1, &reg2]() { CSGRegion(reg1, reg2, "COMPLEMENT"); },
+                                   "Region type COMPLEMENT is not supported for two regions.");
+    Moose::UnitUtils::assertThrows([&reg1, &reg2]() { CSGRegion(reg1, reg2, "EMPTY"); },
+                                   "Region type EMPTY is not supported for two regions.");
+    Moose::UnitUtils::assertThrows([&reg1]() { CSGRegion(reg1, "HALFSPACE"); },
+                                   "Region type HALFSPACE is not supported for a single region.");
+    Moose::UnitUtils::assertThrows([&reg1]() { CSGRegion(reg1, "UNION"); },
+                                   "Region type UNION is not supported for a single region.");
+    Moose::UnitUtils::assertThrows(
+        [&reg1]() { CSGRegion(reg1, "INTERSECTION"); },
+        "Region type INTERSECTION is not supported for a single region.");
+  }
 }
 
 // Tests stripRegionString function
