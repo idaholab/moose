@@ -125,10 +125,15 @@ EquationSystem::AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc)
 
 void
 EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
+                     ComplexGridFunctions & cpx_gridfunctions,
                      const Moose::MFEM::FESpaces & /*fespaces*/,
                      mfem::AssemblyLevel assembly_level)
 {
   _assembly_level = assembly_level;
+
+  if (cpx_gridfunctions.size())
+    mooseError("Complex variables have been created but the executioner numeric type has not been "
+               "set to complex. Please set Executioner/numeric_type = complex.");
 
   for (auto & test_var_name : _test_var_names)
   {
@@ -364,37 +369,6 @@ EquationSystem::RecoverFEMSolution(mfem::BlockVector & trueX,
   else
   {
     mooseError("No gridfunctions provided to recover solution from the equation system.");
-  }
-}
-
-void
-EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
-                     Moose::MFEM::ComplexGridFunctions & cpx_gridfunctions,
-                     const Moose::MFEM::FESpaces & /*fespaces*/,
-                     mfem::AssemblyLevel assembly_level)
-{
-  _assembly_level = assembly_level;
-
-  if (cpx_gridfunctions.size())
-    mooseError("Complex variables have been created but the executioner numeric type has not been "
-               "set to complex. Please set Executioner/numeric_type = complex.");
-
-  for (auto & test_var_name : _test_var_names)
-  {
-    if (!gridfunctions.Has(test_var_name))
-    {
-      MFEM_ABORT("Test variable " << test_var_name
-                                  << " requested by equation system during initialisation was "
-                                     "not found in gridfunctions");
-    }
-    // Store pointers to variable FESpaces
-    _test_pfespaces.push_back(gridfunctions.Get(test_var_name)->ParFESpace());
-    // Create auxiliary gridfunctions for applying Dirichlet conditions
-    _xs.emplace_back(
-        std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));
-    _dxdts.emplace_back(
-        std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));
-    _trial_variables.Register(test_var_name, gridfunctions.GetShared(test_var_name));
   }
 }
 
@@ -687,6 +661,10 @@ TimeDependentEquationSystem::FormSystem(mfem::OperatorHandle & op,
   // Update solution values on Dirichlet values to be in terms of du/dt instead of u
   mfem::Vector bc_x = *(_var_ess_constraints.at(0).get());
   bc_x -= *_eliminated_variables.Get(test_var_name);
+  bc_x /= _dt_coef.constant;
+
+  // Form linear system for operator acting on vector of du/dt
+  mfem::OperatorPtr aux_a;
   td_blf->FormLinearSystem(_ess_tdof_lists.at(0), bc_x, *lf, aux_a, aux_x, aux_rhs);
 
   truedXdt.GetBlock(0) = aux_x;
