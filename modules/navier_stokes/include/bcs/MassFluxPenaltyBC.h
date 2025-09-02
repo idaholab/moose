@@ -28,6 +28,7 @@ public:
   virtual void computeResidual() override;
 
 protected:
+  void precalculateResidual() override;
   virtual ADReal computeQpResidual() override;
 
   const ADVariableValue & _vel_x;
@@ -40,4 +41,7 @@ protected:
   /// The velocity value on the boundary. For a Dirichlet boundary this should be the Dirichlet
   /// value. For a Neumann boundary this should be the trace velocity
   const Moose::Functor<ADRealVectorValue> & _face_functor;
+
+  /// Facet characteristic length for correct norm computations
+  Real _hmax;
 };

@@ -46,7 +46,8 @@ MassFluxPenaltyIPHDG::MassFluxPenaltyIPHDG(const InputParameters & parameters)
     _vel_x_face_phi(_vel_x_face_var.phiFace()),
     _vel_y_face_phi(_vel_y_face_var.phiFace()),
     _comp(getParam<unsigned short>("component")),
-    _gamma(getParam<Real>("gamma"))
+    _gamma(getParam<Real>("gamma")),
+    _hmax(0)
 {
   if (_mesh.dimension() > 2)
     mooseError("Only two-dimensional velocity is currently implemented");
@@ -81,6 +82,7 @@ MassFluxPenaltyIPHDG::computeOnSideHelper(std::vector<T> & residuals,
 void
 MassFluxPenaltyIPHDG::computeResidualOnSide()
 {
+  _hmax = _current_side_elem->hmax();
   const auto & var = _comp == 0 ? _vel_x_var : _vel_y_var;
   const auto & face_var = _comp == 0 ? _vel_x_face_var : _vel_y_face_var;
   const auto & test = _comp == 0 ? _vel_x_phi : _vel_y_phi;
@@ -94,6 +96,7 @@ MassFluxPenaltyIPHDG::computeResidualOnSide()
 void
 MassFluxPenaltyIPHDG::computeJacobianOnSide()
 {
+  _hmax = _current_side_elem->hmax();
   const auto & var = _comp == 0 ? _vel_x_var : _vel_y_var;
   const auto & face_var = _comp == 0 ? _vel_x_face_var : _vel_y_face_var;
   const auto & test = _comp == 0 ? _vel_x_phi : _vel_y_phi;
@@ -110,5 +113,5 @@ MassFluxPenaltyIPHDG::computeQpResidualOnSide()
   const ADRealVectorValue soln_jump(
       _vel_x[_qp] - _vel_x_face[_qp], _vel_y[_qp] - _vel_y_face[_qp], 0);
 
-  return _gamma * soln_jump * _normals[_qp] * _normals[_qp](_comp);
+  return _gamma / _hmax * soln_jump * _normals[_qp] * _normals[_qp](_comp);
 }

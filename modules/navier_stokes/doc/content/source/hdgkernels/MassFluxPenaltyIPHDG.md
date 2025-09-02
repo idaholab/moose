@@ -6,10 +6,10 @@ equations the element face term
 
 \begin{equation}
 \label{eq:perturbation}
-\langle \left(u - \bar{u}\right)\cdot\hat{n}, \left(v - \bar{v}\right)\cdot\hat{n}\rangle
+\langle h_F^{-1} \left(u - \bar{u}\right)\cdot\hat{n}, \left(v - \bar{v}\right)\cdot\hat{n}\rangle
 \end{equation}
 
-where $u$ is the primal finite element solution (defined on element interiors), $\bar{u}$ is the facet solution, $v$ are the primal test functions, $\bar{v}$ are the facet test functions, and $\hat{n}$ is the normal vector. The augmented form of the IP-HDG discretized Navier-Stokes equations is algebraically equivalent to
+where $h_F$ is the characteristic size of the facet (equivalent to $h_K$ for a shape-regular mesh), $u$ is the primal finite element solution (defined on element interiors), $\bar{u}$ is the facet solution, $v$ are the primal test functions, $\bar{v}$ are the facet test functions, and $\hat{n}$ is the normal vector. The augmented form of the IP-HDG discretized Navier-Stokes equations is algebraically equivalent to
 
 \begin{equation*}
   \mathbb{A} =

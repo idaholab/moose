@@ -37,10 +37,17 @@ MassFluxPenaltyBC::MassFluxPenaltyBC(const InputParameters & parameters)
     _comp(getParam<unsigned short>("component")),
     _matrix_only(getParam<bool>("matrix_only")),
     _gamma(getParam<Real>("gamma")),
-    _face_functor(getFunctor<ADRealVectorValue>("face_functor"))
+    _face_functor(getFunctor<ADRealVectorValue>("face_functor")),
+    _hmax(0)
 {
   if (_mesh.dimension() > 2)
     mooseError("This class only supports 2D simulations at this time");
+}
+
+void
+MassFluxPenaltyBC::precalculateResidual()
+{
+  _hmax = _current_side_elem->hmax();
 }
 
 void
@@ -58,5 +65,5 @@ MassFluxPenaltyBC::computeQpResidual()
       _face_functor(Moose::ElemSideQpArg{_current_elem, _current_side, _qp, _qrule, _q_point[_qp]},
                     determineState());
 
-  return _gamma * soln_jump * _normals[_qp] * _test[_i][_qp] * _normals[_qp](_comp);
+  return _gamma / _hmax * soln_jump * _normals[_qp] * _test[_i][_qp] * _normals[_qp](_comp);
 }

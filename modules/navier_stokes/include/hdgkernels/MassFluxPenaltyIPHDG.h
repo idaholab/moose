@@ -47,6 +47,8 @@ protected:
   const MooseArray<std::vector<Real>> & _vel_y_face_phi;
   const unsigned short _comp;
   const Real _gamma;
+  /// Facet characteristic length for correct norm computations
+  Real _hmax;
 
   std::vector<Real> _residuals;
   std::vector<ADReal> _ad_residuals;
