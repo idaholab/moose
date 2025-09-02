@@ -1,7 +1,8 @@
 [Tests]
   issues = '#30655'
+
   [lower_bound]
-    design = LowerBoundNodalKernel.md
+    design = 'KokkosLowerBoundNodalKernel.md'
     requirement = 'The Kokkos system shall be able to enforce a lower bound on a variable using nodal NCP, nodal application of resultant forces,'
     [exo]
       input = kokkos_lower_bound.i
@@ -23,7 +24,7 @@
     []
   []
   [upper_bound]
-    design = UpperBoundNodalKernel.md
+    design = 'KokkosUpperBoundNodalKernel.md'
     requirement = 'The Kokkos system shall be able to enforce an upper bound on a variable using nodal NCP, nodal application of resultant forces,'
     [exo]
       input = kokkos_upper_bound.i
@@ -45,7 +46,7 @@
     []
   []
   [upper_and_lower_bound]
-    design = UpperBoundNodalKernel.md
+    design = 'KokkosLowerBoundNodalKernel.md KokkosUpperBoundNodalKernel.md'
     requirement = 'The Kokkos system shall be able to enforce an upper and lower bound on a variable using nodal NCP, nodal application of resultant forces,'
     [exo]
       input = kokkos_upper_and_lower_bound.i

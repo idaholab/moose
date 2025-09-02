@@ -1,6 +1,6 @@
 [Tests]
-  design = 'NodalKernels/index.md'
   issues = '#30655'
+  design = 'KokkosConstantRate.md'
 
   [test]
     type = 'Exodiff'
@@ -8,8 +8,7 @@
     exodiff = 'kokkos_constant_rate_out.e'
     rel_err = 1e-05
     abs_zero = 1e-08
-    requirement = "The Kokkos system shall include ability to include constant contributions to the residual nodes "
-                  "of a finite element mesh."
+    requirement = 'The Kokkos system shall include ability to include constant contributions to the residual nodes of a finite element mesh.'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda'
   []

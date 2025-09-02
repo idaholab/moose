@@ -1,12 +1,12 @@
 [Tests]
   issues = '#30655'
-  design = 'syntax/KokkosBCs/index.md'
+  design = 'KokkosBCs/index.md'
 
   [convective_flux_bc_test]
     type = 'Exodiff'
     input = 'kokkos_convective_flux_bc.i'
     exodiff = 'kokkos_convective_flux_bc_out.e'
-    requirement = "The Kokkos system shall support the ability to create convective flux boundary conditions."
+    requirement = 'The Kokkos system shall support the ability to create convective flux boundary conditions.'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda'
   []
@@ -15,7 +15,7 @@
     type = 'Exodiff'
     input = 'kokkos_vacuum_bc_test.i'
     exodiff = 'kokkos_vacuum_bc_test_out.e'
-    requirement = "The Kokkos system shall support a vacuum boundary condition for neutron diffusion on the boundary."
+    requirement = 'The Kokkos system shall support a vacuum boundary condition for neutron diffusion on the boundary.'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda'
   []
