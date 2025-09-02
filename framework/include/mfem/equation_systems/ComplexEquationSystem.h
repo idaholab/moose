@@ -76,10 +76,6 @@ public:
   NamedFieldsMap<mfem::ParSesquilinearForm> _slfs;
   NamedFieldsMap<mfem::ParComplexLinearForm> _clfs;
 
-  // Complex gridfunctions for setting Dirichlet BCs
-  std::vector<std::unique_ptr<mfem::ParComplexGridFunction>> _cxs;
-  std::vector<std::unique_ptr<mfem::ParComplexGridFunction>> _cdxdts;
-
   // Complex kernels and integrated BCs
   NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>> _cpx_kernels_map;
   NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>>
@@ -88,8 +84,13 @@ public:
   // Complex essential BCs
   NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexEssentialBC>>> _cpx_essential_bc_map;
 
-  // Complex trial variables
-  ComplexGridFunctions _cpx_trial_variables;
+  /// Pointers to coupled variables not part of the reduced EquationSystem.
+  ComplexGridFunctions _cpx_eliminated_variables;
+
+  /// Complex Gridfunctions holding essential constraints from Dirichlet BCs
+  std::vector<std::unique_ptr<mfem::ParComplexGridFunction>> _cpx_var_ess_constraints;
+
+
 };
 
 template <class FormType>
