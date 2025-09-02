@@ -6,7 +6,7 @@
     input = 'kokkos_2d_diffusion_test.i'
     exodiff = 'kokkos_2d_diffusion_test_out.e'
     requirement = 'The Kokkos system shall provide an ability to solve a 2D diffusion problem with Dirichlet boundary conditions.'
-    design = '/DirichletBC.md'
+    design = 'KokkosDiffusion.md KokkosDirichletBC.md'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda'
   []
@@ -16,7 +16,7 @@
     input = 'kokkos_2d_diffusion_neumannbc_test.i'
     exodiff = 'kokkos_2d_diffusion_neumannbc_test_out.e'
     requirement = 'The Kokkos system shall provide an ability to solve a 2D diffusion problem with Neumann boundary conditions.'
-    design = '/NeumannBC.md'
+    design = 'KokkosDiffusion.md KokkosNeumannBC.md'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda'
   []
@@ -26,7 +26,7 @@
     input = 'kokkos_2d_diffusion_bodyforce_test.i'
     exodiff = 'kokkos_2d_diffusion_bodyforce_test_out.e'
     requirement = 'The Kokkos system shall provide an ability to solve a 2D diffusion problem including a volumetric source term.'
-    design = '/BodyForce.md'
+    design = 'KokkosDiffusion.md KokkosBodyForce.md'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda'
   []

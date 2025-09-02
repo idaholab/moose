@@ -1,6 +1,6 @@
 [Tests]
   issues = '#30655'
-  design = '/CoupledTimeDerivative.md'
+  design = 'KokkosCoupledTimeDerivative.md'
 
   [test]
     type = 'Exodiff'

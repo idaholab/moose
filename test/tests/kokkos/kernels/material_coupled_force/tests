@@ -1,6 +1,6 @@
 [Tests]
-  issues = '30655'
-  design = 'MatCoupledForce.md'
+  issues = '#30655'
+  design = 'KokkosMatCoupledForce.md'
 
   [material_coupled_force]
     type = 'Exodiff'
