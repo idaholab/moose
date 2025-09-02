@@ -24,6 +24,9 @@ public:
   KOKKOS_FUNCTION Real coefficient() const;
 
 private:
+  /// Emissivity of the boundary
+  const Real _eps_boundary;
+
   /// Post-processor by which to scale boundary condition
   const Moose::Kokkos::PostprocessorValue _scale_pp;
 };

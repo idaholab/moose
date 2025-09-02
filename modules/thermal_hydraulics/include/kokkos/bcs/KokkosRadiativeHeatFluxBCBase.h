@@ -39,9 +39,6 @@ protected:
 
   /// The temperature of the body irhs
   const Real _tinf;
-
-  /// Emissivity of the boundary
-  const Real _eps_boundary;
 };
 
 template <typename RadiativeHeatFluxBC>
@@ -51,7 +48,6 @@ KokkosRadiativeHeatFluxBCBase<RadiativeHeatFluxBC>::validParams()
   InputParameters params = Moose::Kokkos::IntegratedBC<RadiativeHeatFluxBC>::validParams();
   params.addParam<Real>("stefan_boltzmann_constant", 5.670367e-8, "The Stefan-Boltzmann constant.");
   params.addParam<Real>("Tinfinity", 0, "Temperature of the body in radiative heat transfer.");
-  params.addParam<Real>("boundary_emissivity", 1, "Emissivity of the boundary.");
   params.addClassDescription("Boundary condition for radiative heat flux where temperature and the"
                              "temperature of a body in radiative heat transfer are specified.");
   return params;
@@ -62,8 +58,7 @@ KokkosRadiativeHeatFluxBCBase<RadiativeHeatFluxBC>::KokkosRadiativeHeatFluxBCBas
     const InputParameters & parameters)
   : Moose::Kokkos::IntegratedBC<RadiativeHeatFluxBC>(parameters),
     _sigma_stefan_boltzmann(this->template getParam<Real>("stefan_boltzmann_constant")),
-    _tinf(this->template getParam<Real>("Tinfinity")),
-    _eps_boundary(this->template getParam<Real>("boundary_emissivity"))
+    _tinf(this->template getParam<Real>("Tinfinity"))
 {
 }
 
