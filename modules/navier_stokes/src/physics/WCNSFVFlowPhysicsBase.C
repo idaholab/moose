@@ -55,10 +55,6 @@ WCNSFVFlowPhysicsBase::validParams()
   params.transferParam<bool>(NSFVBase::validParams(), "porous_medium_treatment");
   params.transferParam<MooseFunctorName>(NSFVBase::validParams(), "porosity");
 
-  // New functor boundary conditions
-  params.deprecateParam("momentum_inlet_function", "momentum_inlet_functors", "01/01/2025");
-  params.deprecateParam("pressure_function", "pressure_functors", "01/01/2025");
-
   // Initialization parameters
   params.transferParam<std::vector<FunctionName>>(NSFVBase::validParams(), "initial_velocity");
   params.transferParam<FunctionName>(NSFVBase::validParams(), "initial_pressure");

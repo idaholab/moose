@@ -28,8 +28,7 @@ INSFVTurbulentTemperatureWallFunction::validParams()
   params.addRequiredParam<MooseFunctorName>(NS::cp, "The specific heat at constant pressure.");
   params.addParam<MooseFunctorName>(NS::kappa, "The thermal conductivity.");
   params.addParam<MooseFunctorName>("Pr_t", 0.58, "The turbulent Prandtl number.");
-  params.addParam<MooseFunctorName>("k", "Turbulent kinetic energy functor.");
-  params.deprecateParam("k", NS::TKE, "01/01/2025");
+  params.addParam<MooseFunctorName>(NS::TKE, "Turbulent kinetic energy functor.");
   params.addParam<Real>("C_mu", 0.09, "Coupled turbulent kinetic energy closure.");
   MooseEnum wall_treatment("eq_newton eq_incremental eq_linearized neq", "neq");
   params.addParam<MooseEnum>(
