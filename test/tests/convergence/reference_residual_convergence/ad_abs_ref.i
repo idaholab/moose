@@ -9,11 +9,12 @@
 []
 
 [Problem]
-  extra_tag_vectors = 'absref'
+  extra_tag_residuals = 'absref'
 []
 
 [Variables]
-  [u][]
+  [u]
+  []
   [v]
     scaling = 1e-6
   []
@@ -45,7 +46,7 @@
   [v_neg_force]
     type = ADBodyForce
     variable = v
-    value = ${fparse -1 / 2}
+    value = '${fparse -1 / 2}'
     function = ramp
   []
   [v_force]
@@ -98,7 +99,7 @@
 [Convergence]
   [conv]
     type = ReferenceResidualConvergence
-    reference_vector = 'absref'
+    reference_residual = 'absref'
   []
 []
 

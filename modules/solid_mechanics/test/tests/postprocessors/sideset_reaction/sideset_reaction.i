@@ -3,7 +3,7 @@
 []
 
 [Problem]
-  extra_tag_vectors = 'ref'
+  extra_tag_residuals = 'ref'
 []
 
 [Mesh]
@@ -17,12 +17,12 @@
 []
 
 [Postprocessors]
-  [./react_x]
+  [react_x]
     type = SidesetReaction
     direction = '1 0 0'
     stress_tensor = stress
     boundary = right
-  [../]
+  []
 []
 
 [Physics/SolidMechanics/QuasiStatic]

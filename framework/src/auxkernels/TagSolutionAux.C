@@ -18,8 +18,8 @@ TagSolutionAux::validParams()
   params.addClassDescription("Couple a tag solution vector, and return its dof value");
 
   // see #31357 and #20482
-  params.set<bool>("scaled") = true;
   params.suppressParameter<bool>("scaled");
+  params.suppressParameter<bool>("remove_variable_scaling");
 
   return params;
 }

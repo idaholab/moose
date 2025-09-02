@@ -1,5 +1,5 @@
 [Problem]
-  extra_tag_vectors = zeroed_tag
+  extra_tag_residuals = zeroed_tag
   not_zeroed_tag_vectors = not_zeroed_tag
 []
 

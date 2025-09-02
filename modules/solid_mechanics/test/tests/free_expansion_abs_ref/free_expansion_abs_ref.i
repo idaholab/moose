@@ -4,8 +4,8 @@
 
 [Problem]
   type = ReferenceResidualProblem
-  reference_vector = 'ref'
-  extra_tag_vectors = 'ref'
+  reference_residual = 'ref'
+  extra_tag_residuals = 'ref'
   group_variables = 'disp_x disp_y'
 []
 
@@ -47,13 +47,13 @@
     use_displaced_mesh = false
   []
   [ref_x]
-    type = ReactionForceAux
+    type = TagResidualAux
     variable = 'ref_x'
     vector_tag = 'ref'
     v = 'disp_x'
   []
   [ref_y]
-    type = ReactionForceAux
+    type = TagResidualAux
     variable = 'ref_y'
     vector_tag = 'ref'
     v = 'disp_y'

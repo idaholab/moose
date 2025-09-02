@@ -141,7 +141,7 @@
 
 [Problem]
   kernel_coverage_check = false
-  extra_tag_vectors = 'kernel_residual'
+  extra_tag_residuals = 'kernel_residual'
 []
 
 [AuxVariables]
@@ -153,13 +153,13 @@
 
 [AuxKernels]
   [res_x]
-    type = ReactionForceAux
+    type = TagResidualAux
     variable = res_x
     v = disp_x
     vector_tag = kernel_residual
   []
   [res_y]
-    type = ReactionForceAux
+    type = TagResidualAux
     variable = res_y
     v = disp_y
     vector_tag = kernel_residual

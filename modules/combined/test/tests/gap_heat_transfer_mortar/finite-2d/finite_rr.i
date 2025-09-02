@@ -77,8 +77,8 @@ name = 'finite'
 
 [Problem]
   type = ReferenceResidualProblem
-  reference_vector = 'ref'
-  extra_tag_vectors = 'ref'
+  reference_residual = 'ref'
+  extra_tag_residuals = 'ref'
   converge_on = 'disp_x disp_y temp'
 []
 
@@ -86,12 +86,12 @@ name = 'finite'
   [disp_x]
     order = ${order}
     block = 'plank block'
-    scaling = ${fparse 2.0 / (E_plank + E_block)}
+    scaling = '${fparse 2.0 / (E_plank + E_block)}'
   []
   [disp_y]
     order = ${order}
     block = 'plank block'
-    scaling = ${fparse 2.0 / (E_plank + E_block)}
+    scaling = '${fparse 2.0 / (E_plank + E_block)}'
   []
   [temp]
     order = ${order}

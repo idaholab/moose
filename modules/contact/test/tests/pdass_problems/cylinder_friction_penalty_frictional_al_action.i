@@ -13,7 +13,7 @@
 
 [Problem]
   type = AugmentedLagrangianContactFEProblem
-  extra_tag_vectors = 'ref'
+  extra_tag_residuals = 'ref'
 []
 
 [AuxVariables]

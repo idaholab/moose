@@ -50,7 +50,7 @@ public:
   };
 
   /// Returns the tag ID associated with the reference vector tag ID key
-  TagID referenceVectorTagID(ReferenceVectorTagIDKey) const { return _reference_vector_tag_id; }
+  TagID referenceVectorTagID(ReferenceVectorTagIDKey) const { return _reference_residual_tag_id; }
 
 protected:
   virtual void nonlinearConvergenceSetup() override;
@@ -121,7 +121,7 @@ protected:
   std::vector<Real> _scaling_factors;
 
   /// The vector storing the reference residual values
-  const NumericVector<Number> * _reference_vector;
+  const NumericVector<Number> * _reference_residual;
 
   /// Variables to use for individual variable convergence checks
   std::vector<NonlinearVariableName> _converge_on;
@@ -138,7 +138,7 @@ protected:
   libMesh::FEMNormType _norm_type;
 
   /// The reference vector tag id
-  TagID _reference_vector_tag_id;
+  TagID _reference_residual_tag_id;
 
   bool _initialized;
 };

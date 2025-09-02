@@ -21,7 +21,10 @@ ReferenceResidualInterface::validParams()
   params.addParam<std::vector<AuxVariableName>>(
       "reference_residual_variables",
       "Set of variables that provide reference residuals for relative convergence check");
-  params.addParam<TagName>("reference_vector", "The tag name of the reference residual vector.");
+  params.addDeprecatedParam<TagName>("reference_vector",
+                                     "The tag name of the reference residual vector.",
+                                     "This parameter has been replaced by 'reference_residual'");
+  params.addParam<TagName>("reference_residual", "The tag name of the reference residual vector.");
   params.addParam<Real>("acceptable_multiplier",
                         1.0,
                         "Multiplier applied to relative tolerance for acceptable limit");
@@ -73,7 +76,7 @@ ReferenceResidualInterface::validParams()
 
   params.addParamNamesToGroup("acceptable_iterations acceptable_multiplier",
                               "Acceptable convergence");
-  params.addParamNamesToGroup("reference_vector reference_residual_variables",
+  params.addParamNamesToGroup("reference_vector reference_residual reference_residual_variables",
                               "Reference residual");
   params.addParamNamesToGroup("solution_variables group_variables",
                               "Variables to check for convergence");

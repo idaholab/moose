@@ -26,8 +26,8 @@
 
 [Problem]
   type = ReferenceResidualProblem
-  extra_tag_vectors = 'ref'
-  reference_vector = 'ref'
+  extra_tag_residuals = 'ref'
+  reference_residual = 'ref'
   converge_on = 'disp_x disp_y'
 []
 
@@ -212,8 +212,7 @@
   type = Transient
   solve_type = 'NEWTON'
 
-  petsc_options = '-snes_converged_reason -ksp_converged_reason -pc_svd_monitor '
-                  '-snes_linesearch_monitor'
+  petsc_options = '-snes_converged_reason -ksp_converged_reason -pc_svd_monitor -snes_linesearch_monitor'
   petsc_options_iname = '-pc_type   -pc_factor_shift_type -pc_factor_shift_amount'
   petsc_options_value = 'lu          NONZERO               1e-12'
   line_search = 'none'

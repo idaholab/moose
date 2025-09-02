@@ -38,7 +38,7 @@ mu = 'mu'
 []
 
 [Problem]
-  extra_tag_vectors = 'e_time e_advection e_conduction e_laser e_radiation e_mesh_advection'
+  extra_tag_residuals = 'e_time e_advection e_conduction e_laser e_radiation e_mesh_advection'
 []
 
 [AuxVariables]

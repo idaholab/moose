@@ -9,7 +9,7 @@
 [Problem]
   linear_sys_names = 'u_sys v_sys'
   extra_tag_matrices = 'mat_tag_u; mat_tag_v'
-  extra_tag_vectors = 'vec_tag_u; vec_tag_v'
+  extra_tag_residuals = 'vec_tag_u; vec_tag_v'
 []
 
 [Variables]

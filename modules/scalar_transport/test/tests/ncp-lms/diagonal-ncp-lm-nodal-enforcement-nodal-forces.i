@@ -1,14 +1,14 @@
-l=10
-nx=100
-num_steps=${l}
-dt=1
+l = 10
+nx = 100
+num_steps = ${l}
+dt = 1
 
 [GlobalParams]
   lm_sign_positive = false
 []
 
 [Problem]
-  extra_tag_vectors = 'positive diffusion rest'
+  extra_tag_residuals = 'positive diffusion rest'
 []
 
 [Mesh]

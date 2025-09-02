@@ -27,8 +27,8 @@
 
 [Problem]
   type = ReferenceResidualProblem
-  extra_tag_vectors = 'ref'
-  reference_vector = 'ref'
+  extra_tag_residuals = 'ref'
+  reference_residual = 'ref'
 []
 
 [Variables]

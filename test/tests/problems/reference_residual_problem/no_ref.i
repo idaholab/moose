@@ -6,12 +6,13 @@
 
 [Problem]
   type = ReferenceResidualProblem
-  # reference_vector = 'absref'
-  # extra_tag_vectors = 'absref'
+  # reference_residual = 'absref'
+  # extra_tag_residuals = 'absref'
 []
 
 [Variables]
-  [u][]
+  [u]
+  []
   [v]
     scaling = 1e-6
   []
@@ -43,7 +44,7 @@
   [v_neg_force]
     type = BodyForce
     variable = v
-    value = ${fparse -1 / 2}
+    value = '${fparse -1 / 2}'
     function = ramp
   []
   [v_force]
@@ -92,7 +93,6 @@
     expression = 'u_old + v_exact'
   []
 []
-
 
 [Executioner]
   type = Transient

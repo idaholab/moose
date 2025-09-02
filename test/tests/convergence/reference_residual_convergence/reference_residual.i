@@ -1,4 +1,4 @@
-coef=1
+coef = 1
 
 [Mesh]
   type = GeneratedMesh
@@ -8,12 +8,14 @@ coef=1
 
 [Problem]
   # type = ReferenceResidualProblem
-  extra_tag_vectors = 'ref'
+  extra_tag_residuals = 'ref'
 []
 
 [Variables]
-  [u][]
-  [v][]
+  [u]
+  []
+  [v]
+  []
 []
 
 [Kernels]
@@ -70,7 +72,7 @@ coef=1
 [Convergence]
   [conv]
     type = ReferenceResidualConvergence
-    reference_vector = 'ref'
+    reference_residual = 'ref'
   []
 []
 

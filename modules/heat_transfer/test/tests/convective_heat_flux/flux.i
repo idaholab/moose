@@ -17,47 +17,47 @@
 []
 
 [Problem]
-  extra_tag_vectors = 'bcs'
+  extra_tag_residuals = 'bcs'
 []
 
 [Variables]
-  [./temp]
+  [temp]
     initial_condition = 100.0
-  [../]
+  []
 []
 
 [Kernels]
-  [./heat_conduction]
+  [heat_conduction]
     type = HeatConduction
     variable = temp
     diffusion_coefficient = 10
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = temp
     boundary = left
     value = 100.0
-  [../]
-  [./right]
+  []
+  [right]
     type = ConvectiveHeatFluxBC
     variable = temp
     boundary = right
     T_infinity = 200.0
     heat_transfer_coefficient = 10
     heat_transfer_coefficient_dT = 0
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./right_flux]
+  [right_flux]
     type = SideDiffusiveFluxAverage
     variable = temp
     boundary = right
     diffusivity = 10
-  [../]
+  []
 []
 
 [Executioner]

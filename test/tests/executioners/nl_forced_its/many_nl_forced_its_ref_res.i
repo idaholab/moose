@@ -1,7 +1,7 @@
 [Problem]
   type = ReferenceResidualProblem
-  reference_vector = 'ref'
-  extra_tag_vectors = 'ref'
+  reference_residual = 'ref'
+  extra_tag_residuals = 'ref'
 []
 
 [Mesh]
@@ -10,38 +10,38 @@
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
     extra_vector_tags = ref
-  [../]
-  [./dt]
+  []
+  [dt]
     type = TimeDerivative
     variable = u
     extra_vector_tags = ref
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     preset = false
     boundary = left
     value = -1
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     preset = false
     boundary = right
     value = 1
-  [../]
+  []
 []
 
 [Executioner]

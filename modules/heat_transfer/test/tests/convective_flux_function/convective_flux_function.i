@@ -23,7 +23,7 @@
 []
 
 [Problem]
-  extra_tag_vectors = 'bcs'
+  extra_tag_residuals = 'bcs'
 []
 
 [Variables]
@@ -43,7 +43,7 @@
     variable = flux
     v = temp
     vector_tag = 'bcs'
-    scaled = false
+    remove_variable_scaling = true
   []
 []
 

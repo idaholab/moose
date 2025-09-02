@@ -1,9 +1,9 @@
-Krtt=0.
-Kdt2=1
-Pt2_left=1
-Pt2_right=0
-d_t=1
-l=1
+Krtt = 0.
+Kdt2 = 1
+Pt2_left = 1
+Pt2_right = 0
+d_t = 1
+l = 1
 
 [Mesh]
   type = GeneratedMesh
@@ -14,12 +14,13 @@ l=1
 
 [Problem]
   type = ReferenceResidualProblem
-  extra_tag_vectors = 'ref'
-  reference_vector = ref
+  extra_tag_residuals = 'ref'
+  reference_residual = ref
 []
 
 [Variables]
-  [t][]
+  [t]
+  []
 []
 
 [Kernels]
@@ -100,7 +101,7 @@ l=1
   []
   [domain_averaged_flux]
     type = ScalePostprocessor
-    scaling_factor = ${fparse d_t / l}
+    scaling_factor = '${fparse d_t / l}'
     value = difference
   []
 []

@@ -30,8 +30,8 @@
 
 [Problem]
   type = ReferenceResidualProblem
-  reference_vector = ref
-  extra_tag_vectors = ref
+  reference_residual = ref
+  extra_tag_residuals = ref
 []
 
 [GlobalParams]

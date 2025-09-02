@@ -5,8 +5,8 @@
 
 [Problem]
   type = ReferenceResidualProblem
-  reference_vector = 'ref'
-  extra_tag_vectors = 'ref'
+  reference_residual = 'ref'
+  extra_tag_residuals = 'ref'
 []
 
 [Mesh]
@@ -187,8 +187,7 @@
   solve_type = 'PJFNK'
   petsc_options = '-snes_ksp_ew'
 
-  petsc_options_iname = '-pc_type -snes_linesearch_type -pc_factor_shift_type '
-                        '-pc_factor_shift_amount'
+  petsc_options_iname = '-pc_type -snes_linesearch_type -pc_factor_shift_type -pc_factor_shift_amount'
   petsc_options_value = 'lu       basic                 NONZERO               1e-15'
   line_search = 'none'
   automatic_scaling = true

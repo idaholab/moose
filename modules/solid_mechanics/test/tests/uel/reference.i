@@ -70,7 +70,7 @@
 []
 
 [Problem]
-  extra_tag_vectors = 'kernel_residual'
+  extra_tag_residuals = 'kernel_residual'
 []
 
 [AuxVariables]

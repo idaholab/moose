@@ -40,16 +40,17 @@ ReferenceResidualConvergence::validParams()
 ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters & parameters)
   : DefaultNonlinearConvergence(parameters),
     ReferenceResidualInterface(this),
-    _reference_vector(nullptr),
+    _reference_residual(nullptr),
     _converge_on(getParam<std::vector<NonlinearVariableName>>("converge_on")),
     _zero_ref_type(
         getParam<MooseEnum>("zero_reference_residual_treatment").getEnum<ZeroReferenceType>()),
-    _reference_vector_tag_id(Moose::INVALID_TAG_ID),
+    _reference_residual_tag_id(Moose::INVALID_TAG_ID),
     _initialized(false)
 {
   if (parameters.isParamValid("solution_variables"))
   {
-    if (parameters.isParamValid("reference_vector"))
+    if (parameters.isParamValid("reference_vector") ||
+        parameters.isParamValid("reference_residual"))
       mooseDeprecated("The `solution_variables` parameter is deprecated, has no effect when "
                       "the tagging system is used, and will be removed on January 1, 2020. "
                       "Please simply delete this parameter from your input file.");
@@ -57,18 +58,18 @@ ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters
   }
 
   if (parameters.isParamValid("reference_residual_variables") &&
-      parameters.isParamValid("reference_vector"))
-    mooseError(
-        "You may specify either the `reference_residual_variables` "
-        "or `reference_vector` parameter, not both. `reference_residual_variables` is deprecated "
-        "so we recommend using `reference_vector`");
+      (parameters.isParamValid("reference_vector") ||
+       parameters.isParamValid("reference_residual")))
+    mooseError("You may specify either the `reference_residual_variables` "
+               "or `reference_residual` parameter, not both. `reference_residual_variables` "
+               "is deprecated so we recommend using `reference_residual`");
 
   if (parameters.isParamValid("reference_residual_variables"))
   {
     mooseDeprecated(
         "The save-in method for composing reference residual quantities is deprecated "
         "and will be removed on January 1, 2020. Please use the tagging system instead; "
-        "specifically, please assign a TagName to the `reference_vector` parameter");
+        "specifically, please assign a TagName to the `reference_residual` parameter");
 
     _ref_resid_var_names =
         parameters.get<std::vector<AuxVariableName>>("reference_residual_variables");
@@ -80,17 +81,22 @@ ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters
                  _ref_resid_var_names.size(),
                  ")");
   }
-  else if (parameters.isParamValid("reference_vector"))
+  else if (parameters.isParamValid("reference_vector") ||
+           parameters.isParamValid("reference_residual"))
   {
     if (_fe_problem.numNonlinearSystems() > 1)
       paramError(
           "nl_sys_names",
           "reference residual problem does not currently support multiple nonlinear systems");
-    _reference_vector_tag_id = _fe_problem.getVectorTagID(getParam<TagName>("reference_vector"));
-    _reference_vector = &_fe_problem.getNonlinearSystemBase(0).getVector(_reference_vector_tag_id);
+    _reference_residual_tag_id =
+        parameters.isParamValid("reference_vector")
+            ? _fe_problem.getVectorTagID(getParam<TagName>("reference_vector"))
+            : _fe_problem.getVectorTagID(getParam<TagName>("reference_residual"));
+    _reference_residual =
+        &_fe_problem.getNonlinearSystemBase(0).getVector(_reference_residual_tag_id);
   }
   else
-    mooseInfo("Neither the `reference_residual_variables` nor `reference_vector` parameter is "
+    mooseInfo("Neither the `reference_residual_variables` nor `reference_residual` parameter is "
               "specified, which means that no reference "
               "quantites are set. Because of this, the standard technique of comparing the "
               "norm of the full residual vector with its initial value will be used.");
@@ -125,8 +131,10 @@ ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters
     mooseAssert(false, "This point should not be reached.");
   }
 
-  if (_local_norm && !parameters.isParamValid("reference_vector"))
-    paramError("reference_vector", "If local norm is used, a reference_vector must be provided.");
+  if (_local_norm && !parameters.isParamValid("reference_vector") &&
+      !parameters.isParamValid("reference_residual"))
+    paramError("reference_residual",
+               "If local norm is used, a reference_residual must be provided.");
 }
 
 void
@@ -141,15 +149,15 @@ ReferenceResidualConvergence::initialSetup()
 
   if (_soln_var_names.empty())
   {
-    // If the user provides reference_vector, that implies that they want the
+    // If the user provides reference_residual, that implies that they want the
     // individual variables compared against their reference quantities in the
     // tag vector. The code depends on having _soln_var_names populated,
     // so fill that out if they didn't specify solution_variables.
-    if (_reference_vector)
+    if (_reference_residual)
       for (unsigned int var_num = 0; var_num < s.n_vars(); var_num++)
         _soln_var_names.push_back(s.variable_name(var_num));
 
-    // If they didn't provide reference_vector, that implies that they
+    // If they didn't provide reference_residual, that implies that they
     // want to skip the individual variable comparison, so leave it alone.
   }
   else if (_soln_var_names.size() != s.n_vars())
@@ -237,7 +245,7 @@ ReferenceResidualConvergence::initialSetup()
                  "'.");
   }
 
-  if (!_reference_vector)
+  if (!_reference_residual)
   {
     _ref_resid_vars.clear();
     for (unsigned int i = 0; i < _ref_resid_var_names.size(); ++i)
@@ -329,7 +337,7 @@ ReferenceResidualConvergence::initialSetup()
         _group_soln_var_names[_variable_group_num_index[i]] += " (grouped) ";
     }
 
-    if (!_reference_vector && _group_ref_resid_var_names[_variable_group_num_index[i]].empty())
+    if (!_reference_residual && _group_ref_resid_var_names[_variable_group_num_index[i]].empty())
     {
       _group_ref_resid_var_names[_variable_group_num_index[i]] = _ref_resid_var_names[i];
       if (_use_group_variables && _variable_group_num_index[i] < _group_variables.size())
@@ -337,7 +345,7 @@ ReferenceResidualConvergence::initialSetup()
     }
   }
 
-  if (!_reference_vector)
+  if (!_reference_residual)
   {
     const unsigned int size_soln_vars = _soln_vars.size();
     _scaling_factors.resize(size_soln_vars);
@@ -371,11 +379,11 @@ ReferenceResidualConvergence::updateReferenceResidual()
     const auto group = _variable_group_num_index[i];
     if (_local_norm)
     {
-      mooseAssert(_current_nl_sys.RHS().size() == (*_reference_vector).size(),
+      mooseAssert(_current_nl_sys.RHS().size() == (*_reference_residual).size(),
                   "Sizes of nonlinear RHS and reference vector should be the same.");
-      mooseAssert((*_reference_vector).size(), "Reference vector must be provided.");
+      mooseAssert((*_reference_residual).size(), "Reference vector must be provided.");
       // Add a tiny number to the reference to prevent a divide by zero.
-      auto ref = _reference_vector->clone();
+      auto ref = _reference_residual->clone();
       ref->add(std::numeric_limits<Number>::min());
       auto div = _current_nl_sys.RHS().clone();
       *div /= *ref;
@@ -384,9 +392,9 @@ ReferenceResidualConvergence::updateReferenceResidual()
     else
     {
       resid = Utility::pow<2>(s.calculate_norm(_current_nl_sys.RHS(), _soln_vars[i], _norm_type));
-      if (_reference_vector)
+      if (_reference_residual)
       {
-        const auto ref_resid = s.calculate_norm(*_reference_vector, _soln_vars[i], _norm_type);
+        const auto ref_resid = s.calculate_norm(*_reference_residual, _soln_vars[i], _norm_type);
         _group_ref_resid[group] += Utility::pow<2>(ref_resid);
       }
     }
@@ -395,7 +403,7 @@ ReferenceResidualConvergence::updateReferenceResidual()
     _group_output_resid[group] += resid;
   }
 
-  if (!_reference_vector)
+  if (!_reference_residual)
   {
     for (unsigned int i = 0; i < _ref_resid_vars.size(); ++i)
     {
@@ -434,10 +442,10 @@ ReferenceResidualConvergence::nonlinearConvergenceSetup()
     {
       if (_group_soln_var_names[i].size() > maxwsv)
         maxwsv = _group_soln_var_names[i].size();
-      if (!_reference_vector && _group_ref_resid_var_names[i].size() > maxwrv)
+      if (!_reference_residual && _group_ref_resid_var_names[i].size() > maxwrv)
         maxwrv = _group_ref_resid_var_names[i].size();
     }
-    if (_reference_vector)
+    if (_reference_residual)
       // maxwrv is the width of maxwsv plus the length of "_ref" (e.g. 4)
       maxwrv = maxwsv + 4;
 
@@ -454,7 +462,7 @@ ReferenceResidualConvergence::nonlinearConvergenceSetup()
       if (!_local_norm)
       {
         const auto ref_var_name =
-            _reference_vector ? _group_soln_var_names[i] + "_ref" : _group_ref_resid_var_names[i];
+            _reference_residual ? _group_soln_var_names[i] + "_ref" : _group_ref_resid_var_names[i];
         out << "  " << std::setw(maxwrv + 2) << ref_var_name + ":" << std::setw(8)
             << _group_ref_resid[i] << "  (" << std::setw(8)
             << (_group_ref_resid[i] ? _group_resid[i] / _group_ref_resid[i] : _group_resid[i])

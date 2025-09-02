@@ -50,17 +50,23 @@ TagAuxBase<T>::validParams()
                                "The coupled variable whose components are coupled to AuxVariable");
   params.set<ExecFlagEnum>("execute_on", true) = {EXEC_TIMESTEP_END};
   params.suppressParameter<ExecFlagEnum>("execute_on");
-  params.addParam<bool>(
+  params.addDeprecatedParam<bool>(
       "scaled",
       true,
       "Return value depending on the variable scaling/autoscaling. Set this to false to obtain "
-      "unscaled values with units consistent with the rest of the simulation.");
+      "unscaled values with units consistent with the rest of the simulation.",
+      "This parameter has been replaced by remove_variable_scaling.");
+  params.addParam<bool>(
+      "remove_variable_scaling", false, "If true, the variable scaling will be removed.");
   return params;
 }
 
 template <class T>
 TagAuxBase<T>::TagAuxBase(const InputParameters & parameters)
-  : T(parameters), _scaled(this->template getParam<bool>("scaled"))
+  : T(parameters),
+    _scaled(this->isParamValid("scaled")
+                ? this->template getParam<bool>("scaled")
+                : !this->template getParam<bool>("remove_variable_scaling"))
 {
 }
 

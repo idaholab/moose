@@ -1,4 +1,4 @@
-coef=1
+coef = 1
 
 [Mesh]
   type = GeneratedMesh
@@ -8,13 +8,15 @@ coef=1
 
 [Problem]
   type = ReferenceResidualProblem
-  extra_tag_vectors = 'ref'
-  reference_vector = 'ref'
+  extra_tag_residuals = 'ref'
+  reference_residual = 'ref'
 []
 
 [Variables]
-  [u][]
-  [v][]
+  [u]
+  []
+  [v]
+  []
 []
 
 [Kernels]
@@ -67,7 +69,6 @@ coef=1
     extra_vector_tags = 'ref'
   []
 []
-
 
 [Executioner]
   type = Steady

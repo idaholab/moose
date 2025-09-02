@@ -63,8 +63,8 @@ name = 'finite_rr'
 
 [Problem]
   type = ReferenceResidualProblem
-  extra_tag_vectors = 'ref'
-  reference_vector = 'ref'
+  extra_tag_residuals = 'ref'
+  reference_residual = 'ref'
 []
 
 [Variables]
@@ -84,16 +84,14 @@ name = 'finite_rr'
   [block]
     use_automatic_differentiation = true
     strain = FINITE
-    generate_output = 'stress_xx stress_yy stress_zz vonmises_stress hydrostatic_stress strain_xx '
-                      'strain_yy strain_zz'
+    generate_output = 'stress_xx stress_yy stress_zz vonmises_stress hydrostatic_stress strain_xx strain_yy strain_zz'
     block = 'block'
     extra_vector_tags = 'ref'
   []
   [plank]
     use_automatic_differentiation = true
     strain = FINITE
-    generate_output = 'stress_xx stress_yy stress_zz vonmises_stress hydrostatic_stress strain_xx '
-                      'strain_yy strain_zz'
+    generate_output = 'stress_xx stress_yy stress_zz vonmises_stress hydrostatic_stress strain_xx strain_yy strain_zz'
     block = 'plank'
     eigenstrain_names = 'swell'
     extra_vector_tags = 'ref'

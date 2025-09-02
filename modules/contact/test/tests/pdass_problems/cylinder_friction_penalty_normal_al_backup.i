@@ -27,7 +27,7 @@
 
 [Problem]
   type = AugmentedLagrangianContactFEProblem
-  extra_tag_vectors = 'ref'
+  extra_tag_residuals = 'ref'
   maximum_lagrangian_update_iterations = 1000
 []
 

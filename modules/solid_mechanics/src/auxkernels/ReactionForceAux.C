@@ -20,8 +20,9 @@ ReactionForceAux::validParams()
       "removed from the dof value.");
 
   // see #31357 and #20482
-  params.set<bool>("scaled") = false;
+  params.set<bool>("remove_variable_scaling") = true;
   params.suppressParameter<bool>("scaled");
+  params.suppressParameter<bool>("remove_variable_scaling");
 
   return params;
 }

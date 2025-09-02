@@ -277,18 +277,32 @@ FEProblemBase::validParams()
                                        "<path>/<filebase> or <path>/LATEST to "
                                        "grab the latest file available)");
 
-  params.addParam<std::vector<std::vector<TagName>>>(
+  params.addDeprecatedParam<std::vector<std::vector<TagName>>>(
       "extra_tag_vectors",
       {},
       "Extra vectors to add to the system that can be filled by objects which compute residuals "
       "and Jacobians (Kernels, BCs, etc.) by setting tags on them. The outer index is for which "
-      "nonlinear system the extra tag vectors should be added for");
-
+      "nonlinear system the extra tag vectors should be added for",
+      "This parameter has been replaced by 'extra_tag_residuals'");
   params.addParam<std::vector<std::vector<TagName>>>(
+      "extra_tag_residuals",
+      {},
+      "Extra residual vectors to add to the system that can be filled by objects which compute "
+      "residuals and Jacobians (Kernels, BCs, etc.) by setting tags on them. The outer index is "
+      "for which nonlinear system the extra tag vectors should be added for");
+
+  params.addDeprecatedParam<std::vector<std::vector<TagName>>>(
       "not_zeroed_tag_vectors",
       {},
-      "Extra vector tags which the sytem will not zero when other vector tags are zeroed. "
-      "The outer index is for which nonlinear system the extra tag vectors should be added for");
+      "Extra vector tags which the system will not zero when other vector tags are zeroed. "
+      "The outer index is for which nonlinear system the extra tag vectors should be added for",
+      "This parameter has been replaced by 'not_zeroed_tag_residuals'");
+  params.addParam<std::vector<std::vector<TagName>>>(
+      "not_zeroed_tag_residuals",
+      {},
+      "Extra residual vector tags which the system will not zero when other vector tags are "
+      "zeroed. The outer index is for which nonlinear system the extra tag vectors should be added "
+      "for");
 
   params.addParam<std::vector<std::vector<TagName>>>(
       "extra_tag_matrices",
@@ -376,9 +390,9 @@ FEProblemBase::validParams()
   params.addParamNamesToGroup(
       "null_space_dimension transpose_null_space_dimension near_null_space_dimension",
       "Null space removal");
-  params.addParamNamesToGroup(
-      "extra_tag_vectors extra_tag_matrices extra_tag_solutions not_zeroed_tag_vectors",
-      "Contribution to tagged field data");
+  params.addParamNamesToGroup("extra_tag_vectors extra_tag_residuals extra_tag_matrices "
+                              "extra_tag_solutions not_zeroed_tag_vectors not_zeroed_tag_residuals",
+                              "Contribution to tagged field data");
   params.addParamNamesToGroup(
       "allow_invalid_solution show_invalid_solution_console immediately_print_invalid_solution",
       "Solution validity control");
@@ -654,7 +668,9 @@ void
 FEProblemBase::createTagVectors()
 {
   // add vectors and their tags to system
-  auto & vectors = getParam<std::vector<std::vector<TagName>>>("extra_tag_vectors");
+  const auto & vectors = isParamValid("extra_tag_vectors")
+                             ? getParam<std::vector<std::vector<TagName>>>("extra_tag_vectors")
+                             : getParam<std::vector<std::vector<TagName>>>("extra_tag_residuals");
   for (const auto sys_num : index_range(vectors))
     for (auto & vector : vectors[sys_num])
     {
@@ -662,7 +678,10 @@ FEProblemBase::createTagVectors()
       _solver_systems[sys_num]->addVector(tag, false, libMesh::GHOSTED);
     }
 
-  auto & not_zeroed_vectors = getParam<std::vector<std::vector<TagName>>>("not_zeroed_tag_vectors");
+  const auto & not_zeroed_vectors =
+      isParamValid("not_zeroed_tag_vectors")
+          ? getParam<std::vector<std::vector<TagName>>>("not_zeroed_tag_vectors")
+          : getParam<std::vector<std::vector<TagName>>>("not_zeroed_tag_residuals");
   for (const auto sys_num : index_range(not_zeroed_vectors))
     for (auto & vector : not_zeroed_vectors[sys_num])
     {
