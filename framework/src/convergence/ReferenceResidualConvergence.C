@@ -94,6 +94,12 @@ ReferenceResidualConvergence::ReferenceResidualConvergence(const InputParameters
             : _fe_problem.getVectorTagID(getParam<TagName>("reference_residual"));
     _reference_residual =
         &_fe_problem.getNonlinearSystemBase(0).getVector(_reference_residual_tag_id);
+
+    // Check the vector tag type
+    const auto tag_type = _subproblem.vectorTagType(_reference_residual_tag_id);
+    if (tag_type != Moose::VECTOR_TAG_RESIDUAL)
+      paramError("reference_residual",
+                 "The provided reference residual tag does not correspond to a residual.");
   }
   else
     mooseInfo("Neither the `reference_residual_variables` nor `reference_residual` parameter is "
