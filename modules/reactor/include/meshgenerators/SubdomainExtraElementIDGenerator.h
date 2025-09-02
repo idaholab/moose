@@ -24,4 +24,10 @@ protected:
   std::unique_ptr<MeshBase> & _input;
   /// subdomains that are to be assigned with element IDs
   const std::vector<SubdomainName> & _subdomain_names;
+  /// The names for each ID from input
+  const std::vector<std::string> & _id_names;
+  /// The IDs from input
+  const std::vector<std::vector<dof_id_type>> & _ids;
+  /// The default IDs from input, if any
+  const std::vector<dof_id_type> * const _defaults;
 };

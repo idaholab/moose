@@ -22,7 +22,7 @@
     [same_subdomain]
       type = RunException
       input = 'subdomain_elem_ids_test.i'
-      cli_args = "Mesh/subdomain_ids/subdomains='1 1'"
+      cli_args = "Mesh/subdomain_ids/subdomains='1 1 1 1'"
       expect_err = 'Cannot have subdomain with ID 1 listed more than once!'
       detail = 'a subdomain is listed more than once when assigning extra element IDs'
     []
@@ -50,7 +50,7 @@
     [diff_size3]
       type = RunException
       input = 'subdomain_elem_ids_test.i'
-      cli_args = "Mesh/subdomain_ids/default_extra_element_ids='-1 0 '"
+      cli_args = "Mesh/subdomain_ids/default_extra_element_ids='0 0 '"
       expect_err = 'Inconsistent vector size for default element IDs'
       detail = 'the default extra element IDs arent specified for each extra element id'
     []
