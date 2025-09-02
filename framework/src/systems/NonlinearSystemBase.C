@@ -3846,8 +3846,9 @@ NonlinearSystemBase::needBoundaryMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid
 
   // Because MortarConstraints do not inherit from BoundaryRestrictable, they are not sorted
   // by boundary in the MooseObjectWarehouse. So for now, we return true for all boundaries
-  if (_constraints.hasActiveObjects(tid))
-    for (const auto & ct : _constraints.getActiveObjects(tid))
+  // Note: constraints are not threaded at this time
+  if (_constraints.hasActiveObjects(/*tid*/ 0))
+    for (const auto & ct : _constraints.getActiveObjects(/*tid*/ 0))
       if (std::dynamic_pointer_cast<MaterialPropertyInterface>(ct) &&
           std::dynamic_pointer_cast<MaterialPropertyInterface>(ct)->getMaterialPropertyCalled())
         return true;
