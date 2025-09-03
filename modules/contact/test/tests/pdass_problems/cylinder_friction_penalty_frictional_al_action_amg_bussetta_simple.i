@@ -55,7 +55,7 @@
   strain = FINITE
   add_variables = true
   save_in = 'saved_x saved_y'
-  extra_vector_tags = 'ref'
+  extra_residual_tags = 'ref'
   block = '1 2 3 4 5 6 7'
   generate_output = 'stress_xx stress_yy stress_xy'
 []

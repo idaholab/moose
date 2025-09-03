@@ -30,12 +30,22 @@ CavityPressureAction::validParams()
   params.addParam<bool>("use_automatic_differentiation",
                         false,
                         "Flag to use automatic differentiation (AD) objects when possible");
-  params.addParam<std::vector<TagName>>("extra_vector_tags",
-                                        "The extra tags for the vectors this Kernel should fill");
+  params.addDeprecatedParam<std::vector<TagName>>(
+      "extra_vector_tags",
+      "The tag names for extra vectors that residual data should be saved into",
+      "This parameter has been renamed to 'extra_residual_tags'");
   params.addParam<std::vector<TagName>>(
+      "extra_residual_tags",
+      "The tag names for extra residuals that residual data should be saved into");
+  params.addDeprecatedParam<std::vector<TagName>>(
       "absolute_value_vector_tags",
-      "The tags for the vectors this residual object should fill with the "
-      "absolute value of the residual contribution");
+      "The tags for the vectors this residual object should fill with the absolute value of the "
+      "residual contribution",
+      "This parameter has been renamed to 'absolute_value_residual_tags'");
+  params.addParam<std::vector<TagName>>(
+      "absolute_value_residual_tags",
+      "The tags for the residuals this residual object should fill with the absolute value of the "
+      "residual contribution");
   params.addClassDescription("Action to setup cavity pressure boundary condition");
   return params;
 }

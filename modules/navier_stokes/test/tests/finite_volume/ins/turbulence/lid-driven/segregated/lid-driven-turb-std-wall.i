@@ -132,7 +132,7 @@ pressure_tag = "pressure_grad"
     variable = vel_x
     momentum_component = 'x'
     pressure = pressure
-    extra_vector_tags = ${pressure_tag}
+    extra_residual_tags = ${pressure_tag}
   []
   [v_advection]
     type = INSFVMomentumAdvection
@@ -161,7 +161,7 @@ pressure_tag = "pressure_grad"
     variable = vel_y
     momentum_component = 'y'
     pressure = pressure
-    extra_vector_tags = ${pressure_tag}
+    extra_residual_tags = ${pressure_tag}
   []
   [p_diffusion]
     type = FVAnisotropicDiffusion
@@ -385,7 +385,7 @@ pressure_tag = "pressure_grad"
     type = LineValueSampler
     start_point = '${fparse 0.499 * side_length} ${fparse 0.01 * side_length} 0'
     end_point = '${fparse 0.499 * side_length} ${fparse 0.99 * side_length} 0'
-    num_points =  ${Mesh/gen/ny}
+    num_points = ${Mesh/gen/ny}
     variable = 'vel_x vel_y pressure TKE TKED'
     sort_by = 'y'
     execute_on = 'timestep_end'

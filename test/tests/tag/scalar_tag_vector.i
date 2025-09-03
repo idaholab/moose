@@ -11,83 +11,83 @@
 []
 
 [Variables]
-  [./n]
+  [n]
     family = SCALAR
     order = FIRST
     initial_condition = 1
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./tag_vector_var1]
+  [tag_vector_var1]
     family = SCALAR
     order = FIRST
-  [../]
-  [./tag_vector_var2]
+  []
+  [tag_vector_var2]
     family = SCALAR
     order = FIRST
-  [../]
-  [./tag_matrix_var2]
+  []
+  [tag_matrix_var2]
     family = SCALAR
     order = FIRST
-  [../]
+  []
 []
 
 [ScalarKernels]
-  [./dn]
+  [dn]
     type = ODETimeDerivative
     variable = n
     extra_matrix_tags = 'mat_tag1 mat_tag2'
-    extra_vector_tags = 'vec_tag1'
-  [../]
+    extra_residual_tags = 'vec_tag1'
+  []
 
-  [./ode1]
+  [ode1]
     type = ParsedODEKernel
     expression = '-n'
     variable = n
     extra_matrix_tags = 'mat_tag1'
-    extra_vector_tags = 'vec_tag1'
-  [../]
+    extra_residual_tags = 'vec_tag1'
+  []
 
-  [./ode2]
+  [ode2]
     type = ParsedODEKernel
     expression = '-n'
     variable = n
-    vector_tags = 'vec_tag2'
+    residual_tags = 'vec_tag2'
     matrix_tags = 'mat_tag2'
-  [../]
+  []
 []
 
 [AuxScalarKernels]
-  [./TagVectorAux]
+  [TagVectorAux]
     type = ScalarTagVectorAux
     variable = tag_vector_var1
     v = n
-    vector_tag  = vec_tag1
-  [../]
+    vector_tag = vec_tag1
+  []
 
-  [./TagVectorAux2]
+  [TagVectorAux2]
     type = ScalarTagVectorAux
     variable = tag_vector_var2
     v = n
-    vector_tag  = vec_tag2
-  [../]
+    vector_tag = vec_tag2
+  []
 
-  [./TagMatrixAux2]
+  [TagMatrixAux2]
     type = ScalarTagMatrixAux
     variable = tag_matrix_var2
     v = n
-    matrix_tag  = mat_tag2
-  [../]
+    matrix_tag = mat_tag2
+  []
 []
 
 [Problem]
   type = TagTestProblem
-  test_tag_vectors =  'time nontime residual vec_tag1 vec_tag2'
+  test_tag_vectors = 'time nontime residual vec_tag1 vec_tag2'
   test_tag_matrices = 'mat_tag1 mat_tag2'
 
   extra_tag_matrices = 'mat_tag1 mat_tag2'
-  extra_tag_vectors  = 'vec_tag1 vec_tag2'
+  extra_tag_vectors = 'vec_tag1 vec_tag2'
 []
 
 [Executioner]
@@ -102,14 +102,14 @@
 []
 
 [Functions]
-  [./exact_solution]
+  [exact_solution]
     type = ParsedFunction
     expression = exp(t)
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./error_n]
+  [error_n]
     # Post processor that computes the difference between the computed
     # and exact solutions.  For the exact solution used here, the
     # error at the final time should converge at O(dt^p), where p is
@@ -117,7 +117,7 @@
     type = ScalarL2Error
     variable = n
     function = exact_solution
-  [../]
+  []
 []
 
 [Outputs]

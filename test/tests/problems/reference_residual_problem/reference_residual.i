@@ -59,14 +59,14 @@ coef = 1
     boundary = 'left right'
     coef = ${coef}
     variable = u
-    extra_vector_tags = 'ref'
+    extra_residual_tags = 'ref'
   []
   [v]
     type = RobinBC
     boundary = 'left right'
     coef = 1
     variable = v
-    extra_vector_tags = 'ref'
+    extra_residual_tags = 'ref'
   []
 []
 

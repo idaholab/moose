@@ -30,7 +30,7 @@
   []
   [rhs]
     type = CoefReaction
-    extra_vector_tags = 'eigen'
+    extra_residual_tags = 'eigen'
     coefficient = -0.01
     variable = u
   []

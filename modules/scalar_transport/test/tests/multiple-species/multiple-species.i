@@ -36,24 +36,24 @@ d_t = 1
   [time_h]
     type = TimeDerivative
     variable = h
-    extra_vector_tags = ref
+    extra_residual_tags = ref
   []
   [diff_h]
     type = MatDiffusion
     variable = h
     diffusivity = ${d_h}
-    extra_vector_tags = ref
+    extra_residual_tags = ref
   []
   [time_t]
     type = TimeDerivative
     variable = t
-    extra_vector_tags = ref
+    extra_residual_tags = ref
   []
   [diff_t]
     type = MatDiffusion
     variable = t
     diffusivity = ${d_t}
-    extra_vector_tags = ref
+    extra_residual_tags = ref
   []
 []
 

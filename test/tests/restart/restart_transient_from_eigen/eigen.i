@@ -14,7 +14,7 @@
   []
   [rhs]
     type = Reaction
-    extra_vector_tags = 'eigen'
+    extra_residual_tags = 'eigen'
     variable = u
     rate = -1
   []

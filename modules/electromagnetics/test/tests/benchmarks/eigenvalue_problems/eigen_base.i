@@ -30,7 +30,6 @@
 #     Expected analytic eigenvalue = 67.108864
 #     EM Module calculated eigenvalue = 68.007802
 
-
 [Mesh]
   [fmg]
     type = FileMeshGenerator
@@ -65,7 +64,7 @@
     type = CoefReaction
     coefficient = -1
     variable = potential
-    extra_vector_tags = 'eigen'
+    extra_residual_tags = 'eigen'
   []
 []
 

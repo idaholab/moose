@@ -41,7 +41,7 @@
     type = LinearFVSource
     variable = u
     source_density = 60.0
-    vector_tags = 'rhs vec_tag_u'
+    residual_tags = 'rhs vec_tag_u'
   []
   [diffusion_v]
     type = LinearFVDiffusion
@@ -58,7 +58,7 @@
     type = LinearFVSource
     variable = v
     source_density = 20.0
-    vector_tags = 'rhs vec_tag_v'
+    residual_tags = 'rhs vec_tag_v'
   []
 []
 
@@ -139,7 +139,7 @@
     type = TagSolutionAux
     variable = soln_u
     v = u
-    vector_tag = 'solution'
+    solution_tag = 'solution'
   []
   [rhs_u_dof]
     type = TagVectorDofValueAux
@@ -151,7 +151,7 @@
     type = TagResidualAux
     variable = rhs_u
     v = u
-    vector_tag = 'rhs'
+    residual_tag = 'rhs'
   []
   [extra_vector_u_dof]
     type = TagVectorDofValueAux
@@ -160,10 +160,10 @@
     vector_tag = 'vec_tag_u'
   []
   [extra_vector_u]
-    type = TagSolutionAux
+    type = TagResidualAux
     variable = vector_tag_u
     v = u
-    vector_tag = 'vec_tag_u'
+    residual_tag = 'vec_tag_u'
   []
   [extra_matrix_u]
     type = TagMatrixAux
@@ -181,7 +181,7 @@
     type = TagSolutionAux
     variable = soln_v
     v = v
-    vector_tag = 'solution'
+    solution_tag = 'solution'
   []
   [rhs_v_dof]
     type = TagVectorDofValueAux
@@ -190,10 +190,10 @@
     vector_tag = 'rhs'
   []
   [rhs_v]
-    type = TagSolutionAux
+    type = TagResidualAux
     variable = rhs_v
     v = v
-    vector_tag = 'rhs'
+    residual_tag = 'rhs'
   []
   [extra_vector_v_dof]
     type = TagVectorDofValueAux
@@ -205,7 +205,7 @@
     type = TagResidualAux
     variable = vector_tag_v
     v = v
-    vector_tag = 'vec_tag_v'
+    residual_tag = 'vec_tag_v'
   []
   [extra_matrix_v]
     type = TagMatrixAux

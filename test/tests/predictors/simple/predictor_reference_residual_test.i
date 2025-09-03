@@ -22,7 +22,7 @@
   [diff_u]
     type = Diffusion
     variable = u
-    extra_vector_tags = 'ref'
+    extra_residual_tags = 'ref'
   []
 []
 

@@ -68,7 +68,7 @@
 [Kernels]
   [TensorMechanics]
     use_displaced_mesh = true
-    extra_vector_tags = 'ref'
+    extra_residual_tags = 'ref'
     block = '1 2 3 4 5 6 7'
   []
 []
@@ -135,13 +135,13 @@
   []
   [react_x]
     type = ReactionForceAux
-    vector_tag = 'ref'
+    residual_tag = 'ref'
     v = 'disp_x'
     variable = 'react_x'
   []
   [react_y]
     type = ReactionForceAux
-    vector_tag = 'ref'
+    residual_tag = 'ref'
     v = 'disp_y'
     variable = 'react_y'
   []

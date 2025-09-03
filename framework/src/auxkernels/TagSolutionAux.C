@@ -14,30 +14,41 @@ registerMooseObject("MooseApp", TagSolutionAux);
 InputParameters
 TagSolutionAux::validParams()
 {
-  InputParameters params = TagResidualAux::validParams();
+  InputParameters params = TagAuxBase<AuxKernel>::validParams();
   params.addClassDescription("Couple a tag solution vector, and return its dof value");
-
+  params.addRequiredParam<TagName>("solution_tag",
+                                   "Name of the solution tag this AuxKernel works on");
   // see #31357 and #20482
   params.suppressParameter<bool>("scaled");
   params.suppressParameter<bool>("remove_variable_scaling");
-
   return params;
 }
 
-TagSolutionAux::TagSolutionAux(const InputParameters & parameters) : TagResidualAux(parameters) {}
+TagSolutionAux::TagSolutionAux(const InputParameters & parameters)
+  : TagAuxBase<AuxKernel>(parameters),
+    _v(coupledVectorTagValue("v", "solution_tag")),
+    _v_var(*getFieldVar("v", 0))
+{
+  checkCoupledVariable(&_v_var, &_var);
+}
 
 void
 TagSolutionAux::initialSetup()
 {
   TagAuxBase<AuxKernel>::initialSetup();
 
-  const auto vector_tag_id = _subproblem.getVectorTagID(getParam<TagName>("vector_tag"));
-  const auto vector_tag_type = _subproblem.vectorTagType(vector_tag_id);
-  if (vector_tag_type == Moose::VECTOR_TAG_RESIDUAL)
-    paramError("vector_tag",
-               "The provided vector tag corresponds to a residual vector tag. Please use "
+  const auto tag_id = _subproblem.getVectorTagID(getParam<TagName>("solution_tag"));
+  const auto tag_type = _subproblem.vectorTagType(tag_id);
+  if (tag_type == Moose::VECTOR_TAG_RESIDUAL)
+    paramError("solution_tag",
+               "The provided tag corresponds to a residual vector. Please use "
                "'TagResidualAux' instead.");
-  if (vector_tag_type != Moose::VECTOR_TAG_SOLUTION)
-    paramError("vector_tag",
-               "The provided vector tag does not correspond to a solution vector tag.");
+  if (tag_type != Moose::VECTOR_TAG_SOLUTION)
+    paramError("solution_tag", "The provided tag does not correspond to a solution vector.");
+}
+
+Real
+TagSolutionAux::computeValue()
+{
+  return _scaled ? _v[_qp] : _v[_qp] / _v_var.scalingFactor();
 }

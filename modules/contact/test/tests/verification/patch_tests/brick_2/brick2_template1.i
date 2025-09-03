@@ -71,7 +71,7 @@
   [TensorMechanics]
     use_displaced_mesh = true
     save_in = 'saved_x saved_y saved_z'
-    extra_vector_tags = 'ref'
+    extra_residual_tags = 'ref'
   []
 []
 

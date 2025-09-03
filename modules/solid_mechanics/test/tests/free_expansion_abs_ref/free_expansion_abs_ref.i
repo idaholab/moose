@@ -49,13 +49,13 @@
   [ref_x]
     type = TagResidualAux
     variable = 'ref_x'
-    vector_tag = 'ref'
+    residual_tag = 'ref'
     v = 'disp_x'
   []
   [ref_y]
     type = TagResidualAux
     variable = 'ref_y'
-    vector_tag = 'ref'
+    residual_tag = 'ref'
     v = 'disp_y'
   []
 []
@@ -83,7 +83,7 @@
     generate_output = 'stress_xx stress_xy stress_yy stress_zz strain_xx strain_xy strain_yy strain_zz'
     planar_formulation = PLANE_STRAIN
     eigenstrain_names = eigenstrain
-    absolute_value_vector_tags = 'ref'
+    absolute_value_residual_tags = 'ref'
   []
 []
 

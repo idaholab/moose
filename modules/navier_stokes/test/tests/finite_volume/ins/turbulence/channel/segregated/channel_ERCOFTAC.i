@@ -56,11 +56,11 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     dim = 2
     xmin = 0
     xmax = ${L}
-    ymin = ${fparse -H}
+    ymin = '${fparse -H}'
     ymax = 0
     nx = 4
     ny = 3
-    bias_y = ${fparse 1/0.7}
+    bias_y = '${fparse 1/0.7}'
   []
   [smg]
     type = StitchedMeshGenerator
@@ -154,7 +154,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     variable = vel_x
     momentum_component = 'x'
     pressure = pressure
-    extra_vector_tags = ${pressure_tag}
+    extra_residual_tags = ${pressure_tag}
   []
 
   [v_advection]
@@ -183,7 +183,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     variable = vel_y
     momentum_component = 'y'
     pressure = pressure
-    extra_vector_tags = ${pressure_tag}
+    extra_residual_tags = ${pressure_tag}
   []
 
   [p_diffusion]
@@ -431,7 +431,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     type = LineValueSampler
     start_point = '${fparse 0.125 * L} ${fparse 0.5 * H} 0'
     end_point = '${fparse 0.875 * L} ${fparse 0.5 * H} 0'
-    num_points =  ${Mesh/block_1/nx}
+    num_points = ${Mesh/block_1/nx}
     variable = 'vel_x vel_y pressure TKE TKED'
     sort_by = 'x'
     execute_on = 'timestep_end'

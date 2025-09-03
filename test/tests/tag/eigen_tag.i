@@ -31,13 +31,13 @@
   [diff]
     type = Diffusion
     variable = u
-    extra_vector_tags = 'tag_diff'
+    extra_residual_tags = 'tag_diff'
     extra_matrix_tags = 'tag_diff'
   []
   [rhs]
     type = CoefReaction
     variable = u
-    extra_vector_tags = 'eigen tag_rhs'
+    extra_residual_tags = 'eigen tag_rhs'
     extra_matrix_tags = 'tag_rhs'
   []
 []
@@ -47,26 +47,26 @@
     type = TagVectorAux
     variable = vec_tag_diff
     v = u
-    vector_tag = tag_diff
+    residual_tag = tag_diff
   []
   [vec_tag_rhs]
     type = TagVectorAux
     variable = vec_tag_rhs
     v = u
-    vector_tag = tag_rhs
+    residual_tag = tag_rhs
   []
 
   [mat_tag_diff]
     type = TagVectorAux
     variable = mat_tag_diff
     v = u
-    vector_tag = tag_diff
+    residual_tag = tag_diff
   []
   [mat_tag_rhs]
     type = TagVectorAux
     variable = mat_tag_diff
     v = u
-    vector_tag = tag_rhs
+    residual_tag = tag_rhs
   []
 []
 

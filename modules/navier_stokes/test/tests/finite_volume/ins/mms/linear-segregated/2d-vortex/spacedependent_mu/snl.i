@@ -76,7 +76,7 @@ pressure_tag = "pressure_grad"
     variable = vel_x
     momentum_component = 'x'
     pressure = pressure
-    extra_vector_tags = ${pressure_tag}
+    extra_residual_tags = ${pressure_tag}
   []
   [u_forcing]
     type = INSFVBodyForce
@@ -106,7 +106,7 @@ pressure_tag = "pressure_grad"
     variable = vel_y
     momentum_component = 'y'
     pressure = pressure
-    extra_vector_tags = ${pressure_tag}
+    extra_residual_tags = ${pressure_tag}
   []
   [v_forcing]
     type = INSFVBodyForce
@@ -162,41 +162,25 @@ pressure_tag = "pressure_grad"
   []
   [forcing_u]
     type = ParsedFunction
-    expression = '-(2*x-1)*y*(y-1)*(2*x-6*x^2+4*x^3)*(2*y-6*y^2+4*y^3)'
-                 '-(1+x*(x-1)*y*(y-1))*(2*y-6*y^2+4*y^3)*(2-12*x+12*x^2)'
-                 '-(2*y-1)*x*(x-1)*(x^2*(1-x)^2*(2-12*y+12*y^2))'
-                 '-(1+x*(x-1)*y*(y-1))*(x^2*(1-x)^2*(-12+24*y))'
-                 '+1-2*x+rho*4*x^3*y^2*(2*y^2-2*y+1)*(y-1)^2*(-1+2*x)*(x-1)^3'
+    expression = '-(2*x-1)*y*(y-1)*(2*x-6*x^2+4*x^3)*(2*y-6*y^2+4*y^3)-(1+x*(x-1)*y*(y-1))*(2*y-6*y^2+4*y^3)*(2-12*x+12*x^2)-(2*y-1)*x*(x-1)*(x^2*(1-x)^2*(2-12*y+12*y^2))-(1+x*(x-1)*y*(y-1))*(x^2*(1-x)^2*(-12+24*y))+1-2*x+rho*4*x^3*y^2*(2*y^2-2*y+1)*(y-1)^2*(-1+2*x)*(x-1)^3'
     symbol_names = 'rho'
     symbol_values = '${rho}'
   []
   [forcing_v]
     type = ParsedFunction
-    expression = '(2*y-1)*x*(x-1)*(2*y-6*y^2+4*y^3)*(2*x-6*x^2+4*x^3)'
-                 '+(1+x*(x-1)*y*(y-1))*(2-12*y+12*y^2)*(2*x-6*x^2+4*x^3)'
-                 '+(2*x-1)*y*(y-1)*(y^2*(1-y)^2*(2-12*x+12*x^2))'
-                 '+(1+x*(x-1)*y*(y-1))*(y^2*(1-y)^2*(-12+24*x))'
-                 '+rho*4*y^3*x^2*(2*x^2-2*x+1)*(x-1)^2*(-1+2*y)*(y-1)^3'
+    expression = '(2*y-1)*x*(x-1)*(2*y-6*y^2+4*y^3)*(2*x-6*x^2+4*x^3)+(1+x*(x-1)*y*(y-1))*(2-12*y+12*y^2)*(2*x-6*x^2+4*x^3)+(2*x-1)*y*(y-1)*(y^2*(1-y)^2*(2-12*x+12*x^2))+(1+x*(x-1)*y*(y-1))*(y^2*(1-y)^2*(-12+24*x))+rho*4*y^3*x^2*(2*x^2-2*x+1)*(x-1)^2*(-1+2*y)*(y-1)^3'
     symbol_names = 'rho'
     symbol_values = '${rho}'
   []
   [forcing_u_deviatoric]
     type = ParsedFunction
-    expression = '-2*(2*x-1)*y*(y-1)*(2*x-6*x^2+4*x^3)*(2*y-6*y^2+4*y^3)'
-                 '-2*(1+x*(x-1)*y*(y-1))*(2*y-6*y^2+4*y^3)*(2-12*x+12*x^2)'
-                 '-(2*y-1)*x*(x-1)*(x^2*(1-x)^2*(2-12*y+12*y^2)-y^2*(1-y)^2*(2-12*x+12*x^2))'
-                 '-(1+x*(x-1)*y*(y-1))*(x^2*(1-x)^2*(-12+24*y)-(2*y-6*y^2+4*y^3)*(2-12*x+12*x^2))'
-                 '+1-2*x+rho*4*x^3*y^2*(2*y^2-2*y+1)*(y-1)^2*(-1+2*x)*(x-1)^3'
+    expression = '-2*(2*x-1)*y*(y-1)*(2*x-6*x^2+4*x^3)*(2*y-6*y^2+4*y^3)-2*(1+x*(x-1)*y*(y-1))*(2*y-6*y^2+4*y^3)*(2-12*x+12*x^2)-(2*y-1)*x*(x-1)*(x^2*(1-x)^2*(2-12*y+12*y^2)-y^2*(1-y)^2*(2-12*x+12*x^2))-(1+x*(x-1)*y*(y-1))*(x^2*(1-x)^2*(-12+24*y)-(2*y-6*y^2+4*y^3)*(2-12*x+12*x^2))+1-2*x+rho*4*x^3*y^2*(2*y^2-2*y+1)*(y-1)^2*(-1+2*x)*(x-1)^3'
     symbol_names = 'rho'
     symbol_values = '${rho}'
   []
   [forcing_v_deviatoric]
     type = ParsedFunction
-    expression = '2*(2*y-1)*x*(x-1)*(2*y-6*y^2+4*y^3)*(2*x-6*x^2+4*x^3)'
-                 '+2*(1+x*(x-1)*y*(y-1))*(2-12*y+12*y^2)*(2*x-6*x^2+4*x^3)'
-                 '-(2*x-1)*y*(y-1)*(x^2*(1-x)^2*(2-12*y+12*y^2)-y^2*(1-y)^2*(2-12*x+12*x^2))'
-                 '-(1+x*(x-1)*y*(y-1))*(-y^2*(1-y)^2*(-12+24*x)+(2*x-6*x^2+4*x^3)*(2-12*y+12*y^2))'
-                 '+rho*4*y^3*x^2*(2*x^2-2*x+1)*(x-1)^2*(-1+2*y)*(y-1)^3'
+    expression = '2*(2*y-1)*x*(x-1)*(2*y-6*y^2+4*y^3)*(2*x-6*x^2+4*x^3)+2*(1+x*(x-1)*y*(y-1))*(2-12*y+12*y^2)*(2*x-6*x^2+4*x^3)-(2*x-1)*y*(y-1)*(x^2*(1-x)^2*(2-12*y+12*y^2)-y^2*(1-y)^2*(2-12*x+12*x^2))-(1+x*(x-1)*y*(y-1))*(-y^2*(1-y)^2*(-12+24*x)+(2*x-6*x^2+4*x^3)*(2-12*y+12*y^2))+rho*4*y^3*x^2*(2*x^2-2*x+1)*(x-1)^2*(-1+2*y)*(y-1)^3'
     symbol_names = 'rho'
     symbol_values = '${rho}'
   []

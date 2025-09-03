@@ -11,96 +11,96 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = MONOMIAL
 
-    [./InitialCondition]
+    [InitialCondition]
       type = ConstantIC
       value = 1
-    [../]
-  [../]
+    []
+  []
 []
 
 [AuxVariables]
-  [./tag_variable1]
+  [tag_variable1]
     order = FIRST
     family = MONOMIAL
-  [../]
+  []
 
-  [./tag_variable2]
+  [tag_variable2]
     order = FIRST
     family = MONOMIAL
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./TagVectorAux1]
+  [TagVectorAux1]
     type = TagVectorAux
     variable = tag_variable1
     v = u
-    vector_tag = vec_tag2
-  [../]
+    residual_tag = vec_tag2
+  []
 
-  [./TagVectorAux2]
+  [TagVectorAux2]
     type = TagMatrixAux
     variable = tag_variable2
     v = u
     matrix_tag = mat_tag2
-  [../]
+  []
 []
 
 [Functions]
-  [./forcing_fn]
+  [forcing_fn]
     type = ParsedFunction
     expression = 2*pow(e,-x-(y*y))*(1-2*y*y)
-  [../]
+  []
 
-  [./exact_fn]
+  [exact_fn]
     type = ParsedGradFunction
     value = pow(e,-x-(y*y))
     grad_x = -pow(e,-x-(y*y))
     grad_y = -2*y*pow(e,-x-(y*y))
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
     extra_matrix_tags = 'mat_tag1 mat_tag2'
-    extra_vector_tags = 'vec_tag1 vec_tag2'
-  [../]
+    extra_residual_tags = 'vec_tag1 vec_tag2'
+  []
 
-  [./abs]
+  [abs]
     type = Reaction
     variable = u
     extra_matrix_tags = 'mat_tag1 mat_tag2'
-    extra_vector_tags = 'vec_tag1 vec_tag2'
-  [../]
+    extra_residual_tags = 'vec_tag1 vec_tag2'
+  []
 
-  [./forcing]
+  [forcing]
     type = BodyForce
     variable = u
     function = forcing_fn
     extra_matrix_tags = 'mat_tag1 mat_tag2'
-    extra_vector_tags = 'vec_tag1'
-  [../]
+    extra_residual_tags = 'vec_tag1'
+  []
 []
 
 [DGKernels]
-  [./dg_diff]
+  [dg_diff]
     type = DGDiffusion
     variable = u
     epsilon = -1
     sigma = 6
     extra_matrix_tags = 'mat_tag1 mat_tag2'
-    extra_vector_tags = 'vec_tag1 vec_tag2'
-  [../]
+    extra_residual_tags = 'vec_tag1 vec_tag2'
+  []
 []
 
 [BCs]
-  [./all]
+  [all]
     type = DGFunctionDiffusionDirichletBC
     variable = u
     boundary = '0 1 2 3'
@@ -108,17 +108,17 @@
     epsilon = -1
     sigma = 6
     extra_matrix_tags = 'mat_tag1 mat_tag2'
-    extra_vector_tags = 'vec_tag1 vec_tag2'
-  [../]
+    extra_residual_tags = 'vec_tag1 vec_tag2'
+  []
 []
 
 [Problem]
   type = TagTestProblem
-  test_tag_vectors =  'nontime residual vec_tag1 vec_tag2'
+  test_tag_vectors = 'nontime residual vec_tag1 vec_tag2'
   test_tag_matrices = 'mat_tag1 mat_tag2'
 
   extra_tag_matrices = 'mat_tag1 mat_tag2'
-  extra_tag_vectors  = 'vec_tag1 vec_tag2'
+  extra_tag_vectors = 'vec_tag1 vec_tag2'
 []
 
 [Executioner]
@@ -129,19 +129,19 @@
 []
 
 [Postprocessors]
-  [./h]
+  [h]
     type = AverageElementSize
-  [../]
+  []
 
-  [./dofs]
+  [dofs]
     type = NumDOFs
-  [../]
+  []
 
-  [./l2_err]
+  [l2_err]
     type = ElementL2Error
     variable = u
     function = exact_fn
-  [../]
+  []
 []
 
 [Outputs]

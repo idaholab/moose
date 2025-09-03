@@ -8,7 +8,7 @@
 
 [Problem]
   solve = false
-  extra_tag_vectors  = 'vec_tag1 vec_tag2'
+  extra_tag_vectors = 'vec_tag1 vec_tag2'
 []
 
 [Variables]
@@ -21,12 +21,12 @@
   [diff]
     type = Diffusion
     variable = u
-    extra_vector_tags = 'vec_tag1'
+    extra_residual_tags = 'vec_tag1'
   []
   [react]
     type = Reaction
     variable = u
-    extra_vector_tags = 'vec_tag1 vec_tag2'
+    extra_residual_tags = 'vec_tag1 vec_tag2'
   []
 []
 

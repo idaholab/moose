@@ -100,7 +100,7 @@
     num_state_vars = 8
     constant_properties = '100 0.3' # E nu
     external_fields = 'temperature voltage'
-    extra_vector_tags = 'kernel_residual'
+    extra_residual_tags = 'kernel_residual'
   []
 []
 
@@ -121,13 +121,13 @@
     type = TagResidualAux
     variable = res_x
     v = disp_x
-    vector_tag = kernel_residual
+    residual_tag = kernel_residual
   []
   [res_y]
     type = TagResidualAux
     variable = res_y
     v = disp_y
-    vector_tag = kernel_residual
+    residual_tag = kernel_residual
   []
 []
 

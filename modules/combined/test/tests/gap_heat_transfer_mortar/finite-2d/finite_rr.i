@@ -116,7 +116,7 @@ name = 'finite'
     block = 'plank block'
     use_automatic_differentiation = true
     strain = FINITE
-    extra_vector_tags = 'ref'
+    extra_residual_tags = 'ref'
   []
 []
 
@@ -126,7 +126,7 @@ name = 'finite'
     variable = temp
     use_displaced_mesh = true
     block = 'plank block'
-    extra_vector_tags = 'ref'
+    extra_residual_tags = 'ref'
   []
 []
 

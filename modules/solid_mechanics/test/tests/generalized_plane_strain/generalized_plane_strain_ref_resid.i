@@ -63,7 +63,7 @@
     eigenstrain_names = eigenstrain
     scalar_out_of_plane_strain = scalar_strain_zz
     temperature = temp
-    absolute_value_vector_tags = 'ref'
+    absolute_value_residual_tags = 'ref'
   []
 []
 
@@ -77,13 +77,13 @@
   [saved_x]
     type = ReactionForceAux
     variable = 'saved_x'
-    vector_tag = 'ref'
+    residual_tag = 'ref'
     v = 'disp_x'
   []
   [saved_y]
     type = ReactionForceAux
     variable = 'saved_y'
-    vector_tag = 'ref'
+    residual_tag = 'ref'
     v = 'disp_y'
   []
 []

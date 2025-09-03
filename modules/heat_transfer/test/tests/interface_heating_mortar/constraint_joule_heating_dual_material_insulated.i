@@ -100,14 +100,14 @@
     type = ADHeatConduction
     variable = temperature
     thermal_conductivity = steel_thermal_conductivity
-    extra_vector_tags = 'ref'
+    extra_residual_tags = 'ref'
     block = 'left_block'
   []
   [HeatDiff_aluminum]
     type = ADHeatConduction
     variable = temperature
     thermal_conductivity = aluminum_thermal_conductivity
-    extra_vector_tags = 'ref'
+    extra_residual_tags = 'ref'
     block = 'right_block'
   []
 
@@ -115,14 +115,14 @@
     type = ADMatDiffusion
     variable = potential
     diffusivity = steel_electrical_conductivity
-    extra_vector_tags = 'ref'
+    extra_residual_tags = 'ref'
     block = 'left_block'
   []
   [electric_aluminum]
     type = ADMatDiffusion
     variable = potential
     diffusivity = aluminum_electrical_conductivity
-    extra_vector_tags = 'ref'
+    extra_residual_tags = 'ref'
     block = 'right_block'
   []
 []

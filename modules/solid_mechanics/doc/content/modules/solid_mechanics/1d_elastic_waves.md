@@ -68,7 +68,7 @@ matrix. The ADCoefReaction kernels
 represent the mass terms and contribute to the "B" matrix. The
 [!param](/Kernels/CoefReaction/coefficient) in [kernels/CoefReaction.md] is set
 to a negative value which corresponds to a positive density. The
-`extra_vector_tags = 'eigen'` parameter is used to indicate that these kernels
+`extra_residual_tags = 'eigen'` parameter is used to indicate that these kernels
 contribute to "B" matrix. In other literature the A matrix would be the
 stiffness matrix (K) and B would be the Mass matrix (M).
 

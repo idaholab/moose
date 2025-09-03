@@ -57,7 +57,7 @@
     eigenstrain_names = thermal_expansion
     strain = FINITE
     decomposition_method = EigenSolution
-    extra_vector_tags = 'ref'
+    extra_residual_tags = 'ref'
     temperature = temp
   []
 []
@@ -67,7 +67,7 @@
     type = HeatConduction
     variable = temp
     save_in = saved_t
-    extra_vector_tags = 'ref'
+    extra_residual_tags = 'ref'
   []
 []
 

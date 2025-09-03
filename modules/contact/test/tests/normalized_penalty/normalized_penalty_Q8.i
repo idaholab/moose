@@ -33,7 +33,7 @@
     strain = FINITE
     generate_output = 'stress_xx'
     save_in = 'saved_x saved_y'
-    extra_vector_tags = 'ref'
+    extra_residual_tags = 'ref'
   []
 []
 

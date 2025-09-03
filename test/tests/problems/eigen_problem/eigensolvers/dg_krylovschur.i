@@ -11,14 +11,14 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = MONOMIAL
-  [../]
+  []
 []
 
 [DGKernels]
-  [./dg_diff]
+  [dg_diff]
     type = DGDiffusion
     variable = u
     sigma = 6
@@ -28,11 +28,11 @@
 
 [Kernels]
   inactive = 'rhs'
-  [./rhs]
+  [rhs]
     type = Reaction
     variable = u
-    extra_vector_tags = 'eigen'
-  [../]
+    extra_residual_tags = 'eigen'
+  []
 []
 
 [Executioner]
@@ -43,10 +43,10 @@
 []
 
 [VectorPostprocessors]
-  [./eigenvalues]
+  [eigenvalues]
     type = Eigenvalues
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

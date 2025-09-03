@@ -33,7 +33,7 @@
     variable = lm
     var = u
     boundary = '100 101'
-    absolute_value_vector_tags = 'ref'
+    absolute_value_residual_tags = 'ref'
   []
 []
 

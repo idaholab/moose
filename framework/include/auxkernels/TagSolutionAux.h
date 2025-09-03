@@ -9,13 +9,14 @@
 
 #pragma once
 
-#include "TagResidualAux.h"
+#include "AuxKernel.h"
+#include "TagAuxBase.h"
 
 /**
  * The value of a tagged solution vector for a given variable is coupled to
  * the current AuxVariable.
  */
-class TagSolutionAux : public TagResidualAux
+class TagSolutionAux : public TagAuxBase<AuxKernel>
 {
 public:
   static InputParameters validParams();
@@ -23,4 +24,10 @@ public:
   TagSolutionAux(const InputParameters & parameters);
 
   void initialSetup() override;
+
+protected:
+  virtual Real computeValue() override;
+
+  const VariableValue & _v;
+  const MooseVariableBase & _v_var;
 };

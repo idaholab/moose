@@ -1,27 +1,27 @@
 !include line_source_base.i
 
 [Problem]
-  not_zeroed_tag_vectors = ray_residual
+  not_zeroed_tag_residuals = ray_residual
 []
 
 [RayKernels]
   [constant_source]
-    vector_tags = ray_residual
+    residual_tags = ray_residual
   []
   [pp_source]
-    vector_tags = ray_residual
+    residual_tags = ray_residual
   []
   [function_source]
-    vector_tags = ray_residual
+    residual_tags = ray_residual
   []
   [mixed_source]
-    vector_tags = ray_residual
+    residual_tags = ray_residual
   []
   [data_source]
-    vector_tags = ray_residual
+    residual_tags = ray_residual
   []
   [aux_data_source]
-    vector_tags = ray_residual
+    residual_tags = ray_residual
   []
 []
 

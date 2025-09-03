@@ -126,7 +126,7 @@
     displacements = 'disp_x disp_y'
     temperature = temp
     save_in = 'saved_x saved_y'
-    extra_vector_tags = 'ref'
+    extra_residual_tags = 'ref'
     block = '1 2'
   []
 []

@@ -34,24 +34,24 @@
   [diff]
     type = Diffusion
     variable = u
-    extra_vector_tags = 'ref'
+    extra_residual_tags = 'ref'
   []
   [rxn]
     type = PReaction
     power = 2
     variable = u
-    extra_vector_tags = 'ref'
+    extra_residual_tags = 'ref'
   []
   [diff_v]
     type = Diffusion
     variable = v
-    extra_vector_tags = 'ref'
+    extra_residual_tags = 'ref'
   []
   [rxn_v]
     type = PReaction
     power = 2
     variable = v
-    extra_vector_tags = 'ref'
+    extra_residual_tags = 'ref'
   []
 []
 

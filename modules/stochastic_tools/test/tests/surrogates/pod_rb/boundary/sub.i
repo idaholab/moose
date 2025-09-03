@@ -1,6 +1,6 @@
 [Problem]
   type = FEProblem
-  extra_tag_vectors  = 'diff react bodyf dir_src dir_imp'
+  extra_tag_vectors = 'diff react bodyf dir_src dir_imp'
 []
 
 [Mesh]
@@ -20,19 +20,19 @@
     type = MatDiffusion
     variable = u
     diffusivity = k
-    extra_vector_tags = 'diff'
+    extra_residual_tags = 'diff'
   []
   [reaction]
     type = MaterialReaction
     variable = u
     coefficient = alpha
-    extra_vector_tags = 'react'
+    extra_residual_tags = 'react'
   []
   [source]
     type = BodyForce
     variable = u
     value = 1.0
-    extra_vector_tags = 'bodyf'
+    extra_residual_tags = 'bodyf'
   []
 []
 
@@ -55,14 +55,14 @@
     variable = u
     boundary = left
     value = 0
-    extra_vector_tags = 'dir_imp'
+    extra_residual_tags = 'dir_imp'
   []
   [dummy_2]
     type = DirichletBCModifier
     variable = u
     boundary = left
     value = 1
-    extra_vector_tags = 'dir_src'
+    extra_residual_tags = 'dir_src'
   []
   [left]
     type = DirichletBC

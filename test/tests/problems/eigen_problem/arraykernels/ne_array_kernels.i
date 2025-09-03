@@ -41,7 +41,7 @@
     type = ArrayReaction
     variable = u
     reaction_coefficient = rc
-    extra_vector_tags = 'eigen'
+    extra_residual_tags = 'eigen'
   []
 
   [diffv]
@@ -54,7 +54,7 @@
     type = ArrayReaction
     variable = v
     reaction_coefficient = rc
-    extra_vector_tags = 'eigen'
+    extra_residual_tags = 'eigen'
   []
 []
 
@@ -104,10 +104,10 @@
 []
 
 [VectorPostprocessors]
-  [./eigenvalues]
+  [eigenvalues]
     type = Eigenvalues
     execute_on = 'timestep_end'
-  [../]
+  []
 []
 
 [Outputs]

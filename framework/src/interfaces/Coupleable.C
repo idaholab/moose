@@ -245,7 +245,7 @@ Coupleable::checkVar(const std::string & var_name_in,
 
   // Only perform the following checks for objects that feed into residuals/Jacobians, e.g. objects
   // that inherit from the TaggingInterface
-  if (_c_parameters.have_parameter<MultiMooseEnum>("vector_tags"))
+  if (_c_parameters.have_parameter<MultiMooseEnum>("residual_tags"))
   {
     // Are we attempting to couple to a non-FV var in an FV object?
     if (!var->isFV() && _is_fv)

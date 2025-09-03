@@ -75,37 +75,37 @@ mu = 'mu'
   [e_time]
     type = TagResidualAux
     variable = e_time
-    vector_tag = e_time
+    residual_tag = e_time
     v = T
   []
   [e_advection]
     type = TagResidualAux
     variable = e_advection
-    vector_tag = e_advection
+    residual_tag = e_advection
     v = T
   []
   [e_mesh_advection]
     type = TagResidualAux
     variable = e_mesh_advection
-    vector_tag = e_mesh_advection
+    residual_tag = e_mesh_advection
     v = T
   []
   [e_conduction]
     type = TagResidualAux
     variable = e_conduction
-    vector_tag = e_conduction
+    residual_tag = e_conduction
     v = T
   []
   [e_laser]
     type = TagResidualAux
     variable = e_laser
-    vector_tag = e_laser
+    residual_tag = e_laser
     v = T
   []
   [e_radiation]
     type = TagResidualAux
     variable = e_radiation
-    vector_tag = e_radiation
+    residual_tag = e_radiation
     v = T
   []
 []
@@ -252,20 +252,20 @@ mu = 'mu'
     rho = ${rho}
     dh_dt = dh_dt
     use_displaced_mesh = true
-    extra_vector_tags = 'e_time'
+    extra_residual_tags = 'e_time'
   []
   [temperature_advection]
     type = INSFVEnergyAdvection
     variable = T
     use_displaced_mesh = true
-    extra_vector_tags = 'e_advection'
+    extra_residual_tags = 'e_advection'
   []
   [temperature_conduction]
     type = FVDiffusion
     coeff = 'k'
     variable = T
     use_displaced_mesh = true
-    extra_vector_tags = 'e_conduction'
+    extra_residual_tags = 'e_conduction'
   []
   [temperature_mesh_advection_volumetric]
     type = INSFVMeshAdvection
@@ -275,7 +275,7 @@ mu = 'mu'
     disp_y = disp_y
     advected_quantity = 'h'
     use_displaced_mesh = true
-    extra_vector_tags = 'e_mesh_advection'
+    extra_residual_tags = 'e_mesh_advection'
   []
 []
 
@@ -324,7 +324,7 @@ mu = 'mu'
     Tinfinity = 300
     stefan_boltzmann_constant = ${sb}
     use_displaced_mesh = true
-    extra_vector_tags = 'e_radiation'
+    extra_residual_tags = 'e_radiation'
   []
   [weld_flux]
     type = FVGaussianEnergyFluxBC
@@ -336,7 +336,7 @@ mu = 'mu'
     y_beam_coord = 0
     z_beam_coord = 0
     use_displaced_mesh = true
-    extra_vector_tags = 'e_laser'
+    extra_residual_tags = 'e_laser'
   []
 []
 

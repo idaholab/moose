@@ -85,12 +85,22 @@ QuasiStaticSolidMechanicsPhysics::validParams()
   params.addParam<std::string>(
       "strain_base_name",
       "The base name used for the strain. If not provided, it will be set equal to base_name");
-  params.addParam<std::vector<TagName>>(
+  params.addDeprecatedParam<std::vector<TagName>>(
       "extra_vector_tags",
-      "The tag names for extra vectors that residual data should be saved into");
-  params.addParam<std::vector<TagName>>("absolute_value_vector_tags",
-                                        "The tag names for extra vectors that the absolute value "
-                                        "of the residual should be accumulated into");
+      "The tag names for extra vectors that residual data should be saved into",
+      "This parameter has been renamed to 'extra_residual_tags'");
+  params.addParam<std::vector<TagName>>(
+      "extra_residual_tags",
+      "The tag names for extra residuals that residual data should be saved into");
+  params.addDeprecatedParam<std::vector<TagName>>(
+      "absolute_value_vector_tags",
+      "The tags for the vectors this residual object should fill with the absolute value of the "
+      "residual contribution",
+      "This parameter has been renamed to 'absolute_value_residual_tags'");
+  params.addParam<std::vector<TagName>>(
+      "absolute_value_residual_tags",
+      "The tags for the residuals this residual object should fill with the absolute value of the "
+      "residual contribution");
   params.addParam<Real>("scaling", "The scaling to apply to the displacement variables");
   params.addParam<Point>(
       "cylindrical_axis_point1",

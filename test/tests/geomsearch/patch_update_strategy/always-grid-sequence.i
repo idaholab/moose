@@ -39,7 +39,7 @@
     type = CoefDiffusion
     variable = u
     coef = 1
-    extra_vector_tags = 'ref'
+    extra_residual_tags = 'ref'
   []
 []
 

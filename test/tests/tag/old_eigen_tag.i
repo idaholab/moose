@@ -38,13 +38,13 @@
   [diff_u]
     type = Diffusion
     variable = u
-    extra_vector_tags = 'tag_diff'
+    extra_residual_tags = 'tag_diff'
     extra_matrix_tags = 'tag_diff'
   []
   [rhs_u]
     type = MassEigenKernel
     variable = u
-    extra_vector_tags = 'tag_rhs'
+    extra_residual_tags = 'tag_rhs'
     extra_matrix_tags = 'tag_rhs'
     diag_save_in = 'u_mat_savein_rhs'
   []
@@ -52,13 +52,13 @@
   [diff_v]
     type = Diffusion
     variable = v
-    extra_vector_tags = 'tag_diff'
+    extra_residual_tags = 'tag_diff'
     extra_matrix_tags = 'tag_diff'
   []
   [rhs_v]
     type = MassEigenKernel
     variable = v
-    extra_vector_tags = 'tag_rhs'
+    extra_residual_tags = 'tag_rhs'
     extra_matrix_tags = 'tag_rhs'
   []
 
@@ -66,14 +66,14 @@
     type = CoupledEigenKernel
     variable = u
     v = v
-    extra_vector_tags = 'tag_rhs'
+    extra_residual_tags = 'tag_rhs'
     extra_matrix_tags = 'tag_rhs'
   []
   [rhs_vu]
     type = CoupledEigenKernel
     variable = v
     v = u
-    extra_vector_tags = 'tag_rhs'
+    extra_residual_tags = 'tag_rhs'
     extra_matrix_tags = 'tag_rhs'
   []
 []
@@ -83,50 +83,50 @@
     type = TagVectorAux
     variable = u_vec_tag_diff
     v = u
-    vector_tag = tag_diff
+    residual_tag = tag_diff
   []
   [u_vec_tag_rhs]
     type = TagVectorAux
     variable = u_vec_tag_rhs
     v = u
-    vector_tag = tag_rhs
+    residual_tag = tag_rhs
   []
   [u_mat_tag_diff]
     type = TagVectorAux
     variable = u_mat_tag_diff
     v = u
-    vector_tag = tag_diff
+    residual_tag = tag_diff
   []
   [u_mat_tag_rhs]
     type = TagVectorAux
     variable = u_mat_tag_diff
     v = u
-    vector_tag = tag_rhs
+    residual_tag = tag_rhs
   []
 
   [v_vec_tag_diff]
     type = TagVectorAux
     variable = v_vec_tag_diff
     v = v
-    vector_tag = tag_diff
+    residual_tag = tag_diff
   []
   [v_vec_tag_rhs]
     type = TagVectorAux
     variable = v_vec_tag_rhs
     v = v
-    vector_tag = tag_rhs
+    residual_tag = tag_rhs
   []
   [v_mat_tag_diff]
     type = TagVectorAux
     variable = v_mat_tag_diff
     v = v
-    vector_tag = tag_diff
+    residual_tag = tag_diff
   []
   [v_mat_tag_rhs]
     type = TagVectorAux
     variable = v_mat_tag_diff
     v = v
-    vector_tag = tag_rhs
+    residual_tag = tag_rhs
   []
 []
 

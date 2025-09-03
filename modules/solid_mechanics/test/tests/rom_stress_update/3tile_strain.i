@@ -31,7 +31,7 @@
     strain = FINITE
     add_variables = true
     generate_output = 'vonmises_stress'
-    extra_vector_tags = 'ref'
+    extra_residual_tags = 'ref'
   []
 []
 

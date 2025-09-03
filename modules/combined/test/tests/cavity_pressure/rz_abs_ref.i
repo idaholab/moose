@@ -36,7 +36,7 @@
 
 [GlobalParams]
   displacements = 'disp_r disp_z'
-  absolute_value_vector_tags = ref
+  absolute_value_residual_tags = ref
 []
 
 [Mesh]

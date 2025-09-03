@@ -20,11 +20,11 @@ registerMooseObject("MooseApp", MassMatrix);
 void
 MassMatrix::setMassMatrixParams(InputParameters & params)
 {
-  params.set<MultiMooseEnum>("vector_tags") = "";
+  params.set<MultiMooseEnum>("residual_tags") = "";
   params.set<MultiMooseEnum>("matrix_tags") = "";
-  params.suppressParameter<MultiMooseEnum>("vector_tags");
-  params.suppressParameter<std::vector<TagName>>("extra_vector_tags");
-  params.suppressParameter<std::vector<TagName>>("absolute_value_vector_tags");
+  params.suppressParameter<MultiMooseEnum>("residual_tags");
+  params.suppressParameter<std::vector<TagName>>("extra_residual_tags");
+  params.suppressParameter<std::vector<TagName>>("absolute_value_residual_tags");
   params.set<bool>("matrix_only") = true;
 }
 

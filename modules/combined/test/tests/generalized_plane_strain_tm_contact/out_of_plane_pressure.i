@@ -105,7 +105,7 @@
     use_displaced_mesh = true
     displacements = 'disp_x disp_y'
     save_in = 'saved_x saved_y'
-    extra_vector_tags = 'ref'
+    extra_residual_tags = 'ref'
   []
 []
 

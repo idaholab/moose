@@ -10,49 +10,49 @@
 []
 
 [Variables]
-  [./u]
+  [u]
     order = FIRST
     family = LAGRANGE
     initial_condition = 0.1
-  [../]
+  []
 []
 
 [Kernels]
-  [./diff]
+  [diff]
     type = Diffusion
     variable = u
-  [../]
-  [./power]
+  []
+  [power]
     type = PReaction
     variable = u
     coefficient = 0.2
     power = -5
     # Comment out this will make fixed point iteration converged in one iteration.
     # However, this makes the solving diverge and require a proper initial condition (>1.00625).
-    vector_tags = 'previous'
-  [../]
+    residual_tags = 'previous'
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = VacuumBC
     variable = u
     boundary = left
-  [../]
+  []
 
-  [./right]
+  [right]
     type = NeumannBC
     variable = u
     boundary = right
     value = 10
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./unorm]
+  [unorm]
     type = ElementL2Norm
     variable = u
-  [../]
+  []
 []
 
 [Problem]

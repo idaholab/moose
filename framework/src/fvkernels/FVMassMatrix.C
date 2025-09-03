@@ -20,11 +20,11 @@ FVMassMatrix::validParams()
       "Computes a 'mass matrix', which will just be a diagonal matrix for the finite volume "
       "method, meant for use in preconditioning schemes which require one");
   params.addParam<MooseFunctorName>("density", 1.0, "Optional density weighting functor");
-  params.set<MultiMooseEnum>("vector_tags") = "";
+  params.set<MultiMooseEnum>("residual_tags") = "";
   params.set<MultiMooseEnum>("matrix_tags") = "";
-  params.suppressParameter<MultiMooseEnum>("vector_tags");
-  params.suppressParameter<std::vector<TagName>>("extra_vector_tags");
-  params.suppressParameter<std::vector<TagName>>("absolute_value_vector_tags");
+  params.suppressParameter<MultiMooseEnum>("residual_tags");
+  params.suppressParameter<std::vector<TagName>>("extra_residual_tags");
+  params.suppressParameter<std::vector<TagName>>("absolute_value_residual_tags");
   params.set<bool>("matrix_only") = true;
   return params;
 }

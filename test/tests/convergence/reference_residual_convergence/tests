@@ -94,14 +94,14 @@
     type = RunException
     input = no_ref.i
     expect_err = 'Solve failed'
-    cli_args = 'Problem/extra_tag_residuals=absref Convergence/conv/reference_vector=absref Convergence/conv/zero_reference_residual_treatment=zero_tolerance'
+    cli_args = 'Problem/extra_tag_residuals=absref Convergence/conv/reference_residual=absref Convergence/conv/zero_reference_residual_treatment=zero_tolerance'
     requirement = 'The system shall treat convergence with a zero reference residual value as requiring zero residual value for convergence, using a convergence object.'
   []
   [zero_rel_tolerance_ref]
     type = CSVDiff
     input = no_ref.i
     csvdiff = 'zero_rel_tolerance_ref_out.csv'
-    cli_args = 'Problem/extra_tag_residuals=absref Convergence/conv/reference_vector=absref Convergence/conv/zero_reference_residual_treatment=relative_tolerance Convergence/conv/nl_rel_tol=1e-8 Outputs/file_base=zero_rel_tolerance_ref_out'
+    cli_args = 'Problem/extra_tag_residuals=absref Convergence/conv/reference_residual=absref Convergence/conv/zero_reference_residual_treatment=relative_tolerance Convergence/conv/nl_rel_tol=1e-8 Outputs/file_base=zero_rel_tolerance_ref_out'
     requirement = 'The system shall treat convergence with a zero reference residual value as converged if the residual is below the relative tolerance, using a convergence object.'
   []
 
@@ -125,7 +125,7 @@
       type = RunException
       input = no_ref.i
       cli_args = "Convergence/conv/normalization_type=local_L2 Problem/extra_tag_residuals=absref"
-      expect_err = "If local norm is used, a reference_vector must be provided"
+      expect_err = "If local norm is used, a reference_residual must be provided"
       detail = "if the reference vector is not provided when using local normalization."
     []
     [not_residual_tag]

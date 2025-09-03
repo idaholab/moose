@@ -164,7 +164,7 @@ pressure_tag = "pressure_grad"
     pressure = pressure
     block = 'spacer_block porous_block'
     porosity = porosity
-    extra_vector_tags = ${pressure_tag}
+    extra_residual_tags = ${pressure_tag}
   []
 
   [u_buoyancy]
@@ -214,7 +214,7 @@ pressure_tag = "pressure_grad"
     pressure = pressure
     block = 'spacer_block porous_block'
     porosity = porosity
-    extra_vector_tags = ${pressure_tag}
+    extra_residual_tags = ${pressure_tag}
   []
 
   [v_buoyancy]

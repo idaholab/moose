@@ -51,31 +51,31 @@ dt = 1
     type = TagVectorAux
     variable = positive
     v = lm
-    vector_tag = positive
+    residual_tag = positive
   []
   [diffusion_lm]
     type = TagVectorAux
     variable = diffusion_lm
     v = lm
-    vector_tag = diffusion
+    residual_tag = diffusion
   []
   [rest_lm]
     type = TagVectorAux
     variable = rest_lm
     v = lm
-    vector_tag = rest
+    residual_tag = rest
   []
   [diffusion_primal]
     type = TagVectorAux
     variable = diffusion_primal
     v = u
-    vector_tag = diffusion
+    residual_tag = diffusion
   []
   [rest_primal]
     type = TagVectorAux
     variable = rest_primal
     v = u
-    vector_tag = rest
+    residual_tag = rest
   []
 []
 
@@ -92,25 +92,25 @@ dt = 1
     type = TimeDerivativeLM
     variable = u
     lm_variable = lm
-    extra_vector_tags = 'rest'
+    extra_residual_tags = 'rest'
   []
   [diff]
     type = Diffusion
     variable = u
-    extra_vector_tags = 'diffusion'
+    extra_residual_tags = 'diffusion'
   []
   [diff_lm]
     type = LMDiffusion
     variable = lm
     primal_variable = u
-    extra_vector_tags = 'diffusion'
+    extra_residual_tags = 'diffusion'
   []
   [ffn]
     type = BodyForceLM
     variable = u
     lm_variable = lm
     function = '-1'
-    extra_vector_tags = 'rest'
+    extra_residual_tags = 'rest'
   []
 []
 
@@ -119,17 +119,17 @@ dt = 1
     type = CoupledForceNodalKernel
     variable = u
     v = lm
-    extra_vector_tags = 'rest'
+    extra_residual_tags = 'rest'
   []
   [corresponding_lm_portion]
     type = ReactionNodalKernel
     variable = lm
     coeff = 1
-    extra_vector_tags = 'rest'
+    extra_residual_tags = 'rest'
   []
   [positive_constraint]
     type = LowerBoundNodalKernel
-    extra_vector_tags = positive
+    extra_residual_tags = positive
     variable = lm
     v = u
     # exclude_boundaries = 'left right'

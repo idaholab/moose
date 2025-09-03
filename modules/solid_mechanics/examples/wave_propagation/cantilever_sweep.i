@@ -49,19 +49,19 @@
     type = Reaction
     variable = disp_x
     rate = 0 # filled by controller
-    extra_vector_tags = 'ref'
+    extra_residual_tags = 'ref'
   []
   [reaction_realy]
     type = Reaction
     variable = disp_y
     rate = 0 # filled by controller
-    extra_vector_tags = 'ref'
+    extra_residual_tags = 'ref'
   []
   [reaction_realz]
     type = Reaction
     variable = disp_z
     rate = 0 # filled by controller
-    extra_vector_tags = 'ref'
+    extra_residual_tags = 'ref'
   []
 []
 

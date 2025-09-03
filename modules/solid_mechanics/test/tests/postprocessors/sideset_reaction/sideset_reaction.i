@@ -28,7 +28,7 @@
 [Physics/SolidMechanics/QuasiStatic]
   [plane_strain]
     strain = FINITE
-    extra_vector_tags = 'ref'
+    extra_residual_tags = 'ref'
     add_variables = true
   []
 []

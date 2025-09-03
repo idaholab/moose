@@ -5,7 +5,7 @@
 []
 
 [GlobalParams]
-  absolute_value_vector_tags = 'absref'
+  absolute_value_residual_tags = 'absref'
 []
 
 [Problem]

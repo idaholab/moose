@@ -27,7 +27,7 @@
     type = MatReaction
     variable = u
     reaction_rate = L
-    extra_vector_tags = 'eigen'
+    extra_residual_tags = 'eigen'
   []
 []
 

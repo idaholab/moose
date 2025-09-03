@@ -30,6 +30,7 @@ TaggingInterface::validParams()
       "matrix_only", false, "Whether this object is only doing assembly to matrices (no vectors)");
 
   params.addDeprecatedParam<MultiMooseEnum>("vector_tags",
+                                            vtags,
                                             "The tag for the vectors this Kernel should fill",
                                             "This parameter has been renamed to 'residual_tags'");
   params.addParam<MultiMooseEnum>(
@@ -82,7 +83,7 @@ TaggingInterface::TaggingInterface(const MooseObject * moose_object)
   }
   else
   {
-    for (auto & residual_tag_name : residual_tag_names)
+    for (const auto & residual_tag_name : residual_tag_names)
     {
       const TagID residual_tag_id = _subproblem.getVectorTagID(residual_tag_name.name());
       if (_subproblem.vectorTagType(residual_tag_id) != Moose::VECTOR_TAG_RESIDUAL)

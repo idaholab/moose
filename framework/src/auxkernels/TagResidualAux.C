@@ -17,13 +17,17 @@ TagResidualAux::validParams()
 {
   InputParameters params = TagAuxBase<AuxKernel>::validParams();
   params.addClassDescription("Couple a tag residual vector, and return its dof value");
-  params.addRequiredParam<TagName>("vector_tag", "Name of the vector tag this AuxKernel works on");
+  params.addDeprecatedParam<TagName>("vector_tag",
+                                     "Name of the vector tag this AuxKernel works on",
+                                     "This parameter has been renamed to 'residual_tag'");
+  params.addRequiredParam<TagName>("residual_tag",
+                                   "Name of the residual tag this AuxKernel works on");
   return params;
 }
 
 TagResidualAux::TagResidualAux(const InputParameters & parameters)
   : TagAuxBase<AuxKernel>(parameters),
-    _v(coupledVectorTagValue("v", "vector_tag")),
+    _v(coupledVectorTagValue("v", "residual_tag")),
     _v_var(*getFieldVar("v", 0))
 {
   checkCoupledVariable(&_v_var, &_var);
@@ -34,15 +38,15 @@ TagResidualAux::initialSetup()
 {
   TagAuxBase<AuxKernel>::initialSetup();
 
-  const auto vector_tag_id = _subproblem.getVectorTagID(getParam<TagName>("vector_tag"));
-  const auto vector_tag_type = _subproblem.vectorTagType(vector_tag_id);
-  if (vector_tag_type == Moose::VECTOR_TAG_SOLUTION)
-    paramError("vector_tag",
-               "The provided vector tag corresponds to a solution vector tag. Please use "
+  const auto tag_param_name = isParamValid("vector_tag") ? "vector_tag" : "residual_tag";
+  const auto tag_id = _subproblem.getVectorTagID(getParam<TagName>(tag_param_name));
+  const auto tag_type = _subproblem.vectorTagType(tag_id);
+  if (tag_type == Moose::VECTOR_TAG_SOLUTION)
+    paramError(tag_param_name,
+               "The provided tag corresponds to a solution vector. Please use "
                "'TagSolutionAux' instead.");
-  if (vector_tag_type != Moose::VECTOR_TAG_RESIDUAL)
-    paramError("vector_tag",
-               "The provided vector tag does not correspond to a residual vector tag.");
+  if (tag_type != Moose::VECTOR_TAG_RESIDUAL)
+    paramError(tag_param_name, "The provided tag does not correspond to a residual vector.");
 }
 
 Real

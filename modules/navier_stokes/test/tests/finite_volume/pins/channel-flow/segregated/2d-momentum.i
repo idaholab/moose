@@ -86,7 +86,7 @@ pressure_tag = "pressure_grad"
     momentum_component = 'x'
     pressure = pressure
     porosity = porosity
-    extra_vector_tags = ${pressure_tag}
+    extra_residual_tags = ${pressure_tag}
   []
   [u_friction]
     type = PINSFVMomentumFriction
@@ -119,7 +119,7 @@ pressure_tag = "pressure_grad"
     momentum_component = 'y'
     pressure = pressure
     porosity = porosity
-    extra_vector_tags = ${pressure_tag}
+    extra_residual_tags = ${pressure_tag}
   []
   [v_friction]
     type = PINSFVMomentumFriction

@@ -47,7 +47,7 @@
     temperature = temp
     eigenstrain_names = 'thermal_eigenstrain'
     generate_output = 'vonmises_stress stress_xx stress_yy hydrostatic_stress max_principal_stress strain_xy elastic_strain_xx stress_xy'
-    extra_vector_tags = 'ref'
+    extra_residual_tags = 'ref'
     use_finite_deform_jacobian = true
     incremental = true
   []

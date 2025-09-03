@@ -60,12 +60,22 @@ GeneralizedPlaneStrainAction::validParams()
                                               "The list of ids of the blocks (subdomain) "
                                               "that the GeneralizedPlaneStrain kernels "
                                               "will be applied to");
-  params.addParam<std::vector<TagName>>(
+  params.addDeprecatedParam<std::vector<TagName>>(
       "extra_vector_tags",
-      "The tag names for extra vectors that residual data should be saved into");
-  params.addParam<std::vector<TagName>>("absolute_value_vector_tags",
-                                        "The tag names for extra vectors that the absolute value "
-                                        "of the residual should be accumulated into");
+      "The tag names for extra vectors that residual data should be saved into",
+      "This parameter has been renamed to 'extra_residual_tags'");
+  params.addParam<std::vector<TagName>>(
+      "extra_residual_tags",
+      "The tag names for extra residuals that residual data should be saved into");
+  params.addDeprecatedParam<std::vector<TagName>>(
+      "absolute_value_vector_tags",
+      "The tags for the vectors this residual object should fill with the absolute value of the "
+      "residual contribution",
+      "This parameter has been renamed to 'absolute_value_residual_tags'");
+  params.addParam<std::vector<TagName>>(
+      "absolute_value_residual_tags",
+      "The tags for the residuals this residual object should fill with the absolute value of the "
+      "residual contribution");
 
   return params;
 }
@@ -167,12 +177,11 @@ GeneralizedPlaneStrainAction::act()
     // set the UserObjectName from previously added UserObject
     params.set<UserObjectName>("generalized_plane_strain") = uo_name;
 
-    if (isParamValid("extra_vector_tags"))
-      params.set<std::vector<TagName>>("extra_vector_tags") =
-          getParam<std::vector<TagName>>("extra_vector_tags");
-    if (isParamValid("absolute_value_vector_tags"))
-      params.set<std::vector<TagName>>("absolute_value_vector_tags") =
-          getParam<std::vector<TagName>>("absolute_value_vector_tags");
+    params.applySpecificParameters(parameters(),
+                                   {"extra_vector_tags",
+                                    "extra_residual_tags",
+                                    "absolute_value_vector_tags",
+                                    "absolute_value_residual_tags"});
 
     _problem->addScalarKernel(sk_type, _name + "_GeneralizedPlaneStrain", params);
   }

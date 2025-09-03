@@ -57,7 +57,7 @@
     add_variables = true
     strain = FINITE
     save_in = 'saved_x saved_y'
-    extra_vector_tags = 'ref'
+    extra_residual_tags = 'ref'
   []
 []
 

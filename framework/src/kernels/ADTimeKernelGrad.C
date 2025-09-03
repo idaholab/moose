@@ -21,7 +21,7 @@ InputParameters
 ADTimeKernelGradTempl<T>::validParams()
 {
   InputParameters params = ADKernelGradTempl<T>::validParams();
-  params.set<MultiMooseEnum>("vector_tags") = "time";
+  params.set<MultiMooseEnum>("residual_tags") = "time";
   params.set<MultiMooseEnum>("matrix_tags") = "system time";
   return params;
 }

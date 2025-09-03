@@ -94,7 +94,7 @@ pressure_tag = "pressure_grad"
     variable = vel_x
     momentum_component = 'x'
     pressure = pressure
-    extra_vector_tags = ${pressure_tag}
+    extra_residual_tags = ${pressure_tag}
   []
   [v_advection]
     type = INSFVMomentumAdvection
@@ -115,7 +115,7 @@ pressure_tag = "pressure_grad"
     variable = vel_y
     momentum_component = 'y'
     pressure = pressure
-    extra_vector_tags = ${pressure_tag}
+    extra_residual_tags = ${pressure_tag}
   []
   [w_advection]
     type = INSFVMomentumAdvection
@@ -136,7 +136,7 @@ pressure_tag = "pressure_grad"
     variable = vel_z
     momentum_component = 'z'
     pressure = pressure
-    extra_vector_tags = ${pressure_tag}
+    extra_residual_tags = ${pressure_tag}
   []
   [p_diffusion]
     type = FVAnisotropicDiffusion

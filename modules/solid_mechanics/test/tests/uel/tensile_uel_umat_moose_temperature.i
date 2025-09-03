@@ -104,7 +104,7 @@
     jtype = 17
     num_state_vars = 177
     constant_properties = '190 28.0 3.0 1.0 6.0 0.0 0.0 23.0 25.0 26.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 31700000.0 0.32 6.67e-06 1e-08 5000.0 4.0' # 28 properties
-    extra_vector_tags = 'kernel_residual'
+    extra_residual_tags = 'kernel_residual'
   []
 []
 
@@ -125,13 +125,13 @@
     type = TagResidualAux
     variable = res_x
     v = disp_x
-    vector_tag = kernel_residual
+    residual_tag = kernel_residual
   []
   [res_y]
     type = TagResidualAux
     variable = res_y
     v = disp_y
-    vector_tag = kernel_residual
+    residual_tag = kernel_residual
   []
 []
 

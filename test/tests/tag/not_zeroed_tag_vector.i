@@ -1,6 +1,6 @@
 [Problem]
   extra_tag_residuals = zeroed_tag
-  not_zeroed_tag_vectors = not_zeroed_tag
+  not_zeroed_tag_residuals = not_zeroed_tag
 []
 
 [Mesh]
@@ -36,7 +36,7 @@
     variable = u
     function = switch_off
     point = '0 0 0'
-    vector_tags = 'zeroed_tag not_zeroed_tag'
+    residual_tags = 'zeroed_tag not_zeroed_tag'
   []
 []
 
@@ -51,13 +51,13 @@
   [not_zeroed_tag_value]
     type = TagVectorAux
     variable = not_zeroed_tag
-    vector_tag = not_zeroed_tag
+    residual_tag = not_zeroed_tag
     v = u
   []
   [zeroed_tag_value]
     type = TagVectorAux
     variable = zeroed_tag
-    vector_tag = zeroed_tag
+    residual_tag = zeroed_tag
     v = u
   []
 []

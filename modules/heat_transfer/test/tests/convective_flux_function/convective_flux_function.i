@@ -42,7 +42,7 @@
     type = TagResidualAux
     variable = flux
     v = temp
-    vector_tag = 'bcs'
+    residual_tag = 'bcs'
     remove_variable_scaling = true
   []
 []
@@ -74,7 +74,7 @@
     boundary = right
     T_infinity = 200.0
     coefficient = 10.0 #This will behave as described in the header of this file if this evaluates to 10
-    extra_vector_tags = 'bcs'
+    extra_residual_tags = 'bcs'
   []
 []
 

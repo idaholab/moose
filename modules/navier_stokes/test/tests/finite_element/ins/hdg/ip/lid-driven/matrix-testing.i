@@ -125,7 +125,7 @@ l = 1
     u = vel_x
     v = vel_y
     component = 0
-    vector_tags = ''
+    residual_tags = ''
     matrix_tags = 'grad_div combined'
   []
   [v_jump]
@@ -135,7 +135,7 @@ l = 1
     u = vel_x
     v = vel_y
     component = 1
-    vector_tags = ''
+    residual_tags = ''
     matrix_tags = 'grad_div combined'
   []
 []
@@ -163,7 +163,7 @@ l = 1
     u = vel_x
     v = vel_y
     component = 0
-    vector_tags = ''
+    residual_tags = ''
     matrix_tags = 'jump combined'
   []
   [v_jump]
@@ -173,7 +173,7 @@ l = 1
     u = vel_x
     v = vel_y
     component = 1
-    vector_tags = ''
+    residual_tags = ''
     matrix_tags = 'jump combined'
   []
 []
@@ -241,7 +241,7 @@ l = 1
     u = vel_x
     v = vel_y
     component = 0
-    vector_tags = ''
+    residual_tags = ''
     matrix_tags = 'jump combined'
     boundary = 'left right bottom'
     dirichlet_value = 'walls'
@@ -253,7 +253,7 @@ l = 1
     u = vel_x
     v = vel_y
     component = 1
-    vector_tags = ''
+    residual_tags = ''
     matrix_tags = 'jump combined'
     boundary = 'left right bottom'
     dirichlet_value = 'walls'
@@ -265,7 +265,7 @@ l = 1
     u = vel_x
     v = vel_y
     component = 0
-    vector_tags = ''
+    residual_tags = ''
     matrix_tags = 'jump combined'
     boundary = 'top'
     dirichlet_value = 'top'
@@ -277,7 +277,7 @@ l = 1
     u = vel_x
     v = vel_y
     component = 1
-    vector_tags = ''
+    residual_tags = ''
     matrix_tags = 'jump combined'
     boundary = 'top'
     dirichlet_value = 'top'

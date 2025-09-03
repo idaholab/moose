@@ -22,7 +22,7 @@ LinearSystemContributionObject::validParams()
   params += TaggingInterface::validParams();
 
   MultiMooseEnum vtags("rhs time", "rhs", true);
-  auto & vector_tag_enum = params.set<MultiMooseEnum>("vector_tags", true);
+  auto & vector_tag_enum = params.set<MultiMooseEnum>("residual_tags", true);
   vector_tag_enum = vtags;
 
   params.addRequiredParam<LinearVariableName>(

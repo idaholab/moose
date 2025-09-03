@@ -58,13 +58,22 @@ ExplicitDynamicsContactAction::validParams()
   params.addParam<Real>("penalty", 1e8, "Penalty factor for normal contact.");
   params.addClassDescription("Sets up all objects needed for mechanical contact enforcement in "
                              "explicit dynamics simulations.");
-  params.addParam<std::vector<TagName>>(
+  params.addDeprecatedParam<std::vector<TagName>>(
       "extra_vector_tags",
-      "The tag names for extra vectors that residual data should be saved into");
+      "The tag names for extra vectors that residual data should be saved into",
+      "This parameter has been renamed to 'extra_residual_tags'");
   params.addParam<std::vector<TagName>>(
+      "extra_residual_tags",
+      "The tag names for extra residuals that residual data should be saved into");
+  params.addDeprecatedParam<std::vector<TagName>>(
       "absolute_value_vector_tags",
-      "The tags for the vectors this residual object should fill with the "
-      "absolute value of the residual contribution");
+      "The tags for the vectors this residual object should fill with the absolute value of the "
+      "residual contribution",
+      "This parameter has been renamed to 'absolute_value_residual_tags'");
+  params.addParam<std::vector<TagName>>(
+      "absolute_value_residual_tags",
+      "The tags for the residuals this residual object should fill with the absolute value of the "
+      "residual contribution");
 
   params.addParam<VariableName>("secondary_gap_offset",
                                 "Offset to gap distance from secondary side");
@@ -397,7 +406,10 @@ ExplicitDynamicsContactAction::addNodeFaceContact()
       params.set<NonlinearVariableName>("variable") = displacements[i];
       params.set<std::vector<VariableName>>("primary_variable") = {displacements[i]};
       params.applySpecificParameters(parameters(),
-                                     {"extra_vector_tags", "absolute_value_vector_tags"});
+                                     {"extra_vector_tags",
+                                      "extra_residual_tags",
+                                      "absolute_value_vector_tags",
+                                      "absolute_value_residual_tags"});
       _problem->addConstraint(constraint_type, name, params);
     }
   }

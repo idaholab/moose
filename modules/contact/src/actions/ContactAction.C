@@ -260,13 +260,22 @@ ContactAction::validParams()
   params.addCoupledVar("wear_depth",
                        "The name of the mortar auxiliary variable that is used to modify the "
                        "weighted gap definition");
-  params.addParam<std::vector<TagName>>(
+  params.addDeprecatedParam<std::vector<TagName>>(
       "extra_vector_tags",
-      "The tag names for extra vectors that residual data should be saved into");
+      "The tag names for extra vectors that residual data should be saved into",
+      "This parameter has been renamed to 'extra_residual_tags'");
   params.addParam<std::vector<TagName>>(
+      "extra_residual_tags",
+      "The tag names for extra residuals that residual data should be saved into");
+  params.addDeprecatedParam<std::vector<TagName>>(
       "absolute_value_vector_tags",
-      "The tags for the vectors this residual object should fill with the "
-      "absolute value of the residual contribution");
+      "The tags for the vectors this residual object should fill with the absolute value of the "
+      "residual contribution",
+      "This parameter has been renamed to 'absolute_value_residual_tags'");
+  params.addParam<std::vector<TagName>>(
+      "absolute_value_residual_tags",
+      "The tags for the residuals this residual object should fill with the absolute value of the "
+      "residual contribution");
   params.addParam<bool>(
       "use_petrov_galerkin",
       false,
@@ -1004,7 +1013,9 @@ ContactAction::addMortarContact()
                                      {"correct_edge_dropping",
                                       "normalize_c",
                                       "extra_vector_tags",
-                                      "absolute_value_vector_tags"});
+                                      "extra_residual_tags",
+                                      "absolute_value_vector_tags",
+                                      "absolute_value_residual_tags"});
 
       _problem->addConstraint(
           mortar_constraint_name, action_name + "_normal_lm_weighted_gap", params);
@@ -1058,7 +1069,10 @@ ContactAction::addMortarContact()
 
       params.set<Real>("mu") = getParam<Real>("friction_coefficient");
       params.applySpecificParameters(parameters(),
-                                     {"extra_vector_tags", "absolute_value_vector_tags"});
+                                     {"extra_vector_tags",
+                                      "absolute_value_vector_tags",
+                                      "extra_residual_tags",
+                                      "absolute_value_residual_tags"});
 
       _problem->addConstraint(mortar_constraint_name, action_name + "_tangential_lm", params);
       _problem->haveADObjects(true);
@@ -1091,7 +1105,10 @@ ContactAction::addMortarContact()
       if (is_additional_frictional_constraint)
         params.set<MooseEnum>("direction") = "direction_2";
       params.applySpecificParameters(parameters(),
-                                     {"extra_vector_tags", "absolute_value_vector_tags"});
+                                     {"extra_vector_tags",
+                                      "absolute_value_vector_tags",
+                                      "extra_residual_tags",
+                                      "absolute_value_residual_tags"});
 
       for (unsigned int i = 0; i < displacements.size(); ++i)
       {
@@ -1222,7 +1239,10 @@ ContactAction::addNodeFaceContact()
       params.set<NonlinearVariableName>("variable") = displacements[i];
       params.set<std::vector<VariableName>>("primary_variable") = {displacements[i]};
       params.applySpecificParameters(parameters(),
-                                     {"extra_vector_tags", "absolute_value_vector_tags"});
+                                     {"extra_vector_tags",
+                                      "extra_residual_tags",
+                                      "absolute_value_vector_tags",
+                                      "absolute_value_residual_tags"});
       _problem->addConstraint(constraint_type, name, params);
     }
   }

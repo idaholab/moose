@@ -122,7 +122,7 @@
   [all]
     add_variables = true
     strain = SMALL
-    extra_vector_tags = 'ref'
+    extra_residual_tags = 'ref'
     save_in = 'saved_x saved_y saved_z'
   []
 []

@@ -103,7 +103,7 @@ pressure_tag = "pressure_grad"
     momentum_component = 'x'
     pressure = pressure
     porosity = porosity
-    extra_vector_tags = ${pressure_tag}
+    extra_residual_tags = ${pressure_tag}
   []
 
   [v_advection]
@@ -128,7 +128,7 @@ pressure_tag = "pressure_grad"
     momentum_component = 'y'
     pressure = pressure
     porosity = porosity
-    extra_vector_tags = ${pressure_tag}
+    extra_residual_tags = ${pressure_tag}
   []
 
   [p_diffusion]

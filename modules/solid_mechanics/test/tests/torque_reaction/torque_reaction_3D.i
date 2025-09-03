@@ -43,19 +43,19 @@
 [AuxKernels]
   [saved_x]
     type = ReactionForceAux
-    vector_tag = 'ref'
+    residual_tag = 'ref'
     v = 'disp_x'
     variable = 'saved_x'
   []
   [saved_y]
     type = ReactionForceAux
-    vector_tag = 'ref'
+    residual_tag = 'ref'
     v = 'disp_y'
     variable = 'saved_y'
   []
   [saved_z]
     type = ReactionForceAux
-    vector_tag = 'ref'
+    residual_tag = 'ref'
     v = 'disp_z'
     variable = 'saved_z'
   []
@@ -66,7 +66,7 @@
     strain = SMALL
     generate_output = 'stress_xx stress_yy stress_zz'
     add_variables = true
-    extra_vector_tags = 'ref'
+    extra_residual_tags = 'ref'
   []
 []
 

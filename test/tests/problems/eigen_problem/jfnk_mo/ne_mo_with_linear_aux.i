@@ -27,7 +27,8 @@
 []
 
 [AuxVariables]
-  [w][]
+  [w]
+  []
 []
 
 [AuxKernels]
@@ -51,7 +52,7 @@
     type = ArrayReaction
     variable = u
     reaction_coefficient = rc
-    extra_vector_tags = 'eigen'
+    extra_residual_tags = 'eigen'
   []
 
   [diffv]
@@ -64,7 +65,7 @@
     type = ArrayReaction
     variable = v
     reaction_coefficient = rc
-    extra_vector_tags = 'eigen'
+    extra_residual_tags = 'eigen'
   []
 []
 

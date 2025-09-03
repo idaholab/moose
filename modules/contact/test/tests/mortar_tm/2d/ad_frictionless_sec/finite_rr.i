@@ -84,7 +84,7 @@ name = 'finite_rr'
     strain = FINITE
     generate_output = 'stress_xx stress_yy stress_zz vonmises_stress hydrostatic_stress strain_xx strain_yy strain_zz'
     block = 'plank block'
-    extra_vector_tags = 'ref'
+    extra_residual_tags = 'ref'
     use_automatic_differentiation = true
   []
 []

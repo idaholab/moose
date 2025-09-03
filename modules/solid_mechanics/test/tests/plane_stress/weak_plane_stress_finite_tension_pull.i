@@ -54,7 +54,7 @@
   [plane_stress]
     strain = FINITE
     planar_formulation = WEAK_PLANE_STRESS
-    extra_vector_tags = 'ref'
+    extra_residual_tags = 'ref'
     generate_output = 'stress_xx stress_xy stress_yy stress_zz strain_xx strain_xy strain_yy'
   []
 []
@@ -62,7 +62,7 @@
 [AuxKernels]
   [react_x]
     type = ReactionForceAux
-    vector_tag = 'ref'
+    residual_tag = 'ref'
     v = 'disp_x'
     variable = 'react_x'
   []

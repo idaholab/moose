@@ -91,7 +91,7 @@
     primary_subdomain = 10000
     secondary_boundary = 101
     secondary_subdomain = 10001
-    absolute_value_vector_tags = 'ref'
+    absolute_value_residual_tags = 'ref'
   []
   [ced_v]
     type = EqualValueConstraint
@@ -101,7 +101,7 @@
     primary_subdomain = 10000
     secondary_boundary = 101
     secondary_subdomain = 10001
-    absolute_value_vector_tags = 'ref'
+    absolute_value_residual_tags = 'ref'
   []
 []
 

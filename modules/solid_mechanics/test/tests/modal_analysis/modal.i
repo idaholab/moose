@@ -33,19 +33,19 @@ index = 0
   [mass_x]
     type = ADCoefReaction
     variable = disp_x
-    extra_vector_tags = 'eigen'
+    extra_residual_tags = 'eigen'
     coefficient = -2.7e3
   []
   [mass_y]
     type = ADCoefReaction
     variable = disp_y
-    extra_vector_tags = 'eigen'
+    extra_residual_tags = 'eigen'
     coefficient = -2.7e3
   []
   [mass_z]
     type = ADCoefReaction
     variable = disp_z
-    extra_vector_tags = 'eigen'
+    extra_residual_tags = 'eigen'
     coefficient = -2.7e3
   []
   [stiffness_x]

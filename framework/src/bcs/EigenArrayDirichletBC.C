@@ -16,7 +16,7 @@ EigenArrayDirichletBC::validParams()
 {
   InputParameters params = ArrayNodalBC::validParams();
 
-  params.set<MultiMooseEnum>("vector_tags") = "eigen";
+  params.set<MultiMooseEnum>("residual_tags") = "eigen";
   params.set<MultiMooseEnum>("matrix_tags") = "eigen";
 
   params.addClassDescription("Array Dirichlet BC for eigenvalue solvers");

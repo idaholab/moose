@@ -19,7 +19,7 @@ FVTimeKernel::validParams()
   InputParameters params = FVElementalKernel::validParams();
   params.addClassDescription(
       "Residual contribution from time derivative of a variable for the finite volume method.");
-  params.set<MultiMooseEnum>("vector_tags") = "time";
+  params.set<MultiMooseEnum>("residual_tags") = "time";
   params.set<MultiMooseEnum>("matrix_tags") = "system time";
   return params;
 }

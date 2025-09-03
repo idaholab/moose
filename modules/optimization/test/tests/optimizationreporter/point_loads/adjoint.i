@@ -25,7 +25,7 @@
 [AuxKernels]
   [residual_src]
     type = TagResidualAux
-    vector_tag = 'ref'
+    residual_tag = 'ref'
     v = 'adjoint'
     variable = 'residual_src'
   []
@@ -53,7 +53,7 @@
     y_coord_name = misfit/measurement_ycoord
     z_coord_name = misfit/measurement_zcoord
     value_name = misfit/misfit_values
-    extra_vector_tags = 'ref'
+    extra_residual_tags = 'ref'
   []
 []
 

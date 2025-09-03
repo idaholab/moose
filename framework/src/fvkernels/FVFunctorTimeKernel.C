@@ -20,7 +20,7 @@ FVFunctorTimeKernel::validParams()
   params.addClassDescription("Residual contribution from time derivative of an AD functor (default "
                              "is the variable this kernel is acting upon if the 'functor' "
                              "parameter is not supplied)  for the finite volume method.");
-  params.set<MultiMooseEnum>("vector_tags") = "time";
+  params.set<MultiMooseEnum>("residual_tags") = "time";
   params.set<MultiMooseEnum>("matrix_tags") = "system time";
   params.addParam<MooseFunctorName>("functor",
                                     "The functor this kernel queries for the time derivative.");

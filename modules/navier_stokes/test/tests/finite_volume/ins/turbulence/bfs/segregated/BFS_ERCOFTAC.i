@@ -53,14 +53,14 @@ wall_treatment = 'eq_incremental' # Options: eq_newton, eq_incremental, eq_linea
   [corner_walls]
     type = SideSetsBetweenSubdomainsGenerator
     input = gen
-    primary_block ='1'
-    paired_block ='2'
+    primary_block = '1'
+    paired_block = '2'
     new_boundary = 'wall-side'
   []
   [delete_bottom]
     type = BlockDeletionGenerator
     input = corner_walls
-    block ='2'
+    block = '2'
   []
   # Prevent test diffing on distributed parallel element numbering
   allow_renumbering = false
@@ -146,7 +146,7 @@ wall_treatment = 'eq_incremental' # Options: eq_newton, eq_incremental, eq_linea
     variable = vel_x
     momentum_component = 'x'
     pressure = pressure
-    extra_vector_tags = ${pressure_tag}
+    extra_residual_tags = ${pressure_tag}
   []
 
   [v_advection]
@@ -175,7 +175,7 @@ wall_treatment = 'eq_incremental' # Options: eq_newton, eq_incremental, eq_linea
     variable = vel_y
     momentum_component = 'y'
     pressure = pressure
-    extra_vector_tags = ${pressure_tag}
+    extra_residual_tags = ${pressure_tag}
   []
 
   [p_diffusion]
