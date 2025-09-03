@@ -46,16 +46,26 @@ Repository = "https://github.com/idaholab/moose"
 Issues = "https://github.com/idaholab/moose/issues"
 
 [project.optional-dependencies]
-dev = ["pytest"]
+dev = ["pytest", "black"]
 
 [tool.setuptools.packages.find]
 where = ["python"]
 exclude = ["doc*", "peacock*", "pycapabilities*"]
 
+[tool.black]
+include = '\.py$'
+extend-exclude = '''
+(
+      ^/python/doc
+    | ^/python/peacock
+)
+'''
+
 [tool.pytest.ini_options]
 python_classes = "" # This will enforce that all tests derive from unittest.TestCase
 minversion = "6.0"
 testpaths = [
+    "python/chigger",
     "python/mms",
     "python/MooseDocs",
     "python/moosesqa",
