@@ -15,7 +15,7 @@
 #include "MFEMGeneralUserObject.h"
 
 /**
- * Declares parsed functions based on names and values prescribed by input parameters.
+ * Declares arbitrary parsed function of position, time, and any number of problem variables.
  */
 class MFEMParsedFunction : public MFEMGeneralUserObject, public FunctionParserUtils<false>
 {
@@ -34,7 +34,7 @@ protected:
   const bool _use_xyzt;
   /// coordinate and time variable names
   const std::vector<std::string> _xyzt;
-  /// function parser object for the resudual and on-diagonal Jacobian
+  /// function parser object
   SymFunctionPtr _func_F;
 };
 

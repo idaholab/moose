@@ -13,8 +13,6 @@
 
 #include "MFEMContainers.h"
 #include "FunctionParserUtils.h"
-#include <vector>
-#include <functional>
 
 /**
  * Define a coefficient that, given a set of grid functions u, v, w, ...,

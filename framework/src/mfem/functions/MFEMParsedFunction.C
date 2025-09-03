@@ -11,10 +11,7 @@
 
 #include "MFEMParsedFunction.h"
 #include "MFEMScalarParsedCoeff.h"
-#include "InputParameters.h"
 #include "MFEMProblem.h"
-#include <vector>
-#include <memory>
 
 registerMooseObject("MooseApp", MFEMParsedFunction);
 
@@ -24,13 +21,11 @@ MFEMParsedFunction::validParams()
   InputParameters params = MFEMGeneralUserObject::validParams();
   params += FunctionParserUtils<false>::validParams();
   params.registerBase("Function");
-  params.addClassDescription("Parses function expression based on names and values "
-                             "prescribed by input parameters.");
+  params.addClassDescription("Parses function expression of position, time and problem variables.");
   params.addRequiredCustomTypeParam<std::string>(
-      "function", "FunctionExpression", "Parsed function expression to compute");
-  params.deprecateParam("function", "expression", "02/07/2024");
+      "expression", "FunctionExpression", "Parsed function expression to compute");
   params.addRequiredParam<std::vector<VariableName>>("var_names",
-                                                     "The names of the function variable names");
+                                                     "The names of the function variables");
   params.addParam<bool>(
       "use_xyzt",
       false,
