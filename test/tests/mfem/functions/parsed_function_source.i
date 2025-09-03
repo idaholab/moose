@@ -1,7 +1,7 @@
 [Mesh]
   type = MFEMMesh
-  file = ../mesh/mug.e
-  dim = 3
+  file = ../mesh/hinomaru.e
+  dim = 2
 []
 
 [Problem]
@@ -43,13 +43,15 @@
   [bottom]
     type = MFEMScalarDirichletBC
     variable = concentration
-    boundary = 'bottom'
+    boundary = 1
+    coefficient = 1
   []
 []
+
 [Functions]
   [force]
     type = MFEMParsedFunction
-    expression = 'aux_var*sin(10*z)'
+    expression = 'aux_var*sin(y*x)'
     use_xyzt = true
     var_names = 'aux_var'
   []
@@ -64,6 +66,7 @@
     type = MFEMDomainLFKernel
     variable = concentration
     coefficient = force
+    block = wire
   []
 []
 
