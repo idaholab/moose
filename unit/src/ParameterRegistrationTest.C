@@ -68,12 +68,11 @@ testValue(const std::string & hit_value, const T & value = T())
   ASSERT_EQ(*test_param.value, value);
 }
 
-template <typename T>
+template <typename T, class ExceptionType = std::invalid_argument>
 void
 testValueError(const std::string & hit_value, const std::string & error)
 {
-  Moose::UnitUtils::assertThrows<std::invalid_argument>([&hit_value]() { testValue<T>(hit_value); },
-                                                        error);
+  Moose::UnitUtils::assertThrows<ExceptionType>([&hit_value]() { testValue<T>(hit_value); }, error);
 }
 
 TEST(ParameterRegistrationTest, setScalarValue)
@@ -309,9 +308,7 @@ TEST(ParameterRegistrationTest, testBool)
     testValue<bool>("\"" + v + "\"", false);
   }
   // failed scalar
-  Moose::UnitUtils::assertThrows<std::invalid_argument>(
-      []() { testValue<bool>("foo"); },
-      "invalid boolean syntax for parameter: " + param_name + "='foo'");
+  testValueError<bool>("foo", "invalid boolean syntax for parameter: " + param_name + "='foo'");
 
   // vector bools
   for (const auto & true_v : trues)
@@ -321,9 +318,8 @@ TEST(ParameterRegistrationTest, testBool)
       testValue<std::vector<bool>>("\"" + true_v + " " + false_v + " \"", {true, false});
       testValue<std::vector<bool>>("\"" + false_v + " " + true_v + " \"", {false, true});
       // failed value
-      Moose::UnitUtils::assertThrows<std::invalid_argument>(
-          []() { testValue<std::vector<bool>>("\"true bar\""); },
-          "invalid syntax for bool vector parameter: " + param_name + "[1]='bar'");
+      testValueError<std::vector<bool>>(
+          "\"true bar\"", "invalid syntax for bool vector parameter: " + param_name + "[1]='bar'");
     }
 }
 
@@ -334,10 +330,9 @@ TEST(ParameterRegistrationTest, testScalarComponentValue)
   testValue<RealVectorValue>("\"4 5.0 6\"", RealVectorValue(4, 5, 6));
 
   // must be size 3
-  Moose::UnitUtils::assertThrows<std::invalid_argument>(
-      []() { testValue<Point>("\"1\""); },
-      "wrong number of values in libMesh::Point parameter '" + param_name +
-          "': was given 1 component(s) but should have 3");
+  testValueError<Point>("\"1\"",
+                        "wrong number of values in libMesh::Point parameter '" + param_name +
+                            "': was given 1 component(s) but should have 3");
 }
 
 TEST(ParameterRegistrationTest, testRealEigenVector)
@@ -349,8 +344,7 @@ TEST(ParameterRegistrationTest, testRealEigenVector)
   testValue<RealEigenVector>("\" 1\n2.0\"", expected_value);
 
   // conversion failed
-  Moose::UnitUtils::assertThrows<hit::Error>([]() { testValue<RealEigenVector>("a"); },
-                                             "cannot convert field 'key' value 'a' to float");
+  testValueError<RealEigenVector, hit::Error>("a", "cannot convert field 'key' value 'a' to float");
 }
 
 TEST(ParameterRegistrationTest, testRealEigenMatrix)
@@ -364,13 +358,11 @@ TEST(ParameterRegistrationTest, testRealEigenMatrix)
   testValue<RealEigenMatrix>("\"1.0 2; 3 4.0\"", expected_value);
 
   // not square
-  Moose::UnitUtils::assertThrows<std::invalid_argument>(
-      []() { testValue<RealEigenMatrix>("\"3; 1 2\""); }, "matrix is not square");
+  testValueError<RealEigenMatrix>("\"3; 1 2\"", "matrix is not square");
 
   // invalid syntax
-  Moose::UnitUtils::assertThrows<std::invalid_argument>(
-      []() { testValue<RealEigenMatrix>("\"1 2.0; a 1\""); },
-      "invalid syntax for parameter: " + param_name + "[1]='a 1'");
+  testValueError<RealEigenMatrix>("\"1 2.0; a 1\"",
+                                  "invalid syntax for parameter: " + param_name + "[1]='a 1'");
 }
 
 TEST(ParameterRegistrationTest, testMooseEnum)
@@ -412,13 +404,11 @@ TEST(ParameterRegistrationTest, testRealTensorValue)
                              RealTensorValue(1, 2, 3, 4, 5, 6, 7, 8, 9));
 
   // must have 9 components
-  Moose::UnitUtils::assertThrows<std::invalid_argument>(
-      []() { testValue<RealTensorValue>("\"1\""); },
-      "invalid RealTensorValue parameter '" + param_name + "': size is 1 but should be 9");
+  testValueError<RealTensorValue>(
+      "\"1\"", "invalid RealTensorValue parameter '" + param_name + "': size is 1 but should be 9");
 
   // conversion failed
-  Moose::UnitUtils::assertThrows<hit::Error>([]() { testValue<RealTensorValue>("a"); },
-                                             "cannot convert field 'key' value 'a' to float");
+  testValueError<RealTensorValue, hit::Error>("a", "cannot convert field 'key' value 'a' to float");
 }
 
 TEST(ParameterRegistrationTest, testReporterName)
@@ -427,10 +417,9 @@ TEST(ParameterRegistrationTest, testReporterName)
   testValue<ReporterName>("foo/bar", {"foo", "bar"});
 
   // can't split without /
-  Moose::UnitUtils::assertThrows<std::invalid_argument>(
-      []() { testValue<ReporterName>("foo"); },
-      "invalid syntax in ReporterName parameter " + param_name +
-          ": supplied name 'foo' must contain the '/' delimiter");
+  testValueError<ReporterName>("foo",
+                               "invalid syntax in ReporterName parameter " + param_name +
+                                   ": supplied name 'foo' must contain the '/' delimiter");
 }
 
 TEST(ParameterRegistrationTest, testVectorComponentValue)
@@ -441,14 +430,13 @@ TEST(ParameterRegistrationTest, testVectorComponentValue)
                                           std::vector<RealVectorValue>{{2, 3, 4}, {5, 6, 7}});
 
   // bad size
-  Moose::UnitUtils::assertThrows<std::invalid_argument>(
-      []() { testValue<std::vector<Point>>("1"); },
-      "wrong number of values in vector parameter '" + param_name +
-          "': size 1 is not a multiple of 3");
+  testValueError<std::vector<Point>>("1",
+                                     "wrong number of values in vector parameter '" + param_name +
+                                         "': size 1 is not a multiple of 3");
 
   // conversion failed
-  Moose::UnitUtils::assertThrows<hit::Error>([]() { testValue<std::vector<Point>>("a"); },
-                                             "cannot convert field 'key' value 'a' to float");
+  testValueError<std::vector<Point>, hit::Error>("a",
+                                                 "cannot convert field 'key' value 'a' to float");
 }
 
 TEST(ParameterRegistrationTest, testVectorMooseEnum)
@@ -489,8 +477,8 @@ TEST(ParameterRegistrationTest, testVectorReporterName)
   testValue<std::vector<ReporterName>>("\"foo/bar baz/bang\"", {{"foo", "bar"}, {"baz", "bang"}});
 
   // can't split without /
-  Moose::UnitUtils::assertThrows<std::invalid_argument>(
-      []() { testValue<std::vector<ReporterName>>("\"foo/bar baz\""); },
+  testValueError<std::vector<ReporterName>>(
+      "\"foo/bar baz\"",
       "invalid syntax in ReporterName parameter " + param_name +
           ": supplied name 'baz' must contain the '/' delimiter");
 }
@@ -504,13 +492,12 @@ TEST(ParameterRegistrationTest, testDoubleVectorComponentValue)
                                                        {{{1, 2, 3}}, {{4, 5, 6}, {7, 8, 9}}});
 
   // bad size
-  Moose::UnitUtils::assertThrows<std::invalid_argument>(
-      []() { testValue<std::vector<std::vector<Point>>>("\"1 2 3; 4 5 6.0\n7.0 8\""); },
+  testValueError<std::vector<std::vector<Point>>>(
+      "\"1 2 3; 4 5 6.0\n7.0 8\"",
       "wrong number of values in double-indexed vector component parameter '" + param_name +
           "' at index 1: subcomponent size 5 is not a multiple of 3");
 
   // conversion failed
-  Moose::UnitUtils::assertThrows<std::invalid_argument>(
-      []() { testValue<std::vector<std::vector<Point>>>("a"); },
-      "invalid format for parameter '" + param_name + "' at index 0");
+  testValueError<std::vector<std::vector<Point>>>(
+      "a", "invalid format for parameter '" + param_name + "' at index 0");
 }
