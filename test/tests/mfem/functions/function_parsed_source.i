@@ -39,25 +39,13 @@
   []
 []
 
-
 [BCs]
   [bottom]
     type = MFEMScalarDirichletBC
     variable = concentration
     boundary = 'bottom'
-    coefficient = 0.0
   []
 []
-
-[FunctorMaterials]
-  [Substance]
-    type = MFEMGenericFunctorMaterial
-    prop_names = diffusivity
-    prop_values = 1.0
-    block = 'the_domain'
-  []
-[]
-
 [Functions]
   [force]
     type = MFEMParsedFunction
@@ -71,7 +59,6 @@
   [diff]
     type = MFEMDiffusionKernel
     variable = concentration
-    coefficient = diffusivity
   []
   [source]
     type = MFEMDomainLFKernel

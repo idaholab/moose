@@ -30,11 +30,14 @@ MFEMScalarParsedCoeff::Eval(mfem::ElementTransformation & T, const mfem::Integra
 
   if (_use_xyzt)
   {
-    mfem::Vector transip(3);
+    mfem::Vector transip;
     T.Transform(ip, transip);
 
-    for (unsigned i = 0; i < 3; i++)
+    for (unsigned i = 0; i < transip.Size(); i++)
       vals[_var_names.size() + i] = transip(i);
+
+    for (unsigned i = transip.Size(); i < 3; i++)
+      vals[_var_names.size() + i] = 0;
 
     vals[_var_names.size() + 3] = GetTime();
   }
