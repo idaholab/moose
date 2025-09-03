@@ -15,7 +15,7 @@
 
 /**
  * Modifies the MFEM Mesh to label a subdomain consisting of elements adjacent to an
- * interior surface on one side, and constructs an stores an mfem::ParSubMesh object
+ * interior surface on one side, and constructs and stores an mfem::ParSubMesh object
  * associated with it.
  * Access using the getSubMesh() accessor.
  */

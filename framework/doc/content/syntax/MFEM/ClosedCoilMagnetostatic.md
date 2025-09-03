@@ -97,7 +97,7 @@ Next, we define a one element wide 'transition' region $\Omega_t \subset \Omega_
 on one side of the cut surface, using an `MFEMCutTransitionSubMesh` object, comprised of all
 elements with at least one vertex lying on the cut surface that lie on one side of the cut.
 
-Next, to enforce $\vec \nabla \times \vec E_{ext} =0$ in this region, we define a scalar variable $v$ defined on a (nodal) $H^1$ conforming finite element space on this submesh such that $\vec E_{ext} = -\vec \nabla v$:
+Next, to enforce $\vec \nabla \times \vec E_{ext} =0$ in this region, we define a scalar field variable $v$ defined on a (nodal) $H^1$ conforming finite element space on this submesh such that $\vec E_{ext} = -\vec \nabla v$:
 
 \begin{equation}
   v = \sum_{i \in \Omega_t} V_i v_i
