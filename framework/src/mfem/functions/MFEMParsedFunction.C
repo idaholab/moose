@@ -10,7 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMParsedFunction.h"
-#include "MFEMScalarParsedCoeff.h"
+#include "MFEMScalarParsedCoefficient.h"
 #include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMParsedFunction);
@@ -76,8 +76,8 @@ MFEMParsedFunction::MFEMParsedFunction(const InputParameters & parameters)
       _communicator.barrier();
   }
 
-  // declares MFEMScalarParsedCoeff
-  getMFEMProblem().getCoefficients().declareScalar<MFEMScalarParsedCoeff>(
+  // declares MFEMScalarParsedCoefficient
+  getMFEMProblem().getCoefficients().declareScalar<MFEMScalarParsedCoefficient>(
       name(), getMFEMProblem().getProblemData().gridfunctions, _var_names, _use_xyzt, _func_F);
 }
 

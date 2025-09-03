@@ -9,9 +9,9 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MFEMScalarParsedCoeff.h"
+#include "MFEMScalarParsedCoefficient.h"
 
-MFEMScalarParsedCoeff::MFEMScalarParsedCoeff(
+MFEMScalarParsedCoefficient::MFEMScalarParsedCoefficient(
     const Moose::MFEM::GridFunctions & gridfunctions,
     const std::vector<VariableName> & var_names,
     bool use_xyzt,
@@ -21,7 +21,7 @@ MFEMScalarParsedCoeff::MFEMScalarParsedCoeff(
 }
 
 mfem::real_t
-MFEMScalarParsedCoeff::Eval(mfem::ElementTransformation & T, const mfem::IntegrationPoint & ip)
+MFEMScalarParsedCoefficient::Eval(mfem::ElementTransformation & T, const mfem::IntegrationPoint & ip)
 {
   std::vector<mfem::real_t> vals(_var_names.size() + (_use_xyzt ? 4 : 0));
 
