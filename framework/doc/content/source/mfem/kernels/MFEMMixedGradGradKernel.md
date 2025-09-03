@@ -2,10 +2,6 @@
 
 !if! function=hasCapability('mfem')
 
-## Summary
-
-!syntax description /Kernels/MFEMMixedGradGradKernel
-
 ## Overview
 
 Adds the domain integrator for integrating the mixed bilinear form
@@ -19,7 +15,7 @@ $k$ is a scalar coefficient.
 This term arises from the weak form of the Laplacian operator
 
 !equation
-k \vec\nabla u
+\nabla\cdot k \vec\nabla u
 
 ## Example Input File Syntax
 

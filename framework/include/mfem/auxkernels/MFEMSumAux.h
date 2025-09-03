@@ -16,7 +16,7 @@
 #include "MFEMAuxKernel.h"
 
 /*
-Class to scale and sum two MFEM variables, and store the result in a third variable.
+ * Class to scale and sum two MFEM variables, and store the result in a third variable.
 */
 class MFEMSumAux : public MFEMAuxKernel
 {
@@ -32,8 +32,8 @@ public:
 
 protected:
   // Names of input MFEMVariables to sum.
-  const VariableName _v1_var_name;
-  const VariableName _v2_var_name;
+  const VariableName & _v1_var_name;
+  const VariableName & _v2_var_name;
   // Reference to input variable gridfunctions.
   const mfem::ParGridFunction & _v1_var;
   const mfem::ParGridFunction & _v2_var;

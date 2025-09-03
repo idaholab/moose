@@ -35,7 +35,7 @@ MFEMCutTransitionSubMesh::validParams()
   params.addRequiredParam<SubdomainName>(
       "closed_subdomain",
       "The name of the subdomain attribute to be created comprised of the set of all elements "
-      "of the closed goemetry, including the new transition region.");
+      "of the closed geometry, including the new transition region.");
   return params;
 }
 
@@ -98,7 +98,7 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
   std::vector<int> global_cut_vert_ids;
   mfem::Array<HYPRE_BigInt> gi;
   parent_mesh.GetGlobalVertexIndices(gi);
-  mfem::Table * vert_to_elem = parent_mesh.GetVertexToElementTable();
+  std::unique_ptr<mfem::Table> vert_to_elem = parent_mesh.GetVertexToElementTable();
   const mfem::Array<int> & cut_to_parent_vertex_id_map = _cut_submesh->GetParentVertexIDMap();
   for (int i = 0; i < _cut_submesh->GetNV(); ++i)
   {
@@ -151,7 +151,7 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
     {
       // all els touching this shared vertex plvtx should be updated
       int cut_vert = parent_mesh.GroupVertex(g, gv);
-      for (size_t i = 0; i < all_cut_verts.size(); i += 1)
+      for (std::size_t i = 0; i < all_cut_verts.size(); i += 1)
       {
         if (gi[cut_vert] == all_cut_verts[i]) // check if shared vertex is on the cut plane
         {
@@ -170,7 +170,6 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
     }
   }
 
-  delete vert_to_elem;
   transition_els.Sort();
   transition_els.Unique();
 
@@ -215,9 +214,7 @@ MFEMCutTransitionSubMesh::sideOfCut(const int & el,
   mfem::Vector vertex_coords(parent_mesh.GetVertex(el_vertex_on_cut), sdim);
   mfem::Vector relative_center(sdim);
   for (int j = 0; j < sdim; j++)
-  {
     relative_center[j] = el_center[j] - vertex_coords[j];
-  }
   double side = _cut_normal * relative_center;
   if (side > 0)
     return 1;
@@ -269,7 +266,7 @@ MFEMCutTransitionSubMesh::setAttributes(mfem::ParMesh & parent_mesh,
   /// Create attribute set labelling the entire closed geometry
   attr_sets.SetAttributeSet(_closed_subdomain, getSubdomainAttributes());
   /// Add the new domain attributes to new attribute sets
-  std::set<std::string> attr_set_names = attr_sets.GetAttributeSetNames();
+  const std::set<std::string> attr_set_names = attr_sets.GetAttributeSetNames();
   for (int old_attr = 1; old_attr < global_new_attrs.Size() + 1; ++old_attr)
   {
     int new_attr = global_new_attrs[old_attr - 1];
@@ -301,17 +298,14 @@ MFEMCutTransitionSubMesh::isInDomain(const int & element,
                                      const mfem::Array<int> & subdomains,
                                      const mfem::ParMesh & mesh)
 {
-  bool is_in_domain = false;
   /// element<0 for ghost elements
   if (element < 0)
     return true;
 
   for (const auto & subdomain : subdomains)
-  {
     if (mesh.GetAttribute(element) == subdomain)
-      is_in_domain = true;
-  }
-  return is_in_domain;
+      return true;
+  return false;
 }
 
 #endif
