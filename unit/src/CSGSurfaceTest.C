@@ -25,18 +25,22 @@ TEST(CSGSurfaceTest, testCSGPlane)
   // expected coefficients: a=-1, b=0, c=0, d=2.0
   std::unordered_map<std::string, Real> exp_coeffs = {
       {"a", -1.0}, {"b", 0.0}, {"c", 0.0}, {"d", 2.0}};
+  // expected surface type string
+  std::string exp_type = "CSG::CSGPlane";
 
   // Construct plane from points: plane at x=-2
   {
     const std::array<Point, 3> points{Point(-2, 0, 0), Point(-2, 1, 0), Point(-2, 0, 1)};
     CSGPlane plane("plane_surf", points[0], points[1], points[2]);
     ASSERT_EQ(exp_coeffs, plane.getCoeffs());
+    ASSERT_EQ(exp_type, plane.getSurfaceType());
   }
   // Construct plane from coefficients
   {
     // a=-1.0, b=0.0, c=0.0, d=2.0
     CSGPlane plane("plane_surf", -1.0, 0.0, 0.0, 2.0);
     ASSERT_EQ(exp_coeffs, plane.getCoeffs());
+    ASSERT_EQ(exp_type, plane.getSurfaceType());
   }
   // Collinear points; error
   {
@@ -56,6 +60,9 @@ TEST(CSGSurfaceTest, testCSGPlane)
 /// Tests CSGSphere::CSGSphere constructors and methods
 TEST(CSGSurfaceTest, testCSGSphere)
 {
+  // expected surface type string
+  std::string exp_type = "CSG::CSGSphere";
+
   // Construct sphere at specified center point
   {
     std::unordered_map<std::string, Real> exp_coeffs = {
@@ -64,6 +71,7 @@ TEST(CSGSurfaceTest, testCSGSphere)
     Real radius = 4.0;
     CSGSphere sphere("sphere_surf", center, radius);
     ASSERT_EQ(exp_coeffs, sphere.getCoeffs());
+    ASSERT_EQ(exp_type, sphere.getSurfaceType());
   }
   // Construct sphere at origin
   {
@@ -72,6 +80,7 @@ TEST(CSGSurfaceTest, testCSGSphere)
     Real radius = 4.0;
     CSGSphere sphere("sphere_surf", radius);
     ASSERT_EQ(exp_coeffs, sphere.getCoeffs());
+    ASSERT_EQ(exp_type, sphere.getSurfaceType());
   }
   // negative radius; error
   {
@@ -105,16 +114,19 @@ TEST(CSGSurfaceTest, testCSGCylinders)
   {
     std::unordered_map<std::string, Real> exp_coeffs = {{"y0", 1.0}, {"z0", 2.0}, {"r", 3.0}};
     ASSERT_EQ(exp_coeffs, xcyl.getCoeffs());
+    ASSERT_EQ("CSG::CSGXCylinder", xcyl.getSurfaceType());
   }
   // YCylinder coefficients
   {
     std::unordered_map<std::string, Real> exp_coeffs = {{"x0", 1.0}, {"z0", 2.0}, {"r", 3.0}};
     ASSERT_EQ(exp_coeffs, ycyl.getCoeffs());
+    ASSERT_EQ("CSG::CSGYCylinder", ycyl.getSurfaceType());
   }
   // ZCylinder coefficients
   {
     std::unordered_map<std::string, Real> exp_coeffs = {{"x0", 1.0}, {"y0", 2.0}, {"r", 3.0}};
     ASSERT_EQ(exp_coeffs, zcyl.getCoeffs());
+    ASSERT_EQ("CSG::CSGZCylinder", zcyl.getSurfaceType());
   }
 
   // negative radius; error
@@ -171,6 +183,7 @@ TEST(CSGSurfaceTest, testGetHalfspaceFromPoint)
   }
 }
 
+/// tests surface equality operators
 TEST(CSGSurfaceTest, testSurfaceEquality)
 {
   // make two identical surfaces and check they register as equal
@@ -188,4 +201,12 @@ TEST(CSGSurfaceTest, testSurfaceEquality)
   {
     ASSERT_TRUE(sphere1 != surf);
   }
+}
+
+/// test CSGSurface::getName
+TEST(CSGSurfaceTest, testSurfaceGetName)
+{
+  std::string name = "sph_surf_name";
+  CSGSphere sph(name, 1.0);
+  ASSERT_EQ(name, sph.getName());
 }
