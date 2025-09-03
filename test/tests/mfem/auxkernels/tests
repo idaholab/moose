@@ -4,7 +4,6 @@
     input = projection.i
     xmldiff = 'OutputData/Projection/Run0/Run0.pvd
                 OutputData/Projection/Run0/Cycle000001/proc000000.vtu'
-    ignored_items = "root['VTKFile']['@version']"
     design = 'MFEMScalarProjectionAux.md MFEMVectorProjectionAux.md'
     issues = '#31153'
     requirement = 'The system shall have the ability to project scalar and vector coefficients onto appropriate MFEM auxvariables.'
@@ -22,7 +21,6 @@
                'Outputs/ParaViewDataCollection/file_base=OutputData/HeatTransferTimeAverage'
     xmldiff = 'OutputData/HeatTransferTimeAverage/Run0/Run0.pvd
                 OutputData/HeatTransferTimeAverage/Run0/Cycle000003/proc000000.vtu'
-    ignored_items = "root['VTKFile']['@version']"
     design = 'MFEMScalarTimeAverageAux.md'
     issues = '#31163'
     requirement = 'The system shall have the ability to take a running time average of an MFEM variable.'

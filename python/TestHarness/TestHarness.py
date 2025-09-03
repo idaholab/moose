@@ -1135,8 +1135,7 @@ class TestHarness:
                                  help='Ignore specified caveats when checking if a test should run; using --ignore without a conditional will ignore all caveats')
         filtergroup.add_argument('--no-check-input', action='store_true', help='Do not run check_input (syntax) tests')
         filtergroup.add_argument('--not-group', action='store', type=str, help='Run only tests NOT in the named group')
-        filtergroup.add_argument('--re', action='store', type=str, dest='reg_exp', help='Run tests that match --re=regular_expression')
-        filtergroup.add_argument('--run', type=str, default='', dest='run', help='Only run tests of the specified of tag(s)')
+        filtergroup.add_argument('--re', action='store', type=str, dest='reg_exp', help='Run tests that match the given regular expression')
         filtergroup.add_argument('--valgrind', action='store_const', dest='valgrind_mode', const='NORMAL', help='Run normal valgrind tests')
         filtergroup.add_argument('--valgrind-heavy', action='store_const', dest='valgrind_mode', const='HEAVY', help='Run heavy valgrind tests')
 
@@ -1220,8 +1219,6 @@ class TestHarness:
             if hpc_config is not None:
                 self.options.hpc = hpc_config.scheduler
                 print(f'INFO: Setting --hpc={self.options.hpc} for known host {hpc_host}')
-
-        self.options.runtags = [tag for tag in self.options.run.split(',') if tag != '']
 
         # Convert all list based options of length one to scalars
         for key, value in list(vars(self.options).items()):

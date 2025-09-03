@@ -44,7 +44,6 @@ class Tester(MooseObject, OutputInterface):
         params.addParam('allow_test_objects', False, "Allow the use of test objects by adding --allow-test-objects to the command line.")
 
         params.addParam('valgrind', 'NONE', "Set to (NONE, NORMAL, HEAVY) to determine which configurations where valgrind will run.")
-        params.addParam('tags',      [], "A list of strings")
         params.addParam('max_buffer_size', None, "Bytes allowed in stdout/stderr before it is subjected to being trimmed. Set to -1 to ignore output size restrictions. "
                                                  "If 'max_buffer_size' is not set, the default value of 'None' triggers a reasonable value (e.g. 100 kB)")
         params.addParam('parallel_scheduling', False, "Allow all tests in test spec file to run in parallel (adheres to prereq rules).")
@@ -196,7 +195,6 @@ class Tester(MooseObject, OutputInterface):
         self.specs = params
         self.joined_out = ''
         self.process = None
-        self.tags = params['tags']
         self.__caveats = set([])
 
         # Alternate text we want to print as part of our status instead of the
@@ -595,15 +593,6 @@ class Tester(MooseObject, OutputInterface):
             augment('compute_device', [options.compute_device, 'Compute device'])
         else:
             capabilities = None
-
-        tag_match = False
-        for t in self.tags:
-            if t in options.runtags:
-                tag_match = True
-                break
-        if len(options.runtags) > 0 and not tag_match:
-            self.setStatus(self.silent)
-            return False
 
         # If something has already deemed this test a failure
         if self.isFail():
