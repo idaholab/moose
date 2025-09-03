@@ -44,7 +44,6 @@ const TagName PREVIOUS_FP_SOLUTION_TAG = "U_PREVIOUS_FP";
   static_assert(true, "")
 DerivativeStringToJSON(FileName);
 DerivativeStringToJSON(FileNameNoExtension);
-DerivativeStringToJSON(RelativeFileName);
 DerivativeStringToJSON(DataFileName);
 DerivativeStringToJSON(MeshFileName);
 DerivativeStringToJSON(MatrixFileName);

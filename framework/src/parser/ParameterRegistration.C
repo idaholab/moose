@@ -64,7 +64,6 @@ static Moose::ParameterRegistry & registry = Moose::ParameterRegistry::get();
 // Special cases that aren't included: CLIArgString
 registerParameter(FileName);
 registerParameter(FileNameNoExtension);
-registerParameter(RelativeFileName);
 registerParameter(DataFileName);
 registerParameter(MeshFileName);
 registerParameter(MatrixFileName);
