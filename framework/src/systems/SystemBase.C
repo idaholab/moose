@@ -824,6 +824,14 @@ SystemBase::addVariable(const std::string & var_type,
         mooseError("This should be a functor");
     }
 
+    if (auto scalar_var = dynamic_cast<MooseVariableScalar *>(var.get()))
+    {
+      if (auto * const functor = dynamic_cast<Moose::FunctorBase<ADReal> *>(scalar_var))
+        _subproblem.addFunctor(name, *functor, tid);
+      else
+        mooseError("Scalar variables should be functors");
+    }
+
     if (var->blockRestricted())
       for (const SubdomainID & id : var->blockIDs())
         for (MooseIndex(components) component = 0; component < components; ++component)

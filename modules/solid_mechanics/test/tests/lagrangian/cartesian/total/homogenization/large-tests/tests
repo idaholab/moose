@@ -1,6 +1,6 @@
 [Tests]
   issues = '#17473'
-  design = 'source/scalarkernels/lagrangian/HomogenizationConstraintScalarKernel.md'
+  design = 'source/kernels/lagrangian/HomogenizedTotalLagrangianStressDivergence.md'
   [1d-strain]
     type = CSVDiff
     input = '1d.i'

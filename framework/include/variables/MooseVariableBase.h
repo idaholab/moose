@@ -16,6 +16,7 @@
 #include "MooseTypes.h"
 #include "MooseArray.h"
 #include "MooseError.h"
+#include "MooseFunctorArguments.h"
 
 #include "libmesh/fe_type.h"
 #include "libmesh/enum_fe_family.h"
@@ -196,6 +197,11 @@ public:
   virtual void sizeMatrixTagData() { mooseError("Derived class must implement this method"); }
 
 protected:
+  /**
+   * Get the solution corresponding to the provided state
+   */
+  const libMesh::NumericVector<libMesh::Number> & getSolution(const Moose::StateArg & state) const;
+
   /**
    * @returns whether we should insert derivatives
    */

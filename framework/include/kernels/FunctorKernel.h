@@ -21,11 +21,21 @@ public:
 
   FunctorKernel(const InputParameters & parameters);
 
+  enum Mode
+  {
+    ADD = 0,
+    TARGET = 1
+  };
+
+  /// The working mode of this kernel ("add" or "target")
+  const Mode _mode;
+
 protected:
   virtual ADReal precomputeQpResidual() override;
 
   /// Functor to add
   const Moose::Functor<ADReal> & _functor;
+
   /// Sign to apply to functor
   const Real _sign;
 };
