@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 # Solution to Mandel's problem as presented in
 # AHD Cheng and E Detournay "A direct boundary element method for plane strain poroelasticity" International Journal of Numerical and Analytical Methods in Geomechanics 12 (1988) 551-572
