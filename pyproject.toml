@@ -46,7 +46,7 @@ Repository = "https://github.com/idaholab/moose"
 Issues = "https://github.com/idaholab/moose/issues"
 
 [project.optional-dependencies]
-dev = ["pytest", "black"]
+dev = ["pytest", "black", "ruff"]
 
 [tool.setuptools.packages.find]
 where = ["python"]
@@ -60,6 +60,10 @@ extend-exclude = '''
     | ^/python/peacock
 )
 '''
+
+[tool.ruff]
+include = ["*.py"]
+exclude = ["python/doc", "python/peacock", "moosedocs.py"]
 
 [tool.pytest.ini_options]
 python_classes = "" # This will enforce that all tests derive from unittest.TestCase
