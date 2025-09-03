@@ -18,7 +18,7 @@
  * Define a coefficient that, given a set of grid functions u, v, w, ...,
  * and a function func, returns func(x, y, z, t, u, v, w, ...)
  */
-class MFEMScalarParsedCoeff : public mfem::Coefficient
+class MFEMScalarParsedCoefficient : public mfem::Coefficient
 {
 private:
   const Moose::MFEM::GridFunctions & _gridfunctions;
@@ -27,10 +27,10 @@ private:
   const FunctionParserUtils<false>::SymFunctionPtr & _func;
 
 public:
-  MFEMScalarParsedCoeff(const Moose::MFEM::GridFunctions & gridfunctions,
-                        const std::vector<VariableName> & var_names,
-                        bool use_xyzt,
-                        const FunctionParserUtils<false>::SymFunctionPtr & func);
+  MFEMScalarParsedCoefficient(const Moose::MFEM::GridFunctions & gridfunctions,
+                              const std::vector<VariableName> & var_names,
+                              bool use_xyzt,
+                              const FunctionParserUtils<false>::SymFunctionPtr & func);
 
   mfem::real_t Eval(mfem::ElementTransformation & T, const mfem::IntegrationPoint & ip) override;
 };
