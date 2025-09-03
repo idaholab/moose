@@ -3844,6 +3844,13 @@ NonlinearSystemBase::needBoundaryMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid
       if (std::static_pointer_cast<MaterialPropertyInterface>(bc)->getMatPropDependencies().size())
         return true;
 
+  // Thin layer heat transfer in the heat_transfer module is being used on a boundary even though
+  // it's an interface kernel
+  if (_interface_kernels.hasActiveBoundaryObjects(bnd_id, tid))
+    for (const auto & ik : _interface_kernels.getActiveBoundaryObjects(bnd_id, tid))
+      if (std::static_pointer_cast<MaterialPropertyInterface>(ik)->getMatPropDependencies().size())
+        return true;
+
   // Because MortarConstraints do not inherit from BoundaryRestrictable, they are not sorted
   // by boundary in the MooseObjectWarehouse. So for now, we return true for all boundaries
   // Note: constraints are not threaded at this time
