@@ -30,19 +30,19 @@ public:
 
   virtual mfem::LinearFormIntegrator * getRealLFIntegrator()
   {
-    return _real_kernel->createLFIntegrator();
+    return _real_kernel ? _real_kernel->createLFIntegrator() : nullptr;
   }
   virtual mfem::LinearFormIntegrator * getImagLFIntegrator()
   {
-    return _imag_kernel->createLFIntegrator();
+    return _imag_kernel ? _imag_kernel->createLFIntegrator() : nullptr;
   }
   virtual mfem::BilinearFormIntegrator * getRealBFIntegrator()
   {
-    return _real_kernel->createBFIntegrator();
+    return _real_kernel ? _real_kernel->createBFIntegrator() : nullptr;
   }
   virtual mfem::BilinearFormIntegrator * getImagBFIntegrator()
   {
-    return _imag_kernel->createBFIntegrator();
+    return _imag_kernel ? _imag_kernel->createBFIntegrator() : nullptr;
   }
 
   virtual void setRealKernel(std::shared_ptr<MFEMKernel> kernel) { _real_kernel = kernel; }

@@ -128,10 +128,6 @@ elec_cond_air = 0.0
       type = MFEMCurlCurlKernel
       coefficient = MagReluctivity
     []
-    [imag_part]
-      type = MFEMVectorFEMassKernel
-      coefficient = 0.0
-    []
   []
   [mass_loss]
     type = MFEMComplexKernel
