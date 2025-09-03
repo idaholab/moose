@@ -161,10 +161,14 @@ MeshInfo::possiblyAddSidesetInfo()
       std::map<processor_id_type,
                std::vector<std::tuple<boundary_id_type, dof_id_type, unsigned int>>>
           send_info;
-      auto & root_info = send_info[0];
-      for (const auto & pair : sidesets)
-        for (const auto & side : pair.second.sides)
-          root_info.emplace_back(pair.second.id, side.first, side.second);
+      // Avoid empty sends
+      if (!sidesets.empty())
+      {
+        auto & root_info = send_info[0];
+        for (const auto & pair : sidesets)
+          for (const auto & side : pair.second.sides)
+            root_info.emplace_back(pair.second.id, side.first, side.second);
+      }
 
       // Take the received information and insert it into _sideset_elems
       auto accumulate_info =
@@ -307,10 +311,14 @@ MeshInfo::possiblyAddSubdomainInfo()
     {
       // Set up a structure for sending each (id, elem id) to root
       std::map<processor_id_type, std::vector<std::pair<subdomain_id_type, dof_id_type>>> send_info;
-      auto & root_info = send_info[0];
-      for (const auto & pair : subdomains)
-        for (const auto elem_id : pair.second.elems)
-          root_info.emplace_back(pair.second.id, elem_id);
+      // Avoid creating empty entry
+      if (!subdomains.empty())
+      {
+        auto & root_info = send_info[0];
+        for (const auto & pair : subdomains)
+          for (const auto elem_id : pair.second.elems)
+            root_info.emplace_back(pair.second.id, elem_id);
+      }
 
       // Take the received information and insert it into _subdomain_elems
       auto accumulate_info =
