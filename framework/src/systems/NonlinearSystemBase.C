@@ -3841,7 +3841,7 @@ NonlinearSystemBase::needBoundaryMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid
   // matprops on boundaries.
   if (_integrated_bcs.hasActiveBoundaryObjects(bnd_id, tid))
     for (const auto & bc : _integrated_bcs.getActiveBoundaryObjects(bnd_id, tid))
-      if (std::static_pointer_cast<MaterialPropertyInterface>(bc)->getMaterialPropertyCalled())
+      if (std::static_pointer_cast<MaterialPropertyInterface>(bc)->getMatPropDependencies().size())
         return true;
 
   // Because MortarConstraints do not inherit from BoundaryRestrictable, they are not sorted
@@ -3850,7 +3850,7 @@ NonlinearSystemBase::needBoundaryMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid
   if (_constraints.hasActiveObjects(/*tid*/ 0))
     for (const auto & ct : _constraints.getActiveObjects(/*tid*/ 0))
       if (std::dynamic_pointer_cast<MaterialPropertyInterface>(ct) &&
-          std::dynamic_pointer_cast<MaterialPropertyInterface>(ct)->getMaterialPropertyCalled())
+          std::dynamic_pointer_cast<MaterialPropertyInterface>(ct)->getMatPropDependencies().size())
         return true;
   return false;
 }
@@ -3862,7 +3862,7 @@ NonlinearSystemBase::needInterfaceMaterialOnSide(BoundaryID bnd_id, THREAD_ID ti
   // boundaries.
   if (_interface_kernels.hasActiveBoundaryObjects(bnd_id, tid))
     for (const auto & ik : _interface_kernels.getActiveBoundaryObjects(bnd_id, tid))
-      if (std::static_pointer_cast<MaterialPropertyInterface>(ik)->getMaterialPropertyCalled())
+      if (std::static_pointer_cast<MaterialPropertyInterface>(ik)->getMatPropDependencies().size())
         return true;
   return false;
 }
@@ -3874,11 +3874,11 @@ NonlinearSystemBase::needSubdomainMaterialOnSide(SubdomainID subdomain_id, THREA
   // internal sides.
   if (_dg_kernels.hasActiveBlockObjects(subdomain_id, tid))
     for (const auto & dg : _dg_kernels.getActiveBlockObjects(subdomain_id, tid))
-      if (std::static_pointer_cast<MaterialPropertyInterface>(dg)->getMaterialPropertyCalled())
+      if (std::static_pointer_cast<MaterialPropertyInterface>(dg)->getMatPropDependencies().size())
         return true;
   if (_hybridized_kernels.hasActiveBlockObjects(subdomain_id, tid))
     for (const auto & hdg : _hybridized_kernels.getActiveBlockObjects(subdomain_id, tid))
-      if (std::static_pointer_cast<MaterialPropertyInterface>(hdg)->getMaterialPropertyCalled())
+      if (std::static_pointer_cast<MaterialPropertyInterface>(hdg)->getMatPropDependencies().size())
         return true;
   return false;
 }
