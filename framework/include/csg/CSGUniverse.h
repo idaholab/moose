@@ -11,6 +11,8 @@
 
 #include "CSGCellList.h"
 
+#include "gtest/gtest.h"
+
 namespace CSG
 {
 
@@ -125,5 +127,14 @@ protected:
 
   // CSGUniverseList needs to be friend to access addCell()
   friend class CSGBase;
+
+  /// Friends for unit testing
+  ///@{
+  FRIEND_TEST(CSGUniverseTest, testGetCell);
+  FRIEND_TEST(CSGUniverseTest, testAddCell);
+  FRIEND_TEST(CSGUniverseTest, testRemoveCell);
+  FRIEND_TEST(CSGUniverseTest, testRemoveAllCells);
+  FRIEND_TEST(CSGUniverseTest, testSetName);
+  ///@}
 };
 } // namespace CSG
