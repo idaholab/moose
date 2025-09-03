@@ -1,7 +1,7 @@
 [Tests]
   [MFEMParsedFunction]
     type = XMLDiff
-    input = function_parsed_source.i
+    input = parsed_function_source.i
     xmldiff = 'OutputData/FunctionParsedSource/Run0/Run0.pvd
                 OutputData/FunctionParsedSource/Run0/Cycle000001/proc000000.vtu'
     design = 'MFEMParsedFunction.md'
