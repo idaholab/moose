@@ -4187,6 +4187,39 @@ FEProblemBase::reinitMaterialsFace(const SubdomainID blk_id,
 }
 
 void
+FEProblemBase::reinitMaterialsFaceOnBoundary(const BoundaryID boundary_id,
+                                             const SubdomainID blk_id,
+                                             const THREAD_ID tid,
+                                             const bool swap_stateful,
+                                             const std::deque<MaterialBase *> * const reinit_mats)
+{
+  if (hasActiveMaterialProperties(tid) &&
+      (needBoundaryMaterialOnSide(boundary_id, tid) ||
+       needInterfaceMaterialOnSide(boundary_id, tid) || needSubdomainMaterialOnSide(blk_id, tid)))
+  {
+    auto && elem = _assembly[tid][0]->elem();
+    unsigned int side = _assembly[tid][0]->side();
+    unsigned int n_points = _assembly[tid][0]->qRuleFace()->n_points();
+
+    auto & bnd_material_data = _bnd_material_props.getMaterialData(tid);
+    bnd_material_data.resize(n_points);
+
+    if (swap_stateful && !bnd_material_data.isSwapped())
+      bnd_material_data.swap(*elem, side);
+
+    if (_discrete_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
+      bnd_material_data.reset(
+          _discrete_materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
+
+    if (reinit_mats)
+      bnd_material_data.reinit(*reinit_mats);
+    else if (_materials[Moose::FACE_MATERIAL_DATA].hasActiveBlockObjects(blk_id, tid))
+      bnd_material_data.reinit(
+          _materials[Moose::FACE_MATERIAL_DATA].getActiveBlockObjects(blk_id, tid));
+  }
+}
+
+void
 FEProblemBase::reinitMaterialsNeighbor(const SubdomainID blk_id,
                                        const THREAD_ID tid,
                                        const bool swap_stateful,
