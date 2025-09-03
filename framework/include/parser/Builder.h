@@ -20,6 +20,7 @@
 #include <vector>
 #include <string>
 #include <iomanip>
+#include <optional>
 
 // Forward declarations
 class ActionWarehouse;
@@ -120,6 +121,14 @@ private:
    */
   bool isGlobal(const hit::Node & node) const;
 
+  /**
+   * Get the [GlobalParams] section node if it exists
+   *
+   * We need to separate this so that we can call extractParams()
+   * before calling build()
+   */
+  const hit::Node * queryGlobalParamsNode() const;
+
   /// The MooseApp this Parser is part of
   MooseApp & _app;
   /// The Factory associated with that MooseApp
@@ -151,7 +160,8 @@ private:
   std::map<std::string, std::string> _deprecated_params;
 
   /// The hit Node for the [GlobalParams] block, if any
-  const hit::Node * _global_params_node;
+  /// If set (could be null), it means we have searched for it
+  mutable std::optional<const hit::Node *> _global_params_node;
 
   void walkRaw(std::string fullpath, std::string nodepath, hit::Node * n);
 };

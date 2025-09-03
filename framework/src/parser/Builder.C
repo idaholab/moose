@@ -304,12 +304,11 @@ Builder::build()
 
   // There are a few order dependent actions that have to be built first in
   // order for the parser and application to function properly
-  const auto need_action_syntax_first = [this](const auto & action_Name)
+  const auto need_action_syntax_first = [this](const auto & action_name)
   {
-    const auto syntax = _syntax.getSyntaxByAction(action_Name);
+    const auto syntax = _syntax.getSyntaxByAction(action_name);
     mooseAssert(syntax.size(), "Empty syntax");
     std::copy(syntax.begin(), syntax.end(), std::back_inserter(_secs_need_first));
-    return syntax;
   };
 
   // SetupDebugAction: This action can contain an option for monitoring the
@@ -320,10 +319,7 @@ Builder::build()
   // GlobalParamsAction: This action is checked during the parameter extraction
   // routines of all subsequent blocks. It must be parsed early since it must
   // exist during subsequent parameter extraction.
-  const auto global_params_syntax = need_action_syntax_first("GlobalParamsAction");
-  mooseAssert(global_params_syntax.size() == 1, "Unexpected GlobalParamsAction syntax size");
-  const auto global_params_prefix = global_params_syntax.front();
-  _global_params_node = _root.find(global_params_prefix);
+  need_action_syntax_first("GlobalParamsAction");
 
   // DynamicObjectRegistration: This action must be built before any MooseObjectActions
   // are built. This is because we retrieve valid parameters from the Factory
@@ -691,11 +687,11 @@ Builder::extractParams(const hit::Node * const section_node, InputParameters & p
           param_node = section_param_node;
       }
       // No node found within the given section, check [GlobalParams]
-      if (!param_node && _global_params_node)
+      if (!param_node && queryGlobalParamsNode())
       {
-        if (const auto global_node = _global_params_node->find(param_name);
+        if (const auto global_node = queryGlobalParamsNode()->find(param_name);
             global_node && global_node->type() == hit::NodeType::Field &&
-            global_node->parent() == _global_params_node)
+            global_node->parent() == queryGlobalParamsNode())
         {
           mooseAssert(isGlobal(*global_node), "Could not detect global-ness");
           param_node = global_node;
@@ -829,7 +825,20 @@ Builder::extractParams(const std::string & prefix, InputParameters & p)
 bool
 Builder::isGlobal(const hit::Node & node) const
 {
-  return _global_params_node && node.parent() == _global_params_node;
+  const auto global_params_node = queryGlobalParamsNode();
+  return global_params_node && node.parent() == global_params_node;
+}
+
+const hit::Node *
+Builder::queryGlobalParamsNode() const
+{
+  if (!_global_params_node)
+  {
+    const auto syntax = _syntax.getSyntaxByAction("GlobalParamsAction");
+    mooseAssert(syntax.size() == 1, "Unexpected GlobalParamsAction syntax size");
+    _global_params_node = _root.find(syntax.front());
+  }
+  return *_global_params_node;
 }
 
 } // end of namespace Moose
