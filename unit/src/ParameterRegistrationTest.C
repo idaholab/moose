@@ -159,6 +159,14 @@ TEST(ParameterRegistrationTest, setTripleVectorValue)
     ASSERT_EQ(value, expected_value);
   }
 
+  // empty vector early return
+  {
+    const auto test_field = buildTestField("\"\"");
+    std::vector<std::vector<std::vector<int>>> value;
+    Moose::ParameterRegistration::setTripleVectorValue(value, *test_field.field);
+    ASSERT_EQ(value, std::vector<std::vector<std::vector<int>>>{});
+  }
+
   // failed to convert
   {
     const auto test_field = buildTestField("\"1 | 2; 3 a \"");
