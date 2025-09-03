@@ -257,22 +257,34 @@ TEST(ParameterRegistrationTest, testBool)
   const std::vector<std::string> falses{
       "false", "FALSE", "faLse", "off", "OFF", "oFF", "no", "NO", "nO", "0"};
 
+  // successful scalar trues, with and without quotes
   for (const auto & v : trues)
   {
     testValue<bool>(v, true);
     testValue<bool>("\"" + v + "\"", true);
   }
+  // successful scalar falses, with and without quotes
   for (const auto & v : falses)
   {
     testValue<bool>(v, false);
     testValue<bool>("\"" + v + "\"", false);
   }
+  // failed scalar
+  Moose::UnitUtils::assertThrows<std::invalid_argument>(
+      []() { testValue<bool>("foo"); },
+      "invalid boolean syntax for parameter: " + param_name + "='foo'");
 
+  // vector bools
   for (const auto & true_v : trues)
     for (const auto & false_v : falses)
     {
+      // successful mixes
       testValue<std::vector<bool>>("\"" + true_v + " " + false_v + " \"", {true, false});
       testValue<std::vector<bool>>("\"" + false_v + " " + true_v + " \"", {false, true});
+      // failed value
+      Moose::UnitUtils::assertThrows<std::invalid_argument>(
+          []() { testValue<std::vector<bool>>("\"true bar\""); },
+          "invalid boolean syntax for bool vector parameter: " + param_name + "[1]='bar'");
     }
 }
 
