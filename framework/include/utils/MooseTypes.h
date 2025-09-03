@@ -1057,6 +1057,10 @@ MooseDerivativeStringClass(FileName);
 /// Similar to FileName but without an extension
 MooseDerivativeStringClass(FileNameNoExtension);
 
+/// This type is for expected filenames that should be relative and will not have their
+/// values set to absolute paths like FileName
+MooseDerivativeStringClass(RelativeFileName);
+
 /// This type is for files used in the DataFileInterface, which enables searching of files
 /// within the registered data directory
 MooseDerivativeStringClass(DataFileName);
