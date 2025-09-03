@@ -24,19 +24,23 @@ class TestProjectFind(unittest.TestCase):
         """
         Test that class with h and C files are located.
         """
-        self.assertEqual(check_filenames('image1.png'), 'image1.png')
-        self.assertEqual(check_filenames('another/file0.md'), '/path/to/another/file0.md')
+        self.assertEqual(check_filenames("image1.png"), "image1.png")
+        self.assertEqual(
+            check_filenames("another/file0.md"), "/path/to/another/file0.md"
+        )
 
         with self.assertRaises(exceptions.MooseDocsException) as e:
-            self.assertEqual(check_filenames('file0.md'), ['file0.md', '/path/to/another/file0.md'])
-        self.assertIn('Multiple files', str(e.exception))
-        self.assertIn('another/file0.md', str(e.exception))
+            self.assertEqual(
+                check_filenames("file0.md"), ["file0.md", "/path/to/another/file0.md"]
+            )
+        self.assertIn("Multiple files", str(e.exception))
+        self.assertIn("another/file0.md", str(e.exception))
 
         with self.assertRaises(exceptions.MooseDocsException) as e:
-            self.assertEqual(check_filenames('wrong'), [])
-        self.assertIn('does not exist in the repository', str(e.exception))
-        self.assertIn('git ls-files', str(e.exception))
+            self.assertEqual(check_filenames("wrong"), [])
+        self.assertIn("does not exist in the repository", str(e.exception))
+        self.assertIn("git ls-files", str(e.exception))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(verbosity=2)

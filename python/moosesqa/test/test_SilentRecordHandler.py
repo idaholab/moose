@@ -17,6 +17,7 @@ import logging
 import mooseutils
 import moosesqa
 
+
 class TestSilentRecordHandler(unittest.TestCase):
     def testHandler(self):
         logger = logging.getLogger(__name__)
@@ -24,13 +25,13 @@ class TestSilentRecordHandler(unittest.TestCase):
         logger.addHandler(handler)
 
         logger.error("error")
-        logger.warning('warning')
+        logger.warning("warning")
 
         records = handler.getRecords()
         self.assertEqual(len(records[logging.ERROR]), 1)
-        self.assertEqual(list(records[logging.ERROR])[0].getMessage(), 'error')
+        self.assertEqual(list(records[logging.ERROR])[0].getMessage(), "error")
         self.assertEqual(len(records[logging.WARNING]), 1)
-        self.assertEqual(list(records[logging.WARNING])[0].getMessage(), 'warning')
+        self.assertEqual(list(records[logging.WARNING])[0].getMessage(), "warning")
 
         handler.clearRecords()
         records = handler.getRecords()
@@ -38,5 +39,5 @@ class TestSilentRecordHandler(unittest.TestCase):
         self.assertEqual(len(records[logging.WARNING]), 0)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(verbosity=2, buffer=True)

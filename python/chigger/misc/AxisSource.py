@@ -1,4 +1,4 @@
-#pylint: disable=missing-docstring
+# pylint: disable=missing-docstring
 # This file is part of the MOOSE framework
 # https://mooseframework.inl.gov
 #
@@ -11,6 +11,7 @@
 import vtk
 from .. import base
 from .. import utils
+
 
 class AxisSource(base.ChiggerFilterSourceBase):
     """
@@ -26,8 +27,9 @@ class AxisSource(base.ChiggerFilterSourceBase):
         return opt
 
     def __init__(self, **kwargs):
-        super(AxisSource, self).__init__(vtkactor_type=vtk.vtkContextActor, vtkmapper_type=None,
-                                         **kwargs)
+        super(AxisSource, self).__init__(
+            vtkactor_type=vtk.vtkContextActor, vtkmapper_type=None, **kwargs
+        )
 
         self._vtksource = vtk.vtkAxis()
         self._vtkactor.GetScene().AddItem(self._vtksource)

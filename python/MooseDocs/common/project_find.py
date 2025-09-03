@@ -9,6 +9,7 @@
 
 import MooseDocs
 
+
 def project_find(filename):
     """
     Utility for finding files within a project based on 'git ls-files', see MooseDocs.__init__.py.

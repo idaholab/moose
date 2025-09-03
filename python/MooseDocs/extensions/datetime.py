@@ -13,10 +13,13 @@ from ..common import exceptions
 from ..tree import tokens, html, latex
 from . import command
 
+
 def make_extension(**kwargs):
     return DateTimeExtension(**kwargs)
 
-DateTime = tokens.newToken('DateTime', datetime=None, format=None, inline=True)
+
+DateTime = tokens.newToken("DateTime", datetime=None, format=None, inline=True)
+
 
 class DateTimeExtension(command.CommandExtension):
     """
@@ -31,36 +34,46 @@ class DateTimeExtension(command.CommandExtension):
     def extend(self, reader, renderer):
         self.requires(command)
         self.addCommand(reader, TodayCommand())
-        renderer.add('DateTime', RenderDateTime())
+        renderer.add("DateTime", RenderDateTime())
+
 
 class TodayCommand(command.CommandComponent):
-    COMMAND = 'datetime'
-    SUBCOMMAND = 'today'
+    COMMAND = "datetime"
+    SUBCOMMAND = "today"
 
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings['format'] = ('%Y-%m-%d', "The date format (see python datetime).")
+        settings["format"] = ("%Y-%m-%d", "The date format (see python datetime).")
         return settings
 
     def createToken(self, parent, info, page, settings):
-        content = info['inline'] if 'inline' in info else info['block']
+        content = info["inline"] if "inline" in info else info["block"]
         if content:
-            raise exceptions.MooseDocsException("Content is not supported for the 'datetime today' command.")
+            raise exceptions.MooseDocsException(
+                "Content is not supported for the 'datetime today' command."
+            )
 
-        DateTime(parent, datetime=datetime.date.today(),
-                 inline='inline' in info,
-                 format=settings['format'])
+        DateTime(
+            parent,
+            datetime=datetime.date.today(),
+            inline="inline" in info,
+            format=settings["format"],
+        )
         return parent
+
 
 class RenderDateTime(components.RenderComponent):
 
     def createHTML(self, parent, token, page):
-        html.Tag(parent, 'span' if token['inline'] else 'p',
-                 class_='moose-datetime',
-                 string=token['datetime'].strftime(token['format']))
+        html.Tag(
+            parent,
+            "span" if token["inline"] else "p",
+            class_="moose-datetime",
+            string=token["datetime"].strftime(token["format"]),
+        )
         return parent
 
     def createLatex(self, parent, token, page):
-        latex.String(parent, content=token['datetime'].strftime(token['format']))
+        latex.String(parent, content=token["datetime"].strftime(token["format"]))
         return parent

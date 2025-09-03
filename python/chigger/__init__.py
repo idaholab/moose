@@ -1,4 +1,4 @@
-#pylint: disable=missing-docstring
+# pylint: disable=missing-docstring
 # This file is part of the MOOSE framework
 # https://mooseframework.inl.gov
 #

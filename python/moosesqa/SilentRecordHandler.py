@@ -9,8 +9,11 @@
 import collections
 import copy
 import logging
+
+
 class SilentRecordHandler(logging.NullHandler):
     """Custom logging Handler object for caching warnings/errors"""
+
     COUNTS = collections.defaultdict(int)
 
     def __init__(self, *args, **kwargs):

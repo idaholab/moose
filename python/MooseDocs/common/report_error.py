@@ -9,7 +9,9 @@
 
 import mooseutils
 from .box import box
-def report_error(message, filename, line=None, src='', traceback=None, prefix='ERROR'):
+
+
+def report_error(message, filename, line=None, src="", traceback=None, prefix="ERROR"):
     """
     Helper for reporting error to logging module.
 
@@ -19,14 +21,14 @@ def report_error(message, filename, line=None, src='', traceback=None, prefix='E
         info[Information]: The lexer information object
         traceback: The traceback (should be a string from traceback.format_exc())
     """
-    title = '{}: {}'.format(prefix, message)
+    title = "{}: {}".format(prefix, message)
     if src:
-        src = mooseutils.colorText(box(src, line=line, width=100), 'LIGHT_CYAN')
+        src = mooseutils.colorText(box(src, line=line, width=100), "LIGHT_CYAN")
 
     if line is not None:
-        filename = mooseutils.colorText('{}:{}\n'.format(filename, line), 'RESET')
+        filename = mooseutils.colorText("{}:{}\n".format(filename, line), "RESET")
     else:
-        filename = mooseutils.colorText('{}\n'.format(filename), 'RESET')
+        filename = mooseutils.colorText("{}\n".format(filename), "RESET")
 
-    trace = '\n' + mooseutils.colorText(traceback, 'GREY') if traceback else ''
-    return '\n{}\n{}{}{}\n'.format(title, filename, src, trace)
+    trace = "\n" + mooseutils.colorText(traceback, "GREY") if traceback else ""
+    return "\n{}\n{}{}{}\n".format(title, filename, src, trace)

@@ -9,11 +9,12 @@
 
 from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
 
+
 class TestHarnessTester(TestHarnessTestCase):
     def testUnreadableOutput(self):
         """
         Test for bad output supplied by executed commands
         """
 
-        out = self.runTests('-i', 'non_unicode', exit_code=132).output
-        self.assertIn('non-unicode characters in output', out)
+        out = self.runTests("-i", "non_unicode", exit_code=132).output
+        self.assertIn("non-unicode characters in output", out)

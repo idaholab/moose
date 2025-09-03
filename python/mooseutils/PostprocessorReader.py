@@ -10,6 +10,7 @@
 from .MooseDataFrame import MooseDataFrame
 from . import message
 
+
 class PostprocessorReader(MooseDataFrame):
     """
     An extension to the MooseDataFrame to provide functionality mirroring that of the VectorPostprocessorReader.
@@ -49,7 +50,9 @@ class PostprocessorReader(MooseDataFrame):
            (output, imports) The necessary script and include statements to re-create data load.
         """
 
-        imports = ['import mooseutils']
-        output = ['\n# Read Postprocessor Data']
-        output += ['data = mooseutils.PostprocessorReader({})'.format(repr(self.filename))]
+        imports = ["import mooseutils"]
+        output = ["\n# Read Postprocessor Data"]
+        output += [
+            "data = mooseutils.PostprocessorReader({})".format(repr(self.filename))
+        ]
         return output, imports

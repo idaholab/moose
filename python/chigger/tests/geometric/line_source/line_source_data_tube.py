@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#pylint: disable=missing-docstring
+# pylint: disable=missing-docstring
 # This file is part of the MOOSE framework
 # https://mooseframework.inl.gov
 #
@@ -12,8 +12,10 @@
 import chigger
 
 tube = chigger.filters.TubeFilter(radius=1)
-cyl0 = chigger.geometric.LineSource(point1=[0,0,0], point2=[0,1,0], data=[1, 2, 4, 8, 16], cmap='viridis')
+cyl0 = chigger.geometric.LineSource(
+    point1=[0, 0, 0], point2=[0, 1, 0], data=[1, 2, 4, 8, 16], cmap="viridis"
+)
 cyls = chigger.base.ChiggerResult(cyl0, filters=[tube])
-window = chigger.RenderWindow(cyls, size=[300,300], test=True)
-window.write('line_source_data_tube.png')
+window = chigger.RenderWindow(cyls, size=[300, 300], test=True)
+window.write("line_source_data_tube.png")
 window.start()

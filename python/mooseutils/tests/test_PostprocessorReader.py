@@ -18,6 +18,7 @@ import mooseutils
 
 from mooseutils.tests import TEST_FILES
 
+
 class TestrPostprocessorReader(unittest.TestCase):
     """
     Test use of PostprocessorReader for loading/reloading csv files.
@@ -31,7 +32,7 @@ class TestrPostprocessorReader(unittest.TestCase):
         """
         self._partial = os.path.join(TEST_FILES, "white_elephant_jan_2016_partial.csv")
         self._filename = os.path.join(TEST_FILES, "white_elephant_jan_2016.csv")
-        self._keys = ['air_temp_low_24_hour_set_1', 'snow_depth_set_1']
+        self._keys = ["air_temp_low_24_hour_set_1", "snow_depth_set_1"]
 
     def testBasic(self):
         """
@@ -78,13 +79,13 @@ class TestrPostprocessorReader(unittest.TestCase):
 
         # Load data and inspect
         data = mooseutils.PostprocessorReader(tmp)
-        self.assertEqual(data.data.shape, (287,8))
+        self.assertEqual(data.data.shape, (287, 8))
 
         # Wait and copy more data
         time.sleep(1)
         shutil.copyfile(self._filename, tmp)
         data.update()
-        self.assertEqual(data.data.shape, (742,8))
+        self.assertEqual(data.data.shape, (742, 8))
         os.remove(tmp)
 
     def testVariables(self):
@@ -93,7 +94,7 @@ class TestrPostprocessorReader(unittest.TestCase):
         """
         data = mooseutils.PostprocessorReader(self._filename)
         self.assertTrue(data)
-        self.assertIn('time', data.variables())
+        self.assertIn("time", data.variables())
         for k in self._keys:
             self.assertIn(k, data.variables())
 
@@ -114,21 +115,22 @@ class TestrPostprocessorReader(unittest.TestCase):
         output += ["print('VALUE:', data['snow_depth_set_1'][10])"]
 
         # Write the test script
-        script = '{}_repr.py'.format(self.__class__.__name__)
-        with open(script, 'w') as fid:
-            fid.write('\n'.join(imports))
-            fid.write('\n'.join(output))
+        script = "{}_repr.py".format(self.__class__.__name__)
+        with open(script, "w") as fid:
+            fid.write("\n".join(imports))
+            fid.write("\n".join(output))
 
         # Run script
         self.assertTrue(os.path.exists(script))
-        out = subprocess.check_output(['python', script])
+        out = subprocess.check_output(["python", script])
 
         # Test for output
-        self.assertIn('SHAPE: (742, 8)', out.decode())
-        self.assertIn('VALUE: 51', out.decode())
+        self.assertIn("SHAPE: (742, 8)", out.decode())
+        self.assertIn("VALUE: 51", out.decode())
 
         # Remove the script
         os.remove(script)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main(module=__name__, verbosity=2, buffer=True)

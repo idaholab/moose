@@ -9,11 +9,17 @@
 
 from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
 
+
 class TestHarnessTester(TestHarnessTestCase):
     def testCyclic(self):
         """
         Test cyclic dependency error.
         """
-        out = self.runTests('--no-color', '-i', 'cyclic_tests', exit_code=132).output
-        self.assertRegex(out, r'tests/test_harness.testC.*? FAILED \(Cyclic or Invalid Dependency Detected!\)')
-        self.assertRegex(out, r'tests/test_harness.test[A|B].*? \[SKIPPED DEPENDENCY\] SKIP')
+        out = self.runTests("--no-color", "-i", "cyclic_tests", exit_code=132).output
+        self.assertRegex(
+            out,
+            r"tests/test_harness.testC.*? FAILED \(Cyclic or Invalid Dependency Detected!\)",
+        )
+        self.assertRegex(
+            out, r"tests/test_harness.test[A|B].*? \[SKIPPED DEPENDENCY\] SKIP"
+        )

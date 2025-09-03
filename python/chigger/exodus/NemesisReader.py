@@ -1,4 +1,4 @@
-#pylint: disable=missing-docstring
+# pylint: disable=missing-docstring
 # This file is part of the MOOSE framework
 # https://mooseframework.inl.gov
 #
@@ -10,6 +10,7 @@
 
 from .MultiAppExodusReader import MultiAppExodusReader
 
+
 class NemesisReader(MultiAppExodusReader):
     """
     A reader for Nemesis files.
@@ -18,4 +19,5 @@ class NemesisReader(MultiAppExodusReader):
     defined for naming reasons and possible future changes that may differ between the two
     types of file sets.
     """
+
     pass

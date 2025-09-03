@@ -1,4 +1,4 @@
-#pylint: disable=missing-docstring
+# pylint: disable=missing-docstring
 # This file is part of the MOOSE framework
 # https://mooseframework.inl.gov
 #
@@ -20,17 +20,25 @@ from .PlaneClipper import PlaneClipper
 from .BoxClipper import BoxClipper
 
 from .ChiggerFilterBase import ChiggerFilterBase
+
+
 def create_basic_filter(vtkfilter_type):
     """
     Function for creating meta filter objects.
     """
+
     class ChiggerMetaFilter(ChiggerFilterBase):
         """
         Meta object for generating chigger filter objects.
         """
+
         def __init__(self, **kwargs):
-            super(ChiggerMetaFilter, self).__init__(vtkfilter_type=vtkfilter_type, **kwargs)
+            super(ChiggerMetaFilter, self).__init__(
+                vtkfilter_type=vtkfilter_type, **kwargs
+            )
+
     return ChiggerMetaFilter
+
 
 GeometryFilter = create_basic_filter(vtk.vtkCompositeDataGeometryFilter)
 IdFilter = create_basic_filter(vtk.vtkIdFilter)

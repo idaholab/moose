@@ -12,17 +12,21 @@ import mock
 import logging
 from moosesqa import SQAReport, SQAMooseAppReport
 
+
 class TestSQAMooseAppReport(unittest.TestCase):
 
     def testExeError(self):
-        kwargs = dict(exe_name='wrong',
-                      exe_directory='test',
-                      content_directory='framework/doc/content',
-                      remove=['framework/doc/remove.yml', 'test/doc/remove.yml'])
+        kwargs = dict(
+            exe_name="wrong",
+            exe_directory="test",
+            content_directory="framework/doc/content",
+            remove=["framework/doc/remove.yml", "test/doc/remove.yml"],
+        )
 
         reporter = SQAMooseAppReport(**kwargs)
         with self.assertRaises(IOError):
             reporter.getReport()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main(verbosity=2)

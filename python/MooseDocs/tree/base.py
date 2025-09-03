@@ -12,13 +12,14 @@ import mooseutils
 
 LOG = logging.getLogger(__name__)
 
+
 class NodeBase(moosetree.Node):
     """
     Base class for tree nodes that accepts arbitrary attributes, see moosetree.Node.
     """
 
-    #The color to print (see mooseutils.colorText).
-    COLOR = 'RESET'
+    # The color to print (see mooseutils.colorText).
+    COLOR = "RESET"
 
     def __init__(self, name, parent, **kwargs):
         super(NodeBase, self).__init__(parent, name, **kwargs)
@@ -34,7 +35,7 @@ class NodeBase(moosetree.Node):
         """
         Method for outputting content of node to a string.
         """
-        out = ''
+        out = ""
         for child in self.children:
             out += child.write()
         return out

@@ -9,15 +9,19 @@
 
 from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
 
+
 class TestHarnessTester(TestHarnessTestCase):
     def testRequiredApps(self):
         """
         Test that the required_apps check works
         """
-        result = self.runTests('--no-color', '-i', 'required_apps')
+        result = self.runTests("--no-color", "-i", "required_apps")
 
         out = result.output
-        self.assertRegex(out, r'test_harness\.bad_app.*? \[APP DOESNOTEXIST NOT REGISTERED IN EXECUTABLE\] SKIP')
-        self.assertRegex(out, r'test_harness\.good_app.*? OK')
+        self.assertRegex(
+            out,
+            r"test_harness\.bad_app.*? \[APP DOESNOTEXIST NOT REGISTERED IN EXECUTABLE\] SKIP",
+        )
+        self.assertRegex(out, r"test_harness\.good_app.*? OK")
 
         self.checkStatus(result.harness, passed=1, skipped=1)

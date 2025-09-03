@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#pylint: disable=missing-docstring
+# pylint: disable=missing-docstring
 # This file is part of the MOOSE framework
 # https://mooseframework.inl.gov
 #
@@ -18,9 +18,9 @@ camera.SetViewUp(0.1889, 0.9412, -0.2800)
 camera.SetPosition(3.4055, -0.8236, -1.9897)
 camera.SetFocalPoint(0.5000, 0.5000, 0.5000)
 
-reader = chigger.exodus.NemesisReader('../input/nemesis.e.24.*')
-result = chigger.exodus.ExodusResult(reader, variable='u', explode=0.3, camera=camera)
+reader = chigger.exodus.NemesisReader("../input/nemesis.e.24.*")
+result = chigger.exodus.ExodusResult(reader, variable="u", explode=0.3, camera=camera)
 
-window = chigger.RenderWindow(result, size=[300,300], test=True)
-window.write('explode.png')
+window = chigger.RenderWindow(result, size=[300, 300], test=True)
+window.write("explode.png")
 window.start()

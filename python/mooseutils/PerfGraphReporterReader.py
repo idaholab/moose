@@ -9,8 +9,11 @@
 
 from mooseutils.ReporterReader import ReporterReader
 
+
 # Use old sum() behavior (Python <3.12)
-class fLoAt(float): pass
+class fLoAt(float):
+    pass
+
 
 class PerfGraphObject:
     """
@@ -46,10 +49,24 @@ class PerfGraphObject:
         Returns the number of calls, the time, and the memory
         in a human readable form.
         """
-        info_str = 'Num calls: {}'.format(self.numCalls())
-        info_str += '\nLevel: {}'.format(self.level())
-        info_str += '\nTime ({:.2f}%): Self {:.2f} s, Children {:.2f} s, Total {:.2f} s'.format(self.percentTime(), self.selfTime(), self.childrenTime(), self.totalTime())
-        info_str += '\nMemory ({:.2f}%): Self {} MB, Children {} MB, Total {} MB'.format(self.percentMemory(), self.selfMemory(), self.childrenMemory(), self.totalMemory())
+        info_str = "Num calls: {}".format(self.numCalls())
+        info_str += "\nLevel: {}".format(self.level())
+        info_str += (
+            "\nTime ({:.2f}%): Self {:.2f} s, Children {:.2f} s, Total {:.2f} s".format(
+                self.percentTime(),
+                self.selfTime(),
+                self.childrenTime(),
+                self.totalTime(),
+            )
+        )
+        info_str += (
+            "\nMemory ({:.2f}%): Self {} MB, Children {} MB, Total {} MB".format(
+                self.percentMemory(),
+                self.selfMemory(),
+                self.childrenMemory(),
+                self.totalMemory(),
+            )
+        )
         return info_str
 
     def name(self):
@@ -86,7 +103,9 @@ class PerfGraphObject:
         """
         Returns the time the children took in seconds.
         """
-        return self._sumAllNodes(lambda node: sum([fLoAt(child.totalTime()) for child in node.children()]))
+        return self._sumAllNodes(
+            lambda node: sum([fLoAt(child.totalTime()) for child in node.children()])
+        )
 
     def percentTime(self):
         """
@@ -111,7 +130,9 @@ class PerfGraphObject:
         """
         Returns the memory added by children in Megabytes.
         """
-        return self._sumAllNodes(lambda node: sum([child.totalMemory() for child in node.children()]))
+        return self._sumAllNodes(
+            lambda node: sum([child.totalMemory() for child in node.children()])
+        )
 
     def percentMemory(self):
         """
@@ -129,6 +150,7 @@ class PerfGraphObject:
             parent = parent.parent()
         return parent
 
+
 class PerfGraphNode(PerfGraphObject):
     r"""
     A node in the graph for the PerfGraphReporterReader.
@@ -141,20 +163,25 @@ class PerfGraphNode(PerfGraphObject):
     - node_data\[dict\]: JSON output for this node.
     - parent\[PerfGraphNode\]: The parent to this node (None if root).
     """
+
     def __init__(self, name, node_data, parent):
         # Validate that the data in the node is as we expect
-        valid_node_data = {'level': int, 'memory': int, 'num_calls': int, 'time': float}
+        valid_node_data = {"level": int, "memory": int, "num_calls": int, "time": float}
         for key, type in valid_node_data.items():
-            if key not in node_data: # Required key is missing
+            if key not in node_data:  # Required key is missing
                 raise Exception('Entry missing key "{}":\n{}'.format(key, node_data))
             if not isinstance(node_data.get(key), type):
-                raise Exception('Key "{}" in node entry is not the required type "{}"\n{}'.format(key, type, node_data))
+                raise Exception(
+                    'Key "{}" in node entry is not the required type "{}"\n{}'.format(
+                        key, type, node_data
+                    )
+                )
 
-        self._memory = node_data['memory']
-        self._num_calls = node_data['num_calls']
-        self._time = node_data['time']
+        self._memory = node_data["memory"]
+        self._num_calls = node_data["num_calls"]
+        self._time = node_data["time"]
 
-        super().__init__(name, node_data['level'])
+        super().__init__(name, node_data["level"])
         self._nodes.append(self)
 
         if parent is not None and not isinstance(parent, PerfGraphNode):
@@ -171,7 +198,7 @@ class PerfGraphNode(PerfGraphObject):
         self._section = None
 
     def __str__(self):
-        return 'PerfGraphNode "' + '/'.join(self.path()) + '"'
+        return 'PerfGraphNode "' + "/".join(self.path()) + '"'
 
     def __getitem__(self, name):
         return self.child(name)
@@ -181,15 +208,21 @@ class PerfGraphNode(PerfGraphObject):
         Returns the number of calls, the time, memory,
         and children in a human readable form.
         """
-        info_str = 'PerfGraphNode\n'
-        info_str += '  Path:\n'
+        info_str = "PerfGraphNode\n"
+        info_str += "  Path:\n"
         for i in range(0, len(self.path())):
-            info_str += '    ' + ' ' * i + self.path()[i] + '\n'
-        info_str += '  ' + super().info().replace('\n', '\n  ')
+            info_str += "    " + " " * i + self.path()[i] + "\n"
+        info_str += "  " + super().info().replace("\n", "\n  ")
         if self.children():
-            info_str += '\n  Children:'
+            info_str += "\n  Children:"
             for child in self.children():
-                info_str += '\n    ' + child.name() + ' ({} call(s), {:.1f}% time, {:.1f}% memory)'.format(child.numCalls(), child.percentTime(), child.percentMemory())
+                info_str += (
+                    "\n    "
+                    + child.name()
+                    + " ({} call(s), {:.1f}% time, {:.1f}% memory)".format(
+                        child.numCalls(), child.percentTime(), child.percentMemory()
+                    )
+                )
         return info_str
 
     def path(self):
@@ -232,6 +265,7 @@ class PerfGraphNode(PerfGraphObject):
         """
         return self._parent
 
+
 class PerfGraphSection(PerfGraphObject):
     r"""
     A section in the graph for the PerfGraphReporterReader.
@@ -250,14 +284,16 @@ class PerfGraphSection(PerfGraphObject):
 
     def info(self):
         info_str = 'PerfGraphSection "' + self.name() + '":'
-        info_str += '\n  ' + super().info().replace('\n', '\n  ')
-        info_str += '\n  Nodes:'
+        info_str += "\n  " + super().info().replace("\n", "\n  ")
+        info_str += "\n  Nodes:"
         for node in self.nodes():
             for i in range(len(node.path())):
-                info_str += '\n    ' + ('- ' if i == 0 else '  ')
-                info_str += ' ' * i + node.path()[i]
+                info_str += "\n    " + ("- " if i == 0 else "  ")
+                info_str += " " * i + node.path()[i]
                 if i == len(node.path()) - 1:
-                    info_str += ' ({} call(s), {:.1f}% time, {:.1f}% memory)'.format(node.numCalls(), node.percentTime(), node.percentMemory())
+                    info_str += " ({} call(s), {:.1f}% time, {:.1f}% memory)".format(
+                        node.numCalls(), node.percentTime(), node.percentMemory()
+                    )
         return info_str
 
     def nodes(self):
@@ -280,6 +316,7 @@ class PerfGraphSection(PerfGraphObject):
 
         return None
 
+
 class PerfGraphReporterReader:
     r"""
     A Reader for MOOSE PerfGraphReporterReader data.
@@ -291,6 +328,7 @@ class PerfGraphReporterReader:
 
     The final timestep is used to capture the PerfGraph data.
     """
+
     def __init__(self, file, part=0):
         self._reader = None
         self._reader = ReporterReader(file)
@@ -299,13 +337,16 @@ class PerfGraphReporterReader:
         # Find the Reporter variable that contains the PerfGraph graph
         perf_graph_var = None
         for var in self._reader.variables():
-            if self._reader.info(var[0])['type'] == 'PerfGraphReporter' and var[1] == 'graph':
+            if (
+                self._reader.info(var[0])["type"] == "PerfGraphReporter"
+                and var[1] == "graph"
+            ):
                 perf_graph_var = var
 
         graph_data = self._reader[perf_graph_var]
 
         if len(graph_data) != 1:
-            raise Exception('Single root node not found in data')
+            raise Exception("Single root node not found in data")
 
         # Build the graph; the PerfGraphNode constructor will recursively add children
         root_node_name = list(graph_data.keys())[0]
@@ -314,6 +355,7 @@ class PerfGraphReporterReader:
 
         # Setup all of the sections
         self._sections = {}
+
         def add_section(node):
             if node.name() in self._sections:
                 section = self._sections.get(node.name())
@@ -322,6 +364,7 @@ class PerfGraphReporterReader:
                 self._sections[node.name()] = section
             node._section = section
             section._nodes.append(node)
+
         self.recurse(add_section)
 
     def __getitem__(self, name):
@@ -335,6 +378,7 @@ class PerfGraphReporterReader:
 
         - act\[function\]: Action to perform on each node (input: a PerfGraphNode)
         """
+
         def _recurse(node, act, *args, **kwargs):
             act(node, *args, **kwargs)
             for child in node.children():
@@ -398,7 +442,11 @@ class PerfGraphReporterReader:
         nodes = []
         add_node = lambda node: nodes.append(node)
         self.recurse(add_node)
-        return sorted(nodes, key=lambda node: node.selfMemory() if memory else node.selfTime(), reverse=True)[0:num]
+        return sorted(
+            nodes,
+            key=lambda node: node.selfMemory() if memory else node.selfTime(),
+            reverse=True,
+        )[0:num]
 
     def heaviestSections(self, num, memory=False):
         r"""
@@ -413,4 +461,8 @@ class PerfGraphReporterReader:
             raise TypeError('"num" should be an int')
         if num < 1:
             raise ValueError('"num" should be >= 1')
-        return sorted(self.sections(), key=lambda section: section.selfMemory() if memory else section.selfTime(), reverse=True)[0:num]
+        return sorted(
+            self.sections(),
+            key=lambda section: section.selfMemory() if memory else section.selfTime(),
+            reverse=True,
+        )[0:num]

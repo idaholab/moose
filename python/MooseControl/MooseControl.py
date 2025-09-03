@@ -20,7 +20,8 @@ import numpy as np
 from typing import Any
 
 # Common logger for the MooseControl
-logger = logging.getLogger('MooseControl')
+logger = logging.getLogger("MooseControl")
+
 
 class MooseControl:
     """Helper for interacting with the MOOSE WebServerControl.
@@ -34,12 +35,14 @@ class MooseControl:
     This object is tested primarily by
     test/tests/controls/web_server_control in the framework."""
 
-    def __init__(self,
-                 moose_command: list[str] = None,
-                 moose_port: int = None,
-                 moose_control_name: str = None,
-                 inherit_environment: bool = True,
-                 poll_time: float = 0.1):
+    def __init__(
+        self,
+        moose_command: list[str] = None,
+        moose_port: int = None,
+        moose_control_name: str = None,
+        inherit_environment: bool = True,
+        poll_time: float = 0.1,
+    ):
         """Constructor
 
         If "moose_port" is specified without "moose_command": Connect to the webserver at
@@ -63,18 +66,24 @@ class MooseControl:
             poll_time (float): Time between successive message polls in seconds
         """
         # Setup a basic logger
-        logging.basicConfig(level=logging.INFO,
-                            handlers=[logging.StreamHandler()],
-                            format='%(name)s: %(message)s')
+        logging.basicConfig(
+            level=logging.INFO,
+            handlers=[logging.StreamHandler()],
+            format="%(name)s: %(message)s",
+        )
 
         # Sanity checks on input
         has_moose_command = moose_command is not None
         has_moose_port = moose_port is not None
         has_moose_control_name = moose_control_name is not None
         if not has_moose_command and not has_moose_port:
-            raise ValueError('One of "moose_command" or "moose_port" must at least be provided')
+            raise ValueError(
+                'One of "moose_command" or "moose_port" must at least be provided'
+            )
         if has_moose_command and not has_moose_control_name:
-            raise ValueError('"moose_control_name" must be specified with "moose_command"')
+            raise ValueError(
+                '"moose_control_name" must be specified with "moose_command"'
+            )
         if has_moose_command and not isinstance(moose_command, list):
             raise ValueError('"moose_command" is not a list')
 
@@ -124,19 +133,21 @@ class MooseControl:
 
     class ControlException(Exception):
         """Basic exception for an error within the MooseControl"""
+
         def __init__(self, message):
             super().__init__(message)
 
     def _requireMooseProcess(self):
         """Throws an exception if the moose process is not running (only if one was spwaned)"""
         if self._moose_process and not self.isProcessRunning():
-            raise self.ControlException('The MOOSE process has ended')
+            raise self.ControlException("The MOOSE process has ended")
 
     def _requests_wrapper(self, function_name, *args, **kwargs):
         """Helper for wrapping a request function with the name function_name
         that uses a patch for dealing with file socket"""
         if self._file_socket:
             from .requests_unixsocket import Session
+
             accessor = Session()
         else:
             accessor = requests
@@ -144,11 +155,11 @@ class MooseControl:
 
     def _requests_get(self, *args, **kwargs):
         """Wrapper for requests.get that uses a patch for dealing with a file socket"""
-        return self._requests_wrapper('get', *args, **kwargs)
+        return self._requests_wrapper("get", *args, **kwargs)
 
     def _requests_post(self, *args, **kwargs):
         """Wrapper for requests.post that uses a patch for dealing with a file socket"""
-        return self._requests_wrapper('post', *args, **kwargs)
+        return self._requests_wrapper("post", *args, **kwargs)
 
     def _get(self, path: str):
         """Calls GET on the webserver
@@ -160,15 +171,15 @@ class MooseControl:
             dict or None: The returned JSON data, if any, otherwise None
         """
         if not self._initialized:
-            raise self.ControlException('Attempting GET without calling initialize()')
+            raise self.ControlException("Attempting GET without calling initialize()")
         self._requireMooseProcess()
         self._requireListening()
 
-        r = self._requests_get(f'{self._url}/{path}')
+        r = self._requests_get(f"{self._url}/{path}")
         r.raise_for_status()
 
         r_json = None
-        if r.headers.get('content-type') == 'application/json':
+        if r.headers.get("content-type") == "application/json":
             r_json = r.json()
 
         return int(r.status_code), r_json
@@ -184,20 +195,20 @@ class MooseControl:
             dict or None: The returned JSON data, if any, otherwise None
         """
         if not self._initialized:
-            raise self.ControlException('Attempting POST without calling initialize()')
+            raise self.ControlException("Attempting POST without calling initialize()")
         self._requireMooseProcess()
         self._requireListening()
         self._requireWaiting()
 
-        r = self._requests_post(f'{self._url}/{path}', json=data)
+        r = self._requests_post(f"{self._url}/{path}", json=data)
 
         r_json = None
-        if r.headers.get('content-type') == 'application/json':
+        if r.headers.get("content-type") == "application/json":
             r_json = r.json()
-            error = r_json.get('error')
+            error = r_json.get("error")
             if error is not None:
                 logger.error(error)
-                raise self.ControlException(f'WebServerControl error: {error}')
+                raise self.ControlException(f"WebServerControl error: {error}")
         r.raise_for_status()
 
         return r.status_code, r_json
@@ -215,7 +226,7 @@ class MooseControl:
     def isListening(self) -> bool:
         """Returns whether or not the webserver is listening"""
         try:
-            r = self._requests_get(f'{self._url}/check')
+            r = self._requests_get(f"{self._url}/check")
         except requests.exceptions.ConnectionError:
             return False
         return r.status_code == 200
@@ -223,7 +234,7 @@ class MooseControl:
     def _requireListening(self):
         """Internal helper that throws if the server is not listening"""
         if not self.isListening():
-            raise self.ControlException('MOOSE is not listening')
+            raise self.ControlException("MOOSE is not listening")
 
     def initialize(self):
         """Starts the MOOSE process (if enabled) and waits for
@@ -231,7 +242,7 @@ class MooseControl:
 
         Must be called before doing any other operations"""
         if self._initialized:
-            raise self.ControlException('Already called initialize()')
+            raise self.ControlException("Already called initialize()")
 
         # The port to listen on, if any
         port = None
@@ -244,46 +255,55 @@ class MooseControl:
             # Specify the port command
             if self._moose_port is not None:
                 port = int(self._moose_port)
-                listen_command = f'Controls/{self._moose_control_name}/port={port}'
+                listen_command = f"Controls/{self._moose_control_name}/port={port}"
             # Specify the socket command, determining a randon socket to connect to
             else:
-                suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
-                self._file_socket = os.path.join(tempfile.gettempdir(), f'moose_control_{suffix}')
-                logger.info(f'Determined file socket {self._file_socket} for communication')
-                listen_command = f'Controls/{self._moose_control_name}/file_socket={self._file_socket}'
+                suffix = "".join(
+                    random.choices(string.ascii_lowercase + string.digits, k=6)
+                )
+                self._file_socket = os.path.join(
+                    tempfile.gettempdir(), f"moose_control_{suffix}"
+                )
+                logger.info(
+                    f"Determined file socket {self._file_socket} for communication"
+                )
+                listen_command = f"Controls/{self._moose_control_name}/file_socket={self._file_socket}"
 
             # Append the listen command
             moose_command = self._moose_command + [listen_command]
 
             # Spawn the moose process
             logger.info(f'Spawning MOOSE with command "{moose_command}"')
-            self._moose_process = self.spawnMoose(moose_command, self._inherit_environment)
+            self._moose_process = self.spawnMoose(
+                moose_command, self._inherit_environment
+            )
 
             # And setup the threaded reader that will pipe the moose process
             # to the common logger
             def read_process(pipe):
                 for line in iter(pipe.readline, ""):
-                    logging.getLogger('MooseControl.app').info(line.rstrip())
-            self._moose_reader = Thread(target=read_process,
-                                        args=[self._moose_process.stdout],
-                                        daemon=True)
+                    logging.getLogger("MooseControl.app").info(line.rstrip())
+
+            self._moose_reader = Thread(
+                target=read_process, args=[self._moose_process.stdout], daemon=True
+            )
             self._moose_reader.start()
 
             # This should be running now
             self._requireMooseProcess()
         # MOOSE command is not provided; just connect via the port
         else:
-            logger.info(f'Using provided port {self._moose_port} for communication')
+            logger.info(f"Using provided port {self._moose_port} for communication")
             port = int(self._moose_port)
 
         # Set the URL for communication
         if port is not None:
-            self._url = f'http://localhost:{port}'
+            self._url = f"http://localhost:{port}"
         else:
             self._url = f'http+unix://{self._file_socket.replace("/", "%2F")}'
 
         # Wait for the webserver to listen
-        url_clean = self._url.replace('%2F', '/') # cleanup %2F for socket listening
+        url_clean = self._url.replace("%2F", "/")  # cleanup %2F for socket listening
         logger.info(f'Waiting for the webserver to start on "{url_clean}"')
         while True:
             time.sleep(self._poll_time)
@@ -302,9 +322,11 @@ class MooseControl:
         throw in the event that the webserver is waiting for
         input when you think it should be done"""
         if self._moose_process:
-            logger.info('Waiting for the webserver to stop and for the app process to exit')
+            logger.info(
+                "Waiting for the webserver to stop and for the app process to exit"
+            )
         else:
-            logger.info('Waiting for the webserver to stop')
+            logger.info("Waiting for the webserver to stop")
 
         webserver_stopped = False
         while True:
@@ -313,12 +335,12 @@ class MooseControl:
             # If the server is no longer responding, we're good
             if not self.isListening():
                 if not webserver_stopped:
-                    logger.info('Webserver has stopped listening')
+                    logger.info("Webserver has stopped listening")
                     webserver_stopped = True
                 if self._moose_process:
                     self._moose_process.wait()
                     return_code = self._moose_process.returncode
-                    logger.info(f'App process has exited with code {return_code}')
+                    logger.info(f"App process has exited with code {return_code}")
                 break
 
             # Make sure that the control isn't waiting for input
@@ -327,10 +349,12 @@ class MooseControl:
             waiting_flag = None
             try:
                 waiting_flag = self.getWaitingFlag()
-            except: # could be shutting down; can fil
+            except:  # could be shutting down; can fil
                 pass
             if waiting_flag is not None:
-                raise self.ControlException(f'Final wait is stuck because the control is waiting on flag {waiting_flag}')
+                raise self.ControlException(
+                    f"Final wait is stuck because the control is waiting on flag {waiting_flag}"
+                )
 
         # Clean this up if it exists
         self.possiblyRemoveSocket()
@@ -338,9 +362,9 @@ class MooseControl:
     def returnCode(self):
         """Gets the return code of the moose process"""
         if self._moose_process is None:
-            raise self.ControlException('A MOOSE process was not spawned')
+            raise self.ControlException("A MOOSE process was not spawned")
         if self._moose_process.poll() is None:
-            raise self.ControlException('The MOOSE process has not completed')
+            raise self.ControlException("The MOOSE process has not completed")
         return self._moose_process.returncode
 
     def wait(self, flag: str = None) -> str:
@@ -353,9 +377,9 @@ class MooseControl:
             str: The execute on flag
         """
         if flag:
-            logger.info(f'Waiting for the webserver to be at execute on flag {flag}')
+            logger.info(f"Waiting for the webserver to be at execute on flag {flag}")
         else:
-            logger.info(f'Waiting for the webserver')
+            logger.info(f"Waiting for the webserver")
 
         # Poll until we're available
         while True:
@@ -364,16 +388,18 @@ class MooseControl:
 
             # If the process is provided, die if it is no longer running
             if self._moose_process and self._moose_process.poll() is not None:
-                raise self.ControlException(f'Attached MOOSE process has terminated')
+                raise self.ControlException(f"Attached MOOSE process has terminated")
 
             # Wait for it to be available
             current_flag = self.getWaitingFlag()
             if current_flag is None:
                 continue
 
-            logger.info(f'Webserver is waiting at execute on flag {current_flag}')
+            logger.info(f"Webserver is waiting at execute on flag {current_flag}")
             if flag is not None and current_flag != flag:
-                raise self.ControlException(f'Unexpected execute on flag {current_flag}')
+                raise self.ControlException(
+                    f"Unexpected execute on flag {current_flag}"
+                )
             return current_flag
 
     def getWaitingFlag(self) -> str:
@@ -382,16 +408,16 @@ class MooseControl:
         Returns:
             str or None: The current EXECUTE_ON flag if waiting, otherwise None
         """
-        status, r = self._get('waiting')
+        status, r = self._get("waiting")
         if status != 200:
-            raise self.ControlException(f'Unexpected status {status} from waiting')
+            raise self.ControlException(f"Unexpected status {status} from waiting")
 
-        if not r['waiting']:
-            self._checkResponse(['waiting'], r)
+        if not r["waiting"]:
+            self._checkResponse(["waiting"], r)
             return None
 
-        self._checkResponse(['waiting', 'execute_on_flag'], r)
-        return r['execute_on_flag']
+        self._checkResponse(["waiting", "execute_on_flag"], r)
+        return r["execute_on_flag"]
 
     def isWaiting(self) -> bool:
         """Checks whether or not the webserver is waiting
@@ -404,39 +430,41 @@ class MooseControl:
     def _requireWaiting(self):
         """Internal helper that throws if the server is not waiting"""
         if not self.isWaiting():
-            raise self.ControlException('MOOSE is not waiting')
+            raise self.ControlException("MOOSE is not waiting")
 
     def setContinue(self):
         """Tells the WebServerControl to continue"""
-        logger.info(f'Telling the webserver to continue')
+        logger.info(f"Telling the webserver to continue")
         self._requireWaiting()
-        status, r_json = self._get('continue')
+        status, r_json = self._get("continue")
         if status != 200:
-            raise self.ControlException(f'Unexpected status {status} from continue')
+            raise self.ControlException(f"Unexpected status {status} from continue")
         if r_json is not None:
-            raise self.ControlException(f'Unexpected data {r_json} from continue')
-        logger.debug(f'Successfully told the webserver to continue')
+            raise self.ControlException(f"Unexpected data {r_json} from continue")
+        logger.debug(f"Successfully told the webserver to continue")
 
     def setTerminate(self):
         """Tells the WebServerControl to terminate the simulation gracefully."""
-        logger.info(f'Telling the webserver to terminate')
+        logger.info(f"Telling the webserver to terminate")
         self._requireWaiting()
-        status, r_json = self._get('terminate')
+        status, r_json = self._get("terminate")
         if status != 200:
-            raise self.ControlException(f'Unexpected status {status} from terminate')
+            raise self.ControlException(f"Unexpected status {status} from terminate")
         if r_json is not None:
-            raise self.ControlException(f'Unexpected data {r_json} from terminate')
-        logger.debug(f'Successfully told the webserver to terminate')
+            raise self.ControlException(f"Unexpected data {r_json} from terminate")
+        logger.debug(f"Successfully told the webserver to terminate")
 
     def _setControllable(self, path: str, type: str, value):
         """Internal helper for setting a controllable value"""
-        logger.info(f'Setting controllable value {path}')
-        logger.debug(f'Setting controllable {type} value {path}={value}')
-        data = {'name': path, 'value': value, 'type': type}
-        status, _ = self._post('set/controllable', data)
+        logger.info(f"Setting controllable value {path}")
+        logger.debug(f"Setting controllable {type} value {path}={value}")
+        data = {"name": path, "value": value, "type": type}
+        status, _ = self._post("set/controllable", data)
         if status != 201:
-            raise self.ControlException(f'Unexpected status {status} from setting controllable value')
-        logger.debug(f'Successfully set controllable value {path}')
+            raise self.ControlException(
+                f"Unexpected status {status} from setting controllable value"
+            )
+        logger.debug(f"Successfully set controllable value {path}")
 
     @staticmethod
     def _requireNumeric(value):
@@ -448,7 +476,9 @@ class MooseControl:
     def _requireType(value, value_type):
         """Helper for requring that the given value is a certain type"""
         if not isinstance(value, value_type):
-            raise self.ControlException(f'value is not a {value_type}; is a {type(value)}')
+            raise self.ControlException(
+                f"value is not a {value_type}; is a {type(value)}"
+            )
 
     def setControllableBool(self, path: str, value: bool):
         """Sets a controllable bool-valued parameter
@@ -460,7 +490,7 @@ class MooseControl:
             value (float): The value to set
         """
         self._requireType(value, bool)
-        self._setControllable(path, 'bool', value)
+        self._setControllable(path, "bool", value)
 
     def setControllableReal(self, path: str, value: float):
         """Sets a controllable Real-valued parameter
@@ -472,7 +502,7 @@ class MooseControl:
             value (float): The value to set
         """
         self._requireNumeric(value)
-        self._setControllable(path, 'Real', float(value))
+        self._setControllable(path, "Real", float(value))
 
     def setControllableInt(self, path: str, value: int):
         """Sets a controllable int-valued parameter
@@ -484,7 +514,7 @@ class MooseControl:
             value (int): The value to set
         """
         self._requireNumeric(value)
-        self._setControllable(path, 'int', int(value))
+        self._setControllable(path, "int", int(value))
 
     def setControllableVectorReal(self, path: str, value: list[float]):
         """Sets a controllable vector-of-Real parameter
@@ -500,7 +530,7 @@ class MooseControl:
         for entry in value:
             self._requireNumeric(entry)
             value_list.append(entry)
-        self._setControllable(path, 'std::vector<Real>', value_list)
+        self._setControllable(path, "std::vector<Real>", value_list)
 
     def setControllableVectorInt(self, path: str, value: list[int]):
         """Sets a controllable vector-of-int parameter
@@ -516,7 +546,7 @@ class MooseControl:
         for entry in value:
             self._requireNumeric(entry)
             value_list.append(int(entry))
-        self._setControllable(path, 'std::vector<int>', value_list)
+        self._setControllable(path, "std::vector<int>", value_list)
 
     def setControllableString(self, path: str, value: str):
         """Sets a controllable string parameter
@@ -525,7 +555,7 @@ class MooseControl:
             path (str): The path of the controllable value
             value (str): The value to set
         """
-        self._setControllable(path, 'std::string', str(value))
+        self._setControllable(path, "std::string", str(value))
 
     def setControllableVectorString(self, path: str, value: list[float]):
         """Sets a controllable vector-of-string parameter
@@ -539,7 +569,7 @@ class MooseControl:
         self._requireType(value, list)
         for i in range(len(value)):
             value[i] = str(value[i])
-        self._setControllable(path, 'std::vector<std::string>', value)
+        self._setControllable(path, "std::vector<std::string>", value)
 
     def setControllableMatrix(self, path: str, value: np.typing.ArrayLike):
         """Sets a controllable RealEigenMatrix.
@@ -558,8 +588,10 @@ class MooseControl:
                 array = array.reshape((1, -1))
             assert len(array.shape) == 2
         except Exception as e:
-            raise self.ControlException('value is not convertible to a 1- or 2-D array.') from e
-        self._setControllable(path, 'RealEigenMatrix', array.tolist())
+            raise self.ControlException(
+                "value is not convertible to a 1- or 2-D array."
+            ) from e
+        self._setControllable(path, "RealEigenMatrix", array.tolist())
 
     def getPostprocessor(self, name: str) -> float:
         """Gets a postprocessor value
@@ -572,15 +604,17 @@ class MooseControl:
         logger.debug(f'Getting postprocessor value for "{name}"')
         self._requireWaiting()
 
-        data = {'name': name}
-        status, r = self._post('get/postprocessor', data)
+        data = {"name": name}
+        status, r = self._post("get/postprocessor", data)
 
         if status != 200:
-            raise self.ControlException(f'Unexpected status {status} from getting postprocessor value')
-        self._checkResponse(['value'], r)
+            raise self.ControlException(
+                f"Unexpected status {status} from getting postprocessor value"
+            )
+        self._checkResponse(["value"], r)
 
-        value = float(r['value'])
-        logger.debug(f'Successfully retrieved postprocessor value {name}={value}')
+        value = float(r["value"])
+        logger.debug(f"Successfully retrieved postprocessor value {name}={value}")
 
         return value
 
@@ -595,27 +629,33 @@ class MooseControl:
         logger.debug(f'Getting reporter value for "{name}"')
         self._requireWaiting()
 
-        data = {'name': name}
-        status, r = self._post('get/reporter', data)
+        data = {"name": name}
+        status, r = self._post("get/reporter", data)
 
         if status != 200:
-            raise self.ControlException(f'Unexpected status {status} from getting postprocessor value')
-        self._checkResponse(['value'], r)
+            raise self.ControlException(
+                f"Unexpected status {status} from getting postprocessor value"
+            )
+        self._checkResponse(["value"], r)
 
-        value = r['value']
-        logger.debug(f'Successfully retrieved reporter value {name}={value}')
+        value = r["value"]
+        logger.debug(f"Successfully retrieved reporter value {name}={value}")
 
         return value
 
     @staticmethod
-    def spawnMoose(cmd: list[str], inherit_environment: bool = True) -> subprocess.Popen:
+    def spawnMoose(
+        cmd: list[str], inherit_environment: bool = True
+    ) -> subprocess.Popen:
         """Helper for spawning a MOOSE process that will be cleanly killed"""
-        popen_kwargs = {'stdout': subprocess.PIPE,
-                        'stderr': subprocess.STDOUT,
-                        'text': True,
-                        'universal_newlines': True,
-                        'bufsize': 1,
-                        'env': os.environ if inherit_environment else None,
-                        'preexec_fn': os.setsid}
+        popen_kwargs = {
+            "stdout": subprocess.PIPE,
+            "stderr": subprocess.STDOUT,
+            "text": True,
+            "universal_newlines": True,
+            "bufsize": 1,
+            "env": os.environ if inherit_environment else None,
+            "preexec_fn": os.setsid,
+        }
 
         return subprocess.Popen(cmd, **popen_kwargs)

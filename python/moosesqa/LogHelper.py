@@ -9,11 +9,13 @@
 import collections
 import logging
 
+
 class LogHelper(object):
     """Tool for allowing log level for individual log messages"""
+
     def __init__(self, logger_name, *keys, default=logging.ERROR, **kwargs):
         self.__logger = logging.getLogger(logger_name)
-        self.__modes = {k:default for k in keys}
+        self.__modes = {k: default for k in keys}
         self.__counts = collections.defaultdict(int)
         self.__text = collections.defaultdict(list)
         for key, value in kwargs.items():

@@ -1,4 +1,4 @@
-#pylint: disable=missing-docstring
+# pylint: disable=missing-docstring
 # This file is part of the MOOSE framework
 # https://mooseframework.inl.gov
 #
@@ -14,5 +14,6 @@ from .LineSource import LineSource
 
 from . import PlaneSourceMeta
 from .. import base
+
 PlaneSource = PlaneSourceMeta.create(base.ChiggerSource)
 PlaneSource2D = PlaneSourceMeta.create(base.ChiggerSource2D)

@@ -17,6 +17,7 @@ from ..common import exceptions
 from ..tree import tokens
 from . import core, command
 
+
 # Needed to load the Versioner
 def getVersionerClass():
     """Dynamically load the versioner.Versioner class since it isn't installed by default."""
@@ -41,6 +42,7 @@ def getVersionerClass():
 
 def make_extension(**kwargs):
     return VersionerExtension(**kwargs)
+
 
 class VersionerExtension(command.CommandExtension):
     """
@@ -73,6 +75,7 @@ class VersionerExtension(command.CommandExtension):
             value = getattr(value, key)
         return value
 
+
 class VersionerCodeReplace(command.CommandComponent):
     """
     Code block replace:
@@ -88,49 +91,64 @@ class VersionerCodeReplace(command.CommandComponent):
         ...
     """
 
-    COMMAND = 'versioner'
-    SUBCOMMAND = 'code'
+    COMMAND = "versioner"
+    SUBCOMMAND = "code"
 
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings['max-height'] = ('350px', "The default height for listing content.")
-        settings['language'] = ('bash', "The language to use for highlighting, if not supplied " \
-                                         "it will be inferred from the extension (if possible).")
+        settings["max-height"] = ("350px", "The default height for listing content.")
+        settings["language"] = (
+            "bash",
+            "The language to use for highlighting, if not supplied "
+            "it will be inferred from the extension (if possible).",
+        )
         return settings
 
     def createToken(self, parent, info, page, settings):
-        content = info['inline'] if 'inline' in info else info['block']
+        content = info["inline"] if "inline" in info else info["block"]
 
         def replace(content, prefix, versioner_keys):
             def sub_function(match):
-                package_dashed = match.group(1).lower().replace('_', '-')
+                package_dashed = match.group(1).lower().replace("_", "-")
                 return self.extension.getVersion(package_dashed, versioner_keys)
-            return re.sub(r'__VERSIONER_' + re.escape(prefix) + r'_(?P<package>[A-Z][A-Z_]+)__',
-                          sub_function, content, flags=re.UNICODE)
-        content = replace(content, 'VERSION', ['full_version'])
-        content = replace(content, 'CONDA_VERSION', ['conda', 'install'])
 
-        core.Code(parent, style="max-height:{};".format(settings['max-height']),
-                  language=settings['language'], content=content)
+            return re.sub(
+                r"__VERSIONER_" + re.escape(prefix) + r"_(?P<package>[A-Z][A-Z_]+)__",
+                sub_function,
+                content,
+                flags=re.UNICODE,
+            )
+
+        content = replace(content, "VERSION", ["full_version"])
+        content = replace(content, "CONDA_VERSION", ["conda", "install"])
+
+        core.Code(
+            parent,
+            style="max-height:{};".format(settings["max-height"]),
+            language=settings["language"],
+            content=content,
+        )
         return parent
 
+
 class VersionerReplaceBase(command.CommandComponent):
-    COMMAND = 'versioner'
+    COMMAND = "versioner"
 
     @staticmethod
     def defaultSettings():
         settings = command.CommandComponent.defaultSettings()
-        settings['package'] = (None, "The package to get the version of")
+        settings["package"] = (None, "The package to get the version of")
         return settings
 
     def createTokenBase(self, parent, info, package, settings, versioner_keys):
-        package = settings.get('package')
+        package = settings.get("package")
         if package is None:
             raise exceptions.MooseDocsException('Missing required option "package"')
         version = self.extension.getVersion(package, versioner_keys, True)
         tokens.String(parent, content=str(version))
         return parent
+
 
 class VersionerVersionReplace(VersionerReplaceBase):
     """
@@ -142,10 +160,12 @@ class VersionerVersionReplace(VersionerReplaceBase):
     yields:
         "This is a sentence with moose-dev version abcd123"
     """
-    SUBCOMMAND = 'version'
+
+    SUBCOMMAND = "version"
 
     def createToken(self, parent, info, page, settings):
-        return self.createTokenBase(parent, info, page, settings, ['full_version'])
+        return self.createTokenBase(parent, info, page, settings, ["full_version"])
+
 
 class VersionerCondaVersionReplace(VersionerReplaceBase):
     """
@@ -157,7 +177,8 @@ class VersionerCondaVersionReplace(VersionerReplaceBase):
     yields:
         "This is a sentence with moose-dev version 2024.01.01"
     """
-    SUBCOMMAND = 'conda_version'
+
+    SUBCOMMAND = "conda_version"
 
     def createToken(self, parent, info, page, settings):
-        return self.createTokenBase(parent, info, page, settings, ['conda', 'install'])
+        return self.createTokenBase(parent, info, page, settings, ["conda", "install"])

@@ -19,6 +19,7 @@ from MooseDocs.common import exceptions
 from MooseDocs.extensions import command
 from MooseDocs.test import TEST_ROOT
 
+
 class TestTranslator(unittest.TestCase):
 
     def setUp(self):
@@ -28,12 +29,13 @@ class TestTranslator(unittest.TestCase):
         self.translator.init()
 
     def testFindPage(self):
-        page = self.translator.findPage('core.md')
-        self.assertEqual(page.local, 'extensions/core.md')
+        page = self.translator.findPage("core.md")
+        self.assertEqual(page.local, "extensions/core.md")
 
     def testFindPageError(self):
         with self.assertRaisesRegex(exceptions.MooseDocsException, "Did you mean"):
             page = self.translator.findPage("wrong.md")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main(verbosity=2)

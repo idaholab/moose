@@ -9,11 +9,16 @@
 
 from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
 
+
 class TestHarnessTester(TestHarnessTestCase):
     def testMinADSize(self):
         """
         Test AD vector size
         """
-        output = self.runTests('-i', 'ad_size', '--no-color', no_capabilities=False).output
-        self.assertRegex(output, r'tests/test_harness.enough \.* OK')
-        self.assertRegex(output, r'tests/test_harness\.too_few \.* \[NEEDS: AD_SIZE>=1000\] SKIP')
+        output = self.runTests(
+            "-i", "ad_size", "--no-color", no_capabilities=False
+        ).output
+        self.assertRegex(output, r"tests/test_harness.enough \.* OK")
+        self.assertRegex(
+            output, r"tests/test_harness\.too_few \.* \[NEEDS: AD_SIZE>=1000\] SKIP"
+        )

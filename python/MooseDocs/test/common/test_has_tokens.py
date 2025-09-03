@@ -11,13 +11,15 @@ import unittest
 from MooseDocs import common
 from MooseDocs.tree import tokens
 
+
 class TestHasTokens(unittest.TestCase):
     def testBasic(self):
-        root = tokens.Token('', None)
-        tokens.Token('Test', root)
+        root = tokens.Token("", None)
+        tokens.Token("Test", root)
 
-        self.assertTrue(common.has_tokens(root, 'Test'))
-        self.assertFalse(common.has_tokens(root, 'Nope'))
+        self.assertTrue(common.has_tokens(root, "Test"))
+        self.assertFalse(common.has_tokens(root, "Nope"))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main(verbosity=2)

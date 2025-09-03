@@ -11,7 +11,10 @@
 The MooseDocs systems raises the following exceptions.
 """
 import logging
+
 LOG = logging.getLogger(__name__)
+
+
 class MooseDocsException(Exception):
     """
     General exception.
@@ -21,9 +24,10 @@ class MooseDocsException(Exception):
         *args: (Optoinal) Any values supplied in *args are automatically applied to the to the
                message with the built-in python format method.
     """
+
     def __init__(self, message, *args, **kwargs):
         self.__message = message.format(*args)
-        if kwargs.pop('log', False):
+        if kwargs.pop("log", False):
             LOG.exception(self.__message)
         Exception.__init__(self, self.__message)
 

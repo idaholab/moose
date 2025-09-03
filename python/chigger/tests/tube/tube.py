@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#pylint: disable=missing-docstring
+# pylint: disable=missing-docstring
 # This file is part of the MOOSE framework
 # https://mooseframework.inl.gov
 #
@@ -11,11 +11,11 @@
 
 import chigger
 
-reader = chigger.exodus.ExodusReader('../input/pipe.e')
+reader = chigger.exodus.ExodusReader("../input/pipe.e")
 
 tube = chigger.filters.TubeFilter()
-pipe = chigger.exodus.ExodusResult(reader, variable='u', cmap='viridis', filters=[tube])
+pipe = chigger.exodus.ExodusResult(reader, variable="u", cmap="viridis", filters=[tube])
 
-window = chigger.RenderWindow(pipe, size=[300,300], test=True)
-window.write('tube.png')
+window = chigger.RenderWindow(pipe, size=[300, 300], test=True)
+window.write("tube.png")
 window.start()

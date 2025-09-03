@@ -11,6 +11,7 @@
 import unittest
 from MooseDocs.common import build_class_database
 
+
 class TestClassDatabase(unittest.TestCase):
 
     def setUp(self):
@@ -35,28 +36,35 @@ class TestClassDatabase(unittest.TestCase):
         """
         Test that class with h and C files are located.
         """
-        info = self.database['BoxMarker']
-        self.assertEqual(info.header, 'framework/include/markers/BoxMarker.h')
-        self.assertEqual(info.source, 'framework/src/markers/BoxMarker.C')
-        self.assertIn('test/tests/markers/box_marker/box_marker_test.i', info.inputs)
+        info = self.database["BoxMarker"]
+        self.assertEqual(info.header, "framework/include/markers/BoxMarker.h")
+        self.assertEqual(info.source, "framework/src/markers/BoxMarker.C")
+        self.assertIn("test/tests/markers/box_marker/box_marker_test.i", info.inputs)
 
     def testNamed(self):
         """
         Test that named objects with h and C files are located.
         """
-        info = self.database['ParsedFunction']
-        self.assertEqual(info.header, 'framework/include/functions/MooseParsedFunction.h')
-        self.assertEqual(info.source, 'framework/src/functions/MooseParsedFunction.C')
+        info = self.database["ParsedFunction"]
+        self.assertEqual(
+            info.header, "framework/include/functions/MooseParsedFunction.h"
+        )
+        self.assertEqual(info.source, "framework/src/functions/MooseParsedFunction.C")
+
 
 class TestClassDatabaseEmptyInput(unittest.TestCase):
     def testDiffusion(self):
         database = build_class_database()
-        info = database['Diffusion']
-        self.assertEqual(info.header, 'framework/include/kernels/Diffusion.h')
-        self.assertEqual(info.source, 'framework/src/kernels/Diffusion.C')
-        self.assertIn('modules/heat_transfer/include/kernels/HeatConduction.h', info.children)
-        self.assertIn('test/tests/mesh/named_entities/named_entities_test_xda.i', info.inputs)
+        info = database["Diffusion"]
+        self.assertEqual(info.header, "framework/include/kernels/Diffusion.h")
+        self.assertEqual(info.source, "framework/src/kernels/Diffusion.C")
+        self.assertIn(
+            "modules/heat_transfer/include/kernels/HeatConduction.h", info.children
+        )
+        self.assertIn(
+            "test/tests/mesh/named_entities/named_entities_test_xda.i", info.inputs
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(verbosity=2)

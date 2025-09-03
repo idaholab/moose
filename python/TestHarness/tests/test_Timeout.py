@@ -10,12 +10,13 @@ import os
 import subprocess
 from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
 
+
 class TestHarnessTester(TestHarnessTestCase):
     def testTimeout(self):
         """
         Test that timeout tests report TIMEOUT
         """
-        out = self.runTests('-i', 'timeout', exit_code=1).output
+        out = self.runTests("-i", "timeout", exit_code=1).output
 
         self.assertRegex(out, r"test_harness\.timeout.*?TIMEOUT")
 
@@ -23,8 +24,8 @@ class TestHarnessTester(TestHarnessTestCase):
         """
         Test that timeout tests report TIMEOUT
         """
-        os.environ['MOOSE_TEST_MAX_TIME'] = '2'
-        out = self.runTests('-i', 'timeout', exit_code=1).output
-        os.environ.pop('MOOSE_TEST_MAX_TIME')
+        os.environ["MOOSE_TEST_MAX_TIME"] = "2"
+        out = self.runTests("-i", "timeout", exit_code=1).output
+        os.environ.pop("MOOSE_TEST_MAX_TIME")
 
         self.assertRegex(out, r"test_harness\.timeout.*?TIMEOUT")

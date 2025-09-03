@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#pylint: disable=missing-docstring
+# pylint: disable=missing-docstring
 # This file is part of the MOOSE framework
 # https://mooseframework.inl.gov
 #
@@ -10,9 +10,12 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 import chigger
-reader = chigger.exodus.ExodusReader('../../input/variable_range.e')
-result = chigger.exodus.ExodusResult(reader, variable='u', representation='wireframe')
-cell_result = chigger.exodus.LabelExodusResult(result, text_color=[0,1,1], font_size=10)
-window = chigger.RenderWindow(result, cell_result, size=[800,800], test=True)
-window.write('variable.png')
+
+reader = chigger.exodus.ExodusReader("../../input/variable_range.e")
+result = chigger.exodus.ExodusResult(reader, variable="u", representation="wireframe")
+cell_result = chigger.exodus.LabelExodusResult(
+    result, text_color=[0, 1, 1], font_size=10
+)
+window = chigger.RenderWindow(result, cell_result, size=[800, 800], test=True)
+window.write("variable.png")
 window.start()

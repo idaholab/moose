@@ -1,4 +1,4 @@
-#pylint: disable=missing-docstring
+# pylint: disable=missing-docstring
 # This file is part of the MOOSE framework
 # https://mooseframework.inl.gov
 #
@@ -23,6 +23,7 @@ from .ColorMap import ColorMap
 
 from .ResultGroup import ResultGroup
 
+
 def create_single_source_result(source_type):
     """
     In many cases only a single source object (ChiggerSourceBase) must be linked to a renderer
@@ -33,10 +34,12 @@ def create_single_source_result(source_type):
     Inputs:
         SOURCE_TYPE: The type of source to attach to a ChiggerResult object.
     """
+
     class ChiggerResultMeta(ChiggerResult):
         """
         Meta class for creating ChiggerResult classes of different types.
         """
+
         @staticmethod
         def getOptions():
             opt = ChiggerResult.getOptions()

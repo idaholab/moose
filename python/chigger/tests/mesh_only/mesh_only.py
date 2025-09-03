@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#pylint: disable=missing-docstring
+# pylint: disable=missing-docstring
 # This file is part of the MOOSE framework
 # https://mooseframework.inl.gov
 #
@@ -10,8 +10,9 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 import chigger
-reader = chigger.exodus.ExodusReader('../input/mesh_only.e')
+
+reader = chigger.exodus.ExodusReader("../input/mesh_only.e")
 mug = chigger.exodus.ExodusResult(reader, color=[1, 1, 0.2])
-window = chigger.RenderWindow(mug, size=[300,300], test=True)
-window.write('mesh_only.png')
+window = chigger.RenderWindow(mug, size=[300, 300], test=True)
+window.write("mesh_only.png")
 window.start()

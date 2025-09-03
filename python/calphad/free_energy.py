@@ -20,7 +20,8 @@ If no list of phases is supplied all phases are exported.
 
 import os
 import sys
-sys.path.append(os.path.join(os.path.dirname(os.path.abspath( __file__ )), '..', 'mms'))
+
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "mms"))
 
 from pycalphad import Database, Model
 from fparser import *
@@ -56,8 +57,8 @@ else:
         sys.exit(1)
 
 for phase in phases:
-    print('  [./F_%s]' % phase)
-    print('    type = DerivativeParsedMaterial')
+    print("  [./F_%s]" % phase)
+    print("    type = DerivativeParsedMaterial")
 
     # get constituents
     constituents = list(set([i for c in db.phases[phase].constituents for i in c]))
@@ -70,4 +71,4 @@ for phase in phases:
 
     # print(variables
     print("    args = '%s'" % " ".join([v.name for v in m.variables]))
-    print('  [../]')
+    print("  [../]")

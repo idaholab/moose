@@ -17,13 +17,14 @@ from TestHarness.resultsreader.results import TestHarnessResults, TestHarnessTes
 
 FAKE_CIVET_VERSION = 2
 FAKE_CIVET_JOB_ID = 12345
-FAKE_CIVET_JOB_URL = f'civet.inl.gov/job/{FAKE_CIVET_JOB_ID}'
-FAKE_EVENT_SHA = 'abcd1234ababcd1234ababcd1234ababcd1234ab'
-FAKE_BASE_SHA = '1234abcdab1234abcdab1234abcdab1234abcdab'
-FAKE_EVENT_CAUSE = 'pr'
+FAKE_CIVET_JOB_URL = f"civet.inl.gov/job/{FAKE_CIVET_JOB_ID}"
+FAKE_EVENT_SHA = "abcd1234ababcd1234ababcd1234ababcd1234ab"
+FAKE_BASE_SHA = "1234abcdab1234abcdab1234abcdab1234abcdab"
+FAKE_EVENT_CAUSE = "pr"
 FAKE_PR_NUM = 1234
 FAKE_HPC_QUEUED_TIME = 1.234
 FAKE_TIME = datetime.now()
+
 
 class TestResultsReaderResults(TestHarnessTestCase):
     def __init__(self, *args, **kwargs):
@@ -42,44 +43,50 @@ class TestResultsReaderResults(TestHarnessTestCase):
         tests = []
 
         # Faked values that CIVET would add
-        civet_values = {'event_sha': FAKE_EVENT_SHA,
-                        'event_cause': FAKE_EVENT_CAUSE,
-                        'pr_num': FAKE_PR_NUM,
-                        'base_sha': FAKE_BASE_SHA,
-                        'time': FAKE_TIME}
+        civet_values = {
+            "event_sha": FAKE_EVENT_SHA,
+            "event_cause": FAKE_EVENT_CAUSE,
+            "pr_num": FAKE_PR_NUM,
+            "base_sha": FAKE_BASE_SHA,
+            "time": FAKE_TIME,
+        }
         for k in remove_civet_keys:
             del civet_values[k]
 
         # Perform fixups that CIVET would do
-        for folder_name, folder_values in values['tests'].items():
-            for test_name, test_values in folder_values['tests'].items():
+        for folder_name, folder_values in values["tests"].items():
+            for test_name, test_values in folder_values["tests"].items():
                 # Remove output entires, as they're removed when storing
-                for key in ['output', 'output_files']:
+                for key in ["output", "output_files"]:
                     if key in test_values:
                         del test_values[key]
 
-                tester_metadata = test_values.get('tester', {}).get('json_metadata', {})
+                tester_metadata = test_values.get("tester", {}).get("json_metadata", {})
                 for key, value in tester_metadata.items():
                     if value:
-                        with open(value, 'r') as f:
+                        with open(value, "r") as f:
                             data = json.load(f)
-                        tester_metadata[key] = zlib.compress(json.dumps(data).encode('utf-8'))
+                        tester_metadata[key] = zlib.compress(
+                            json.dumps(data).encode("utf-8")
+                        )
 
-                test_values['folder_name'] = folder_name
-                test_values['test_name'] = test_name
+                test_values["folder_name"] = folder_name
+                test_values["test_name"] = test_name
 
                 # Fake values from civet
                 test_values.update(civet_values)
                 # Fake values from HPC
-                test_values['timing']['hpc_queued'] = FAKE_HPC_QUEUED_TIME
+                test_values["timing"]["hpc_queued"] = FAKE_HPC_QUEUED_TIME
                 tests.append(test_values)
 
         # Setup main results entry
         results = values.copy()
-        del results['tests']
-        results['civet'] = {'job_url': FAKE_CIVET_JOB_URL,
-                            'job_id': FAKE_CIVET_JOB_ID,
-                            'version': civet_version}
+        del results["tests"]
+        results["civet"] = {
+            "job_url": FAKE_CIVET_JOB_URL,
+            "job_id": FAKE_CIVET_JOB_ID,
+            "version": civet_version,
+        }
         results.update(civet_values)
 
         return results, tests
@@ -89,9 +96,11 @@ class TestResultsReaderResults(TestHarnessTestCase):
         result = TestHarnessResults(results)
 
         self.assertEqual(result.data, results)
-        self.assertEqual(result.testharness, results['testharness'])
-        self.assertEqual(result.version, results['testharness']['version'])
-        self.assertEqual(result.validation_version, results['testharness']['validation_version'])
+        self.assertEqual(result.testharness, results["testharness"])
+        self.assertEqual(result.version, results["testharness"]["version"])
+        self.assertEqual(
+            result.validation_version, results["testharness"]["validation_version"]
+        )
 
         # Faked entries for civet
         self.assertEqual(result.civet_job_url, FAKE_CIVET_JOB_URL)
@@ -112,8 +121,10 @@ class TestResultsReaderResults(TestHarnessTestCase):
             # Get the actual Job object from the TestHarness
             folder_name = entry["folder_name"]
             test_name = entry["test_name"]
-            full_test_name = f'{folder_name}.{test_name}'
-            jobs = [j for j in harness.finished_jobs if j.getTestName() == full_test_name]
+            full_test_name = f"{folder_name}.{test_name}"
+            jobs = [
+                j for j in harness.finished_jobs if j.getTestName() == full_test_name
+            ]
             self.assertEqual(len(jobs), 1)
             job = jobs[0]
 
@@ -133,18 +144,20 @@ class TestResultsReaderResults(TestHarnessTestCase):
             self.assertEqual(test_result.time, FAKE_TIME)
 
             # Status properties
-            self.assertEqual(test_result.status, entry['status'])
-            self.assertEqual(test_result.status_value, entry['status']['status'])
+            self.assertEqual(test_result.status, entry["status"])
+            self.assertEqual(test_result.status_value, entry["status"]["status"])
 
             # Timing properties
-            self.assertEqual(test_result.timing, entry['timing'])
-            self.assertEqual(test_result.run_time, entry['timing']['runner_run'])
+            self.assertEqual(test_result.timing, entry["timing"])
+            self.assertEqual(test_result.run_time, entry["timing"]["runner_run"])
             self.assertEqual(test_result.hpc_queued_time, FAKE_HPC_QUEUED_TIME)
 
             # Tester properties
-            self.assertEqual(test_result.tester, entry['tester'])
-            self.assertEqual(test_result.json_metadata, entry['tester']['json_metadata'])
-            for k, v in entry['tester']['json_metadata'].items():
+            self.assertEqual(test_result.tester, entry["tester"])
+            self.assertEqual(
+                test_result.json_metadata, entry["tester"]["json_metadata"]
+            )
+            for k, v in entry["tester"]["json_metadata"].items():
                 self.assertEqual(test_result.json_metadata[k], v)
 
             # Validation data
@@ -164,8 +177,9 @@ class TestResultsReaderResults(TestHarnessTestCase):
         Tests when base_sha didn't exist in the database (civet version < 2)
         """
         civet_version = 1
-        results, tests = self.captureResult(remove_civet_keys=['base_sha'],
-                                            civet_version=civet_version)
+        results, tests = self.captureResult(
+            remove_civet_keys=["base_sha"], civet_version=civet_version
+        )
 
         test_harness_results = TestHarnessResults(results)
         self.assertEqual(test_harness_results.civet_version, civet_version)
@@ -175,5 +189,6 @@ class TestResultsReaderResults(TestHarnessTestCase):
             test_result = TestHarnessTestResult(entry, test_harness_results)
             self.assertIsNone(test_result.base_sha)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

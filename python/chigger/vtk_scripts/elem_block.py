@@ -13,8 +13,8 @@
 import vtk
 
 # Input file and variable
-filename = '../tests/input/block_vars_out.e'
-varname = 'right_elemental'
+filename = "../tests/input/block_vars_out.e"
+varname = "right_elemental"
 
 # Read Exodus Data
 reader = vtk.vtkExodusIIReader()
@@ -23,7 +23,7 @@ reader.UpdateInformation()
 reader.SetTimeStep(0)
 reader.SetAllArrayStatus(vtk.vtkExodusIIReader.ELEM_BLOCK, 1)
 reader.Update()
-#print reader # uncomment this to show the file information
+# print reader # uncomment this to show the file information
 
 blk0 = reader.GetOutput().GetBlock(0).GetBlock(0)
 

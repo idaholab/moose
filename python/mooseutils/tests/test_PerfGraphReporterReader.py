@@ -14,6 +14,7 @@ from mooseutils.ReporterReader import ReporterReader
 
 from mooseutils.tests import MOOSE_DIR
 
+
 class TestPerfGraphReporterReader(unittest.TestCase):
     """
     Test use of PerfGraphReporterReader for loading PerfGraphReporter data.
@@ -27,15 +28,15 @@ class TestPerfGraphReporterReader(unittest.TestCase):
 
         reader = ReporterReader(self._file)
         reader.update(reader.times()[-1])
-        self._data = reader[('perf_graph', 'graph')]
-        self._root_node = self._data['MooseTestApp (main)']
+        self._data = reader[("perf_graph", "graph")]
+        self._root_node = self._data["MooseTestApp (main)"]
 
     def test(self):
         def totalTime(node_data):
-            return node_data['time'] + childrenTime(node_data)
+            return node_data["time"] + childrenTime(node_data)
 
         def totalMemory(node_data):
-            return node_data['memory'] + childrenMemory(node_data)
+            return node_data["memory"] + childrenMemory(node_data)
 
         def childrenTime(node_data):
             children_time = 0
@@ -82,18 +83,22 @@ class TestPerfGraphReporterReader(unittest.TestCase):
             self.assertIn(node, node.section().nodes())
             self.assertEqual(pgrr.rootNode(), node.rootNode())
 
-            self.assertEqual(node.level(), node_data['level'])
-            self.assertEqual(node.numCalls(), node_data['num_calls'])
+            self.assertEqual(node.level(), node_data["level"])
+            self.assertEqual(node.numCalls(), node_data["num_calls"])
 
-            self.assertEqual(node.selfTime(), node_data['time'])
+            self.assertEqual(node.selfTime(), node_data["time"])
             self.assertEqual(node.childrenTime(), childrenTime(node_data))
             self.assertEqual(node.totalTime(), totalTime(node_data))
-            self.assertEqual(node.percentTime(), totalTime(node_data) * 100 / root_node_time)
+            self.assertEqual(
+                node.percentTime(), totalTime(node_data) * 100 / root_node_time
+            )
 
-            self.assertEqual(node.selfMemory(), node_data['memory'])
+            self.assertEqual(node.selfMemory(), node_data["memory"])
             self.assertEqual(node.childrenTime(), childrenTime(node_data))
             self.assertEqual(node.totalTime(), totalTime(node_data))
-            self.assertEqual(node.percentMemory(), totalMemory(node_data) * 100 / root_node_memory)
+            self.assertEqual(
+                node.percentMemory(), totalMemory(node_data) * 100 / root_node_memory
+            )
 
             if node.name() not in sections:
                 sections[node.name()] = []
@@ -120,62 +125,85 @@ class TestPerfGraphReporterReader(unittest.TestCase):
                 self.assertEqual(node.level(), section.level())
                 self.assertEqual(node.name(), section.name())
 
-            self.assertEqual(section.numCalls(), sum([node.numCalls() for node in section.nodes()]))
+            self.assertEqual(
+                section.numCalls(), sum([node.numCalls() for node in section.nodes()])
+            )
 
-            self.assertAlmostEqual(section.selfTime(), sum([node.selfTime() for node in section.nodes()]))
-            self.assertAlmostEqual(section.totalTime(), sum([node.totalTime() for node in section.nodes()]))
-            self.assertAlmostEqual(section.childrenTime(), sum([node.childrenTime() for node in section.nodes()]))
+            self.assertAlmostEqual(
+                section.selfTime(), sum([node.selfTime() for node in section.nodes()])
+            )
+            self.assertAlmostEqual(
+                section.totalTime(), sum([node.totalTime() for node in section.nodes()])
+            )
+            self.assertAlmostEqual(
+                section.childrenTime(),
+                sum([node.childrenTime() for node in section.nodes()]),
+            )
 
-            self.assertAlmostEqual(section.selfMemory(), sum([node.selfMemory() for node in section.nodes()]))
-            self.assertAlmostEqual(section.totalMemory(), sum([node.totalMemory() for node in section.nodes()]))
-            self.assertAlmostEqual(section.childrenMemory(), sum([node.childrenMemory() for node in section.nodes()]))
+            self.assertAlmostEqual(
+                section.selfMemory(),
+                sum([node.selfMemory() for node in section.nodes()]),
+            )
+            self.assertAlmostEqual(
+                section.totalMemory(),
+                sum([node.totalMemory() for node in section.nodes()]),
+            )
+            self.assertAlmostEqual(
+                section.childrenMemory(),
+                sum([node.childrenMemory() for node in section.nodes()]),
+            )
 
         heaviest_nodes = pgrr.heaviestNodes(2)
         self.assertEqual(len(heaviest_nodes), 2)
-        self.assertEqual(heaviest_nodes[0].name(), 'MooseApp::setupOptions')
-        self.assertEqual(heaviest_nodes[1].name(), 'MooseTestApp (main)')
+        self.assertEqual(heaviest_nodes[0].name(), "MooseApp::setupOptions")
+        self.assertEqual(heaviest_nodes[1].name(), "MooseTestApp (main)")
 
         heaviest_mem_nodes = pgrr.heaviestNodes(2, memory=True)
         self.assertEqual(len(heaviest_mem_nodes), 2)
-        self.assertEqual(heaviest_mem_nodes[0].name(), 'MooseTestApp (main)')
-        self.assertEqual(heaviest_mem_nodes[1].name(), 'FEProblem::solve')
+        self.assertEqual(heaviest_mem_nodes[0].name(), "MooseTestApp (main)")
+        self.assertEqual(heaviest_mem_nodes[1].name(), "FEProblem::solve")
 
         heaviest_sections = pgrr.heaviestSections(2)
         self.assertEqual(len(heaviest_sections), 2)
-        self.assertEqual(heaviest_sections[0].name(), 'MooseApp::setupOptions')
-        self.assertEqual(heaviest_sections[1].name(), 'MooseTestApp (main)')
+        self.assertEqual(heaviest_sections[0].name(), "MooseApp::setupOptions")
+        self.assertEqual(heaviest_sections[1].name(), "MooseTestApp (main)")
 
         heaviest_mem_sections = pgrr.heaviestSections(2, memory=True)
         self.assertEqual(len(heaviest_sections), 2)
-        self.assertEqual(heaviest_mem_sections[0].name(), 'MooseTestApp (main)')
-        self.assertEqual(heaviest_mem_sections[1].name(), 'Console::outputStep')
+        self.assertEqual(heaviest_mem_sections[0].name(), "MooseTestApp (main)")
+        self.assertEqual(heaviest_mem_sections[1].name(), "Console::outputStep")
 
     def testExceptions(self):
         pgrr = PerfGraphReporterReader(self._file)
 
         with self.assertRaisesRegex(TypeError, '"num" should be an int'):
-            pgrr.heaviestNodes('foo')
+            pgrr.heaviestNodes("foo")
         with self.assertRaisesRegex(ValueError, '"num" should be >= 1'):
             pgrr.heaviestNodes(-1)
         with self.assertRaisesRegex(TypeError, '"num" should be an int'):
-            pgrr.heaviestSections('foo')
+            pgrr.heaviestSections("foo")
         with self.assertRaisesRegex(ValueError, '"num" should be >= 1'):
             pgrr.heaviestSections(-1)
 
     def testPerfGraphNodeExceptions(self):
         with self.assertRaisesRegex(TypeError, 'parent is not of type "PerfGraphNode"'):
-            PerfGraphNode(0, self._root_node, 'foo')
+            PerfGraphNode(0, self._root_node, "foo")
 
-        for key in ['level', 'memory', 'num_calls', 'time']:
-            with self.assertRaisesRegex(Exception, 'Entry missing key "{}"'.format(key)):
+        for key in ["level", "memory", "num_calls", "time"]:
+            with self.assertRaisesRegex(
+                Exception, 'Entry missing key "{}"'.format(key)
+            ):
                 data = copy.deepcopy(self._root_node)
                 del data[key]
-                PerfGraphNode('foo', data, None)
+                PerfGraphNode("foo", data, None)
 
-            with self.assertRaisesRegex(Exception, 'Key "{}" in node entry is not the required type'.format(key)):
+            with self.assertRaisesRegex(
+                Exception, 'Key "{}" in node entry is not the required type'.format(key)
+            ):
                 data = copy.deepcopy(self._root_node)
                 data[key] = None
-                PerfGraphNode('foo', data, None)
+                PerfGraphNode("foo", data, None)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main(module=__name__, verbosity=2, buffer=True)

@@ -17,4 +17,10 @@ from .renderers import Renderer, HTMLRenderer, MaterializeRenderer, LatexRendere
 from .renderers import RevealRenderer
 from .Extension import Extension
 from .Translator import Translator
-from .executioners import Executioner, Serial, ParallelBarrier, ParallelPipe, ParallelQueue
+from .executioners import (
+    Executioner,
+    Serial,
+    ParallelBarrier,
+    ParallelPipe,
+    ParallelQueue,
+)

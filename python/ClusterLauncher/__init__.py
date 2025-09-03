@@ -8,4 +8,5 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 from PBSJob import PBSJob
-__all__=['PBSJob']
+
+__all__ = ["PBSJob"]

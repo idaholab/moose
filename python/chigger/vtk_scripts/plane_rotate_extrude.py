@@ -28,7 +28,7 @@ actor.SetMapper(mapper)
 
 ren = vtk.vtkRenderer()
 ren.AddActor(actor)
-ren.SetBackground([0.5]*3)
+ren.SetBackground([0.5] * 3)
 
 win = vtk.vtkRenderWindow()
 win.AddRenderer(ren)

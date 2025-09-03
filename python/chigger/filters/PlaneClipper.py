@@ -1,4 +1,4 @@
-#pylint: disable=missing-docstring
+# pylint: disable=missing-docstring
 # This file is part of the MOOSE framework
 # https://mooseframework.inl.gov
 #
@@ -12,6 +12,7 @@ import copy
 import vtk
 from .ClipperFilterBase import ClipperFilterBase
 
+
 class PlaneClipper(ClipperFilterBase):
     """
     Clip object using a plane.
@@ -20,8 +21,8 @@ class PlaneClipper(ClipperFilterBase):
     @staticmethod
     def getOptions():
         opt = ClipperFilterBase.getOptions()
-        opt.add('origin', [0.5, 0.5, 0.5], "The origin of the clipping plane.")
-        opt.add('normal', [1, 0, 0], "The outward normal of the clipping plane.")
+        opt.add("origin", [0.5, 0.5, 0.5], "The origin of the clipping plane.")
+        opt.add("normal", [1, 0, 0], "The outward normal of the clipping plane.")
         return opt
 
     def __init__(self, **kwargs):
@@ -33,6 +34,6 @@ class PlaneClipper(ClipperFilterBase):
         """
         super(PlaneClipper, self).update(**kwargs)
 
-        origin = self.getPosition(copy.copy(self.getOption('origin')))
-        self._vtkclipfunction.SetNormal(self.getOption('normal'))
+        origin = self.getPosition(copy.copy(self.getOption("origin")))
+        self._vtkclipfunction.SetNormal(self.getOption("normal"))
         self._vtkclipfunction.SetOrigin(origin)

@@ -2,8 +2,10 @@
 For simplicity this module should be a stand-alone package, i.e., it should not use any
 non-standard python packages such as mooseutils.
 """
+
 import copy
 from . import search
+
 
 class Node(object):
     """
@@ -122,7 +124,7 @@ class Node(object):
         if (self.__parent is not None) and (self.__parent.__children):
             idx = self.__parent.__children.index(self)
             if idx > 0:
-                return self.__parent.__children[idx-1]
+                return self.__parent.__children[idx - 1]
 
     @property
     def next(self):
@@ -130,7 +132,7 @@ class Node(object):
         if (self.__parent is not None) and (self.__parent.__children):
             idx = self.__parent.__children.index(self)
             if idx < len(self.__parent.__children) - 1:
-                return self.__parent.__children[idx+1]
+                return self.__parent.__children[idx + 1]
 
     def __call__(self, *args):
         """Return child nodes based on index."""
@@ -179,18 +181,18 @@ class Node(object):
     def __repr__(self):
         """Return the 'name' of the object as it should be printed in the tree."""
         if self.__attributes:
-            return '{}: {}'.format(self.name, repr(self.__attributes))
+            return "{}: {}".format(self.name, repr(self.__attributes))
         return self.name
 
-    def __print(self, indent=u''):
+    def __print(self, indent=""):
         """Helper function printing to the screen."""
         if (self.parent is None) or (self.parent.children[-1] is self):
-            out = u'{}\u2514\u2500 {}\n'.format(indent, repr(self))
-            indent += u"   "
+            out = "{}\u2514\u2500 {}\n".format(indent, repr(self))
+            indent += "   "
 
         else:
-            out = u'{}\u251c\u2500 {}\n'.format(indent, repr(self))
-            indent += u"\u2502  "
+            out = "{}\u251c\u2500 {}\n".format(indent, repr(self))
+            indent += "\u2502  "
 
         for child in self.children:
             out += child.__print(indent)

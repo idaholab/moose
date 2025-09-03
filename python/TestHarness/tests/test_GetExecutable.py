@@ -14,11 +14,12 @@ import TestHarness
 from contextlib import redirect_stdout
 from TestHarness.tests.TestHarnessTestCase import MOOSE_DIR
 
+
 class TestHarnessTester(unittest.TestCase):
-    def __init__(self, methodName='runTest'):
+    def __init__(self, methodName="runTest"):
         super().__init__(methodName)
 
-        self.all_methods = {'opt', 'oprof', 'dbg', 'devel'}
+        self.all_methods = {"opt", "oprof", "dbg", "devel"}
 
     def helperGetPresentMethods(self, directory):
         """
@@ -45,7 +46,7 @@ class TestHarnessTester(unittest.TestCase):
         out = io.StringIO()
         with redirect_stdout(out):
             with self.assertRaises(SystemExit) as e:
-                args = ['', method, '--test-root', 'testroot']
+                args = ["", method, "--test-root", "testroot"]
                 TestHarness.TestHarness.buildAndRun(args, None, MOOSE_DIR)
             if expect_fail:
                 self.assertNotEqual(e.exception.code, 0)
@@ -57,7 +58,7 @@ class TestHarnessTester(unittest.TestCase):
         """
         Test for method that does not exist in test
         """
-        test_dir = 'test'
+        test_dir = "test"
         present_methods = self.helperGetPresentMethods(test_dir)
         absent_methods = self.all_methods - present_methods
         if absent_methods:
@@ -66,14 +67,14 @@ class TestHarnessTester(unittest.TestCase):
             # Cannot test for an absent method when all methods are present
             return
 
-        out = self.helperTestGetExecutable(test_dir, f'--{method}', True)
-        self.assertIn('Failed to find MOOSE executable', out)
+        out = self.helperTestGetExecutable(test_dir, f"--{method}", True)
+        self.assertIn("Failed to find MOOSE executable", out)
 
     def testMethodIsAbsentInCombined(self):
         """
         Test for method that does not exist in combined
         """
-        test_dir = os.path.join('modules', 'combined')
+        test_dir = os.path.join("modules", "combined")
         present_methods = self.helperGetPresentMethods(test_dir)
         absent_methods = self.all_methods - present_methods
         if absent_methods:
@@ -82,14 +83,14 @@ class TestHarnessTester(unittest.TestCase):
             # Cannot test for an absent method when all methods are present
             return
 
-        out = self.helperTestGetExecutable('modules', f'--{method}', True)
-        self.assertIn('Failed to find MOOSE executable', out)
+        out = self.helperTestGetExecutable("modules", f"--{method}", True)
+        self.assertIn("Failed to find MOOSE executable", out)
 
     def testMethodIsPresentInTest(self):
         """
         Test for method that exists in test
         """
-        test_dir = 'test'
+        test_dir = "test"
         present_methods = self.helperGetPresentMethods(test_dir)
         if present_methods:
             method = list(present_methods)[0]
@@ -97,14 +98,14 @@ class TestHarnessTester(unittest.TestCase):
             # Cannot test for a present method when all methods are absent
             return
 
-        out = self.helperTestGetExecutable(test_dir, f'--{method}', False)
-        self.assertNotIn('Failed to find MOOSE executable', out)
+        out = self.helperTestGetExecutable(test_dir, f"--{method}", False)
+        self.assertNotIn("Failed to find MOOSE executable", out)
 
     def testMethodIsPresentInCombined(self):
         """
         Test for method that exists in combined
         """
-        test_dir = os.path.join('modules', 'combined')
+        test_dir = os.path.join("modules", "combined")
         present_methods = self.helperGetPresentMethods(test_dir)
         if present_methods:
             method = list(present_methods)[0]
@@ -112,8 +113,9 @@ class TestHarnessTester(unittest.TestCase):
             # Cannot test for a present method when all methods are absent
             return
 
-        out = self.helperTestGetExecutable('modules', f'--{method}', False)
-        self.assertNotIn('Failed to find MOOSE executable', out)
+        out = self.helperTestGetExecutable("modules", f"--{method}", False)
+        self.assertNotIn("Failed to find MOOSE executable", out)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
