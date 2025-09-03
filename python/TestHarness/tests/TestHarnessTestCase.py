@@ -21,7 +21,7 @@ import pyhit
 import mooseutils
 
 MOOSE_DIR = mooseutils.find_moose_directory()
-TEST_DIR = os.path.join(MOOSE_DIR, 'test')
+TEST_DIR = os.path.join(MOOSE_DIR, "test")
 
 
 @unittest.skipIf(
@@ -36,18 +36,21 @@ class TestHarnessTestCase(unittest.TestCase):
     @dataclass
     class RunTestsResult:
         # On screen output
-        output: str = ''
+        output: str = ""
         # JSON results
         results: Optional[dict] = None
         # TestHarness that was ran
         harness: Optional[TestHarness] = None
 
-    def runTests(self, *args,
-                 tmp_output: bool = True,
-                 no_capabilities: bool = True,
-                 capture_results: bool = True,
-                 exit_code: int = 0,
-                 tests: Optional[dict[str, dict]] = None) -> RunTestsResult:
+    def runTests(
+        self,
+        *args,
+        tmp_output: bool = True,
+        no_capabilities: bool = True,
+        capture_results: bool = True,
+        exit_code: int = 0,
+        tests: Optional[dict[str, dict]] = None,
+    ) -> RunTestsResult:
         """
         Helper for running tests
 
@@ -60,9 +63,9 @@ class TestHarnessTestCase(unittest.TestCase):
             exit_code: Exit code to check against
             tests: Test spec (dict of str -> params) to run instead
         """
-        argv = ['unused'] + list(args) + ['--term-format', 'njCst']
+        argv = ["unused"] + list(args) + ["--term-format", "njCst"]
         if no_capabilities:
-            argv += ['--no-capabilities']
+            argv += ["--no-capabilities"]
 
         test_root = TEST_DIR
 
@@ -72,38 +75,42 @@ class TestHarnessTestCase(unittest.TestCase):
 
         result = self.RunTestsResult()
 
-        context = tempfile.TemporaryDirectory if (tmp_output or test_spec) else nullcontext
+        context = (
+            tempfile.TemporaryDirectory if (tmp_output or test_spec) else nullcontext
+        )
         with context() as c:
             test_harness_build_kwargs = {}
 
             if tmp_output:
-                argv += ['-o', c]
+                argv += ["-o", c]
 
             # Setup test spec directory if we're building one on the fly
             if test_spec:
                 test_root = c
 
                 # Spec goes within the 'test' directory
-                test_dir = os.path.join(c, 'test')
+                test_dir = os.path.join(c, "test")
                 os.mkdir(test_dir)
 
-                test_harness_build_kwargs['skip_testroot'] = True
+                test_harness_build_kwargs["skip_testroot"] = True
 
                 # Write the test spec
-                test_spec_file = os.path.join(test_dir, 'tests')
-                with open(test_spec_file, 'w') as f:
+                test_spec_file = os.path.join(test_dir, "tests")
+                with open(test_spec_file, "w") as f:
                     f.write(test_spec)
 
                 # Link the moose-exe so that it can be found
-                moose_exe = os.path.join(TEST_DIR, 'moose_test-opt')
-                os.symlink(moose_exe, os.path.join(test_root, 'moose_test-opt'))
+                moose_exe = os.path.join(TEST_DIR, "moose_test-opt")
+                os.symlink(moose_exe, os.path.join(test_root, "moose_test-opt"))
 
             cwd = os.getcwd()
             os.chdir(test_root)
             stdout = StringIO()
             try:
                 with redirect_stdout(stdout):
-                    result.harness = TestHarness.build(argv, 'moose_test', MOOSE_DIR, **test_harness_build_kwargs)
+                    result.harness = TestHarness.build(
+                        argv, "moose_test", MOOSE_DIR, **test_harness_build_kwargs
+                    )
                     result.harness.findAndRunTests()
             except SystemExit as e:
                 self.assertEqual(e.code, exit_code)
@@ -118,7 +125,7 @@ class TestHarnessTestCase(unittest.TestCase):
             self.assertEqual(result.harness.error_code, exit_code)
 
             if capture_results:
-                with open(result.harness.options.results_file, 'r') as f:
+                with open(result.harness.options.results_file, "r") as f:
                     result.results = json.loads(f.read())
 
         return result
@@ -132,7 +139,7 @@ class TestHarnessTestCase(unittest.TestCase):
         assert isinstance(tests, dict)
 
         root = pyhit.Node()
-        tests_section = root.insert(0, 'Tests')
+        tests_section = root.insert(0, "Tests")
 
         i = 0
         for name, params in tests.items():
@@ -144,10 +151,9 @@ class TestHarnessTestCase(unittest.TestCase):
 
         return root.render()
 
-    def checkStatus(self, harness: TestHarness,
-                    passed: int = 0,
-                    skipped: int = 0,
-                    failed: int = 0):
+    def checkStatus(
+        self, harness: TestHarness, passed: int = 0, skipped: int = 0, failed: int = 0
+    ):
         """
         Make sure the TestHarness status line reports the correct counts.
         """

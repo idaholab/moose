@@ -1,7 +1,9 @@
 """Python utilities for performing SQA related checks"""
+
 from .SilentRecordHandler import SilentRecordHandler
 import logging
-logger = logging.getLogger('moosesqa')
+
+logger = logging.getLogger("moosesqa")
 logger.addHandler(SilentRecordHandler())
 
 from .get_sqa_reports import get_sqa_reports
@@ -16,4 +18,10 @@ from .SQAMooseAppReport import SQAMooseAppReport
 from .Requirement import Requirement, Detail, TestSpecification
 from .LogHelper import LogHelper
 
-MOOSESQA_COLLECTIONS = {'FUNCTIONAL', 'USABILITY', 'PERFORMANCE', 'SYSTEM', 'FAILURE_ANALYSIS'}
+MOOSESQA_COLLECTIONS = {
+    "FUNCTIONAL",
+    "USABILITY",
+    "PERFORMANCE",
+    "SYSTEM",
+    "FAILURE_ANALYSIS",
+}

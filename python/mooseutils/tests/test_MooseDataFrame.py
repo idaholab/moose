@@ -16,6 +16,7 @@ import mooseutils
 
 from mooseutils.tests import TEST_FILES
 
+
 class TestMooseDataFrame(unittest.TestCase):
     """
     Test use of MooseDataFrame for loading/reloading csv files.
@@ -27,7 +28,7 @@ class TestMooseDataFrame(unittest.TestCase):
         """
         self._filename = os.path.join(TEST_FILES, "white_elephant_jan_2016.csv")
         assert os.path.exists(self._filename)
-        self._keys = ['air_temp_low_24_hour_set_1', 'snow_depth_set_1']
+        self._keys = ["air_temp_low_24_hour_set_1", "snow_depth_set_1"]
 
     def testBasic(self):
         """
@@ -53,15 +54,15 @@ class TestMooseDataFrame(unittest.TestCase):
         Test that no-file doesn't fail.
         """
 
-        filename = 'not_a_file.csv'
+        filename = "not_a_file.csv"
         data = mooseutils.MooseDataFrame(filename)
         self.assertEqual(filename, data.filename)
         self.assertFalse(data)
 
         # Key Testing
-        self.assertFalse('key' in data)
+        self.assertFalse("key" in data)
 
-        x = data[ ['key1', 'key2'] ]
+        x = data[["key1", "key2"]]
         self.assertTrue(x.empty)
 
     def testEmptyUpdateRemove(self):
@@ -70,7 +71,7 @@ class TestMooseDataFrame(unittest.TestCase):
         """
 
         # Temporary filename
-        filename = "{}_{}.csv".format(self.__class__.__name__, 'tmp')
+        filename = "{}_{}.csv".format(self.__class__.__name__, "tmp")
         if os.path.exists(filename):
             os.remove(filename)
 
@@ -104,7 +105,7 @@ class TestMooseDataFrame(unittest.TestCase):
         """
         Test that the index of the data may be set.
         """
-        data = mooseutils.MooseDataFrame(self._filename, index='time')
+        data = mooseutils.MooseDataFrame(self._filename, index="time")
         x = data[self._keys]
         idx = 29.42
         self.assertEqual(x.loc[idx][self._keys[0]], 20.12)
@@ -114,11 +115,13 @@ class TestMooseDataFrame(unittest.TestCase):
         """
         Test that "old" files do not load.
         """
-        data = mooseutils.MooseDataFrame(self._filename, index='time')
+        data = mooseutils.MooseDataFrame(self._filename, index="time")
         self.assertTrue(data)
-        data = mooseutils.MooseDataFrame(self._filename, index='time', run_start_time=time.time())
+        data = mooseutils.MooseDataFrame(
+            self._filename, index="time", run_start_time=time.time()
+        )
         self.assertFalse(data)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(module=__name__, verbosity=2)

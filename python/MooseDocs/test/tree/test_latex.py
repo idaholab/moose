@@ -12,10 +12,12 @@ import unittest
 
 from MooseDocs.tree import latex
 
+
 class TestLatex(unittest.TestCase):
     """
     Tests for latex tree structure.
     """
+
     def testEscape(self):
         self.assertEqual(latex.escape("&"), r"\&")
         self.assertEqual(latex.escape("%"), r"\%")
@@ -31,45 +33,45 @@ class TestLatex(unittest.TestCase):
         self.assertEqual(latex.escape(">"), r"{\textgreater}")
 
     def testEnclosureBase(self):
-        enc = latex.EnclosureBase('foo', None, enclose=('#','@'))
-        self.assertEqual(enc['enclose'], ('#','@'))
+        enc = latex.EnclosureBase("foo", None, enclose=("#", "@"))
+        self.assertEqual(enc["enclose"], ("#", "@"))
 
-        enc = latex.EnclosureBase('foo', None, enclose=(';',';'), string='foo')
+        enc = latex.EnclosureBase("foo", None, enclose=(";", ";"), string="foo")
         self.assertIsInstance(enc(0), latex.String)
-        self.assertEqual(enc(0)['content'], 'foo')
+        self.assertEqual(enc(0)["content"], "foo")
 
     def testBracket(self):
         enc = latex.Bracket()
-        self.assertEqual(enc['enclose'], ('[',']'))
+        self.assertEqual(enc["enclose"], ("[", "]"))
 
     def testBrace(self):
         enc = latex.Brace()
-        self.assertEqual(enc['enclose'], ('{','}'))
+        self.assertEqual(enc["enclose"], ("{", "}"))
 
     def testInlineMath(self):
         enc = latex.InlineMath()
-        self.assertEqual(enc['enclose'], ('$','$'))
+        self.assertEqual(enc["enclose"], ("$", "$"))
 
     def testCommand(self):
-        cmd = latex.Command(None, 'foo')
-        self.assertEqual(cmd.write(), '\\foo')
+        cmd = latex.Command(None, "foo")
+        self.assertEqual(cmd.write(), "\\foo")
 
-        cmd = latex.Command(None, 'foo', string='bar')
+        cmd = latex.Command(None, "foo", string="bar")
         self.assertIsInstance(cmd(0), latex.String)
-        self.assertEqual(cmd(0)['content'], 'bar')
-        self.assertEqual(cmd.write(), '\\foo{bar}')
+        self.assertEqual(cmd(0)["content"], "bar")
+        self.assertEqual(cmd.write(), "\\foo{bar}")
 
-        cmd = latex.Command(None, 'foo', start='5', end='6')
-        self.assertEqual(cmd.write(), '5\\foo6')
+        cmd = latex.Command(None, "foo", start="5", end="6")
+        self.assertEqual(cmd.write(), "5\\foo6")
 
     def testEnvironment(self):
-        env = latex.Environment(None, 'foo')
-        self.assertEqual(env.write(), '\n\\begin{foo}\n\n\\end{foo}\n')
+        env = latex.Environment(None, "foo")
+        self.assertEqual(env.write(), "\n\\begin{foo}\n\n\\end{foo}\n")
 
     def testString(self):
-        s = latex.String(None, content='foo')
-        self.assertEqual(s['content'], 'foo')
+        s = latex.String(None, content="foo")
+        self.assertEqual(s["content"], "foo")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(verbosity=2)

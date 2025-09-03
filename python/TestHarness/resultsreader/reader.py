@@ -19,18 +19,21 @@ from TestHarness.resultsreader.results import TestHarnessResults, TestHarnessTes
 
 NoneType = type(None)
 
+
 class TestHarnessResultsReader:
     """
     Utility for reading test harness results stored in a mongodb database
     """
+
     # Default sort ID from mongo
-    mongo_sort_id = sort=[('_id', pymongo.DESCENDING)]
+    mongo_sort_id = sort = [("_id", pymongo.DESCENDING)]
 
     @dataclass
     class Authentication:
         """
         Helper class for storing the authentication to a mongo database
         """
+
         def __post_init__(self):
             assert isinstance(self.host, str)
             assert isinstance(self.username, str)
@@ -46,7 +49,11 @@ class TestHarnessResultsReader:
         # The port
         port: int | None = None
 
-    def __init__(self, database: str, client: Optional[pymongo.MongoClient | Authentication] = None):
+    def __init__(
+        self,
+        database: str,
+        client: Optional[pymongo.MongoClient | Authentication] = None,
+    ):
         self.client: pymongo.MongoClient = None
         assert isinstance(database, str)
 
@@ -54,18 +61,22 @@ class TestHarnessResultsReader:
         if client is None:
             client = self.loadEnvironmentAuthentication()
             if client is None:
-                raise ValueError("Must specify either 'client' or set RESULTS_READER_AUTH_FILE with credentials")
+                raise ValueError(
+                    "Must specify either 'client' or set RESULTS_READER_AUTH_FILE with credentials"
+                )
         if isinstance(client, pymongo.MongoClient):
             self.client = client
         elif isinstance(client, self.Authentication):
-            self.client = pymongo.MongoClient(client.host, username=client.username, password=client.password)
+            self.client = pymongo.MongoClient(
+                client.host, username=client.username, password=client.password
+            )
         else:
             raise TypeError(f"Invalid type for 'client'")
 
         # Get the database
         self.database: str = database
         if database not in self.client.list_database_names():
-            raise ValueError(f'Database {database} not found')
+            raise ValueError(f"Database {database} not found")
         self.db = self.client.get_database(database)
 
         # Cached TestHarness result objects, by ID
@@ -86,11 +97,11 @@ class TestHarnessResultsReader:
         RESULTS_READER_AUTH_FILE if it is available.
         """
         # Helpers for getting authentication variables
-        var_name = lambda k: f'RESULTS_READER_AUTH_{k.upper()}'
+        var_name = lambda k: f"RESULTS_READER_AUTH_{k.upper()}"
         get_var = lambda k: os.environ.get(var_name(k))
 
         # Try to get authentication from env
-        all_auth_keys = ['host', 'username', 'password']
+        all_auth_keys = ["host", "username", "password"]
         auth = {}
         for key in all_auth_keys:
             v = get_var(key)
@@ -98,19 +109,21 @@ class TestHarnessResultsReader:
                 auth[key] = v
         # Have all three set
         if len(auth) == 3:
-            auth['port'] = get_var('port')
+            auth["port"] = get_var("port")
             return TestHarnessResultsReader.Authentication(**auth)
         # Have one or two but not all three set
         if len(auth) != 0:
-            all_auth_vars = ' '.join(map(var_name, all_auth_keys))
-            raise ValueError(f'All environment variables "{all_auth_vars}" must be set for authentication')
+            all_auth_vars = " ".join(map(var_name, all_auth_keys))
+            raise ValueError(
+                f'All environment variables "{all_auth_vars}" must be set for authentication'
+            )
 
         # Try to get authentication from file
-        auth_file = get_var('file')
+        auth_file = get_var("file")
         if auth_file is None:
             return None
         try:
-            with open(auth_file, 'r') as f:
+            with open(auth_file, "r") as f:
                 values = yaml.safe_load(f)
             return TestHarnessResultsReader.Authentication(**values)
         except Exception as e:
@@ -130,8 +143,9 @@ class TestHarnessResultsReader:
         """
         return {"folder_name": {"$eq": folder_name}, "test_name": {"$eq": test_name}}
 
-    def _getTestsPREntry(self, folder_name: str, test_name: str, pr_num: int,
-                         filter: Optional[dict] = {}) -> dict | None:
+    def _getTestsPREntry(
+        self, folder_name: str, test_name: str, pr_num: int, filter: Optional[dict] = {}
+    ) -> dict | None:
         """
         Internal method for getting the pull request entry for a given test
 
@@ -155,9 +169,15 @@ class TestHarnessResultsReader:
             return dict(entry)
         return None
 
-    def _getTestsEntry(self, folder_name: str, test_name: str,
-                       limit: int = 50, unique_event: bool = True,
-                       filter: dict = {}, pr_num: Optional[int] = None) -> list[dict]:
+    def _getTestsEntry(
+        self,
+        folder_name: str,
+        test_name: str,
+        limit: int = 50,
+        unique_event: bool = True,
+        filter: dict = {},
+        pr_num: Optional[int] = None,
+    ) -> list[dict]:
         """
         Internal helper for getting the raw database entries for a specific test.
 
@@ -179,7 +199,9 @@ class TestHarnessResultsReader:
 
         # Find a single entry for this pull request, if requested and put at the top
         if pr_num is not None:
-            pr_entry = self._getTestsPREntry(folder_name, test_name, pr_num, filter=filter)
+            pr_entry = self._getTestsPREntry(
+                folder_name, test_name, pr_num, filter=filter
+            )
             if pr_entry:
                 values.append(pr_entry)
 
@@ -204,22 +226,24 @@ class TestHarnessResultsReader:
         while True:
             filter_non_pr = {}
             if last_id is not None:
-                filter_non_pr['_id'] = {'$lt': last_id}
+                filter_non_pr["_id"] = {"$lt": last_id}
             filter_non_pr.update(find_base)
 
-            cursor = self.db.tests.find(filter_non_pr, limit=find_event_limit, sort=self.mongo_sort_id)
+            cursor = self.db.tests.find(
+                filter_non_pr, limit=find_event_limit, sort=self.mongo_sort_id
+            )
 
             entry_count = 0
             for entry in cursor:
                 if len(values) == limit:
                     break
 
-                last_id = entry['_id']
+                last_id = entry["_id"]
                 entry_count += 1
 
                 # Only get the most recent value for this sha (in case of invalidation)
                 if unique_event:
-                    event_sha = entry['event_sha']
+                    event_sha = entry["event_sha"]
                     if event_sha in unique_shas:
                         continue
                     unique_shas.add(event_sha)
@@ -237,7 +261,9 @@ class TestHarnessResultsReader:
 
         return values
 
-    def getTestResults(self, folder_name: str, test_name: str, **kwargs) -> list[TestHarnessTestResult]:
+    def getTestResults(
+        self, folder_name: str, test_name: str, **kwargs
+    ) -> list[TestHarnessTestResult]:
         """
         Get the TestHarnessTestResults given a specific test.
 
@@ -251,7 +277,7 @@ class TestHarnessResultsReader:
 
         values = []
         for entry in entries:
-            result_id = entry['result_id']
+            result_id = entry["result_id"]
             test_harness_results = self._getTestHarnessResult(result_id)
             test_result = TestHarnessTestResult(entry, test_harness_results)
             values.append(test_result)
@@ -270,7 +296,7 @@ class TestHarnessResultsReader:
 
         value = self.db.results.find_one({"_id": id})
         if value is None:
-            raise KeyError(f'No {self.database}.results entry with _id={id}')
+            raise KeyError(f"No {self.database}.results entry with _id={id}")
         return value
 
     def _getTestHarnessResult(self, id: ObjectId | str) -> TestHarnessResults:

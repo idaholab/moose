@@ -9,17 +9,20 @@
 
 from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
 
+
 class TestHarnessTester(TestHarnessTestCase):
     def testDeleted(self):
         """
         Test that deleted tests returns a failed deleted test when extra info argument is supplied
         """
-        out = self.runTests('--no-color', '-i', 'deleted', '-e', exit_code=131).output
-        self.assertRegex(out, r'test_harness\.deleted.*? \[TEST DELETED TEST\] FAILED \(DELETED\)')
+        out = self.runTests("--no-color", "-i", "deleted", "-e", exit_code=131).output
+        self.assertRegex(
+            out, r"test_harness\.deleted.*? \[TEST DELETED TEST\] FAILED \(DELETED\)"
+        )
 
     def testNoExtraInfo(self):
         """
         Test that deleted tests do not run without -e (extra) option
         """
-        output = self.runTests('--no-color', '-i', 'deleted').output
-        self.assertNotIn('tests/test_harness.deleted', output)
+        output = self.runTests("--no-color", "-i", "deleted").output
+        self.assertNotIn("tests/test_harness.deleted", output)

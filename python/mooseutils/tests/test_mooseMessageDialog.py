@@ -27,7 +27,7 @@ class TestMooseMessageDialog(unittest.TestCase):
         """
         Test the default dialog message.
         """
-        box = mooseutils.mooseMessage("A message", dialog = True, test = True)
+        box = mooseutils.mooseMessage("A message", dialog=True, test=True)
         self.assertTrue(box.text() == "A message")
         self.assertTrue(box.icon() == QtWidgets.QMessageBox.NoIcon)
 
@@ -35,7 +35,7 @@ class TestMooseMessageDialog(unittest.TestCase):
         """
         Test the warning dialog message.
         """
-        box = mooseutils.mooseWarning("A message", dialog = True, test = True)
+        box = mooseutils.mooseWarning("A message", dialog=True, test=True)
         self.assertIn("A message", box.text())
         self.assertIn("WARNING", box.text())
         self.assertTrue(box.icon() == QtWidgets.QMessageBox.Warning)
@@ -44,10 +44,11 @@ class TestMooseMessageDialog(unittest.TestCase):
         """
         Test the error dialog message.
         """
-        box = mooseutils.mooseError("A message", dialog = True, test = True)
+        box = mooseutils.mooseError("A message", dialog=True, test=True)
         self.assertIn("A message", box.text())
         self.assertIn("ERROR", box.text())
         self.assertTrue(box.icon() == QtWidgets.QMessageBox.Critical)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main(module=__name__, verbosity=2, buffer=True, exit=False)

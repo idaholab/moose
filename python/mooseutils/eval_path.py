@@ -12,6 +12,7 @@
 import os
 import re
 
+
 def eval_path(path):
     """
     Import environment variables into paths.
@@ -19,5 +20,9 @@ def eval_path(path):
     Inputs:
         path[str]: Path containing environment variable: e.g., ${MOOSE_DIR}/python
     """
-    assert isinstance(path, str), "Input argument must be a 'str', '{}' provided".format(type(path))
-    return re.sub(r'\$\{(?P<env>.*?)\}', lambda m: os.environ.get(m.group('env'), m.group()), path)
+    assert isinstance(
+        path, str
+    ), "Input argument must be a 'str', '{}' provided".format(type(path))
+    return re.sub(
+        r"\$\{(?P<env>.*?)\}", lambda m: os.environ.get(m.group("env"), m.group()), path
+    )

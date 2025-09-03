@@ -8,9 +8,9 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
 
+
 class TestHarnessTester(TestHarnessTestCase):
     def testUnknownParam(self):
-        out = self.runTests('--no-color', '-i', 'unknown_param', exit_code=128).output
+        out = self.runTests("--no-color", "-i", "unknown_param", exit_code=128).output
 
-        self.assertIn('unknown_param:5: unused parameter "not_a_parameter"',
-                      out)
+        self.assertIn('unknown_param:5: unused parameter "not_a_parameter"', out)

@@ -15,6 +15,7 @@ import bisect
 from .MooseDataFrame import MooseDataFrame
 from . import message
 
+
 class VectorPostprocessorReader(object):
     """
     A Reader for MOOSE VectorPostprocessor data.
@@ -32,11 +33,12 @@ class VectorPostprocessorReader(object):
     regardless of the existence of a file. It will also append new data and remove old/deleted data
     on subsequent calls to "update()".
     """
+
     def __init__(self, pattern, run_start_time=0):
         self._pattern = pattern
-        self._timedata = MooseDataFrame(self._pattern.replace('*', 'time'),
-                                        run_start_time=None,
-                                        index='timestep')
+        self._timedata = MooseDataFrame(
+            self._pattern.replace("*", "time"), run_start_time=None, index="timestep"
+        )
         self._frames = dict()
         self._time = -1
         self._index = None
@@ -116,14 +118,22 @@ class VectorPostprocessorReader(object):
         # The list of files from the supplied pattern
         last_modified = 0.0
         for fname in sorted(glob.glob(self._pattern)):
-            if fname.endswith('LATEST') or fname.endswith('FINAL') or (fname == self._timedata.filename):
+            if (
+                fname.endswith("LATEST")
+                or fname.endswith("FINAL")
+                or (fname == self._timedata.filename)
+            ):
                 continue
             idx = self._timeHelper(fname)
 
             mdf = self._frames.get(idx, None)
             if mdf is None:
-                mdf = MooseDataFrame(fname, run_start_time=self._run_start_time, update=False,
-                                     peacock_index=True)
+                mdf = MooseDataFrame(
+                    fname,
+                    run_start_time=self._run_start_time,
+                    update=False,
+                    peacock_index=True,
+                )
                 self._frames[idx] = mdf
 
         # Clean up old and empty data
@@ -132,7 +142,7 @@ class VectorPostprocessorReader(object):
             mdf.update()
             if mdf.empty():
                 self._frames.pop(idx)
-            elif (mdf.modified < last_modified):
+            elif mdf.modified < last_modified:
                 self._frames.pop(idx)
             elif mdf.filesize == 0:
                 self._frames.pop(idx)
@@ -149,22 +159,26 @@ class VectorPostprocessorReader(object):
            (output, imports) The necessary script and include statements to re-create data load.
         """
 
-        imports = ['import mooseutils']
-        output = ['\n# Read VectorPostprocessor Data']
-        output += ['data = mooseutils.VectorPostprocessorReader({})'.format(repr(self._pattern))]
+        imports = ["import mooseutils"]
+        output = ["\n# Read VectorPostprocessor Data"]
+        output += [
+            "data = mooseutils.VectorPostprocessorReader({})".format(
+                repr(self._pattern)
+            )
+        ]
         return output, imports
 
     def _timeHelper(self, filename):
         """
         Determine the time index. (protected)
         """
-        idx = filename.rfind('_') + 1
+        idx = filename.rfind("_") + 1
         tstep = int(filename[idx:-4])
         if not self._timedata:
             return tstep
         else:
             try:
-                return self._timedata['time'].loc[tstep]
+                return self._timedata["time"].loc[tstep]
             except Exception:
                 return tstep
 
@@ -173,7 +187,7 @@ class VectorPostprocessorReader(object):
         Helper for setting the current key for the supplied time.
         """
         if not self._frames:
-           index = None
+            index = None
 
         # Return the latest time
         elif self._time == -1:

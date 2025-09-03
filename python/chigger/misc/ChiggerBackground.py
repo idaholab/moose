@@ -1,4 +1,4 @@
-#pylint: disable=missing-docstring
+# pylint: disable=missing-docstring
 # This file is part of the MOOSE framework
 # https://mooseframework.inl.gov
 #
@@ -9,14 +9,17 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 from .. import base
+
+
 class ChiggerBackground(base.ChiggerResultBase):
     """
     An empty renderer to serve as the background for other objects.
     """
+
     @staticmethod
     def getOptions():
         opt = base.ChiggerResultBase.getOptions()
-        opt.setDefault('layer', 0)
+        opt.setDefault("layer", 0)
         return opt
 
     def __init__(self, **kwargs):

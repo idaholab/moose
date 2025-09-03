@@ -17,28 +17,36 @@ import moosesqa
 from MooseDocs.commands import syntax
 from MooseDocs.test import requiresMooseExecutable
 
-@unittest.skipIf(mooseutils.git_version() < (2,11,4), "Git version must at least 2.11.4")
+
+@unittest.skipIf(
+    mooseutils.git_version() < (2, 11, 4), "Git version must at least 2.11.4"
+)
 class TestGenerate(unittest.TestCase):
     def setUp(self):
         # Change to the test/doc directory
         self._working_dir = os.getcwd()
-        moose_test_doc_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..', 'test', 'doc'))
+        moose_test_doc_dir = os.path.abspath(
+            os.path.join(
+                os.path.dirname(__file__), "..", "..", "..", "..", "test", "doc"
+            )
+        )
         os.chdir(moose_test_doc_dir)
 
     def tearDown(self):
         # Restore the working directory
         os.chdir(self._working_dir)
 
-    @mock.patch('mooseutils.colorText')
+    @mock.patch("mooseutils.colorText")
     @requiresMooseExecutable()
     def testDump(self, colorText):
         colorText.side_effect = lambda txt, *args, **kwargs: txt
 
         # Run the generate command
-        opt = types.SimpleNamespace(config='sqa_reports.yml')
-        with mock.patch('sys.stdout', new=io.StringIO()) as stdout:
+        opt = types.SimpleNamespace(config="sqa_reports.yml")
+        with mock.patch("sys.stdout", new=io.StringIO()) as stdout:
             status = syntax.main(opt)
-        self.assertIn('Adaptivity: /Adaptivity', stdout.getvalue())
+        self.assertIn("Adaptivity: /Adaptivity", stdout.getvalue())
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main(verbosity=2)

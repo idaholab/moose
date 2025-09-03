@@ -10,16 +10,17 @@
 import re
 from .exceptions import MooseDocsException
 
+
 def regex(pattern, content, flags=None):
     """
     Tool for searching for "content" within a regex and raising the desired exception if not found.
     """
     match = re.search(pattern, content, flags=flags)
     if match:
-        if 'content' in match.groupdict():
-            content = match.group('content')
-        elif 'remove' in match.groupdict():
-            content = content[:match.start('remove')] + content[match.end('remove'):]
+        if "content" in match.groupdict():
+            content = match.group("content")
+        elif "remove" in match.groupdict():
+            content = content[: match.start("remove")] + content[match.end("remove") :]
         else:
             content = match.group()
     else:

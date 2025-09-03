@@ -10,32 +10,35 @@ except:
 class DAGValidationError(Exception):
     pass
 
+
 # Added by the MOOSE group
 class DAGEdgeDepError(Exception):
     pass
+
 
 # Added by the MOOSE group
 class DAGEdgeIndError(Exception):
     pass
 
+
 class DAG(object):
-    """ Directed acyclic graph implementation. """
+    """Directed acyclic graph implementation."""
 
     def __init__(self):
-        """ Construct a new DAG with no nodes or edges. """
+        """Construct a new DAG with no nodes or edges."""
         self.__cached_graph = None
         self.reset_graph()
 
     # Added by the MOOSE group
     def __cacheGraph(self):
-        """ Private method to cache the current state of the graph """
+        """Private method to cache the current state of the graph"""
         if self.__cached_graph == None:
             self.__cached_graph = self.clone()
         return self.__cached_graph
 
     # Added by the MOOSE group
     def serialize_dag(self, graph=None):
-        """ Serialize the DAG """
+        """Serialize the DAG"""
         if not graph:
             graph = self.graph
         queue = deque()
@@ -50,18 +53,18 @@ class DAG(object):
         return graph
 
     def add_node(self, node_name, graph=None):
-        """ Add a node if it does not exist yet, or error out. """
+        """Add a node if it does not exist yet, or error out."""
         if not graph:
             graph = self.graph
         if node_name in graph:
-            raise KeyError('node %s already exists' % node_name)
+            raise KeyError("node %s already exists" % node_name)
         graph[node_name] = set()
 
         # Invalidate cached graph because a node was added
         self.__cached_graph = None
 
     def node_exists(self, node_name, graph=None):
-        """ Check if node exists """
+        """Check if node exists"""
         if not graph:
             graph = self.graph
         if node_name in graph:
@@ -75,11 +78,11 @@ class DAG(object):
 
     # Modified by the MOOSE group
     def delete_node(self, node_name, graph=None):
-        """ Deletes this node and all edges referencing it. """
+        """Deletes this node and all edges referencing it."""
         if not graph:
             graph = self.graph
         if node_name not in graph:
-            raise KeyError('node %s does not exist' % node_name)
+            raise KeyError("node %s does not exist" % node_name)
 
         graph.pop(node_name)
 
@@ -95,7 +98,7 @@ class DAG(object):
 
     # Modified by the MOOSE group
     def add_edge(self, ind_node, dep_node, graph=None):
-        """ Add an edge (dependency) between the specified nodes. """
+        """Add an edge (dependency) between the specified nodes."""
         if not graph:
             graph = self.graph
 
@@ -111,16 +114,16 @@ class DAG(object):
 
     # Modified by the MOOSE group
     def delete_edge(self, ind_node, dep_node, graph=None):
-        """ Delete an edge from the graph. """
+        """Delete an edge from the graph."""
         if not graph:
             graph = self.graph
 
         if dep_node not in graph.get(ind_node, []):
-            raise KeyError('this edge does not exist in graph')
+            raise KeyError("this edge does not exist in graph")
         graph[ind_node].remove(dep_node)
 
     def rename_edges(self, old_task_name, new_task_name, graph=None):
-        """ Change references to a task in existing edges. """
+        """Change references to a task in existing edges."""
         if not graph:
             graph = self.graph
 
@@ -136,17 +139,17 @@ class DAG(object):
                     edges.add(new_task_name)
 
     def predecessors(self, node, graph=None):
-        """ Returns a list of all predecessors of the given node """
+        """Returns a list of all predecessors of the given node"""
         if graph is None:
             graph = self.graph
         return [key for key in graph if node in graph[key]]
 
     def downstream(self, node, graph=None):
-        """ Returns a list of all nodes this node has edges towards. """
+        """Returns a list of all nodes this node has edges towards."""
         if graph is None:
             graph = self.graph
         if node not in graph:
-            raise KeyError('node %s is not in graph' % node)
+            raise KeyError("node %s is not in graph" % node)
         return list(graph[node])
 
     def all_downstreams(self, node, graph=None):
@@ -166,10 +169,12 @@ class DAG(object):
                     nodes_seen.add(downstream_node)
                     nodes.append(downstream_node)
             i += 1
-        return filter(lambda node: node in nodes_seen, self.topological_sort(graph=graph))
+        return filter(
+            lambda node: node in nodes_seen, self.topological_sort(graph=graph)
+        )
 
     def delete_downstreams(self, node, graph=None):
-        """ Delete and return all nodes this node has edges towards. """
+        """Delete and return all nodes this node has edges towards."""
         if graph is None:
             graph = self.graph
         deleted_nodes = set([])
@@ -180,13 +185,13 @@ class DAG(object):
         return deleted_nodes
 
     def all_leaves(self, graph=None):
-        """ Return a list of all leaves (nodes with no downstreams) """
+        """Return a list of all leaves (nodes with no downstreams)"""
         if graph is None:
             graph = self.graph
         return [key for key in graph if not graph[key]]
 
     def from_dict(self, graph_dict):
-        """ Reset the graph and build it from the passed dictionary.
+        """Reset the graph and build it from the passed dictionary.
         The dictionary takes the form of {node_name: [directed edges]}
         """
 
@@ -195,12 +200,12 @@ class DAG(object):
             self.add_node(new_node)
         for ind_node, dep_nodes in graph_dict.items():
             if not isinstance(dep_nodes, list):
-                raise TypeError('dict values must be lists')
+                raise TypeError("dict values must be lists")
             for dep_node in dep_nodes:
                 self.add_edge(ind_node, dep_node)
 
     def reset_graph(self):
-        """ Restore the graph to an empty state. """
+        """Restore the graph to an empty state."""
         self.graph = OrderedDict()
 
     # Modified by the MOOSE group
@@ -215,22 +220,24 @@ class DAG(object):
         # cache current graph because someone is asking for concurrent nodes
         # and the graph is _probably_ the most complete at this stage
         self.__cacheGraph()
-        dependent_nodes = set(node for dependents in graph.values() for node in dependents)
+        dependent_nodes = set(
+            node for dependents in graph.values() for node in dependents
+        )
         return [node for node in graph.keys() if node not in dependent_nodes]
 
     def validate(self, graph=None):
-        """ Returns (Boolean, message) of whether DAG is valid. """
+        """Returns (Boolean, message) of whether DAG is valid."""
         graph = graph if graph is not None else self.graph
         if len(self.ind_nodes(graph)) == 0:
-            return (False, 'no independent nodes detected')
+            return (False, "no independent nodes detected")
         try:
             self.topological_sort(graph)
         except ValueError:
-            return (False, 'failed topological sort')
-        return (True, 'valid')
+            return (False, "failed topological sort")
+        return (True, "valid")
 
     def topological_sort(self, graph=None):
-        """ Returns a topological ordering of the DAG.
+        """Returns a topological ordering of the DAG.
         Raises an error if this is not possible (graph is not valid).
         """
         if graph is None:
@@ -261,7 +268,7 @@ class DAG(object):
         if len(l) == len(graph):
             return l
         else:
-            raise ValueError('graph is not acyclic')
+            raise ValueError("graph is not acyclic")
 
     def size(self):
         return len(self.graph)
@@ -275,7 +282,7 @@ class DAG(object):
 
     # Added by the MOOSE group
     def clone(self):
-        """ create a hard copy of the current graph with pointers
+        """create a hard copy of the current graph with pointers
         to the original graph's contents.
         """
         new_graph = DAG()
@@ -302,14 +309,14 @@ class DAG(object):
 
     # Added by the MOOSE group
     def reverse_edges(self, graph=None):
-        """ Reversed dependencies in current graph. """
+        """Reversed dependencies in current graph."""
 
         new_graph = self.reverse_clone()
         self.graph = new_graph.graph
 
     # Modified by the MOOSE group
     def delete_edge_if_exists(self, ind_node, dep_node, graph=None):
-        """ Delete an edge from the graph. """
+        """Delete an edge from the graph."""
         if not graph:
             graph = self.graph
 
@@ -319,7 +326,7 @@ class DAG(object):
 
     # Added by the MOOSE group
     def is_dependency(self, ind_node, dep_node, graph=None):
-        """ Returns whether or not dep_node depends on ind_node """
+        """Returns whether or not dep_node depends on ind_node"""
         if not graph:
             graph = self.graph
 

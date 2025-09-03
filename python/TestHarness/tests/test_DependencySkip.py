@@ -8,11 +8,12 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
 
+
 class TestHarnessTester(TestHarnessTestCase):
     def testDependencySkip(self):
         """
         Test skipping a test if its prereq is also skipped
         """
-        output = self.runTests('--no-color', '-i', 'depend_skip_tests').output
-        self.assertIn('[ALWAYS SKIPPED] SKIP', output)
-        self.assertIn('[SKIPPED DEPENDENCY] SKIP', output)
+        output = self.runTests("--no-color", "-i", "depend_skip_tests").output
+        self.assertIn("[ALWAYS SKIPPED] SKIP", output)
+        self.assertIn("[SKIPPED DEPENDENCY] SKIP", output)
