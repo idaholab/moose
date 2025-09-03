@@ -142,6 +142,15 @@
     issues = '#10847'
     design = 'porous_flow/porosity.md PorousFlowPorosity.md'
   []
+  [poro_hm_func]
+    type = CSVDiff
+    input = poro_hm_func.i
+    csvdiff = poro_hm_func_out.csv
+    threading = '!pthreads'
+    requirement = 'The system shall be able to calculate porosity for hydro-mechanical coupled models if solid_bulk changes.'
+    issues = '#31342'
+    design = 'porous_flow/porosity.md PorousFlowPorosity.md'
+  []
 
   [except1]
     type = RunException
