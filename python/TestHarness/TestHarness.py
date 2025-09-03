@@ -9,7 +9,12 @@
 
 import sys
 import platform
-import os, re, inspect, errno, copy, json
+import os
+import re
+import inspect
+import errno
+import copy
+import json
 import subprocess
 import shutil
 import socket
@@ -17,7 +22,7 @@ import datetime
 import getpass
 import argparse
 import typing
-from collections import defaultdict, namedtuple, OrderedDict
+from collections import defaultdict, namedtuple
 
 from socket import gethostname
 
@@ -242,7 +247,7 @@ class TestHarness:
     ) -> None:
         # Cannot skip the testroot if we don't have an application name
         if skip_testroot and not app_name:
-            raise ValueError(f'Must provide "app_name" when skip_testroot=True')
+            raise ValueError('Must provide "app_name" when skip_testroot=True')
 
         # Assume python directory from moose (in-tree)
         if moose_python is None:
@@ -379,7 +384,6 @@ class TestHarness:
 
             # Make sure capabilities are available early; this will exit
             # if we fail
-            import pycapabilities
 
             with util.ScopedTimer(0.5, "Parsing application capabilities"):
                 self.options._capabilities = util.getCapabilities(self.executable)
@@ -501,7 +505,7 @@ class TestHarness:
         # or (deprecated) '--parallel-mesh' option.
         if (
             self.options.distributed_mesh
-            or not self.options.cli_args is None
+            or self.options.cli_args is not None
             and self.options.cli_args.find("--distributed-mesh") != -1
         ):
 
@@ -740,7 +744,7 @@ class TestHarness:
         params["root_params"] = testroot_params.get("root_params", self.root_params)
 
         if params.isValid("prereq"):
-            if type(params["prereq"]) != list:
+            if not isinstance(params["prereq"], list):
                 print(
                     (
                         "Option 'prereq' needs to be of type list in "
@@ -774,10 +778,7 @@ class TestHarness:
         new_tests = []
 
         for part1 in testers:
-            if (
-                part1.parameters()["recover"] == True
-                and not part1.parameters()["check_input"]
-            ):
+            if part1.parameters()["recover"] and not part1.parameters()["check_input"]:
                 # Clone the test specs
                 part2 = copy.deepcopy(part1)
 
@@ -801,17 +802,14 @@ class TestHarness:
 
                 new_tests.append(part2)
 
-            elif (
-                part1.parameters()["recover"] == True
-                and part1.parameters()["check_input"]
-            ):
+            elif part1.parameters()["recover"] and part1.parameters()["check_input"]:
                 part1.setStatus(part1.silent)
 
         testers.extend(new_tests)
         return testers
 
     def checkExpectError(self, output, expect_error):
-        if re.search(expect_error, output, re.MULTILINE | re.DOTALL) == None:
+        if re.search(expect_error, output, re.MULTILINE | re.DOTALL) is None:
             return False
         else:
             return True
@@ -1051,7 +1049,7 @@ class TestHarness:
 
     def determineScheduler(self):
         if self.options.hpc_host and not self.options.hpc:
-            print(f"ERROR: --hpc must be set with --hpc-host for an unknown host")
+            print("ERROR: --hpc must be set with --hpc-host for an unknown host")
             sys.exit(1)
 
         if self.options.hpc == "pbs":
@@ -1301,7 +1299,7 @@ class TestHarness:
         term_cols = None
         try:
             term_cols = os.get_terminal_size().columns * 7 / 8
-        except:
+        except:  # noqa: E722
             term_cols = 110
             pass
         term_cols = int(os.getenv("MOOSE_TERM_COLS", term_cols))
@@ -1823,7 +1821,7 @@ class TestHarness:
 
         # Convert all list based options of length one to scalars
         for key, value in list(vars(self.options).items()):
-            if type(value) == list and len(value) == 1:
+            if isinstance(value, list) and len(value) == 1:
                 setattr(self.options, key, value[0])
 
         self.checkAndUpdateCLArgs()
@@ -1869,7 +1867,7 @@ class TestHarness:
             print("Do not be an oxymoron with --verbose and --quiet")
             sys.exit(1)
         if opts.error and opts.allow_warnings:
-            print(f"ERROR: Cannot use --error and --allow-warnings together")
+            print("ERROR: Cannot use --error and --allow-warnings together")
             sys.exit(1)
 
         # Setup absolute paths and output paths

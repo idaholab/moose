@@ -440,8 +440,7 @@ class PerfGraphReporterReader:
         if num < 1:
             raise ValueError('"num" should be >= 1')
         nodes = []
-        add_node = lambda node: nodes.append(node)
-        self.recurse(add_node)
+        self.recurse(lambda node: nodes.append(node))
         return sorted(
             nodes,
             key=lambda node: node.selfMemory() if memory else node.selfTime(),

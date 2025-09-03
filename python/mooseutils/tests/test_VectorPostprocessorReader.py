@@ -13,7 +13,6 @@ import shutil
 import unittest
 import mooseutils
 import time
-import subprocess
 
 from mooseutils.tests import TEST_FILES
 

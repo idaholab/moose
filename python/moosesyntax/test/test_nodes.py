@@ -161,12 +161,12 @@ class TestObjectNodeBase(unittest.TestCase):
 
     def testErrors(self):
         with self.assertLogs(level="CRITICAL") as cm:
-            r = ObjectNodeBase(None, "a", source="")
+            ObjectNodeBase(None, "a", source="")
         self.assertEqual(len(cm.output), 1)
         self.assertIn("MooseDocs requires", cm.output[0])
 
         with self.assertLogs(level="CRITICAL") as cm:
-            r = ObjectNodeBase(None, "a", source="wrong")
+            ObjectNodeBase(None, "a", source="wrong")
         self.assertEqual(len(cm.output), 1)
         self.assertIn("does not exist: wrong", cm.output[0])
 

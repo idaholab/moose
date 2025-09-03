@@ -6,7 +6,6 @@
 #
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
-import os
 import logging
 from ..common import exceptions
 from ..base import components, LatexRenderer

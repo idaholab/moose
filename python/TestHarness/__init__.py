@@ -6,6 +6,6 @@
 #
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
-from .TestHarness import TestHarness
-from .OutputInterface import OutputInterface
-from .TestHarness import findDepApps
+from .TestHarness import TestHarness as TestHarness
+from .OutputInterface import OutputInterface as OutputInterface
+from .TestHarness import findDepApps as findDepApps

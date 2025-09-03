@@ -41,7 +41,7 @@ class FileChecker(object):
                     try:
                         lastModifiedTime = os.path.getmtime(fullyQualifiedFile)
                         times[fullyQualifiedFile] = lastModifiedTime
-                    except:
+                    except:  # noqa: E722
                         pass
         return times
 
@@ -54,11 +54,11 @@ class FileChecker(object):
             try:
                 if originalTimes[fullyQualifiedFile] != newTimes[fullyQualifiedFile]:
                     changed.append(fullyQualifiedFile)
-            except:
+            except:  # noqa: E722
                 pass
 
         ##Going to need to check to see if any other items were added
         for fullyQualifiedFile in newTimes:
-            if not fullyQualifiedFile in originalTimes:
+            if fullyQualifiedFile not in originalTimes:
                 changed.append(fullyQualifiedFile)
         return changed

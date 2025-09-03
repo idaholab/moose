@@ -6,12 +6,11 @@
 #
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
+import os
 import enum
 import logging
-import collections
-import copy
+import glob
 import mooseutils
-from .LogHelper import LogHelper
 
 LOG = logging.getLogger(__name__)
 

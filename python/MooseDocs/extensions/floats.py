@@ -7,14 +7,12 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import uuid
 import collections
 import re
 import logging
 import moosetree
-import MooseDocs
-from ..common import exceptions, report_error
-from ..base import components, MarkdownReader, LatexRenderer, Extension
+from ..common import exceptions
+from ..base import components, MarkdownReader, LatexRenderer
 from ..tree import tokens, html, latex
 from . import core, command, heading
 
@@ -153,14 +151,14 @@ class FloatReferenceCommand(command.CommandComponent):
     def createToken(self, parent, info, page, settings):
         inline = "inline" in info
         if not inline:
-            raise common.exceptions.MooseDocsException(
+            raise exceptions.MooseDocsException(
                 "The float reference command is an inline level command."
             )
 
         content = info["inline"]
         match = self.LABEL_RE.search(content)
         if match is None:
-            raise common.exceptions.MooseDocsException("Invalid label format.")
+            raise exceptions.MooseDocsException("Invalid label format.")
 
         FloatReference(
             parent, label=match.group("label"), filename=match.group("filename")
@@ -239,6 +237,7 @@ class RenderFloatReference(core.RenderShortcutLink):
     def createHTML(self, parent, token, page):
         a = html.Tag(parent, "a", class_="moose-float-reference")
 
+        key = token["label"]
         float_page = page
         if token["filename"]:
             float_page = self.translator.findPage(
@@ -260,7 +259,6 @@ class RenderFloatReference(core.RenderShortcutLink):
             else:
                 html.String(a, content=token["filename"] + ", ")
 
-        key = token["label"]
         float_node = float_page["floats"].get(key, None)
         if float_node is None:
             a["class"] = "moose-error"

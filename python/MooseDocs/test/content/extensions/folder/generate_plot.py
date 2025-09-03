@@ -1,4 +1,5 @@
-import os, sys
+import os
+import sys
 import matplotlib.pyplot as plt
 
 script_dir = os.path.dirname(os.path.realpath(__file__))

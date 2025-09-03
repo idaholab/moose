@@ -10,7 +10,6 @@
 import os
 import collections
 import logging
-import copy
 import re
 import time
 import traceback
@@ -20,7 +19,7 @@ import mooseutils
 
 import MooseDocs
 from .. import common
-from ..common import exceptions, report_error
+from ..common import exceptions
 from ..base import components, LatexRenderer, MarkdownReader
 from ..tree import html, tokens, latex
 from . import command, core, floats, table, autolink, materialicon, modal, alert
@@ -200,7 +199,7 @@ class AppSyntaxExtension(command.CommandExtension):
                     msg += "    {} --show-type".format(exe)
                     LOG.error(msg)
 
-            except Exception as e:
+            except Exception:
                 msg = (
                     "Failed to load application executable from '{}' with the following error; "
                     "application syntax is being disabled.\n".format(exe)
@@ -371,7 +370,7 @@ class SyntaxCommandBase(command.CommandComponent):
 
     def createDisabledToken(self, parent, info, page, settings):
         tag = "span" if MarkdownReader.INLINE in info else "p"
-        tok = tokens.DisabledToken(parent, tag=tag, string=settings["syntax"])
+        tokens.DisabledToken(parent, tag=tag, string=settings["syntax"])
         return parent
 
     def createTokenFromSyntax(self, parent, info, page, obj, settings):
@@ -673,7 +672,7 @@ class SyntaxListCommand(SyntaxCommandHeadingBase):
             if (
                 (group in obj.groups())
                 and not (obj.removed or obj.test)
-                and not (obj.name, obj.markdown) in obj_name_set
+                and (obj.name, obj.markdown) not in obj_name_set
             ):
                 obj_name_set.add((obj.name, obj.markdown))
                 count += 1

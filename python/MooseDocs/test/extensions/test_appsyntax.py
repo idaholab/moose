@@ -409,13 +409,13 @@ class TestRenderSyntaxList(AppSyntaxTestCase):
         appsyntax.SyntaxListItem(cls.AST, string="item")
 
     def testHTML(self):
-        res = self.render(self.AST, renderer=base.HTMLRenderer())
+        self.render(self.AST, renderer=base.HTMLRenderer())
         # self.assertHTMLTag(res, 'body', size=1)
         # self.assertHTMLTag(res(0), 'div', size=2, class_='moose-syntax-list')
         # self.assertHTMLTag(res(0,'p'
 
     def testMaterialize(self):
-        res = self.render(self.AST, renderer=base.MaterializeRenderer())
+        self.render(self.AST, renderer=base.MaterializeRenderer())
 
 
 class TestSyntaxFailure(AppSyntaxTestCase):

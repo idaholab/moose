@@ -8,7 +8,11 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os, shlex, subprocess, sys, urllib.parse
+import os
+import shlex
+import subprocess
+import sys
+import urllib.parse
 
 # This is a helper script for running an external process in HPC _not_
 # within a shell, which allows for continuity of running things on HPC

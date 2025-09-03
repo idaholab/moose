@@ -12,7 +12,7 @@ import unittest
 import logging
 from MooseDocs.test import MooseDocsTestCase
 from MooseDocs.extensions import core, command, floats, alert, materialicon, template
-from MooseDocs import base, common, tree
+from MooseDocs import base, common
 
 logging.basicConfig()
 
@@ -37,7 +37,6 @@ class TestTemplate(MooseDocsTestCase):
                 content=["extensions/example.template.md"],
             )
         ]
-        x = common.get_content(config, ".md")
         return common.get_content(config, ".md")
 
     def testAST(self):

@@ -67,8 +67,7 @@ class AcronymExtension(command.CommandExtension):
         """
         Adds a list of valid acronyms to the page attributes.
         """
-        func = lambda n: (n.name == "AcronymToken")
-        for node in moosetree.iterate(ast.root, func):
+        for node in moosetree.iterate(ast.root, lambda n: (n.name == "AcronymToken")):
             acro = node.get("acronym")
             if acro in self.__acronyms.keys() and acro not in page["acronyms"].keys():
                 page["acronyms"][acro] = self.__acronyms.get(acro)
@@ -212,10 +211,10 @@ class RenderAcronymListToken(components.RenderComponent):
 
         elif not token["complete"]:
             listed = []  # keeps track of which acronyms have already been listed
-            func = lambda p: p.local.startswith(token["location"]) and isinstance(
-                p, pages.Source
-            )
-            for node in self.translator.findPages(func):
+            for node in self.translator.findPages(
+                lambda p: p.local.startswith(token["location"])
+                and isinstance(p, pages.Source)
+            ):
                 for key, value in self.extension.getAcronyms(node, False).items():
                     if key not in listed:
                         rows.append([key, value])
@@ -250,10 +249,10 @@ class RenderAcronymListToken(components.RenderComponent):
 
         elif not token["complete"]:
             listed = []  # keeps track of which acronyms have already been listed
-            func = lambda p: p.local.startswith(token["location"]) and isinstance(
-                p, pages.Source
-            )
-            for node in self.translator.findPages(func):
+            for node in self.translator.findPages(
+                lambda p: p.local.startswith(token["location"])
+                and isinstance(p, pages.Source)
+            ):
                 for key, value in self.extension.getAcronyms(node, False).items():
                     if key not in listed:
                         latex.String(

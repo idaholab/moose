@@ -7,9 +7,12 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import re, time, os, subprocess, yaml
+import re
+import time
+import os
+import subprocess
+import yaml
 from TestHarness.runners.Runner import Runner
-from TestHarness import util
 
 
 class HPCRunner(Runner):
@@ -110,7 +113,7 @@ class HPCRunner(Runner):
                         try:
                             with open(file, "r") as f:
                                 result = yaml.safe_load(f)
-                        except:
+                        except:  # noqa: E722
                             continue
                         self.exit_code = result["exit_code"]
                         walltime = result["walltime"]
@@ -235,7 +238,7 @@ class HPCRunner(Runner):
                 # an earlier part of the file and we can't decode
                 try:
                     contents = file.read(len_comment).decode("utf-8")
-                except:
+                except:  # noqa: E722
                     return False
 
                 # Terminator isn't there
@@ -269,7 +272,7 @@ class HPCRunner(Runner):
             call_file = subprocess.check_output(
                 ["file", "--mime-encoding", file], text=True
             )
-        except:
+        except:  # noqa: E722
             return None
 
         # Will return something like "<filename>: <encoding>",

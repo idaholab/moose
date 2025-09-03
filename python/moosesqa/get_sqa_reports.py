@@ -8,19 +8,15 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os
 import copy
-import subprocess
 import logging
 import mooseutils
-import moosetree
-import pyhit
-
-LOG = logging.getLogger(__name__)
 
 from .SQARequirementReport import SQARequirementReport, SQARequirementDiffReport
 from .SQADocumentReport import SQADocumentReport
 from .SQAMooseAppReport import SQAMooseAppReport
+
+LOG = logging.getLogger(__name__)
 
 
 def get_sqa_reports(config_file, app_report=True, doc_report=True, req_report=True):

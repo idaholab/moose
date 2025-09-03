@@ -10,11 +10,9 @@
 
 import unittest
 import logging
-import os
-import sys
 from MooseDocs.test import MooseDocsTestCase
 from MooseDocs.extensions import core, command, versioner
-from MooseDocs import base, MOOSE_DIR
+from MooseDocs import base
 
 logging.basicConfig()
 
@@ -37,7 +35,7 @@ class TestTemplate(MooseDocsTestCase):
         """Helper for testing the render stage given a command
         and the keys to look up in the versioner meta"""
         for name, package in self.packages.items():
-            if conda == True and not package.conda:
+            if conda == True and not package.conda:  # noqa: E712
                 continue
             text = f"The version is [!versioner!{cmd} package={name}]"
             _, res = self.execute(text, renderer=base.MaterializeRenderer())

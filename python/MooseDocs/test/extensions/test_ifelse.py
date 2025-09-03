@@ -11,7 +11,6 @@ import os
 import sys
 import unittest
 import logging
-from MooseDocs import common, base, tree
 from MooseDocs.test import MooseDocsTestCase, requiresMooseExecutable
 from MooseDocs.extensions import (
     core,

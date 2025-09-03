@@ -8,7 +8,7 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 from RunApp import RunApp
-import os, signal, time
+import signal
 
 
 # Classes that derive from this class are expected to write

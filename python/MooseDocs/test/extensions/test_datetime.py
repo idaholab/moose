@@ -11,7 +11,7 @@
 import unittest
 import logging
 import datetime as dt
-from MooseDocs import common, base
+from MooseDocs import base
 from MooseDocs.test import MooseDocsTestCase
 from MooseDocs.extensions import core, command, datetime
 

@@ -10,16 +10,13 @@
 import os
 import re
 import copy
-import codecs
 import logging
 import collections
 import traceback
 import moosetree
 import uuid
-import json
 import time
 import itertools
-import pyhit
 
 import MooseDocs
 import mooseutils
@@ -28,7 +25,7 @@ import moosesqa
 from .. import common
 from ..common import exceptions
 from ..base import components, MarkdownReader, LatexRenderer, HTMLRenderer
-from ..tree import tokens, html, latex, pages
+from ..tree import tokens, html, latex
 from . import core, command, floats, autolink, civet, appsyntax, table, modal
 
 LOG = logging.getLogger(__name__)
@@ -477,7 +474,7 @@ class SQARequirementsCommand(command.CommandComponent):
                         req.filename,
                         req.requirement_line,
                         req.requirement,
-                        token.get("traceback", None),
+                        t.get("traceback", None),
                         "SQA TOKENIZE ERROR",
                     )
                     LOG.critical(msg)
@@ -502,7 +499,7 @@ class SQARequirementsCommand(command.CommandComponent):
                             detail.filename,
                             detail.detail_line,
                             detail.detail,
-                            token.get("traceback", None),
+                            t.get("traceback", None),
                             "SQA TOKENIZE ERROR",
                         )
                         LOG.critical(msg)
@@ -514,7 +511,7 @@ class SQARequirementsCommand(command.CommandComponent):
                 for spec in req.specifications:
                     if p.count > 2:
                         tokens.String(p, content=", ")
-                    s = modal.ModalLink(
+                    modal.ModalLink(
                         p, string=spec.name, content=core.Code(None, content=spec.text)
                     )
 
@@ -800,9 +797,10 @@ class SQAReportCommand(command.CommandComponent):
                 p = core.Paragraph(item)
                 tokens.String(p, content="Specification(s): ")
                 for spec in req.specifications:
-                    p = SQARequirementSpecification(item, spec_name=req.name)
-                    s = modal.ModalSourceLink(
-                        p, string=spec.name, content=core.Code(None, content=content)
+                    if p.count > 2:
+                        tokens.String(p, content=", ")
+                    modal.ModalLink(
+                        p, string=spec.name, content=core.Code(None, content=spec.text)
                     )
 
             if token["link_design"] and req.design:
@@ -1206,12 +1204,6 @@ class RenderSQAReport(components.RenderComponent):
             # Header
             li = html.Tag(ul, "li")
             hdr = html.Tag(li, "div", class_="collapsible-header", string=report.title)
-            if report.status == report.Status.WARNING:
-                badge = ("WARNING", "yellow")
-            elif report.status == report.Status.ERROR:
-                badge = ("ERROR", "red")
-            else:
-                badge = ("OK", "green")
             html.Tag(
                 hdr,
                 "span",
@@ -1225,9 +1217,9 @@ class RenderSQAReport(components.RenderComponent):
             for key, mode in report.logger.modes.items():
                 cnt = report.logger.counts[key]
                 item = html.Tag(collection, "li", class_="collection-item")
-                span = html.Tag(item, "span", string=key)
+                _span = html.Tag(item, "span", string=key)
                 color = self._getBadgeColor(mode) if (cnt > 0) else "green"
-                badge = html.Tag(
+                _badge = html.Tag(
                     item, "span", class_="badge {}".format(color), string=str(cnt)
                 )
                 if cnt > 0:
@@ -1244,7 +1236,7 @@ class RenderSQAReport(components.RenderComponent):
             href="#{}".format(unique_id),
             style="float:right;margin-left:10px;margin-right:10px;",
         )
-        i = html.Tag(
+        html.Tag(
             trigger,
             "i",
             string="help",

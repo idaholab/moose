@@ -8,7 +8,6 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 """Utilities for reading files."""
-import sys
 import codecs
 import os
 

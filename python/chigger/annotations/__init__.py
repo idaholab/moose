@@ -8,7 +8,7 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-from .ImageAnnotation import ImageAnnotation
+from .ImageAnnotation import ImageAnnotation as ImageAnnotation
 from .TextAnnotationSource import TextAnnotationSource
 from .TimeAnnotationSource import TimeAnnotationSource
 from .. import base

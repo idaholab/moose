@@ -9,12 +9,10 @@
 
 """Defines the MooseDocs build command."""
 import os
-import sys
 import time
 import collections
 import multiprocessing
 import logging
-import subprocess
 import shutil
 import argparse
 from typing import Tuple
@@ -22,11 +20,9 @@ from typing import Tuple
 import yaml
 import livereload
 import mooseutils
-from mooseutils.yaml_load import yaml_load
 
 import MooseDocs
 from .. import common
-from ..tree import pages
 
 LOG = logging.getLogger("MooseDocs.build")
 
@@ -233,9 +229,12 @@ def setupOptions(options: argparse.Namespace) -> Tuple[argparse.Namespace, dict]
     Augments the CLI argument options and sets up the configuration dict
     for each object
     """
+
     # Infinite nested dict
-    tree = lambda: collections.defaultdict(tree)
-    config = tree()
+    def nested_defaultdict():
+        return collections.defaultdict(nested_defaultdict)
+
+    config = nested_defaultdict()
 
     # Setup executioner
     if options.executioner:
@@ -362,11 +361,12 @@ def main(options):
     # Update contents lists if only building certain files
     if options.files:
         for index, translator in enumerate(translators):
-            func = lambda p: (
-                p in contents[index]
-                and any([p.local.startswith(f) for f in options.files])
+            contents[index] = translator.findPages(
+                lambda p: (
+                    p in contents[index]
+                    and any([p.local.startswith(f) for f in options.files])
+                )
             )
-            contents[index] = translator.findPages(func)
 
     # Execute the read and tokenize methods on all translators
     for index, translator in enumerate(translators):

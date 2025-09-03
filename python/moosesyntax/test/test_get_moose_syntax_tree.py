@@ -10,7 +10,6 @@
 
 import os
 import unittest
-import logging
 import moosetree
 import mooseutils
 import moosesyntax
@@ -26,7 +25,7 @@ class TestSyntaxTreeRun(unittest.TestCase):
     """Test 'get_moose_syntax_tree' can operate with given executable"""
 
     def testRun(self):
-        root = moosesyntax.get_moose_syntax_tree(MOOSE_EXE)
+        moosesyntax.get_moose_syntax_tree(MOOSE_EXE)
 
 
 @unittest.skipIf(MOOSE_EXE is None, "MOOSE executable not found.")

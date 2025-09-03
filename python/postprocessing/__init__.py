@@ -7,4 +7,4 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-from postprocessing import combine_csv
+from postprocessing import combine_csv as combine_csv

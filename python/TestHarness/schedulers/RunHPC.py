@@ -8,11 +8,20 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 import urllib.parse
-from RunParallel import RunParallel
-import threading, os, re, sys, datetime, shlex, socket, threading, time, urllib, contextlib, copy
+from TestHarness.schedulers.RunParallel import RunParallel
+import os
+import re
+import sys
+import datetime
+import shlex
+import socket
+import threading
+import time
+import urllib
+import contextlib
+import copy
 from enum import Enum
 import statistics
-from collections import namedtuple
 
 from multiprocessing.pool import ThreadPool
 from TestHarness import util
@@ -156,7 +165,7 @@ class RunHPC(RunParallel):
                     identityfile = config.get("identityfile")
                     if identityfile is not None and len(identityfile) > 0:
                         self.ssh_key_filenames[host] = identityfile[-1]
-                except:
+                except:  # noqa: E722
                     pass
 
         # Make sure that we can call commands up front, only if we're not re-running
@@ -628,7 +637,7 @@ class RunHPC(RunParallel):
                 if exit_code != 0:
                     try:
                         self.killHPCJob(hpc_job, lock=False)  # already locked
-                    except:
+                    except:  # noqa: E722
                         pass
                     raise self.CallHPCException(self, f"{cmd} failed", full_cmd, result)
 
@@ -672,10 +681,10 @@ class RunHPC(RunParallel):
                 # Helper for splitting a list into chunks. We won't update
                 # everything together because PBS is particularly bad
                 # at processing the status for a ton of jobs at once...
-                def in_chunks(l):
+                def in_chunks(lst):
                     N = self.update_hpc_jobs_chunk_size
-                    for i in range(0, len(l), N):
-                        yield l[i : i + N]
+                    for i in range(0, len(lst), N):
+                        yield lst[i : i + N]
 
                 # Whether or not all of the updates suceeded
                 success = True
@@ -865,10 +874,9 @@ class RunHPC(RunParallel):
     def killRemaining(self, keyboard=False):
         """Kills all currently running HPC jobs"""
         running_states = [HPCJob.State.killed, HPCJob.State.done]
-        functor = (
+        killed_jobs = self.killHPCJobs(
             lambda hpc_job: hpc_job is not None and hpc_job.state not in running_states
         )
-        killed_jobs = self.killHPCJobs(functor)
         if keyboard and killed_jobs:
             print(f"\nAttempted to kill remaining {killed_jobs} HPC jobs...")
         super().killRemaining(keyboard)
@@ -985,8 +993,7 @@ class RunHPC(RunParallel):
         # Kill the remaining jobs that are held, which would exist if things
         # fail and jobs that we pre-submitted were skipped due to a failed
         # dependency above them
-        functor = lambda hpc_job: hpc_job.state == hpc_job.State.held
-        self.killHPCJobs(functor)
+        self.killHPCJobs(lambda hpc_job: hpc_job.state == hpc_job.State.held)
 
     def appendStats(self):
         timer_keys = ["hpc_queued", "hpc_wait_output"]
@@ -1091,8 +1098,8 @@ class RunHPC(RunParallel):
 
         # --hpc-pre-source contents
         if self.options.hpc_pre_source:
-            submission_env["PRE_SOURCE_FILE"] = self.options.hpc_pre_source
-            submission_env["PRE_SOURCE_CONTENTS"] = self.source_contents
+            submit_env["PRE_SOURCE_FILE"] = self.options.hpc_pre_source
+            submit_env["PRE_SOURCE_CONTENTS"] = self.source_contents
 
         # If running on INL HPC, minimize the bindpath; this is a configuration
         # option for the moose-dev-container module on INL HPC

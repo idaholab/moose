@@ -12,7 +12,6 @@
 import unittest
 import chigger
 import mock
-import subprocess
 import os.path
 
 

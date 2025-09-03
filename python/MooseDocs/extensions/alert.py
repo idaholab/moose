@@ -7,10 +7,9 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os
 from ..base import components, LatexRenderer, HTMLRenderer, MarkdownReader
 from ..tree import tokens, html, latex
-from . import command, materialicon
+from . import command
 
 
 def make_extension(**kwargs):

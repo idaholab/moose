@@ -8,7 +8,9 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 from FactorySystem import InputParameters
-import os, sys, shutil
+import os
+import sys
+import shutil
 
 # Get the real path of cluster_launcher
 if os.path.islink(sys.argv[0]):

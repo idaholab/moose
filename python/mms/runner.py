@@ -101,7 +101,7 @@ def _runner(input_files, num_refinements, *args, **kwargs):
                 fcsv = "{}.csv".format(fbase)
 
         print("Running:", executable, " ".join(a))
-        out = mooseutils.run_executable(
+        _out = mooseutils.run_executable(
             executable, *a, mpi=mpi, suppress_output=not console
         )
 

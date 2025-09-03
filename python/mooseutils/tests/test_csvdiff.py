@@ -11,7 +11,6 @@ import os
 import unittest
 import csv
 import tempfile
-import argparse
 import mooseutils.csvdiff
 
 

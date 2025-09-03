@@ -6,16 +6,12 @@
 #
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
-import os
 import sys
 import re
 import importlib
-import collections
 import logging
-import moosetree
 import mooseutils
 import MooseDocs
-from ..base import Extension, components
 from ..base.readers import MarkdownReader
 from ..common import exceptions
 from ..tree import tokens
@@ -110,7 +106,7 @@ class IfElseExtension(command.CommandExtension):
         try:
             LOG.info("Reading MOOSE application capabilities...")
             self._capabilities = util.getCapabilities(exe)
-        except:
+        except:  # noqa: E722
             LOG.error(f"Failed to load capabilities from application {exe}.")
 
     def hasSubmodule(self, name, recursive):
@@ -128,7 +124,7 @@ class IfElseExtension(command.CommandExtension):
             LOG.error(msg)
             return False
         entry = self._capabilities.get(name.lower())
-        return entry is not None and entry[0] != False
+        return entry is not None and entry[0] != False  # noqa: E712
 
     def extend(self, reader, renderer):
         self.requires(command)

@@ -11,16 +11,28 @@
 The base module defines the primary base classes for creating MooseDocs objects for
 converting Markdown into HTML or LaTeX.
 """
-from .lexers import Lexer, RecursiveLexer, Grammar
-from .readers import Reader, MarkdownReader
-from .renderers import Renderer, HTMLRenderer, MaterializeRenderer, LatexRenderer
-from .renderers import RevealRenderer
-from .Extension import Extension
-from .Translator import Translator
+from .lexers import (
+    Lexer as Lexer,
+    RecursiveLexer as RecursiveLexer,
+    Grammar as Grammar,
+)
+from .readers import (
+    Reader as Reader,
+    MarkdownReader as MarkdownReader,
+)
+from .renderers import (
+    Renderer as Renderer,
+    HTMLRenderer as HTMLRenderer,
+    MaterializeRenderer as MaterializeRenderer,
+    LatexRenderer as LatexRenderer,
+)
+from .renderers import RevealRenderer as RevealRenderer
+from .Extension import Extension as Extension
+from .Translator import Translator as Translator
 from .executioners import (
-    Executioner,
-    Serial,
-    ParallelBarrier,
-    ParallelPipe,
-    ParallelQueue,
+    Executioner as Executioner,
+    Serial as Serial,
+    ParallelBarrier as ParallelBarrier,
+    ParallelPipe as ParallelPipe,
+    ParallelQueue as ParallelQueue,
 )

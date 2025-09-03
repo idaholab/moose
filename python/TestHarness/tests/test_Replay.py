@@ -27,7 +27,7 @@ class TestHarnessTester(TestHarnessTestCase):
         try:
             # remove previous results file
             shutil.rmtree(self.output_dir)
-        except:
+        except:  # noqa: E722
             pass
 
     def tearDown(self):

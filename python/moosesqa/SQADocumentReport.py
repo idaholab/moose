@@ -7,10 +7,6 @@
 #
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
-import os
-import urllib
-import logging
-import glob
 import mooseutils
 from .SQAReport import SQAReport
 from .get_documents import get_documents, INL_DOCUMENTS, DEPRECATED_DOCUMENTS

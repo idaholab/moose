@@ -29,7 +29,7 @@ class TestNodeInitTime(unittest.TestCase):
             for j in range(N):
                 div1 = cls(div0, "div")
                 for k in range(N):
-                    p = cls(div1, "p")
+                    cls(div1, "p")
 
     @unittest.skipIf(not HAS_ANYTREE, "anytree not install")
     def testTime(self):
@@ -224,11 +224,11 @@ class TestNode(unittest.TestCase):
     def testCount(self):
         n0 = moosetree.Node(None, "0")
         n1 = moosetree.Node(n0, "1")
-        n2 = moosetree.Node(n1, "2")
-        n3 = moosetree.Node(n1, "3")
+        _n2 = moosetree.Node(n1, "2")
+        _n3 = moosetree.Node(n1, "3")
         n4 = moosetree.Node(n0, "4")
-        n5 = moosetree.Node(n4, "5")
-        n6 = moosetree.Node(n4, "6")
+        _n5 = moosetree.Node(n4, "5")
+        _n6 = moosetree.Node(n4, "6")
 
         self.assertEqual(n0.count, 6)
 

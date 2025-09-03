@@ -121,7 +121,7 @@ class TestReporterReader(unittest.TestCase):
             data.update(time)
             self.assertEqual(data[("accumulate", "pp:value")], pp)
 
-    def testTimeData(self):
+    def testTimeData2(self):
         """
         Test functionality with one file per timestep
         """

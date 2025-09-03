@@ -13,9 +13,7 @@ import mock
 import types
 import io
 import mooseutils
-import moosesqa
 import copy
-import platform
 import subprocess
 from MooseDocs.commands import check
 from MooseDocs.test import requiresMooseExecutable
@@ -114,14 +112,14 @@ class TestCheck(unittest.TestCase):
         opt.reports = ["app"]
         opt.config = "sqa_reports.yml"
         with mock.patch("sys.stdout", new=io.StringIO()) as stdout:
-            status = check.main(opt)
+            check.main(opt)
         self.assertIn("MOOSEAPP REPORT(S)", stdout.getvalue())
         self.assertNotIn("DOCUMENT REPORT(S)", stdout.getvalue())
         self.assertNotIn("REQUIREMENT REPORT(S)", stdout.getvalue())
 
         opt.reports = ["doc", "req"]
         with mock.patch("sys.stdout", new=io.StringIO()) as stdout:
-            status = check.main(opt)
+            check.main(opt)
         self.assertNotIn("MOOSEAPP REPORT(S)", stdout.getvalue())
         self.assertIn("DOCUMENT REPORT(S)", stdout.getvalue())
         self.assertIn("REQUIREMENT REPORT(S)", stdout.getvalue())
@@ -130,14 +128,14 @@ class TestCheck(unittest.TestCase):
         opt.reports = ["app"]
         opt.app_reports = ["not-a-value"]
         with mock.patch("sys.stdout", new=io.StringIO()) as stdout:
-            status = check.main(opt)
+            check.main(opt)
         self.assertNotIn("MOOSEAPP REPORT(S)", stdout.getvalue())
         self.assertNotIn("DOCUMENT REPORT(S)", stdout.getvalue())
         self.assertNotIn("REQUIREMENT REPORT(S)", stdout.getvalue())
 
         opt.app_reports = ["framework"]
         with mock.patch("sys.stdout", new=io.StringIO()) as stdout:
-            status = check.main(opt)
+            check.main(opt)
         self.assertIn("MOOSEAPP REPORT(S)", stdout.getvalue())
         self.assertNotIn("DOCUMENT REPORT(S)", stdout.getvalue())
         self.assertNotIn("REQUIREMENT REPORT(S)", stdout.getvalue())
@@ -146,14 +144,14 @@ class TestCheck(unittest.TestCase):
         opt.reports = ["req"]
         opt.req_reports = ["not-a-value"]
         with mock.patch("sys.stdout", new=io.StringIO()) as stdout:
-            status = check.main(opt)
+            check.main(opt)
         self.assertNotIn("MOOSEAPP REPORT(S)", stdout.getvalue())
         self.assertNotIn("DOCUMENT REPORT(S)", stdout.getvalue())
         self.assertNotIn("REQUIREMENT REPORT(S)", stdout.getvalue())
 
         opt.req_reports = ["moose_test"]
         with mock.patch("sys.stdout", new=io.StringIO()) as stdout:
-            status = check.main(opt)
+            check.main(opt)
         self.assertNotIn("MOOSEAPP REPORT(S)", stdout.getvalue())
         self.assertNotIn("DOCUMENT REPORT(S)", stdout.getvalue())
         self.assertIn("REQUIREMENT REPORT(S)", stdout.getvalue())

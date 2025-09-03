@@ -10,7 +10,8 @@ import sys
 from TestHarness.JobDAG import JobDAG
 from TestHarness.StatusSystem import StatusSystem
 from FactorySystem.MooseObject import MooseObject
-import os, traceback
+import os
+import traceback
 from time import sleep
 from timeit import default_timer as clock
 from multiprocessing.pool import ThreadPool
@@ -139,7 +140,7 @@ class Scheduler(MooseObject):
 
         Needed so that derived schedulers can modify this limit.
         """
-        if params["max_processes"] == None:
+        if params["max_processes"] is None:
             available_slots = 1
             soft_limit = True
         else:
@@ -581,7 +582,7 @@ class Scheduler(MooseObject):
                     else:
                         job.setStatus(StatusSystem().error, "SCHEDULER ERROR")
                         job.appendOutput(
-                            f"Failed to remove job from active jobs in Scheduler; did not exist"
+                            "Failed to remove job from active jobs in Scheduler; did not exist"
                         )
 
             # Not enough slots to run the job...

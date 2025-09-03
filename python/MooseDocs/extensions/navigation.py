@@ -12,8 +12,7 @@ import uuid
 import logging
 import json
 import moosetree
-from . import common
-from ..base import components, renderers, Extension
+from ..base import renderers, Extension
 from ..common import exceptions, write
 from ..tree import html, pages, tokens
 from . import core, heading

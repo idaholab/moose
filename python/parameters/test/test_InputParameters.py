@@ -8,8 +8,6 @@
 #
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
-import sys
-import re
 import unittest
 from parameters import InputParameters
 
@@ -32,7 +30,6 @@ class TestInputParameters(unittest.TestCase):
             "Cannot add parameter, the parameter 'foo' already exists.", log.output[0]
         )
 
-        sub = InputParameters()
         params.add("bar", InputParameters())
         with self.assertLogs(level="WARNING") as log:
             params.add("bar_something")

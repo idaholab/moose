@@ -10,7 +10,7 @@
 import unittest
 import mock
 import logging
-from moosesqa import SQAReport, SilentRecordHandler, LogHelper
+from moosesqa import SQAReport, LogHelper
 
 
 class TestSQAReport(unittest.TestCase):
@@ -23,8 +23,6 @@ class TestSQAReport(unittest.TestCase):
         with self.assertRaises(NotImplementedError):
             r = SQAReport()
             r.execute()
-
-        logger = logging.getLogger("moosesqa")
 
         class TestReport(SQAReport):
             def execute(self):

@@ -10,39 +10,39 @@ def build_tree():
     C = moosetree.Node(root, "C", year=2011)
     D = moosetree.Node(root, "D")
 
-    AA = moosetree.Node(A, "AA")
+    _AA = moosetree.Node(A, "AA")
     AB = moosetree.Node(A, "AB")
-    AC = moosetree.Node(A, "AC")
+    _AC = moosetree.Node(A, "AC")
 
     BA = moosetree.Node(B, "BA")
-    BB = moosetree.Node(B, "BB", year=1949)
-    BC = moosetree.Node(B, "BC")
-    BD = moosetree.Node(B, "BD")
+    _BB = moosetree.Node(B, "BB", year=1949)
+    _BC = moosetree.Node(B, "BC")
+    _BD = moosetree.Node(B, "BD")
 
-    CA = moosetree.Node(C, "CA")
-    CB = moosetree.Node(C, "CB", year=1980)
+    _CA = moosetree.Node(C, "CA")
+    _CB = moosetree.Node(C, "CB", year=1980)
     CC = moosetree.Node(C, "CC")
 
-    DA = moosetree.Node(D, "DA")
-    DB = moosetree.Node(D, "DB")
+    _DA = moosetree.Node(D, "DA")
+    _DB = moosetree.Node(D, "DB")
 
-    ABA = moosetree.Node(AB, "ABA")
-    ABB = moosetree.Node(AB, "ABB")
+    _ABA = moosetree.Node(AB, "ABA")
+    _ABB = moosetree.Node(AB, "ABB")
     ABC = moosetree.Node(AB, "ABC", year=1980)
-    ABD = moosetree.Node(AB, "ABD")
+    _ABD = moosetree.Node(AB, "ABD")
 
-    BAA = moosetree.Node(BA, "BAA")
-    BAB = moosetree.Node(BA, "BAB", year=1954)
+    _BAA = moosetree.Node(BA, "BAA")
+    _BAB = moosetree.Node(BA, "BAB", year=1954)
 
-    CCA = moosetree.Node(CC, "CCA")
-    CCB = moosetree.Node(CC, "CCB")
-    CCC = moosetree.Node(CC, "CCC")
+    _CCA = moosetree.Node(CC, "CCA")
+    _CCB = moosetree.Node(CC, "CCB")
+    _CCC = moosetree.Node(CC, "CCC")
 
     ABCA = moosetree.Node(ABC, "ABCA")
-    ABCB = moosetree.Node(ABC, "ABCB")
+    _ABCB = moosetree.Node(ABC, "ABCB")
 
-    ABCAA = moosetree.Node(ABCA, "ABCAA")
-    ABCAB = moosetree.Node(ABCA, "ABCAB", year=2013)
+    _ABCAA = moosetree.Node(ABCA, "ABCAA")
+    _ABCAB = moosetree.Node(ABCA, "ABCAB", year=2013)
     return root
 
 

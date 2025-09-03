@@ -8,7 +8,6 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os
 import unittest
 
 
@@ -26,9 +25,9 @@ class TestCapabilities(unittest.TestCase):
             "compiler": ["GCC", "Compiler used to build moose"],
         }
 
-        check = lambda v, status: self.assertEqual(
-            pycapabilities.check(v, cap)[0], status
-        )
+        def check(v, status):
+            return self.assertEqual(pycapabilities.check(v, cap)[0], status)
+
         check("!petsc", pycapabilities.CERTAIN_FAIL)
         check("!unknown", pycapabilities.POSSIBLE_PASS)
         check("adsize > 20", pycapabilities.CERTAIN_PASS)

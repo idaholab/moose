@@ -1,10 +1,5 @@
-from copy import copy, deepcopy
-from collections import deque
-
-try:
-    from collections import OrderedDict
-except:
-    from ordereddict import OrderedDict
+from copy import copy
+from collections import deque, OrderedDict
 
 
 class DAGValidationError(Exception):
@@ -32,7 +27,7 @@ class DAG(object):
     # Added by the MOOSE group
     def __cacheGraph(self):
         """Private method to cache the current state of the graph"""
-        if self.__cached_graph == None:
+        if self.__cached_graph is None:
             self.__cached_graph = self.clone()
         return self.__cached_graph
 
@@ -256,17 +251,17 @@ class DAG(object):
             if in_degree[u] == 0:
                 queue.appendleft(u)
 
-        l = []
+        lueue = []
         while queue:
             u = queue.pop()
-            l.append(u)
+            lueue.append(u)
             for v in graph[u]:
                 in_degree[v] -= 1
                 if in_degree[v] == 0:
                     queue.appendleft(v)
 
-        if len(l) == len(graph):
-            return l
+        if len(lueue) == len(graph):
+            return lueue
         else:
             raise ValueError("graph is not acyclic")
 

@@ -7,10 +7,7 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-try:
-    from sympy.printing.cxx import CXX11CodePrinter
-except:
-    from sympy.printing.cxxcode import CXX11CodePrinter
+from sympy.printing.cxx import CXX11CodePrinter
 
 
 class MooseFunctionPrinter(CXX11CodePrinter):

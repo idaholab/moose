@@ -8,14 +8,12 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import mock
 import unittest
+from unittest.mock import patch
 import logging
-import collections
 from MooseDocs.test import MooseDocsTestCase
 from MooseDocs.extensions import core, floats, heading, command, katex, include, config
 from MooseDocs import base, common
-from MooseDocs.tree import pages, tokens
 
 logging.basicConfig()
 
@@ -50,17 +48,17 @@ class TestTokenizeEquation(MooseDocsTestCase):
 
     def testExceptions(self):
         with self.assertLogs(level=logging.ERROR) as cm:
-            ast = self.tokenize("[!equation](y=2x)")
+            self.tokenize("[!equation](y=2x)")
         self.assertEqual(len(cm.output), 1)
         self.assertIn(r"The '!equation' command is a block level command", cm.output[0])
 
         with self.assertLogs(level=logging.ERROR) as cm:
-            ast = self.tokenize("!eq\ny=2x")
+            self.tokenize("!eq\ny=2x")
         self.assertEqual(len(cm.output), 1)
         self.assertIn(r"The '!eq' command is an inline level command", cm.output[0])
 
         with self.assertLogs(level=logging.ERROR) as cm:
-            ast = self.tokenize("[!eq id=foo](y=2x)")
+            self.tokenize("[!eq id=foo](y=2x)")
         self.assertEqual(len(cm.output), 1)
         self.assertIn(r"The 'id' setting is not allowed", cm.output[0])
 
@@ -90,7 +88,7 @@ class TestTokenizeEquationReference(MooseDocsTestCase):
 
     def testExceptions(self):
         with self.assertLogs(level=logging.ERROR) as cm:
-            ast = self.tokenize("!eqref")
+            self.tokenize("!eqref")
         self.assertEqual(len(cm.output), 1)
         self.assertIn(r"The '!eqref' command is an inline level command", cm.output[0])
 
@@ -188,15 +186,23 @@ class TestRenderEquationReference(MooseDocsTestCase):
 
     def testLocalEqRef(self):
         ast = katex.EquationReference(None, label="second_law")
-        res = self.render(ast, renderer=base.HTMLRenderer())
+
+        def mockPostTokenize(page, ast):
+            page["labels"] = {"second_law": (27, "test_uuid")}
+
+        with patch.object(
+            katex.KatexExtension, "postTokenize", side_effect=mockPostTokenize
+        ):
+            res = self.render(ast, renderer=base.HTMLRenderer())
+
         self.assertHTMLTag(res, "body", size=1)
         self.assertHTMLTag(
             res(0),
             "a",
             size=1,
             class_="moose-equation-reference",
-            href="#None",
-            string="Eq. (None)",
+            href="#test_uuid",
+            string="Eq. (27)",
         )
 
     def testNonLocalEqRefNoHeading(self):
@@ -221,7 +227,7 @@ class TestRenderEquationReference(MooseDocsTestCase):
         self.assertIn("Equations", res(0, 0)["content"])
         self.assertIn("Eq. (2)", res(0, 8)["content"])
 
-    def testLocalEqRef(self):
+    def testLocalEqRefLatex(self):
         ast = katex.EquationReference(None, label="second_law")
         res = self.render(ast, renderer=base.LatexRenderer())
         self.assertLatexString(res(0), content="Eq.~")

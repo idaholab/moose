@@ -33,7 +33,7 @@ class TestModalLink(MooseDocsTestCase):
         ast = modal.ModalLink(None)
 
         with self.assertLogs(level=logging.ERROR) as cm:
-            res = self.render(ast, renderer=base.HTMLRenderer())
+            self.render(ast, renderer=base.HTMLRenderer())
         self.assertEqual(len(cm.output), 1)
         self.assertIn("The 'ModalLink' token requires children", cm.output[0])
 
@@ -89,13 +89,13 @@ class TestModalLink(MooseDocsTestCase):
 
         ast = modal.ModalLink(None, content=core.Code(None, content="1+2=3"))
         with self.assertLogs(level=logging.ERROR) as cm:
-            res = self.render(ast, renderer=base.MaterializeRenderer())
+            self.render(ast, renderer=base.MaterializeRenderer())
         self.assertEqual(len(cm.output), 1)
         self.assertIn("The 'ModalLink' token requires children", cm.output[0])
 
         ast = modal.ModalLink(None, string="test", content=1980)
         with self.assertLogs(level=logging.ERROR) as cm:
-            res = self.render(ast, renderer=base.MaterializeRenderer())
+            self.render(ast, renderer=base.MaterializeRenderer())
         self.assertEqual(len(cm.output), 1)
         self.assertIn(
             "The 'ModalLink' token 'content' attribute must be a string or Token",
@@ -104,7 +104,7 @@ class TestModalLink(MooseDocsTestCase):
 
         ast = modal.ModalLink(None, string="test")
         with self.assertLogs(level=logging.ERROR) as cm:
-            res = self.render(ast, renderer=base.MaterializeRenderer())
+            self.render(ast, renderer=base.MaterializeRenderer())
         self.assertEqual(len(cm.output), 1)
         self.assertIn(
             "The 'ModalLink' token 'content' attribute must be a string or Token",
@@ -278,13 +278,13 @@ class TestModalSourceLink(MooseDocsTestCase):
 
         ast = modal.ModalSourceLink(None, src="Makefile")
         with self.assertLogs(level=logging.ERROR) as cm:
-            res = self.render(ast, renderer=base.MaterializeRenderer())
+            self.render(ast, renderer=base.MaterializeRenderer())
         self.assertEqual(len(cm.output), 1)
         self.assertIn("Multiple files match the supplied filename", cm.output[0])
 
         ast = modal.ModalSourceLink(None, src="wrong")
         with self.assertLogs(level=logging.ERROR) as cm:
-            res = self.render(ast, renderer=base.MaterializeRenderer())
+            self.render(ast, renderer=base.MaterializeRenderer())
         self.assertEqual(len(cm.output), 1)
         self.assertIn(
             "Unable to locate file that matches the supplied filename", cm.output[0]

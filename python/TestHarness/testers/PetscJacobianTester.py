@@ -10,7 +10,6 @@
 from RunApp import RunApp
 import re
 import math
-from TestHarness import util
 import os
 
 

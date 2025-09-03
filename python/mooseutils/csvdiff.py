@@ -71,7 +71,7 @@ class CSVTools:
                     for header, val in zip(headers, vals):
                         try:
                             table[header].append(float(val))
-                        except:
+                        except ValueError:
                             # ignore strings
                             table[header].append(0)
 
@@ -367,7 +367,7 @@ class CSVDiffer(CSVTools):
                 if self.custom_columns:
                     try:
                         abs_zero = abs_zero_map[key]
-                    except:
+                    except KeyError:
                         abs_zero = self.abs_zero
                 if abs(val1) < abs_zero:
                     val1 = 0
@@ -401,7 +401,7 @@ class CSVDiffer(CSVTools):
                 if self.custom_columns:
                     try:
                         rel_tol = rel_err_map[key]
-                    except:
+                    except KeyError:
                         rel_tol = self.rel_tol
                 if rel_diff > rel_tol:
                     self.addError(
@@ -449,7 +449,7 @@ def verifyArgs(args):
     unify_custom_args = [
         x
         for x in [args.custom_columns, args.custom_abs_zero, args.custom_rel_err]
-        if x != None
+        if x is not None
     ]
     if unify_custom_args and len(unify_custom_args) != 3:
         problems.append("When using any --custom-* option, you must use all three")

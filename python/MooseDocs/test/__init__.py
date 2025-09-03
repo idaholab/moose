@@ -25,7 +25,7 @@ def requiresMooseExecutable(exe_path=os.path.join(MOOSE_DIR, "test")):
     but only if running in a pytest environment.
     """
     # Pytest will load itself when called
-    if not "pytest" in sys.modules:
+    if "pytest" not in sys.modules:
         return lambda func_or_cls: func_or_cls
     exe = mooseutils.find_moose_executable(exe_path)
     if exe is None:

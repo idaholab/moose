@@ -15,8 +15,6 @@ between the reading and rendering content.
 import os
 import uuid
 import logging
-import multiprocessing
-import types
 import traceback
 import time
 
@@ -24,9 +22,6 @@ import mooseutils
 
 from ..common import mixins, exceptions
 from ..tree import pages
-from .Extension import Extension
-from .readers import Reader
-from .renderers import Renderer
 from .executioners import ParallelBarrier
 
 LOG = logging.getLogger("MooseDocs.Translator")
@@ -172,10 +167,15 @@ class Translator(mixins.ConfigObject):
         if isinstance(arg, str):
             items = self.__page_cache.get(arg, None) if not exact else None
             if items is None:
-                func = lambda p: (p.local == arg) or (
-                    not exact and p.local.endswith(os.sep + arg.lstrip(os.sep))
-                )
-                items = [page for page in self.__executioner.getPages() if func(page)]
+
+                def add_page(p):
+                    return (p.local == arg) or (
+                        not exact and p.local.endswith(os.sep + arg.lstrip(os.sep))
+                    )
+
+                items = [
+                    page for page in self.__executioner.getPages() if add_page(page)
+                ]
 
                 # if pages matched string 'arg', cache them so we don't have to repeat this search
                 if items:

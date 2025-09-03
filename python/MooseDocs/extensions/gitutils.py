@@ -6,13 +6,9 @@
 #
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
-import os
-import datetime
 import mooseutils
 import MooseDocs
-from ..base import components
 from ..common import exceptions
-from ..tree import tokens, html
 from . import command, core
 
 

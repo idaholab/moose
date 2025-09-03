@@ -14,7 +14,7 @@ import time
 import chigger
 import mooseutils
 
-if os.getenv("MOOSE_DIR") == None:
+if os.getenv("MOOSE_DIR") is None:
     mooseutils.mooseError("MOOSE_DIR must be set in this script")
 
 filename = os.path.join(

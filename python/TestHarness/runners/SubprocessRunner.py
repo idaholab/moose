@@ -7,11 +7,14 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os, platform, subprocess, shlex, time
+import os
+import platform
+import subprocess
+import shlex
+import time
 from tempfile import SpooledTemporaryFile
 from signal import SIGTERM
 from TestHarness.runners.Runner import Runner
-from TestHarness import util
 
 
 class SubprocessRunner(Runner):

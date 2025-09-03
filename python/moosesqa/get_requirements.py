@@ -8,11 +8,9 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 import os
 import collections
-import logging
 import pyhit
 import mooseutils
 import moosetree
-import moosesqa
 from .Requirement import TestSpecification, Requirement, Detail
 
 

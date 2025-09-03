@@ -7,9 +7,10 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os, io, glob
+import os
+import io
+import glob
 import unittest
-import mock
 import TestHarness
 from contextlib import redirect_stdout
 from TestHarness.tests.TestHarnessTestCase import MOOSE_DIR

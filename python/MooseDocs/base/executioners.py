@@ -7,12 +7,9 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 """Module for defining Executioner objects, which are helpers for tokenization and rendering."""
-import sys
-import os
 import copy
 import time
 import logging
-import traceback
 import multiprocessing
 import mooseutils
 import random
@@ -559,7 +556,7 @@ class ParallelQueue(Executioner):
 
         for uid in iter(qin.get, ParallelQueue.STOP):
             node = self._getPage(uid)
-            ast = self.write(node, self._page_result[uid])
+            self.write(node, self._page_result[uid])
             qout.put((uid, node.attributes, None))
 
 

@@ -56,7 +56,7 @@ class TestBuild(unittest.TestCase):
     @mock.patch.object(base.Translator, "init")
     def testBuildDefault(self, init_mock, execute_mock):
         opt = self.getCommandLineArguments()
-        status = build.main(opt)
+        build.main(opt)
         init_mock.assert_called_once()
         execute_mock.assert_called()
 
@@ -78,7 +78,7 @@ class TestBuild(unittest.TestCase):
 
         opt = self.getCommandLineArguments()
         with mock.patch("MooseDocs.common.load_configs", load_unmodified):
-            status = build.main(opt)
+            build.main(opt)
 
         # Modified
         def load_modified(filenames, **kwargs):
@@ -94,7 +94,7 @@ class TestBuild(unittest.TestCase):
         args = {"Extensions": {"MooseDocs.extensions.listing": {"modal-link": 0}}}
         opt = self.getCommandLineArguments(args=args)
         with mock.patch("MooseDocs.common.load_configs", load_modified):
-            status = build.main(opt)
+            build.main(opt)
 
         # Multiple
         def load_multiple(filenames, **kwargs):
@@ -108,13 +108,25 @@ class TestBuild(unittest.TestCase):
             self.assertEqual(trans[0].destination, trans[1].destination)
 
             # Assert that translators have access to the same global pool of non-directory content
-            isdir = lambda p: isinstance(p, MooseDocs.tree.pages.Directory)
-            sort_local = lambda p: p.local
             page_list = [
-                sorted([p for p in trans[0].getPages() if not isdir(p)], key=sort_local)
+                sorted(
+                    [
+                        p
+                        for p in trans[0].getPages()
+                        if not isinstance(p, MooseDocs.tree.pages.Directory)
+                    ],
+                    key=lambda p: p.local,
+                )
             ]
             page_list += [
-                sorted([p for p in trans[1].getPages() if not isdir(p)], key=sort_local)
+                sorted(
+                    [
+                        p
+                        for p in trans[1].getPages()
+                        if not isinstance(p, MooseDocs.tree.pages.Directory)
+                    ],
+                    key=lambda p: p.local,
+                )
             ]
             self.assertListEqual(*page_list)
 
@@ -138,7 +150,7 @@ class TestBuild(unittest.TestCase):
         configs = [testpath + config for config in ["config.yml", "subsite_config.yml"]]
         opt = self.getCommandLineArguments(config=configs)
         with mock.patch("MooseDocs.common.load_configs", load_multiple):
-            status = build.main(opt)
+            build.main(opt)
             _, conts, _ = self._load_multiple_out
             init_mock.assert_any_call(conts[0])
             init_mock.assert_any_call(conts[1])

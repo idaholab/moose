@@ -143,7 +143,7 @@ if __name__ == "__main__":
             for j in range(N):
                 div1 = cls(div0, "div")
                 for k in range(N):
-                    p = cls(div1, "p", string="STUFF")
+                    _p = cls(div1, "p", string="STUFF")
 
     mooseutils.run_profile(createTree, 100, Tag)
     mooseutils.run_profile(createTree, 100, Node)

@@ -121,7 +121,7 @@ class MooseControl:
             try:
                 os.remove(self._file_socket)
                 self._file_socket = None
-            except:
+            except:  # noqa: E722
                 pass
 
     def kill(self):
@@ -218,10 +218,10 @@ class MooseControl:
         """Internal helper for checking the keys in data"""
         for key in data.keys():
             if key not in expected_keys:
-                raise self.ControlException(f'Unexpected key "{key}"')
+                raise MooseControl.ControlException(f'Unexpected key "{key}"')
         for key in expected_keys:
             if key not in data:
-                raise self.ControlException(f'Missing expected key "{key}"')
+                raise MooseControl.ControlException(f'Missing expected key "{key}"')
 
     def isListening(self) -> bool:
         """Returns whether or not the webserver is listening"""
@@ -349,7 +349,7 @@ class MooseControl:
             waiting_flag = None
             try:
                 waiting_flag = self.getWaitingFlag()
-            except:  # could be shutting down; can fil
+            except:  # could be shutting down; can fil  # noqa: E722
                 pass
             if waiting_flag is not None:
                 raise self.ControlException(
@@ -379,7 +379,7 @@ class MooseControl:
         if flag:
             logger.info(f"Waiting for the webserver to be at execute on flag {flag}")
         else:
-            logger.info(f"Waiting for the webserver")
+            logger.info("Waiting for the webserver")
 
         # Poll until we're available
         while True:
@@ -388,7 +388,7 @@ class MooseControl:
 
             # If the process is provided, die if it is no longer running
             if self._moose_process and self._moose_process.poll() is not None:
-                raise self.ControlException(f"Attached MOOSE process has terminated")
+                raise self.ControlException("Attached MOOSE process has terminated")
 
             # Wait for it to be available
             current_flag = self.getWaitingFlag()
@@ -434,25 +434,25 @@ class MooseControl:
 
     def setContinue(self):
         """Tells the WebServerControl to continue"""
-        logger.info(f"Telling the webserver to continue")
+        logger.info("Telling the webserver to continue")
         self._requireWaiting()
         status, r_json = self._get("continue")
         if status != 200:
             raise self.ControlException(f"Unexpected status {status} from continue")
         if r_json is not None:
             raise self.ControlException(f"Unexpected data {r_json} from continue")
-        logger.debug(f"Successfully told the webserver to continue")
+        logger.debug("Successfully told the webserver to continue")
 
     def setTerminate(self):
         """Tells the WebServerControl to terminate the simulation gracefully."""
-        logger.info(f"Telling the webserver to terminate")
+        logger.info("Telling the webserver to terminate")
         self._requireWaiting()
         status, r_json = self._get("terminate")
         if status != 200:
             raise self.ControlException(f"Unexpected status {status} from terminate")
         if r_json is not None:
             raise self.ControlException(f"Unexpected data {r_json} from terminate")
-        logger.debug(f"Successfully told the webserver to terminate")
+        logger.debug("Successfully told the webserver to terminate")
 
     def _setControllable(self, path: str, type: str, value):
         """Internal helper for setting a controllable value"""
@@ -470,13 +470,13 @@ class MooseControl:
     def _requireNumeric(value):
         """Helper for requring that the given value is numeric"""
         if not isinstance(value, (int, float)):
-            raise self.ControlException(f'Value "{value}" is not numeric')
+            raise MooseControl.ControlException(f'Value "{value}" is not numeric')
 
     @staticmethod
     def _requireType(value, value_type):
         """Helper for requring that the given value is a certain type"""
         if not isinstance(value, value_type):
-            raise self.ControlException(
+            raise MooseControl.ControlException(
                 f"value is not a {value_type}; is a {type(value)}"
             )
 

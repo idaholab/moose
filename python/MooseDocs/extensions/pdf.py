@@ -8,14 +8,13 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 import os
 import re
-import subprocess
 import logging
 import collections
 import moosetree
 import mooseutils
 from ..base import renderers
-from ..common import exceptions, box
-from ..tree import base, latex, pages
+from ..common import box
+from ..tree import base, latex
 from . import core, command, bibtex
 
 LOG = logging.getLogger(__name__)
@@ -78,40 +77,40 @@ class PDFExtension(command.CommandExtension):
         """
         return
 
-        files = []
-        for page in self.translator.getPages():
-            if isinstance(page, pages.Source):
-                files.append(page)
-        root = self.buildTreeFromPageList(files)
+        # files = []
+        # for page in self.translator.getPages():
+        #     if isinstance(page, pages.Source):
+        #         files.append(page)
+        # root = self.buildTreeFromPageList(files)
 
-        main = self._processPages(root)
+        # main = self._processPages(root)
 
-        loc = self.translator["destination"]
-        with open(os.path.join(loc, "main.tex"), "w+") as fid:
-            fid.write(main.write())
+        # loc = self.translator["destination"]
+        # with open(os.path.join(loc, "main.tex"), "w+") as fid:
+        #     fid.write(main.write())
 
-        main_tex = os.path.join(loc, "main.tex")
-        LOG.info("Building complete LaTeX document: %s", main_tex)
-        commands = [
-            ["pdflatex", "-halt-on-error", "main"],
-            ["bibtex", "main"],
-            ["pdflatex", "-halt-on-error", "main"],
-            ["pdflatex", "-halt-on-error", "main"],
-        ]
-        for cmd in commands:
-            try:
-                output = subprocess.check_output(
-                    cmd, cwd=loc, stderr=subprocess.STDOUT, encoding="utf8"
-                )
-            except subprocess.CalledProcessError as e:
-                msg = "Failed to run pdflatex command: {}\n\n{}"
-                raise exceptions.MooseDocsException(msg, " ".join(cmd), e.output)
+        # main_tex = os.path.join(loc, "main.tex")
+        # LOG.info("Building complete LaTeX document: %s", main_tex)
+        # commands = [
+        #     ["pdflatex", "-halt-on-error", "main"],
+        #     ["bibtex", "main"],
+        #     ["pdflatex", "-halt-on-error", "main"],
+        #     ["pdflatex", "-halt-on-error", "main"],
+        # ]
+        # for cmd in commands:
+        #     try:
+        #         output = subprocess.check_output(
+        #             cmd, cwd=loc, stderr=subprocess.STDOUT, encoding="utf8"
+        #         )
+        #     except subprocess.CalledProcessError as e:
+        #         msg = "Failed to run pdflatex command: {}\n\n{}"
+        #         raise exceptions.MooseDocsException(msg, " ".join(cmd), e.output)
 
-        # Process output
-        root = self.processLatexOutput(output, content)
-        for node in moosetree.iterate(root):
-            if node["warnings"]:
-                self._reportLatexWarnings(node, content)
+        # # Process output
+        # root = self.processLatexOutput(output, content)
+        # for node in moosetree.iterate(root):
+        #     if node["warnings"]:
+        #         self._reportLatexWarnings(node, content)
 
     def _processPages(self, root):
         """

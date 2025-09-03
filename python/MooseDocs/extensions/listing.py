@@ -82,8 +82,13 @@ class ListingExtension(command.CommandExtension):
 
     def postTokenize(self, page, ast):
         """Only add the moose input parser JavaScript if the page needs it."""
-        find_moose_code_token = lambda token: token.get("language", None) == "moose"
-        if self.syntax and moosetree.find(ast, func=find_moose_code_token) is not None:
+        if (
+            self.syntax
+            and moosetree.find(
+                ast, func=lambda token: token.get("language", None) == "moose"
+            )
+            is not None
+        ):
             self.translator.renderer.addJavaScript(
                 "moose_input_parser", "js/moose_input_parser.js", page
             )
@@ -167,7 +172,7 @@ class LocalListingCommand(command.CommandComponent):
         content_lines = content.splitlines()
         try:
             root = pyhit.parse(content)
-        except:
+        except:  # noqa: E722
             return content
         for node in moosetree.iterate(root):
             # Add reference to moose syntax
@@ -176,10 +181,10 @@ class LocalListingCommand(command.CommandComponent):
                 fullpath, node_type=SyntaxNode, throw_on_missing=False
             )
             if moose_node:
-                l = node.line() - 1
-                line = content_lines[l]
+                li = node.line() - 1
+                line = content_lines[li]
                 ind = line.find(node.name) + len(node.name)
-                content_lines[l] = (
+                content_lines[li] = (
                     line[:ind]
                     + self._stringifySyntaxData(moose_node, page)
                     + line[ind:]

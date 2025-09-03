@@ -71,7 +71,7 @@ class TestHarnessResultsReader:
                 client.host, username=client.username, password=client.password
             )
         else:
-            raise TypeError(f"Invalid type for 'client'")
+            raise TypeError("Invalid type for 'client'")
 
         # Get the database
         self.database: str = database
@@ -96,9 +96,13 @@ class TestHarnessResultsReader:
         environment from the file set by env var
         RESULTS_READER_AUTH_FILE if it is available.
         """
+
         # Helpers for getting authentication variables
-        var_name = lambda k: f"RESULTS_READER_AUTH_{k.upper()}"
-        get_var = lambda k: os.environ.get(var_name(k))
+        def var_name(k):
+            return f"RESULTS_READER_AUTH_{k.upper()}"
+
+        def get_var(k):
+            return os.environ.get(var_name(k))
 
         # Try to get authentication from env
         all_auth_keys = ["host", "username", "password"]

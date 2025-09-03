@@ -7,10 +7,10 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os, re
+import os
+import re
 import logging
 from ..tree import tokens
-from ..common import __init__
 from . import command
 
 """

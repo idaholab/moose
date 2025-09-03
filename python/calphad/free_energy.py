@@ -24,7 +24,7 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "mms"))
 
 from pycalphad import Database, Model
-from fparser import *
+from fparser import fparser
 
 # get commandline arguments
 if len(sys.argv) < 2:

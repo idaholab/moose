@@ -94,7 +94,7 @@ class TestGetRequirementsFromFile(unittest.TestCase):
 
     def testError(self):
         with self.assertRaises(FileNotFoundError) as e:
-            req = get_requirements_from_file("wrong")
+            get_requirements_from_file("wrong")
         self.assertIn("The supplied filename does not exist: wrong", str(e.exception))
 
 
@@ -133,14 +133,14 @@ class TestFindFile(unittest.TestCase):
         fname = "markers/box_marker/wrong"
         root_dir = mooseutils.git_root_dir(os.path.dirname(__file__))
         with self.assertRaises(NameError) as e:
-            filename = _find_file(root_dir, fname)
+            _find_file(root_dir, fname)
         self.assertIn("Unable to locate a test specification", str(e.exception))
 
     def testToManyError(self):
         fname = "box_marker/tests"
         root_dir = mooseutils.git_root_dir(os.path.dirname(__file__))
         with self.assertRaises(NameError) as e:
-            filename = _find_file(root_dir, fname)
+            _find_file(root_dir, fname)
         self.assertIn("Located multiple test specifications", str(e.exception))
 
 
