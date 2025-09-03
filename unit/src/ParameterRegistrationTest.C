@@ -56,7 +56,7 @@ buildTestParam()
   return test_param;
 }
 
-template <typename T, bool near = false>
+template <typename T>
 void
 testValue(const std::string & hit_value, const T & value = T())
 {
@@ -65,10 +65,15 @@ testValue(const std::string & hit_value, const T & value = T())
 
   Moose::ParameterRegistry::get().set(*test_param.param, *test_field.field);
 
-  if constexpr (near)
-    ASSERT_NEAR(*test_param.value, value, 1e-12);
-  else
-    ASSERT_EQ(*test_param.value, value);
+  ASSERT_EQ(*test_param.value, value);
+}
+
+template <typename T>
+void
+testValueError(const std::string & hit_value, const std::string & error)
+{
+  Moose::UnitUtils::assertThrows<std::invalid_argument>([&hit_value]() { testValue<T>(hit_value); },
+                                                        error);
 }
 
 TEST(ParameterRegistrationTest, setScalarValue)
@@ -239,15 +244,49 @@ TEST(ParameterRegistrationTest, testDerivativeString)
       "\"foo bar; baz | bang\"", {{{"foo", "bar"}, {"baz"}}, {{"bang"}}});
 }
 
-TEST(ParameterRegistrationTest, testNativeScalars)
+template <typename T>
+void
+testNumericScalar()
 {
-  // double
-  testValue<double>("1", 1);
-  testValue<double>("-1", -1);
-  testValue<double>("10.000000", 10);
-  testValue<double>("1.234", 1.234);
-  testValue<double>("1.2e-4", 1.2e-4);
-  testValue<double>("-10e-2", -10e-2);
+  const auto syntax_error = [](const auto & value)
+  {
+    return "invalid syntax for " + MooseUtils::prettyCppType<T>() + " parameter: " + param_name +
+           "='" + value + "'";
+  };
+
+  testValue<T>("1", T(1));
+
+  // signed, test -1
+  if constexpr (std::is_signed_v<T>)
+  {
+    testValue<T>("-1", T(-1));
+  }
+  // unsigned, negatives not allowed
+  else
+  {
+    testValueError<T>("-1", syntax_error("-1"));
+  }
+
+  // floating point values
+  if constexpr (std::is_floating_point_v<T>)
+  {
+    testValue<T>("10.000000", T(10));
+    testValue<T>("1.234", T(1.234));
+    testValue<T>("1.23e-4", T(1.23e-4));
+    testValue<T>("-2.34e-2", T(-2.34e-2));
+  }
+}
+
+TEST(ParameterRegistrationTest, testNumericScalars)
+{
+  testNumericScalar<double>();
+  testNumericScalar<short int>();
+  testNumericScalar<int>();
+  testNumericScalar<long int>();
+  testNumericScalar<unsigned short>();
+  testNumericScalar<unsigned int>();
+  testNumericScalar<unsigned long>();
+  testNumericScalar<unsigned long long>();
 }
 
 TEST(ParameterRegistrationTest, testBool)
@@ -284,7 +323,7 @@ TEST(ParameterRegistrationTest, testBool)
       // failed value
       Moose::UnitUtils::assertThrows<std::invalid_argument>(
           []() { testValue<std::vector<bool>>("\"true bar\""); },
-          "invalid boolean syntax for bool vector parameter: " + param_name + "[1]='bar'");
+          "invalid syntax for bool vector parameter: " + param_name + "[1]='bar'");
     }
 }
 
