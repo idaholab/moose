@@ -4,7 +4,7 @@
 #include "libmesh/ignore_warnings.h"
 #include "mfem/miniapps/common/pfem_extras.hpp"
 #include "libmesh/restore_warnings.h"
-#include "MFEMContainers.h"
+#include "EquationSystem.h"
 #include "MFEMComplexKernel.h"
 #include "MFEMComplexIntegratedBC.h"
 #include "MFEMComplexEssentialBC.h"
