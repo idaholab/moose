@@ -19,8 +19,8 @@
 
 using namespace CSG;
 
-/// Tests CSGPlane::CSGPlane constructors and methods
-TEST(CSGSurfaceTest, testCSGPlane)
+/// Tests CSGPlane::CSGPlane constructors, from 3 points
+TEST(CSGSurfaceTest, testPlaneFromPoints)
 {
   // expected coefficients: a=-1, b=0, c=0, d=2.0
   std::unordered_map<std::string, Real> exp_coeffs = {
@@ -28,128 +28,190 @@ TEST(CSGSurfaceTest, testCSGPlane)
   // expected surface type string
   std::string exp_type = "CSG::CSGPlane";
 
-  // Construct plane from points: plane at x=-2
-  {
-    const std::array<Point, 3> points{Point(-2, 0, 0), Point(-2, 1, 0), Point(-2, 0, 1)};
-    CSGPlane plane("plane_surf", points[0], points[1], points[2]);
-    ASSERT_EQ(exp_coeffs, plane.getCoeffs());
-    ASSERT_EQ(exp_type, plane.getSurfaceType());
-  }
-  // Construct plane from coefficients
-  {
-    // a=-1.0, b=0.0, c=0.0, d=2.0
-    CSGPlane plane("plane_surf", -1.0, 0.0, 0.0, 2.0);
-    ASSERT_EQ(exp_coeffs, plane.getCoeffs());
-    ASSERT_EQ(exp_type, plane.getSurfaceType());
-  }
-  // Collinear points; error
-  {
-    const std::array<Point, 3> points{Point(0, 0, 0), Point(1, 0, 0), Point(2, 0, 0)};
-    Moose::UnitUtils::assertThrows(
-        [&points]() { CSGPlane plane("plane_surf", points[0], points[1], points[2]); },
-        "Provided points to define a CSGPlane are collinear");
-  }
-  // evaluateSurfaceEquationAtPoint
-  {
-    CSGPlane plane("plane_surf", 1.0, 0.0, 0.0, 2.0);
-    const Point p = Point(3.0, 0.0, 0.0);
-    ASSERT_FLOAT_EQ(1.0, plane.evaluateSurfaceEquationAtPoint(p));
-  }
+  const std::array<Point, 3> points{Point(-2, 0, 0), Point(-2, 1, 0), Point(-2, 0, 1)};
+  CSGPlane plane("plane_surf", points[0], points[1], points[2]);
+  ASSERT_EQ(exp_coeffs, plane.getCoeffs());
+  ASSERT_EQ(exp_type, plane.getSurfaceType());
 }
 
-/// Tests CSGSphere::CSGSphere constructors and methods
-TEST(CSGSurfaceTest, testCSGSphere)
+/// Tests CSGPlane::CSGPlane constructors, from coefficients
+TEST(CSGSurfaceTest, testPlaneFromCoeffs)
+{
+  // expected coefficients: a=-1, b=0, c=0, d=2.0
+  std::unordered_map<std::string, Real> exp_coeffs = {
+      {"a", -1.0}, {"b", 0.0}, {"c", 0.0}, {"d", 2.0}};
+  // expected surface type string
+  std::string exp_type = "CSG::CSGPlane";
+
+  // a=-1.0, b=0.0, c=0.0, d=2.0
+  CSGPlane plane("plane_surf", -1.0, 0.0, 0.0, 2.0);
+  ASSERT_EQ(exp_coeffs, plane.getCoeffs());
+  ASSERT_EQ(exp_type, plane.getSurfaceType());
+}
+
+/// Tests CSGPlane::CSGPlane, error if points are collinear
+TEST(CSGSurfaceTest, testPlaneCollinearPoints)
+{
+  // three collinear points, expect error from constructor check
+  const std::array<Point, 3> points{Point(0, 0, 0), Point(1, 0, 0), Point(2, 0, 0)};
+  Moose::UnitUtils::assertThrows([&points]()
+                                 { CSGPlane plane("plane_surf", points[0], points[1], points[2]); },
+                                 "Provided points to define a CSGPlane are collinear");
+}
+
+/// tests CSGPlane::evaluateSurfaceEquationAtPoint
+TEST(CSGSurfaceTest, testPlaneEvaluateEq)
+{
+  CSGPlane plane("plane_surf", 1.0, 0.0, 0.0, 2.0);
+  const Point p = Point(3.0, 0.0, 0.0);
+  ASSERT_FLOAT_EQ(1.0, plane.evaluateSurfaceEquationAtPoint(p));
+}
+
+/// Tests CSGSphere::CSGSphere constructor, at specified center point
+TEST(CSGSurfaceTest, testSphereAtPoint)
+{
+  // expected surface type string
+  std::string exp_type = "CSG::CSGSphere";
+  std::unordered_map<std::string, Real> exp_coeffs = {
+      {"x0", 1.0}, {"y0", 2.0}, {"z0", 3.0}, {"r", 4.0}};
+
+  // Construct sphere at specified center point
+  Point center = Point(1, 2, 3);
+  Real radius = 4.0;
+  CSGSphere sphere("sphere_surf", center, radius);
+
+  ASSERT_EQ(exp_coeffs, sphere.getCoeffs());
+  ASSERT_EQ(exp_type, sphere.getSurfaceType());
+}
+
+/// Tests CSGSphere::CSGSphere constructor, at origin
+TEST(CSGSurfaceTest, testphereAtOrigin)
 {
   // expected surface type string
   std::string exp_type = "CSG::CSGSphere";
 
-  // Construct sphere at specified center point
-  {
-    std::unordered_map<std::string, Real> exp_coeffs = {
-        {"x0", 1.0}, {"y0", 2.0}, {"z0", 3.0}, {"r", 4.0}};
-    Point center = Point(1, 2, 3);
-    Real radius = 4.0;
-    CSGSphere sphere("sphere_surf", center, radius);
-    ASSERT_EQ(exp_coeffs, sphere.getCoeffs());
-    ASSERT_EQ(exp_type, sphere.getSurfaceType());
-  }
   // Construct sphere at origin
+  std::unordered_map<std::string, Real> exp_coeffs = {
+      {"x0", 0.0}, {"y0", 0.0}, {"z0", 0.0}, {"r", 4.0}};
+  Real radius = 4.0;
+  CSGSphere sphere("sphere_surf", radius);
+
+  ASSERT_EQ(exp_coeffs, sphere.getCoeffs());
+  ASSERT_EQ(exp_type, sphere.getSurfaceType());
+}
+
+/// Tests CSGSphere::evaluateSurfaceEquationAtPoint
+TEST(CSGSurfaceTest, testSphereEvaluateEq)
+{
+  Real radius = 4.0;
+  CSGSphere sphere("sphere_surf", radius);
+  const Point p = Point(2.0, 0.0, 0.0);
+  ASSERT_FLOAT_EQ(-12.0, sphere.evaluateSurfaceEquationAtPoint(p));
+}
+
+/// Tests error is raised during construction for negative radius
+TEST(CSGSurfaceTest, testSphereNegativeRadius)
+{
+  Real radius = -1.0;
+  Moose::UnitUtils::assertThrows([&radius]() { CSGSphere sphere("sphere_surf", radius); },
+                                 "Radius of sphere must be positive.");
+}
+
+// center and radius to use for all axially aligned cylinders
+Real c0 = 1.0;
+Real c1 = 2.0;
+Real radius = 3.0;
+
+// helper function for checking axis aligned cylinders
+void
+checkCylinder(std::string axis,
+              std::unordered_map<std::string, Real> test_coeffs,
+              std::string test_type)
+{
+  std::string k0, k1;
+  if (axis == "X")
   {
-    std::unordered_map<std::string, Real> exp_coeffs = {
-        {"x0", 0.0}, {"y0", 0.0}, {"z0", 0.0}, {"r", 4.0}};
-    Real radius = 4.0;
-    CSGSphere sphere("sphere_surf", radius);
-    ASSERT_EQ(exp_coeffs, sphere.getCoeffs());
-    ASSERT_EQ(exp_type, sphere.getSurfaceType());
+    k0 = "y0";
+    k1 = "z0";
   }
-  // negative radius; error
+  else if (axis == "Y")
   {
-    Real radius = -1.0;
-    Moose::UnitUtils::assertThrows([&radius]() { CSGSphere sphere("sphere_surf", radius); },
-                                   "Radius of sphere must be positive.");
+    k0 = "x0";
+    k1 = "z0";
   }
-  // evaluateSurfaceEquationAtPoint
+  else if (axis == "Z")
   {
-    Real radius = 4.0;
-    CSGSphere sphere("sphere_surf", radius);
-    const Point p = Point(2.0, 0.0, 0.0);
-    ASSERT_FLOAT_EQ(-12.0, sphere.evaluateSurfaceEquationAtPoint(p));
+    k0 = "x0";
+    k1 = "y0";
+  }
+  std::unordered_map<std::string, Real> exp_coeffs = {{k0, c0}, {k1, c1}, {"r", radius}};
+  std::string exp_type = "CSG::CSG" + axis + "Cylinder";
+  ASSERT_TRUE(exp_coeffs == test_coeffs);
+  ASSERT_TRUE(exp_type == test_type);
+}
+
+/// tests CSGXCylinder constructor and attributes
+TEST(CSGSurfaceTest, testXCylinder)
+{
+  CSGXCylinder xcyl("xcyl", c0, c1, radius);
+  checkCylinder("X", xcyl.getCoeffs(), xcyl.getSurfaceType());
+}
+
+/// tests CSGYCylinder constructor and attributes
+TEST(CSGSurfaceTest, testYCylinder)
+{
+  CSGYCylinder ycyl("ycyl", c0, c1, radius);
+  checkCylinder("Y", ycyl.getCoeffs(), ycyl.getSurfaceType());
+}
+
+/// tests CSGZCylinder constructor and attributes
+TEST(CSGSurfaceTest, testZCylinder)
+{
+  CSGZCylinder zcyl("zcyl", c0, c1, radius);
+  checkCylinder("Z", zcyl.getCoeffs(), zcyl.getSurfaceType());
+}
+
+/// Expect error if cylinders are constructed with a negative radius
+TEST(CSGSurfaceTest, testCylNegativeRadius)
+{
+  Real neg_r = -1.0;
+
+  // XCylinder
+  {
+    Moose::UnitUtils::assertThrows([&neg_r]() { CSGXCylinder xcyl("cyl", c0, c1, neg_r); },
+                                   "Radius of x-cylinder must be positive.");
+  }
+  // YCylinder
+  {
+    Moose::UnitUtils::assertThrows([&neg_r]() { CSGYCylinder ycyl("cyl", c0, c1, neg_r); },
+                                   "Radius of y-cylinder must be positive.");
+  }
+  // ZCylinder
+  {
+    Moose::UnitUtils::assertThrows([&neg_r]() { CSGZCylinder zcyl("cyl", c0, c1, neg_r); },
+                                   "Radius of z-cylinder must be positive.");
   }
 }
 
-/// Tests CSG[X/Y/Z]Cylinder::CSG[X/Y/Z]Cylinder constructors and methods
-TEST(CSGSurfaceTest, testCSGCylinders)
+// tests CSG[X/Y/Z]Cylinder::evaluateSurfaceEquationAtPoint
+TEST(CSGSurfaceTest, testCylEvaluateEq)
 {
-  // center and radius to use for all axially aligned cylinders
-  Real c0 = 1.0;
-  Real c1 = 2.0;
-  Real radius = 3.0;
-
-  // Construct each cylinder
-  CSGXCylinder xcyl("xcyl", c0, c1, radius);
-  CSGYCylinder ycyl("ycyl", c0, c1, radius);
-  CSGZCylinder zcyl("zcyl", c0, c1, radius);
-
-  // XCylinder coefficients
+  Real exp_val = -4.0;
+  const Point p = Point(0.0, 0.0, 0.0);
+  // XCylinder
   {
-    std::unordered_map<std::string, Real> exp_coeffs = {{"y0", 1.0}, {"z0", 2.0}, {"r", 3.0}};
-    ASSERT_EQ(exp_coeffs, xcyl.getCoeffs());
-    ASSERT_EQ("CSG::CSGXCylinder", xcyl.getSurfaceType());
+    CSGXCylinder cyl("cyl", c0, c1, radius);
+    ASSERT_FLOAT_EQ(exp_val, cyl.evaluateSurfaceEquationAtPoint(p));
   }
-  // YCylinder coefficients
+  // YCylinder
   {
-    std::unordered_map<std::string, Real> exp_coeffs = {{"x0", 1.0}, {"z0", 2.0}, {"r", 3.0}};
-    ASSERT_EQ(exp_coeffs, ycyl.getCoeffs());
-    ASSERT_EQ("CSG::CSGYCylinder", ycyl.getSurfaceType());
+    CSGYCylinder cyl("cyl", c0, c1, radius);
+    ASSERT_FLOAT_EQ(exp_val, cyl.evaluateSurfaceEquationAtPoint(p));
   }
-  // ZCylinder coefficients
+  // ZCylinder
   {
-    std::unordered_map<std::string, Real> exp_coeffs = {{"x0", 1.0}, {"y0", 2.0}, {"r", 3.0}};
-    ASSERT_EQ(exp_coeffs, zcyl.getCoeffs());
-    ASSERT_EQ("CSG::CSGZCylinder", zcyl.getSurfaceType());
-  }
-
-  // negative radius; error
-  {
-    Real radius = -1.0;
-    Moose::UnitUtils::assertThrows([&c0, &c1, &radius]()
-                                   { CSGXCylinder xcyl("cyl", c0, c1, radius); },
-                                   "Radius of x-cylinder must be positive.");
-    Moose::UnitUtils::assertThrows([&c0, &c1, &radius]()
-                                   { CSGYCylinder ycyl("cyl", c0, c1, radius); },
-                                   "Radius of y-cylinder must be positive.");
-    Moose::UnitUtils::assertThrows([&c0, &c1, &radius]()
-                                   { CSGZCylinder zcyl("cyl", c0, c1, radius); },
-                                   "Radius of z-cylinder must be positive.");
-  }
-  // evaluateSurfaceEquationAtPoint
-  {
-    const Point px = Point(2.0, 0.0, 0.0);
-    ASSERT_FLOAT_EQ(-4.0, xcyl.evaluateSurfaceEquationAtPoint(px));
-    const Point py = Point(0.0, 2.0, 0.0);
-    ASSERT_FLOAT_EQ(-4.0, ycyl.evaluateSurfaceEquationAtPoint(py));
-    const Point pz = Point(0.0, 0.0, 2.0);
-    ASSERT_FLOAT_EQ(-4.0, zcyl.evaluateSurfaceEquationAtPoint(pz));
+    CSGZCylinder cyl("cyl", c0, c1, radius);
+    ASSERT_FLOAT_EQ(exp_val, cyl.evaluateSurfaceEquationAtPoint(p));
   }
 }
 

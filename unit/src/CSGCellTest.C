@@ -18,68 +18,63 @@
 
 using namespace CSG;
 
+// make surfaces and region to use for cells
+CSGSphere sphere("sphere_surf", 1.0);
+auto region1 = -sphere;
+auto region2 = +sphere;
+std::string reg_str = "-sphere_surf";
+
 // Test each type of CSGCell constructor
-TEST(CSGCellTest, testCellConstructors)
+TEST(CSGCellTest, testVoidCell)
 {
-  // make surfaces and region
-  CSGSphere sphere("sphere_surf", 1.0);
-  auto region = -sphere;
-  std::string reg_str = "-sphere_surf";
+  std::string name = "void_cell";
+  CSGCell cell(name, region1);
 
-  // void cell
-  {
-    std::string name = "void_cell";
-    CSGCell cell(name, region);
+  // check expected attributes
+  ASSERT_EQ(name, cell.getName());
+  ASSERT_EQ("VOID", cell.getFillType());
+  ASSERT_EQ("", cell.getFillName());
+  ASSERT_EQ(region1, cell.getRegion());
+  ASSERT_EQ(reg_str, cell.getRegionAsString());
+}
 
-    // check expected attributes
-    ASSERT_EQ(name, cell.getName());
-    ASSERT_EQ("VOID", cell.getFillType());
-    ASSERT_EQ("", cell.getFillName());
-    ASSERT_EQ(region, cell.getRegion());
-    ASSERT_EQ(reg_str, cell.getRegionAsString());
-  }
+TEST(CSGCellTest, testMaterialCell)
+{
+  std::string name = "mat_cell";
+  std::string matname = "matname";
+  CSGCell cell(name, matname, region1);
 
-  // material cell
-  {
-    std::string name = "mat_cell";
-    std::string matname = "matname";
-    CSGCell cell(name, matname, region);
+  // check expected attributes
+  ASSERT_EQ(name, cell.getName());
+  ASSERT_EQ("CSG_MATERIAL", cell.getFillType());
+  ASSERT_EQ(matname, cell.getFillName());
+  ASSERT_EQ(region1, cell.getRegion());
+  ASSERT_EQ(reg_str, cell.getRegionAsString());
+}
 
-    // check expected attributes
-    ASSERT_EQ(name, cell.getName());
-    ASSERT_EQ("CSG_MATERIAL", cell.getFillType());
-    ASSERT_EQ(matname, cell.getFillName());
-    ASSERT_EQ(region, cell.getRegion());
-    ASSERT_EQ(reg_str, cell.getRegionAsString());
-  }
+TEST(CSGCellTest, testUniverseCell)
+{
+  std::string name = "univ_cell";
+  std::string uname = "new_univ";
+  const CSGUniverse univ(uname);
+  CSGCell cell(name, &univ, region1);
 
-  // universe cell
-  {
-    std::string name = "univ_cell";
-    std::string uname = "new_univ";
-    const CSGUniverse univ(uname);
-    CSGCell cell(name, &univ, region);
-
-    // check expected attributes
-    ASSERT_EQ(name, cell.getName());
-    ASSERT_EQ("UNIVERSE", cell.getFillType());
-    ASSERT_EQ(uname, cell.getFillName());
-    ASSERT_EQ(region, cell.getRegion());
-    ASSERT_EQ(reg_str, cell.getRegionAsString());
-  }
+  // check expected attributes
+  ASSERT_EQ(name, cell.getName());
+  ASSERT_EQ("UNIVERSE", cell.getFillType());
+  ASSERT_EQ(uname, cell.getFillName());
+  ASSERT_EQ(region1, cell.getRegion());
+  ASSERT_EQ(reg_str, cell.getRegionAsString());
 }
 
 // tests CSGCell::getFillUniverse and CSGCell::getFillMaterial
 TEST(CSGCellTest, testGetFill)
 {
-  // make surfaces and region
-  CSGSphere sphere("sphere_surf", 1.0);
-  auto region = -sphere;
   std::string cellname = "cellname";
 
   // get fill for void cell - expect errors for both methods
   {
-    CSGCell cell(cellname, region);
+    CSGCell cell(cellname, region1);
     Moose::UnitUtils::assertThrows([&cell]() { cell.getFillUniverse(); },
                                    "Cell '" + cellname + "' has VOID fill, not UNIVERSE.");
     Moose::UnitUtils::assertThrows([&cell]() { cell.getFillMaterial(); },
@@ -88,7 +83,7 @@ TEST(CSGCellTest, testGetFill)
   // get fill for material cell - expect error for universe method
   {
     std::string matname = "matname";
-    CSGCell cell(cellname, matname, region);
+    CSGCell cell(cellname, matname, region1);
 
     ASSERT_EQ(matname, cell.getFillMaterial());
 
@@ -99,7 +94,7 @@ TEST(CSGCellTest, testGetFill)
   // get fill for universe cell - expect error for material method
   {
     const CSGUniverse univ("new_univ");
-    CSGCell cell(cellname, &univ, region);
+    CSGCell cell(cellname, &univ, region1);
     ASSERT_EQ(univ, cell.getFillUniverse());
 
     // expect error if trying to get universe fill from a material cell
@@ -111,11 +106,6 @@ TEST(CSGCellTest, testGetFill)
 // Test equality operators
 TEST(CSGCellTest, testCellEquality)
 {
-  // make surfaces and region
-  CSGSphere sphere("sphere_surf", 1.0);
-  auto region1 = -sphere;
-  auto region2 = +sphere;
-
   // identical void cells
   CSGCell vcell1("void_cell", region1);
   CSGCell vcell2("void_cell", region1);
