@@ -14,6 +14,8 @@
 #include "MultiMooseEnum.h"
 #include "Conversion.h"
 #include "Parser.h"
+#include "MooseUnitUtils.h"
+#include "MooseBase.h"
 
 TEST(InputParametersTest, checkControlParamPrivateError)
 {
@@ -896,4 +898,24 @@ TEST(InputParametersTest, checkIsParamDefined)
   params.addParam<Real>("test_param", "This parameter should be indicated as being defined");
   ASSERT_TRUE(params.isParamDefined("test_param"));
   ASSERT_FALSE(params.isParamDefined("some_other_param"));
+}
+
+TEST(InputParametersTest, queryAndGetObjectType)
+{
+  InputParameters params = emptyInputParameters();
+
+  // Not set
+  ASSERT_EQ(params.queryObjectType(), nullptr);
+  Moose::UnitUtils::assertThrows([&params]() { params.getObjectType(); },
+                                 "InputParameters::getObjectType(): Missing '" +
+                                     MooseBase::type_param + "' param",
+                                 true);
+
+  // Is set
+  const auto object_type = "foo";
+  params.set<std::string>(MooseBase::type_param) = object_type;
+  const auto type_ptr = params.queryObjectType();
+  ASSERT_NE(type_ptr, nullptr);
+  ASSERT_EQ(*type_ptr, object_type);
+  ASSERT_EQ(params.getObjectType(), *type_ptr);
 }

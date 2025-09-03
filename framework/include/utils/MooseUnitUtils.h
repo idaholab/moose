@@ -12,6 +12,7 @@
 #include "gtest/gtest.h"
 
 #include "MooseUtils.h"
+#include "Moose.h"
 
 namespace Moose::UnitUtils
 {
@@ -20,12 +21,19 @@ namespace Moose::UnitUtils
  *
  * @param action A function that calls the thing that should throw
  * @param contains Optional argument to check that the assertion message contains this sub string
+ * @param set_throw_on_error Set to true to set moose to throw on error
  */
 template <class ExceptionType = std::exception, class Action = bool>
 void
-assertThrows(const Action & action, const std::optional<std::string> & contains = {})
+assertThrows(const Action & action,
+             const std::optional<std::string> & contains = {},
+             const bool set_throw_on_error = false)
 {
   static_assert(std::is_base_of_v<std::exception, ExceptionType>, "Not an exception");
+
+  std::unique_ptr<Moose::ScopedThrowOnError> scoped_throw_on_error;
+  if (set_throw_on_error)
+    scoped_throw_on_error = std::make_unique<Moose::ScopedThrowOnError>();
 
   try
   {
