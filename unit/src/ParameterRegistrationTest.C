@@ -247,12 +247,6 @@ template <typename T>
 void
 testNumericScalar()
 {
-  const auto syntax_error = [](const auto & value)
-  {
-    return "invalid syntax for " + MooseUtils::prettyCppType<T>() + " parameter: " + param_name +
-           "='" + value + "'";
-  };
-
   testValue<T>("1", T(1));
 
   // signed, test -1
@@ -263,7 +257,9 @@ testNumericScalar()
   // unsigned, negatives not allowed
   else
   {
-    testValueError<T>("-1", syntax_error("-1"));
+    testValueError<T>("-1",
+                      "invalid syntax for " + MooseUtils::prettyCppType<T>() +
+                          " parameter: " + param_name + "='-1'");
   }
 
   // floating point values
