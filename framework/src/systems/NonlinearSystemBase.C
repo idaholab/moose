@@ -3785,16 +3785,15 @@ NonlinearSystemBase::needInterfaceMaterialOnSide(BoundaryID bnd_id, THREAD_ID ti
 bool
 NonlinearSystemBase::needSubdomainMaterialOnSide(SubdomainID subdomain_id, THREAD_ID tid) const
 {
-  // DGKernels and HDGKernels are for now the only objects we consider to be consuming matprops on
+  // DGKernels are for now the only objects we consider to be consuming matprops on
   // internal sides.
   if (_dg_kernels.hasActiveBlockObjects(subdomain_id, tid))
     for (const auto & dg : _dg_kernels.getActiveBlockObjects(subdomain_id, tid))
       if (std::static_pointer_cast<MaterialPropertyInterface>(dg)->getMatPropDependencies().size())
         return true;
-  if (_hybridized_kernels.hasActiveBlockObjects(subdomain_id, tid))
-    for (const auto & hdg : _hybridized_kernels.getActiveBlockObjects(subdomain_id, tid))
-      if (std::static_pointer_cast<MaterialPropertyInterface>(hdg)->getMatPropDependencies().size())
-        return true;
+  // NOTE:
+  // It seems HDG kernels do not require face material properties on internal sides  at this time.
+  // In fact, they do not create sufficient algebraic ghosting to compute these properties
   return false;
 }
 
