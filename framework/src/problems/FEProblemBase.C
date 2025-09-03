@@ -668,7 +668,7 @@ void
 FEProblemBase::createTagVectors()
 {
   // add vectors and their tags to system
-  const auto & vectors = isParamValid("extra_tag_vectors")
+  const auto & vectors = isParamSetByUser("extra_tag_vectors")
                              ? getParam<std::vector<std::vector<TagName>>>("extra_tag_vectors")
                              : getParam<std::vector<std::vector<TagName>>>("extra_tag_residuals");
   for (const auto sys_num : index_range(vectors))
@@ -679,7 +679,7 @@ FEProblemBase::createTagVectors()
     }
 
   const auto & not_zeroed_vectors =
-      isParamValid("not_zeroed_tag_vectors")
+      isParamSetByUser("not_zeroed_tag_vectors")
           ? getParam<std::vector<std::vector<TagName>>>("not_zeroed_tag_vectors")
           : getParam<std::vector<std::vector<TagName>>>("not_zeroed_tag_residuals");
   for (const auto sys_num : index_range(not_zeroed_vectors))

@@ -42,15 +42,18 @@ public:
     LOCAL_LINF = 3
   };
 
-  class ReferenceVectorTagIDKey
+  class ReferenceResidualTagIDKey
   {
     friend class TaggingInterface;
-    ReferenceVectorTagIDKey() {}
-    ReferenceVectorTagIDKey(const ReferenceVectorTagIDKey &) {}
+    ReferenceResidualTagIDKey() {}
+    ReferenceResidualTagIDKey(const ReferenceResidualTagIDKey &) {}
   };
 
-  /// Returns the tag ID associated with the reference vector tag ID key
-  TagID referenceVectorTagID(ReferenceVectorTagIDKey) const { return _reference_residual_tag_id; }
+  /// Returns the tag ID associated with the reference residual tag ID key
+  TagID referenceResidualTagID(ReferenceResidualTagIDKey) const
+  {
+    return _reference_residual_tag_id;
+  }
 
 protected:
   virtual void nonlinearConvergenceSetup() override;

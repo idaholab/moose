@@ -102,13 +102,13 @@ public:
 
   void useMatrixTag(TagID tag_id, MatrixTagsKey);
 
-  bool isVectorTagged() { return _vector_tags.size() > 0; }
+  bool isVectorTagged() { return _residual_tags.size() > 0; }
 
   bool isMatrixTagged() { return _matrix_tags.size() > 0; }
 
-  bool hasVectorTags() const { return !_vector_tags.empty(); }
+  bool hasVectorTags() const { return !_residual_tags.empty(); }
 
-  const std::set<TagID> & getVectorTags(VectorTagsKey) const { return _vector_tags; }
+  const std::set<TagID> & getVectorTags(VectorTagsKey) const { return _residual_tags; }
 
   const std::set<TagID> & getMatrixTags(MatrixTagsKey) const { return _matrix_tags; }
 
@@ -378,35 +378,35 @@ private:
    */
   void prepareVectorTagInternal(Assembly & assembly,
                                 unsigned int ivar,
-                                const std::set<TagID> & vector_tags,
-                                const std::set<TagID> & absolute_value_vector_tags);
+                                const std::set<TagID> & residual_tags,
+                                const std::set<TagID> & absolute_value_residual_tags);
 
   /// The vector tag ids this Kernel will contribute to
-  std::set<TagID> _vector_tags;
+  std::set<TagID> _residual_tags;
 
   /// The absolute value residual tag ids
-  std::set<TagID> _abs_vector_tags;
+  std::set<TagID> _abs_residual_tags;
 
   /// The matrices this Kernel will contribute to
   std::set<TagID> _matrix_tags;
 
   /// A set to hold vector tags excluding the reference residual tag. If there is no reference
-  /// residual problem, this container is the same as \p _vector_tags;
-  std::set<TagID> _non_ref_vector_tags;
+  /// residual problem, this container is the same as \p _residual_tags;
+  std::set<TagID> _non_ref_residual_tags;
 
   /// A set to hold absolute value vector tags excluding the reference residual tag. If there is no
-  /// reference residual problem, this container is the same as \p _abs_vector_tags;
-  std::set<TagID> _non_ref_abs_vector_tags;
+  /// reference residual problem, this container is the same as \p _abs_residual_tags;
+  std::set<TagID> _non_ref_abs_residual_tags;
 
-  /// A set of either size 1 or 0. If we have a reference residual problem and \p _vector_tags holds
+  /// A set of either size 1 or 0. If we have a reference residual problem and \p _residual_tags holds
   /// the reference vector tag, then this set holds the reference vector tags, otherwise it holds
   /// nothing
-  std::set<TagID> _ref_vector_tags;
+  std::set<TagID> _ref_residual_tags;
 
-  /// A set of either size 1 or 0. If we have a reference residual problem and \p _abs_vector_tags
+  /// A set of either size 1 or 0. If we have a reference residual problem and \p _abs_residual_tags
   /// holds the reference vector tag, then this set holds the reference vector tags, otherwise it
   /// holds nothing
-  std::set<TagID> _ref_abs_vector_tags;
+  std::set<TagID> _ref_abs_residual_tags;
 
   /// Moose objct this tag works on
   const MooseObject & _moose_object;
@@ -451,8 +451,8 @@ TaggingInterface::addResiduals(Assembly & assembly,
                                const Real scaling_factor)
 {
   assembly.cacheResiduals(
-      residuals, dof_indices, scaling_factor, Assembly::LocalDataKey{}, _vector_tags);
-  if (!_abs_vector_tags.empty())
+      residuals, dof_indices, scaling_factor, Assembly::LocalDataKey{}, _residual_tags);
+  if (!_abs_residual_tags.empty())
   {
     _absolute_residuals.resize(residuals.size());
     for (const auto i : index_range(residuals))
@@ -462,7 +462,7 @@ TaggingInterface::addResiduals(Assembly & assembly,
                             dof_indices,
                             scaling_factor,
                             Assembly::LocalDataKey{},
-                            _abs_vector_tags);
+                            _abs_residual_tags);
   }
 }
 
@@ -484,8 +484,8 @@ TaggingInterface::addResidualsWithoutConstraints(Assembly & assembly,
                                                  const Real scaling_factor)
 {
   assembly.cacheResidualsWithoutConstraints(
-      residuals, dof_indices, scaling_factor, Assembly::LocalDataKey{}, _vector_tags);
-  if (!_abs_vector_tags.empty())
+      residuals, dof_indices, scaling_factor, Assembly::LocalDataKey{}, _residual_tags);
+  if (!_abs_residual_tags.empty())
   {
     _absolute_residuals.resize(residuals.size());
     for (const auto i : index_range(residuals))
@@ -495,7 +495,7 @@ TaggingInterface::addResidualsWithoutConstraints(Assembly & assembly,
                                               dof_indices,
                                               scaling_factor,
                                               Assembly::LocalDataKey{},
-                                              _abs_vector_tags);
+                                              _abs_residual_tags);
   }
 }
 
@@ -570,7 +570,7 @@ template <typename T>
 void
 TaggingInterface::setResidual(SystemBase & sys, const T & residual, MooseVariableFE<T> & var)
 {
-  for (const auto tag_id : _vector_tags)
+  for (const auto tag_id : _residual_tags)
     if (sys.hasVector(tag_id))
       var.insertNodalValue(sys.getVector(tag_id), residual);
 }
@@ -578,7 +578,7 @@ TaggingInterface::setResidual(SystemBase & sys, const T & residual, MooseVariabl
 inline void
 TaggingInterface::setResidual(SystemBase & sys, const Real residual, const dof_id_type dof_index)
 {
-  for (const auto tag_id : _vector_tags)
+  for (const auto tag_id : _residual_tags)
     if (sys.hasVector(tag_id))
       sys.getVector(tag_id).set(dof_index, residual);
 }
@@ -587,7 +587,7 @@ template <typename SetResidualFunctor>
 void
 TaggingInterface::setResidual(SystemBase & sys, const SetResidualFunctor set_residual_functor)
 {
-  for (const auto tag_id : _vector_tags)
+  for (const auto tag_id : _residual_tags)
     if (sys.hasVector(tag_id))
       set_residual_functor(sys.getVector(tag_id));
 }

@@ -23,7 +23,7 @@ disabled invalid parameters.
     displacements                = INVALID
     enable                       = 1
     extra_matrix_tags            = INVALID
-    extra_vector_tags            = INVALID
+    extra_residual_tags          = INVALID
     implicit                     = 1
     inactive                     = (no_default)
     isObjectAction               = 1
@@ -45,7 +45,7 @@ disabled invalid parameters.
     displacements                = INVALID
     enable                       = 1
     extra_matrix_tags            = INVALID
-    extra_vector_tags            = INVALID
+    extra_residual_tags          = INVALID
     implicit                     = 1
     inactive                     = (no_default)
     isObjectAction               = 1
