@@ -17,7 +17,7 @@
 
 /*
  * Class to scale and sum two MFEM variables, and store the result in a third variable.
-*/
+ */
 class MFEMSumAux : public MFEMAuxKernel
 {
 public:

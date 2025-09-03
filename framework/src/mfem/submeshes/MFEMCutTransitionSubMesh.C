@@ -71,8 +71,8 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
   MPI_Comm_rank(getMFEMProblem().mesh().getMFEMParMesh().GetComm(), &mpi_comm_rank);
   MPI_Comm_size(getMFEMProblem().mesh().getMFEMParMesh().GetComm(), &mpi_comm_size);
 
-  /// First determine face normal based on the first boundary element found on the cut
-  /// to use when determining orientation relative to the cut
+  // First determine face normal based on the first boundary element found on the cut
+  // to use when determining orientation relative to the cut
   const mfem::Array<int> & parent_cut_element_id_map = _cut_submesh->GetParentElementIDMap();
   int rank_with_submesh = -1;
   if (parent_cut_element_id_map.Size() > 0)
@@ -92,13 +92,13 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
             MPI_DOUBLE,
             rank_with_submesh,
             getMFEMProblem().mesh().getMFEMParMesh().GetComm());
-  /// Iterate over all vertices on cut, find elements with those vertices,
-  /// and declare them transition elements if they are on the +ve side of the cut
+  // Iterate over all vertices on cut, find elements with those vertices,
+  // and declare them transition elements if they are on the +ve side of the cut
   mfem::Array<int> transition_els;
   std::vector<int> global_cut_vert_ids;
   mfem::Array<HYPRE_BigInt> gi;
   parent_mesh.GetGlobalVertexIndices(gi);
-  std::unique_ptr<mfem::Table> vert_to_elem = parent_mesh.GetVertexToElementTable();
+  std::unique_ptr<mfem::Table> vert_to_elem(parent_mesh.GetVertexToElementTable());
   const mfem::Array<int> & cut_to_parent_vertex_id_map = _cut_submesh->GetParentVertexIDMap();
   for (int i = 0; i < _cut_submesh->GetNV(); ++i)
   {
@@ -144,12 +144,12 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
                  MPI_INT,
                  getMFEMProblem().mesh().getMFEMParMesh().GetComm());
 
-  /// Detect shared vertices and add corresponding elements
+  // Detect shared vertices and add corresponding elements
   for (int g = 1, sv = 0; g < parent_mesh.GetNGroups(); g++)
   {
     for (int gv = 0; gv < parent_mesh.GroupNVertices(g); gv++, sv++)
     {
-      // all els touching this shared vertex plvtx should be updated
+      // all elements touching this shared vertex should be updated
       int cut_vert = parent_mesh.GroupVertex(g, gv);
       for (std::size_t i = 0; i < all_cut_verts.size(); i += 1)
       {
@@ -186,7 +186,7 @@ MFEMCutTransitionSubMesh::findFaceNormal(const mfem::ParMesh & mesh, const int &
   std::vector<mfem::Vector> v;
   mesh.GetFaceVertices(face, face_verts);
 
-  /// First we get the coordinates of 3 vertices on the face
+  // First we get the coordinates of 3 vertices on the face
   for (auto vtx : face_verts)
   {
     mfem::Vector vtx_coords(3);
@@ -195,7 +195,7 @@ MFEMCutTransitionSubMesh::findFaceNormal(const mfem::ParMesh & mesh, const int &
     v.push_back(vtx_coords);
   }
 
-  /// Now we find the unit vector normal to the face
+  // Now we find the unit vector normal to the face
   v[0] -= v[1];
   v[1] -= v[2];
   v[0].cross3D(v[1], normal);
@@ -226,7 +226,7 @@ void
 MFEMCutTransitionSubMesh::setAttributes(mfem::ParMesh & parent_mesh,
                                         mfem::Array<int> & transition_els)
 {
-  /// Generate a set of local new attributes for transition region elements
+  // Generate a set of local new attributes for transition region elements
   const int old_max_attr = parent_mesh.attributes.Max();
   mfem::Array<int> new_attrs(old_max_attr);
   for (int i = 0; i < new_attrs.Size(); ++i)
@@ -238,8 +238,8 @@ MFEMCutTransitionSubMesh::setAttributes(mfem::ParMesh & parent_mesh,
     new_attrs[old_attr - 1] = old_max_attr + old_attr % old_max_attr + 1;
   }
 
-  /// Distribute local attribute IDs to other MPI ranks to create set of new
-  /// global attribute IDs for the transition region.
+  // Distribute local attribute IDs to other MPI ranks to create set of new
+  // global attribute IDs for the transition region.
   mfem::Array<int> global_new_attrs(old_max_attr);
   global_new_attrs = -1;
   MPI_Allreduce(new_attrs,
@@ -249,7 +249,7 @@ MFEMCutTransitionSubMesh::setAttributes(mfem::ParMesh & parent_mesh,
                 MPI_MAX,
                 getMFEMProblem().mesh().getMFEMParMesh().GetComm());
 
-  /// Set the new attribute IDs for transition region elements
+  // Set the new attribute IDs for transition region elements
   for (int i = 0; i < transition_els.Size(); ++i)
   {
     const auto & transition_el = transition_els[i];
@@ -260,12 +260,12 @@ MFEMCutTransitionSubMesh::setAttributes(mfem::ParMesh & parent_mesh,
 
   mfem::AttributeSets & attr_sets = parent_mesh.attribute_sets;
   mfem::AttributeSets & bdr_attr_sets = parent_mesh.bdr_attribute_sets;
-  /// Create attribute set labelling the newly created transition region
-  /// on one side of the cut
+  // Create attribute set labelling the newly created transition region
+  // on one side of the cut
   attr_sets.CreateAttributeSet(_transition_subdomain);
-  /// Create attribute set labelling the entire closed geometry
+  // Create attribute set labelling the entire closed geometry
   attr_sets.SetAttributeSet(_closed_subdomain, getSubdomainAttributes());
-  /// Add the new domain attributes to new attribute sets
+  // Add the new domain attributes to new attribute sets
   const std::set<std::string> attr_set_names = attr_sets.GetAttributeSetNames();
   for (int old_attr = 1; old_attr < global_new_attrs.Size() + 1; ++old_attr)
   {
@@ -284,8 +284,8 @@ MFEMCutTransitionSubMesh::setAttributes(mfem::ParMesh & parent_mesh,
     }
   }
 
-  /// Create boundary attribute set labelling the exterior of the newly created
-  /// transition region, excluding the cut
+  // Create boundary attribute set labelling the exterior of the newly created
+  // transition region, excluding the cut
   bdr_attr_sets.CreateAttributeSet(_transition_subdomain_boundary);
   bdr_attr_sets.AddToAttributeSet(_transition_subdomain_boundary,
                                   parent_mesh.bdr_attributes.Max() + 1);
@@ -298,7 +298,7 @@ MFEMCutTransitionSubMesh::isInDomain(const int & element,
                                      const mfem::Array<int> & subdomains,
                                      const mfem::ParMesh & mesh)
 {
-  /// element<0 for ghost elements
+  // element<0 for ghost elements
   if (element < 0)
     return true;
 
