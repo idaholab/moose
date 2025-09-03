@@ -236,35 +236,31 @@ MultiAppGeneralFieldTransfer::initialSetup()
     if (isParamValid("from_blocks"))
     {
       const auto & block_names = getParam<std::vector<SubdomainName>>("from_blocks");
-      
+
       for (const auto & b : block_names)
-        if (!MooseMeshUtils::hasSubdomainName(
-                const_cast<MeshBase &>(from_moose_mesh.getMesh()), b))
-                  
-            paramError("from_blocks", "The block '", b, "' was not found in the mesh");
-      
+        if (!MooseMeshUtils::hasSubdomainName(const_cast<MeshBase &>(from_moose_mesh.getMesh()), b))
+
+          paramError("from_blocks", "The block '", b, "' was not found in the mesh");
+
       if (!block_names.empty())
       {
         const auto ids = from_moose_mesh.getSubdomainIDs(block_names);
         _from_blocks.insert(ids.begin(), ids.end());
       }
-          
     }
 
     if (isParamValid("from_boundaries"))
     {
-        const auto & boundary_names = getParam<std::vector<BoundaryName>>("from_boundaries");
-        for (const auto & bn : boundary_names)
-          if (!MooseMeshUtils::hasBoundaryName(
-                  const_cast<MeshBase &>(from_moose_mesh.getMesh()), bn))
-            paramError("from_boundaries",
-                       "The boundary '", bn, "' was not found in the mesh");
-                       
-        if (!boundary_names.empty())
-        {
-          const auto boundary_ids = from_moose_mesh.getBoundaryIDs(boundary_names);
-          _from_boundaries.insert(boundary_ids.begin(), boundary_ids.end());
-        }
+      const auto & boundary_names = getParam<std::vector<BoundaryName>>("from_boundaries");
+      for (const auto & bn : boundary_names)
+        if (!MooseMeshUtils::hasBoundaryName(const_cast<MeshBase &>(from_moose_mesh.getMesh()), bn))
+          paramError("from_boundaries", "The boundary '", bn, "' was not found in the mesh");
+
+      if (!boundary_names.empty())
+      {
+        const auto boundary_ids = from_moose_mesh.getBoundaryIDs(boundary_names);
+        _from_boundaries.insert(boundary_ids.begin(), boundary_ids.end());
+      }
     }
 
     if (isParamValid("from_mesh_division"))
@@ -320,34 +316,30 @@ MultiAppGeneralFieldTransfer::initialSetup()
     const auto & to_moose_mesh = _to_problems[i_to]->mesh(_displaced_target_mesh);
     if (isParamValid("to_blocks"))
     {
-        const auto & block_names = getParam<std::vector<SubdomainName>>("to_blocks");
-        for (const auto & b : block_names)
-          if (!MooseMeshUtils::hasSubdomainName(
-                  const_cast<MeshBase &>(to_moose_mesh.getMesh()), b))
-            paramError("to_blocks",
-                       "The block '", b, "' was not found in the mesh");
-                       
-        if (!block_names.empty())
-        {
-          const auto ids = to_moose_mesh.getSubdomainIDs(block_names);
-          _to_blocks.insert(ids.begin(), ids.end());
-        }
+      const auto & block_names = getParam<std::vector<SubdomainName>>("to_blocks");
+      for (const auto & b : block_names)
+        if (!MooseMeshUtils::hasSubdomainName(const_cast<MeshBase &>(to_moose_mesh.getMesh()), b))
+          paramError("to_blocks", "The block '", b, "' was not found in the mesh");
+
+      if (!block_names.empty())
+      {
+        const auto ids = to_moose_mesh.getSubdomainIDs(block_names);
+        _to_blocks.insert(ids.begin(), ids.end());
+      }
     }
 
     if (isParamValid("to_boundaries"))
     {
-        const auto & boundary_names = getParam<std::vector<BoundaryName>>("to_boundaries");
-        for (const auto & bn : boundary_names)
-          if (!MooseMeshUtils::hasBoundaryName(
-                  const_cast<MeshBase &>(to_moose_mesh.getMesh()), bn))
-            paramError("to_boundaries",
-                       "The boundary '", bn, "' was not found in the mesh");
-                       
-        if (!boundary_names.empty())
-        {
-          const auto boundary_ids = to_moose_mesh.getBoundaryIDs(boundary_names);
-          _to_boundaries.insert(boundary_ids.begin(), boundary_ids.end());
-        }
+      const auto & boundary_names = getParam<std::vector<BoundaryName>>("to_boundaries");
+      for (const auto & bn : boundary_names)
+        if (!MooseMeshUtils::hasBoundaryName(const_cast<MeshBase &>(to_moose_mesh.getMesh()), bn))
+          paramError("to_boundaries", "The boundary '", bn, "' was not found in the mesh");
+
+      if (!boundary_names.empty())
+      {
+        const auto boundary_ids = to_moose_mesh.getBoundaryIDs(boundary_names);
+        _to_boundaries.insert(boundary_ids.begin(), boundary_ids.end());
+      }
     }
 
     if (isParamValid("to_mesh_division"))
