@@ -7,12 +7,10 @@
 #
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
-import os
 import unittest
 import logging
 from MooseDocs.test import MooseDocsTestCase
 from MooseDocs.extensions import core, command, civet
-from MooseDocs.tree import pages
 from MooseDocs import base
 
 logging.basicConfig()

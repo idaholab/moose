@@ -7,10 +7,8 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os
 import urllib
 import logging
-import collections
 import mooseutils
 from .LogHelper import LogHelper
 
@@ -61,7 +59,7 @@ def _check_document(name, filename, file_list, logger):
 
     elif filename.startswith("http"):
         try:
-            response = urllib.request.urlopen(filename)
+            urllib.request.urlopen(filename)
         except urllib.error.URLError:
             msg = "Invalid URL for '{}' document: {}".format(name, filename)
             logger.log(log_key, msg)

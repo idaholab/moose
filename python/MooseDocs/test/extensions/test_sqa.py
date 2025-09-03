@@ -12,8 +12,6 @@ import mock
 import unittest
 import logging
 import collections
-import itertools
-import moosesqa
 from MooseDocs.test import MooseDocsTestCase
 from MooseDocs.extensions import (
     core,
@@ -27,7 +25,6 @@ from MooseDocs.extensions import (
     modal,
 )
 from MooseDocs import base
-from MooseDocs.tree import pages
 
 logging.basicConfig()
 

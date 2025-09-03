@@ -7,36 +7,36 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-from . import tagging
-from . import acronym
-from . import alert
-from . import analytics
-from . import appsyntax
-from . import autolink
-from . import bibtex
-from . import civet
-from . import command
-from . import comment
-from . import common
-from . import config
-from . import content
-from . import core
-from . import devel
-from . import floats
-from . import gallery
-from . import graph
-from . import heading
-from . import include
-from . import katex
-from . import layout
-from . import listing
-from . import materialicon
-from . import media
-from . import navigation
-from . import package
-from . import shortcut
-from . import sqa
-from . import style
-from . import table
-from . import special
-from . import versioner
+from . import tagging as tagging
+from . import acronym as acronym
+from . import alert as alert
+from . import analytics as analytics
+from . import appsyntax as appsyntax
+from . import autolink as autolink
+from . import bibtex as bibtex
+from . import civet as civet
+from . import command as command
+from . import comment as comment
+from . import common as common
+from . import config as config
+from . import content as content
+from . import core as core
+from . import devel as devel
+from . import floats as floats
+from . import gallery as gallery
+from . import graph as graph
+from . import heading as heading
+from . import include as include
+from . import katex as katex
+from . import layout as layout
+from . import listing as listing
+from . import materialicon as materialicon
+from . import media as media
+from . import navigation as navigation
+from . import package as package
+from . import shortcut as shortcut
+from . import sqa as sqa
+from . import style as style
+from . import table as table
+from . import special as special
+from . import versioner as versioner

@@ -11,7 +11,6 @@
 import unittest
 import logging
 from MooseDocs import common, base
-from MooseDocs.common import exceptions
 from MooseDocs.test import MooseDocsTestCase
 from MooseDocs.extensions import core, command, floats, media, gallery
 

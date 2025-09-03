@@ -7,14 +7,11 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 import os
-import re
-import sys
 import glob
 import logging
-import yaml
 import mooseutils
 import MooseDocs
-from MooseDocs.common import exceptions
+from MooseDocs.common import apply_template_arguments
 
 LOG = logging.getLogger(__name__)
 
@@ -126,9 +123,7 @@ def init_sqa_config(app, is_module, category):
         content = fid.read()
 
     repo = mooseutils.git_repo(MooseDocs.ROOT_DIR)
-    content = mooseutils.apply_template_arguments(
-        content, repo=repo, category=category, app=app
-    )
+    content = apply_template_arguments(content, repo=repo, category=category, app=app)
 
     filename = os.path.join(os.getcwd(), "sqa_{}.yml".format(category))
     _write_file(filename, content)
@@ -148,7 +143,7 @@ def init_sqa_report(app, is_module, category):
     with open(template, "r") as fid:
         content = fid.read()
 
-    content = mooseutils.apply_template_arguments(content, category=category, app=app)
+    content = apply_template_arguments(content, category=category, app=app)
     filename = os.path.join(os.getcwd(), "sqa_reports.yml")
     _write_file(filename, content)
 
@@ -156,8 +151,7 @@ def init_sqa_report(app, is_module, category):
 def update_config_with_sqa(filename, app, category):
     """Modifies the config.yml to support SQA."""
 
-    with open(filename, "r") as fid:
-        config = mooseutils.yaml_load(filename, include=False)
+    config = mooseutils.yaml_load(filename, include=False)
 
     if "MooseDocs.extensions.sqa" not in config["Extensions"]:
         config["Extensions"]["MooseDocs.extensions.sqa"] = dict()

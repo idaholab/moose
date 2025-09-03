@@ -6,7 +6,6 @@
 #
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
-import sys
 import re
 import uuid
 import logging
@@ -77,8 +76,9 @@ class KatexExtension(command.CommandExtension):
     def postTokenize(self, page, ast):
         labels = dict()
         count = 0
-        func = lambda n: (n.name == "Equation") and (n["label"] is not None)
-        for node in moosetree.iterate(ast, func):
+        for node in moosetree.iterate(
+            ast, lambda n: (n.name == "Equation") and (n["label"] is not None)
+        ):
             count += 1
             node["number"] = count
             labels[node["label"]] = (count, node["bookmark"])
@@ -341,7 +341,6 @@ class RenderEquationReference(core.RenderShortcutLink):
                 html.String(a, content=token["filename"] + ", ")
 
         num, id_ = eq_page["labels"].get(token["label"], (None, None))
-        # TODO: Error if label not found
         if eq_page is not page:
             url = eq_page.relativeDestination(page)
             a["href"] = "{}#{}".format(url, id_)

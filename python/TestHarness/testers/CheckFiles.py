@@ -7,7 +7,7 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-from FileTester import FileTester
+from TestHarness.testers.FileTester import FileTester
 from TestHarness import util
 import os
 

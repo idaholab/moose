@@ -9,7 +9,7 @@
 
 import re
 from datetime import datetime
-from RunHPC import RunHPC
+from TestHarness.schedulers.RunHPC import RunHPC
 
 
 ## This Class is responsible for maintaining an interface to the slurm scheduling syntax

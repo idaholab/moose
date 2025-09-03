@@ -14,7 +14,7 @@ import MooseDocs
 from .. import common
 from ..base import components, Extension
 from ..tree import tokens, latex, html
-from . import core, floats, heading, modal
+from . import core, heading, modal
 
 
 def make_extension(**kwargs):
@@ -180,9 +180,12 @@ class RenderLinkBase(components.RenderComponent):
         return None
 
     def createLatexHelper(self, parent, token, page, desired):
-        func = lambda p, t, u, l: latex.Command(
-            p, "hyperref", token=t, args=[latex.Bracket(string=l, escape=False)]
-        )
+
+        def _latexCommand(p, t, u, lab):
+            return latex.Command(
+                p, "hyperref", token=t, args=[latex.Bracket(string=lab, escape=False)]
+            )
+
         # Create optional content
         bookmark = token["bookmark"]
 
@@ -212,7 +215,7 @@ class RenderLinkBase(components.RenderComponent):
 
         else:
             label = head.get("id") or re.sub(r" +", r"-", head.text().lower())
-            href = func(parent, token, url, label)
+            href = _latexCommand(parent, token, url, label)
 
             if len(token) == 0:
                 head.copyToToken(tok)

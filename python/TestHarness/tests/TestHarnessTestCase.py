@@ -139,14 +139,14 @@ class TestHarnessTestCase(unittest.TestCase):
         assert isinstance(tests, dict)
 
         root = pyhit.Node()
-        tests_section = root.insert(0, "Tests")
+        _tests_section = root.insert(0, "Tests")
 
         i = 0
         for name, params in tests.items():
             assert isinstance(name, str)
             assert isinstance(params, dict)
 
-            test_section = tests_section.insert(i, name, **params)
+            _test_section = _tests_section.insert(i, name, **params)
             i += 1
 
         return root.render()

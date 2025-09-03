@@ -11,7 +11,7 @@
 import re
 
 from .. import common
-from ..base import components, Reader, Extension
+from ..base import components, Extension
 from ..tree import tokens
 from . import core
 

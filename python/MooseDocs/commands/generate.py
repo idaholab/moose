@@ -8,20 +8,14 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 """Developer tools for MooseDocs."""
-import argparse
 import os
-import re
-import collections
 import logging
 
-import MooseDocs
+from MooseDocs.common import apply_template_arguments
 import moosesqa
 import moosetree
-import mooseutils
 import moosesyntax
 
-from .. import common
-from ..extensions import template
 
 LOG = logging.getLogger(__name__)
 
@@ -90,7 +84,6 @@ def _createStubPage(report, node):
     if isinstance(node, moosesyntax.ObjectNodeBase):
         filename = os.path.join(report.working_dir, node["_md_path"])
     elif isinstance(node, moosesyntax.SyntaxNode):
-        action = moosetree.find(node, lambda n: isinstance(n, moosesyntax.ActionNode))
         filename = os.path.join(
             report.working_dir, os.path.dirname(node["_md_path"]), "index.md"
         )
@@ -125,9 +118,7 @@ def _createStubPage(report, node):
     # Read template and apply node content
     with open(tname, "r") as fid:
         content = fid.read()
-    content = mooseutils.apply_template_arguments(
-        content, name=node.name, syntax=node.fullpath()
-    )
+    content = apply_template_arguments(content, name=node.name, syntax=node.fullpath())
 
     # Write the content to the desired destination
     print("Creating/updating stub page: {}".format(filename))

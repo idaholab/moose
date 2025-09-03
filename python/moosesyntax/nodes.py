@@ -8,7 +8,6 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 import os
 import logging
-import copy
 import moosetree
 import mooseutils
 
@@ -50,7 +49,6 @@ class NodeBase(moosetree.Node):
         if self.is_root:
             return "ROOT"
 
-        msg = ""
         color = self.color
         if self.removed:
             color = "GREY"
@@ -140,12 +138,12 @@ class SyntaxNode(NodeBase):
                        False only the children of the node are considered.
         """
         if recursive:
-            filter_ = (
+            return moosetree.findall(
+                self,
                 lambda node: (syntax in node.fullpath())
                 and isinstance(node, node_type)
-                and (group is None or group in node.groups())
+                and (group is None or group in node.groups()),
             )
-            return moosetree.findall(self, filter_)
 
         else:
             return [

@@ -11,8 +11,6 @@
 import unittest
 from unittest import mock
 import logging
-import datetime as dt
-from MooseDocs import common, base
 from MooseDocs.test import MooseDocsTestCase
 from MooseDocs.extensions import core, command, gitutils
 
@@ -49,7 +47,7 @@ class TestGitUtilsCommit(MooseDocsTestCase):
         )
 
 
-class TestGitUtilsCommit(MooseDocsTestCase):
+class TestGitUtilsSubmoduleCommit(MooseDocsTestCase):
     EXTENSIONS = [core, command, gitutils]
 
     def testInline(self):

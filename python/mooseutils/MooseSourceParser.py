@@ -109,7 +109,7 @@ class MooseSourceParser(object):
         """
         A tool for dumping the cursor tree.
         """
-        if cursor == None:
+        if cursor is None:
             cursor = (self._translation_unit.cursor,)
         recursive = kwargs.pop("recursive", True)
         for c in cursor.get_children():
@@ -152,7 +152,7 @@ class MooseSourceParser(object):
             if (
                 (hasattr(cursor, "kind"))
                 and (cursor.kind == kind)
-                and (name == None or cursor.spelling == name)
+                and (name is None or cursor.spelling == name)
             ):
                 # print(cursor.extent.start.file)
                 yield cursor

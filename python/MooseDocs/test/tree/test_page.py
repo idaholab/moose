@@ -10,7 +10,6 @@
 
 import unittest
 import os
-import multiprocessing
 
 from MooseDocs import ROOT_DIR
 from MooseDocs.tree import pages

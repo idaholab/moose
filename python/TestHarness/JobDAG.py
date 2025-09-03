@@ -9,7 +9,6 @@
 
 from .schedulers.Job import Job
 from contrib import dag
-import sys
 import threading
 
 
@@ -153,7 +152,7 @@ class JobDAG(object):
             prereq_tester = prereq_job.getTester()
             if not prereq_tester.specs["heavy"]:
                 prereq_tester.specs["heavy"] = True
-                prereq_tester.addCaveats(f"implicit heavy")
+                prereq_tester.addCaveats("implicit heavy")
 
     def _hasDownStreamsWithFailures(self, job):
         """Return True if any dependents of job has previous failures"""

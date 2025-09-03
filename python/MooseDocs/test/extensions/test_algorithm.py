@@ -12,7 +12,6 @@ import unittest
 import logging
 from MooseDocs.test import MooseDocsTestCase
 from MooseDocs.extensions import core, command, floats, algorithm
-from MooseDocs import base
 
 logging.basicConfig()
 

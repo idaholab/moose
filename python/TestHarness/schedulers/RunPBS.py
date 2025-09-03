@@ -7,11 +7,11 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import re, json
+import re
+import json
 import datetime
-from RunHPC import RunHPC
-from PBScodes import PBS_User_EXITCODES
-from TestHarness import util
+from TestHarness.schedulers.RunHPC import RunHPC
+from TestHarness.schedulers.PBScodes import PBS_User_EXITCODES
 
 
 ## This Class is responsible for maintaining an interface to the PBS scheduling syntax
@@ -66,7 +66,7 @@ class RunPBS(RunHPC):
                         return datetime.datetime.strptime(
                             entry, "%a %b %d %H:%M:%S %Y"
                         ).timestamp()
-                    except:
+                    except:  # noqa: E722
                         self.setHPCJobError(
                             hpc_job,
                             "FAILED TO PARSE TIMING",
@@ -91,7 +91,7 @@ class RunPBS(RunHPC):
                         self.killHPCJob(
                             hpc_job, lock=False
                         )  # no lock; we're already in one
-                    except:
+                    except:  # noqa: E722
                         pass
 
                 # Job finished before it started, so something killed it

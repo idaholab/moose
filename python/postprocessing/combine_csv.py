@@ -8,7 +8,8 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os, csv
+import os
+import csv
 import pandas
 
 
@@ -77,14 +78,14 @@ class CombineCSV(object):
             )
 
         # Determine start and stop
-        if self.__lastn != None:
-            if self.__startt != 0 or self.__endt != None:
+        if self.__lastn is not None:
+            if self.__startt != 0 or self.__endt is not None:
                 raise CombineCSV.CombineError(
                     "StepBoundsError",
                     "Cannot specify --last together with --start or --end",
                 )
             self.__startt = len(csvfile_names) - self.__lastn
-        if self.__endt == None:
+        if self.__endt is None:
             self.__endt = len(csvfile_names) - 1
 
         if self.__timefile:
@@ -100,7 +101,7 @@ class CombineCSV(object):
                     times.append(str(i))
 
         fieldnames = []
-        if self.__x_varname != None:
+        if self.__x_varname is not None:
             fieldnames += [self.__x_varname]
         fieldnames += times
 
@@ -125,7 +126,7 @@ class CombineCSV(object):
                     break
                 if icsv == 0:
                     line_data = {}
-                if self.__x_varname != None:
+                if self.__x_varname is not None:
                     try:
                         cur_xvar = curr_line_data[self.__x_varname]
                     except KeyError as kerr:

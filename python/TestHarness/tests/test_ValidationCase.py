@@ -13,9 +13,14 @@ import typing
 from dataclasses import dataclass, asdict
 import numpy as np
 import os
+import json
 from TestHarness.validation import ValidationCase
-from TestHarness.validation.dataclasses import *
-from TestHarness.validation.exceptions import *
+from TestHarness.validation.dataclasses import ValidationData
+from TestHarness.validation.exceptions import (
+    ValidationTestRunException,
+    ValidationNoTestsDefined,
+    ValidationTestMissingResults,
+)
 from FactorySystem.InputParameters import InputParameters
 
 THIS_DIR = os.path.dirname(__file__)
@@ -402,7 +407,7 @@ class TestValidationCase(unittest.TestCase):
         # Other int values to float
         int_value = int(1)
         case.addScalarData(
-            f"values_to_float",
+            "values_to_float",
             1,
             "unused",
             None,
@@ -410,7 +415,7 @@ class TestValidationCase(unittest.TestCase):
             rel_err=int_value,
             abs_zero=int_value,
         )
-        data = case.data[f"values_to_float"]
+        data = case.data["values_to_float"]
         self.assertTrue(isinstance(data.nominal, float))
         self.assertTrue(isinstance(data.rel_err, float))
         self.assertTrue(isinstance(data.abs_zero, float))

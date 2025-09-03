@@ -11,9 +11,7 @@ import os
 import unittest
 import mock
 import types
-import io
 import mooseutils
-import moosesqa
 from MooseDocs.commands import generate
 from MooseDocs.test import requiresMooseExecutable
 

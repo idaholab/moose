@@ -8,19 +8,7 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 import collections
-import sys
 import json
-
-
-def deunicodify_hook(pairs):
-    new_pairs = []
-    for key, value in pairs:
-        if isinstance(value, unicode):
-            value = value.encode("utf-8")
-        if isinstance(key, unicode):
-            key = key.encode("utf-8")
-        new_pairs.append((key, value))
-    return collections.OrderedDict(new_pairs)
 
 
 def json_load(filename):

@@ -20,7 +20,6 @@ import subprocess
 from optparse import OptionParser
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
-from TestHarness import util
 
 
 # These kernels have guaranteed correct Jacobians
@@ -61,7 +60,7 @@ def recursiveFindFile(current_path, p, executable):
             "/".join(split[:-2]) + "/" + split[-1], p, executable
         )
         # Still didn't find it, we must keep looking up this path so fall through here
-        if the_file != None:
+        if the_file is not None:
             return the_file
 
     for afile in files:
@@ -435,7 +434,7 @@ if __name__ == "__main__":
                 "Outputs/file_base=" + basename + "_" + dofoutname,
             ]
         )
-        if options.cli_args != None:
+        if options.cli_args is not None:
             mooseparams.extend([options.cli_args])
         if options.debug:
             print("Running\n%s\n" % " ".join(mooseparams))
@@ -448,7 +447,7 @@ if __name__ == "__main__":
                 print("Application quit with non-zero return code")
                 print(data)
                 sys.exit(1)
-        except:
+        except:  # noqa: E722
             print("Error executing moose based application to gather DOF map\n")
             sys.exit(1)
     else:
@@ -481,7 +480,7 @@ if __name__ == "__main__":
                     [
                         kernel["name"]
                         for kernel in kernels
-                        if not kernel["name"] in dofkernels[dof]
+                        if kernel["name"] not in dofkernels[dof]
                     ]
                 )
 
@@ -529,7 +528,7 @@ if __name__ == "__main__":
                 "Executioner/solve_type=NEWTON",
             ]
         )
-    if options.cli_args != None:
+    if options.cli_args is not None:
         mooseparams.extend([options.cli_args])
 
     if options.debug:
@@ -553,7 +552,7 @@ if __name__ == "__main__":
             print(data)
             print("Application quit with an unexpected return code")
             sys.exit(1)
-    except:
+    except:  # noqa: E722
         print("Error executing moose based application\n")
         sys.exit(1)
 

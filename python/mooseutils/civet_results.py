@@ -8,16 +8,13 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 import os
-import sys
 import re
 import glob
 import tarfile
-import tempfile
 import enum
 import urllib.request
 import urllib.error
 import collections
-import logging
 import subprocess
 import concurrent.futures
 
@@ -134,7 +131,6 @@ def _update_database_from_job(job, database, possible):
     for member in tar.getmembers():
         match = RECIPE_RE.search(member.name)
         recipe = match.group("recipe")
-        number = int(match.group("number"))
 
         f = tar.extractfile(member)
         if f is not None:

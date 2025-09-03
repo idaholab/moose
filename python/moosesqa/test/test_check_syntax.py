@@ -10,8 +10,6 @@
 import os
 import sys
 import unittest
-import mock
-import logging
 import mooseutils
 import moosesyntax
 from moosesqa import check_syntax

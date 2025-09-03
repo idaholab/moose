@@ -12,7 +12,6 @@ import traceback
 from TestHarness.schedulers.Scheduler import Scheduler
 from TestHarness import util
 from TestHarness.runners.SubprocessRunner import Runner, SubprocessRunner
-from TestHarness.testers.Tester import Tester
 
 
 class RunParallel(Scheduler):
@@ -58,7 +57,7 @@ class RunParallel(Scheduler):
             # Set the successful message
             if not tester.isSkip() and not job.isFail():
                 self.setSuccessfulMessage(tester)
-        except:
+        except:  # noqa: E722
             trace = traceback.format_exc()
             job.appendOutput(
                 util.outputHeader("Python exception encountered in Job") + trace

@@ -6,7 +6,6 @@
 #
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
-import sys
 import uuid
 import logging
 
@@ -215,8 +214,8 @@ class RenderBibtexCite(components.RenderComponent):
             entry = self.extension.database().entries[key]
             author_found = True
             if (
-                not "author" in entry.persons.keys()
-                and not "Author" in entry.persons.keys()
+                "author" not in entry.persons.keys()
+                and "Author" not in entry.persons.keys()
             ):
                 author_found = False
                 entities = ["institution", "organization"]

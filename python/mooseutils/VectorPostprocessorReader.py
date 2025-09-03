@@ -7,13 +7,11 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os
 import glob
 import pandas
 import bisect
 
 from .MooseDataFrame import MooseDataFrame
-from . import message
 
 
 class VectorPostprocessorReader(object):

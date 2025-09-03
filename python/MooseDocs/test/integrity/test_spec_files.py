@@ -12,7 +12,6 @@ import os
 import sys
 import unittest
 import glob
-import mooseutils
 import pyhit
 import moosetree
 import inspect
@@ -21,8 +20,9 @@ import MooseDocs
 
 def get_parent_objects(module, cls):
     """Tool for locating all objects that derive from a certain base class."""
-    func = lambda obj: inspect.isclass(obj) and issubclass(obj, cls)
-    return inspect.getmembers(module, predicate=func)
+    return inspect.getmembers(
+        module, predicate=lambda obj: inspect.isclass(obj) and issubclass(obj, cls)
+    )
 
 
 class TestSpecFiles(unittest.TestCase):

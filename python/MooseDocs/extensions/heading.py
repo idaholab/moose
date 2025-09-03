@@ -38,9 +38,8 @@ class HeadingExtension(Extension):
         page["headings"] = dict()
 
     def postTokenize(self, page, ast):
-        func = lambda n: (n.name == "Heading")
         level = 100
-        for node in moosetree.iterate(ast.root, func):
+        for node in moosetree.iterate(ast.root, lambda n: (n.name == "Heading")):
             id_ = node.get("id") or node.text("-").lower()
             node["id"] = id_
             if page["title"] is None or node["level"] < level:

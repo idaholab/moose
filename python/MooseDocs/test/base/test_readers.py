@@ -13,12 +13,10 @@ import unittest
 import re
 import logging
 
-logging.basicConfig()  # level=logging.CRITICAL)
-
-import MooseDocs
-from MooseDocs.common import exceptions
 from MooseDocs.tree import tokens, pages
 from MooseDocs.base import readers, lexers, components
+
+logging.basicConfig()  # level=logging.CRITICAL)
 
 Word = tokens.newToken("Word")
 

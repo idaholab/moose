@@ -143,7 +143,7 @@ class TestResultsReaderReader(unittest.TestCase):
         if os.environ.get("TEST_RESULTSREADER_MISSING_AUTH") is not None:
             self.assertFalse(HAS_AUTH)
 
-    @unittest.skipUnless(HAS_AUTH, f"Skipping because authentication is not available")
+    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testGetTestResultsGold(self):
         """
         Tests that generating the gold file (using static test entries) using
@@ -210,7 +210,7 @@ class TestResultsReaderReader(unittest.TestCase):
         results = self._testGetTestResults(reader)
         self.assertEqual(len(results), len(gold_tests))
 
-    @unittest.skipUnless(HAS_AUTH, f"Skipping because authentication is not available")
+    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testGetTestResultsLive(self):
         """
         Tests calling getTestResults() using the real server, if available
@@ -220,7 +220,7 @@ class TestResultsReaderReader(unittest.TestCase):
         results = self._testGetTestResults(reader, limit=limit)
         self.assertEqual(len(results), limit)
 
-    @unittest.skipIf(HAS_AUTH, f"Skipping because authentication is available")
+    @unittest.skipIf(HAS_AUTH, "Skipping because authentication is available")
     def testMissingClient(self):
         """
         Tests creating the TestHarnessResultsReader without a client/auth
@@ -250,7 +250,7 @@ class TestResultsReaderReader(unittest.TestCase):
         ):
             TestHarnessResultsReader(PROD_DATABASE_NAME, BadDatabaseClient())
 
-    @unittest.skipUnless(HAS_AUTH, f"Skipping because authentication is not available")
+    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testMissingDatabaseLive(self):
         """
         Tests creating the TestHarnessResultsReader with a database that isn't found
@@ -259,7 +259,7 @@ class TestResultsReaderReader(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, f"Database {name} not found"):
             TestHarnessResultsReader(name)
 
-    @unittest.skipUnless(HAS_AUTH, f"Skipping because authentication is not available")
+    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testMissingResultsEntryLive(self):
         """
         Tests an exception being thrown from _getResultsEntry() with an invalid id
@@ -273,7 +273,7 @@ class TestResultsReaderReader(unittest.TestCase):
 
     @unittest.skipUnless(
         os.environ.get("TEST_RESULTSREADER_READER"),
-        f"Skipping because TEST_RESULTSREADER_READER not set",
+        "Skipping because TEST_RESULTSREADER_READER not set",
     )
     def testGetTestsWithPRLive(self):
         """

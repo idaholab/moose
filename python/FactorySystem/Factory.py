@@ -7,7 +7,8 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os, sys
+import os
+import sys
 import json
 import inspect
 
@@ -29,7 +30,7 @@ class Factory:
         return self.objects[type](*args, **kwargs)
 
     def getClassHierarchy(self, classes):
-        if classes != None:
+        if classes is not None:
             for aclass in classes:
                 classes.extend(self.getClassHierarchy(aclass.__subclasses__()))
         return classes
@@ -73,7 +74,7 @@ class Factory:
                 default = ""
                 if params.isValid(key):
                     the_param = params[key]
-                    if type(the_param) == list:
+                    if type(the_param) is list:
                         default = "'" + " ".join(the_param) + "'"
                     else:
                         default = str(the_param)

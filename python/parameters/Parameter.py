@@ -324,7 +324,11 @@ class Parameter(object):
                 return None
 
         # Check that the value is allowed
-        if (self.__allow is not None) and (val != None) and (val not in self.__allow):
+        if (
+            (self.__allow is not None)
+            and (val is not None)
+            and (val not in self.__allow)
+        ):
             msg = "Attempting to set '%s' to a value of %s but only the following are allowed: %s"
             LOG.warning(msg, self.name, val, self.__allow)
             return None

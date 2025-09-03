@@ -74,7 +74,7 @@ class ExampleCommand(command.CommandComponent):
         ex = Example(flt)
 
         data = info["block"] if "block" in info else info["inline"]
-        code = core.Code(ex, content=data)
+        core.Code(ex, content=data)
         if flt is parent:
             ex.attributes.update(**self.attributes(settings))
 

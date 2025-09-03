@@ -14,11 +14,12 @@ import shutil
 import subprocess
 import numpy as np
 import vtk
-import mooseutils
-from .Options import Option, Options
-from . import AxisOptions
-from . import FontOptions
-from . import LegendOptions
+
+from .Options import Option as Option
+from .Options import Options as Options
+from . import AxisOptions as AxisOptions
+from . import FontOptions as FontOptions
+from . import LegendOptions as LegendOptions
 
 
 def get_active_filenames(basename, pattern=None):

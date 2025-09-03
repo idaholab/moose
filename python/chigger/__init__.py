@@ -8,13 +8,13 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-from .RenderWindow import RenderWindow
-from . import base
-from . import utils
-from . import misc
-from . import annotations
-from . import exodus
-from . import geometric
-from . import graphs
-from . import filters
-from . import observers
+from .RenderWindow import RenderWindow as RenderWindow
+from . import base as base
+from . import utils as utils
+from . import misc as misc
+from . import annotations as annotations
+from . import exodus as exodus
+from . import geometric as geometric
+from . import graphs as graphs
+from . import filters as filters
+from . import observers as observers

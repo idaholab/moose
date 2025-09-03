@@ -7,7 +7,13 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import copy, itertools, os, time, threading, traceback, typing
+import copy
+import itertools
+import os
+import time
+import threading
+import traceback
+import typing
 from io import StringIO
 from contextlib import nullcontext, redirect_stdout
 from TestHarness.StatusSystem import StatusSystem
@@ -19,8 +25,7 @@ from TestHarness import OutputInterface, util
 from tempfile import TemporaryDirectory
 from collections import namedtuple
 from dataclasses import asdict, dataclass
-
-from TestHarness import util
+import errno
 
 
 def time_now():
@@ -271,7 +276,7 @@ class Job(OutputInterface):
             # Don't let this fail
             try:
                 self.tmp_dir.cleanup()
-            except:
+            except:  # noqa: E722
                 pass
             self.tmp_dir = None
 
@@ -347,7 +352,7 @@ class Job(OutputInterface):
         """Wrapper method to return getRunnable"""
         try:
             runnable = self.__tester.getRunnable(self.options)
-        except:
+        except:  # noqa: E722
             trace = traceback.format_exc()
             self.setStatus(self.error, "TESTER EXCEPTION")
             self.appendOutput(util.outputHeader("Python exception encountered") + trace)
@@ -394,7 +399,7 @@ class Job(OutputInterface):
 
     def getSlots(self):
         """Return the number of slots this job consumes"""
-        if self.__slots == None:
+        if self.__slots is None:
             return self.setSlots(self.__tester.getSlots(self.options))
         return self.__slots
 
@@ -444,7 +449,7 @@ class Job(OutputInterface):
                 failed = False
                 try:
                     do()
-                except:
+                except:  # noqa: E722
                     trace = traceback.format_exc()
                     self.setStatus(self.error, f"{exception_name} EXCEPTION")
                     output.appendOutput(
@@ -460,8 +465,9 @@ class Job(OutputInterface):
         # This is truly awful and I really hate that it got put in here,
         # please remove it if you can.
         if not tester.shouldExecute():
-            run_tester = lambda: tester.run(self.options, 0, "")
-            try_catch(run_tester, "TESTER RUN", "tester_run")
+            try_catch(
+                lambda: tester.run(self.options, 0, ""), "TESTER RUN", "tester_run"
+            )
             return
 
         if self.options.pedantic_checks and self.canParallel():
@@ -488,18 +494,23 @@ class Job(OutputInterface):
             return
 
         # Spawn the process
-        spawn = lambda: self._runner.spawn(self.timer)
-        if not try_catch(spawn, "RUNNER SPAWN", "runner_spawn"):
+        if not try_catch(
+            lambda: self._runner.spawn(self.timer), "RUNNER SPAWN", "runner_spawn"
+        ):
             return
 
         # Entry point for testers to do other things
-        post_spawn = lambda: tester.postSpawn(self._runner)
-        if not try_catch(post_spawn, "TESTER POST SPAWN", "tester_post_spawn"):
+        if not try_catch(
+            lambda: tester.postSpawn(self._runner),
+            "TESTER POST SPAWN",
+            "tester_post_spawn",
+        ):
             return
 
         # And wait for it to complete
-        wait = lambda: self._runner.wait(self.timer)
-        if not try_catch(wait, "RUNNER WAIT", "runner_wait"):
+        if not try_catch(
+            lambda: self._runner.wait(self.timer), "RUNNER WAIT", "runner_wait"
+        ):
             return
 
         # Job error occurred, which means the Runner didn't complete
@@ -509,8 +520,9 @@ class Job(OutputInterface):
             return
 
         # And do finalize (really just cleans up output)
-        runner_finalize = lambda: self._runner.finalize()
-        if not try_catch(runner_finalize, "RUNNER FINALIZE", "runner_finalize"):
+        if not try_catch(
+            lambda: self._runner.finalize(), "RUNNER FINALIZE", "runner_finalize"
+        ):
             finalize()
             return
 
@@ -531,17 +543,19 @@ class Job(OutputInterface):
         # Allow derived processResults to process the output and set a failing status (if it failed)
         runner_output = self._runner.getRunOutput().getOutput()
         exit_code = self._runner.getExitCode()
-        run_tester = lambda: tester.run(self.options, exit_code, runner_output)
-        try_catch(run_tester, "TESTER RUN", "tester_run")
+        try_catch(
+            lambda: tester.run(self.options, exit_code, runner_output),
+            "TESTER RUN",
+            "tester_run",
+        )
 
         # Run the validation case, if any and the execution succeeded
         if self.specs["validation_test"] is not None:
             if exit_code == 0:
-                run_validation = lambda: self.runValidation()
                 cwd = os.getcwd()
                 os.chdir(self.getTestDir())
                 success = try_catch(
-                    run_validation,
+                    lambda: self.runValidation(),
                     "VALIDATION RUN",
                     "validation_run",
                     output=self.validation_output,
@@ -572,7 +586,7 @@ class Job(OutputInterface):
         os.chdir(self.getTestDir())
         try:
             return [c(**init_kwargs) for c in validation_classes]
-        except Exception as e:
+        except Exception:
             trace = traceback.format_exc()
             output = (
                 util.outputHeader("Python exception encountered in validation case")
@@ -620,7 +634,7 @@ class Job(OutputInterface):
                 all_data.add(key)
 
         if run_exception:
-            output.appendOutput(f"\nEncountered exception(s) while running tests")
+            output.appendOutput("\nEncountered exception(s) while running tests")
             # TODO: Make this a failure, not an error
             self.setStatus(self.job_status.error, "VALIDATION TEST EXCEPTION")
             return
@@ -640,7 +654,7 @@ class Job(OutputInterface):
         if self._runner:
             try:
                 self._runner.kill()
-            except:
+            except:  # noqa: E722
                 pass
         self.cleanup()
 
@@ -821,7 +835,7 @@ class Job(OutputInterface):
                     if ex.errno == errno.EEXIST:
                         pass
                     else:
-                        self.setStatus(self.error, f"DIRECTORY CREATION FAILURE")
+                        self.setStatus(self.error, "DIRECTORY CREATION FAILURE")
                         self.appendOutput(
                             f"Failed to create Job directory {output_dir}"
                         )
@@ -908,9 +922,6 @@ class Job(OutputInterface):
         return self.getStatus() in self.__finished_statuses
 
     # the following more tester related...
-    def isSilent(self):
-        return self.__tester.isSilent()
-
     def isNoStatus(self):
         return self.__tester.isNoStatus()
 

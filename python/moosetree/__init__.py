@@ -3,5 +3,10 @@ A package for building tree structures. This package is designed as a faster alt
 anytree package, although it is not a direct replacement.
 """
 
-from .Node import Node
-from .search import findall, find, iterate, IterMethod
+from .Node import Node as Node
+from .search import (
+    findall as findall,
+    find as find,
+    iterate as iterate,
+    IterMethod as IterMethod,
+)

@@ -8,7 +8,6 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 import sys
 import unittest
-import subprocess
 from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
 
 

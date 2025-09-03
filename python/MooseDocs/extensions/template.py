@@ -6,16 +6,12 @@
 #
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
-import re
-import codecs
 import logging
 import moosetree
-import mooseutils
 
-import MooseDocs
 from .. import common
-from ..common import exceptions
-from ..base import components, Executioner, MarkdownReader
+from ..common import exceptions, apply_template_arguments
+from ..base import components, MarkdownReader
 from ..extensions import core, command, include, alert, floats, materialicon
 from ..tree import tokens
 
@@ -123,7 +119,7 @@ class TemplateLoadCommand(command.CommandComponent):
 
         token = TemplateContent(parent, kwargs=kwargs)
         content = common.read(location.source)
-        content = mooseutils.apply_template_arguments(content, **kwargs)
+        content = apply_template_arguments(content, **kwargs)
         self.reader.tokenize(token, content, page, line=info.line)
         return parent
 
@@ -167,7 +163,7 @@ class TemplateItemCommand(command.CommandComponent):
             else MarkdownReader.BLOCK
         )
         kwargs = self.extension.getConfig(page, "args")
-        content = mooseutils.apply_template_arguments(info[group], **kwargs)
+        content = apply_template_arguments(info[group], **kwargs)
         if content:
             self.reader.tokenize(item, content, page, line=info.line, group=group)
         return parent
@@ -189,8 +185,9 @@ class RenderTemplateField(components.RenderComponent):
 
         # Locate the replacement
         key = token["key"]
-        func = lambda n: (n.name == "TemplateItem") and (n["key"] == key)
-        replacement = moosetree.find(token.root, func)
+        replacement = moosetree.find(
+            token.root, lambda n: (n.name == "TemplateItem") and (n["key"] == key)
+        )
 
         if replacement:
             # Render TemplateItem
@@ -215,7 +212,7 @@ class RenderTemplateField(components.RenderComponent):
         filename = page.local
         key = token["key"]
         err = alert.AlertToken(None, brand="error")
-        alert_title = alert.AlertTitle(
+        alert.AlertTitle(
             err,
             icon_name="error",
             brand="error",

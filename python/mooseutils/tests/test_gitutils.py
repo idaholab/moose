@@ -8,12 +8,9 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 import os
-import shutil
 import unittest
 import mock
 import tempfile
-import subprocess
-import platform
 import mooseutils
 
 # from mooseutils.gitutils import git_submodule_info
@@ -102,21 +99,21 @@ class Test(unittest.TestCase):
     def testGitVersion2(self, re_func):
         re_func.return_value = None
         with self.assertRaises(SystemError):
-            ver = mooseutils.git_version()
+            mooseutils.git_version()
 
     @unittest.skip("Fails on CIVET and I can't reproduce it")
     def testGitAuthors(self):
         names = mooseutils.git_authors(mooseutils.__file__)
         self.assertIn("Andrew E. Slaughter", names)
 
-        with self.assertRaises(OSError) as e:
+        with self.assertRaises(OSError):
             mooseutils.git_authors("wrong")
 
     @unittest.skip("Fails on CIVET and I can't reproduce it")
     def testCommitters(self):
         names = mooseutils.git_committers(mooseutils.__file__)
         self.assertIn("Andrew E. Slaughter", names)
-        with self.assertRaises(OSError) as e:
+        with self.assertRaises(OSError):
             mooseutils.git_authors("wrong")
 
         names = mooseutils.git_committers(mooseutils.__file__, "--merges")
@@ -127,7 +124,7 @@ class Test(unittest.TestCase):
             lines = fid.readlines()
 
         n_with_blank = len(lines)
-        n_no_blank = n_with_blank - len([l for l in lines if not l.strip()])
+        n_no_blank = n_with_blank - len([line for line in lines if not line.strip()])
 
         counts = mooseutils.git_lines(__file__)
         self.assertIn("Andrew E. Slaughter", counts)

@@ -8,7 +8,9 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import copy, os, unittest
+import copy
+import os
+import unittest
 from mooseutils.PerfGraphReporterReader import PerfGraphReporterReader, PerfGraphNode
 from mooseutils.ReporterReader import ReporterReader
 
@@ -41,14 +43,14 @@ class TestPerfGraphReporterReader(unittest.TestCase):
         def childrenTime(node_data):
             children_time = 0
             for entry in node_data.values():
-                if type(entry) == dict:
+                if isinstance(entry, dict):
                     children_time += totalTime(entry)
             return children_time
 
         def childrenMemory(node_data):
             children_memory = 0
             for entry in node_data.values():
-                if type(entry) == dict:
+                if isinstance(entry, dict):
                     children_memory += totalMemory(entry)
             return children_memory
 

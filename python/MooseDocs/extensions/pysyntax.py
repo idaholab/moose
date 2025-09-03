@@ -66,7 +66,9 @@ class PySyntax(object):
             )
 
         def __str__(self):
-            out = "{}:\n".format(self.name, self.signature or self.name)
+            out = "{}:\n".format(
+                self.name,
+            )
             if self.documentation:
                 out += '"{}"\n'.format(self.documentation)
             out += "  public: {}\n".format(self.public)
@@ -192,7 +194,7 @@ class PySyntaxCommandBase(command.CommandComponent):
         """Helper for listing class members"""
         sec = PyClass(parent)
 
-        h = core.Heading(
+        core.Heading(
             sec, level=h_level, string=name, class_="moose-pysyntax-class-heading"
         )
         core.Monospace(sec, string=name + doc.signature)

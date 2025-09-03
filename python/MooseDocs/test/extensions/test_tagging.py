@@ -10,8 +10,7 @@
 
 import unittest
 import logging
-from MooseDocs import common, base
-from MooseDocs.common import exceptions
+from MooseDocs import common
 from MooseDocs.test import MooseDocsTestCase
 from MooseDocs.extensions import core, command, tagging
 
@@ -56,7 +55,7 @@ class TestTaggingCommand(MooseDocsTestCase):
     def testStandardUsage(self):
         with self.assertLogs(
             level=logging.INFO
-        ) as cm:  # For warning suppression. TODO: remove cm when non-experimental
+        ) as _cm:  # For warning suppression. TODO: remove cm when non-experimental
             ast = self.tokenize(self.TEXT)
         self.assertSize(ast, 1)
         self.assertEqual(ast(0)["attr_name"], "tag_test")

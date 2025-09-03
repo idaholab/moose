@@ -11,7 +11,7 @@ import subprocess
 import logging
 import mooseutils
 from ..common import exceptions
-from ..base import components, Extension, LatexRenderer
+from ..base import components, LatexRenderer
 from ..tree import tokens, html, latex, pages
 from . import command, floats
 
@@ -363,7 +363,7 @@ class RenderVideo(components.RenderComponent):
 
             div = html.Tag(parent, "div", style="text-align:center;")
             # using standard YouTube width and height for embedded videos as of July 2020
-            video = html.Tag(
+            _video = html.Tag(
                 div,
                 "iframe",
                 token,
@@ -375,7 +375,7 @@ class RenderVideo(components.RenderComponent):
                 allowfullscreen="allowfullscreen",
             )
         else:
-            video = self.addVideoHelper(parent, token, page)
+            _video = self.addVideoHelper(parent, token, page)
 
     def addVideoHelper(self, parent, token, page):
         src = token["src"]

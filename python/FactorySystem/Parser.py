@@ -8,7 +8,9 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os, re, time
+import os
+import re
+import time
 import moosetree
 import pyhit
 
@@ -98,7 +100,7 @@ class Parser:
             if key not in params:
                 continue
 
-            if params.type(key) == list:
+            if params.type(key) is list:
                 if isinstance(value, str):
                     value = value.replace("\n", " ")
                     params[key] = re.split(r"\s+", value)
@@ -119,17 +121,17 @@ class Parser:
                             except ValueError:
                                 self.error(
                                     "invalid date value: '{}=\"{}\"'".format(
-                                        child.fullpath, value
+                                        param_path, value
                                     ),
-                                    node=child,
+                                    node=getpot_node,
                                 )
                                 have_err = True
-                        elif strict_type != type(value):
+                        elif strict_type is not type(value):
                             self.error(
                                 "wrong data type for parameter value: '{}=\"{}\"'".format(
-                                    child.fullpath, value
+                                    param_path, value
                                 ),
-                                node=child,
+                                node=getpot_node,
                             )
                             have_err = True
                     else:

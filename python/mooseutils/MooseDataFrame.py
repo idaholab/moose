@@ -146,7 +146,7 @@ class MooseDataFrame(object):
                             pandas.Series(self._data.index, index=self._data.index),
                         )
                     message.mooseDebug("Reading csv file: {}".format(self._filename))
-                except:
+                except:  # noqa: E722
                     self.clear()
                     message.mooseDebug(
                         "Unable to read file {} it likely does not contain data.".format(

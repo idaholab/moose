@@ -401,7 +401,7 @@ class TestAutoLinkRender(MooseDocsTestCase):
         link = autolink.AutoLink(
             None, page="not_a_file.md", alternative="https://www.google.com/"
         )
-        res = self.render(link, renderer=base.HTMLRenderer())
+        self.render(link, renderer=base.HTMLRenderer())
 
         # TODO: Use assertLogs in python 3.4
         self.assertIn(
@@ -422,7 +422,7 @@ class TestAutoLinkRender(MooseDocsTestCase):
     @mock.patch.object(base.renderers.LOG, "error")
     def testExactError(self, mock_log):
         link = autolink.AutoLink(None, page="core.md", exact=True)
-        res = self.render(link, renderer=base.HTMLRenderer())
+        self.render(link, renderer=base.HTMLRenderer())
 
         # TODO: Use assertLogs in python 3.4
         self.assertIn(

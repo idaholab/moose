@@ -16,7 +16,6 @@ import unittest
 
 from MooseDocs.tree import tokens
 from MooseDocs.base import lexers
-from MooseDocs.common import exceptions
 from MooseDocs.extensions import core
 
 

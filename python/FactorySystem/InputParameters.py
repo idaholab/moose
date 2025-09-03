@@ -47,7 +47,11 @@ class InputParameters:
         self.addParam(name, *args)
 
     def isValid(self, name):
-        if name in self.valid and self.valid[name] != None and self.valid[name] != []:
+        if (
+            name in self.valid
+            and self.valid[name] is not None
+            and self.valid[name] != []
+        ):
             return True
         else:
             return False
@@ -86,18 +90,18 @@ class InputParameters:
             return None
 
     def basicTypeHelper(self, value_type):
-        if value_type == int:
+        if value_type is int:
             return "Integer"
-        elif value_type == float:
+        elif value_type is float:
             return "Real"
-        elif value_type == bool:
+        elif value_type is bool:
             return "Boolean"
         else:
             return "String"
 
     def basicType(self, key):
         if key in self.valid:
-            if type(self.valid[key]) == list:
+            if type(self.valid[key]) is list:
                 if len(self.valid[key]) == 0:
                     return "Array:String"
                 else:

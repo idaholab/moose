@@ -9,7 +9,6 @@
 import os
 import re
 import subprocess
-import logging
 import collections
 import mooseutils
 
@@ -144,7 +143,7 @@ def git_init_submodule(path, working_dir=os.getcwd(), progress=False):
         if (
             (submodule == path)
             and ((status[0] == "-") or ("(null)" in status[2]))
-            and (progress == False)
+            and (not progress)
         ):
             subprocess.call(
                 ["git", "submodule", "update", "--init", path], cwd=working_dir
@@ -153,7 +152,7 @@ def git_init_submodule(path, working_dir=os.getcwd(), progress=False):
         elif (
             (submodule == path)
             and ((status[0] == "-") or ("(null)" in status[2]))
-            and (progress == True)
+            and (progress)
         ):
             subprocess.call(
                 ["git", "submodule", "update", "--init", "--progress", path],

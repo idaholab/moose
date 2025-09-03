@@ -7,10 +7,9 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-from sympy import *  # use star so all functions are available to supplied strings
-from sympy.vector import divergence, curl, gradient, Vector, CoordSys3D
-from mms.fparser import print_fparser
-from mms.moosefunction import print_moose
+from sympy import Function, Symbol
+from sympy import *  # use star so all functions are available to supplied strings  # noqa: F403
+from sympy.vector import divergence, curl, gradient, Vector, CoordSys3D  # noqa: F401
 
 
 def evaluate(

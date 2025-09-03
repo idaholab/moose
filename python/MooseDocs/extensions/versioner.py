@@ -9,7 +9,6 @@
 
 import os
 import re
-import sys
 import importlib.util
 
 import MooseDocs

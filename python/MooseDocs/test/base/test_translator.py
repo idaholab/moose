@@ -34,7 +34,7 @@ class TestTranslator(unittest.TestCase):
 
     def testFindPageError(self):
         with self.assertRaisesRegex(exceptions.MooseDocsException, "Did you mean"):
-            page = self.translator.findPage("wrong.md")
+            self.translator.findPage("wrong.md")
 
 
 if __name__ == "__main__":

@@ -9,7 +9,11 @@
 
 from Job import Job
 
-import os, sys, subprocess, shutil, re
+import os
+import sys
+import subprocess
+import shutil
+import re
 
 
 class PBSJob(Job):

@@ -8,6 +8,8 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 import re
 
+from MooseDocs.common import exceptions
+
 
 def apply_template_arguments(content, **template_args):
     """

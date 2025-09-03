@@ -17,8 +17,7 @@ import shutil
 import moosetree
 import copy
 
-import MooseDocs
-from ..common import exceptions, mixins, report_error, Storage
+from ..common import exceptions, mixins, report_error
 from ..tree import html, latex, pages
 
 LOG = logging.getLogger(__name__)

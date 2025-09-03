@@ -8,7 +8,7 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 from .. import common
-from ..base import RevealRenderer, Translator
+from ..base import RevealRenderer
 from . import command
 
 

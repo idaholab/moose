@@ -7,7 +7,7 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os, json
+import os
 from TestHarness import OutputInterface, util
 
 
@@ -110,7 +110,7 @@ class Runner(OutputInterface):
             output = stream.read().decode("utf-8")
         except UnicodeDecodeError:
             self.job.setStatus(self.job.error, "non-unicode characters in output")
-        except:
+        except:  # noqa: E722
             self.job.setStatus(self.job.error, "error reading output")
         if output and output[-1] != "\n":
             output += "\n"

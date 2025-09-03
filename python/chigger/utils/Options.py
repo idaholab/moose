@@ -70,7 +70,7 @@ class Option(object):
                             "{}({})".format(self.vtype.__name__, str(self.allow[i]))
                         )
 
-                except:  # pylint: disable=bare-except
+                except:  # pylint: disable=bare-except  # noqa: E722
                     msg = (
                         "The type provided, {}, does not match the type of the allowed "
                         + "values, {} for the {} option."
@@ -83,7 +83,7 @@ class Option(object):
                     return
 
         # Try to set the value using the set method to test the type and if it is allowed
-        if (self.__value != None) and not isinstance(self.__value, Options):
+        if (self.__value is not None) and not isinstance(self.__value, Options):
             self.set(self.__value)
 
     def unset(self):
@@ -148,7 +148,7 @@ class Option(object):
                 # Check if we can convert (e.g., int->float)
                 try:
                     value = eval(self.vtype.__name__ + "(" + str(value) + ")")
-                except:  # pylint: disable=bare-except
+                except:  # pylint: disable=bare-except  # noqa: E722
                     msg = "{} must be of type {} but {} provided."
                     mooseutils.mooseWarning(
                         msg.format(self.name, self.vtype.__name__, type(value).__name__)
@@ -156,7 +156,7 @@ class Option(object):
                     value = None
 
             # Check that the value is allowed
-            if self.allow and (value != None) and (value not in self.allow):
+            if self.allow and (value is not None) and (value not in self.allow):
                 msg = "Attempting to set {} to a value of {} but only the following are allowed: {}"
                 mooseutils.mooseWarning(msg.format(self.name, value, self.allow))
                 value = None
@@ -219,7 +219,7 @@ class Options(object):
         Inputs:
             name[str]: The name of the Option to retrieve
         """
-        return self.hasOption(name) and (self[name] != None)
+        return self.hasOption(name) and (self[name] is not None)
 
     def isOptionDefault(self, name):
         """

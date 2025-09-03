@@ -8,7 +8,6 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 import os
-import re
 import unittest
 import mock
 import types
@@ -61,7 +60,7 @@ class TestInit(unittest.TestCase):
         mock_git_repo.return_value = "test"
 
         opt = self.getCommandLineArguments(app="MooseTestApp", category="moose_test")
-        status = init.main(opt)
+        init.main(opt)
 
         self.assertEqual(len(self._init_write.keys()), 12)
 

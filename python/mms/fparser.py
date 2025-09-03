@@ -15,7 +15,6 @@ The FParserPrinter converts single sympy expressions into a single FParser.
 
 from sympy.printing.codeprinter import CodePrinter
 from sympy.printing.precedence import precedence
-from sympy import ccode
 
 # dictionary mapping sympy function to (argument_conditions, fparser function).
 # Used in FParserPrinter._print_Function(self)
@@ -142,7 +141,7 @@ class FParserPrinter(CodePrinter):
             "if(%s,%s" % (self._print(c), self._print(e)) for e, c in expr.args[:-1]
         ]
 
-        if expr.args[-1].cond == True:
+        if expr.args[-1].cond == True:  # noqa: E712
             ecpairs.append("%s" % self._print(expr.args[-1].expr))
         else:
             # there is no default value, so we generate an invalid expression

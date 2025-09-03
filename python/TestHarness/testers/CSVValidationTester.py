@@ -7,8 +7,7 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-from FileTester import FileTester
-from TestHarness import util
+from TestHarness.testers.FileTester import FileTester
 from mooseutils.csvdiff import CSVTools
 from mooseutils import colorText
 import os
@@ -54,7 +53,7 @@ def diff_files(gold_file, out_file, err_type="relative"):
     for key in keys1:
         if len(table1[key]) != len(table2[key]):
             csv.addError(
-                self.files[0],
+                out_file,
                 "Columns with header '" + key + "' aren't the same length",
             )
             # assume all columns are the same length, so don't report the other errors

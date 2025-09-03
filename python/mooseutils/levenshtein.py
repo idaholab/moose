@@ -18,7 +18,6 @@ def levenshteinDistance(s1, possible, number=None):
         number: (Optional) The number of entries to return
     """
     results = []
-    minimum = 1e9
     for i, s2 in enumerate(possible):
         d = levenshtein(s1, s2)
         results.append((s2, d))

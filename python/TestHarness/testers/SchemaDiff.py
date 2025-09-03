@@ -7,7 +7,7 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-from RunApp import RunApp
+from TestHarness.testers.RunApp import RunApp
 from TestHarness import util
 import os
 
@@ -60,7 +60,7 @@ class SchemaDiff(RunApp):
         return super().getOutputFiles(options) + self.specs["schemadiff"]
 
     def prepare(self, options):
-        if self.specs["delete_output_before_running"] == True:
+        if self.specs["delete_output_before_running"]:
             util.deleteFilesAndFolders(self.getTestDir(), self.getOutputFiles(options))
 
     def processResults(self, moose_dir, options, exit_code, runner_output):

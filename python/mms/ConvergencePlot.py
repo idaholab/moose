@@ -8,9 +8,7 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 import matplotlib.pyplot as plt
-import glob
 import collections
-import pandas
 import numpy as np
 
 

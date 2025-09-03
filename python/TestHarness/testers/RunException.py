@@ -8,7 +8,7 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 from TestHarness import util
-from RunApp import RunApp
+from TestHarness.testers.RunApp import RunApp
 
 
 class RunException(RunApp):
@@ -42,10 +42,7 @@ class RunException(RunApp):
 
     def __init__(self, name, params):
         RunApp.__init__(self, name, params)
-        if (
-            params.isValid("expect_err") == False
-            and params.isValid("expect_assert") == False
-        ):
+        if not params.isValid("expect_err") and not params.isValid("expect_assert"):
             raise RuntimeError(
                 'Either "expect_err" or "expect_assert" must be supplied in RunException'
             )

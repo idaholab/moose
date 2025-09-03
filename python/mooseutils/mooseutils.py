@@ -6,10 +6,8 @@
 #
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
-import sys
 import os
 import re
-import collections
 import difflib
 import multiprocessing
 import subprocess
@@ -17,11 +15,7 @@ import time
 import cProfile as profile
 import pstats
 from typing import Optional
-
-try:
-    from io import StringIO
-except ImportError:
-    from io import StringIO
+from io import StringIO
 
 import mooseutils
 
@@ -491,7 +485,7 @@ def list_files(working_dir=os.getcwd()):
 def run_time(function, *args, **kwargs):
     """Run supplied function with duration timing."""
     start = time.time()
-    out = function(*args, **kwargs)
+    function(*args, **kwargs)
     return time.time() - start
 
 

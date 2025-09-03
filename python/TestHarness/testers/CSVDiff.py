@@ -7,7 +7,7 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-from FileTester import FileTester
+from TestHarness.testers.FileTester import FileTester
 from TestHarness import util
 import os
 
@@ -174,7 +174,7 @@ class CSVDiff(FileTester):
             for command in commands:
                 exo_output = util.runCommand(command)
                 output += "Running csvdiff: " + command + "\n" + exo_output
-                if not "Files are the same" in exo_output:
+                if "Files are the same" not in exo_output:
                     self.setStatus(self.diff, "CSVDIFF")
                     break
 

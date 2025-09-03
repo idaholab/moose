@@ -11,11 +11,8 @@ import logging
 import time
 import mooseutils
 import collections
-import uuid
-import MooseDocs
 from ..base import components, HTMLRenderer
-from ..tree import tokens, html, latex, pages
-from ..common import exceptions
+from ..tree import tokens, html, pages
 
 from . import command, core
 
@@ -269,10 +266,9 @@ class CivetMergeResultsCommand(CivetCommandBase):
     def createToken(self, parent, info, page, settings):
         site, repo = self.getCivetInfo(settings)
 
-        rows = []
         for sha in self.extension.hashes() or list():
             url = "{}/sha_events/{}/{}".format(site, repo, sha)
-            link = core.Link(parent, url=url, string=sha)
+            core.Link(parent, url=url, string=sha)
             core.LineBreak(parent)
         return parent
 

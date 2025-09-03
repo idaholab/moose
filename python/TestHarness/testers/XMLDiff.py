@@ -7,7 +7,7 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-from SchemaDiff import SchemaDiff
+from TestHarness.testers.SchemaDiff import SchemaDiff
 from TestHarness import util
 
 
@@ -32,7 +32,7 @@ class XMLDiff(SchemaDiff):
             self.specs["required_python_packages"] += " xmltodict"
 
     def prepare(self, options):
-        if self.specs["delete_output_before_running"] == True:
+        if self.specs["delete_output_before_running"]:
             util.deleteFilesAndFolders(self.getTestDir(), self.specs["xmldiff"])
 
     def load_file(self, path1):

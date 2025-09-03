@@ -13,7 +13,6 @@ import mock
 import types
 import io
 import mooseutils
-import moosesqa
 from MooseDocs.commands import syntax
 from MooseDocs.test import requiresMooseExecutable
 
@@ -44,7 +43,7 @@ class TestGenerate(unittest.TestCase):
         # Run the generate command
         opt = types.SimpleNamespace(config="sqa_reports.yml")
         with mock.patch("sys.stdout", new=io.StringIO()) as stdout:
-            status = syntax.main(opt)
+            syntax.main(opt)
         self.assertIn("Adaptivity: /Adaptivity", stdout.getvalue())
 
 

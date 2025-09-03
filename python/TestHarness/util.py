@@ -7,7 +7,9 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import platform, os, re
+import platform
+import os
+import re
 import subprocess
 from mooseutils import colorText
 from collections import OrderedDict
@@ -136,9 +138,14 @@ def formatResult(
 
     # Helper for the length of the result string so far, removing any color
     def len_result() -> int:
-        strip = lambda v: re.sub(r"\033\[\d+m", "", v)
         return len(
-            " ".join([strip(message) for message, _ in result.values() if message])
+            " ".join(
+                [
+                    re.sub(r"\033\[\d+m", "", message)
+                    for message, _ in result.values()
+                    if message
+                ]
+            )
         )
 
     # Decorate Caveats
@@ -195,7 +202,7 @@ def formatJobResult(
         # Add caveats with extra info
         if job.isPass() and options.extra_info:
             for check in options._checks.keys():
-                if job.specs.isValid(check) and not "ALL" in job.specs[check]:
+                if job.specs.isValid(check) and "ALL" not in job.specs[check]:
                     job.addCaveats(check)
         # Format failed messages
         elif job.isFail():
@@ -308,7 +315,7 @@ def checkSlepcVersion(checks, test):
     if len(test["slepc_version"]) == 0:
         return (False, None)
     # SLEPc is not installed
-    if checks["slepc_version"] == None:
+    if checks["slepc_version"] is None:
         return (False, None)
     # If any version of SLEPc works, return true immediately
     if "ALL" in set(test["slepc_version"]):
@@ -327,7 +334,7 @@ def checkExodusVersion(checks, test):
         return (True, version_string)
 
     # Exodus not installed or version could not be detected (e.g. old libMesh)
-    if checks["exodus_version"] == None:
+    if checks["exodus_version"] is None:
         return (False, version_string)
 
     return (checkVersion(checks, version_string, "exodus_version"), version_string)
@@ -342,7 +349,7 @@ def checkVTKVersion(checks, test):
         return (True, version_string)
 
     # VTK not installed or version could not be detected (e.g. old libMesh)
-    if checks["vtk_version"] == None:
+    if checks["vtk_version"] is None:
         return (False, version_string)
 
     return (checkVersion(checks, version_string, "vtk_version"), version_string)
@@ -357,7 +364,7 @@ def checkLibtorchVersion(checks, test):
         return (True, version_string)
 
     # libtorch not installed or version could not be detected
-    if checks["libtorch_version"] == None:
+    if checks["libtorch_version"] is None:
         return (False, version_string)
 
     return (checkVersion(checks, version_string, "libtorch_version"), version_string)
@@ -384,9 +391,9 @@ def getCapabilities(exe):
         cmd = f"{exe} --show-capabilities"
         output = runCommand(cmd, force_mpi_command=True, check=True)
     except subprocess.CalledProcessError as e:
-        print(f"ERROR: Failed to parse the application capabilities!")
+        print("ERROR: Failed to parse the application capabilities!")
         print(f"Command ran: {cmd}\n")
-        print(outputHeader(f"Failed command output"))
+        print(outputHeader("Failed command output"))
         print(e.stdout)
         sys.exit(1)
     return parseMOOSEJSON(output, "--show-capabilities")
@@ -464,7 +471,7 @@ def getSharedOption(libmesh_dir):
     for line in f:
         try:
             (key, value) = line.rstrip().split("=", 2)
-        except Exception as e:
+        except Exception:
             continue
 
         if key == "build_libtool_libs":
@@ -553,7 +560,7 @@ def checkOutputForPattern(output, re_pattern):
     """
     Returns boolean of pattern match
     """
-    if re.search(re_pattern, output, re.MULTILINE | re.DOTALL) == None:
+    if re.search(re_pattern, output, re.MULTILINE | re.DOTALL) is None:
         return False
     else:
         return True
@@ -582,7 +589,7 @@ def deleteFilesAndFolders(test_dir, paths, delete_folders=True):
         if os.path.exists(full_path):
             try:
                 os.remove(full_path)
-            except:
+            except:  # noqa: E722
                 print(("Unable to remove file: " + full_path))
 
     # Now try to delete directories that might have been created
@@ -593,7 +600,7 @@ def deleteFilesAndFolders(test_dir, paths, delete_folders=True):
                 (path, tail) = os.path.split(path)
                 try:
                     os.rmdir(os.path.join(test_dir, path, tail))
-                except:
+                except:  # noqa: E722
                     # There could definitely be problems with removing the directory
                     # because it might be non-empty due to checkpoint files or other
                     # files being created on different operating systems. We just

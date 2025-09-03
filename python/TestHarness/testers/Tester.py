@@ -7,7 +7,13 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import re, os, sys, shutil, json, importlib.util, inspect
+import re
+import os
+import sys
+import shutil
+import json
+import importlib.util
+import inspect
 import mooseutils
 from TestHarness import OutputInterface, util
 from TestHarness.StatusSystem import StatusSystem
@@ -810,7 +816,7 @@ class Tester(MooseObject, OutputInterface):
         """return bool on tester having redirected output"""
         return (
             self.specs.isValid("redirect_output")
-            and self.specs["redirect_output"] == True
+            and self.specs["redirect_output"]
             and self.getProcs(options) > 1
         )
 
@@ -826,7 +832,7 @@ class Tester(MooseObject, OutputInterface):
     def addCaveats(self, *kwargs):
         """Add caveat(s) which will be displayed with the final test status"""
         for i in [x for x in kwargs if x]:
-            if type(i) == type([]):
+            if isinstance(i, list):
                 self.__caveats.update(i)
             else:
                 self.__caveats.add(i)
@@ -975,15 +981,15 @@ class Tester(MooseObject, OutputInterface):
             if tmp_reason != "":
                 reasons["valgrind"] = tmp_reason
         # If we're running in recover mode skip tests that have recover = false
-        elif options.enable_recover and self.specs["recover"] == False:
+        elif options.enable_recover and not self.specs["recover"]:
             reasons["recover"] = "NO RECOVER"
-        elif options.enable_restep and self.specs["restep"] == False:
+        elif options.enable_restep and not self.specs["restep"]:
             reasons["restep"] = "NO RESTEP"
 
         # AD size check
         min_ad_size = self.specs["min_ad_size"]
         max_ad_size = self.specs["max_ad_size"]
-        if not None in [min_ad_size, max_ad_size]:
+        if None not in [min_ad_size, max_ad_size]:
             ad_size = self.getCapability(options, "ad_size")
             assert isinstance(ad_size, int)
             if min_ad_size is not None and int(min_ad_size) > ad_size:
@@ -1007,20 +1013,20 @@ class Tester(MooseObject, OutputInterface):
         # Check for SLEPc versions
         (slepc_status, slepc_version) = util.checkSlepcVersion(checks, self.specs)
         if not slepc_status and len(self.specs["slepc_version"]) != 0:
-            if slepc_version != None:
+            if slepc_version is not None:
                 reasons["slepc_version"] = (
                     "using SLEPc "
                     + str(checks["slepc_version"])
                     + " REQ: "
                     + slepc_version
                 )
-            elif slepc_version == None:
+            elif slepc_version is None:
                 reasons["slepc_version"] = "SLEPc is not installed"
 
         # Check for ExodusII versions
         (exodus_status, exodus_version) = util.checkExodusVersion(checks, self.specs)
         if not exodus_status:
-            if checks["exodus_version"] != None:
+            if checks["exodus_version"] is not None:
                 reasons["exodus_version"] = (
                     "using ExodusII "
                     + str(checks["exodus_version"])
@@ -1035,7 +1041,7 @@ class Tester(MooseObject, OutputInterface):
         # Check for VTK versions
         (vtk_status, vtk_version) = util.checkVTKVersion(checks, self.specs)
         if not vtk_status:
-            if checks["vtk_version"] != None:
+            if checks["vtk_version"] is not None:
                 reasons["vtk_version"] = (
                     "using VTK " + str(checks["vtk_version"]) + " REQ: " + vtk_version
                 )
@@ -1140,7 +1146,7 @@ class Tester(MooseObject, OutputInterface):
 
         # There should only be one entry in self.specs['dof_id_bytes']
         for x in self.specs["dof_id_bytes"]:
-            if x != "ALL" and not x in checks["dof_id_bytes"]:
+            if x != "ALL" and x not in checks["dof_id_bytes"]:
                 reasons["dof_id_bytes"] = "--with-dof-id-bytes!=" + x
 
         # Check to make sure depend files exist
@@ -1298,7 +1304,7 @@ class Tester(MooseObject, OutputInterface):
                             with open(path, "r") as f:
                                 result = json.load(f)
                                 del result
-                        except:
+                        except:  # noqa: E722
                             output += f"{prefix}cannot be loaded\n"
                             self.setStatus(self.fail, "BAD METADATA")
                         else:

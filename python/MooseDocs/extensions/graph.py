@@ -211,11 +211,9 @@ class GraphHistogram(command.CommandComponent):
         filename = common.check_filenames(filename)
         reader = mooseutils.PostprocessorReader(filename)
 
-        show_legend = True
-
         if data is None:
             vectors = reader.variables()
-            if not settings["vectors"] is None:
+            if settings["vectors"] is not None:
                 vectors = settings["vectors"].split(" ")
 
             names = []
@@ -230,7 +228,7 @@ class GraphHistogram(command.CommandComponent):
 
             data = [dict() for i in range(len(vectors))]
             for i in range(len(vectors)):
-                if not vectors[i] in reader.variables():
+                if vectors[i] not in reader.variables():
                     string = "The vector " + vectors[i] + " is not in " + filename
                     raise common.exceptions.MooseDocsException(string)
                 data[i]["type"] = "histogram"

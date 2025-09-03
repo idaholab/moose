@@ -10,14 +10,16 @@
 
 import vtk
 
-from .ContourFilter import ContourFilter
-from .TransformFilter import TransformFilter
-from .TubeFilter import TubeFilter
-from .RotationalExtrusionFilter import RotationalExtrusionFilter
+from .ContourFilter import ContourFilter as ContourFilter
+from .TransformFilter import TransformFilter as TransformFilter
+from .TubeFilter import TubeFilter as TubeFilter
+from .RotationalExtrusionFilter import (
+    RotationalExtrusionFilter as RotationalExtrusionFilter,
+)
 
-from .ClipperFilterBase import ClipperFilterBase
-from .PlaneClipper import PlaneClipper
-from .BoxClipper import BoxClipper
+from .ClipperFilterBase import ClipperFilterBase as ClipperFilterBase
+from .PlaneClipper import PlaneClipper as PlaneClipper
+from .BoxClipper import BoxClipper as BoxClipper
 
 from .ChiggerFilterBase import ChiggerFilterBase
 

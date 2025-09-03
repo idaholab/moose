@@ -14,7 +14,7 @@ try:
     from PyQt5 import QtWidgets, QtCore
 
     MOOSE_USE_QT5 = True
-except:
+except ModuleNotFoundError:
     MOOSE_USE_QT5 = False
 
 """

@@ -328,7 +328,7 @@ class ExodusReader(base.ChiggerObject):
             list: A list of all times.
         """
         self.checkUpdateState()
-        return [t.time for t in self.__timedata if t.time != None]
+        return [t.time for t in self.__timedata if t.time is not None]
 
     def getBlockInformation(self):
         """

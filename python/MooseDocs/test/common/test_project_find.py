@@ -10,7 +10,6 @@
 
 import unittest
 from unittest.mock import patch
-import MooseDocs
 from MooseDocs.common import project_find
 
 

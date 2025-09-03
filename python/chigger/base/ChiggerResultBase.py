@@ -71,7 +71,7 @@ class ChiggerResultBase(ChiggerObject):
 
     def __init__(self, renderer=None, **kwargs):
         super(ChiggerResultBase, self).__init__(**kwargs)
-        self._vtkrenderer = renderer if renderer != None else vtk.vtkRenderer()
+        self._vtkrenderer = renderer if renderer is not None else vtk.vtkRenderer()
         self._vtklight = vtk.vtkLight()
         self._vtklight.SetLightTypeToHeadlight()
 

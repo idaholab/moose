@@ -13,7 +13,6 @@ import logging
 
 import moosetree
 
-import MooseDocs
 from .. import common
 from ..common import mixins
 from ..tree import tokens, pages

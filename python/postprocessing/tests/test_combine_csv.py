@@ -133,7 +133,7 @@ class TestCombineCSV(unittest.TestCase):
         Test exception when bad basename is provided.
         """
         with self.assertRaises(combine_csv.CombineCSV.CombineError) as cerr:
-            df_test = combine_csv.CombineCSV(
+            combine_csv.CombineCSV(
                 "bad_basename_54", "remove_me_54.csv", "large_number"
             )
         self.assertEqual(cerr.exception._name, "BasenameError")
@@ -143,7 +143,7 @@ class TestCombineCSV(unittest.TestCase):
         Test exception when mismatch of steps are provided.
         """
         with self.assertRaises(combine_csv.CombineCSV.CombineError) as cerr:
-            df_test = combine_csv.CombineCSV(
+            combine_csv.CombineCSV(
                 self.__basename, "remove_me_54.csv", "large_number", lastn=2, endt=1
             )
         self.assertEqual(cerr.exception._name, "StepBoundsError")
@@ -153,7 +153,7 @@ class TestCombineCSV(unittest.TestCase):
         Test exception when bad "x" variable name is provided.
         """
         with self.assertRaises(combine_csv.CombineCSV.CombineError) as cerr:
-            df_test = combine_csv.CombineCSV(
+            combine_csv.CombineCSV(
                 self.__basename,
                 "remove_me_54.csv",
                 "large_number",
@@ -166,7 +166,7 @@ class TestCombineCSV(unittest.TestCase):
         Test exception when data rows are not consistent.
         """
         with self.assertRaises(combine_csv.CombineCSV.CombineError) as cerr:
-            df_test = combine_csv.CombineCSV(
+            combine_csv.CombineCSV(
                 "{}54_bad_".format(self.__basename),
                 "remove_me_54.csv",
                 "large_number",
@@ -179,16 +179,9 @@ class TestCombineCSV(unittest.TestCase):
         Test exception when bad "y" variable name is provided.
         """
         with self.assertRaises(combine_csv.CombineCSV.CombineError) as cerr:
-            df_test = combine_csv.CombineCSV(
-                self.__basename, "remove_me_54.csv", "bad_y54_name"
-            )
+            combine_csv.CombineCSV(self.__basename, "remove_me_54.csv", "bad_y54_name")
         self.assertEqual(cerr.exception._name, "YVariableError")
 
 
 if __name__ == "__main__":
-    import sys
-
-    sys.path.append("..")
-    import combine_csv
-
     unittest.main(module=__name__, verbosity=2)

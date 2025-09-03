@@ -100,8 +100,9 @@ class ContentExtension(command.CommandExtension):
         """
 
         location = location
-        func = lambda p: p.local.startswith(location) and isinstance(p, pages.Source)
-        nodes = self.translator.findPages(func)
+        nodes = self.translator.findPages(
+            lambda p: p.local.startswith(location) and isinstance(p, pages.Source)
+        )
         nodes.sort(key=lambda n: n.local)
 
         headings = collections.defaultdict(list)
@@ -189,7 +190,7 @@ class TableOfContentsCommand(command.CommandComponent):
     def createToken(self, parent, info, page, settings):
         levels = settings["levels"]
         if isinstance(levels, (str, str)):
-            levels = [int(l) for l in levels.split()]
+            levels = [int(lev) for lev in levels.split()]
 
         return TableOfContents(
             parent,
@@ -425,12 +426,15 @@ class RenderTableOfContents(components.RenderComponent):
     def createHTML(self, parent, token, page):
         hide = token["hide"]
         levels = token["levels"]
-        func = (
-            lambda n: (n.name == "Heading")
-            and (n["level"] in levels)
-            and (n is not token)
-            and (n["id"] not in hide)
-        )
+
+        def func(n):
+            return (
+                (n.name == "Heading")
+                and (n["level"] in levels)
+                and (n is not token)
+                and (n["id"] not in hide)
+            )
+
         toks = moosetree.findall(token.root, func)
 
         div = html.Tag(parent, "div", class_="moose-table-of-contents")
@@ -456,15 +460,18 @@ class RenderContentOutline(components.RenderComponent):
 
     def createHTMLHelper(self, parent, token, page):
         if token["location"] is not None and not token["pages"]:
-            if token["recursive"]:
-                func = lambda p: p.local.startswith(token["location"]) and isinstance(
-                    p, pages.Source
-                )
-            else:
-                location = token["location"].rstrip("/")
-                func = lambda p: os.path.dirname(p.local) == location and isinstance(
-                    p, pages.Source
-                )
+
+            def func(p):
+                if token["recursive"]:
+                    return p.local.startswith(token["location"]) and isinstance(
+                        p, pages.Source
+                    )
+                else:
+                    location = token["location"].rstrip("/")
+                    return os.path.dirname(p.local) == location and isinstance(
+                        p, pages.Source
+                    )
+
             nodes = self.translator.findPages(func)
         elif token["pages"] and token["location"] is None:
             nodes = [self.translator.findPage(p) for p in token["pages"]]
@@ -535,9 +542,9 @@ class RenderPagination(components.RenderComponent):
         div = html.Tag(parent, "div", class_="moose-content-pagination", style=style)
 
         if token["previous"] is not None:
-            link = self.createHTMLHelper(div, token, page, "previous")
+            self.createHTMLHelper(div, token, page, "previous")
         if token["next"] is not None:
-            link = self.createHTMLHelper(div, token, page, "next")
+            self.createHTMLHelper(div, token, page, "next")
 
     def createMaterialize(self, parent, token, page):
         style = "margin-top:{};margin-bottom:{};".format(*token["margins"])

@@ -9,11 +9,10 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 import unittest
 import mock
-import logging
 
 import MooseDocs
 import mooseutils
-from moosesqa import SQAReport, SQADocumentReport, LogHelper
+from moosesqa import SQAReport, SQADocumentReport
 
 
 @unittest.skipIf(

@@ -7,9 +7,10 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os, sys
+import os
+import sys
 from TestHarness import util
-from FileTester import FileTester
+from TestHarness.testers.FileTester import FileTester
 
 
 class AnalyzeJacobian(FileTester):
@@ -43,17 +44,6 @@ class AnalyzeJacobian(FileTester):
     def prepare(self, options):
         # We do not know what file(s) analyzejacobian.py produces
         return
-
-    # Check if numpy is available
-    def checkRunnable(self, options):
-        try:
-            import numpy
-
-            assert numpy  # silence pyflakes warning
-            return True
-        except Exception:
-            self.addCaveats("skipped (no numpy)")
-            return False
 
     def getCommand(self, options):
         specs = self.specs

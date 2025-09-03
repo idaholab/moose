@@ -10,7 +10,7 @@
 
 import unittest
 import logging
-from MooseDocs import common, base, tree
+from MooseDocs import base
 from MooseDocs.test import MooseDocsTestCase
 from MooseDocs.extensions import core, command, floats, devel
 

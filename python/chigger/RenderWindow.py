@@ -303,7 +303,7 @@ class RenderWindow(base.ChiggerObject):
                         msg.format(type(observer), observers.ChiggerObserver)
                     )
 
-                elif not observer.isActive() is None:
+                elif observer.isActive() is not None:
                     observer.init(self)
 
         self.__vtkwindow.Render()

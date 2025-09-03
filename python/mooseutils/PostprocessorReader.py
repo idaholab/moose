@@ -8,7 +8,6 @@
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
 from .MooseDataFrame import MooseDataFrame
-from . import message
 
 
 class PostprocessorReader(MooseDataFrame):

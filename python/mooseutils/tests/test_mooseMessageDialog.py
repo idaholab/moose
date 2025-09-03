@@ -8,7 +8,6 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import sys
 import unittest
 import mooseutils
 from mooseutils.message import MOOSE_USE_QT5

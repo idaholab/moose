@@ -7,14 +7,10 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 import re
-import os
 import collections
 import logging
-import enum
-import pyhit
 import mooseutils
 import moosesqa
-from .Requirement import Requirement
 from .LogHelper import LogHelper
 
 ISSUE_RE = re.compile(r"^([0-9a-f]{6,40})$|^(.*#[0-9]+)$", flags=re.MULTILINE)
@@ -97,7 +93,6 @@ def check_requirements(
         raise ValueError(msg)
     elif file_list is None:
         root = mooseutils.git_root_dir()
-        ver = mooseutils.git_version()
         file_list = mooseutils.git_ls_files(root, recurse_submodules=True)
 
     # Setup allowed collections

@@ -7,8 +7,10 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-import re, os, shutil
-from Tester import Tester
+import re
+import os
+import shutil
+from TestHarness.testers.Tester import Tester
 from TestHarness import util, TestHarness
 from shlex import quote
 
@@ -205,7 +207,7 @@ class RunApp(Tester):
             for param in ["expect_out", "absent_out"]:
                 if self.specs.isValid(param):
                     caveats.append(param)
-            if self.specs["should_crash"] == True:
+            if self.specs["should_crash"]:
                 caveats.append("should_crash")
             if caveats:
                 self.addCaveats(f'{",".join(caveats)} {reason}')
@@ -215,7 +217,7 @@ class RunApp(Tester):
         if (
             self.specs.isValid("executable_pattern")
             and re.search(self.specs["executable_pattern"], self.specs["executable"])
-            == None
+            is None
         ):
             self.addCaveats("EXECUTABLE PATTERN")
             self.setStatus(self.skip)
@@ -247,7 +249,7 @@ class RunApp(Tester):
         # more complex, but there isn't a need at the moment.
         if (
             options.hpc
-            and self.specs["redirect_output"] == True
+            and self.specs["redirect_output"]
             and int(self.specs["min_parallel"]) > 1
         ):
             self.addCaveats("hpc min_cpus=1")
@@ -299,7 +301,7 @@ class RunApp(Tester):
         if self.specs["no_additional_cli_args"]:
             return 1
 
-        if options.parallel == None:
+        if options.parallel is None:
             default_ncpus = 1
         else:
             default_ncpus = options.parallel
@@ -316,7 +318,7 @@ class RunApp(Tester):
         # more complex, but there isn't a need at the moment.
         if (
             options.hpc
-            and self.specs["redirect_output"] == True
+            and self.specs["redirect_output"]
             and min_parallel == 1
             and ncpus > 1
         ):
@@ -375,7 +377,7 @@ class RunApp(Tester):
             # and it is NOT supplied already in the cli-args option
             cli_args.append("--distributed-mesh")
 
-        if specs["restep"] != False and options.enable_restep:
+        if specs["restep"] and options.enable_restep:
             cli_args.append("--test-restep")
 
         if not specs["perf_graph_live"] and "--disable-perf-graph-live" not in cli_args:
@@ -420,7 +422,7 @@ class RunApp(Tester):
             path = os.path.join(self.getTestDir(), pg_metadata.path)
             cli_args.append(f"Outputs/perf_graph_json_file={path}")
 
-        if options.colored == False:
+        if not options.colored:
             cli_args.append("--color off")
 
         if options.cli_args:
@@ -483,7 +485,8 @@ class RunApp(Tester):
                 errors += "expect_out and absent_out can not be supplied when using a custom evaluation function!"
                 self.setStatus(self.fail, "CUSTOM EVAL FAILED")
                 return errors
-            import importlib.util, sys
+            import importlib.util
+            import sys
 
             custom_mod_spec = importlib.util.spec_from_file_location(
                 "custom_module",
@@ -583,9 +586,9 @@ class RunApp(Tester):
             > 0
         ):
             reason = "ERRMSG"
-        elif exit_code == 0 and specs["should_crash"] == True:
+        elif exit_code == 0 and specs["should_crash"]:
             reason = "NO CRASH"
-        elif exit_code != 0 and specs["should_crash"] == False and self.shouldExecute():
+        elif exit_code != 0 and not specs["should_crash"] and self.shouldExecute():
             # Let's look at the error code to see if we can perhaps further split this out later with a post exam
             reason = "CRASH"
         # Valgrind runs
