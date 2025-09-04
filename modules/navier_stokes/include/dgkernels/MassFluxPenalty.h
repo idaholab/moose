@@ -26,6 +26,7 @@ public:
   virtual void computeResidual() override;
 
 protected:
+  void precalculateResidual() override;
   virtual ADReal computeQpResidual(Moose::DGResidualType type) override;
 
   const ADVariableValue & _vel_x;
@@ -37,4 +38,6 @@ protected:
   const bool _matrix_only;
   /// Stabilization magnitude parameter
   const Real _gamma;
+  /// Facet characteristic length for correct norm computations
+  Real _hmax;
 };

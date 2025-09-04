@@ -287,13 +287,13 @@ l = 1
 [Functions]
   [top]
     type = ParsedVectorFunction
-    value_x = ${U}
-    value_y = 0
+    expression_x = ${U}
+    expression_y = 0
   []
   [walls]
     type = ParsedVectorFunction
-    value_x = 0
-    value_y = 0
+    expression_x = 0
+    expression_y = 0
   []
 []
 
