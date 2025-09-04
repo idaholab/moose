@@ -70,7 +70,14 @@ MFEMTransient::takeStep(Real input_dt)
     _dt = input_dt;
 
   _time_stepper->preSolve();
+
+  // Unfortunately, time needs to be temporarily incremented so we get
+  // meaningful console output in timestepSetup(). We decrement it back
+  // immediately after so step() below behaves as expected.
+  _time += _dt;
   _problem.timestepSetup();
+  _time -= _dt;
+
   _problem.onTimestepBegin();
 
   // Advance time step of the MFEM problem. Time is also updated here, and
