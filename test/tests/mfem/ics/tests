@@ -6,7 +6,6 @@
     input = scalar_ic.i
     xmldiff = 'OutputData/ScalarIC/Run0/Run0.pvd
                 OutputData/ScalarIC/Run0/Cycle000000/proc000000.vtu'
-    ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to set initial conditions on a scalar variable.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
@@ -18,7 +17,6 @@
     input = vector_ic.i
     xmldiff = 'OutputData/VectorIC/Run0/Run0.pvd
                 OutputData/VectorIC/Run0/Cycle000000/proc000000.vtu'
-    ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to set initial conditions on a vector MFEM variable.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
@@ -31,7 +29,6 @@
     xmldiff = 'OutputData/TransientScalarIC/Run0/Run0.pvd
                 OutputData/TransientScalarIC/Run0/Cycle000000/proc000000.vtu
                 OutputData/TransientScalarIC/Run0/Cycle000001/proc000000.vtu'
-    ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to set initial conditions on a scalar variable in transient simulations.'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'

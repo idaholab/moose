@@ -36,10 +36,8 @@ PorousFlowPorosity::validParams()
                         "Biot coefficient that appears in the term (biot_coefficient_prime - 1) * "
                         "(P - reference_porepressure) / solid_bulk.  If not provided, this "
                         "defaults to the standard biot_coefficient");
-  params.addRangeCheckedParam<Real>(
-      "solid_bulk",
-      "solid_bulk>0",
-      "Bulk modulus of the drained porous solid skeleton (only used if fluid=true)");
+  params.addParam<MooseFunctorName>(
+      "solid_bulk", "Bulk modulus of the drained porous solid skeleton (only used if fluid=true)");
   params.addCoupledVar(
       "reference_temperature", 0.0, "Reference temperature (only used if thermal=true)");
   params.addCoupledVar(
@@ -71,11 +69,9 @@ PorousFlowPorosity::PorousFlowPorosity(const InputParameters & parameters)
     _biot(getParam<Real>("biot_coefficient")),
     _exp_coeff(isParamValid("thermal_expansion_coeff") ? getParam<Real>("thermal_expansion_coeff")
                                                        : 0.0),
-    _solid_bulk(isParamValid("solid_bulk") ? getParam<Real>("solid_bulk")
-                                           : std::numeric_limits<Real>::max()),
-    _coeff(isParamValid("biot_coefficient_prime")
-               ? (getParam<Real>("biot_coefficient_prime") - 1.0) / _solid_bulk
-               : (_biot - 1.0) / _solid_bulk),
+    _solid_bulk(isParamValid("solid_bulk") ? &(getFunctor<Real>("solid_bulk")) : nullptr),
+    _coeff(isParamValid("biot_coefficient_prime") ? (getParam<Real>("biot_coefficient_prime") - 1.0)
+                                                  : (_biot - 1.0)),
 
     _t_reference(_nodal_material ? coupledDofValues("reference_temperature")
                                  : coupledValue("reference_temperature")),
@@ -150,7 +146,7 @@ PorousFlowPorosity::PorousFlowPorosity(const InputParameters & parameters)
 {
   if (_thermal && !isParamValid("thermal_expansion_coeff"))
     mooseError("PorousFlowPorosity: When thermal=true you must provide a thermal_expansion_coeff");
-  if (_fluid && !isParamValid("solid_bulk"))
+  if (_fluid && !_solid_bulk)
     mooseError("PorousFlowPorosity: When fluid=true you must provide a solid_bulk");
   if (_chemical && _num_c_ref != _dictator.numAqueousKinetic())
     mooseError("PorousFlowPorosity: When chemical=true you must provide the reference_chemistry "
@@ -261,7 +257,32 @@ PorousFlowPorosity::decayQp() const
     result += _exp_coeff * ((*_temperature)[_qp] - _t_reference[_qp]);
 
   if (_fluid)
-    result += _coeff * ((*_pf)[_qp] - _p_reference[_qp]);
+  {
+    Real solid_bulk;
+    // Using Qp 0 can leverage the functor caching
+    // TODO: Find a way to effectively use subdomain-constant-ness
+    unsigned int qp_used = (_constant_option == ConstantTypeEnum::NONE) ? _qp : 0;
+    if (_nodal_material)
+    {
+      const std::set<SubdomainID> subdomain_set = {_current_elem->subdomain_id()};
+      const Moose::NodeArg space_arg = {_current_elem->node_ptr(qp_used), &subdomain_set};
+      solid_bulk = (*_solid_bulk)(space_arg, Moose::currentState());
+    }
+    else if (_bnd)
+    {
+      const Moose::ElemSideQpArg space_arg = {
+          _current_elem, _current_side, qp_used, _qrule, _q_point[qp_used]};
+      solid_bulk = (*_solid_bulk)(space_arg, Moose::currentState());
+    }
+    else
+    {
+      const Moose::ElemQpArg space_arg = {_current_elem, qp_used, _qrule, _q_point[qp_used]};
+      solid_bulk = (*_solid_bulk)(space_arg, Moose::currentState());
+    }
+    if (solid_bulk <= 0)
+      mooseError("PorousFlowPorosity: solid_bulk must be larger than Zero");
+    result += _coeff / solid_bulk * ((*_pf)[_qp] - _p_reference[_qp]);
+  }
 
   if (_mechanical)
   {
@@ -286,7 +307,32 @@ PorousFlowPorosity::ddecayQp_dvar(unsigned pvar) const
     result += _exp_coeff * (*_dtemperature_dvar)[_qp][pvar];
 
   if (_fluid)
-    result += _coeff * (*_dpf_dvar)[_qp][pvar];
+  {
+    Real solid_bulk;
+    // Using Qp 0 can leverage the functor caching
+    // TODO: Find a way to effectively use subdomain-constant-ness
+    unsigned int qp_used = (_constant_option == ConstantTypeEnum::NONE) ? _qp : 0;
+    if (_nodal_material)
+    {
+      const std::set<SubdomainID> subdomain_set = {_current_elem->subdomain_id()};
+      const Moose::NodeArg space_arg = {_current_elem->node_ptr(qp_used), &subdomain_set};
+      solid_bulk = (*_solid_bulk)(space_arg, Moose::currentState());
+    }
+    else if (_bnd)
+    {
+      const Moose::ElemSideQpArg space_arg = {
+          _current_elem, _current_side, qp_used, _qrule, _q_point[qp_used]};
+      solid_bulk = (*_solid_bulk)(space_arg, Moose::currentState());
+    }
+    else
+    {
+      const Moose::ElemQpArg space_arg = {_current_elem, qp_used, _qrule, _q_point[qp_used]};
+      solid_bulk = (*_solid_bulk)(space_arg, Moose::currentState());
+    }
+    if (solid_bulk <= 0)
+      mooseError("PorousFlowPorosity: solid_bulk must be larger than Zero.");
+    result += _coeff / solid_bulk * (*_dpf_dvar)[_qp][pvar];
+  }
 
   return result;
 }
