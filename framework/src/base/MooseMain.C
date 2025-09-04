@@ -56,7 +56,7 @@ createMooseApp(const std::string & default_app_type, int argc, char * argv[])
   // Setup the parser with the input and the HIT parameters from the command line. The parse
   // will also look for "Application/type=" in input to specify the application type
   auto parser = std::make_unique<Parser>(input_filenames);
-  parser->setAppType(default_app_type);
+  parser->setAppType(default_app_type, nullptr);
   parser->setCommandLineParams(command_line->buildHitParams());
   parser->parse();
 
@@ -64,11 +64,16 @@ createMooseApp(const std::string & default_app_type, int argc, char * argv[])
   for (const auto & entry : std::as_const(*command_line).getEntries())
     if (!entry.subapp_name && entry.value &&
         (entry.name == "--app" || entry.name == "Application/type"))
-      parser->setAppType(*entry.value);
+      parser->setAppType(*entry.value, parser->queryCommandLineRoot());
 
-  const auto & app_type = parser->getAppType();
+  const auto & [app_type, node] = *parser->getAppType();
   if (!AppFactory::instance().isRegistered(app_type))
-    mooseError("'", app_type, "' is not a registered application type.");
+  {
+    auto error = "'" + app_type + "' is not a registered application type";
+    if (node)
+      error = Moose::hitMessagePrefix(*node) + error;
+    mooseError(error);
+  }
 
   // Create an instance of the application and store it in a smart pointer for easy cleanup
   return AppFactory::create(std::move(parser), std::move(command_line));

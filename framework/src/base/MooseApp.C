@@ -56,6 +56,8 @@
 #include "MooseMain.h"
 #include "FEProblemBase.h"
 #include "Parser.h"
+#include "ParameterExtraction.h"
+#include "ParseUtils.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -95,7 +97,7 @@ void
 MooseApp::addAppParam(InputParameters & params)
 {
   params.addCommandLineParam<std::string>(
-      "app_to_run", "--app <type>", "Specify the application type to run (case-sensitive)");
+      "type", "--app <type>", "Specify the application type to run (case-sensitive)");
 }
 
 void
@@ -395,6 +397,8 @@ MooseApp::validParams()
 
   params.addPrivateParam<std::shared_ptr<CommandLine>>("_command_line");
   params.addPrivateParam<std::shared_ptr<Parallel::Communicator>>("_comm");
+  params.addPrivateParam<std::shared_ptr<const Moose::ParameterExtraction::ExtractionInfo>>(
+      "_app_extraction_info");
   params.addPrivateParam<unsigned int>("_multiapp_level");
   params.addPrivateParam<unsigned int>("_multiapp_number");
   params.addPrivateParam<bool>("_use_master_mesh", false);
@@ -2174,7 +2178,7 @@ MooseApp::run()
     setupOptions();
     runInputFile();
   }
-  catch (Parser::Error & err)
+  catch (Moose::ParseUtils::ParseError & err)
   {
     mooseAssert(_parser->getThrowOnError(), "Should be true");
     throw err;
@@ -3605,6 +3609,37 @@ MooseApp::addCapability(const std::string & capability, const char * value, cons
 {
   checkReservedCapability(capability);
   Moose::Capabilities::getCapabilityRegistry().add(capability, std::string(value), doc);
+}
+
+void
+MooseApp::extractApplicationParams(const hit::Node & root,
+                                   InputParameters & params,
+                                   const bool throw_on_error)
+{
+  // Extract from [Application] into params
+  const auto info = Moose::ParameterExtraction::extract(root, "Application", params);
+
+  // Errors found during extraction so we cannot build the app
+  if (info.errors.size())
+    Moose::ParseUtils::parseError(root, info.errors, throw_on_error);
+
+  // Set the ExtractionInfo as a parameter so that the Builder
+  // can utilize the extracted variables and deprecated parameters
+  // that we have collected here, because it won't be extracting
+  // anything in the [Application] block
+  params.set<std::shared_ptr<const Moose::ParameterExtraction::ExtractionInfo>>(
+      "_app_extraction_info") =
+      std::make_unique<const Moose::ParameterExtraction::ExtractionInfo>(info);
+}
+
+const Moose::ParameterExtraction::ExtractionInfo &
+MooseApp::getAppExtractionInfo() const
+{
+  if (const auto ptr =
+          parameters().get<std::shared_ptr<const Moose::ParameterExtraction::ExtractionInfo>>(
+              "_app_extraction_info"))
+    return *ptr;
+  mooseError("MooseApp::getAppExtractionInfo: ExtractionInfo is not available");
 }
 
 #ifdef MOOSE_MFEM_ENABLED
