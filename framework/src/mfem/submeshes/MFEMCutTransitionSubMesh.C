@@ -95,7 +95,7 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
   // Iterate over all vertices on cut, find elements with those vertices,
   // and declare them transition elements if they are on the +ve side of the cut
   mfem::Array<int> transition_els;
-  std::vector<int> global_cut_vert_ids;
+  std::vector<HYPRE_BigInt> global_cut_vert_ids;
   mfem::Array<HYPRE_BigInt> gi;
   parent_mesh.GetGlobalVertexIndices(gi);
   std::unique_ptr<mfem::Table> vert_to_elem(parent_mesh.GetVertexToElementTable());
@@ -134,14 +134,14 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
     global_n_cut_vertices += cut_vert_sizes[i];
 
   // Gather the queries to all ranks.
-  std::vector<int> all_cut_verts(global_n_cut_vertices, 0);
+  std::vector<HYPRE_BigInt> all_cut_verts(global_n_cut_vertices, 0);
   MPI_Allgatherv(&global_cut_vert_ids[0],
                  n_cut_vertices,
-                 MPI_INT,
+                 HYPRE_MPI_BIG_INT,
                  &all_cut_verts[0],
                  &cut_vert_sizes[0],
                  &n_vert_offset[0],
-                 MPI_INT,
+                 HYPRE_MPI_BIG_INT,
                  getMFEMProblem().mesh().getMFEMParMesh().GetComm());
 
   // Detect shared vertices and add corresponding elements
