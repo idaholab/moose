@@ -61,6 +61,8 @@ const ExecFlagType EXEC_POST_ADAPTIVITY = registerExecFlag("POST_ADAPTIVITY");
 namespace Moose
 {
 
+const std::string global_params_syntax = "GlobalParams";
+
 void associateSyntaxInner(Syntax & syntax, ActionFactory & action_factory);
 
 void
@@ -564,7 +566,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("AddConvergenceAction", "Convergence/*");
   syntax.registerSyntaxType("Convergence/*", "ConvergenceName");
 
-  registerSyntax("GlobalParamsAction", "GlobalParams");
+  registerSyntax("GlobalParamsAction", global_params_syntax);
 
   registerSyntax("AddDistributionAction", "Distributions/*");
   syntax.registerSyntaxType("Distributions/*", "DistributionName");

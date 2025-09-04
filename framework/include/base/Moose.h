@@ -221,6 +221,11 @@ extern bool _throw_on_warning;
 extern ExecFlagEnum execute_flags;
 
 /**
+ * The syntax for the global parameters block
+ */
+extern const std::string global_params_syntax;
+
+/**
  * Macros for coloring any output stream (_console, std::ostringstream, etc.)
  */
 #define COLOR_BLACK (Moose::colorConsole() ? XTERM_BLACK : "")

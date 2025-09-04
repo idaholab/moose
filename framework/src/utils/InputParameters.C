@@ -1799,7 +1799,7 @@ InputParameters::queryDataFileNamePath(const std::string & name) const
 std::optional<std::string>
 InputParameters::setupVariableNames(std::vector<VariableName> & names,
                                     const hit::Node & node,
-                                    const Moose::PassKey<Moose::Builder>)
+                                    const SetupVariableNamesKey)
 {
   // Whether or not a name was found
   bool has_name = false;
