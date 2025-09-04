@@ -707,9 +707,17 @@ TEST(InputParametersTest, commandLineParamSetNotCLParam)
   InputParameters params = emptyInputParameters();
   params.addParam<std::string>("param", "Doc");
   Moose::UnitUtils::assertThrows<MooseRuntimeError>(
-      [&params]() { params.commandLineParamSet("param", {}); },
+      [&params]() { params.commandLineParamSet("param", "unused", nullptr, {}); },
       "InputParameters::commandLineParamSet: The parameter 'param' is not a command line "
       "parameter");
+}
+
+TEST(InputParametersTest, commandLineParamFullpath)
+{
+  InputParameters params = emptyInputParameters();
+  params.addCommandLineParam<bool>("foo", "--foo", "doc");
+  params.commandLineParamSet("foo", "--foo", nullptr, {});
+  ASSERT_EQ(params.paramFullpath("foo"), "--foo");
 }
 
 TEST(InputParametersTest, isCommandLineParameter)

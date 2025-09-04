@@ -83,7 +83,8 @@ mooseErrorRaw(std::string msg,
     {
       // If we have a node available, add in the hit context (file location)
       if (node)
-        msg = Moose::hitMessagePrefix(*node) + msg;
+        if (const auto hit_prefix = Moose::hitMessagePrefix(*node, /* fullpath = */ true))
+          msg = *hit_prefix + "\n" + msg;
 
       msg = mooseMsgFmt(msg, "*** ERROR ***", COLOR_RED) + "\n";
       if (!prefix.empty()) // multiapp prefix

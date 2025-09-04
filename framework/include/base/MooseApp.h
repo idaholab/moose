@@ -82,6 +82,10 @@ namespace hit
 {
 class Node;
 }
+namespace Moose::ParameterExtraction
+{
+struct ExtractionInfo;
+}
 
 #ifdef MOOSE_KOKKOS_ENABLED
 namespace Moose::Kokkos
@@ -1072,6 +1076,33 @@ public:
 
   /// Returns whether the flag for unused parameters is set to throw an error
   bool unusedFlagIsError() const { return _enable_unused_check == ERROR_UNUSED; }
+
+  /**
+   * Extracts the [Application] block parameters into \p params.
+   *
+   * Also sets the ExtractionInfo in the "_app_extraction_info" parameter
+   *
+   * The \p command_line_root argument should be able to removed once
+   * idaholab/moose#31461 is resolved.
+   *
+   * @param root The root hit node (should come from the Parser)
+   * @param command_line_root The root command line hit node (should come from the Parser)
+   * @param params The parameters to fill
+   * @param throw_on_error If true, throw a ParseError instead of using mooseError if extraction
+   * fails
+   */
+  static void extractApplicationParams(const hit::Node & root,
+                                       const hit::Node & command_line_root,
+                                       InputParameters & params,
+                                       const bool throw_on_error);
+
+  /**
+   * Get the ExtractionInfo object obtained during extraction in extractApplicationParams
+   *
+   * This is used by the Builder to report deprecated and unused parameters
+   * during the Builder::build stage
+   */
+  const Moose::ParameterExtraction::ExtractionInfo & getAppExtractionInfo() const;
 
 #ifdef MOOSE_MFEM_ENABLED
   /**

@@ -101,12 +101,6 @@ public:
    */
   Parser(const std::string & input_filename, const std::optional<std::string> & input_text = {});
 
-  struct Error : public hit::Error
-  {
-    Error() = delete;
-    Error(const std::vector<hit::ErrorMessage> & error_messages);
-  };
-
   /**
    * Parses the inputs
    */
@@ -127,7 +121,10 @@ public:
    *
    * If it doesn't exist, it means we haven't parsed yet
    */
+  ///@{
+  const hit::Node & getRoot() const;
   hit::Node & getRoot();
+  ///@}
 
   /**
    * @return The root command line HIT node if it exists
@@ -160,14 +157,22 @@ public:
   const std::vector<std::string> & getInputText() const { return _input_text; }
 
   /*
-   * Get extracted application type from parser
+   * Get the extracted application type from parser (or one set manually)
+   *
+   * First entry is the app type string, second entry is the hit node it came from (if any)
    */
-  const std::string & getAppType() const { return _app_type; }
+  const std::optional<std::pair<std::string, const hit::Node *>> & getAppType() const
+  {
+    return _app_type;
+  }
 
   /*
-   * Set the application type in parser
+   * Set the application type and optionally the hit node that the type came from
    */
-  void setAppType(const std::string & app_type) { _app_type = app_type; }
+  void setAppType(const std::string & app_type, const hit::Node * const node)
+  {
+    _app_type = {app_type, node};
+  }
 
   /**
    * Sets the HIT parameters from the command line
@@ -204,27 +209,18 @@ public:
    * These are the variables that have been used during brace expansion.
    */
   const std::set<std::string> & getExtractedVars() const { return _extracted_vars; }
-  /**
-   * Helper for accumulating errors from a walker into an accumulation of errors
-   */
-  ///@{
-  static void appendErrorMessages(std::vector<hit::ErrorMessage> & to,
-                                  const std::vector<hit::ErrorMessage> & from);
-  static void appendErrorMessages(std::vector<hit::ErrorMessage> & to, const hit::Error & error);
-  ///@}
-
-  /**
-   * Helper for combining error messages into a single, newline separated message
-   */
-  static std::string joinErrorMessages(const std::vector<hit::ErrorMessage> & error_messages);
 
   /**
    * Helper for throwing an error with the given messages.
    *
    * If throwOnError(), throw a Parser::Error (for the MooseServer).
    * Otherwise, use mooseError() (for standard runs).
+   *
+   * See Moose::ParseUtils::parseError for information on the
+   * \p augment_node_errors argument.
    */
-  void parseError(std::vector<hit::ErrorMessage> messages) const;
+  void parseError(const std::vector<hit::ErrorMessage> & messages,
+                  const bool augment_node_errors = true) const;
 
 private:
   /// The root node, which owns the whole tree
@@ -239,8 +235,8 @@ private:
   /// The root node for command line hit arguments
   std::unique_ptr<hit::Node> _cli_root;
 
-  /// The application types extracted from [Application] block
-  std::string _app_type;
+  /// The application type extracted from [Application] block (or set manually)
+  std::optional<std::pair<std::string, const hit::Node *>> _app_type;
 
   /// Whether or not to throw on error
   bool _throw_on_error;

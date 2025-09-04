@@ -750,15 +750,15 @@ InputParameters::getFileBase(const std::optional<std::string> & param_name) cons
   // Context from the individual parameter
   if (param_name)
     hit_node = getHitNode(*param_name);
-  // Context from the parameters
-  if (!hit_node)
+  // Context from the parameters (and not a command line parameter)
+  if (!hit_node || hit_node->filename() == Moose::hit_command_line_filename)
     hit_node = getHitNode();
   // No hit node, so use the cwd (no input files)
   if (!hit_node)
     return std::filesystem::current_path();
 
   // Find any context that isn't command line arguments
-  while (hit_node && hit_node->filename() == "CLI_ARGS")
+  while (hit_node && hit_node->filename() == Moose::hit_command_line_filename)
     hit_node = hit_node->parent();
 
   // Failed to find a node up the tree that isn't a command line argument
@@ -1047,14 +1047,19 @@ InputParameters::getCommandLineMetadata(const std::string & name) const
 }
 
 void
-InputParameters::commandLineParamSet(const std::string & name, const CommandLineParamSetKey)
+InputParameters::commandLineParamSet(const std::string & name,
+                                     const std::string & cl_switch,
+                                     const hit::Node * const command_line_node,
+                                     const CommandLineParamSetKey)
 {
   auto & cl_data = at(checkForRename(name))._cl_data;
   if (!cl_data)
     mooseError("InputParameters::commandLineParamSet: The parameter '",
                name,
                "' is not a command line parameter");
-  cl_data->set_by_command_line = true;
+  if (command_line_node)
+    setHitNode(name, *command_line_node, {});
+  cl_data->set_switch = cl_switch;
 }
 
 std::string
@@ -1236,7 +1241,7 @@ InputParameters::isParamSetByUser(const std::string & name_in) const
     return false;
   // Special case for a command line option, which is a private parameter
   if (const auto cl_data = queryCommandLineMetadata(name))
-    return cl_data->set_by_command_line;
+    return cl_data->set_switch.has_value();
   // Not a command line option, not set by addParam and not private
   return !_params.at(name)._set_by_add_param && !_params.at(name)._is_private;
 }
@@ -1569,8 +1574,8 @@ InputParameters::setHitNode(const std::string & param,
                             const hit::Node & node,
                             const InputParameters::SetParamHitNodeKey)
 {
-  mooseAssert(node.type() == hit::NodeType::Field, "Must be a field");
-  at(param)._hit_node = &node;
+  mooseAssert(node.isRoot() || node.type() == hit::NodeType::Field, "Must be a field or the root");
+  at(checkForRename(param))._hit_node = &node;
 }
 
 std::string
@@ -1584,6 +1589,11 @@ InputParameters::inputLocation(const std::string & param) const
 std::string
 InputParameters::paramFullpath(const std::string & param) const
 {
+  // A command line parameter could be set via a switch
+  // (--mesh-only, for example), or a hit parameter
+  // (Application/mesh_only); this captures that
+  if (const auto cl_data = queryCommandLineMetadata(param); cl_data && cl_data->set_switch)
+    return *cl_data->set_switch;
   if (const auto hit_node = getHitNode(param))
     return hit_node->fullpath();
   return "";
@@ -1799,7 +1809,7 @@ InputParameters::queryDataFileNamePath(const std::string & name) const
 std::optional<std::string>
 InputParameters::setupVariableNames(std::vector<VariableName> & names,
                                     const hit::Node & node,
-                                    const Moose::PassKey<Moose::Builder>)
+                                    const SetupVariableNamesKey)
 {
   // Whether or not a name was found
   bool has_name = false;
@@ -1841,8 +1851,8 @@ std::pair<std::string, const hit::Node *>
 InputParameters::paramMessageContext(const std::string & param) const
 {
   const hit::Node * node = nullptr;
-
   std::string fullpath;
+
   // First try to find the parameter
   if (const hit::Node * param_node = getHitNode(param))
   {
@@ -1859,15 +1869,22 @@ InputParameters::paramMessageContext(const std::string & param) const
   else
     fullpath = param;
 
+  if (const auto cl_data = queryCommandLineMetadata(param);
+      cl_data && cl_data->set_switch.has_value())
+  {
+    fullpath = *cl_data->set_switch;
+  }
+
   return {fullpath + ": ", node};
 }
 
 std::string
 InputParameters::paramMessagePrefix(const std::string & param) const
 {
-  auto [prefix, node] = paramMessageContext(param);
+  const auto [prefix, node] = paramMessageContext(param);
   if (node)
-    prefix = Moose::hitMessagePrefix(*node) + prefix;
+    if (const auto hit_prefix = Moose::hitMessagePrefix(*node, false))
+      return *hit_prefix + "\n" + prefix;
   return prefix;
 }
 

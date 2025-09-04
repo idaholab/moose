@@ -17,7 +17,7 @@
 #include "ExecFlagEnum.h"
 #include "Conversion.h"
 #include "DataFileUtils.h"
-#include "MoosePassKey.h"
+#include "ParameterExtraction.h"
 
 #include "libmesh/parameters.h"
 
@@ -93,8 +93,8 @@ public:
     ArgumentType argument_type;
     /// Whether or not the argument is required
     bool required;
-    /// Whether or not the parameter was set by the CommandLine
-    bool set_by_command_line = false;
+    /// If this parameter was set by the CommandLine, the switch that set it
+    std::optional<std::string> set_switch;
     /// Whether or not the parameter is global (passed to MultiApps)
     bool global = false;
   };
@@ -111,7 +111,11 @@ public:
     friend class Factory;
     friend class FEProblemBase;
     friend class InputParameters;
+    friend Moose::ParameterExtraction::ExtractionInfo Moose::ParameterExtraction::extract(
+        const hit::Node &, const hit::Node * const, const hit::Node * const, InputParameters &);
+#ifdef MOOSE_UNIT_TEST
     FRIEND_TEST(InputParametersTest, fileNames);
+#endif
     SetHitNodeKey() {}
     SetHitNodeKey(const SetHitNodeKey &) {}
   };
@@ -122,10 +126,26 @@ public:
    */
   class SetParamHitNodeKey
   {
-    friend class Moose::Builder;
+    friend Moose::ParameterExtraction::ExtractionInfo Moose::ParameterExtraction::extract(
+        const hit::Node &, const hit::Node * const, const hit::Node * const, InputParameters &);
+    friend class InputParameters;
+#ifdef MOOSE_UNIT_TEST
     FRIEND_TEST(InputParametersTest, fileNames);
+#endif
     SetParamHitNodeKey() {}
     SetParamHitNodeKey(const SetParamHitNodeKey &) {}
+  };
+
+  /**
+   * Class that is used as a parameter to setHitNode(param) that allows only
+   * relevant classes to set the hit node
+   */
+  class SetupVariableNamesKey
+  {
+    friend Moose::ParameterExtraction::ExtractionInfo Moose::ParameterExtraction::extract(
+        const hit::Node &, const hit::Node * const, const hit::Node * const, InputParameters &);
+    SetupVariableNamesKey() {}
+    SetupVariableNamesKey(const SetupVariableNamesKey &) {}
   };
 
   /**
@@ -442,7 +462,12 @@ public:
   class CommandLineParamSetKey
   {
     friend class CommandLine;
+    friend Moose::ParameterExtraction::ExtractionInfo Moose::ParameterExtraction::extract(
+        const hit::Node &, const hit::Node * const, const hit::Node * const, InputParameters &);
+#ifdef MOOSE_UNIT_TEST
     FRIEND_TEST(InputParametersTest, commandLineParamSetNotCLParam);
+    FRIEND_TEST(InputParametersTest, commandLineParamFullpath);
+#endif
     CommandLineParamSetKey() {}
     CommandLineParamSetKey(const CommandLineParamSetKey &) {}
   };
@@ -450,8 +475,19 @@ public:
    * Marks the command line parameter \p name as set by the CommandLine.
    *
    * Protected by the CommandLineParamSetKey so that only the CommandLine can call this.
+   *
+   * In the case of non-hit command line parameters (--mesh-only, for example),
+   * \p command_line_node can be set to the root hit node so that it can be
+   * attributed to command line arguments during errors
+   *
+   * @param name The name of the parameter
+   * @param cl_switch The switch that was used to set the parameter
+   * @param command_line_node Optionally the hit node associated with the parameter
    */
-  void commandLineParamSet(const std::string & name, const CommandLineParamSetKey);
+  void commandLineParamSet(const std::string & name,
+                           const std::string & cl_switch,
+                           const hit::Node * const command_line_node,
+                           const CommandLineParamSetKey);
 
   /**
    * Get the documentation string for a parameter
@@ -1104,7 +1140,7 @@ public:
   /**
    * Sets the hit node associated with the parameter \p param to \p node
    *
-   * Is protected to be called by only the Builder via the SetParamHitNodeKey.
+   * Is protected to be called by ParameterExtraction::extract via the SetParamHitNodeKey.
    */
   void setHitNode(const std::string & param, const hit::Node & node, const SetParamHitNodeKey);
 
@@ -1275,8 +1311,8 @@ public:
    * Sets the hit node that represents the syntax responsible for creating
    * these parameters
    *
-   * Is protected to be called by only the ActionFactory, Builder, and Factory
-   * via the SetHitNodeKey.
+   * Is protected to be called by only the ActionFactory, ParameterExtraction::extract,
+   * and Factory via the SetHitNodeKey.
    */
   void setHitNode(const hit::Node & node, const SetHitNodeKey) { _hit_node = &node; }
 
@@ -1291,8 +1327,8 @@ public:
   std::optional<Moose::DataFileUtils::Path> queryDataFileNamePath(const std::string & name) const;
 
   /**
-   * Entrypoint for the Builder to setup a std::vector<VariableName> parameter,
-   * which will setup the default variable names if appropriate
+   * Entrypoint for ParameterExtraction::extract to setup a std::vector<VariableName>
+   * parameter, which will setup the default variable names if appropriate
    *
    * @param names The variable names
    * @param node The hit node that produced this parameter
@@ -1300,7 +1336,7 @@ public:
    */
   std::optional<std::string> setupVariableNames(std::vector<VariableName> & names,
                                                 const hit::Node & node,
-                                                const Moose::PassKey<Moose::Builder>);
+                                                const SetupVariableNamesKey);
 
 private:
   // Private constructor so that InputParameters can only be created in certain places.

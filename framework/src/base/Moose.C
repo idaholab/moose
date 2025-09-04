@@ -578,7 +578,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("AddConvergenceAction", "Convergence/*");
   syntax.registerSyntaxType("Convergence/*", "ConvergenceName");
 
-  registerSyntax("GlobalParamsAction", "GlobalParams");
+  registerSyntax("GlobalParamsAction", global_params_syntax);
 
   registerSyntax("AddDistributionAction", "Distributions/*");
   syntax.registerSyntaxType("Distributions/*", "DistributionName");
@@ -792,16 +792,24 @@ ScopedThrowOnError::ScopedThrowOnError() : ScopedThrowOnError(true) {}
 
 ScopedThrowOnError::~ScopedThrowOnError() { Moose::_throw_on_error = _throw_on_error_before; }
 
-std::string
-hitMessagePrefix(const hit::Node & node)
+std::optional<std::string>
+hitMessagePrefix(const hit::Node & node, const bool fullpath /* = false */)
 {
-  // Strip meaningless line and column number for CLI args
-  if (node.filename() == "CLI_ARGS")
-    return "CLI_ARGS:\n";
+  if (!node.getNodeView().node_pool())
+    return {};
   // If using the root node, don't add line info
   if (node.isRoot())
-    return node.filename() + ":\n";
-  return node.fileLocation() + ":\n";
+    return node.filename() + ":";
+  // Strip meaningless line and column number for CLI args
+  // and add fullpath for context (if requested)
+  if (node.filename() == Moose::hit_command_line_filename)
+  {
+    auto prefix = node.filename() + ":";
+    if (fullpath)
+      prefix += node.fullpath() + ":";
+    return prefix;
+  }
+  return node.fileLocation() + ":";
 }
 
 bool _warnings_are_errors = false;

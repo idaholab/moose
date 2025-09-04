@@ -136,8 +136,15 @@ public:
    *
    * Will throw errors when conversions fail and may combine entires in
    * _entries if some are found that can be combined.
+   *
+   * Optionally, the root node for the command line parameters can be
+   * added via \p command_line_root. This is useful as it will allow
+   * the prefix for all errors associated with a command line parameter
+   * to be attributed with "CLI_ARGS". This should be done for the
+   * command line population for MooseApps.
    */
-  void populateCommandLineParams(InputParameters & params);
+  void populateCommandLineParams(InputParameters & params,
+                                 const hit::Node * const command_line_root = nullptr);
 
   /**
    * @return An iterator to the beginning of the options

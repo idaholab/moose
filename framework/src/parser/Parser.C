@@ -15,6 +15,7 @@
 #include "SystemInfo.h"
 #include "Parser.h"
 #include "Units.h"
+#include "ParseUtils.h"
 
 #include "libmesh/parallel.h"
 #include "libmesh/fparser.hh"
@@ -267,12 +268,12 @@ public:
   walk(const std::string & /*fullpath*/, const std::string & /*nodepath*/, hit::Node * n) override
   {
     if (n && n->type() == hit::NodeType::Field && n->fullpath() == "Application/type")
-      _app_type = n->param<std::string>();
+      _app_type = {n->param<std::string>(), n};
   }
-  const std::optional<std::string> & getApp() { return _app_type; };
+  const std::optional<std::pair<std::string, const hit::Node *>> & getApp() { return _app_type; };
 
 private:
-  std::optional<std::string> _app_type;
+  std::optional<std::pair<std::string, const hit::Node *>> _app_type;
 };
 
 void
@@ -288,11 +289,6 @@ Parser::getLastInputFileName() const
   if (_input_filenames.empty())
     mooseError("Parser::getLastInputFileName(): No inputs are set");
   return _input_filenames.back();
-}
-
-Parser::Error::Error(const std::vector<hit::ErrorMessage> & error_messages)
-  : hit::Error(error_messages)
-{
 }
 
 void
@@ -343,7 +339,7 @@ Parser::parse()
 
       DupParamWalker dw;
       root->walk(&dw, hit::NodeType::Field);
-      appendErrorMessages(dw_errors, dw.errors);
+      Moose::ParseUtils::appendErrorMessages(dw_errors, dw.errors);
 
       if (!queryRoot())
         _root = std::move(root);
@@ -354,13 +350,15 @@ Parser::parse()
       }
 
       if (!syntax_errors.empty())
-        throw Parser::Error(syntax_errors);
+        throw Moose::ParseUtils::ParseError(syntax_errors);
 
       getRoot().walk(&cpw, hit::NodeType::Field);
     }
     catch (hit::Error & err)
     {
-      parseError(err.error_messages);
+      // Don't try to make the node errors any better here because we don't
+      // know if we have a fully valid tree
+      parseError(err.error_messages, /* augment_node_errors = */ false);
     }
   }
 
@@ -383,8 +381,8 @@ Parser::parse()
   {
     FindAppWalker fw;
     getRoot().walk(&fw, hit::NodeType::Field);
-    if (fw.getApp())
-      setAppType(*fw.getApp());
+    if (const auto & type_node_pair_ptr = fw.getApp())
+      setAppType(type_node_pair_ptr->first, type_node_pair_ptr->second);
   }
 
   // Duplicate parameter errors (within each input file)
@@ -392,11 +390,18 @@ Parser::parse()
     parseError(dw_errors);
 
   // Merge in command line HIT arguments
-  const auto joined_params =
-      _command_line_params ? MooseUtils::stringJoin(*_command_line_params) : "";
+  // If we have no arguments at all, we need to add a dummy parameter to the
+  // command line tree so that we will have a top level node. Without any
+  // parameters, quering the cli tree will fail (bug?)
+  const std::string unused_name = "__cli_unused";
+  const std::string joined_params = (_command_line_params && _command_line_params->size())
+                                        ? MooseUtils::stringJoin(*_command_line_params)
+                                        : (unused_name + "=value");
   try
   {
-    _cli_root.reset(hit::parse("CLI_ARGS", joined_params));
+    _cli_root.reset(hit::parse(Moose::hit_command_line_filename, joined_params));
+    if (auto unused_node = _cli_root->find(unused_name))
+      unused_node->remove();
     hit::merge(&getCommandLineRoot(), &getRoot());
   }
   catch (hit::Error & err)
@@ -424,33 +429,39 @@ Parser::parse()
     getRoot().walk(&exw);
     for (auto & var : exw.used)
       _extracted_vars.insert(var);
-    Parser::appendErrorMessages(errors, exw.errors);
+    Moose::ParseUtils::appendErrorMessages(errors, exw.errors);
   }
 
   // Collect duplicate parameters now that we've merged inputs
   {
     DupParamWalker dw;
     getRoot().walk(&dw, hit::NodeType::Field);
-    Parser::appendErrorMessages(errors, dw.errors);
+    Moose::ParseUtils::appendErrorMessages(errors, dw.errors);
   }
 
   // Check bad active now that we've merged inputs
   {
     BadActiveWalker bw;
     getRoot().walk(&bw, hit::NodeType::Section);
-    Parser::appendErrorMessages(errors, bw.errors);
+    Moose::ParseUtils::appendErrorMessages(errors, bw.errors);
   }
 
   if (errors.size())
     parseError(errors);
 }
 
-hit::Node &
-Parser::getRoot()
+const hit::Node &
+Parser::getRoot() const
 {
   if (!queryRoot())
     mooseError("Parser::getRoot(): root is not set");
   return *queryRoot();
+}
+
+hit::Node &
+Parser::getRoot()
+{
+  return const_cast<hit::Node &>(std::as_const(*this).getRoot());
 }
 
 const hit::Node &
@@ -468,52 +479,8 @@ Parser::getCommandLineRoot()
 }
 
 void
-Parser::appendErrorMessages(std::vector<hit::ErrorMessage> & to,
-                            const std::vector<hit::ErrorMessage> & from)
+Parser::parseError(const std::vector<hit::ErrorMessage> & messages,
+                   const bool augment_node_errors /* = true */) const
 {
-  to.insert(to.end(), from.begin(), from.end());
-}
-
-void
-Parser::appendErrorMessages(std::vector<hit::ErrorMessage> & to, const hit::Error & error)
-{
-  appendErrorMessages(to, error.error_messages);
-}
-
-std::string
-Parser::joinErrorMessages(const std::vector<hit::ErrorMessage> & error_messages)
-{
-  std::vector<std::string> values;
-  for (const auto & em : error_messages)
-    values.push_back(em.prefixed_message);
-  return MooseUtils::stringJoin(values, "\n");
-}
-
-void
-Parser::parseError(std::vector<hit::ErrorMessage> messages) const
-{
-  // Few things about command line arguments...
-  // 1. We don't care to add line and column context for CLI args, because
-  //    it doesn't make sense. We go from the full CLI args and pull out
-  //    the HIT parameters so "line" 1 might not even be command line
-  //    argument 1. So, remove line/column context from all CLI args.
-  // 2. Whenever we have a parameter in input that then gets overridden
-  //    by a command line argument, under the hood we're merging two
-  //    different HIT trees. However, WASP doesn't currently update the
-  //    "filename" context for the updated parameter. Which means that
-  //    a param that is in input and then overridden by CLI will have
-  //    its location as in input. Which isn't true. So we get around this
-  //    by searching the independent CLI args tree for params that we have
-  //    errors for. If the associated path is also in CLI args, we manually
-  //    set its error to come from CLI args. This should be fixed in
-  //    the future with a WASP update.
-  for (auto & em : messages)
-    if (em.node && queryCommandLineRoot())
-      if (getCommandLineRoot().find(em.node->fullpath()))
-        em = hit::ErrorMessage(em.message, "CLI_ARGS");
-
-  if (_throw_on_error)
-    throw Parser::Error(messages);
-  else
-    mooseError(joinErrorMessages(messages));
+  Moose::ParseUtils::parseError(messages, _throw_on_error, augment_node_errors);
 }

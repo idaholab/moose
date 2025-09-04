@@ -26,7 +26,8 @@
 #include "CommandLine.h"
 #include "JsonSyntaxTree.h"
 #include "Syntax.h"
-#include "ParameterRegistry.h"
+#include "ParameterExtraction.h"
+#include "ParseUtils.h"
 
 #include "libmesh/parallel.h"
 #include "libmesh/fparser.hh"
@@ -302,6 +303,9 @@ Builder::build()
   // Pull in extracted variables from the parser (fparse stuff)
   _extracted_vars = _parser.getExtractedVars();
 
+  // Pull in the extraction info from the [Application] block, which was extracted first
+  appendExtractionInfo(_app.getAppExtractionInfo());
+
   // There are a few order dependent actions that have to be built first in
   // order for the parser and application to function properly
   const auto need_action_syntax_first = [this](const auto & action_name)
@@ -330,6 +334,9 @@ Builder::build()
   for (const auto & sec : _secs_need_first)
     if (auto n = _root.find(sec))
       walkRaw(n->parent()->fullpath(), n->path(), n);
+
+  // Skip the [Application] block as we've already extracted it
+  _secs_need_first.push_back("Application");
 
   // Walk for the remainder
   _root.walk(this, hit::NodeType::Section);
@@ -369,13 +376,13 @@ Builder::errorCheck(const Parallel::Communicator & comm, bool warn_unused, bool 
   {
     UnusedWalker uw(_extracted_vars, *this);
     _parser.getCommandLineRoot().walk(&uw);
-    Parser::appendErrorMessages(messages, uw.errors);
+    Moose::ParseUtils::appendErrorMessages(messages, uw.errors);
   }
 
   {
     UnusedWalker uw(_extracted_vars, *this);
     _root.walk(&uw);
-    Parser::appendErrorMessages(messages, uw.errors);
+    Moose::ParseUtils::appendErrorMessages(messages, uw.errors);
   }
 
   for (const auto & arg : _app.commandLine()->unusedHitParams(comm))
@@ -383,13 +390,13 @@ Builder::errorCheck(const Parallel::Communicator & comm, bool warn_unused, bool 
 
   if (messages.size())
   {
-    const auto message = _parser.joinErrorMessages(messages);
+    const auto message = Moose::ParseUtils::joinErrorMessages(messages);
     if (warn_unused)
       mooseUnused(message);
     if (err_unused)
     {
       if (_parser.getThrowOnError())
-        _parser.parseError(messages);
+        Moose::ParseUtils::parseError(messages, true);
       else
         mooseError(
             message +
@@ -665,180 +672,25 @@ Builder::buildFullTree(const std::string & search_string)
 void
 Builder::extractParams(const hit::Node * const section_node, InputParameters & p)
 {
-  if (section_node)
-    mooseAssert(section_node->type() == hit::NodeType::Section, "Node type should be a section");
-
-  for (const auto & [name, par_unique_ptr] : p)
-  {
-    if (p.shouldIgnore(name))
-      continue;
-
-    const hit::Node * param_node = nullptr;
-
-    for (const auto & param_name : p.paramAliases(name))
-    {
-      // Check for parameters under the given section, if a section
-      // node was provided
-      if (section_node)
-      {
-        if (const auto section_param_node = section_node->find(param_name);
-            section_param_node && section_param_node->type() == hit::NodeType::Field &&
-            section_param_node->parent() == section_node)
-          param_node = section_param_node;
-      }
-      // No node found within the given section, check [GlobalParams]
-      if (!param_node && queryGlobalParamsNode())
-      {
-        if (const auto global_node = queryGlobalParamsNode()->find(param_name);
-            global_node && global_node->type() == hit::NodeType::Field &&
-            global_node->parent() == queryGlobalParamsNode())
-        {
-          mooseAssert(isGlobal(*global_node), "Could not detect global-ness");
-          param_node = global_node;
-        }
-      }
-
-      // Found it
-      if (param_node)
-      {
-        const auto fullpath = param_node->fullpath();
-        p.setHitNode(param_name, *param_node, {});
-        p.set_attributes(param_name, false);
-        _extracted_vars.insert(fullpath);
-
-        const auto global = isGlobal(*param_node);
-
-        // Check for deprecated parameters if the parameter is not a global param
-        if (!global)
-          if (const auto deprecated_message = p.queryDeprecatedParamMessage(param_name))
-          {
-            std::string key = "";
-            if (const auto object_type_ptr = p.queryObjectType())
-              key += *object_type_ptr + "_";
-            key += param_name;
-            _deprecated_params.emplace(key, *deprecated_message);
-          }
-
-        // Private parameter, don't set
-        if (p.isPrivate(param_name))
-        {
-          // Error if it isn't global, just once
-          if (!global && std::find_if(_errors.begin(),
-                                      _errors.end(),
-                                      [&param_node](const auto & err)
-                                      { return err.node == param_node; }) == _errors.end())
-            _errors.emplace_back("parameter '" + fullpath + "' is private and cannot be set",
-                                 param_node);
-          continue;
-        }
-
-        // Set the value, capturing errors
-        const auto param_field = dynamic_cast<const hit::Field *>(param_node);
-        mooseAssert(param_field, "Is not a field");
-        bool set_param = false;
-        try
-        {
-          ParameterRegistry::get().set(*par_unique_ptr, *param_field);
-          set_param = true;
-        }
-        catch (hit::Error & e)
-        {
-          _errors.emplace_back(e.message, param_node);
-        }
-        catch (std::exception & e)
-        {
-          _errors.emplace_back(e.what(), param_node);
-        }
-
-        // Break if we failed here and don't perform extra checks
-        if (!set_param)
-          break;
-
-        // Special setup for vector<VariableName>
-        if (auto cast_par = dynamic_cast<InputParameters::Parameter<std::vector<VariableName>> *>(
-                par_unique_ptr.get()))
-          if (const auto error = p.setupVariableNames(cast_par->set(), *param_node, {}))
-            _errors.emplace_back(*error, param_node);
-
-        // Possibly perform a range check if this parameter has one
-        if (p.isRangeChecked(param_node->path()))
-          if (const auto error = p.parameterRangeCheck(
-                  *par_unique_ptr, param_node->fullpath(), param_node->path(), true))
-            _errors.emplace_back(error->second, param_node);
-
-        // Don't check the other alises since we've found it
-        break;
-      }
-    }
-
-    // Special casing when the parameter was not found
-    if (!param_node)
-    {
-      // In the case where we have OutFileName but it wasn't actually found in the input filename,
-      // we will populate it with the actual parsed filename which is available here in the
-      // parser.
-      if (auto out_par_ptr =
-              dynamic_cast<InputParameters::Parameter<OutFileBase> *>(par_unique_ptr.get()))
-      {
-        const auto input_file_name = getPrimaryFileName();
-        mooseAssert(input_file_name.size(), "Input Filename is empty");
-        const auto pos = input_file_name.find_last_of('.');
-        mooseAssert(pos != std::string::npos, "Unable to determine suffix of input file name");
-        out_par_ptr->set() = input_file_name.substr(0, pos) + "_out";
-        p.set_attributes(name, false);
-      }
-    }
-  }
-
-  // See if there are any auto build vectors that need to be created
-  for (const auto & [param_name, base_name_num_repeat_pair] : p.getAutoBuildVectors())
-  {
-    const auto & [base_name, num_repeat] = base_name_num_repeat_pair;
-    // We'll autogenerate values iff the requested vector is not valid but both the base and
-    // number are valid
-    if (!p.isParamValid(param_name) && p.isParamValid(base_name) && p.isParamValid(num_repeat))
-    {
-      const auto vec_size = p.get<unsigned int>(num_repeat);
-      const std::string & name = p.get<std::string>(base_name);
-
-      std::vector<VariableName> variable_names(vec_size);
-      for (const auto i : index_range(variable_names))
-      {
-        std::ostringstream oss;
-        oss << name << i;
-        variable_names[i] = oss.str();
-      }
-
-      // Finally set the autogenerated vector into the InputParameters object
-      p.set<std::vector<VariableName>>(param_name) = variable_names;
-    }
-  }
+  const auto info =
+      ParameterExtraction::extract(_root, &_parser.getCommandLineRoot(), section_node, p);
+  appendExtractionInfo(info);
 }
 
 void
 Builder::extractParams(const std::string & prefix, InputParameters & p)
 {
-  const auto node = _root.find(prefix);
-  extractParams((node && node->type() == hit::NodeType::Section) ? node : nullptr, p);
+  const auto info = ParameterExtraction::extract(_root, &_parser.getCommandLineRoot(), prefix, p);
+  appendExtractionInfo(info);
 }
 
-bool
-Builder::isGlobal(const hit::Node & node) const
+void
+Builder::appendExtractionInfo(const ParameterExtraction::ExtractionInfo & info)
 {
-  const auto global_params_node = queryGlobalParamsNode();
-  return global_params_node && node.parent() == global_params_node;
-}
-
-const hit::Node *
-Builder::queryGlobalParamsNode() const
-{
-  if (!_global_params_node)
-  {
-    const auto syntax = _syntax.getSyntaxByAction("GlobalParamsAction");
-    mooseAssert(syntax.size() == 1, "Unexpected GlobalParamsAction syntax size");
-    _global_params_node = _root.find(syntax.front());
-  }
-  return *_global_params_node;
+  Moose::ParseUtils::appendErrorMessages(_errors, info.errors);
+  _extracted_vars.insert(info.extracted_variables.begin(), info.extracted_variables.end());
+  for (const auto & [k, v] : info.deprecated_params)
+    _deprecated_params.emplace(k, v);
 }
 
 } // end of namespace Moose

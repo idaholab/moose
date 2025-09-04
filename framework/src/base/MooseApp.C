@@ -57,6 +57,8 @@
 #include "FEProblemBase.h"
 #include "Parser.h"
 #include "CSGBase.h"
+#include "ParameterExtraction.h"
+#include "ParseUtils.h"
 
 // Regular expression includes
 #include "pcrecpp.h"
@@ -94,7 +96,7 @@ void
 MooseApp::addAppParam(InputParameters & params)
 {
   params.addCommandLineParam<std::string>(
-      "app_to_run", "--app <type>", "Specify the application type to run (case-sensitive)");
+      "type", "--app <type>", "Specify the application type to run (case-sensitive)");
 }
 
 void
@@ -399,6 +401,8 @@ MooseApp::validParams()
 
   params.addPrivateParam<std::shared_ptr<CommandLine>>("_command_line");
   params.addPrivateParam<std::shared_ptr<Parallel::Communicator>>("_comm");
+  params.addPrivateParam<std::shared_ptr<const Moose::ParameterExtraction::ExtractionInfo>>(
+      "_app_extraction_info");
   params.addPrivateParam<unsigned int>("_multiapp_level");
   params.addPrivateParam<unsigned int>("_multiapp_number");
   params.addPrivateParam<bool>("_use_master_mesh", false);
@@ -607,14 +611,13 @@ MooseApp::MooseApp(const InputParameters & parameters)
       std::vector<processor_id_type> ranks;
       bool success = MooseUtils::tokenizeAndConvert(rankstr, ranks, ", ");
       if (!success)
-        mooseError("Invalid argument for --gperf-profiler-on: '", rankstr, "'");
+        paramError("gperf_profiler_on", "Invalid argument '" + rankstr + "'");
       for (auto & rank : ranks)
       {
         if (rank >= _comm->size())
-          mooseError("Invalid argument for --gperf-profiler-on: ",
-                     rank,
-                     " is greater than or equal to ",
-                     _comm->size());
+          paramError("gperf_profiler_on",
+                     "Rank " + std::to_string(rank) + " is greater than or equal to " +
+                         std::to_string(_comm->size()));
         if (rank == _comm->rank())
         {
           _cpu_profiling = has_cpu_profiling;
@@ -674,7 +677,9 @@ MooseApp::MooseApp(const InputParameters & parameters)
   _perf_graph.enableLivePrint();
 
   if (_check_input && isParamSetByUser("recover"))
-    mooseError("Cannot run --check-input with --recover. Recover files might not exist");
+    paramError("check_input",
+               "Cannot be used with '" + _pars.paramFullpath("recover") +
+                   "'; recover files might not exist");
 
   if (isParamSetByUser("start_in_debugger") && isUltimateMaster())
   {
@@ -694,10 +699,7 @@ MooseApp::MooseApp(const InputParameters & parameters)
     if (command.find("lldb") != std::string::npos || command.find("gdb") != std::string::npos)
       command_stream << command << " -p " << getpid();
     else
-      mooseError("Unknown debugger: ",
-                 command,
-                 "\nIf this is truly what you meant then contact moose-users to have a discussion "
-                 "about adding your debugger.");
+      paramError("start_in_debugger", "Unknown debugger '" + command + "'");
 
     // Finish up the command
     command_stream << "\"" << " & ";
@@ -764,7 +766,9 @@ MooseApp::MooseApp(const InputParameters & parameters)
                     " to remove this deprecation warning.");
 
   if (_test_restep && _test_checkpoint_half_transient)
-    mooseError("Cannot use --test-restep and --test-checkpoint-half-transient together");
+    paramError("test_restep",
+               "Cannot be used with '" + _pars.paramFullpath("test_checkpoint_half_transient") +
+                   "'");
 
   registerCapabilities();
 
@@ -1292,7 +1296,7 @@ MooseApp::setupOptions()
     _trap_fpe = true;
     _perf_graph.setActive(false);
     if (getParam<bool>("no_trap_fpe"))
-      mooseError("Cannot use both \"--trap-fpe\" and \"--no-trap-fpe\" flags.");
+      paramError("no_trap_fpe", "Cannot be used with '" + _pars.paramFullpath("trap_fpe") + "'");
   }
   else if (getParam<bool>("no_trap_fpe"))
     _trap_fpe = false;
@@ -1343,7 +1347,8 @@ MooseApp::setupOptions()
 // any threads launched.
 #if !LIBMESH_USING_THREADS
   if (libMesh::command_line_value("--n-threads", 1) > 1)
-    mooseError("You specified --n-threads > 1, but there is no threading model active!");
+    paramError("n_threads",
+               "Multiple threads were specified but there is no threading model active");
 #endif
 
   // Build a minimal running application, ignoring the input file.
@@ -1568,12 +1573,12 @@ MooseApp::setupOptions()
         return;
       }
       if (status == CapabilityUtils::UNKNOWN)
-        mooseError("Required capabilities '",
-                   required_capabilities,
-                   "' are not specific enough. A comparison test is performed on an undefined "
-                   "capability. Disambiguate this requirement by adding an existence/non-existence "
-                   "requirement. Example: 'unknown<1.2.3' should become 'unknown & unknown<1.2.3' "
-                   "or '!unknown | unknown<1.2.3'");
+        paramError("required_capabilities",
+                   "Required capabilities '" + required_capabilities +
+                       "' are not specific enough. A comparison test is performed on an undefined "
+                       "capability. Disambiguate this requirement by adding an "
+                       "existence/non-existence requirement. Example: 'unknown<1.2.3' should "
+                       "become 'unknown & unknown<1.2.3' or '!unknown | unknown<1.2.3'");
     }
 
     // Lambda to check for mutually exclusive parameters
@@ -1584,8 +1589,9 @@ MooseApp::setupOptions()
       if (is_set)
         for (const auto & p : group)
           if (p != param && isParamSetByUser(p))
-            mooseError("Parameters '" + p + "' and '" + param +
-                       "' are mutually exclusive. Please choose only one of them.");
+            paramError(p,
+                       "This parameter is mutually exclusive with '" + _pars.paramFullpath(param) +
+                           ". Please choose only one of them.");
       return is_set;
     };
 
@@ -1679,7 +1685,8 @@ MooseApp::setupOptions()
     mooseAssert(getInputFileNames().empty(), "Should be empty");
 
     if (_check_input)
-      mooseError("You specified --check-input, but did not provide an input file. Add -i "
+      paramError("check_input",
+                 "You specified --check-input, but did not provide an input file. Add -i "
                  "<inputfile> to your command line.");
 
     mooseError("No input files specified. Add -i <inputfile> to your command line.");
@@ -1831,10 +1838,7 @@ MooseApp::errorCheck()
     {
       mooseAssert(_check_input,
                   "Something went wrong, we should only get here if _check_input is true.");
-      mooseError(
-          "Incompatible command line arguments provided. --check-input cannot be called with ",
-          _early_exit_param,
-          ".");
+      paramError(_early_exit_param, "This parameter cannot be used with '--check-input'");
     }
     // We should never get here
     mooseError("The Executor is being called without being initialized. This is likely "
@@ -2257,7 +2261,7 @@ MooseApp::run()
     setupOptions();
     runInputFile();
   }
-  catch (Parser::Error & err)
+  catch (Moose::ParseUtils::ParseError & err)
   {
     mooseAssert(_parser->getThrowOnError(), "Should be true");
     throw;
@@ -2329,7 +2333,7 @@ MooseApp::copyInputs()
   if (isParamSetByUser("copy_inputs"))
   {
     if (comm().size() > 1)
-      mooseError("The --copy-inputs option should not be ran in parallel");
+      paramError("copy_inputs", "This option cannot be ran in parallel");
 
     // Get command line argument following --copy-inputs on command line
     auto dir_to_copy = getParam<std::string>("copy_inputs");
@@ -3688,6 +3692,39 @@ MooseApp::addCapability(const std::string & capability, const char * value, cons
 {
   checkReservedCapability(capability);
   Moose::Capabilities::getCapabilityRegistry().add(capability, std::string(value), doc);
+}
+
+void
+MooseApp::extractApplicationParams(const hit::Node & root,
+                                   const hit::Node & command_line_root,
+                                   InputParameters & params,
+                                   const bool throw_on_error)
+{
+  // Extract from [Application] into params
+  const auto info =
+      Moose::ParameterExtraction::extract(root, &command_line_root, "Application", params);
+
+  // Errors found during extraction so we cannot build the app
+  if (info.errors.size())
+    Moose::ParseUtils::parseError(info.errors, throw_on_error);
+
+  // Set the ExtractionInfo as a parameter so that the Builder
+  // can utilize the extracted variables and deprecated parameters
+  // that we have collected here, because it won't be extracting
+  // anything in the [Application] block
+  params.set<std::shared_ptr<const Moose::ParameterExtraction::ExtractionInfo>>(
+      "_app_extraction_info") =
+      std::make_unique<const Moose::ParameterExtraction::ExtractionInfo>(info);
+}
+
+const Moose::ParameterExtraction::ExtractionInfo &
+MooseApp::getAppExtractionInfo() const
+{
+  if (const auto ptr =
+          parameters().get<std::shared_ptr<const Moose::ParameterExtraction::ExtractionInfo>>(
+              "_app_extraction_info"))
+    return *ptr;
+  mooseError("MooseApp::getAppExtractionInfo: ExtractionInfo is not available");
 }
 
 #ifdef MOOSE_MFEM_ENABLED
