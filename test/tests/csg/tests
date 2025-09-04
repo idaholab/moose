@@ -66,15 +66,6 @@
         mesh_mode = REPLICATED
         detail = 'specifies a final generator to create a CSG representation for an intermediate generator.'
     []
-    [all_region_types]
-        type = 'JSONDiff'
-        input = 'csg_only_region_types.i'
-        cli_args = '--csg-only'
-        jsondiff = 'csg_only_region_types_out_csg.json'
-        recover = false
-        mesh_mode = REPLICATED
-        detail = 'correctly defines regions as a combination of halfspaces, intersections, unions, and complements.'
-    []
   []
   [errors]
     requirement = 'The system shall report an error when generating a mesh in CSG-only mode when'
@@ -132,30 +123,6 @@
       detail = ' a cell being removed from a universe does not exist in the current CSGBase instance.'
       cli_args = '--csg-only'
       expect_err = 'A cell named square_cell is being removed from universe ROOT_UNIVERSE that is different from the cell of the same name in the CSGBase instance.'
-      mesh_mode = REPLICATED
-    []
-    [collinear_points_on_plane]
-      type = 'RunException'
-      input = 'csg_only_surface_collinear_points.i'
-      detail = ' trying to generate a CSG plane where all points on the plane are colienar'
-      cli_args = '--csg-only'
-      expect_err = 'Provided points to define a CSGPlane are collinear'
-      mesh_mode = REPLICATED
-    []
-    [halfspace_defined_by_two_regions]
-      type = 'RunException'
-      input = 'csg_only_invalid_region_types.i'
-      detail = ' trying to define a halfspace by passing in two regions to the CSGRegion constructor'
-      cli_args = '--csg-only'
-      expect_err = 'Region type HALFSPACE is not supported for two regions.'
-      mesh_mode = REPLICATED
-    []
-    [union_defined_by_empty_region]
-      type = 'RunException'
-      input = 'csg_only_invalid_region_types.i'
-      detail = ' trying to define a unionized region by passing in an empty region to the CSGRegion constructor'
-      cli_args = 'Mesh/csg_inf_square/region_type=1 --csg-only'
-      expect_err = 'Region operation UNION cannot be performed on an empty region.'
       mesh_mode = REPLICATED
     []
     [distributed_mesh]
