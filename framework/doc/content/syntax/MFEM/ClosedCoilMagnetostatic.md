@@ -92,7 +92,7 @@ external electric field, such that
 
 for some unique set of degrees of freedom $\{V_i\}$. We shall also wish to restrict the support of $\{\vec c_i\}$ to the smallest number of elements possible in $\Omega_c$ to minimise the number of degrees of freedom required to represent $\vec E_{ext}$.
 
-To do this, we first identify a 'cut' surface $\Gamma_c$ of the toroidal the conductor that is required to make it simply connected.
+To do this, we first identify a 'cut' surface $\Gamma_c$ of the toroidal conductor that is required to make it simply connected.
 Next, we define a one element wide 'transition' region $\Omega_t \subset \Omega_c$
 on one side of the cut surface, using an `MFEMCutTransitionSubMesh` object, comprised of all
 elements with at least one vertex lying on the cut surface that lie on one side of the cut.
