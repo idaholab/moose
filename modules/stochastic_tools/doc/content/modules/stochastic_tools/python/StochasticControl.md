@@ -28,11 +28,11 @@ qois = ["pp/value"]                       # Reporter(s) to collect as QoIs
 
 # Configure how the stochastic run is executed
 opts = StochasticRunOptions(
-    num_procs=4,                 # mpiexec -n 4 ...
+    num_procs=4,                   # mpiexec -n 4 ...
     mpi_command="mpiexec",
-    input_name="stochastic_run.i",
-    cli_args=[],                 # extra CLI args to the *stochastic* driver input
-    min_procs_per_sample=None,   # per-sample parallelism (optional)
+    input_name="stochastic_run.i", # name of created stochastic tools input (optional)
+    cli_args=[],                   # extra CLI args to the *stochastic* driver input
+    min_procs_per_sample=None,     # per-sample parallelism (optional)
     multiapp_mode=StochasticRunOptions.MultiAppMode.BATCH_RESET,
     ignore_solve_not_converge=False
 )

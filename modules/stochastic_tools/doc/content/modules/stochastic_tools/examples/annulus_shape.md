@@ -4,7 +4,7 @@ This example demonstrates how to couple [SciPy optimization](https://docs.scipy.
 
 ## Problem Description
 
-In this problem, we focus on an annular (ring-shaped) domain subjected to thermal conditions. The domain is defined by two concentric circles with an inner radius and thickness. The physical problem is heat conduction governed by the heat equation with convective flux type boundary conditions at the inner radius and an insulated outer radius. The convective heat transfer coefficient is dependent on the inner radius. A constant source term is distributed throughout the domain.
+In this problem, we focus on an annular (ring-shaped) domain subjected to thermal conditions. The domain is defined by two concentric circles with an inner radius and thickness. The physical problem is heat conduction governed by the heat equation with a convective flux type boundary condition at the inner radius and an insulated outer radius. The convective heat transfer coefficient is dependent on the inner radius. A constant source term is distributed throughout the domain.
 
 The optimization goal is to find the inner radius and thickness that minimize the maximum temperature within the domain while maintaining a fixed volume of the annulus. In other words, the design variables are the inner radius and thickness, and the objective function is the maximum temperature within the annulus. This is a constrained optimization problem because the volume of the annulus needs to remain constant during the optimization process.
 
@@ -12,7 +12,7 @@ This example problem is identical to the [shape optimization example](optimizati
 
 ## Physics Inputs
 
-There are two MOOSE inputs representing the physics. The first is utilizes input variables for the inner radius and thickness to directly change the mesh that is generated. The other uses mesh displacement to change the domain of the ring.
+There are two MOOSE inputs representing the physics. The first utilizes input variables for the inner radius and thickness to directly change the mesh that is generated. The other uses mesh displacement to change the domain of the ring.
 
 ### Mesh-Based Perturbation Input
 
@@ -78,7 +78,7 @@ The parameters to control are dependent on which input file is being utilized:
 Next, the postprocessors defining the objective and constraints of the optimization are specified as QoIs of the simulation:
 A `StochasticRunOptions` is then built, to be given as options for the `StochasticControl`.
 The `StochasticControl` is created as a context manager which returns a `StochasticRunner` object.
-Since the optimizers often run objective and constraint evaluation separately, but with the same sample, it is recommended to cache the input-output pairs using `configCache`. Finally, somewhat arbitrary bounds for the parameters is defined.
+Since the optimizers often run objective and constraint evaluation separately, but with the same sample, it is recommended to cache the input-output pairs using `configCache`. Finally, somewhat arbitrary bounds for the parameters are defined.
 
 !listing annulus_shape/optimize_annulus.py start=# Parameters to optimize end=# Simplicial
 
