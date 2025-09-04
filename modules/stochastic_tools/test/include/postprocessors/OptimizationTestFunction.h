@@ -20,14 +20,11 @@ public:
 
   PostprocessorValue getValue() const override final;
 
-  /// https://en.wikipedia.org/wiki/Test_functions_for_optimization
-  static Real rosen(const std::vector<Real> & x);
-  /// https://en.wikipedia.org/wiki/Test_functions_for_optimization
-  static Real eggholder(const std::vector<Real> & x);
-
 protected:
-  /// Function to evaluate
-  const MooseEnum & _function;
+  // Function to override
+  virtual Real function(const std::vector<Real> & x) const = 0;
+
+private:
   // Input values
   const std::vector<Real> & _x;
 };

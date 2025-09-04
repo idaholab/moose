@@ -3,13 +3,11 @@
 
 [Postprocessors]
   [rosenbrock]
-    type = OptimizationTestFunction
-    function = rosen
+    type = Rosenbrock
     x = '0 0 0'
   []
   [eggholder]
-    type = OptimizationTestFunction
-    function = eggholder
+    type = Eggholder
     x = '0 0'
   []
 []

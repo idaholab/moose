@@ -24,7 +24,7 @@ import sys
 import numpy as np
 import argparse
 import importlib.util
-from scipy.optimize import rosen  # Exact match to OptimizationTestFunction::rosen
+from scipy.optimize import rosen  # Exact match to Rosenbrock::rosen
 
 if importlib.util.find_spec("moose_stochastic_tools") is None:
     _moose_dir = os.environ.get("MOOSE_DIR", None)
@@ -39,7 +39,7 @@ from moose_stochastic_tools import StochasticControl, StochasticRunOptions
 
 
 def eggholder(x):
-    """Exact match to OptimizationTestFunction::eggholder"""
+    """Exact match to Eggholder::eggholder"""
     return -(x[1] + 47.0) * np.sin(np.sqrt(abs(x[0] / 2.0 + (x[1] + 47.0)))) - x[
         0
     ] * np.sin(np.sqrt(abs(x[0] - (x[1] + 47.0))))
