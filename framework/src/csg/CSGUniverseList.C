@@ -21,13 +21,6 @@ CSGUniverseList::CSGUniverseList()
   _universes.insert(std::make_pair(root_name, std::move(root_universe)));
 }
 
-void
-CSGUniverseList::checkUniverseName(const std::string & name) const
-{
-  if (_universes.find(name) != _universes.end())
-    mooseError("Universe with name " + name + " already exists in geometry.");
-}
-
 CSGUniverse &
 CSGUniverseList::getUniverse(const std::string & name)
 {
@@ -50,17 +43,16 @@ CSGUniverseList::getAllUniverses() const
 CSGUniverse &
 CSGUniverseList::addUniverse(const std::string & name)
 {
-  checkUniverseName(name);
-  _universes.insert(std::make_pair(name, std::make_unique<CSGUniverse>(name)));
-  return *_universes[name];
+  return addUniverse(std::make_unique<CSGUniverse>(name));
 }
 
-void
+CSGUniverse &
 CSGUniverseList::addUniverse(std::unique_ptr<CSGUniverse> universe)
 {
-  auto name = universe->getName();
-  checkUniverseName(name);
-  _universes.insert(std::make_pair(name, std::move(universe)));
+  auto [it, inserted] = _universes.emplace(universe->getName(), std::move(universe));
+  if (!inserted)
+    mooseError("Universe with name " + universe->getName() + " already exists in geometry.");
+  return *it->second;
 }
 
 void
@@ -74,10 +66,9 @@ CSGUniverseList::renameUniverse(const CSGUniverse & universe, const std::string 
     mooseError("Universe " + prev_name + " cannot be renamed to " + name +
                " as it does not exist in this CSGBase instance.");
 
-  checkUniverseName(name);
   existing_univ->setName(name);
   _universes.erase(prev_name);
-  _universes.insert(std::make_pair(name, std::move(existing_univ)));
+  addUniverse(std::move(existing_univ));
 }
 
 } // namespace CSG
