@@ -16,17 +16,24 @@
 
 #include "MooseUnitUtils.h"
 
-using namespace CSG;
+namespace CSG
+{
 
-// make surfaces and region to use for cells
-CSGSphere sphere("sphere_surf", 1.0);
-auto region1 = -sphere;
-auto region2 = +sphere;
-std::string reg_str = "-sphere_surf";
+// helper function to setup the regions used for the cells in all tests
+std::tuple<CSGRegion, CSGRegion, std::string>
+setupRegions()
+{
+  static CSG::CSGSphere sphere("sphere_surf", 1.0);
+  auto region1 = -sphere;
+  auto region2 = +sphere;
+  std::string reg_str = "-sphere_surf";
+  return std::make_tuple(region1, region2, reg_str);
+}
 
 // Test each type of CSGCell constructor
 TEST(CSGCellTest, testVoidCell)
 {
+  auto [region1, region2, reg_str] = setupRegions();
   std::string name = "void_cell";
   CSGCell cell(name, region1);
 
@@ -40,6 +47,7 @@ TEST(CSGCellTest, testVoidCell)
 
 TEST(CSGCellTest, testMaterialCell)
 {
+  auto [region1, region2, reg_str] = setupRegions();
   std::string name = "mat_cell";
   std::string matname = "matname";
   CSGCell cell(name, matname, region1);
@@ -54,6 +62,7 @@ TEST(CSGCellTest, testMaterialCell)
 
 TEST(CSGCellTest, testUniverseCell)
 {
+  auto [region1, region2, reg_str] = setupRegions();
   std::string name = "univ_cell";
   std::string uname = "new_univ";
   const CSGUniverse univ(uname);
@@ -70,6 +79,7 @@ TEST(CSGCellTest, testUniverseCell)
 // tests CSGCell::getFillUniverse and CSGCell::getFillMaterial
 TEST(CSGCellTest, testGetFill)
 {
+  auto [region1, region2, reg_str] = setupRegions();
   std::string cellname = "cellname";
 
   // get fill for void cell - expect errors for both methods
@@ -106,6 +116,8 @@ TEST(CSGCellTest, testGetFill)
 // Test equality operators
 TEST(CSGCellTest, testCellEquality)
 {
+  auto [region1, region2, reg_str] = setupRegions();
+
   // identical void cells
   CSGCell vcell1("void_cell", region1);
   CSGCell vcell2("void_cell", region1);
@@ -158,3 +170,23 @@ TEST(CSGCellTest, testCellEquality)
     }
   }
 }
+
+/// CSGCell::setName
+TEST(CSGCellTest, testSetName)
+{
+  auto [region1, region2, reg_str] = setupRegions();
+  CSGCell cell("first_name", region1);
+  cell.setName("new_name");
+  ASSERT_EQ("new_name", cell.getName());
+}
+
+/// CSGCell::updateRegion
+TEST(CSGCellTest, testUpdateRegion)
+{
+  auto [region1, region2, reg_str] = setupRegions();
+  CSGCell cell("cellname", region1);
+  cell.updateRegion(region2);
+  ASSERT_EQ(region2, cell.getRegion());
+}
+
+} // namespace CSG

@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "gtest/gtest.h"
+
 #include "MooseApp.h"
 #include "MooseEnum.h"
 
@@ -110,5 +112,10 @@ protected:
 
   // CSGSurfaceList needs to be friend to access setName()
   friend class CSGSurfaceList;
+
+  /// Friends for unit testing
+  ///@{
+  FRIEND_TEST(CSGSurfaceTest, testSetName);
+  ///@}
 };
 } // namespace CSG

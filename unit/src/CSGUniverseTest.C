@@ -7,21 +7,34 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "CSGUniverseTest.h"
+#include "gtest/gtest.h"
+
+#include "CSGSphere.h"
+#include "CSGCell.h"
+#include "CSGUniverse.h"
+#include "CSGRegion.h"
+
+#include "MooseUnitUtils.h"
 
 namespace CSG
 {
 
-// create cells to use for universes
-CSGSphere sphere("sphere_surf", 1.0);
-auto region1 = -sphere;
-auto region2 = +sphere;
-CSGCell c1("cell1", region1);
-CSGCell c2("cell2", region2);
-CSGCell c3("cell3", region1 | region2);
+// helper function create cells to use for universes
+std::tuple<CSGCell, CSGCell, CSGCell>
+setupCells()
+{
+  // sphere is static because it must remain in memory after calling to avoid errors in some tests
+  static CSG::CSGSphere sphere("sphere_surf", 1.0);
+  auto region1 = -sphere;
+  auto region2 = +sphere;
+  CSG::CSGCell c1("cell1", region1);
+  CSG::CSGCell c2("cell2", region2);
+  CSG::CSGCell c3("cell3", region1 | region2);
+  return std::make_tuple(c1, c2, c3);
+}
 
 // Test attributes of root/empty CSGUniverse constructor
-TEST_F(CSGUniverseTest, testRootUniverseConstructor)
+TEST(CSGUniverseTest, testRootUniverseConstructor)
 {
   CSGUniverse root_univ("root_name", true);
   ASSERT_EQ("root_name", root_univ.getName());
@@ -30,8 +43,9 @@ TEST_F(CSGUniverseTest, testRootUniverseConstructor)
 }
 
 // test attributes of CSGUniverse constructor with list of cells
-TEST_F(CSGUniverseTest, testCellsUniverseConstructor)
+TEST(CSGUniverseTest, testCellsUniverseConstructor)
 {
+  auto [c1, c2, c3] = setupCells();
   std::vector<CSGCell *> cells = {&c1, &c2};
   CSGUniverse cells_univ("cells_univ", cells);
 
@@ -43,8 +57,9 @@ TEST_F(CSGUniverseTest, testCellsUniverseConstructor)
 }
 
 // CSGUniverse::getCell
-TEST_F(CSGUniverseTest, testGetCell)
+TEST(CSGUniverseTest, testGetCell)
 {
+  auto [c1, c2, c3] = setupCells();
   std::vector<CSGCell *> cells = {&c1, &c2};
   CSGUniverse cells_univ("cells_univ", cells);
 
@@ -60,8 +75,14 @@ TEST_F(CSGUniverseTest, testGetCell)
 }
 
 // CSGUniverse::addCell
-TEST_F(CSGUniverseTest, testAddCell)
+TEST(CSGUniverseTest, testAddCell)
 {
+  // must unpack individually to be able to pass c1 into assertThrows
+  auto all_cells = setupCells();
+  auto c1 = std::get<0>(all_cells);
+  auto c2 = std::get<1>(all_cells);
+  auto c3 = std::get<2>(all_cells);
+
   std::vector<CSGCell *> cells = {&c1, &c2};
   CSGUniverse cells_univ("cells_univ", cells);
 
@@ -73,7 +94,7 @@ TEST_F(CSGUniverseTest, testAddCell)
   }
   // try to add a cell that already exists, should raise warning and not add
   {
-    Moose::UnitUtils::assertThrows([&cells_univ]() { cells_univ.addCell(c1); },
+    Moose::UnitUtils::assertThrows([&cells_univ, &c1]() { cells_univ.addCell(c1); },
                                    "Skipping cell insertion for cell with duplicate name.");
     ASSERT_EQ(3, cells_univ.getAllCells().size());
   }
@@ -92,8 +113,9 @@ TEST_F(CSGUniverseTest, testAddCell)
 }
 
 // CSGUniverse::removeCell
-TEST_F(CSGUniverseTest, testRemoveCell)
+TEST(CSGUniverseTest, testRemoveCell)
 {
+  auto [c1, c2, c3] = setupCells();
   std::vector<CSGCell *> cells = {&c1, &c2, &c3};
   CSGUniverse cells_univ("cells_univ", cells);
 
@@ -112,8 +134,9 @@ TEST_F(CSGUniverseTest, testRemoveCell)
 }
 
 // CSGUniverse::removeAllCells
-TEST_F(CSGUniverseTest, testRemoveAllCells)
+TEST(CSGUniverseTest, testRemoveAllCells)
 {
+  auto [c1, c2, c3] = setupCells();
   std::vector<CSGCell *> cells = {&c1, &c2, &c3};
   CSGUniverse cells_univ("cells_univ", cells);
   cells_univ.removeAllCells();
@@ -121,7 +144,7 @@ TEST_F(CSGUniverseTest, testRemoveAllCells)
 }
 
 // CSGUniverse::setName
-TEST_F(CSGUniverseTest, testSetName)
+TEST(CSGUniverseTest, testSetName)
 {
   CSGUniverse univ("first_name");
   univ.setName("new_name");

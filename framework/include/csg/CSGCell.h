@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "gtest/gtest.h"
+
 #include "CSGRegion.h"
 
 namespace CSG
@@ -136,5 +138,11 @@ protected:
 
   friend class CSGCellList; // needed for setName() access
   friend class CSGBase;     // needed for updateRegion() access
+
+  /// Friends for unit testing
+  ///@{
+  FRIEND_TEST(CSGCellTest, testSetName);
+  FRIEND_TEST(CSGCellTest, testUpdateRegion);
+  ///@}
 };
 } // namespace CSG
