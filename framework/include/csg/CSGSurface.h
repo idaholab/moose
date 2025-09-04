@@ -54,7 +54,7 @@ public:
    *
    * @return type of surface
    */
-  const std::string getSurfaceType() const { return _surface_type; }
+  const std::string & getSurfaceType() const { return _surface_type; }
 
   /**
    * @brief Get the coefficients that define the surface
