@@ -21,7 +21,7 @@
     type = RunException
     input = input_matrix_dynamic.i
     cli_args = 'Controls/sample_control/num_cols_function=dynamic_num_rows'
-    expect_err = 'Inputted matrix as changed the number of columns from \d+ to \d+'
+    expect_err = 'Input matrix changed the number of columns from \d+ to \d+'
     allow_test_objects = true
 
     issues = '#31171'

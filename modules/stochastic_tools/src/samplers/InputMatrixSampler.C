@@ -33,7 +33,7 @@ InputMatrixSampler::executeSetUp()
 {
   if ((dof_id_type)_data.cols() != getNumberOfCols())
     paramError("matrix",
-               "Inputted matrix as changed the number of columns from ",
+               "Input matrix changed the number of columns from ",
                getNumberOfCols(),
                " to ",
                _data.cols());
