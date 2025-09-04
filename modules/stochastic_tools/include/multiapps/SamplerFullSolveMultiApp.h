@@ -29,6 +29,12 @@ public:
   virtual void preTransfer(Real dt, Real target_time) override;
 
   /**
+   * This method is overridden so that we only store the initial state and not on any other
+   * timestep when doing batch-restore.
+   */
+  virtual void backup() override;
+
+  /**
    * Helper for inserting row data into commandline arguments
    * Used here and in SamplerTransientMultiApp
    *
