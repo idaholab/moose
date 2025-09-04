@@ -1,0 +1,84 @@
+[Tests]
+  issues = '#31300'
+  design = 'ADPhaseFieldTimeDerivativeSUPG.md ADPhaseFieldForcingFunctionSUPG.md ADPhaseFieldAdvection.md ADPhaseFieldAdvectionSUPG.md'
+  [mms]
+    type = CSVDiff
+    input = phase_field_advection_mms.i
+    csvdiff = phase_field_advection_mms_out.csv
+    # This problem uses SuperLU.
+    capabilities = 'superlu'
+    requirement = "The ADPhaseFieldAdvection Kernel shall converage at the correct rate as tested by the method of manufactured solutions."
+  []
+  [phase_00]
+    type = CSVDiff
+    input = phase_field_mms.i
+    csvdiff = phase_field_mms_00.csv
+    cli_args = 'Mesh/uniform_refine=0 Outputs/file_base=phase_field_mms_00'
+    requirement = "The phase field module shall use the method of manufactured solutions to test convergence of the phase field equation and ensure that the level 0 solution is consistent."
+  []
+  [phase_01]
+    type = CSVDiff
+    input = phase_field_mms.i
+    csvdiff = phase_field_mms_01.csv
+    cli_args = 'Mesh/uniform_refine=1 Outputs/file_base=phase_field_mms_01'
+    requirement = "The phase field module shall use the method of manufactured solutions to test convergence of the phase field equation and ensure that the level 1 solution is consistent."
+  []
+  [phase_02]
+    type = CSVDiff
+    input = phase_field_mms.i
+    csvdiff = phase_field_mms_02.csv
+    cli_args = 'Mesh/uniform_refine=2 Outputs/file_base=phase_field_mms_02'
+    requirement = "The phase field module shall use the method of manufactured solutions to test convergence of the phase field equation and ensure that the level 2 solution is consistent."
+  []
+  [phase_03]
+    type = CSVDiff
+    input = phase_field_mms.i
+    csvdiff = phase_field_mms_03.csv
+    cli_args = 'Mesh/uniform_refine=3 Outputs/file_base=phase_field_mms_03'
+    requirement = "The phase field module shall use the method of manufactured solutions to test convergence of the phase field equation and ensure that the level 3 solution is consistent."
+  []
+  [phase_04]
+    type = CSVDiff
+    input = phase_field_mms.i
+    csvdiff = phase_field_mms_04.csv
+    cli_args = 'Mesh/uniform_refine=4 Outputs/file_base=phase_field_mms_04'
+    requirement = "The phase field module shall use the method of manufactured solutions to test convergence of the phase field equation and ensure that the level 4 solution is consistent."
+    valgrind = HEAVY
+  []
+  [phase_supg_00]
+    type = CSVDiff
+    input = phase_field_supg_mms.i
+    csvdiff = phase_field_supg_mms_00.csv
+    cli_args = 'Mesh/uniform_refine=0 Outputs/file_base=phase_field_supg_mms_00'
+    requirement = "The phase field module shall use the method of manufactured solutions to test convergence of the phase field equation with SUPG and ensure that the level 0 solution is consistent."
+  []
+  [phase_supg_01]
+    type = CSVDiff
+    input = phase_field_supg_mms.i
+    csvdiff = phase_field_supg_mms_01.csv
+    cli_args = 'Mesh/uniform_refine=1 Outputs/file_base=phase_field_supg_mms_01'
+    requirement = "The phase field module shall use the method of manufactured solutions to test convergence of the phase field equation with SUPG and ensure that the level 1 solution is consistent."
+  []
+  [phase_supg_02]
+    type = CSVDiff
+    input = phase_field_supg_mms.i
+    csvdiff = phase_field_supg_mms_02.csv
+    cli_args = 'Mesh/uniform_refine=2 Outputs/file_base=phase_field_supg_mms_02'
+    requirement = "The phase field module shall use the method of manufactured solutions to test convergence of the phase field equation with SUPG and ensure that the level 2 solution is consistent."
+  []
+  [phase_supg_03]
+    type = CSVDiff
+    input = phase_field_supg_mms.i
+    csvdiff = phase_field_supg_mms_03.csv
+    cli_args = 'Mesh/uniform_refine=3 Outputs/file_base=phase_field_supg_mms_03'
+    requirement = "The phase field module shall use the method of manufactured solutions to test convergence of the phase field equation with SUPG and ensure that the level 3 solution is consistent."
+  []
+  [phase_supg_04]
+    type = CSVDiff
+    input = phase_field_supg_mms.i
+    csvdiff = phase_field_supg_mms_04.csv
+    cli_args = 'Mesh/uniform_refine=4 Outputs/file_base=phase_field_supg_mms_04'
+    requirement = "The phase field module shall use the method of manufactured solutions to test convergence of the phase field equation with SUPG and ensure that the level 4 solution is consistent."
+    valgrind = HEAVY
+  []
+[]
