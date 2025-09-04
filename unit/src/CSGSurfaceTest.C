@@ -17,7 +17,52 @@
 
 #include "MooseUnitUtils.h"
 
-using namespace CSG;
+namespace CSG
+{
+
+// helper function for creating axis aligned cylinders
+template <typename T>
+T
+makeCylinder()
+{
+  Real c0 = 1.0;
+  Real c1 = 2.0;
+  Real radius = 3.0;
+  T cylinder("cyl", c0, c1, radius);
+  return cylinder;
+}
+
+// helper function for checking axis aligned cylinders
+void
+checkCylinder(std::string axis,
+              std::unordered_map<std::string, Real> test_coeffs,
+              std::string test_type)
+{
+  Real c0 = 1.0;
+  Real c1 = 2.0;
+  Real radius = 3.0;
+
+  std::string k0, k1;
+  if (axis == "X")
+  {
+    k0 = "y0";
+    k1 = "z0";
+  }
+  else if (axis == "Y")
+  {
+    k0 = "x0";
+    k1 = "z0";
+  }
+  else if (axis == "Z")
+  {
+    k0 = "x0";
+    k1 = "y0";
+  }
+  std::unordered_map<std::string, Real> exp_coeffs = {{k0, c0}, {k1, c1}, {"r", radius}};
+  std::string exp_type = "CSG::CSG" + axis + "Cylinder";
+  ASSERT_TRUE(exp_coeffs == test_coeffs);
+  ASSERT_TRUE(exp_type == test_type);
+}
 
 /// Tests CSGPlane::CSGPlane constructors, from 3 points
 TEST(CSGSurfaceTest, testPlaneFromPoints)
@@ -117,78 +162,44 @@ TEST(CSGSurfaceTest, testSphereNegativeRadius)
                                  "Radius of sphere must be positive.");
 }
 
-// center and radius to use for all axially aligned cylinders
-Real c0 = 1.0;
-Real c1 = 2.0;
-Real radius = 3.0;
-
-// helper function for checking axis aligned cylinders
-void
-checkCylinder(std::string axis,
-              std::unordered_map<std::string, Real> test_coeffs,
-              std::string test_type)
-{
-  std::string k0, k1;
-  if (axis == "X")
-  {
-    k0 = "y0";
-    k1 = "z0";
-  }
-  else if (axis == "Y")
-  {
-    k0 = "x0";
-    k1 = "z0";
-  }
-  else if (axis == "Z")
-  {
-    k0 = "x0";
-    k1 = "y0";
-  }
-  std::unordered_map<std::string, Real> exp_coeffs = {{k0, c0}, {k1, c1}, {"r", radius}};
-  std::string exp_type = "CSG::CSG" + axis + "Cylinder";
-  ASSERT_TRUE(exp_coeffs == test_coeffs);
-  ASSERT_TRUE(exp_type == test_type);
-}
-
 /// tests CSGXCylinder constructor and attributes
 TEST(CSGSurfaceTest, testXCylinder)
 {
-  CSGXCylinder xcyl("xcyl", c0, c1, radius);
-  checkCylinder("X", xcyl.getCoeffs(), xcyl.getSurfaceType());
+  CSGXCylinder cyl = makeCylinder<CSGXCylinder>();
+  checkCylinder("X", cyl.getCoeffs(), cyl.getSurfaceType());
 }
 
 /// tests CSGYCylinder constructor and attributes
 TEST(CSGSurfaceTest, testYCylinder)
 {
-  CSGYCylinder ycyl("ycyl", c0, c1, radius);
-  checkCylinder("Y", ycyl.getCoeffs(), ycyl.getSurfaceType());
+  CSGYCylinder cyl = makeCylinder<CSGYCylinder>();
+  checkCylinder("Y", cyl.getCoeffs(), cyl.getSurfaceType());
 }
 
 /// tests CSGZCylinder constructor and attributes
 TEST(CSGSurfaceTest, testZCylinder)
 {
-  CSGZCylinder zcyl("zcyl", c0, c1, radius);
-  checkCylinder("Z", zcyl.getCoeffs(), zcyl.getSurfaceType());
+  CSGZCylinder cyl = makeCylinder<CSGZCylinder>();
+  checkCylinder("Z", cyl.getCoeffs(), cyl.getSurfaceType());
 }
 
 /// Expect error if cylinders are constructed with a negative radius
 TEST(CSGSurfaceTest, testCylNegativeRadius)
 {
   Real neg_r = -1.0;
-
   // XCylinder
   {
-    Moose::UnitUtils::assertThrows([&neg_r]() { CSGXCylinder xcyl("cyl", c0, c1, neg_r); },
+    Moose::UnitUtils::assertThrows([&neg_r]() { CSGXCylinder xcyl("cyl", 0, 0, neg_r); },
                                    "Radius of x-cylinder must be positive.");
   }
   // YCylinder
   {
-    Moose::UnitUtils::assertThrows([&neg_r]() { CSGYCylinder ycyl("cyl", c0, c1, neg_r); },
+    Moose::UnitUtils::assertThrows([&neg_r]() { CSGYCylinder ycyl("cyl", 0, 0, neg_r); },
                                    "Radius of y-cylinder must be positive.");
   }
   // ZCylinder
   {
-    Moose::UnitUtils::assertThrows([&neg_r]() { CSGZCylinder zcyl("cyl", c0, c1, neg_r); },
+    Moose::UnitUtils::assertThrows([&neg_r]() { CSGZCylinder zcyl("cyl", 0, 0, neg_r); },
                                    "Radius of z-cylinder must be positive.");
   }
 }
@@ -200,17 +211,17 @@ TEST(CSGSurfaceTest, testCylEvaluateEq)
   const Point p = Point(0.0, 0.0, 0.0);
   // XCylinder
   {
-    CSGXCylinder cyl("cyl", c0, c1, radius);
+    CSGXCylinder cyl = makeCylinder<CSGXCylinder>();
     ASSERT_FLOAT_EQ(exp_val, cyl.evaluateSurfaceEquationAtPoint(p));
   }
   // YCylinder
   {
-    CSGYCylinder cyl("cyl", c0, c1, radius);
+    CSGYCylinder cyl = makeCylinder<CSGYCylinder>();
     ASSERT_FLOAT_EQ(exp_val, cyl.evaluateSurfaceEquationAtPoint(p));
   }
   // ZCylinder
   {
-    CSGZCylinder cyl("cyl", c0, c1, radius);
+    CSGZCylinder cyl = makeCylinder<CSGZCylinder>();
     ASSERT_FLOAT_EQ(exp_val, cyl.evaluateSurfaceEquationAtPoint(p));
   }
 }
@@ -266,9 +277,19 @@ TEST(CSGSurfaceTest, testSurfaceEquality)
 }
 
 /// test CSGSurface::getName
-TEST(CSGSurfaceTest, testSurfaceGetName)
+TEST(CSGSurfaceTest, testGetName)
 {
   std::string name = "sph_surf_name";
   CSGSphere sph(name, 1.0);
   ASSERT_EQ(name, sph.getName());
 }
+
+/// test CSGSurface::setName
+TEST(CSGSurfaceTest, testSetName)
+{
+  CSGSphere sph("first_name", 1.0);
+  sph.setName("new_name");
+  ASSERT_EQ("new_name", sph.getName());
+}
+
+} // namespace CSG
