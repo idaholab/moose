@@ -75,8 +75,9 @@ protected:
    * list object that calls this function
    *
    * @param universe pointer to universe to add
+   * @return reference to universe that is passed in
    */
-  void addUniverse(std::unique_ptr<CSGUniverse> universe);
+  CSGUniverse & addUniverse(std::unique_ptr<CSGUniverse> universe);
 
   /**
    * @brief rename the specified universe
@@ -85,9 +86,6 @@ protected:
    * @param name new name
    */
   void renameUniverse(const CSGUniverse & universe, const std::string & name);
-
-  /// Checks whether universe name already exists within CSGUniverseList object
-  void checkUniverseName(const std::string & name) const;
 
   /// Mapping of universe names to pointers of stored universe objects
   std::unordered_map<std::string, std::unique_ptr<CSGUniverse>> _universes;

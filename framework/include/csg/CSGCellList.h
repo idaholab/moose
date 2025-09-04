@@ -91,8 +91,9 @@ protected:
    * that calls this function
    *
    * @param cell cell to add to the CellList.
+   * @return reference to CSGCell that was added to CellList
    */
-  void addCell(std::unique_ptr<CSGCell> cell);
+  CSGCell & addCell(std::unique_ptr<CSGCell> cell);
 
   /**
    * @brief rename the specified cell
@@ -101,9 +102,6 @@ protected:
    * @param name new name
    */
   void renameCell(const CSGCell & cell, const std::string & name);
-
-  /// Checks whether cell name already exists within CSGCellList object
-  void checkCellName(const std::string & name) const;
 
   /// Mapping of cell names to pointers of stored cell objects
   std::unordered_map<std::string, std::unique_ptr<CSGCell>> _cells;

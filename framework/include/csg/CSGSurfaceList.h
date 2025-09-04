@@ -73,9 +73,6 @@ protected:
    */
   void renameSurface(const CSGSurface & surface, const std::string & name);
 
-  /// Checks whether surface name already exists within CSGSurfaceList object
-  void checkSurfaceName(const std::string & name) const;
-
   /// Mapping of surface names to pointers of stored surface objects
   std::unordered_map<std::string, std::unique_ptr<CSGSurface>> _surfaces;
 

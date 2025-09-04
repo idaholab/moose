@@ -19,13 +19,6 @@ namespace CSG
 
 CSGSurfaceList::CSGSurfaceList() {}
 
-void
-CSGSurfaceList::checkSurfaceName(const std::string & name) const
-{
-  if (_surfaces.find(name) != _surfaces.end())
-    mooseError("Surface with name " + name + " already exists in geometry.");
-}
-
 CSGSurface &
 CSGSurfaceList::getSurface(const std::string & name) const
 {
@@ -48,10 +41,10 @@ CSGSurfaceList::getAllSurfaces() const
 CSGSurface &
 CSGSurfaceList::addSurface(std::unique_ptr<CSGSurface> surf)
 {
-  auto name = surf->getName();
-  checkSurfaceName(name);
-  _surfaces.insert(std::make_pair(name, std::move(surf)));
-  return *_surfaces[name];
+  auto [it, inserted] = _surfaces.emplace(surf->getName(), std::move(surf));
+  if (!inserted)
+    mooseError("Surface with name " + surf->getName() + " already exists in geometry.");
+  return *it->second;
 }
 
 void
@@ -65,10 +58,9 @@ CSGSurfaceList::renameSurface(const CSGSurface & surface, const std::string & na
     mooseError("Surface " + prev_name + " cannot be renamed to " + name +
                " as it does not exist in this CSGBase instance.");
 
-  checkSurfaceName(name);
   existing_surface->setName(name);
   _surfaces.erase(prev_name);
-  _surfaces.insert(std::make_pair(name, std::move(existing_surface)));
+  addSurface(std::move(existing_surface));
 }
 
 } // namespace CSG
