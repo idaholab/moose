@@ -35,6 +35,10 @@ class Syntax;
 namespace Moose
 {
 class Builder;
+namespace ParameterExtraction
+{
+struct ExtractionInfo;
+}
 
 class UnusedWalker : public hit::Walker
 {
@@ -117,17 +121,10 @@ public:
 
 private:
   /**
-   * @return Whether or not the given node \p node exists within the [GlobalParams] block
+   * Appends the context from the ExtractionInfo objects (errors, deprecated params, used variables)
+   * collected during extractParams and from the [Application] block extraction
    */
-  bool isGlobal(const hit::Node & node) const;
-
-  /**
-   * Get the [GlobalParams] section node if it exists
-   *
-   * We need to separate this so that we can call extractParams()
-   * before calling build()
-   */
-  const hit::Node * queryGlobalParamsNode() const;
+  void appendExtractionInfo(const ParameterExtraction::ExtractionInfo & info);
 
   /// The MooseApp this Parser is part of
   MooseApp & _app;

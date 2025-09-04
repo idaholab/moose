@@ -292,7 +292,8 @@ CommandLine::buildHitParams()
 }
 
 void
-CommandLine::populateCommandLineParams(InputParameters & params)
+CommandLine::populateCommandLineParams(InputParameters & params,
+                                       const hit::Node * const command_line_root)
 {
   mooseAssert(!_command_line_params_populated, "Already populated");
 
@@ -356,7 +357,7 @@ CommandLine::populateCommandLineParams(InputParameters & params)
 
       // If we found this parameter, that means we set it and we should mark in the
       // InputParameters that it is set so that isParamSetByUser() returns true for this param
-      params.commandLineParamSet(name, {});
+      params.commandLineParamSet(name, entry.name, command_line_root, {});
 
       // If this parameter is global, mark its entry as global
       if (param.metadata.global)
