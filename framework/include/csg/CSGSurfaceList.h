@@ -64,7 +64,7 @@ protected:
    *
    * @return reference to CSGSurface
    */
-  CSGSurface & addSurface(std::unique_ptr<CSGSurface> & surf);
+  CSGSurface & addSurface(std::unique_ptr<CSGSurface> surf);
 
   /**
    * @brief rename the specified surface

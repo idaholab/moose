@@ -58,7 +58,7 @@ TestCSGRegionTypesMeshGenerator::generateCSG()
     const auto plane_coeff = plane_coeffs[i];
     std::unique_ptr<CSG::CSGSurface> plane_ptr = std::make_unique<CSG::CSGPlane>(
         surf_name, plane_coeff[0], plane_coeff[1], plane_coeff[2], plane_coeff[3]);
-    auto & csg_plane = csg_obj->addSurface(plane_ptr);
+    auto & csg_plane = csg_obj->addSurface(std::move(plane_ptr));
     auto pos_halfspace = +csg_plane;
     auto neg_halfspace = -csg_plane;
     if (surf_names[i] == "plus_x")

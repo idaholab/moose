@@ -76,7 +76,7 @@ ExampleCSGInfiniteSquareMeshGenerator::generateCSG()
     // create the plane for one face of the prism
     std::unique_ptr<CSG::CSGSurface> plane_ptr = std::make_unique<CSG::CSGPlane>(
         surf_name, points_on_planes[i][0], points_on_planes[i][1], points_on_planes[i][2]);
-    auto & csg_plane = csg_obj->addSurface(plane_ptr);
+    auto & csg_plane = csg_obj->addSurface(std::move(plane_ptr));
     // determine where the plane is in relation to the centroid to be able to set the half-space
     const auto region_direction = csg_plane.getHalfspaceFromPoint(centroid);
     // half-space is either positive (+plane_ptr) or negative (-plane_ptr)

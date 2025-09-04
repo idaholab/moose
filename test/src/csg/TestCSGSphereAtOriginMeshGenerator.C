@@ -47,7 +47,7 @@ TestCSGSphereAtOriginMeshGenerator::generateCSG()
   // create a sphere surface of the specified radius at the origin
   std::unique_ptr<CSG::CSGSurface> sp_ptr =
       std::make_unique<CSG::CSGSphere>(mg_name + "_sphere_surf", _radius);
-  auto & sphere_surf = csg_obj->addSurface(sp_ptr);
+  auto & sphere_surf = csg_obj->addSurface(std::move(sp_ptr));
   csg_obj->createCell(mg_name + "_sphere_cell", -sphere_surf);
 
   return csg_obj;

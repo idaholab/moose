@@ -50,7 +50,7 @@ TestCSGInvalidRegion::generateCSG()
   const auto surf_name = "surf_plus_x";
   std::unique_ptr<CSG::CSGSurface> plane_ptr = std::make_unique<CSG::CSGPlane>(
       surf_name, points_on_plane[0], points_on_plane[1], points_on_plane[2]);
-  auto & csg_plane = csg_obj->addSurface(plane_ptr);
+  auto & csg_plane = csg_obj->addSurface(std::move(plane_ptr));
 
   // Invalid region type 0: two regions passed into CSGRegion as a halfspace
   if (_region_type == 0)

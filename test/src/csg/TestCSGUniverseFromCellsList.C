@@ -51,7 +51,7 @@ TestCSGUniverseFromCellsList::generateCSG()
     // create a sphere surface of the specified radius at the origin
     std::unique_ptr<CSG::CSGSurface> sp_ptr =
         std::make_unique<CSG::CSGSphere>(mg_name + "_sphere_surf_" + std::to_string(i), _radii[i]);
-    auto & sphere_surf = csg_obj->addSurface(sp_ptr);
+    auto & sphere_surf = csg_obj->addSurface(std::move(sp_ptr));
     // create cell from surface and add it to the list
     const auto & sph_cell =
         csg_obj->createCell(mg_name + "_sphere_cell_" + std::to_string(i), -sphere_surf);
@@ -67,7 +67,7 @@ TestCSGUniverseFromCellsList::generateCSG()
   auto radius = _radii.back();
   std::unique_ptr<CSG::CSGSurface> sp_ptr =
       std::make_unique<CSG::CSGSphere>(mg_name + "_contain_surf", radius);
-  auto & sphere_surf = csg_obj->addSurface(sp_ptr);
+  auto & sphere_surf = csg_obj->addSurface(std::move(sp_ptr));
   csg_obj->createCell(mg_name + "_contain_cell", contain_univ, -sphere_surf);
 
   return csg_obj;

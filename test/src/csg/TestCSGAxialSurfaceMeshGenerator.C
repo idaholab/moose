@@ -76,7 +76,7 @@ TestCSGAxialSurfaceMeshGenerator::generateCSG()
     // z plane equation: 0.0*x + 0.0*y + 1.0*z = (+/-)0.5 * axial_height
     std::unique_ptr<CSG::CSGSurface> surface_ptr =
         std::make_unique<CSG::CSGPlane>(default_surf_name, 0.0, 0.0, 1.0, coeffs[i]);
-    auto & csg_plane = csg_obj->addSurface(surface_ptr);
+    auto & csg_plane = csg_obj->addSurface(std::move(surface_ptr));
 
     // Rename surface so that it has a unique surface name based on the mesh generator
     const auto surf_name = mg_name + "_surf_" + surf_names[i];

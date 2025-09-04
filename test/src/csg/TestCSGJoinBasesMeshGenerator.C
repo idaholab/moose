@@ -49,9 +49,6 @@ TestCSGJoinBasesMeshGenerator::generateCSG()
   csg_obj->renameRootUniverse(mg_name + "_root");
   // iterate over all other mesh generators and add their CSGBase to the first
   for (unsigned int i = 1; i < csg_bases.size(); ++i)
-  {
-    std::unique_ptr<CSG::CSGBase> inp_csg_obj = std::move(*csg_bases[i]);
-    csg_obj->joinOtherBase(inp_csg_obj);
-  }
+    csg_obj->joinOtherBase(std::move(*csg_bases[i]));
   return csg_obj;
 }

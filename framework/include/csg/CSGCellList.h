@@ -92,7 +92,7 @@ protected:
    *
    * @param cell cell to add to the CellList.
    */
-  void addCell(std::unique_ptr<CSGCell> & cell);
+  void addCell(std::unique_ptr<CSGCell> cell);
 
   /**
    * @brief rename the specified cell

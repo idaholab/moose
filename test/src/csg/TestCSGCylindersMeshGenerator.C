@@ -68,10 +68,10 @@ TestCSGCylindersMeshGenerator::generateCSG()
     c = 1;
   std::unique_ptr<CSG::CSGSurface> pos_plane_ptr =
       std::make_unique<CSG::CSGPlane>(mg_name + "_pos_plane", a, b, c, _h / 2);
-  auto & pos_plane = csg_obj->addSurface(pos_plane_ptr);
+  auto & pos_plane = csg_obj->addSurface(std::move(pos_plane_ptr));
   std::unique_ptr<CSG::CSGSurface> neg_plane_ptr =
       std::make_unique<CSG::CSGPlane>(mg_name + "_neg_plane", a, b, c, -1 * _h / 2);
-  auto & neg_plane = csg_obj->addSurface(neg_plane_ptr);
+  auto & neg_plane = csg_obj->addSurface(std::move(neg_plane_ptr));
 
   std::string prev_surf_name;
   for (unsigned int i = 0; i < _radii.size(); ++i)
@@ -96,7 +96,7 @@ TestCSGCylindersMeshGenerator::generateCSG()
       cyl_origin = Point(_x0, _x1, 0);
     }
 
-    auto & cyl_surf = csg_obj->addSurface(cyl_ptr);
+    auto & cyl_surf = csg_obj->addSurface(std::move(cyl_ptr));
     auto cyl_halfspace = cyl_surf.getHalfspaceFromPoint(cyl_origin);
     auto cyl_region = CSG::CSGRegion(cyl_surf, cyl_halfspace);
 

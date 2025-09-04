@@ -76,7 +76,7 @@ protected:
    *
    * @param universe pointer to universe to add
    */
-  void addUniverse(std::unique_ptr<CSGUniverse> & universe);
+  void addUniverse(std::unique_ptr<CSGUniverse> universe);
 
   /**
    * @brief rename the specified universe
