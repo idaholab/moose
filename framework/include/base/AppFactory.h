@@ -91,13 +91,16 @@ public:
    * @param app_type Type of the application being constructed
    * @param name Name for the object
    * @param parameters Parameters this object should have
+   * @param throw_on_extract_error Whether or not to throw a ParseError instead of using mooseError
+   * when [Application] block param extraction fails
    * @return The created object
    */
   ///@{
   std::unique_ptr<MooseApp> create(const std::string & app_type,
                                    const std::string & name,
                                    InputParameters parameters,
-                                   MPI_Comm COMM_WORLD_IN);
+                                   MPI_Comm COMM_WORLD_IN,
+                                   const bool throw_on_extract_error = false);
   std::shared_ptr<MooseApp> createShared(const std::string & app_type,
                                          const std::string & name,
                                          InputParameters parameters,
