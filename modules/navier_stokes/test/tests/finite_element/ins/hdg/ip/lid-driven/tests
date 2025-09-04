@@ -133,6 +133,7 @@
       absent_out = 'Linear nl0_condensed_fieldsplit_p_ solve converged due to CONVERGED_RTOL iterations [3-9]'
       mesh_mode = REPLICATED
       valgrind = 'none'
+      capabilities = 'method!=dbg'
     []
   []
 []
