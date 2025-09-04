@@ -4,7 +4,6 @@
   [geometry]
     requirement = "The system shall support the generation of Constructive Solid Geometry (CSG) representations by correctly construct a CSG object that "
     [csg_only]
-        max_threads = 1
         type = 'JSONDiff'
         input = 'csg_only_inf_planes.i'
         cli_args = '--csg-only'
@@ -14,7 +13,6 @@
         detail = 'is single-level deep with a unique cell constructed of planes each generated from 3 points.'
     []
     [csg_only_chained]
-        max_threads = 1
         type = 'JSONDiff'
         input = 'csg_only_chained.i'
         cli_args = '--csg-only'
@@ -24,7 +22,6 @@
         detail = 'updates an existing CSG representation from another mesh generator by updating the region of an existing cell and constructing planes from coefficients.'
     []
     [csg_only_cylinders_join_new_universes]
-        max_threads = 1
         type = 'JSONDiff'
         input = 'csg_cylinders_join_new_universes.i'
         cli_args = '--csg-only'
@@ -34,7 +31,6 @@
         detail = 'joins multiple CSG representations to create one new representation with multiple universes and constructs cylinder surfaces aligned with each axis.'
     []
     [csg_only_spheres_join_single_root]
-        max_threads = 1
         type = 'JSONDiff'
         input = 'csg_spheres_join_single_root.i'
         cli_args = '--csg-only'
@@ -44,7 +40,6 @@
         detail = 'joins multiple CSG representations together into one single universe and constructs sphere surfaces with and without a center point specified.'
     []
     [csg_only_add_cells_new_universe]
-        max_threads = 1
         type = 'JSONDiff'
         input = 'csg_add_cells_new_univ.i'
         cli_args = '--csg-only csg_cylinders_join_new_universes_out_csg.json'
@@ -54,7 +49,6 @@
         detail = 'collects a list of cells to add to an empty universe and remove from another.'
     []
     [csg_create_universe_from_cells]
-        max_threads = 1
         type = 'JSONDiff'
         input = 'csg_universe_from_cells.i'
         cli_args = '--csg-only'
@@ -64,7 +58,6 @@
         detail = 'collects a list of cells and creates a new universe from the list of cells.'
     []
     [csg_only_final_generator]
-        max_threads = 1
         type = 'JSONDiff'
         input = 'csg_only_chained.i'
         cli_args = 'Mesh/final_generator=inf_square --csg-only csg_only_inf_planes_out_csg.json'
@@ -74,7 +67,6 @@
         detail = 'specifies a final generator to create a CSG representation for an intermediate generator.'
     []
     [all_region_types]
-        max_threads = 1
         type = 'JSONDiff'
         input = 'csg_only_region_types.i'
         cli_args = '--csg-only'
@@ -87,7 +79,6 @@
   [errors]
     requirement = 'The system shall report an error when generating a mesh in CSG-only mode when'
     [csg_only_chained_not_moved]
-      max_threads = 1
       type = 'RunException'
       input = 'csg_only_chained_not_moved.i'
       detail = ' a CSG object from an input mesh generator is not moved upon retrieval'
@@ -96,7 +87,6 @@
       mesh_mode = REPLICATED
     []
     [region_surfaces_error]
-      max_threads = 1
       type = 'RunException'
       input = 'csg_region_surfs_error.i'
       detail = ' a cell region is updated with surfaces not present in the current CSGBase instance'
@@ -105,7 +95,6 @@
       mesh_mode = REPLICATED
     []
     [rename_surface_error]
-      max_threads = 1
       type = 'RunException'
       input = 'csg_rename_surf_error.i'
       detail = ' a surface is renamed but the surface object does not match that of the same name in the current CSGBase instance.'
@@ -114,7 +103,6 @@
       mesh_mode = REPLICATED
     []
     [rename_cell_error]
-      max_threads = 1
       type = 'RunException'
       input = 'csg_rename_cell_error.i'
       detail = ' a cell is renamed but the cell object does not match that of the same name in the current CSGBase instance.'
@@ -123,7 +111,6 @@
       mesh_mode = REPLICATED
     []
     [rename_universe_error]
-      max_threads = 1
       type = 'RunException'
       input = 'csg_rename_univ_error.i'
       detail = ' a universe is renamed but the universe object does not match that of the same name in the current CSGBase instance.'
@@ -132,7 +119,6 @@
       mesh_mode = REPLICATED
     []
     [add_cell_universe_error]
-      max_threads = 1
       type = 'RunException'
       input = 'csg_universe_cell_add_error.i'
       detail = ' a cell being added to a universe does not exist in the current CSGBase instance.'
@@ -141,7 +127,6 @@
       mesh_mode = REPLICATED
     []
     [remove_cell_universe_error]
-      max_threads = 1
       type = 'RunException'
       input = 'csg_universe_cell_remove_error.i'
       detail = ' a cell being removed from a universe does not exist in the current CSGBase instance.'
@@ -150,7 +135,6 @@
       mesh_mode = REPLICATED
     []
     [collinear_points_on_plane]
-      max_threads = 1
       type = 'RunException'
       input = 'csg_only_surface_collinear_points.i'
       detail = ' trying to generate a CSG plane where all points on the plane are colienar'
@@ -159,7 +143,6 @@
       mesh_mode = REPLICATED
     []
     [halfspace_defined_by_two_regions]
-      max_threads = 1
       type = 'RunException'
       input = 'csg_only_invalid_region_types.i'
       detail = ' trying to define a halfspace by passing in two regions to the CSGRegion constructor'
@@ -168,7 +151,6 @@
       mesh_mode = REPLICATED
     []
     [union_defined_by_empty_region]
-      max_threads = 1
       type = 'RunException'
       input = 'csg_only_invalid_region_types.i'
       detail = ' trying to define a unionized region by passing in an empty region to the CSGRegion constructor'
@@ -177,7 +159,6 @@
       mesh_mode = REPLICATED
     []
     [distributed_mesh]
-      max_threads = 1
       type = RunException
       input = 'csg_only_inf_planes.i'
       detail = ' used in conjunction with distributed mesh command line option'
@@ -185,7 +166,6 @@
       expect_err = "--csg-only cannot be used in conjunction with --distributed-mesh"
     []
     [split_mesh]
-      max_threads = 1
       type = RunException
       input = 'csg_only_inf_planes.i'
       detail = ' used in conjunction with split mesh command line option'
@@ -194,7 +174,6 @@
       mesh_mode = REPLICATED
     []
     [refinements]
-      max_threads = 1
       type = RunException
       input = 'csg_only_inf_planes.i'
       detail = ' used in conjunction with mesh refinements command line option'
@@ -203,7 +182,6 @@
       mesh_mode = REPLICATED
     []
     [recover]
-      max_threads = 1
       type = RunException
       input = 'csg_only_inf_planes.i'
       detail = ' used in conjunction with recovery command line option'
@@ -211,20 +189,10 @@
       expect_err = "--csg-only option cannot be used in recovery mode"
       mesh_mode = REPLICATED
     []
-    [multi_threads]
-      min_threads = 2
-      type = RunException
-      input = 'csg_only_inf_planes.i'
-      detail = ' used with multiple threads.'
-      cli_args = '--csg-only'
-      expect_err = "--csg-only option does not currently support multi-threading"
-      mesh_mode = REPLICATED
-    []
   []
   [warnings]
     requirement = 'The system shall report a warning when generating a mesh in CSG only mode when'
     [unlinked_universes]
-      max_threads = 1
       type = 'RunException'
       input = 'csg_cylinders_join_unlinked_universes.i'
       detail = ' a universe is created in the CSGBase object that is not linked to the root universe.'
