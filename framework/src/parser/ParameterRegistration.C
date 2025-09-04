@@ -57,7 +57,7 @@ static Moose::ParameterRegistry & registry = Moose::ParameterRegistry::get();
 /*                                                                             */
 /* Registers for scalars, vectors, double vectors, and triple vectors          */
 /*                                                                             */
-/* See DerivativeStringClass macro usage in MooseTypes.h                       */
+/* See MooseDerivativeStringClass macro usage in MooseTypes.h                  */
 /* Please keep the ordering consistent                                         */
 /*******************************************************************************/
 

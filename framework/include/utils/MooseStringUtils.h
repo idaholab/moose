@@ -69,7 +69,7 @@ tokenize(const std::string & str,
  * Takes the string representation of a value and converts it to the value.
  *
  * For standard numeric types, this gets around the deficiencies in the STL
- * stoi and stod methods wher they might successfully convert part of a string
+ * stoi and stod methods where they might successfully convert part of a string
  * to a number when we'd instead prefer to get a failure.
  *
  * For string and string-derived types, this does a direct copy and does
