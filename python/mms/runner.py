@@ -9,6 +9,7 @@
 import os
 import copy
 import mooseutils
+import sys
 import pandas
 
 SPATIAL = 0
@@ -49,6 +50,18 @@ def _runner(input_files, num_refinements, *args, **kwargs):
     rtype = kwargs.get('rtype') # SPATIAL or TEMPORAL
     dt = kwargs.pop('dt', 1) # only used with rtype=TEMPORAL
     file_base = kwargs.pop('file_base', None)
+
+    # MPI should be an integer
+    if mpi is not None:
+        mpi = int(mpi)
+
+    # If we're running this from the test harness, don't allow for over subscription
+    if mpi is not None:
+        testharness_mpi = os.environ.get('TESTHARNESS_NUM_PROCS')
+        if testharness_mpi is not None:
+            testharness_mpi = int(testharness_mpi)
+            if testharness_mpi < mpi:
+                sys.exit(f'TestHarness number of procs {testharness_mpi} < mpi={mpi}')
 
     # Create list of input_files, if single file provided
     if isinstance(input_files, str): input_files = [input_files]
