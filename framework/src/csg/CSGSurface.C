@@ -36,10 +36,9 @@ CSGSurface::getHalfspaceFromPoint(const Point & p) const
 bool
 CSGSurface::operator==(const CSGSurface & other) const
 {
-  const auto name_eq = this->getName() == other.getName();
-  const auto surface_type_eq = this->getSurfaceType() == other.getSurfaceType();
-  const auto coeffs_eq = this->getCoeffs() == other.getCoeffs();
-  return (name_eq && surface_type_eq && coeffs_eq);
+  return (this->getName() == other.getName()) &&
+         (this->getSurfaceType() == other.getSurfaceType()) &&
+         (this->getCoeffs() == other.getCoeffs());
 }
 
 bool

@@ -34,22 +34,20 @@ CSGRegion::CSGRegion(const CSGRegion & region_a,
   _region_type = region_type;
   if (getRegionType() != RegionType::INTERSECTION && getRegionType() != RegionType::UNION)
     mooseError("Region type " + getRegionTypeString() + " is not supported for two regions.");
-  else if (region_a.getRegionType() == RegionType::EMPTY ||
-           region_b.getRegionType() == RegionType::EMPTY)
+  if (region_a.getRegionType() == RegionType::EMPTY ||
+      region_b.getRegionType() == RegionType::EMPTY)
     mooseError("Region operation " + getRegionTypeString() +
                " cannot be performed on an empty region.");
-  else
-  {
-    std::string op = (getRegionType() == RegionType::UNION) ? " | " : " & ";
-    auto a_string = stripRegionString(region_a.toString(), op);
-    auto b_string = stripRegionString(region_b.toString(), op);
 
-    _region_str = "(" + a_string + op + b_string + ")";
-    const auto & a_surfs = region_a.getSurfaces();
-    const auto & b_surfs = region_b.getSurfaces();
-    _surfaces.insert(_surfaces.end(), a_surfs.begin(), a_surfs.end());
-    _surfaces.insert(_surfaces.end(), b_surfs.begin(), b_surfs.end());
-  }
+  std::string op = (getRegionType() == RegionType::UNION) ? " | " : " & ";
+  auto a_string = stripRegionString(region_a.toString(), op);
+  auto b_string = stripRegionString(region_b.toString(), op);
+
+  _region_str = "(" + a_string + op + b_string + ")";
+  const auto & a_surfs = region_a.getSurfaces();
+  const auto & b_surfs = region_b.getSurfaces();
+  _surfaces.insert(_surfaces.end(), a_surfs.begin(), a_surfs.end());
+  _surfaces.insert(_surfaces.end(), b_surfs.begin(), b_surfs.end());
 }
 
 // complement or explicitly empty constructor
