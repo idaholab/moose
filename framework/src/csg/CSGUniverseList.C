@@ -56,7 +56,7 @@ CSGUniverseList::addUniverse(const std::string & name)
 }
 
 void
-CSGUniverseList::addUniverse(std::unique_ptr<CSGUniverse> & universe)
+CSGUniverseList::addUniverse(std::unique_ptr<CSGUniverse> universe)
 {
   auto name = universe->getName();
   checkUniverseName(name);

@@ -137,7 +137,7 @@ CSGBase::removeCellsFromUniverse(const CSGUniverse & universe,
 }
 
 void
-CSGBase::joinOtherBase(std::unique_ptr<CSGBase> & base)
+CSGBase::joinOtherBase(std::unique_ptr<CSGBase> base)
 {
   joinSurfaceList(base->getSurfaceList());
   joinCellList(base->getCellList());
@@ -145,7 +145,7 @@ CSGBase::joinOtherBase(std::unique_ptr<CSGBase> & base)
 }
 
 void
-CSGBase::joinOtherBase(std::unique_ptr<CSGBase> & base, std::string & new_root_name_join)
+CSGBase::joinOtherBase(std::unique_ptr<CSGBase> base, std::string & new_root_name_join)
 {
   joinSurfaceList(base->getSurfaceList());
   joinCellList(base->getCellList());
@@ -153,7 +153,7 @@ CSGBase::joinOtherBase(std::unique_ptr<CSGBase> & base, std::string & new_root_n
 }
 
 void
-CSGBase::joinOtherBase(std::unique_ptr<CSGBase> & base,
+CSGBase::joinOtherBase(std::unique_ptr<CSGBase> base,
                        std::string & new_root_name_base,
                        std::string & new_root_name_join)
 {
@@ -170,7 +170,7 @@ CSGBase::joinSurfaceList(CSGSurfaceList & surf_list)
   // region definitions.
   auto & surf_list_map = surf_list.getSurfaceListMap();
   for (auto & s : surf_list_map)
-    _surface_list.addSurface(s.second);
+    _surface_list.addSurface(std::move(s.second));
 }
 
 void
@@ -178,7 +178,7 @@ CSGBase::joinCellList(CSGCellList & cell_list)
 {
   auto & cell_list_map = cell_list.getCellListMap();
   for (auto & c : cell_list_map)
-    _cell_list.addCell(c.second);
+    _cell_list.addCell(std::move(c.second));
 }
 
 void
@@ -197,7 +197,7 @@ CSGBase::joinUniverseList(CSGUniverseList & univ_list)
         addCellToUniverse(root, cell);
     }
     else // unique non-root universe to add to list
-      _universe_list.addUniverse(u.second);
+      _universe_list.addUniverse(std::move(u.second));
   }
 }
 
@@ -217,7 +217,7 @@ CSGBase::joinUniverseList(CSGUniverseList & univ_list, std::string & new_root_na
       createUniverse(new_root_name_incoming, all_cells);
     }
     else // unique non-root universe to add to list
-      _universe_list.addUniverse(u.second);
+      _universe_list.addUniverse(std::move(u.second));
   }
 }
 
@@ -245,7 +245,7 @@ CSGBase::joinUniverseList(CSGUniverseList & univ_list,
       createUniverse(new_root_name_incoming, all_cells);
     }
     else // unique non-root universe to add to list
-      _universe_list.addUniverse(u.second);
+      _universe_list.addUniverse(std::move(u.second));
   }
 }
 

@@ -42,9 +42,9 @@ public:
    *
    * @return reference to CSGSurface that was added
    */
-  const CSGSurface & addSurface(std::unique_ptr<CSGSurface> & surf)
+  const CSGSurface & addSurface(std::unique_ptr<CSGSurface> surf)
   {
-    return _surface_list.addSurface(surf);
+    return _surface_list.addSurface(std::move(surf));
   }
 
   /**
@@ -270,7 +270,7 @@ public:
    *
    * @param base pointer to a different CSGBase object
    */
-  void joinOtherBase(std::unique_ptr<CSGBase> & base);
+  void joinOtherBase(std::unique_ptr<CSGBase> base);
 
   /**
    * @brief Join another CSGBase object to this one. For the incoming CSGBase object,
@@ -282,7 +282,7 @@ public:
    * @param base pointer to a different CSGBase object
    * @param new_root_name_join new name for the universe generated from the incoming root universe
    */
-  void joinOtherBase(std::unique_ptr<CSGBase> & base, std::string & new_root_name_join);
+  void joinOtherBase(std::unique_ptr<CSGBase> base, std::string & new_root_name_join);
 
   /**
    * @brief Join another CSGBase object to this one. The root universe for the incoming CSGBase
@@ -296,7 +296,7 @@ public:
    * @param new_root_name_base new name for universe generated from this root universe
    * @param new_root_name_join new name for the universe generated from the incoming root universe
    */
-  void joinOtherBase(std::unique_ptr<CSGBase> & base,
+  void joinOtherBase(std::unique_ptr<CSGBase> base,
                      std::string & new_root_name_base,
                      std::string & new_root_name_join);
 

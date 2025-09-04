@@ -63,9 +63,8 @@ TestCSGUniverseMeshGenerator::generateCSG()
 
   // get all CSGBase objects from the input mesh generators
   auto csg_bases = getCSGBasesByName(_input_mgs);
-  // get just the first two CSGBase objects to join together first
+  // get just the first CSGBase object, second one will be joined to first
   std::unique_ptr<CSG::CSGBase> csg_obj = std::move(*csg_bases[0]);
-  std::unique_ptr<CSG::CSGBase> inp_csg_obj = std::move(*csg_bases[1]);
 
   // new names to use after joining first two bases
   std::string new_base_name = _input_mgs[0] + "_univ";
@@ -73,7 +72,7 @@ TestCSGUniverseMeshGenerator::generateCSG()
 
   // joining via this method will move both roots into new universes;
   // subsequent input CSGBases will be joined uisng a different method (below)
-  csg_obj->joinOtherBase(inp_csg_obj, new_base_name, new_join_name);
+  csg_obj->joinOtherBase(std::move(*csg_bases[1]), new_base_name, new_join_name);
 
   // new empty universe that cells will be added to
   auto & new_univ = csg_obj->createUniverse(mg_name + "_univ");
@@ -90,9 +89,8 @@ TestCSGUniverseMeshGenerator::generateCSG()
     {
       // join this incoming base at the same level as the other bases that already were joined
       // incoming root is renamed but the current root remains untouched
-      inp_csg_obj = std::move(*csg_bases[i]);
       new_join_name = img + "_univ";
-      csg_obj->joinOtherBase(inp_csg_obj, new_join_name);
+      csg_obj->joinOtherBase(std::move(*csg_bases[i]), new_join_name);
     }
 
     std::string current_univ_name;
@@ -129,24 +127,24 @@ TestCSGUniverseMeshGenerator::generateCSG()
     // bounding box for new cell - located at the origin
     std::unique_ptr<CSG::CSGSurface> x_pos_ptr =
         std::make_unique<CSG::CSGPlane>(img + "_x_pos_surf", 1.0, 0, 0, x + 0.5 * _side_lengths[i]);
-    auto & x_pos_surf = csg_obj->addSurface(x_pos_ptr);
+    auto & x_pos_surf = csg_obj->addSurface(std::move(x_pos_ptr));
     std::unique_ptr<CSG::CSGSurface> x_neg_ptr =
         std::make_unique<CSG::CSGPlane>(img + "_x_neg_surf", 1.0, 0, 0, x - 0.5 * _side_lengths[i]);
-    auto & x_neg_surf = csg_obj->addSurface(x_neg_ptr);
+    auto & x_neg_surf = csg_obj->addSurface(std::move(x_neg_ptr));
 
     std::unique_ptr<CSG::CSGSurface> y_pos_ptr =
         std::make_unique<CSG::CSGPlane>(img + "_y_pos_surf", 0, 1.0, 0, y + 0.5 * _side_lengths[i]);
-    auto & y_pos_surf = csg_obj->addSurface(y_pos_ptr);
+    auto & y_pos_surf = csg_obj->addSurface(std::move(y_pos_ptr));
     std::unique_ptr<CSG::CSGSurface> y_neg_ptr =
         std::make_unique<CSG::CSGPlane>(img + "_y_neg_surf", 0, 1.0, 0, y - 0.5 * _side_lengths[i]);
-    auto & y_neg_surf = csg_obj->addSurface(y_neg_ptr);
+    auto & y_neg_surf = csg_obj->addSurface(std::move(y_neg_ptr));
 
     std::unique_ptr<CSG::CSGSurface> z_pos_ptr =
         std::make_unique<CSG::CSGPlane>(img + "_z_pos_surf", 0, 0, 1.0, z + 0.5 * _side_lengths[i]);
-    auto & z_pos_surf = csg_obj->addSurface(z_pos_ptr);
+    auto & z_pos_surf = csg_obj->addSurface(std::move(z_pos_ptr));
     std::unique_ptr<CSG::CSGSurface> z_neg_ptr =
         std::make_unique<CSG::CSGPlane>(img + "_z_neg_surf", 0, 0, 1.0, z - 0.5 * _side_lengths[i]);
-    auto & z_neg_surf = csg_obj->addSurface(z_neg_ptr);
+    auto & z_neg_surf = csg_obj->addSurface(std::move(z_neg_ptr));
 
     auto new_region =
         -x_pos_surf & +x_neg_surf & -y_pos_surf & +y_neg_surf & -z_pos_surf & +z_neg_surf;
@@ -177,24 +175,24 @@ TestCSGUniverseMeshGenerator::generateCSG()
 
   std::unique_ptr<CSG::CSGSurface> x_pos_ptr =
       std::make_unique<CSG::CSGPlane>(mg_name + "_bb_x_pos_surf", 1.0, 0, 0, 0.5 * _x_side);
-  auto & x_pos_surf = csg_obj->addSurface(x_pos_ptr);
+  auto & x_pos_surf = csg_obj->addSurface(std::move(x_pos_ptr));
   std::unique_ptr<CSG::CSGSurface> x_neg_ptr =
       std::make_unique<CSG::CSGPlane>(mg_name + "_bb_x_neg_surf", 1.0, 0, 0, -0.5 * _x_side);
-  auto & x_neg_surf = csg_obj->addSurface(x_neg_ptr);
+  auto & x_neg_surf = csg_obj->addSurface(std::move(x_neg_ptr));
 
   std::unique_ptr<CSG::CSGSurface> y_pos_ptr =
       std::make_unique<CSG::CSGPlane>(mg_name + "_bb_y_pos_surf", 0, 1.0, 0, 0.5 * _y_side);
-  auto & y_pos_surf = csg_obj->addSurface(y_pos_ptr);
+  auto & y_pos_surf = csg_obj->addSurface(std::move(y_pos_ptr));
   std::unique_ptr<CSG::CSGSurface> y_neg_ptr =
       std::make_unique<CSG::CSGPlane>(mg_name + "_bb_y_neg_surf", 0, 1.0, 0, -0.5 * _y_side);
-  auto & y_neg_surf = csg_obj->addSurface(y_neg_ptr);
+  auto & y_neg_surf = csg_obj->addSurface(std::move(y_neg_ptr));
 
   std::unique_ptr<CSG::CSGSurface> z_pos_ptr =
       std::make_unique<CSG::CSGPlane>(mg_name + "_bb_z_pos_surf", 0, 0, 1.0, 0.5 * _z_side);
-  auto & z_pos_surf = csg_obj->addSurface(z_pos_ptr);
+  auto & z_pos_surf = csg_obj->addSurface(std::move(z_pos_ptr));
   std::unique_ptr<CSG::CSGSurface> z_neg_ptr =
       std::make_unique<CSG::CSGPlane>(mg_name + "_bb_z_neg_surf", 0, 0, 1.0, -0.5 * _z_side);
-  auto & z_neg_surf = csg_obj->addSurface(z_neg_ptr);
+  auto & z_neg_surf = csg_obj->addSurface(std::move(z_neg_ptr));
 
   auto bb_region =
       -x_pos_surf & +x_neg_surf & -y_pos_surf & +y_neg_surf & -z_pos_surf & +z_neg_surf;

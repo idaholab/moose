@@ -68,7 +68,7 @@ CSGCellList::getAllCells() const
 }
 
 void
-CSGCellList::addCell(std::unique_ptr<CSGCell> & cell)
+CSGCellList::addCell(std::unique_ptr<CSGCell> cell)
 {
   auto name = cell->getName();
   checkCellName(name);

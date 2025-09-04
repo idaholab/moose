@@ -46,7 +46,7 @@ CSGSurfaceList::getAllSurfaces() const
 }
 
 CSGSurface &
-CSGSurfaceList::addSurface(std::unique_ptr<CSGSurface> & surf)
+CSGSurfaceList::addSurface(std::unique_ptr<CSGSurface> surf)
 {
   auto name = surf->getName();
   checkSurfaceName(name);

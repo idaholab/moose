@@ -51,9 +51,8 @@ TestCSGUnlinkedUniverseMeshGenerator::generateCSG()
   for (unsigned int i = 1; i < _input_mgs.size(); ++i)
   {
     auto img = _input_mgs[i];
-    auto inp_csg_obj = std::move(getCSGBaseByName(img));
     auto new_join_name = img + "_univ";
-    csg_obj->joinOtherBase(inp_csg_obj, new_join_name);
+    csg_obj->joinOtherBase(std::move(getCSGBaseByName(img)), new_join_name);
   }
 
   return csg_obj;
