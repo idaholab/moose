@@ -131,6 +131,7 @@ class StochasticControl(MooseControl):
         quantities_of_interest: list[str],
         options: StochasticRunOptions = DEFAULT_OPTIONS,
         physics_cli_args: list[str] = [],
+        keep_input: bool = False,
         moose_port: int = None,
         inherit_environment: bool = True,
         poll_time: float = 0.1,
@@ -148,6 +149,8 @@ class StochasticControl(MooseControl):
             quantities_of_interest (list[str]): List of QoI reporter names to collect.
             options (StochasticRunOptions): Stochastic run configuration options.
             physics_cli_args (list[str]): Additional CLI arguments for the physics app.
+            keep_input (bool): True to not automatically delete the
+                               auto-generated stochastic input (default = False)
             moose_port (int): Optional port number for web server control.
             inherit_environment (bool): Whether or not the MOOSE command will
                                         inherit the current shell environment.
@@ -161,6 +164,7 @@ class StochasticControl(MooseControl):
         self._opt: StochasticRunOptions = options
         self._physics_cli_args: list[str] = physics_cli_args
         self._input_file = os.path.abspath(self._opt.input_name)
+        self._keep_input: bool = keep_input
 
         # Build stochastic input
         self._root: pyhit.Node = self._buildStochasticInput()
@@ -215,7 +219,7 @@ class StochasticControl(MooseControl):
         else:
             self.kill()
 
-        if os.path.exists(self._input_file):
+        if not self._keep_input and os.path.exists(self._input_file):
             os.remove(self._input_file)
 
     def setInput(self, x: np.ndarray):
