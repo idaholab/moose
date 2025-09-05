@@ -238,8 +238,7 @@ MultiAppGeneralFieldTransfer::initialSetup()
       const auto & block_names = getParam<std::vector<SubdomainName>>("from_blocks");
 
       for (const auto & b : block_names)
-        if (!MooseMeshUtils::hasSubdomainName(const_cast<MeshBase &>(from_moose_mesh.getMesh()), b))
-
+        if (!MooseMeshUtils::hasSubdomainName(from_moose_mesh.getMesh(), b))
           paramError("from_blocks", "The block '", b, "' was not found in the mesh");
 
       if (!block_names.empty())
@@ -253,7 +252,7 @@ MultiAppGeneralFieldTransfer::initialSetup()
     {
       const auto & boundary_names = getParam<std::vector<BoundaryName>>("from_boundaries");
       for (const auto & bn : boundary_names)
-        if (!MooseMeshUtils::hasBoundaryName(const_cast<MeshBase &>(from_moose_mesh.getMesh()), bn))
+        if (!MooseMeshUtils::hasBoundaryName(from_moose_mesh.getMesh(), bn))
           paramError("from_boundaries", "The boundary '", bn, "' was not found in the mesh");
 
       if (!boundary_names.empty())
@@ -318,7 +317,7 @@ MultiAppGeneralFieldTransfer::initialSetup()
     {
       const auto & block_names = getParam<std::vector<SubdomainName>>("to_blocks");
       for (const auto & b : block_names)
-        if (!MooseMeshUtils::hasSubdomainName(const_cast<MeshBase &>(to_moose_mesh.getMesh()), b))
+        if (!MooseMeshUtils::hasSubdomainName(to_moose_mesh.getMesh(), b))
           paramError("to_blocks", "The block '", b, "' was not found in the mesh");
 
       if (!block_names.empty())
@@ -332,7 +331,7 @@ MultiAppGeneralFieldTransfer::initialSetup()
     {
       const auto & boundary_names = getParam<std::vector<BoundaryName>>("to_boundaries");
       for (const auto & bn : boundary_names)
-        if (!MooseMeshUtils::hasBoundaryName(const_cast<MeshBase &>(to_moose_mesh.getMesh()), bn))
+        if (!MooseMeshUtils::hasBoundaryName(to_moose_mesh.getMesh(), bn))
           paramError("to_boundaries", "The boundary '", bn, "' was not found in the mesh");
 
       if (!boundary_names.empty())
