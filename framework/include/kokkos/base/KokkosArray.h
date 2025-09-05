@@ -406,6 +406,10 @@ private:
    */
   std::shared_ptr<unsigned int> _counter;
   /**
+   * Flag whether array was initialized
+   */
+  bool _is_init = false;
+  /**
    * Flag whether host data was allocated
    */
   bool _is_host_alloc = false;
@@ -477,6 +481,7 @@ ArrayBase<T, dimension>::destroy()
     _d[i] = 0;
   }
 
+  _is_init = false;
   _is_host_alloc = false;
   _is_device_alloc = false;
   _is_host_alias = false;
@@ -502,6 +507,7 @@ ArrayBase<T, dimension>::shallowCopy(const ArrayBase<T, dimension> & array)
     _d[i] = array._d[i];
   }
 
+  _is_init = array._is_init;
   _is_host_alloc = array._is_host_alloc;
   _is_device_alloc = array._is_device_alloc;
   _is_host_alias = array._is_host_alias;
@@ -516,6 +522,9 @@ template <typename T, unsigned int dimension>
 void
 ArrayBase<T, dimension>::aliasHost(T * ptr)
 {
+  if (!_is_init)
+    mooseError("Kokkos array error: attempted to alias host data before array initialization.");
+
   if (_is_host_alloc && !_is_host_alias)
     mooseError("Kokkos array error: cannot alias host data because host data was not aliased.");
 
@@ -528,6 +537,9 @@ template <typename T, unsigned int dimension>
 void
 ArrayBase<T, dimension>::aliasDevice(T * ptr)
 {
+  if (!_is_init)
+    mooseError("Kokkos array error: attempted to alias device data before array initialization.");
+
   if (_is_device_alloc && !_is_device_alias)
     mooseError("Kokkos array error: cannot alias device data because device data was not aliased.");
 
@@ -598,6 +610,8 @@ ArrayBase<T, dimension>::createInternal(const std::vector<dof_id_type> & n)
 
   if constexpr (device)
     allocDevice();
+
+  _is_init = true;
 }
 
 template <typename T, unsigned int dimension>
