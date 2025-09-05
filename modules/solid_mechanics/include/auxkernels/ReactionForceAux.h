@@ -9,23 +9,15 @@
 
 #pragma once
 
-#include "AuxKernel.h"
-#include "TagAuxBase.h"
+#include "TagVectorAux.h"
 
 /**
- * TagVectorAux returns the coupled DOF value of a tagged vector.
+ * ReactionForceAux returns the reaction force corresponds to each DOF.
  */
-class TagVectorAux : public TagAuxBase<AuxKernel>
+class ReactionForceAux : public TagVectorAux
 {
 public:
   static InputParameters validParams();
 
-  TagVectorAux(const InputParameters & parameters);
-
-protected:
-  virtual Real computeValue() override;
-
-  const bool _unscaled;
-  const VariableValue & _v;
-  const MooseVariableBase & _v_var;
+  ReactionForceAux(const InputParameters & parameters);
 };
