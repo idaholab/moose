@@ -61,7 +61,7 @@ protected:
    * @param name name of universe
    * @return reference to CSGUniverse of the specified name
    */
-  CSGUniverse & getUniverse(const std::string & name);
+  CSGUniverse & getUniverse(const std::string & name) const;
 
   /**
    * @brief Get the root universe
