@@ -1,16 +1,17 @@
-#pylint: disable=missing-docstring
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# pylint: disable=missing-docstring
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import vtk
 import mooseutils
 from .ChiggerObject import ChiggerObject
+
 
 class ChiggerSourceBase(ChiggerObject):
     """
@@ -28,6 +29,7 @@ class ChiggerSourceBase(ChiggerObject):
     vtkmapper_type: The VTK mapper type to build, must be an instance of VTKMAPPER_TYPE **kwargs:
     The key, value options for this object.
     """
+
     # The base class actor/mapper that this object to which ownership is restricted
     VTKACTOR_TYPE = vtk.vtkProp
     VTKMAPPER_TYPE = vtk.vtkAbstractMapper
@@ -35,7 +37,7 @@ class ChiggerSourceBase(ChiggerObject):
     @staticmethod
     def getOptions():
         opt = ChiggerObject.getOptions()
-        opt.add('visible', True, "Toggle the visibility of the object.")
+        opt.add("visible", True, "Toggle the visibility of the object.")
         return opt
 
     def __init__(self, vtkactor_type=None, vtkmapper_type=None, **kwargs):
@@ -45,24 +47,26 @@ class ChiggerSourceBase(ChiggerObject):
         if not isinstance(self._vtkactor, self.VTKACTOR_TYPE):
             n = type(self._vtkactor).__name__
             t = self.VTKACTOR_TYPE.__name__
-            raise mooseutils.MooseException('The supplied actor is a {} but must be a {} '
-                                            'type.'.format(n, t))
+            raise mooseutils.MooseException(
+                "The supplied actor is a {} but must be a {} " "type.".format(n, t)
+            )
 
         if vtkmapper_type:
             self._vtkmapper = vtkmapper_type()
             if not isinstance(self._vtkmapper, self.VTKMAPPER_TYPE):
                 n = type(self._vtkmapper).__name__
                 t = self.VTKMAPPER_TYPE.__name__
-                raise mooseutils.MooseException('The supplied mapper is a {} but must be a {} '
-                                                'type.'.format(n, t))
+                raise mooseutils.MooseException(
+                    "The supplied mapper is a {} but must be a {} " "type.".format(n, t)
+                )
         else:
             self._vtkmapper = None
 
         if self._vtkmapper:
             self._vtkactor.SetMapper(self._vtkmapper)
 
-        self._vtkrenderer = None # This is set automatically by ChiggerResult object.
-        self._parent = None # Set by ChiggerResult
+        self._vtkrenderer = None  # This is set automatically by ChiggerResult object.
+        self._parent = None  # Set by ChiggerResult
 
     def getVTKActor(self):
         """
@@ -100,5 +104,5 @@ class ChiggerSourceBase(ChiggerObject):
         """
         super(ChiggerSourceBase, self).update(**kwargs)
 
-        if self.isOptionValid('visible'):
-            self._vtkactor.SetVisibility(self.getOption('visible'))
+        if self.isOptionValid("visible"):
+            self._vtkactor.SetVisibility(self.getOption("visible"))

@@ -1,2 +1,2 @@
-from .Parameter import Parameter
-from .InputParameters import InputParameters
+from .Parameter import Parameter as Parameter
+from .InputParameters import InputParameters as InputParameters

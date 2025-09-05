@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import vtk
 
-n = 10        # Number of data points to create
-name = "data" # Name of data array generated
+n = 10  # Number of data points to create
+name = "data"  # Name of data array generated
 
 # A Line
 source = vtk.vtkLineSource()
@@ -23,9 +23,9 @@ source.SetResolution(n)
 # Create and apply nonlinear data along the line
 data = vtk.vtkFloatArray()
 data.SetName(name)
-data.SetNumberOfTuples(n+1)
-for i in range(n+1):
-    data.SetValue(i, i*i)
+data.SetNumberOfTuples(n + 1)
+for i in range(n + 1):
+    data.SetValue(i, i * i)
 
 source.Update()
 source.GetOutput().GetPointData().AddArray(data)

@@ -1,28 +1,30 @@
-#pylint: disable=missing-docstring
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# pylint: disable=missing-docstring
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import vtk
 import mooseutils
 from .. import utils
 from .. import base
 
+
 class VolumeAxes(base.ChiggerResultBase):
     """
     A class for displaying the 3D axis around a volume
     """
+
     @staticmethod
     def getOptions():
         opt = base.ChiggerResult.getOptions()
-        opt.add('xaxis', VolumeAxes.getAxisActorOptions(), "The x-axis options.")
-        opt.add('yaxis', VolumeAxes.getAxisActorOptions(), "The y-axis options.")
-        opt.add('zaxis', VolumeAxes.getAxisActorOptions(), "The z-axis options.")
+        opt.add("xaxis", VolumeAxes.getAxisActorOptions(), "The x-axis options.")
+        opt.add("yaxis", VolumeAxes.getAxisActorOptions(), "The y-axis options.")
+        opt.add("zaxis", VolumeAxes.getAxisActorOptions(), "The z-axis options.")
         return opt
 
     @staticmethod
@@ -31,8 +33,10 @@ class VolumeAxes(base.ChiggerResultBase):
         Return the options for a vtkAxis object.
         """
         opt = utils.Options()
-        opt.add('color', [1, 1, 1], "The color of the title, text, ticks, and axis line.")
-        opt.add('minor_ticks', False, "Enable/disable the minor tick marks.")
+        opt.add(
+            "color", [1, 1, 1], "The color of the title, text, ticks, and axis line."
+        )
+        opt.add("minor_ticks", False, "Enable/disable the minor tick marks.")
         return opt
 
     def __init__(self, result, **kwargs):
@@ -70,9 +74,9 @@ class VolumeAxes(base.ChiggerResultBase):
 
         self._vtkactor.SetCamera(self._vtkrenderer.GetActiveCamera())
 
-        self.__updateAxisOptions('x')
-        self.__updateAxisOptions('y')
-        self.__updateAxisOptions('z')
+        self.__updateAxisOptions("x")
+        self.__updateAxisOptions("y")
+        self.__updateAxisOptions("z")
 
         self._vtkactor.SetGridLineLocation(vtk.vtkCubeAxesActor.VTK_GRID_LINES_FURTHEST)
 
@@ -80,18 +84,20 @@ class VolumeAxes(base.ChiggerResultBase):
         """
         Helper for updating Axis level settings.
         """
-        if axis not in ['x', 'y', 'z']:
+        if axis not in ["x", "y", "z"]:
             mooseutils.mooseError("Must provide 'x', 'y', or 'z'.")
             return
 
-        opt = self.getOption(axis + 'axis')
-        color = opt['color']
-        comp = ['x', 'y', 'z'].index(axis)
+        opt = self.getOption(axis + "axis")
+        color = opt["color"]
+        comp = ["x", "y", "z"].index(axis)
         self._vtkactor.GetTitleTextProperty(comp).SetColor(*color)
         self._vtkactor.GetLabelTextProperty(comp).SetColor(*color)
 
-        func = getattr(self._vtkactor, 'Set{}AxisMinorTickVisibility'.format(axis.upper()))
-        func(opt['minor_ticks'])
+        func = getattr(
+            self._vtkactor, "Set{}AxisMinorTickVisibility".format(axis.upper())
+        )
+        func(opt["minor_ticks"])
 
-        func = getattr(self._vtkactor, 'Get{}AxesLinesProperty'.format(axis.upper()))
+        func = getattr(self._vtkactor, "Get{}AxesLinesProperty".format(axis.upper()))
         func().SetColor(*color)

@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 import os
 import uuid
 import logging
@@ -13,21 +13,27 @@ import mooseutils
 
 LOG = logging.getLogger(__name__)
 
+
 class Page(object):
     """
     Base class for input content that defines the methods called by the translator.
 
     This classes uses properties to minimize modifications after construction.
     """
+
     def __init__(self, fullname, **kwargs):
-        self.base = kwargs.pop('base', None) # set by Translator.init() or addPage()
-        self.source = kwargs.pop('source') # supplied source file/directory
-        self.external = kwargs.pop('external', False) # set by get_content.py used by appsyntax.py
-        self.translator = kwargs.pop('translator', None) # set by Translator.init() or addPage()
+        self.base = kwargs.pop("base", None)  # set by Translator.init() or addPage()
+        self.source = kwargs.pop("source")  # supplied source file/directory
+        self.external = kwargs.pop(
+            "external", False
+        )  # set by get_content.py used by appsyntax.py
+        self.translator = kwargs.pop(
+            "translator", None
+        )  # set by Translator.init() or addPage()
         self.attributes = kwargs
-        self._fullname = fullname            # local path of the node
-        self._name = fullname.split('/')[-1] # folder/file name
-        self.__unique_id = uuid.uuid4()      # a unique identifier
+        self._fullname = fullname  # local path of the node
+        self._name = fullname.split("/")[-1]  # folder/file name
+        self.__unique_id = uuid.uuid4()  # a unique identifier
 
     @property
     def uid(self):
@@ -84,15 +90,22 @@ class Page(object):
 
     def __str__(self):
         """Define the screen output."""
-        return '{}: {}, {}'.format(mooseutils.colorText(self.__class__.__name__, self.COLOR),
-                                   self.local, self.source)
+        return "{}: {}, {}".format(
+            mooseutils.colorText(self.__class__.__name__, self.COLOR),
+            self.local,
+            self.source,
+        )
+
 
 class Text(Page):
     """Text only Page node for unit testing."""
-    COLOR = 'GREEN'
+
+    COLOR = "GREEN"
+
     def __init__(self, **kwargs):
-        self.content = kwargs.pop('content', '')
-        super(Text, self).__init__('_text_', source='_text_', **kwargs)
+        self.content = kwargs.pop("content", "")
+        super(Text, self).__init__("_text_", source="_text_", **kwargs)
+
 
 class Directory(Page):
     """
@@ -101,7 +114,9 @@ class Directory(Page):
     Warning: Try not to do anything special here and avoid external modification to these objects as
              this could create problems if there are multiple translators.
     """
-    COLOR = 'CYAN'
+
+    COLOR = "CYAN"
+
 
 class File(Page):
     """
@@ -109,15 +124,19 @@ class File(Page):
 
     General files that need to be copied to the output directory.
     """
-    COLOR = 'MAGENTA'
+
+    COLOR = "MAGENTA"
+
 
 class Source(File):
     """
     Node for content that is being converted (e.g., Markdown files).
     """
-    COLOR = 'YELLOW'
+
+    COLOR = "YELLOW"
+
     def __init__(self, *args, **kwargs):
-        self.output_extension = kwargs.pop('output_extension', None)
+        self.output_extension = kwargs.pop("output_extension", None)
         super(Source, self).__init__(*args, **kwargs)
 
     @property

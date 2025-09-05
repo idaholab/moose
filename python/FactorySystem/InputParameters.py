@@ -1,11 +1,12 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
+
 
 class InputParameters:
     def __init__(self, *args):
@@ -46,7 +47,11 @@ class InputParameters:
         self.addParam(name, *args)
 
     def isValid(self, name):
-        if name in self.valid and self.valid[name] != None and self.valid[name] != []:
+        if (
+            name in self.valid
+            and self.valid[name] is not None
+            and self.valid[name] != []
+        ):
             return True
         else:
             return False
@@ -85,28 +90,28 @@ class InputParameters:
             return None
 
     def basicTypeHelper(self, value_type):
-        if value_type == int:
+        if value_type is int:
             return "Integer"
-        elif value_type == float:
+        elif value_type is float:
             return "Real"
-        elif value_type == bool:
+        elif value_type is bool:
             return "Boolean"
         else:
             return "String"
 
     def basicType(self, key):
         if key in self.valid:
-            if type(self.valid[key]) == list:
+            if type(self.valid[key]) is list:
                 if len(self.valid[key]) == 0:
-                    return 'Array:String'
+                    return "Array:String"
                 else:
-                    return 'Array:' + self.basicTypeHelper(type(self.valid[key][0]))
+                    return "Array:" + self.basicTypeHelper(type(self.valid[key][0]))
             else:
                 return self.basicTypeHelper(type(self.valid[key]))
         else:
             # we don't know any better at this point so we return the most general type
             # self.strict_types might help, but it is not used anywhere
-            return 'String'
+            return "String"
 
     def keys(self):
         return set([k for k in self.desc])
@@ -134,12 +139,12 @@ class InputParameters:
 
         # Check that the group is a string
         if not isinstance(group, str):
-            print('ERROR: The supplied group name must be a string')
+            print("ERROR: The supplied group name must be a string")
             return
 
         # Check that the prop_list is a list
         if not isinstance(prop_list, list):
-            print('ERROR: The supplied properties must be supplied as a list')
+            print("ERROR: The supplied properties must be supplied as a list")
             return
 
         # Create the storage for the group if it doesn't exist
@@ -171,12 +176,11 @@ class InputParameters:
             if not self.isValid(common_key):
                 self[common_key] = common[common_key]
 
-
     def printParams(self):
         for k in self.desc:
-            value = ''
+            value = ""
             if k in self.valid:
                 value = self.valid[k]
 
             print(k.ljust(20), value)
-            print(' '.ljust(20), self.desc[k])
+            print(" ".ljust(20), self.desc[k])

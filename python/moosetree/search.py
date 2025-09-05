@@ -1,14 +1,17 @@
 """Tools for iterating and locating nodes."""
-import sys
+
 from enum import Enum
+
 
 class IterMethod(Enum):
     """
     An 'Enum' for defining iteration process.
     https://en.wikipedia.org/wiki/Tree_traversal
     """
+
     PRE_ORDER = 1
     BREADTH_FIRST = 2
+
 
 def findall(node, func=None, method=None, **kwargs):
     """
@@ -24,8 +27,11 @@ def findall(node, func=None, method=None, **kwargs):
     keyword arguments match the attributes of the node.
     """
     if (func is None) and (kwargs):
-        func = lambda n: any(n.attributes.get(key, None)==value for key, value in kwargs.items())
+        func = lambda n: any(  # noqa: E731
+            n.attributes.get(key, None) == value for key, value in kwargs.items()
+        )
     return iterate(node, func, False, method)
+
 
 def find(node, func=None, method=None, **kwargs):
     """
@@ -33,9 +39,12 @@ def find(node, func=None, method=None, **kwargs):
     and the node is returned.
     """
     if (func is None) and (kwargs):
-        func = lambda n: any(n.attributes.get(key, None)==value for key, value in kwargs.items())
+        func = lambda n: any(  # noqa: E731
+            n.attributes.get(key, None) == value for key, value in kwargs.items()
+        )
     nodes = list(iterate(node, func, True, method))
     return nodes[0] if nodes else None
+
 
 def iterate(node, func=None, abort_on_find=False, method=None):
     """
@@ -48,13 +57,14 @@ def iterate(node, func=None, abort_on_find=False, method=None):
     function that is `True.
     """
     if func is None:
-        func = lambda n: True
+        func = lambda n: True  # noqa: E731
 
     if (method is None) or (method == IterMethod.BREADTH_FIRST):
         return __breadthfirst_iterate(node, func, abort_on_find)
 
     elif method == IterMethod.PRE_ORDER:
         return __preorder_iterate(node, func, abort_on_find)
+
 
 def __breadthfirst_iterate(node, func, abort_on_find):
     """Breadth-first iteration"""
@@ -66,6 +76,7 @@ def __breadthfirst_iterate(node, func, abort_on_find):
             if abort_on_find:
                 return
         stack += child.children
+
 
 def __preorder_iterate(node, func, abort_on_find):
     """Pre-Order iteration"""

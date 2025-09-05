@@ -1,27 +1,28 @@
-#pylint: disable=missing-docstring
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# pylint: disable=missing-docstring
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
-from .ChiggerObject import ChiggerObject
+from .ChiggerObject import ChiggerObject as ChiggerObject
 
-from .ChiggerSourceBase import ChiggerSourceBase
-from .ChiggerFilterSourceBase import ChiggerFilterSourceBase
-from .ChiggerSource import ChiggerSource
-from .ChiggerSource2D import ChiggerSource2D
+from .ChiggerSourceBase import ChiggerSourceBase as ChiggerSourceBase
+from .ChiggerFilterSourceBase import ChiggerFilterSourceBase as ChiggerFilterSourceBase
+from .ChiggerSource import ChiggerSource as ChiggerSource
+from .ChiggerSource2D import ChiggerSource2D as ChiggerSource2D
 
-from .ChiggerResultBase import ChiggerResultBase
-from .ChiggerResult import ChiggerResult
-from .KeyPressInteractorStyle import KeyPressInteractorStyle
+from .ChiggerResultBase import ChiggerResultBase as ChiggerResultBase
+from .ChiggerResult import ChiggerResult as ChiggerResult
+from .KeyPressInteractorStyle import KeyPressInteractorStyle as KeyPressInteractorStyle
 
-from .ColorMap import ColorMap
+from .ColorMap import ColorMap as ColorMap
 
-from .ResultGroup import ResultGroup
+from .ResultGroup import ResultGroup as ResultGroup
+
 
 def create_single_source_result(source_type):
     """
@@ -33,10 +34,12 @@ def create_single_source_result(source_type):
     Inputs:
         SOURCE_TYPE: The type of source to attach to a ChiggerResult object.
     """
+
     class ChiggerResultMeta(ChiggerResult):
         """
         Meta class for creating ChiggerResult classes of different types.
         """
+
         @staticmethod
         def getOptions():
             opt = ChiggerResult.getOptions()

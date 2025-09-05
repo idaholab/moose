@@ -1,24 +1,25 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import traceback
 
 from TestHarness.schedulers.Scheduler import Scheduler
 from TestHarness import util
 from TestHarness.runners.SubprocessRunner import Runner, SubprocessRunner
-from TestHarness.testers.Tester import Tester
+
 
 class RunParallel(Scheduler):
     """
     RunParallel is a Scheduler plugin responsible for executing a tester
     command and doing something with its output.
     """
+
     @staticmethod
     def validParams():
         params = Scheduler.validParams()
@@ -28,7 +29,7 @@ class RunParallel(Scheduler):
         Scheduler.__init__(self, harness, params)
 
     def run(self, job):
-        """ Run a tester command """
+        """Run a tester command"""
         # Build and set the runner that will actually run the commands
         # This is abstracted away so we can support local runners and PBS/slurm runners
         job.setRunner(self.buildRunner(job, self.options))
@@ -56,10 +57,12 @@ class RunParallel(Scheduler):
             # Set the successful message
             if not tester.isSkip() and not job.isFail():
                 self.setSuccessfulMessage(tester)
-        except:
+        except:  # noqa: E722
             trace = traceback.format_exc()
-            job.appendOutput(util.outputHeader('Python exception encountered in Job') + trace)
-            job.setStatus(job.error, 'JOB EXCEPTION')
+            job.appendOutput(
+                util.outputHeader("Python exception encountered in Job") + trace
+            )
+            job.setStatus(job.error, "JOB EXCEPTION")
         finally:
             # Stop job timer
             job.timer.stopMain()
@@ -73,20 +76,24 @@ class RunParallel(Scheduler):
         return SubprocessRunner(job, options)
 
     def setSuccessfulMessage(self, tester):
-        """ properly set a finished successful message for tester """
-        message = ''
+        """properly set a finished successful message for tester"""
+        message = ""
 
         # Handle 'dry run' first, because if true, job.run() never took place
         if self.options.dry_run:
-            message = 'DRY RUN'
+            message = "DRY RUN"
 
-        elif tester.specs['check_input']:
-            message = 'SYNTAX PASS'
+        elif tester.specs["check_input"]:
+            message = "SYNTAX PASS"
 
-        elif self.options.scaling and tester.specs['scale_refine']:
-            message = 'SCALED'
+        elif self.options.scaling and tester.specs["scale_refine"]:
+            message = "SCALED"
 
-        elif self.options.enable_recover and tester.specs.isValid('skip_checks') and tester.specs['skip_checks']:
-            message = 'PART1'
+        elif (
+            self.options.enable_recover
+            and tester.specs.isValid("skip_checks")
+            and tester.specs["skip_checks"]
+        ):
+            message = "PART1"
 
         tester.setStatus(tester.success, message)

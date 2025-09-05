@@ -1,15 +1,16 @@
-#pylint: disable=missing-docstring
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# pylint: disable=missing-docstring
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import mooseutils
 from .. import misc
+
 
 class ExodusColorBar(misc.ColorBar):
     """
@@ -20,12 +21,12 @@ class ExodusColorBar(misc.ColorBar):
         result1: (Optional) The ExodusResult for the secondary axis.
     """
 
-    AXIS_NAMES = ['primary', 'secondary']
+    AXIS_NAMES = ["primary", "secondary"]
 
     @staticmethod
     def getOptions():
         opt = misc.ColorBar.getOptions()
-        opt.setDefault('viewport', None)
+        opt.setDefault("viewport", None)
         return opt
 
     def __init__(self, *results, **kwargs):
@@ -33,8 +34,10 @@ class ExodusColorBar(misc.ColorBar):
 
         self._results = results
         if len(results) not in [1, 2]:
-            raise mooseutils.MooseException('One or two ExodusResult objects must be supplied to '
-                                            'the ExodusColorBar')
+            raise mooseutils.MooseException(
+                "One or two ExodusResult objects must be supplied to "
+                "the ExodusColorBar"
+            )
 
     def getResult(self, index=0):
         """
@@ -48,8 +51,8 @@ class ExodusColorBar(misc.ColorBar):
         """
         Update the supplied options and apply the colormap options from the ExodusResult.
         """
-        opts = ['cmap', 'cmap_reverse', 'cmap_num_colors', 'cmap_range']
-        cmap_options = {key:self._results[0].getOption(key) for key in opts}
+        opts = ["cmap", "cmap_reverse", "cmap_num_colors", "cmap_range"]
+        cmap_options = {key: self._results[0].getOption(key) for key in opts}
         kwargs.update(cmap_options)
 
         super(ExodusColorBar, self).setOptions(*args, **kwargs)
@@ -61,11 +64,12 @@ class ExodusColorBar(misc.ColorBar):
         for i, result in enumerate(self._results):
             axis_options = self.getOption(self.AXIS_NAMES[i])
             rng = result[0].getVTKMapper().GetScalarRange()
-            if rng != axis_options['lim']:
+            if rng != axis_options["lim"]:
                 return True
 
-        return super(ExodusColorBar, self).needsUpdate() or \
-               any([result.needsUpdate() for result in self._results])
+        return super(ExodusColorBar, self).needsUpdate() or any(
+            [result.needsUpdate() for result in self._results]
+        )
 
     def update(self, **kwargs):
         """
@@ -85,20 +89,22 @@ class ExodusColorBar(misc.ColorBar):
 
         # Enable the secondary if two results provided
         if len(self._results) == 2:
-            self.getOption(self.AXIS_NAMES[1])['visible'] = True
+            self.getOption(self.AXIS_NAMES[1])["visible"] = True
 
         # Apply settings from results
         for i, result in enumerate(self._results):
 
             # Set the range for the axis' and titles
             axis_options = self.getOption(self.AXIS_NAMES[i])
-            axis_options['lim'] = list(result[0].getVTKMapper().GetScalarRange())
-            if not axis_options.isOptionValid('title'):
-                self._sources[i+1].getVTKSource().SetTitle(result[0].getVTKMapper().GetArrayName())
+            axis_options["lim"] = list(result[0].getVTKMapper().GetScalarRange())
+            if not axis_options.isOptionValid("title"):
+                self._sources[i + 1].getVTKSource().SetTitle(
+                    result[0].getVTKMapper().GetArrayName()
+                )
 
             # Viewport
-            if not self.isOptionValid('viewport'):
-                self.setOption('viewport', result.getOption('viewport'))
-            self.setOption('layer', result.getOption('layer'))
+            if not self.isOptionValid("viewport"):
+                self.setOption("viewport", result.getOption("viewport"))
+            self.setOption("layer", result.getOption("layer"))
 
         super(ExodusColorBar, self).update(**kwargs)

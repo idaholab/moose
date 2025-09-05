@@ -1,18 +1,17 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os
 import urllib
 import logging
-import collections
 import mooseutils
 from .LogHelper import LogHelper
+
 
 def check_documents(documents, deprecations, file_list=None, **kwargs):
     """
@@ -20,7 +19,7 @@ def check_documents(documents, deprecations, file_list=None, **kwargs):
     """
 
     # Setup logger, assume the names of the documents with a "log_" prefix are the logging flags (see get_documents)
-    log_default = kwargs.get('log_default', logging.ERROR)
+    log_default = kwargs.get("log_default", logging.ERROR)
     for doc in documents:
         kwargs.setdefault("log_" + doc.name, log_default)
     logger = LogHelper(__name__, **kwargs)
@@ -38,7 +37,9 @@ def check_documents(documents, deprecations, file_list=None, **kwargs):
         for old_name, new_name in deprecations.items():
             log_key = "log_" + new_name
             logger.setLevel(log_key, logging.WARNING)
-            msg = "The document name '{}' has been deprecated, please use '{}' instead in sqa_reports.yml.".format(old_name, new_name)
+            msg = "The document name '{}' has been deprecated, please use '{}' instead in sqa_reports.yml.".format(
+                old_name, new_name
+            )
             logger.log(log_key, msg)
 
     # Perform document checks
@@ -46,6 +47,7 @@ def check_documents(documents, deprecations, file_list=None, **kwargs):
         _check_document(doc.name, doc.filename, file_list, logger)
 
     return logger
+
 
 def _check_document(name, filename, file_list, logger):
     """Helper for inspecting document"""
@@ -55,9 +57,9 @@ def _check_document(name, filename, file_list, logger):
         msg = "Missing value for '{}' document: {}".format(name, filename)
         logger.log(log_key, msg)
 
-    elif filename.startswith('http'):
+    elif filename.startswith("http"):
         try:
-            response = urllib.request.urlopen(filename)
+            urllib.request.urlopen(filename)
         except urllib.error.URLError:
             msg = "Invalid URL for '{}' document: {}".format(name, filename)
             logger.log(log_key, msg)
@@ -65,7 +67,7 @@ def _check_document(name, filename, file_list, logger):
     else:
         found = list()
         for fname in file_list:
-            if fname.endswith(filename.split('#')[0]):
+            if fname.endswith(filename.split("#")[0]):
                 found.append(filename)
 
         if len(found) == 0:

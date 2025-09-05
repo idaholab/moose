@@ -1,17 +1,18 @@
-#pylint: disable=missing-docstring
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# pylint: disable=missing-docstring
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import vtk
 import mooseutils
 from .ChiggerFilterBase import ChiggerFilterBase
 from .. import utils
+
 
 class TubeFilter(ChiggerFilterBase):
     """
@@ -21,13 +22,17 @@ class TubeFilter(ChiggerFilterBase):
     @staticmethod
     def getOptions():
         opt = ChiggerFilterBase.getOptions()
-        opt.add('radius', None, "Radius of the tube.", vtype=float)
-        opt.add('normalized_radius', 0.1, "Specify the radius as a percentage of the 'length' of "
-                                          "the object, where the length is compute as the distance "
-                                          "between the two points that comprise the object "
-                                          "bounding box.")
-        opt.add('caps', True, "Toggle the end-caps of the tube.")
-        opt.add('sides', 30, "The number of edges for the tube.", vtype=int)
+        opt.add("radius", None, "Radius of the tube.", vtype=float)
+        opt.add(
+            "normalized_radius",
+            0.1,
+            "Specify the radius as a percentage of the 'length' of "
+            "the object, where the length is compute as the distance "
+            "between the two points that comprise the object "
+            "bounding box.",
+        )
+        opt.add("caps", True, "Toggle the end-caps of the tube.")
+        opt.add("sides", 30, "The number of edges for the tube.", vtype=int)
         return opt
 
     def __init__(self, **kwargs):
@@ -39,19 +44,23 @@ class TubeFilter(ChiggerFilterBase):
         """
         super(TubeFilter, self).update(**kwargs)
 
-        if self.isOptionValid('radius'):
-            self._vtkfilter.SetRadius(self.getOption('radius'))
+        if self.isOptionValid("radius"):
+            self._vtkfilter.SetRadius(self.getOption("radius"))
 
-        if self.isOptionValid('normalized_radius'):
-            if self.isOptionValid('radius'):
-                mooseutils.mooseWarning("The 'radius' and 'normalized_radius' options are both "
-                                        "set, the 'radius is being used.'")
+        if self.isOptionValid("normalized_radius"):
+            if self.isOptionValid("radius"):
+                mooseutils.mooseWarning(
+                    "The 'radius' and 'normalized_radius' options are both "
+                    "set, the 'radius is being used.'"
+                )
             else:
-                self._vtkfilter.SetRadius(utils.compute_distance(self._source) *
-                                          self.getOption('normalized_radius'))
+                self._vtkfilter.SetRadius(
+                    utils.compute_distance(self._source)
+                    * self.getOption("normalized_radius")
+                )
 
-        if self.isOptionValid('sides'):
-            self._vtkfilter.SetNumberOfSides(self.getOption('sides'))
+        if self.isOptionValid("sides"):
+            self._vtkfilter.SetNumberOfSides(self.getOption("sides"))
 
-        if self.isOptionValid('caps'):
-            self._vtkfilter.SetCapping(self.getOption('caps'))
+        if self.isOptionValid("caps"):
+            self._vtkfilter.SetCapping(self.getOption("caps"))
