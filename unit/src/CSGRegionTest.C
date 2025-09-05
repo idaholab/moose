@@ -139,3 +139,26 @@ TEST(CSGRegionTest, testStripRegionString)
     ASSERT_EQ(reg_str_valid, stripRegionString(reg_str_valid, " & "));
   }
 }
+
+// Tests == and != operators
+TEST(CSGRegionTest, testEquality)
+{
+  CSGPlane surf("s1", 1.0, 0.0, 0.0, 1.0);
+
+  auto reg1 = +surf;         // halfspace type
+  auto reg2 = +surf;         // identical type and region
+  auto reg3 = -surf;         // identical type, different region
+  auto reg4 = -surf | +surf; // different region and type
+
+  // == operator
+  {
+    ASSERT_TRUE(reg1 == reg2);
+  }
+  // != operator
+  {
+    // different region string
+    ASSERT_TRUE(reg1 != reg3);
+    // different type and string
+    ASSERT_TRUE(reg1 != reg4);
+  }
+}
