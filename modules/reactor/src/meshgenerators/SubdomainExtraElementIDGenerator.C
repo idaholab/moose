@@ -40,10 +40,26 @@ SubdomainExtraElementIDGenerator::validParams()
 SubdomainExtraElementIDGenerator::SubdomainExtraElementIDGenerator(const InputParameters & params)
   : MeshGenerator(params),
     _input(getMesh("input")),
-    _subdomain_names(getParam<std::vector<SubdomainName>>("subdomains"))
+    _subdomain_names(getParam<std::vector<SubdomainName>>("subdomains")),
+    _id_names(getParam<std::vector<std::string>>("extra_element_id_names")),
+    _ids(getParam<std::vector<std::vector<dof_id_type>>>("extra_element_ids")),
+    _defaults(queryParam<std::vector<dof_id_type>>("default_extra_element_ids"))
 {
   if (_subdomain_names.size() == 0)
     paramError("subdomains", "Empty subdomain vector provided!");
+  if (_id_names.size() != _ids.size())
+    paramError("extra_element_ids",
+               "Inconsistent vector size for element IDs (must have same size as "
+               "'extra_element_id_names')");
+  for (const auto i : index_range(_ids))
+    if (_subdomain_names.size() != _ids[i].size())
+      paramError("extra_element_ids",
+                 "Inconsistent vector size for element IDs at index " + std::to_string(i) +
+                     " (must have same size as 'subdomains')");
+  if (_defaults && _defaults->size() != _id_names.size())
+    paramError("default_extra_element_ids",
+               "Inconsistent vector size for default element IDs (must have same size as "
+               "'extra_element_id_names')");
 }
 
 std::unique_ptr<MeshBase>
@@ -52,7 +68,7 @@ SubdomainExtraElementIDGenerator::generate()
   std::unique_ptr<MeshBase> mesh = std::move(_input);
 
   // construct a map from the subdomain ID to the index in 'subdomains'
-  auto subdomain_ids = MooseMeshUtils::getSubdomainIDs(*mesh, _subdomain_names);
+  const auto subdomain_ids = MooseMeshUtils::getSubdomainIDs(*mesh, _subdomain_names);
 
   // check that all subdomains are present
   for (const auto & name : _subdomain_names)
@@ -68,50 +84,31 @@ SubdomainExtraElementIDGenerator::generate()
       unique_subdomain_ids.insert(id);
 
   std::map<SubdomainID, unsigned int> subdomains;
-  for (unsigned int i = 0; i < _subdomain_names.size(); ++i)
+  for (const auto i : index_range(_subdomain_names))
     subdomains[subdomain_ids[i]] = i;
-
-  auto & element_id_names = getParam<std::vector<std::string>>("extra_element_id_names");
-  auto & element_ids = getParam<std::vector<std::vector<dof_id_type>>>("extra_element_ids");
-
-  if (element_id_names.size() != element_ids.size())
-    paramError("extra_element_ids", "Inconsistent vector size for element IDs");
-  for (auto & element_id : element_ids)
-  {
-    if (_subdomain_names.size() != element_id.size())
-      paramError("extra_element_ids", "Inconsistent vector size for element IDs");
-  }
 
   // get indices for all extra element integers
   std::vector<unsigned int> extra_id_indices;
-  for (auto & element_id_name : element_id_names)
+  for (const auto & id_name : _id_names)
   {
-    if (!mesh->has_elem_integer(element_id_name))
-      extra_id_indices.push_back(mesh->add_elem_integer(element_id_name));
+    if (!mesh->has_elem_integer(id_name))
+      extra_id_indices.push_back(mesh->add_elem_integer(id_name));
     else
-      extra_id_indices.push_back(mesh->get_elem_integer_index(element_id_name));
-  }
-
-  if (isParamValid("default_extra_element_ids"))
-  {
-    auto & default_ids = getParam<std::vector<dof_id_type>>("default_extra_element_ids");
-    if (default_ids.size() != element_id_names.size())
-      paramError("default_extra_element_ids", "Inconsistent vector size for default element IDs");
-
-    for (auto & elem : mesh->element_ptr_range())
-      for (unsigned int i = 0; i < element_ids.size(); ++i)
-        elem->set_extra_integer(extra_id_indices[i], default_ids[i]);
+      extra_id_indices.push_back(mesh->get_elem_integer_index(id_name));
   }
 
   for (auto & elem : mesh->element_ptr_range())
   {
-    SubdomainID id = elem->subdomain_id();
-    auto it = subdomains.find(id);
-    if (it == subdomains.end())
-      continue;
-
-    for (unsigned int i = 0; i < element_ids.size(); ++i)
-      elem->set_extra_integer(extra_id_indices[i], element_ids[i][it->second]);
+    if (const auto it = subdomains.find(elem->subdomain_id()); it != subdomains.end())
+    {
+      for (const auto i : index_range(_ids))
+        elem->set_extra_integer(extra_id_indices[i], _ids[i][it->second]);
+    }
+    else if (_defaults)
+    {
+      for (const auto i : index_range(_ids))
+        elem->set_extra_integer(extra_id_indices[i], (*_defaults)[i]);
+    }
   }
 
   return mesh;

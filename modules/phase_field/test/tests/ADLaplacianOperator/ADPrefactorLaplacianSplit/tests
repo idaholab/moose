@@ -1,0 +1,10 @@
+[Tests]
+ issues = '#31300'
+ design = 'ADPrefactorLaplacianSplit.md'
+ [ad_transient]
+   type = 'Exodiff'
+   input = 'ad_transient_prefactorLaplacianSplit.i'
+   exodiff = 'ad_transient_prefactorLaplacianSplit_out.e'
+   requirement = 'The system shall be able to solve a transient diffusion problem with ADPrefactorLaplacianSplit kernel'
+ []
+[]

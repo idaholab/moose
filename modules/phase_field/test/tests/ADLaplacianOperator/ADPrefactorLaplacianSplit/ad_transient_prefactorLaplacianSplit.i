@@ -1,39 +1,52 @@
 [Mesh]
   type = GeneratedMesh
-  dim = 1
+  dim = 2
   nx = 10
+  ny = 10
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
-    type = Diffusion
+  [diff]
+    type = ADPrefactorLaplacianSplit
     variable = u
-  [../]
+    c = u
+    prefactor = 0.1
+  []
+  [time]
+    type = ADTimeDerivative
+    variable = u
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
     variable = u
     boundary = left
     value = 0
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
     variable = u
     boundary = right
-    value = 1.2eE
-  [../]
+    value = 1
+  []
 []
 
 [Executioner]
-  type = Steady
-  solve_type = 'PJFNK'
+  type = Transient
+  num_steps = 20
+  dt = 0.1
+  solve_type = NEWTON
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
+[]
+
+[Outputs]
+  exodus = true
 []

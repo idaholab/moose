@@ -14,6 +14,9 @@
 #include <string>
 #include <vector>
 
+#include "libmesh/int_range.h"
+#include "libmesh/libmesh_common.h"
+
 /*
  * This must stay a header-only utility! It is used in the capabilities python module and
  * we do not want to link against any MOOSE libs.
@@ -63,6 +66,77 @@ tokenize(const std::string & str,
 }
 
 /**
+ * Takes the string representation of a value and converts it to the value.
+ *
+ * For standard numeric types, this gets around the deficiencies in the STL
+ * stoi and stod methods where they might successfully convert part of a string
+ * to a number when we'd instead prefer to get a failure.
+ *
+ * For string and string-derived types, this does a direct copy and does
+ * not utilize a stream.
+ *
+ * For all other types, this uses the stringstream >> operator to fill
+ * the value.
+ *
+ * @param str The string to convert from
+ * @param value The typed value to fill
+ * @param throw_on_failure If true, throw a std::invalid_argument on failure
+ * @return Whether or not the conversion succeeded
+ */
+template <class T>
+bool
+convert(const std::string & str, T & value, const bool throw_on_failure)
+{
+  // Special case for numeric values, also handling range checking
+  if constexpr (std::is_same_v<short int, T> || std::is_same_v<unsigned short int, T> ||
+                std::is_same_v<int, T> || std::is_same_v<unsigned int, T> ||
+                std::is_same_v<long int, T> || std::is_same_v<unsigned long int, T> ||
+                std::is_same_v<long long int, T> || std::is_same_v<unsigned long long int, T>)
+  {
+    // Try read a double and try to cast it to an int
+    long double double_val;
+    std::stringstream double_ss(str);
+    double_ss >> double_val;
+
+    if (!double_ss.fail() && double_ss.eof())
+    {
+      // on arm64 the long double does not have sufficient precision
+      std::stringstream int_ss(str);
+      const bool use_int = !(int_ss >> value).fail() && int_ss.eof();
+
+      // Check to see if it's an integer and thus within range of an integer
+      if (double_val == static_cast<long double>(static_cast<T>(double_val)))
+      {
+        if (!use_int)
+          value = static_cast<T>(double_val);
+        return true;
+      }
+    }
+  }
+  // Non numeric values
+  else
+  {
+    // string or derived string: direct copy
+    if constexpr (std::is_base_of_v<std::string, T>)
+    {
+      value = str;
+      return true;
+    }
+    // non-string or numeric, use stringstream >>
+    else
+    {
+      std::stringstream ss(trim(str));
+      if (!(ss >> value).fail() && ss.eof())
+        return true;
+    }
+  }
+
+  if (throw_on_failure)
+    throw std::invalid_argument("Unable to convert '" + str + "' to type " +
+                                libMesh::demangle(typeid(T).name()));
+  return false;
+}
+/**
  *  tokenizeAndConvert splits a string using delimiter and then converts to type T.
  *  If the conversion fails tokenizeAndConvert returns false, otherwise true.
  */
@@ -75,14 +149,9 @@ tokenizeAndConvert(const std::string & str,
   std::vector<std::string> tokens;
   MooseUtils::tokenize(str, tokens, 1, delimiter);
   tokenized_vector.resize(tokens.size());
-  for (unsigned int j = 0; j < tokens.size(); ++j)
-  {
-    std::stringstream ss(trim(tokens[j]));
-    // we have to make sure that the conversion succeeded _and_ that the string
-    // was fully read to avoid situations like [conversion to Real] 3.0abc to work
-    if ((ss >> tokenized_vector[j]).fail() || !ss.eof())
+  for (const auto i : libMesh::index_range(tokens))
+    if (!convert<T>(tokens[i], tokenized_vector[i], false))
       return false;
-  }
   return true;
 }
 
@@ -91,11 +160,10 @@ tokenizeAndConvert(const std::string & str,
  * @params name The string to convert upper case.
  */
 inline std::string
-toUpper(const std::string & name)
+toUpper(std::string name)
 {
-  std::string upper(name);
-  std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
-  return upper;
+  std::transform(name.begin(), name.end(), name.begin(), ::toupper);
+  return name;
 }
 
 /**
@@ -103,11 +171,9 @@ toUpper(const std::string & name)
  * @params name The string to convert upper case.
  */
 inline std::string
-toLower(const std::string & name)
+toLower(std::string name)
 {
-  std::string lower(name);
-  std::transform(lower.begin(), lower.end(), lower.begin(), ::tolower);
-  return lower;
+  std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+  return name;
 }
-
 }

@@ -16,6 +16,7 @@
 
 #include "hit/hit.h"
 
+#include <set>
 #include <vector>
 #include <string>
 #include <iomanip>
@@ -27,7 +28,6 @@ class SyntaxTree;
 class MooseApp;
 class Factory;
 class ActionFactory;
-class GlobalParamsAction;
 class JsonSyntaxTree;
 class Parser;
 class Syntax;
@@ -82,9 +82,15 @@ public:
   void build();
 
   /**
-   * This function attempts to extract values from the input file based on the contents of
-   * the passed parameters objects.  It handles a number of various types with dynamic casting
-   * including vector types
+   * Attempt to extract values from input starting with the section in input in \p section_node
+   * based on the contents of the passed InputParameters \p p.
+   *
+   * If \p section_node is not provided, only the global parameters will be checked
+   */
+  void extractParams(const hit::Node * const section_node, InputParameters & p);
+  /**
+   * Attempt to extract values from input starting with the section in input defined
+   * by the fullpath \p prefix based on the contents of the passed InputParameters \p p.
    */
   void extractParams(const std::string & prefix, InputParameters & p);
 
@@ -111,104 +117,17 @@ public:
 
 private:
   /**
-   * Helper functions for setting parameters of arbitrary types - bodies are in the .C file
-   * since they are called only from this Object
+   * @return Whether or not the given node \p node exists within the [GlobalParams] block
    */
-  /// Template method for setting any scalar type parameter read from the input file or command line
-  template <typename T, typename Base>
-  void setScalarParameter(const std::string & full_name,
-                          const std::string & short_name,
-                          InputParameters::Parameter<T> * param,
-                          bool in_global,
-                          GlobalParamsAction * global_block);
-
-  template <typename T, typename UP_T, typename Base>
-  void setScalarValueTypeParameter(const std::string & full_name,
-                                   const std::string & short_name,
-                                   InputParameters::Parameter<T> * param,
-                                   bool in_global,
-                                   GlobalParamsAction * global_block,
-                                   const hit::Node & node);
-
-  /// Template method for setting any vector type parameter read from the input file or command line
-  template <typename T, typename Base>
-  void setVectorParameter(const std::string & full_name,
-                          const std::string & short_name,
-                          InputParameters::Parameter<std::vector<T>> * param,
-                          bool in_global,
-                          GlobalParamsAction * global_block);
-
-  /// Template method for setting any map type parameter read from the input file or command line
-  template <typename KeyType, typename MappedType>
-  void setMapParameter(const std::string & full_name,
-                       const std::string & short_name,
-                       InputParameters::Parameter<std::map<KeyType, MappedType>> * param,
-                       bool in_global,
-                       GlobalParamsAction * global_block);
+  bool isGlobal(const hit::Node & node) const;
 
   /**
-   * Template method for setting any double indexed type parameter read from the input file or
-   * command line.
+   * Get the [GlobalParams] section node if it exists
+   *
+   * We need to separate this so that we can call extractParams()
+   * before calling build()
    */
-  template <typename T>
-  void setDoubleIndexParameter(const std::string & full_name,
-                               const std::string & short_name,
-                               InputParameters::Parameter<std::vector<std::vector<T>>> * param,
-                               bool in_global,
-                               GlobalParamsAction * global_block);
-
-  /**
-   * Template method for setting any triple indexed type parameter read from the input file or
-   * command line.
-   */
-  template <typename T>
-  void setTripleIndexParameter(
-      const std::string & full_name,
-      const std::string & short_name,
-      InputParameters::Parameter<std::vector<std::vector<std::vector<T>>>> * param,
-      bool in_global,
-      GlobalParamsAction * global_block);
-
-  /**
-   * Template method for setting any multivalue "scalar" type parameter read from the input file or
-   * command line.  Examples include "Point" and "RealVectorValue".
-   */
-  template <typename T>
-  void setScalarComponentParameter(const std::string & full_name,
-                                   const std::string & short_name,
-                                   InputParameters::Parameter<T> * param,
-                                   bool in_global,
-                                   GlobalParamsAction * global_block);
-
-  /**
-   * Template method for setting several multivalue "scalar" type parameter read from the input
-   * file or command line.  Examples include "Point" and "RealVectorValue".
-   */
-  template <typename T>
-  void setVectorComponentParameter(const std::string & full_name,
-                                   const std::string & short_name,
-                                   InputParameters::Parameter<std::vector<T>> * param,
-                                   bool in_global,
-                                   GlobalParamsAction * global_block);
-
-  /**
-   * Template method for setting vector of several multivalue "scalar" type parameter read from the
-   * input file or command line.  Examples include vectors of several "Point"s and
-   * "RealVectorValue"s such as (a three-element vector; each element is several "Point"s):
-   * points_values = '0 0 0
-   *                  0 0 1;
-   *                  0 1 0;
-   *                  1 0 0
-   *                  1 1 0
-   *                  1 1 1'
-   */
-  template <typename T>
-  void
-  setVectorVectorComponentParameter(const std::string & full_name,
-                                    const std::string & short_name,
-                                    InputParameters::Parameter<std::vector<std::vector<T>>> * param,
-                                    bool in_global,
-                                    GlobalParamsAction * global_block);
+  const hit::Node * queryGlobalParamsNode() const;
 
   /// The MooseApp this Parser is part of
   MooseApp & _app;
@@ -234,14 +153,15 @@ private:
   /// The sections that we need to execute first (read during the final walk)
   std::vector<std::string> _secs_need_first;
 
-  /// The current parameter object for which parameters are being extracted
-  InputParameters * _current_params;
-
   /// The errors accumulated during the walk
   std::vector<hit::ErrorMessage> _errors;
 
-  /// Deprecation warnings
-  std::unordered_map<std::string, std::string> _deprecated_params;
+  /// Deprecation warnings (object type/param name) -> (message)
+  std::map<std::string, std::string> _deprecated_params;
+
+  /// The hit Node for the [GlobalParams] block, if any
+  /// If set (could be null), it means we have searched for it
+  mutable std::optional<const hit::Node *> _global_params_node;
 
   void walkRaw(std::string fullpath, std::string nodepath, hit::Node * n);
 };

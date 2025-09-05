@@ -991,6 +991,14 @@ typedef std::function<void(const InputParameters &, InputParameters &)>
 
 std::string stringify(const Moose::RelationshipManagerType & t);
 std::string stringify(const Moose::TimeIntegratorType & t);
+
+/**
+ * Struct that all MOOSE derivative strings derive from
+ */
+struct DerivativeStringClass
+{
+};
+
 } // namespace Moose
 
 namespace libMesh
@@ -1002,9 +1010,7 @@ print_helper(std::ostream & os, const Moose::RelationshipManagerType * param)
   // Specialization so that we don't print out unprintable characters
   os << Moose::stringify(*param);
 }
-
-// End of Moose Namespace
-}
+} // namespace libMesh
 
 template <>
 struct enable_bitmask_operators<Moose::RelationshipManagerType>
@@ -1020,8 +1026,8 @@ struct enable_bitmask_operators<Moose::RelationshipManagerType>
  * Be sure to use the DerivativeStringToJSON macro for new types in
  * MooseTypes.C to also define to_json for each
  */
-#define DerivativeStringClass(TheName)                                                             \
-  class TheName : public std::string                                                               \
+#define MooseDerivativeStringClass(TheName)                                                        \
+  class TheName : public std::string, public Moose::DerivativeStringClass                          \
   {                                                                                                \
   public:                                                                                          \
     TheName() : std::string() {}                                                                   \
@@ -1046,150 +1052,151 @@ struct enable_bitmask_operators<Moose::RelationshipManagerType>
 /// This type is for expected (i.e. input) file names or paths that your simulation needs.
 /// If relative types are assigned to this type, they are replaced with an absolute path
 /// that is relative to the context of the parameter (usually the input file).
-DerivativeStringClass(FileName);
+MooseDerivativeStringClass(FileName);
 
 /// Similar to FileName but without an extension
-DerivativeStringClass(FileNameNoExtension);
+MooseDerivativeStringClass(FileNameNoExtension);
 
 /// This type is for expected filenames that should be relative and will not have their
 /// values set to absolute paths like FileName
-DerivativeStringClass(RelativeFileName);
+MooseDerivativeStringClass(RelativeFileName);
 
 /// This type is for files used in the DataFileInterface, which enables searching of files
 /// within the registered data directory
-DerivativeStringClass(DataFileName);
+MooseDerivativeStringClass(DataFileName);
 
 /// This type is similar to "FileName", but is used to further filter file dialogs on known file mesh types
-DerivativeStringClass(MeshFileName);
+MooseDerivativeStringClass(MeshFileName);
 
 /// This type is similar to "FileName", but is used to further filter file dialogs on known matrix file types
-DerivativeStringClass(MatrixFileName);
+MooseDerivativeStringClass(MatrixFileName);
 
 /// This type is for output file base
-DerivativeStringClass(OutFileBase);
+MooseDerivativeStringClass(OutFileBase);
 
 /// This type is used for objects that expect nonlinear variable names (i.e. Kernels, BCs)
-DerivativeStringClass(NonlinearVariableName);
+MooseDerivativeStringClass(NonlinearVariableName);
 
 /// This type is used for objects that expect linear variable names (i.e. LinearFVKernels, LinearFVBCs)
-DerivativeStringClass(LinearVariableName);
+MooseDerivativeStringClass(LinearVariableName);
 
 /// This type is used for objects that expect linear or nonlinear solver variable names
-DerivativeStringClass(SolverVariableName);
+MooseDerivativeStringClass(SolverVariableName);
 
 /// This type is used for objects that expect Auxiliary variable names (i.e. AuxKernels, AuxBCs)
-DerivativeStringClass(AuxVariableName);
+MooseDerivativeStringClass(AuxVariableName);
 
 /// This type is used for objects that expect either Solver or Auxiliary Variables such as postprocessors
-DerivativeStringClass(VariableName);
+MooseDerivativeStringClass(VariableName);
 
 /// This type is used for objects that expect Boundary Names/Ids read from or generated on the current mesh
-DerivativeStringClass(BoundaryName);
+MooseDerivativeStringClass(BoundaryName);
 
 /// This type is similar to BoundaryName but is used for "blocks" or subdomains in the current mesh
-DerivativeStringClass(SubdomainName);
+MooseDerivativeStringClass(SubdomainName);
 
 /// This type is used for objects that expect Postprocessor objects
-DerivativeStringClass(PostprocessorName);
+MooseDerivativeStringClass(PostprocessorName);
 
 /// This type is used for objects that expect VectorPostprocessor objects
-DerivativeStringClass(VectorPostprocessorName);
+MooseDerivativeStringClass(VectorPostprocessorName);
 
 /// This type is used for objects that expect MeshDivision objects
-DerivativeStringClass(MeshDivisionName);
+MooseDerivativeStringClass(MeshDivisionName);
 
 /// This type is used for objects that expect Moose Function objects
-DerivativeStringClass(FunctionName);
+MooseDerivativeStringClass(FunctionName);
 
 /// This type is used for objects that expect Moose Distribution objects
-DerivativeStringClass(DistributionName);
+MooseDerivativeStringClass(DistributionName);
 
 /// This type is used for objects that expect Moose Sampler objects
-DerivativeStringClass(SamplerName);
+MooseDerivativeStringClass(SamplerName);
 
 /// This type is used for objects that expect "UserObject" names
-DerivativeStringClass(UserObjectName);
+MooseDerivativeStringClass(UserObjectName);
 
 /// This type is used for objects that expect an Indicator object name
-DerivativeStringClass(IndicatorName);
+MooseDerivativeStringClass(IndicatorName);
 
 /// This type is used for objects that expect an Marker object name
-DerivativeStringClass(MarkerName);
+MooseDerivativeStringClass(MarkerName);
 
 /// This type is used for objects that expect an MultiApp object name
-DerivativeStringClass(MultiAppName);
+MooseDerivativeStringClass(MultiAppName);
 
 /// Used for objects the require Output object names
-DerivativeStringClass(OutputName);
+MooseDerivativeStringClass(OutputName);
 
 /// Used for objects that expect MaterialProperty names
-DerivativeStringClass(MaterialPropertyName);
+MooseDerivativeStringClass(MaterialPropertyName);
 
 /// Used for objects that expect Moose::Functor names
-DerivativeStringClass(MooseFunctorName);
+MooseDerivativeStringClass(MooseFunctorName);
 
 /// User for accessing Material objects
-DerivativeStringClass(MaterialName);
+MooseDerivativeStringClass(MaterialName);
 
 /// Tag Name
-DerivativeStringClass(TagName);
+MooseDerivativeStringClass(TagName);
 
 /// Name of MeshGenerators
-DerivativeStringClass(MeshGeneratorName);
+MooseDerivativeStringClass(MeshGeneratorName);
 
 /// Name of extra element IDs
-DerivativeStringClass(ExtraElementIDName);
+MooseDerivativeStringClass(ExtraElementIDName);
 
 /// Name of a Reporter Value, second argument to ReporterName (see Reporter.h)
-DerivativeStringClass(ReporterValueName);
+MooseDerivativeStringClass(ReporterValueName);
 
 /// Name of a Component object
-DerivativeStringClass(ComponentName);
+MooseDerivativeStringClass(ComponentName);
 
 /// Name of a Physics object
-DerivativeStringClass(PhysicsName);
+MooseDerivativeStringClass(PhysicsName);
 
 /// Name of a Positions object
-DerivativeStringClass(PositionsName);
+MooseDerivativeStringClass(PositionsName);
 
 /// Name of a Times object
-DerivativeStringClass(TimesName);
+MooseDerivativeStringClass(TimesName);
 
 /// Name of an Executor.  Used for inputs to Executors
-DerivativeStringClass(ExecutorName);
+MooseDerivativeStringClass(ExecutorName);
 
 /// ParsedFunction/ParsedMaterial etc. FParser expression
-DerivativeStringClass(ParsedFunctionExpression);
+MooseDerivativeStringClass(ParsedFunctionExpression);
 
 /// System name support of multiple nonlinear systems on the same mesh
-DerivativeStringClass(NonlinearSystemName);
+MooseDerivativeStringClass(NonlinearSystemName);
 
 /// Name of a Convergence object
-DerivativeStringClass(ConvergenceName);
+MooseDerivativeStringClass(ConvergenceName);
 
 /// System name support of multiple linear systems on the same mesh
-DerivativeStringClass(LinearSystemName);
+MooseDerivativeStringClass(LinearSystemName);
 
 /// Name of a system which either be linear or nonlinear
-DerivativeStringClass(SolverSystemName);
+MooseDerivativeStringClass(SolverSystemName);
 
 /// Command line argument, specialized to handle quotes in vector arguments
-DerivativeStringClass(CLIArgString);
+MooseDerivativeStringClass(CLIArgString);
 
 #ifdef MOOSE_MFEM_ENABLED
 /**
  * Coefficients used in input for MFEM residual objects
  */
 ///@{
-DerivativeStringClass(MFEMScalarCoefficientName);
-DerivativeStringClass(MFEMVectorCoefficientName);
-DerivativeStringClass(MFEMMatrixCoefficientName);
+MooseDerivativeStringClass(MFEMScalarCoefficientName);
+MooseDerivativeStringClass(MFEMVectorCoefficientName);
+MooseDerivativeStringClass(MFEMMatrixCoefficientName);
 ///@}
 #endif
 /**
  * additional MOOSE typedefs
  */
 typedef std::vector<VariableName> CoupledName;
+
 namespace Moose
 {
 extern const TagName SOLUTION_TAG;

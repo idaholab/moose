@@ -46,24 +46,24 @@ DataFileInterface::getDataFilePath(const std::string & relative_path) const
                          relative_path,
                          "\"): This API should not be used for absolute paths.");
 
-  // Throw on error so that if getPath() fails, we can throw an error
-  // with the context of _parent.mooseError()
-  const auto throw_on_error_before = Moose::_throw_on_error;
-  Moose::_throw_on_error = true;
-  std::optional<std::string> error;
-
   // This will search the data paths for this relative path
+  std::optional<std::string> error;
   Moose::DataFileUtils::Path found_path;
-  try
   {
-    found_path = Moose::DataFileUtils::getPath(relative_path);
-  }
-  catch (std::exception & e)
-  {
-    error = e.what();
+    // Throw on error so that if getPath() fails, we can throw an error
+    // with the context of _parent.mooseError()
+    Moose::ScopedThrowOnError scoped_throw_on_error;
+
+    try
+    {
+      found_path = Moose::DataFileUtils::getPath(relative_path);
+    }
+    catch (std::exception & e)
+    {
+      error = e.what();
+    }
   }
 
-  Moose::_throw_on_error = throw_on_error_before;
   if (error)
     _parent.mooseError(*error);
 

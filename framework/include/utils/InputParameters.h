@@ -17,6 +17,7 @@
 #include "ExecFlagEnum.h"
 #include "Conversion.h"
 #include "DataFileUtils.h"
+#include "MoosePassKey.h"
 
 #include "libmesh/parameters.h"
 
@@ -209,15 +210,16 @@ public:
    */
   ///@{
   template <typename T, typename UP_T>
-  std::optional<std::pair<bool, std::string>> rangeCheck(const std::string & full_name,
-                                                         const std::string & short_name,
-                                                         InputParameters::Parameter<T> * param,
-                                                         const bool include_param_path = true);
+  std::optional<std::pair<bool, std::string>>
+  rangeCheck(const std::string & full_name,
+             const std::string & short_name,
+             const InputParameters::Parameter<T> & param,
+             const bool include_param_path = true);
   template <typename T, typename UP_T>
   std::optional<std::pair<bool, std::string>>
   rangeCheck(const std::string & full_name,
              const std::string & short_name,
-             InputParameters::Parameter<std::vector<T>> * param,
+             const InputParameters::Parameter<std::vector<T>> & param,
              const bool include_param_path = true);
   ///@}
   /**
@@ -583,8 +585,16 @@ public:
    * that have the context of the underlying object, if possible.
    */
   bool isMooseBaseObject() const;
+
+  /**
+   * @return The object type represented by these parameters, if any
+   */
+  const std::string * queryObjectType() const;
+
   /**
    * @returns The underlying owning object type, for MooseBase objects with parameters
+   *
+   * Will error if a type does not exist
    */
   const std::string & getObjectType() const;
   /**
@@ -816,6 +826,20 @@ public:
    *   they were created, or were read from an input file or some other valid source
    */
   void checkParams(const std::string & parsing_syntax);
+
+  /**
+   * Performs a range check on the parameter (which must have a range check)
+   *
+   * @param value The parameter value
+   * @param long_name The full path to the parameter
+   * @param short_name The name of the parameter
+   * @param include_param_path Whether or not to include the parameter path in errors
+   * @return An error, if any; first is whether or not it is a user error and second is the message
+   */
+  std::optional<std::pair<bool, std::string>> parameterRangeCheck(const Parameters::Value & value,
+                                                                  const std::string & long_name,
+                                                                  const std::string & short_name,
+                                                                  const bool include_param_path);
 
   /**
    * Finalizes the parameters, which must be done before constructing any objects
@@ -1266,6 +1290,18 @@ public:
    */
   std::optional<Moose::DataFileUtils::Path> queryDataFileNamePath(const std::string & name) const;
 
+  /**
+   * Entrypoint for the Builder to setup a std::vector<VariableName> parameter,
+   * which will setup the default variable names if appropriate
+   *
+   * @param names The variable names
+   * @param node The hit node that produced this parameter
+   * @return An error message, if any
+   */
+  std::optional<std::string> setupVariableNames(std::vector<VariableName> & names,
+                                                const hit::Node & node,
+                                                const Moose::PassKey<Moose::Builder>);
+
 private:
   // Private constructor so that InputParameters can only be created in certain places.
   InputParameters();
@@ -1524,11 +1560,9 @@ template <typename T, typename UP_T>
 std::optional<std::pair<bool, std::string>>
 InputParameters::rangeCheck(const std::string & full_name,
                             const std::string & short_name,
-                            InputParameters::Parameter<std::vector<T>> * param,
+                            const InputParameters::Parameter<std::vector<T>> & param,
                             const bool include_param_path)
 {
-  mooseAssert(param, "Parameter is NULL");
-
   if (!isParamValid(short_name))
     return {};
 
@@ -1557,7 +1591,7 @@ InputParameters::rangeCheck(const std::string & full_name,
   std::vector<UP_T> parbuf(vars.size());
 
   // parameter vector
-  const std::vector<T> & value = param->set();
+  const std::vector<T> & value = param.get();
 
   // iterate over all vector values (maybe ;)
   bool need_to_iterate = false;
@@ -1570,7 +1604,14 @@ InputParameters::rangeCheck(const std::string & full_name,
       if (vars[j] == short_name)
       {
         if (value.size() == 0)
-          return {{true, "Range checking empty vector '" + range_function + "'"}};
+        {
+          std::ostringstream oss;
+          oss << "Range checking empty vector";
+          if (include_param_path)
+            oss << " parameter " << full_name;
+          oss << "; expression = '" << range_function << "'";
+          return {{true, oss.str()}};
+        }
 
         parbuf[j] = value[i];
         need_to_iterate = true;
@@ -1588,9 +1629,14 @@ InputParameters::rangeCheck(const std::string & full_name,
         if (iss >> index && iss.eof())
         {
           if (index >= value.size())
-            return {{true,
-                     "Error parsing expression '" + range_function + "'; out of range variable '" +
-                         vars[j] + "'"}};
+          {
+            std::ostringstream oss;
+            oss << "Error parsing expression '" + range_function + "'";
+            if (include_param_path)
+              oss << " for parameter " << full_name;
+            oss << "; out of range variable '" + vars[j] << "'";
+            return {{true, oss.str()}};
+          }
           parbuf[j] = value[index];
         }
         else
@@ -1632,11 +1678,9 @@ template <typename T, typename UP_T>
 std::optional<std::pair<bool, std::string>>
 InputParameters::rangeCheck(const std::string & full_name,
                             const std::string & short_name,
-                            InputParameters::Parameter<T> * param,
+                            const InputParameters::Parameter<T> & param,
                             const bool include_param_path)
 {
-  mooseAssert(param, "Parameter is NULL");
-
   if (!isParamValid(short_name))
     return {};
 
@@ -1655,7 +1699,7 @@ InputParameters::rangeCheck(const std::string & full_name,
   auto tmp_eps = fp.epsilon();
   fp.setEpsilon(0);
   // We require a non-const value for the implicit upscaling of the parameter type
-  std::vector<UP_T> value(1, param->set());
+  std::vector<UP_T> value(1, param.get());
   UP_T result = fp.Eval(&value[0]);
   fp.setEpsilon(tmp_eps);
 

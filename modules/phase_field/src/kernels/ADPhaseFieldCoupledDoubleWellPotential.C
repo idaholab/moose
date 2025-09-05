@@ -1,0 +1,35 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "ADPhaseFieldCoupledDoubleWellPotential.h"
+
+registerMooseObject("PhaseFieldApp", ADPhaseFieldCoupledDoubleWellPotential);
+
+InputParameters
+ADPhaseFieldCoupledDoubleWellPotential::validParams()
+{
+  InputParameters params = ADKernelValue::validParams();
+  params.addClassDescription("Double well potential for Cahn-Hilliard advection.");
+  params.addRequiredCoupledVar("c", "phase field variable");
+  params.addRequiredParam<Real>("prefactor", "prefactor for double well potential");
+  return params;
+}
+
+ADPhaseFieldCoupledDoubleWellPotential::ADPhaseFieldCoupledDoubleWellPotential(
+    const InputParameters & parameters)
+  : ADKernelValue(parameters), _c(adCoupledValue("c")), _prefactor(getParam<Real>("prefactor"))
+
+{
+}
+
+ADReal
+ADPhaseFieldCoupledDoubleWellPotential::precomputeQpResidual()
+{
+  return _prefactor * _c[_qp] * (_c[_qp] * _c[_qp] - 1);
+}

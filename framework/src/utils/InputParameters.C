@@ -572,16 +572,6 @@ InputParameters::mooseObjectSyntaxVisibility() const
   return _moose_object_syntax_visibility;
 }
 
-#define dynamicCastRangeCheck(type, up_type, long_name, short_name, param)                         \
-  do                                                                                               \
-  {                                                                                                \
-    libMesh::Parameters::Value * val = MooseUtils::get(param);                                     \
-    if (const auto scalar_p = dynamic_cast<InputParameters::Parameter<type> *>(val))               \
-      error = rangeCheck<type, up_type>(long_name, short_name, scalar_p, false);                   \
-    if (const auto vector_p = dynamic_cast<InputParameters::Parameter<std::vector<type>> *>(val))  \
-      error = rangeCheck<type, up_type>(long_name, short_name, vector_p, false);                   \
-  } while (0)
-
 #define checkMooseType(param_type, name)                                                           \
   if (have_parameter<param_type>(name) || have_parameter<std::vector<param_type>>(name))           \
     error = "non-controllable type '" + type(name) + "' for parameter '" +                         \
@@ -591,7 +581,6 @@ void
 InputParameters::checkParams(const std::string & parsing_syntax)
 {
   const std::string parampath = blockFullpath() != "" ? blockFullpath() : parsing_syntax;
-  std::vector<std::pair<const hit::Node *, std::string>> errors;
 
   // Required parameters
   std::vector<std::string> required_param_errors;
@@ -615,22 +604,14 @@ InputParameters::checkParams(const std::string & parsing_syntax)
     mooseError(MooseUtils::stringJoin(required_param_errors, "\n"));
 
   // Range checked parameters
-  for (const auto & it : *this)
+  for (const auto & [name, param_ptr] : *this)
   {
-    const std::string long_name(parampath + "/" + it.first);
-
-    std::optional<std::pair<bool, std::string>> error;
-    dynamicCastRangeCheck(Real, Real, long_name, it.first, it.second);
-    dynamicCastRangeCheck(int, long, long_name, it.first, it.second);
-    dynamicCastRangeCheck(long, long, long_name, it.first, it.second);
-    dynamicCastRangeCheck(unsigned int, long, long_name, it.first, it.second);
-
-    if (error)
+    if (const auto error = parameterRangeCheck(*param_ptr, parampath + "/" + name, name, false))
     {
       if (error->first)
-        paramError(it.first, error->second);
+        paramError(name, error->second);
       else
-        mooseError("For range checked parameter '" + it.first + "': " + error->second);
+        mooseError("For range checked parameter '" + name + "': " + error->second);
     }
   }
 
@@ -654,6 +635,31 @@ InputParameters::checkParams(const std::string & parsing_syntax)
     if (error)
       paramError(param_name, *error);
   }
+}
+
+std::optional<std::pair<bool, std::string>>
+InputParameters::parameterRangeCheck(const Parameters::Value & value,
+                                     const std::string & long_name,
+                                     const std::string & short_name,
+                                     const bool include_param_path)
+{
+#define dynamicCastRangeCheck(type, up_type, long_name, short_name)                                \
+  do                                                                                               \
+  {                                                                                                \
+    if (const auto scalar_p = dynamic_cast<const InputParameters::Parameter<type> *>(&value))      \
+      return rangeCheck<type, up_type>(long_name, short_name, *scalar_p, include_param_path);      \
+    if (const auto vector_p =                                                                      \
+            dynamic_cast<const InputParameters::Parameter<std::vector<type>> *>(&value))           \
+      return rangeCheck<type, up_type>(long_name, short_name, *vector_p, include_param_path);      \
+  } while (0)
+
+  dynamicCastRangeCheck(Real, Real, long_name, short_name);
+  dynamicCastRangeCheck(int, long, long_name, short_name);
+  dynamicCastRangeCheck(long, long, long_name, short_name);
+  dynamicCastRangeCheck(unsigned int, long, long_name, short_name);
+#undef dynamicCastRangeCheck
+
+  return {};
 }
 
 void
@@ -707,17 +713,18 @@ InputParameters::finalize(const std::string & parsing_syntax)
       std::optional<std::string> error;
 
       // Catch this so that we can add additional error context if it fails (the param path)
-      const auto throw_on_error_before = Moose::_throw_on_error;
-      Moose::_throw_on_error = true;
-      try
       {
-        found_path = Moose::DataFileUtils::getPath(data_file_name->get(), getFileBase(param_name));
+        Moose::ScopedThrowOnError scoped_throw_on_error;
+        try
+        {
+          found_path =
+              Moose::DataFileUtils::getPath(data_file_name->get(), getFileBase(param_name));
+        }
+        catch (std::exception & e)
+        {
+          error = e.what();
+        }
       }
-      catch (std::exception & e)
-      {
-        error = e.what();
-      }
-      Moose::_throw_on_error = throw_on_error_before;
 
       if (error)
         paramError(param_name, *error);
@@ -946,12 +953,20 @@ InputParameters::isMooseBaseObject() const
          have_parameter<std::string>(MooseBase::name_param);
 }
 
+const std::string *
+InputParameters::queryObjectType() const
+{
+  return have_parameter<std::string>(MooseBase::type_param)
+             ? &get<std::string>(MooseBase::type_param)
+             : nullptr;
+}
+
 const std::string &
 InputParameters::getObjectType() const
 {
-  if (!have_parameter<std::string>(MooseBase::type_param))
-    ::mooseError("InputParameters::getObjectType(): Missing '", MooseBase::type_param, "' param");
-  return get<std::string>(MooseBase::type_param);
+  if (const auto type_ptr = queryObjectType())
+    return *type_ptr;
+  ::mooseError("InputParameters::getObjectType(): Missing '", MooseBase::type_param, "' param");
 }
 
 const std::string &
@@ -1779,6 +1794,47 @@ std::optional<Moose::DataFileUtils::Path>
 InputParameters::queryDataFileNamePath(const std::string & name) const
 {
   return at(checkForRename(name))._data_file_name_path;
+}
+
+std::optional<std::string>
+InputParameters::setupVariableNames(std::vector<VariableName> & names,
+                                    const hit::Node & node,
+                                    const Moose::PassKey<Moose::Builder>)
+{
+  // Whether or not a name was found
+  bool has_name = false;
+  // Whether or not a default value (real) was found
+  bool has_default = false;
+
+  // Search through the names for values that convert to Real values,
+  // which are default values. If defaults are found, set appropriately
+  // in the InputParameters object. Keep track of if names or defaults
+  // were found because we don't allow having both
+  for (const auto i : index_range(names))
+  {
+    auto & name = names[i];
+    Real real_value;
+    if (MooseUtils::convert<Real>(name, real_value, false))
+    {
+      has_default = true;
+      defaultCoupledValue(node.path(), real_value, i);
+    }
+    else
+      has_name = true;
+  }
+
+  if (has_default)
+  {
+    if (has_name)
+      return {"invalid value for '" + node.fullpath() +
+              "': coupled vectors where some parameters are reals and others are variables are not "
+              "supported"};
+
+    // Don't actually use the names if these don't represent names
+    names.clear();
+  }
+
+  return {};
 }
 
 std::pair<std::string, const hit::Node *>
