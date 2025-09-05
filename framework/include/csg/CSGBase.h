@@ -14,6 +14,7 @@
 #include "CSGCellList.h"
 #include "CSGUniverseList.h"
 #include "nlohmann/json.h"
+#include "gtest/gtest.h"
 
 namespace CSG
 {
@@ -416,5 +417,11 @@ private:
 
   /// List of universes associated with CSG object
   CSGUniverseList _universe_list;
+
+  /// Friends for unit testing
+  ///@{
+  FRIEND_TEST(CSGBaseTest, testCheckRegionSurfaces);
+  FRIEND_TEST(CSGBaseTest, testAddGetSurface);
+  ///@}
 };
 } // namespace CSG
