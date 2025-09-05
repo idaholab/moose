@@ -157,6 +157,7 @@ Extensions:
             convergence: syntax/Convergence/index.md
             correctors: syntax/Correctors/index.md
             covariances: syntax/Covariance/index.md
+            csg: syntax/CSG/index.md
             dampers: syntax/Dampers/index.md
             dgkernels: syntax/DGKernels/index.md
             dirackernels: syntax/DiracKernels/index.md
