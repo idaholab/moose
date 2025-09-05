@@ -113,6 +113,15 @@ ThermalContactAction::validParams()
   params += GapConductance::actionParameters();
   params += GapConductanceConstant::actionParameters();
 
+  params.addParam<bool>(
+      "search_using_point_locator",
+      false,
+      "Whether to use the mesh point locator (typically an octree search) to find "
+      "elements around closest points of near-contact, contact, or penetration.  "
+      "This is less efficient than the default search via node-element connectivity, but "
+      "may be necessary to accurately detect gaps, contact, or penetration on any "
+      "boundaries whose elements are not connected via shared nodes. ");
+
   params.addParamNamesToGroup("primary secondary", "Gap surface definition");
   params.addParamNamesToGroup(
       "tangential_tolerance normal_smoothing_distance normal_smoothing_method",
