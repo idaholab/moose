@@ -18,7 +18,6 @@ TimeDomainEquationSystemProblemOperator::SetGridFunctions()
 {
   _test_var_names = GetEquationSystem()->TestVarNames();
   _trial_var_names = GetEquationSystem()->TrialVarNames();
-
   TimeDomainProblemOperator::SetGridFunctions();
 }
 
