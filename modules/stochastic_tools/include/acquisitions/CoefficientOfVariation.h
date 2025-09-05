@@ -11,11 +11,11 @@
 
 #include "ParallelAcquisitionFunctionBase.h"
 
-class ProbabilityofImprovement : public ParallelAcquisitionFunctionBase
+class CoefficientOfVariation : public ParallelAcquisitionFunctionBase
 {
 public:
   static InputParameters validParams();
-  ProbabilityofImprovement(const InputParameters & parameters);
+  CoefficientOfVariation(const InputParameters & parameters);
 
   void computeAcquisitionInternal(std::vector<Real> & acq,
                                   const std::vector<Real> & gp_mean,

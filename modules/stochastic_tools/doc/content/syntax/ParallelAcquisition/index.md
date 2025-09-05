@@ -6,7 +6,7 @@ For performing parallel active learning, an acquisition function is needed for p
 
 ## Creating an ParallelAcquisition function
 
-An acquisition function is created by inheriting from `ParallelAcquisitionFunctionBase` and overriding the `computeAcquisition` method in the base class. See the [BayesianPosteriorTargeted](BayesianPosteriorTargeted.md) class for an example.
+An acquisition function is created by inheriting from `ParallelAcquisitionFunctionBase` and overriding the `computeAcquisitionInternal` method in the base class. See the [BayesianPosteriorTargeted](BayesianPosteriorTargeted.md) class for an example.
 
 ## Example Input File Syntax
 

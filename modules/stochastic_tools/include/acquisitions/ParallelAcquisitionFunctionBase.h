@@ -23,7 +23,8 @@ public:
   ParallelAcquisitionFunctionBase(const InputParameters & parameters);
 
   /**
-   * Compute the acquisition function values
+   * Compute the acquisition function values. Performs all argument/size checks,
+   * then dispatches to computeAcquisitionInternal implemented by derived classes.
    * @param acq The computed acquisition function values
    * @param gp_mean The provided GP mean values
    * @param gp_std The provided GP standard deviation values
@@ -32,12 +33,12 @@ public:
    * @param generic A generic parameter (can be output values under which the GP has been trained or
    * threshold parameter under the U-Function etc.)
    */
-  virtual void computeAcquisition(std::vector<Real> & acq,
-                                  const std::vector<Real> & gp_mean,
-                                  const std::vector<Real> & gp_std,
-                                  const std::vector<std::vector<Real>> & test_inputs,
-                                  const std::vector<std::vector<Real>> & train_inputs,
-                                  const std::vector<Real> & generic) const = 0;
+  void computeAcquisition(std::vector<Real> & acq,
+                          const std::vector<Real> & gp_mean,
+                          const std::vector<Real> & gp_std,
+                          const std::vector<std::vector<Real>> & test_inputs,
+                          const std::vector<std::vector<Real>> & train_inputs,
+                          const std::vector<Real> & generic) const;
 
   /**
    * Return the modified acquisition function values and sorted indices considering local
@@ -66,4 +67,22 @@ public:
                           const std::vector<Real> & input1,
                           const std::vector<Real> & input2,
                           const std::vector<Real> & length_scales);
+
+private:
+  /**
+   * Implementation hook for derived classes (no size checks here).
+   * @param acq The computed acquisition function values
+   * @param gp_mean The provided GP mean values
+   * @param gp_std The provided GP standard deviation values
+   * @param test_inputs All the input values under which the GP has to be tested
+   * @param train_inputs All the input values under which the GP has been trained
+   * @param generic A generic parameter (can be output values under which the GP has been trained or
+   * threshold parameter under the U-Function etc.)
+   */
+  virtual void computeAcquisitionInternal(std::vector<Real> & acq,
+                                          const std::vector<Real> & gp_mean,
+                                          const std::vector<Real> & gp_std,
+                                          const std::vector<std::vector<Real>> & test_inputs,
+                                          const std::vector<std::vector<Real>> & train_inputs,
+                                          const std::vector<Real> & generic) const = 0;
 };

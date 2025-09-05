@@ -26,7 +26,7 @@ BayesianPosteriorTargeted::BayesianPosteriorTargeted(const InputParameters & par
 }
 
 void
-BayesianPosteriorTargeted::computeAcquisition(
+BayesianPosteriorTargeted::computeAcquisitionInternal(
     std::vector<Real> & acq,
     const std::vector<Real> & gp_mean,
     const std::vector<Real> & gp_std,

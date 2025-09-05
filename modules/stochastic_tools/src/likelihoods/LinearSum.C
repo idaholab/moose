@@ -27,14 +27,15 @@ LinearSum::function(const std::vector<Real> & exp,
                     const std::vector<Real> & model,
                     const Real & noise)
 {
+  mooseAssert(exp.size() == model.size(), "LinearSum: Vectors must be the same size.");
+  mooseAssert(noise != 0.0, "LinearSum: Noise must not be zero.");
   Real result = 0.0;
-  Real val1;
-  for (unsigned i = 0; i < exp.size(); ++i)
+  for (unsigned int i = 0; i < exp.size(); ++i)
   {
-    val1 = Utility::pow<2>((exp[i] - model[i]) / noise);
-    result += val1;
+    const Real diff = exp[i] - model[i];
+    result += diff * diff;
   }
-  return result;
+  return result / (noise * noise);
 }
 
 Real

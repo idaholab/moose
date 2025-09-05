@@ -20,7 +20,7 @@ ParallelAcquisitionInterface::ParallelAcquisitionInterface(const InputParameters
 {
 }
 
-ParallelAcquisitionFunctionBase *
+ParallelAcquisitionFunctionBase &
 ParallelAcquisitionInterface::getParallelAcquisitionFunctionByName(
     const UserObjectName & name) const
 {
@@ -33,5 +33,6 @@ ParallelAcquisitionInterface::getParallelAcquisitionFunctionByName(
 
   if (models.empty())
     mooseError("Unable to find a ParallelAcquisitionFunction object with the name '" + name + "'");
-  return models[0];
+
+  return *models.front();
 }

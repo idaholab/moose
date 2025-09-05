@@ -22,7 +22,7 @@ public:
 
 protected:
   /// Lookup a ParallelAcquisitionFunction object by name and return pointer
-  ParallelAcquisitionFunctionBase *
+  ParallelAcquisitionFunctionBase &
   getParallelAcquisitionFunctionByName(const UserObjectName & name) const;
 
 private:
