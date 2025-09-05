@@ -75,8 +75,8 @@ packages:
       - scripts/update_and_rebuild_libmesh.sh
   # dependers: moose-dev
   wasp:
-    version: 2025.07.07
-    build_number: 1
+    version: 2025.09.04
+    build_number: 0
     conda: conda/wasp
     templates:
       conda/wasp/meta.yaml.template: conda/wasp/meta.yaml
@@ -93,7 +93,7 @@ packages:
       - python/pyhit/pyhit.py
   # dependers: none
   moose-dev:
-    version: 2025.08.19
+    version: 2025.09.04
     conda: conda/moose-dev
     templates:
       conda/moose-dev/conda_build_config.yaml.template: conda/moose-dev/conda_build_config.yaml
