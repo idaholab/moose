@@ -158,26 +158,9 @@ ComplexEquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
     }
     _cpx_kernels_map.GetRef(test_var_name).Get(trial_var_name)->push_back(std::move(kernel_ptr));
   }
-  else if (auto kernel_ptr = std::dynamic_pointer_cast<MFEMKernel>(kernel))
-  {
-    if (!_kernels_map.Has(test_var_name))
-    {
-      auto kernel_field_map =
-          std::make_shared<NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>();
-      _kernels_map.Register(test_var_name, std::move(kernel_field_map));
-    }
-    // Register new kernels map if not present for the test/trial variable
-    // pair
-    if (!_kernels_map.Get(test_var_name)->Has(trial_var_name))
-    {
-      auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMKernel>>>();
-      _kernels_map.Get(test_var_name)->Register(trial_var_name, std::move(kernels));
-    }
-    _kernels_map.GetRef(test_var_name).Get(trial_var_name)->push_back(std::move(kernel_ptr));
-  }
   else
   {
-    mooseError("Unknown kernel type. Please use MFEMKernel or MFEMComplexKernel.");
+    mooseError("Unknown kernel type. Please use MFEMComplexKernel.");
   }
 }
 
@@ -206,27 +189,9 @@ ComplexEquationSystem::AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> bc)
     }
     _cpx_integrated_bc_map.GetRef(test_var_name).Get(trial_var_name)->push_back(std::move(bc_ptr));
   }
-  else if (auto bc_ptr = std::dynamic_pointer_cast<MFEMIntegratedBC>(bc))
-  {
-    if (!_integrated_bc_map.Has(test_var_name))
-    {
-      auto integrated_bc_field_map =
-          std::make_shared<NamedFieldsMap<std::vector<std::shared_ptr<MFEMIntegratedBC>>>>();
-      _integrated_bc_map.Register(test_var_name, std::move(integrated_bc_field_map));
-    }
-    // Register new integrated bc map if not present for the test/trial variable
-    // pair
-    if (!_integrated_bc_map.Get(test_var_name)->Has(trial_var_name))
-    {
-      auto bcs = std::make_shared<std::vector<std::shared_ptr<MFEMIntegratedBC>>>();
-      _integrated_bc_map.Get(test_var_name)->Register(trial_var_name, std::move(bcs));
-    }
-    _integrated_bc_map.GetRef(test_var_name).Get(trial_var_name)->push_back(std::move(bc_ptr));
-  }
   else
   {
-    mooseError(
-        "Unknown integrated BC type. Please use MFEMIntegratedBC or MFEMComplexIntegratedBC.");
+    mooseError("Unknown integrated BC type. Please use MFEMComplexIntegratedBC.");
   }
 }
 
