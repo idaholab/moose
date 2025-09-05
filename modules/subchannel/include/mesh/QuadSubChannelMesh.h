@@ -39,7 +39,6 @@ public:
    * Over-writing to avoid abstract template definition in this class
    */
   ///@{
-  virtual Node * getChanNodeFromDuct(Node *) override { return nullptr; }
   virtual Node * getDuctNodeFromChannel(Node *) override { return nullptr; }
   virtual Node * getChannelNodeFromDuct(Node *) override { return nullptr; }
   virtual const std::vector<Node *> getDuctNodes() const override { return std::vector<Node *>(); }

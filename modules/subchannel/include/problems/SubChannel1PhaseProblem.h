@@ -35,8 +35,10 @@ public:
   virtual bool solverSystemConverged(const unsigned int) override;
   virtual void initialSetup() override;
 
-  /// Computes added heat for channel i_ch and cell iz
+  /// Function that computes the added heat coming from the fuel pins, for channel i_ch and cell iz
   virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz) = 0;
+  /// Function that computes the heat added by the duct, for channel i_ch and cell iz
+  Real computeAddedHeatDuct(unsigned int i_ch, unsigned int iz);
 
 protected:
   struct FrictionStruct
@@ -71,8 +73,8 @@ protected:
   void computeMu(int iblock);
   /// Computes Residual Matrix based on the lateral momentum conservation equation for block iblock
   void computeWijResidual(int iblock);
-  /// Function that computes the heat flux added by the duct
-  Real computeAddedHeatDuct(unsigned int i_ch, unsigned int iz);
+  /// Function that computes the width of the duct cell that the peripheral subchannel i_ch sees
+  virtual Real getSubChannelPeripheralDuctWidth(unsigned int i_ch) = 0;
   /// Computes Residual Vector based on the lateral momentum conservation equation for block iblock & updates flow variables based on current crossflow solution
   libMesh::DenseVector<Real> residualFunction(int iblock, libMesh::DenseVector<Real> solution);
   /// Computes solution of nonlinear equation using snes and provided a residual in a formFunction
@@ -108,7 +110,6 @@ protected:
   unsigned int _n_pins;
   unsigned int _n_channels;
   unsigned int _block_size;
-  Real _outer_channels;
   /// axial location of nodes
   std::vector<Real> _z_grid;
   Real _one;
@@ -176,8 +177,8 @@ protected:
   std::unique_ptr<SolutionHandle> _S_flow_soln;
   std::unique_ptr<SolutionHandle> _w_perim_soln;
   std::unique_ptr<SolutionHandle> _q_prime_soln;
-  std::unique_ptr<SolutionHandle> _q_prime_duct_soln; // Only used for ducted assemblies
-  std::unique_ptr<SolutionHandle> _Tduct_soln;        // Only used for ducted assemblies
+  std::unique_ptr<SolutionHandle> _duct_heat_flux_soln; // Only used for ducted assemblies
+  std::unique_ptr<SolutionHandle> _Tduct_soln;          // Only used for ducted assemblies
   std::unique_ptr<SolutionHandle> _displacement_soln;
 
   /// Petsc Functions

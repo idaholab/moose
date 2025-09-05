@@ -224,8 +224,11 @@ num_cells = 40
     variable = q_prime_aux
     block = fuel_pins
   []
-  [Total_power_SCMPowerPostprocessor]
-    type = SCMPowerPostprocessor
+  [Total_power_SCMPinPowerPostprocessor]
+    type = SCMPinPowerPostprocessor
+  []
+  [Total_power_SCMTHPowerPostprocessor]
+    type = SCMTHPowerPostprocessor
   []
 []
 

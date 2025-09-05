@@ -75,11 +75,6 @@ public:
   /**
    * Function that gets the channel node from the duct node
    */
-  virtual Node * getChanNodeFromDuct(Node * duct_node) = 0;
-
-  /**
-   * Function that gets the channel node from the duct node
-   */
   virtual Node * getChannelNodeFromDuct(Node * channel_node) = 0;
 
   /**
