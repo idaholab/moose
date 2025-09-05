@@ -68,11 +68,12 @@ CSGCellList::renameCell(const CSGCell & cell, const std::string & name)
 {
   // check that this cell passed in is actually in the same cell that is in the cell list
   auto prev_name = cell.getName();
-  auto existing_cell = std::move(_cells.find(prev_name)->second);
-  if (*existing_cell != cell)
+  auto it = _cells.find(prev_name);
+  if (it == _cells.end() || it->second.get() != &cell)
     mooseError("Cell " + prev_name + " cannot be renamed to " + name +
                " as it does not exist in this CSGBase instance.");
 
+  auto existing_cell = std::move(_cells.find(prev_name)->second);
   existing_cell->setName(name);
   _cells.erase(prev_name);
   addCell(std::move(existing_cell));
