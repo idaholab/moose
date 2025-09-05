@@ -50,4 +50,8 @@ protected:
 
   // The name of the new boundary
   const BoundaryName _interface_name;
+
+  // Whether to put that boundary on 0, 1, or 2 sides of each new
+  // element break
+  const unsigned int _interface_sides;
 };
