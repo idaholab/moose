@@ -50,14 +50,14 @@ CSGSurfaceList::addSurface(std::unique_ptr<CSGSurface> surf)
 void
 CSGSurfaceList::renameSurface(const CSGSurface & surface, const std::string & name)
 {
-  // check that this surface passed in is actually in the same surface that is in the surface
-  // list
+  // check that this surface passed in is actually in the same surface that is in the surface list
   auto prev_name = surface.getName();
-  auto existing_surface = std::move(_surfaces.find(prev_name)->second);
-  if ((*existing_surface) != surface)
+  auto it = _surfaces.find(prev_name);
+  if (it == _surfaces.end() || it->second.get() != &surface)
     mooseError("Surface " + prev_name + " cannot be renamed to " + name +
                " as it does not exist in this CSGBase instance.");
 
+  auto existing_surface = std::move(it->second);
   existing_surface->setName(name);
   _surfaces.erase(prev_name);
   addSurface(std::move(existing_surface));
