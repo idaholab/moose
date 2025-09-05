@@ -58,6 +58,17 @@
     requirement = 'The system shall be capable of calculating strain energy density incrementally in '
                   'materials with inelastic stress and isotropic plasticity.'
   []
+  [rate_model_numerical]
+    type = 'CSVDiff'
+    input = 'numerical_rate_model.i'
+    csvdiff = 'numerical_rate_model_out.csv'
+    rel_err = 3e-2
+    abs_zero = 1e-8
+    design = 'StrainEnergyRateDensity.md'
+    allow_test_objects = true
+    requirement = 'The system shall be capable of calculating strain energy rate density numerically with elastic '
+                  'stress and finite strain.'
+  []
   [rate_model]
     type = 'CSVDiff'
     input = 'rate_model.i'
@@ -65,7 +76,7 @@
     rel_err = 1e-6
     abs_zero = 1e-8
     design = 'StrainEnergyRateDensity.md'
-    requirement = 'The system shall be capable of calculating strain energy rate density with elastic '
+    requirement = 'The system shall be capable of calculating strain energy rate density analytically with elastic '
                   'stress and finite strain.'
   []
   [rate_model_small]
