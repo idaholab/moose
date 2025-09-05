@@ -3,10 +3,12 @@
 # having Young's Modulus of 210000 and poissons ratio of 0.3.
 # The displacement in X direction is constrained in the left end and the
 # displacement of center node of the left end is constrained in Y direction.
-# A uniform pressure of 50 units is applied at the right end.
+# Previous case: A uniform pressure of 50 units is applied at the right end.
 # The shell element strain calculation assumes four quadrature points.
 # So, when a pressure is applied at the edge, two quadrature points
 # are used in the strain calulator and an error is generated.
+# Change to the test: using a PressureBC does not cause material property evaluations
+# anymore. So a MatNeumannBC is used instead
 
 [Mesh]
   [input]
@@ -302,12 +304,13 @@
     boundary = 10 #left_side_mid
   []
   [BC_2]
-    type = ADPressure
+    type = ADMatNeumannBC
     variable = disp_x
-    displacements = 'disp_x disp_y disp_z'
-    factor = -50
+    # Have to pick a property that is
+    # - Real for ADMatNeumannBC
+    # - part of the ADComputeIncrementalShellStrain material
+    boundary_material = J_mapping_t_points_0
     boundary = '3'
-    use_displaced_mesh = false
   []
 []
 

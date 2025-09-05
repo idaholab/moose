@@ -79,6 +79,10 @@ ComputeMaterialsObjectThread::subdomainChanged()
   _discrete_materials.updateBlockFEVariableCoupledVectorTagDependency(
       _subdomain, needed_fe_var_vector_tags, _tid);
   _fe_problem.setActiveFEVariableCoupleableVectorTags(needed_fe_var_vector_tags, _tid);
+
+  // Note that we do not know here which materials will be active on this subdomain because we don't
+  // have the various warehouses (kernels, ...) to gather the needed material properties like in
+  // NonlinearThread
 }
 
 void
@@ -116,7 +120,7 @@ ComputeMaterialsObjectThread::onBoundary(const Elem * elem,
   if (_fe_problem.needBoundaryMaterialOnSide(bnd_id, _tid))
   {
     _fe_problem.reinitElemFace(elem, side, _tid);
-    unsigned int face_n_points = _assembly[_tid][0]->qRuleFace()->n_points();
+    const auto face_n_points = _assembly[_tid][/*system_index*/ 0]->qRuleFace()->n_points();
 
     _bnd_material_props.getMaterialData(_tid).resize(face_n_points);
 

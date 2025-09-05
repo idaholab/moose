@@ -112,7 +112,7 @@ ComputeElemAuxBcsThread<AuxKernelType>::operator()(const ConstBndElemRange & ran
           }
           _fe_problem.setActiveMaterialProperties(needed_mat_props, _tid);
 
-          _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
+          _fe_problem.reinitMaterialsFaceOnBoundary(boundary_id, did, _tid);
 
           _fe_problem.reinitMaterialsBoundary(boundary_id, _tid);
 
