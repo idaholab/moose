@@ -61,11 +61,12 @@ CSGUniverseList::renameUniverse(const CSGUniverse & universe, const std::string 
   // check that this universe passed in is actually in the same universe that is in the universe
   // list
   auto prev_name = universe.getName();
-  auto existing_univ = std::move(_universes.find(prev_name)->second);
-  if (*existing_univ != universe)
+  auto it = _universes.find(prev_name);
+  if (it == _universes.end() || it->second.get() != &universe)
     mooseError("Universe " + prev_name + " cannot be renamed to " + name +
                " as it does not exist in this CSGBase instance.");
 
+  auto existing_univ = std::move(it->second);
   existing_univ->setName(name);
   _universes.erase(prev_name);
   addUniverse(std::move(existing_univ));
