@@ -191,8 +191,7 @@ ComplexEquationSystem::AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> bc)
   }
   else
   {
-    mooseError(
-        "Unknown integrated BC type. Please use MFEMComplexIntegratedBC.");
+    mooseError("Unknown integrated BC type. Please use MFEMComplexIntegratedBC.");
   }
 }
 
