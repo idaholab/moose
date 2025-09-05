@@ -34,10 +34,10 @@ private:
    * Read initialization data off of parameter mesh and error check.
    * @return values read from mesh
    */
-  std::vector<Real> parseExodusData(const std::vector<unsigned int> & exodus_timestep,
-                                    const ParameterMesh & pmesh,
-                                    const std::string & mesh_var_name,
-                                    unsigned int ntimes) const;
+  std::vector<Real> parseExodusData(const FEType fetype,
+                                    const FileName mesh_file_name,
+                                    const std::vector<unsigned int> & exodus_timestep,
+                                    const std::string & mesh_var_name) const;
 
   /// Store parameter meshes for regularization computation
   std::vector<std::unique_ptr<ParameterMesh>> _parameter_meshes;

@@ -14,6 +14,8 @@
 #include "OptUtils.h"
 #include "libmesh/string_to_enum.h"
 
+#include "ReadExodusMeshVars.h"
+
 using namespace libMesh;
 
 registerMooseObject("OptimizationApp", ParameterMeshOptimization);
@@ -101,30 +103,20 @@ ParameterMeshOptimization::ParameterMeshOptimization(const InputParameters & par
 }
 
 std::vector<Real>
-ParameterMeshOptimization::parseExodusData(const std::vector<unsigned int> & exodus_timestep,
-                                           const ParameterMesh & pmesh,
-                                           const std::string & mesh_var_name,
-                                           unsigned int ntimes) const
+ParameterMeshOptimization::parseExodusData(const FEType fetype,
+                                           const FileName mesh_file_name,
+                                           const std::vector<unsigned int> & exodus_timestep,
+                                           const std::string & mesh_var_name) const
 {
-  unsigned int num_cont_params = pmesh.size() * ntimes;
+  // read data off Exodus mesh
+  ReadExodusMeshVars data_mesh(fetype, mesh_file_name, mesh_var_name);
   std::vector<Real> parsed_data;
   // read from mesh
-
   for (auto const & step : exodus_timestep)
   {
-    std::vector<Real> data = pmesh.getParameterValues(mesh_var_name, step);
+    std::vector<Real> data = data_mesh.getParameterValues(step);
     parsed_data.insert(parsed_data.end(), data.begin(), data.end());
   }
-  if (parsed_data.size() != num_cont_params)
-    mooseError("Number of parameters assigned by ",
-               mesh_var_name,
-               " is not equal to the number of parameters on the mesh.  Mesh contains ",
-               num_cont_params,
-               " parameters and ",
-               mesh_var_name,
-               " assigned ",
-               parsed_data.size(),
-               " parameters.");
 
   return parsed_data;
 }
@@ -209,60 +201,50 @@ ParameterMeshOptimization::setICsandBounds()
   _parameter_meshes.resize(_nparams);
   for (const auto & param_id : make_range(_nparams))
   {
-    // store off all the variable names that you might want to read from the mesh
-    std::vector<std::string> var_names;
-    if (isParamValid("initial_condition_mesh_variable"))
-      var_names.push_back(initial_condition_mesh_variable[param_id]);
-    if (isParamValid("lower_bound_mesh_variable"))
-      var_names.push_back(lower_bound_mesh_variable[param_id]);
-    if (isParamValid("upper_bound_mesh_variable"))
-      var_names.push_back(upper_bound_mesh_variable[param_id]);
-
     const std::string family = families.size() > 1 ? families[param_id] : families[0];
     const std::string order = orders.size() > 1 ? orders[param_id] : orders[0];
     const FEType fetype(Utility::string_to_enum<Order>(order),
                         Utility::string_to_enum<FEFamily>(family));
 
-    _parameter_meshes[param_id] =
-        std::make_unique<ParameterMesh>(fetype, meshes[param_id], var_names);
+    _parameter_meshes[param_id] = std::make_unique<ParameterMesh>(fetype, meshes[param_id]);
     _nvalues[param_id] = _parameter_meshes[param_id]->size() * ntimes;
     _ndof += _nvalues[param_id];
 
     // read and assign initial conditions
-    std::vector<Real> initial_condition;
-    if (isParamValid("initial_condition_mesh_variable"))
-      initial_condition = parseExodusData(exodus_timestep,
-                                          *_parameter_meshes[param_id],
-                                          initial_condition_mesh_variable[param_id],
-                                          ntimes);
-    else
-      initial_condition = parseInputData("initial_condition", 0, param_id);
+    {
+      std::vector<Real> initial_condition;
+      if (isParamValid("initial_condition_mesh_variable"))
+        initial_condition = parseExodusData(
+            fetype, meshes[param_id], exodus_timestep, initial_condition_mesh_variable[param_id]);
+      else
+        initial_condition = parseInputData("initial_condition", 0, param_id);
 
-    _parameters[param_id]->assign(initial_condition.begin(), initial_condition.end());
+      _parameters[param_id]->assign(initial_condition.begin(), initial_condition.end());
+    }
 
     // read and assign lower bound
-    std::vector<Real> lower_bound;
-    if (isParamValid("lower_bound_mesh_variable"))
-      lower_bound = parseExodusData(exodus_timestep,
-                                    *_parameter_meshes[param_id],
-                                    lower_bound_mesh_variable[param_id],
-                                    ntimes);
-    else
-      lower_bound = parseInputData("lower_bounds", std::numeric_limits<Real>::lowest(), param_id);
+    {
+      std::vector<Real> lower_bound;
+      if (isParamValid("lower_bound_mesh_variable"))
+        lower_bound = parseExodusData(
+            fetype, meshes[param_id], exodus_timestep, lower_bound_mesh_variable[param_id]);
+      else
+        lower_bound = parseInputData("lower_bounds", std::numeric_limits<Real>::lowest(), param_id);
 
-    _lower_bounds.insert(_lower_bounds.end(), lower_bound.begin(), lower_bound.end());
+      _lower_bounds.insert(_lower_bounds.end(), lower_bound.begin(), lower_bound.end());
+    }
 
     // read and assign upper bound
-    std::vector<Real> upper_bound;
-    if (isParamValid("upper_bound_mesh_variable"))
-      upper_bound = parseExodusData(exodus_timestep,
-                                    *_parameter_meshes[param_id],
-                                    upper_bound_mesh_variable[param_id],
-                                    ntimes);
-    else
-      upper_bound = parseInputData("upper_bounds", std::numeric_limits<Real>::max(), param_id);
+    {
+      std::vector<Real> upper_bound;
+      if (isParamValid("upper_bound_mesh_variable"))
+        upper_bound = parseExodusData(
+            fetype, meshes[param_id], exodus_timestep, upper_bound_mesh_variable[param_id]);
+      else
+        upper_bound = parseInputData("upper_bounds", std::numeric_limits<Real>::max(), param_id);
 
-    _upper_bounds.insert(_upper_bounds.end(), upper_bound.begin(), upper_bound.end());
+      _upper_bounds.insert(_upper_bounds.end(), upper_bound.begin(), upper_bound.end());
+    }
 
     // resize gradient vector to be filled later
     _gradients[param_id]->resize(_nvalues[param_id]);

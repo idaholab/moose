@@ -1,17 +1,38 @@
 [Tests]
   [gradient_l2_regularization]
     design = 'ParameterMeshOptimization.md'
-    issues = '#30897'
-    type = 'Exodiff'
-    input = 'main.i'
-    rel_err = 1e-3 # we have a low gradient tolerance
-    abs_zero = 1e-5
-    exodiff = 'main_out_forward_and_adjoint0.e'
-    # Optimize executioner does not support multiple threads
-    max_threads = 1
     requirement = "The system shall support L2 gradient regularization for parameter mesh "
                   "optimization to enforce smoothness in parameter fields while preserving solution "
-                  "accuracy."
+                  "accuracy "
+    issues = '#30897'
+    [mesh]
+      type = CheckFiles
+      input = initial_param_mesh.i
+      check_files = initial_param_mesh_in.e
+      recover = False
+      detail = 'by first creating a mesh containing the data needed for optimization on a mesh;'
+    []
+    [input_file_ICs]
+      type = 'Exodiff'
+      input = 'main.i optimizationReporterInputIC.i'
+      rel_err = 1e-3 # we have a low gradient tolerance
+      abs_zero = 1e-5
+      exodiff = 'optimizationReporterInputIC_out_forward_and_adjoint0.e'
+      # Optimize executioner does not support multiple threads
+      max_threads = 1
+      detail = " with initial conditions read from the input file;"
+    []
+    [mesh_ICs]
+      prereq = 'gradient_l2_regularization/mesh'
+      type = 'Exodiff'
+      input = 'main.i optimizationReporterMeshIC.i'
+      rel_err = 1e-3 # we have a low gradient tolerance
+      abs_zero = 1e-5
+      exodiff = 'optimizationReporterMeshIC_out_forward_and_adjoint0.e'
+      # Optimize executioner does not support multiple threads
+      max_threads = 1
+      detail = " with initial conditions read from the mesh."
+    []
   []
 
   [regularization_errors]
@@ -22,7 +43,7 @@
 
     [mismatched_coeffs_types]
       type = 'RunException'
-      input = 'main.i'
+      input = 'main.i optimizationReporterInputIC.i'
       cli_args = 'OptimizationReporter/regularization_types="L2_GRADIENT L2_GRADIENT"
                   OptimizationReporter/regularization_coeffs="0.1"'
       # Optimize executioner does not support multiple threads
@@ -34,7 +55,7 @@
 
     [invalid_regularization_type]
       type = 'RunException'
-      input = 'main.i'
+      input = 'main.i optimizationReporterInputIC.i'
       cli_args = 'OptimizationReporter/regularization_types="INVALID_TYPE"
                   OptimizationReporter/regularization_coeffs="0.1"'
       # Optimize executioner does not support multiple threads
@@ -45,7 +66,7 @@
 
     [empty_coeffs_with_types]
       type = 'RunException'
-      input = 'main.i'
+      input = 'main.i optimizationReporterInputIC.i'
       cli_args = 'OptimizationReporter/regularization_types="L2_GRADIENT"
                   OptimizationReporter/regularization_coeffs=""'
       # Optimize executioner does not support multiple threads

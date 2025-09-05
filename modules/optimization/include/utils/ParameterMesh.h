@@ -49,7 +49,6 @@ enum class RegularizationType
  * This class will:
  *  - Ensure that controllable parameters defined by the mesh are correctly ordered on optimiation
  * main app and forward or adjoint sub-apps
- *  - Read initial conditions and bounds from an exodus file
  *  - Define the parameter space (nodal/elemental and shape function)
  *  - Interpolate parameter values to the forward problem mesh using nodal/elemental shape function
  */
@@ -58,7 +57,6 @@ class ParameterMesh
 public:
   ParameterMesh(const libMesh::FEType & param_type,
                 const std::string & exodus_mesh,
-                const std::vector<std::string> & var_names = {},
                 const bool find_closest = false,
                 const unsigned int kdtree_candidates = 5);
 
@@ -86,15 +84,6 @@ public:
   void getIndexAndWeight(const Point & pt,
                          std::vector<dof_id_type> & dof_indices,
                          std::vector<RealGradient> & weights) const;
-  /**
-   * Initializes parameter data and sets bounds in the main optmiization application
-   * getParameterValues is only used by ParameterMeshOptimization
-   * @param var_name  variable to read off mesh
-   * @param timestep  timestep to read variable off mesh
-   * @return vector of variables read off mesh at timestep
-   */
-  std::vector<Real> getParameterValues(std::string var_name, unsigned int timestep) const;
-
   /**
    * Computes regularization objective value for a given regularization type
    * @param parameter_values  vector of parameter values to compute regularization for
