@@ -21,6 +21,7 @@ MFEMDomainSubMesh::validParams()
   params += MFEMBlockRestrictable::validParams();
   params.addClassDescription("Class to construct an MFEMSubMesh formed from the subspace of the "
                              "parent mesh restricted to the set of user-specified subdomains.");
+  params.addParam<BoundaryName>("submesh_boundary", "Name to assign submesh boundary.");
   return params;
 }
 
@@ -37,6 +38,14 @@ MFEMDomainSubMesh::buildSubMesh()
       mfem::ParSubMesh::CreateFromDomain(getMesh(), getSubdomainAttributes()));
   _submesh->attribute_sets.attr_sets = getMesh().attribute_sets.attr_sets;
   _submesh->bdr_attribute_sets.attr_sets = getMesh().bdr_attribute_sets.attr_sets;
+
+  if (isParamSetByUser("submesh_boundary"))
+  {
+    const BoundaryName & submesh_boundary = getParam<BoundaryName>("submesh_boundary");
+    _submesh->bdr_attribute_sets.CreateAttributeSet(submesh_boundary);
+    _submesh->bdr_attribute_sets.AddToAttributeSet(submesh_boundary,
+                                                   getMesh().bdr_attributes.Max() + 1);
+  }
 }
 
 #endif
