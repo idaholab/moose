@@ -271,9 +271,9 @@ CSGBase::checkCellInBase(const CSGCell & cell) const
 {
   auto name = cell.getName();
   // if no cell by this name exists, an error will be produced by getCell
-  auto list_cell = _cell_list.getCell(name);
-  // return whether that the cell in the list is the same as the cell provided
-  return cell == list_cell;
+  auto & list_cell = _cell_list.getCell(name);
+  // return whether that the cell in the list is the same as the cell provided (in memory)
+  return &cell == &list_cell;
 }
 
 void
