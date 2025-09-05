@@ -20,7 +20,8 @@ class DisplacedProblem;
 class FEProblemBase;
 class MooseMesh;
 
-class ResetDisplacedMeshThread : public ThreadedNodeLoop<NodeRange, NodeRange::const_iterator>
+class ResetDisplacedMeshThread final
+  : public ThreadedNodeLoop<NodeRange, NodeRange::const_iterator, ResetDisplacedMeshThread>
 {
 public:
   ResetDisplacedMeshThread(FEProblemBase & fe_problem, DisplacedProblem & displaced_problem);

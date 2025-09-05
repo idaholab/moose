@@ -17,7 +17,8 @@
 
 ComputeNodalDampingThread::ComputeNodalDampingThread(FEProblemBase & feproblem,
                                                      NonlinearSystemBase & nl)
-  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(feproblem),
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator, ComputeNodalDampingThread>(
+        feproblem),
     _damping(1.0),
     _nl(nl),
     _nodal_dampers(_nl.getNodalDamperWarehouse())
@@ -27,7 +28,8 @@ ComputeNodalDampingThread::ComputeNodalDampingThread(FEProblemBase & feproblem,
 // Splitting Constructor
 ComputeNodalDampingThread::ComputeNodalDampingThread(ComputeNodalDampingThread & x,
                                                      Threads::split split)
-  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator, ComputeNodalDampingThread>(
+        x, split),
     _damping(1.0),
     _nl(x._nl),
     _nodal_dampers(x._nodal_dampers)
@@ -40,17 +42,17 @@ void
 ComputeNodalDampingThread::onNode(ConstNodeRange::const_iterator & node_it)
 {
   const Node * node = *node_it;
-  _fe_problem.reinitNode(node, _tid);
+  this->_fe_problem.reinitNode(node, this->_tid);
 
   std::set<MooseVariable *> damped_vars;
 
-  const auto & ndampers = _nl.getNodalDamperWarehouse().getActiveObjects(_tid);
+  const auto & ndampers = _nl.getNodalDamperWarehouse().getActiveObjects(this->_tid);
   for (const auto & damper : ndampers)
     damped_vars.insert(damper->getVariable());
 
-  _nl.reinitIncrementAtNodeForDampers(_tid, damped_vars);
+  _nl.reinitIncrementAtNodeForDampers(this->_tid, damped_vars);
 
-  const auto & objects = _nodal_dampers.getActiveObjects(_tid);
+  const auto & objects = _nodal_dampers.getActiveObjects(this->_tid);
   for (const auto & obj : objects)
   {
     Real cur_damping = obj->computeDamping();
@@ -77,11 +79,11 @@ void
 ComputeNodalDampingThread::printGeneralExecutionInformation() const
 {
   const auto & damper_wh = _nl.getNodalDamperWarehouse();
-  if (!_fe_problem.shouldPrintExecution(_tid) || !damper_wh.hasActiveObjects())
+  if (!this->_fe_problem.shouldPrintExecution(this->_tid) || !damper_wh.hasActiveObjects())
     return;
 
-  const auto & console = _fe_problem.console();
-  const auto & execute_on = _fe_problem.getCurrentExecuteOnFlag();
+  const auto & console = this->_fe_problem.console();
+  const auto & execute_on = this->_fe_problem.getCurrentExecuteOnFlag();
   console << "[DBG] Executing nodal dampers on " << execute_on << std::endl;
   console << "[DBG] Ordering of the dampers on the blocks they are defined on:" << std::endl;
   // TODO Check that all objects are active at this point

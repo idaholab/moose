@@ -17,8 +17,10 @@ class NonlinearSystemBase;
 class AuxiliarySystem;
 class NodalKernelBase;
 
-class ComputeNodalKernelBCJacobiansThread
-  : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
+class ComputeNodalKernelBCJacobiansThread final
+  : public ThreadedNodeLoop<ConstBndNodeRange,
+                            ConstBndNodeRange::const_iterator,
+                            ComputeNodalKernelBCJacobiansThread>
 {
 public:
   ComputeNodalKernelBCJacobiansThread(FEProblemBase & fe_problem,
@@ -30,16 +32,16 @@ public:
   ComputeNodalKernelBCJacobiansThread(ComputeNodalKernelBCJacobiansThread & x,
                                       Threads::split split);
 
-  virtual void pre() override;
+  void pre();
 
-  virtual void onNode(ConstBndNodeRange::const_iterator & node_it) override;
+  void onNode(ConstBndNodeRange::const_iterator & node_it);
 
   void join(const ComputeNodalKernelBCJacobiansThread & /*y*/);
 
-protected:
   /// Print information about the loop, mostly order of execution of objects
-  void printGeneralExecutionInformation() const override;
+  void printGeneralExecutionInformation() const;
 
+protected:
   FEProblemBase & _fe_problem;
   NonlinearSystemBase & _nl;
   AuxiliarySystem & _aux_sys;

@@ -16,7 +16,8 @@ AllNodesSendListThread::AllNodesSendListThread(FEProblemBase & fe_problem,
                                                const MooseMesh & mesh,
                                                const std::vector<unsigned int> & var_nums,
                                                const libMesh::System & system)
-  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator, AllNodesSendListThread>(
+        fe_problem),
     _ref_mesh(mesh),
     _var_nums(var_nums),
     _system(system),
@@ -36,7 +37,8 @@ AllNodesSendListThread::AllNodesSendListThread(FEProblemBase & fe_problem,
 }
 
 AllNodesSendListThread::AllNodesSendListThread(AllNodesSendListThread & x, Threads::split split)
-  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator, AllNodesSendListThread>(x,
+                                                                                             split),
     _ref_mesh(x._ref_mesh),
     _var_nums(x._var_nums),
     _system(x._system),

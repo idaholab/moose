@@ -27,8 +27,10 @@ template <typename T>
 class SparseMatrix;
 }
 
-class ComputeNodalKernelJacobiansThread
-  : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
+class ComputeNodalKernelJacobiansThread final
+  : public ThreadedNodeLoop<ConstNodeRange,
+                            ConstNodeRange::const_iterator,
+                            ComputeNodalKernelJacobiansThread>
 {
 public:
   ComputeNodalKernelJacobiansThread(FEProblemBase & fe_problem,
@@ -39,16 +41,16 @@ public:
   // Splitting Constructor
   ComputeNodalKernelJacobiansThread(ComputeNodalKernelJacobiansThread & x, Threads::split split);
 
-  virtual void pre() override;
+  void pre();
 
-  virtual void onNode(ConstNodeRange::const_iterator & node_it) override;
+  void onNode(ConstNodeRange::const_iterator & node_it);
 
   void join(const ComputeNodalKernelJacobiansThread & /*y*/);
 
-protected:
   /// Print information about the loop, mostly order of execution of objects
-  void printGeneralExecutionInformation() const override;
+  void printGeneralExecutionInformation() const;
 
+protected:
   FEProblemBase & _fe_problem;
   NonlinearSystemBase & _nl;
   AuxiliarySystem & _aux_sys;

@@ -16,8 +16,9 @@
 class AuxiliarySystem;
 class NodalKernelBase;
 
-class ComputeNodalKernelBcsThread
-  : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
+class ComputeNodalKernelBcsThread final : public ThreadedNodeLoop<ConstBndNodeRange,
+                                                                  ConstBndNodeRange::const_iterator,
+                                                                  ComputeNodalKernelBcsThread>
 {
 public:
   ComputeNodalKernelBcsThread(FEProblemBase & fe_problem,
@@ -26,16 +27,16 @@ public:
   // Splitting Constructor
   ComputeNodalKernelBcsThread(ComputeNodalKernelBcsThread & x, Threads::split split);
 
-  virtual void pre() override;
+  void pre();
 
-  virtual void onNode(ConstBndNodeRange::const_iterator & node_it) override;
+  void onNode(ConstBndNodeRange::const_iterator & node_it);
 
   void join(const ComputeNodalKernelBcsThread & /*y*/);
 
-protected:
   /// Print information about the loop, mostly order of execution of objects
-  void printGeneralExecutionInformation() const override;
+  void printGeneralExecutionInformation() const;
 
+protected:
   FEProblemBase & _fe_problem;
 
   AuxiliarySystem & _aux_sys;

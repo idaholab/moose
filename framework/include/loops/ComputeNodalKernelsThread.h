@@ -19,8 +19,9 @@ class FEProblemBase;
 class AuxiliarySystem;
 class NodalKernelBase;
 
-class ComputeNodalKernelsThread
-  : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
+class ComputeNodalKernelsThread final : public ThreadedNodeLoop<ConstNodeRange,
+                                                                ConstNodeRange::const_iterator,
+                                                                ComputeNodalKernelsThread>
 {
 public:
   ComputeNodalKernelsThread(FEProblemBase & fe_problem,
@@ -30,16 +31,16 @@ public:
   // Splitting Constructor
   ComputeNodalKernelsThread(ComputeNodalKernelsThread & x, Threads::split split);
 
-  virtual void pre() override;
+  void pre();
 
-  virtual void onNode(ConstNodeRange::const_iterator & node_it) override;
+  void onNode(ConstNodeRange::const_iterator & node_it);
 
   void join(const ComputeNodalKernelsThread & /*y*/);
 
-protected:
   /// Print execution order of object types in the loop
-  void printGeneralExecutionInformation() const override;
+  void printGeneralExecutionInformation() const;
 
+protected:
   FEProblemBase & _fe_problem;
 
   AuxiliarySystem & _aux_sys;

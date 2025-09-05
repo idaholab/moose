@@ -21,7 +21,9 @@ ComputeNodalKernelBcsThread::ComputeNodalKernelBcsThread(
     FEProblemBase & fe_problem,
     MooseObjectTagWarehouse<NodalKernelBase> & nodal_kernels,
     const std::set<TagID> & tags)
-  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
+  : ThreadedNodeLoop<ConstBndNodeRange,
+                     ConstBndNodeRange::const_iterator,
+                     ComputeNodalKernelBcsThread>(fe_problem),
     _fe_problem(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
     _tags(tags),
@@ -33,7 +35,9 @@ ComputeNodalKernelBcsThread::ComputeNodalKernelBcsThread(
 // Splitting Constructor
 ComputeNodalKernelBcsThread::ComputeNodalKernelBcsThread(ComputeNodalKernelBcsThread & x,
                                                          Threads::split split)
-  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
+  : ThreadedNodeLoop<ConstBndNodeRange,
+                     ConstBndNodeRange::const_iterator,
+                     ComputeNodalKernelBcsThread>(x, split),
     _fe_problem(x._fe_problem),
     _aux_sys(x._aux_sys),
     _tags(x._tags),
@@ -50,9 +54,10 @@ ComputeNodalKernelBcsThread::pre()
   if (!_tags.size() || _tags.size() == _fe_problem.numVectorTags(Moose::VECTOR_TAG_RESIDUAL))
     _nkernel_warehouse = &_nodal_kernels;
   else if (_tags.size() == 1)
-    _nkernel_warehouse = &(_nodal_kernels.getVectorTagObjectWarehouse(*(_tags.begin()), _tid));
+    _nkernel_warehouse =
+        &(_nodal_kernels.getVectorTagObjectWarehouse(*(_tags.begin()), this->_tid));
   else
-    _nkernel_warehouse = &(_nodal_kernels.getVectorTagsObjectWarehouse(_tags, _tid));
+    _nkernel_warehouse = &(_nodal_kernels.getVectorTagsObjectWarehouse(_tags, this->_tid));
 }
 
 void
@@ -63,21 +68,21 @@ ComputeNodalKernelBcsThread::onNode(ConstBndNodeRange::const_iterator & node_it)
   BoundaryID boundary_id = bnode->_bnd_id;
 
   // prepare variables
-  for (auto * var : _aux_sys._nodal_vars[_tid])
+  for (auto * var : _aux_sys._nodal_vars[this->_tid])
     var->prepareAux();
 
-  if (_nkernel_warehouse->hasActiveBoundaryObjects(boundary_id, _tid))
+  if (_nkernel_warehouse->hasActiveBoundaryObjects(boundary_id, this->_tid))
   {
     Node * node = bnode->_node;
     if (node->processor_id() == _fe_problem.processor_id())
     {
       std::set<TagID> needed_fe_var_vector_tags;
       _nkernel_warehouse->updateBoundaryFEVariableCoupledVectorTagDependency(
-          boundary_id, needed_fe_var_vector_tags, _tid);
-      _fe_problem.setActiveFEVariableCoupleableVectorTags(needed_fe_var_vector_tags, _tid);
+          boundary_id, needed_fe_var_vector_tags, this->_tid);
+      _fe_problem.setActiveFEVariableCoupleableVectorTags(needed_fe_var_vector_tags, this->_tid);
 
-      _fe_problem.reinitNodeFace(node, boundary_id, _tid);
-      const auto & objects = _nkernel_warehouse->getActiveBoundaryObjects(boundary_id, _tid);
+      _fe_problem.reinitNodeFace(node, boundary_id, this->_tid);
+      const auto & objects = _nkernel_warehouse->getActiveBoundaryObjects(boundary_id, this->_tid);
       for (const auto & nodal_kernel : objects)
       {
         nodal_kernel->setSubdomains(Moose::NodeArg::undefined_subdomain_connection);
@@ -92,7 +97,7 @@ ComputeNodalKernelBcsThread::onNode(ConstBndNodeRange::const_iterator & node_it)
   {
     _num_cached = 0;
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    _fe_problem.addCachedResidual(_tid);
+    _fe_problem.addCachedResidual(this->_tid);
   }
 }
 
@@ -104,7 +109,7 @@ ComputeNodalKernelBcsThread::join(const ComputeNodalKernelBcsThread & /*y*/)
 void
 ComputeNodalKernelBcsThread::printGeneralExecutionInformation() const
 {
-  if (!_fe_problem.shouldPrintExecution(_tid) || !_nkernel_warehouse->hasActiveObjects())
+  if (!_fe_problem.shouldPrintExecution(this->_tid) || !_nkernel_warehouse->hasActiveObjects())
     return;
 
   const auto & console = _fe_problem.console();

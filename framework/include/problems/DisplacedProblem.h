@@ -407,14 +407,15 @@ protected:
 
   GeometricSearchData _geometric_search_data;
 
-  class UpdateDisplacedMeshThread : public ThreadedNodeLoop<NodeRange, NodeRange::const_iterator>
+  class UpdateDisplacedMeshThread final
+    : public ThreadedNodeLoop<NodeRange, NodeRange::const_iterator, UpdateDisplacedMeshThread>
   {
   public:
     UpdateDisplacedMeshThread(FEProblemBase & fe_problem, DisplacedProblem & displaced_problem);
 
     UpdateDisplacedMeshThread(UpdateDisplacedMeshThread & x, Threads::split split);
 
-    virtual void onNode(NodeRange::const_iterator & nd) override;
+    void onNode(NodeRange::const_iterator & nd);
 
     void join(const UpdateDisplacedMeshThread & y)
     {

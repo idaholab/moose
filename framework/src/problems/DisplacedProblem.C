@@ -1417,7 +1417,7 @@ DisplacedProblem::checkNonlocalCouplingRequirement() const
 
 DisplacedProblem::UpdateDisplacedMeshThread::UpdateDisplacedMeshThread(
     FEProblemBase & fe_problem, DisplacedProblem & displaced_problem)
-  : ThreadedNodeLoop<NodeRange, NodeRange::const_iterator>(fe_problem),
+  : ThreadedNodeLoop<NodeRange, NodeRange::const_iterator, UpdateDisplacedMeshThread>(fe_problem),
     _displaced_problem(displaced_problem),
     _ref_mesh(_displaced_problem.refMesh()),
     _nl_soln(_displaced_problem._nl_solution),
@@ -1429,7 +1429,7 @@ DisplacedProblem::UpdateDisplacedMeshThread::UpdateDisplacedMeshThread(
 
 DisplacedProblem::UpdateDisplacedMeshThread::UpdateDisplacedMeshThread(
     UpdateDisplacedMeshThread & x, Threads::split split)
-  : ThreadedNodeLoop<NodeRange, NodeRange::const_iterator>(x, split),
+  : ThreadedNodeLoop<NodeRange, NodeRange::const_iterator, UpdateDisplacedMeshThread>(x, split),
     _displaced_problem(x._displaced_problem),
     _ref_mesh(x._ref_mesh),
     _nl_soln(x._nl_soln),

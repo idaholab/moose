@@ -16,8 +16,9 @@
 // Forward declarations
 class SubProblem;
 
-class ComputeNodalUserObjectsThread
-  : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
+class ComputeNodalUserObjectsThread final : public ThreadedNodeLoop<ConstNodeRange,
+                                                                    ConstNodeRange::const_iterator,
+                                                                    ComputeNodalUserObjectsThread>
 {
 public:
   ComputeNodalUserObjectsThread(FEProblemBase & fe_problem, const TheWarehouse::Query & query);
@@ -28,12 +29,12 @@ public:
 
   void subdomainChanged();
 
-  virtual void onNode(ConstNodeRange::const_iterator & node_it) override;
+  void onNode(ConstNodeRange::const_iterator & node_it);
 
   void join(const ComputeNodalUserObjectsThread & /*y*/);
 
   /// Print information about the loop, mostly order of execution of objects
-  void printGeneralExecutionInformation() const override;
+  void printGeneralExecutionInformation() const;
 
 private:
   const TheWarehouse::Query _query;
