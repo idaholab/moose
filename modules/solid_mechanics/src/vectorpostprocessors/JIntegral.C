@@ -178,6 +178,9 @@ JIntegral::execute()
   _dphi_curr_elem = &fe->get_dphi();
   fe->reinit(_current_elem);
 
+  // std::cout << "JIntegral::execute(): " << *_crack_front_definition->getCrackFrontPoint(0) <<
+  // "\n";
+
   // calculate q for all nodes in this element
   std::size_t ring_base = (_q_function_type == QMethod::Topology) ? 0 : 1;
 

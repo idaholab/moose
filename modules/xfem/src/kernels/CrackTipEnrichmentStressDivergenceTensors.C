@@ -37,7 +37,6 @@ CrackTipEnrichmentStressDivergenceTensors::validParams()
 CrackTipEnrichmentStressDivergenceTensors::CrackTipEnrichmentStressDivergenceTensors(
     const InputParameters & parameters)
   : ALEKernel(parameters),
-    EnrichmentFunctionCalculation(&getUserObject<CrackFrontDefinition>("crack_front_definition")),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _stress(getMaterialPropertyByName<RankTwoTensor>(_base_name + "stress")),
     _Jacobian_mult(getMaterialPropertyByName<RankFourTensor>(_base_name + "Jacobian_mult")),
@@ -45,6 +44,7 @@ CrackTipEnrichmentStressDivergenceTensors::CrackTipEnrichmentStressDivergenceTen
     _enrichment_component(getParam<unsigned int>("enrichment_component")),
     _nenrich_disp(coupledComponents("enrichment_displacements")),
     _ndisp(coupledComponents("displacements")),
+    _crack_front_definition(nullptr),
     _B(4),
     _dBX(4),
     _dBx(4),
@@ -60,17 +60,28 @@ CrackTipEnrichmentStressDivergenceTensors::CrackTipEnrichmentStressDivergenceTen
     _disp_var[i] = coupled("displacements", i);
 }
 
+void
+CrackTipEnrichmentStressDivergenceTensors::initialSetup()
+{
+  const auto uo_name = getParam<UserObjectName>("crack_front_definition");
+  _crack_front_definition = &_fe_problem.getUserObject<CrackFrontDefinition>(uo_name);
+}
+
 Real
 CrackTipEnrichmentStressDivergenceTensors::computeQpResidual()
 {
-  crackTipEnrichementFunctionAtPoint(*_current_elem->node_ptr(_i), _BI);
+  EnrichFunctionUtility::crackTipEnrichementFunctionAtPoint(
+      _crack_front_definition, *_current_elem->node_ptr(_i), _BI);
 
-  crackTipEnrichementFunctionAtPoint(_q_point[_qp], _B);
+  EnrichFunctionUtility::crackTipEnrichementFunctionAtPoint(
+      _crack_front_definition, _q_point[_qp], _B);
   unsigned int crack_front_point_index =
-      crackTipEnrichementFunctionDerivativeAtPoint(_q_point[_qp], _dBx);
+      EnrichFunctionUtility::crackTipEnrichementFunctionDerivativeAtPoint(
+          _crack_front_definition, _q_point[_qp], _dBx);
 
   for (unsigned int i = 0; i < 4; ++i)
-    rotateFromCrackFrontCoordsToGlobal(_dBx[i], _dBX[i], crack_front_point_index);
+    EnrichFunctionUtility::rotateFromCrackFrontCoordsToGlobal(
+        _crack_front_definition, _dBx[i], _dBX[i], crack_front_point_index);
 
   RealVectorValue grad_B(_dBX[_enrichment_component]);
 
@@ -82,16 +93,21 @@ CrackTipEnrichmentStressDivergenceTensors::computeQpResidual()
 Real
 CrackTipEnrichmentStressDivergenceTensors::computeQpJacobian()
 {
-  crackTipEnrichementFunctionAtPoint(*_current_elem->node_ptr(_i), _BI);
-  crackTipEnrichementFunctionAtPoint(*_current_elem->node_ptr(_j), _BJ);
+  EnrichFunctionUtility::crackTipEnrichementFunctionAtPoint(
+      _crack_front_definition, *_current_elem->node_ptr(_i), _BI);
+  EnrichFunctionUtility::crackTipEnrichementFunctionAtPoint(
+      _crack_front_definition, *_current_elem->node_ptr(_j), _BJ);
 
-  crackTipEnrichementFunctionAtPoint(_q_point[_qp], _B);
+  EnrichFunctionUtility::crackTipEnrichementFunctionAtPoint(
+      _crack_front_definition, _q_point[_qp], _B);
 
   unsigned int crack_front_point_index =
-      crackTipEnrichementFunctionDerivativeAtPoint(_q_point[_qp], _dBx);
+      EnrichFunctionUtility::crackTipEnrichementFunctionDerivativeAtPoint(
+          _crack_front_definition, _q_point[_qp], _dBx);
 
   for (unsigned int i = 0; i < 4; ++i)
-    rotateFromCrackFrontCoordsToGlobal(_dBx[i], _dBX[i], crack_front_point_index);
+    EnrichFunctionUtility::rotateFromCrackFrontCoordsToGlobal(
+        _crack_front_definition, _dBx[i], _dBX[i], crack_front_point_index);
 
   RealVectorValue grad_B(_dBX[_enrichment_component]);
 
@@ -135,15 +151,20 @@ CrackTipEnrichmentStressDivergenceTensors::computeQpOffDiagJacobian(unsigned int
 
   if (active_enrich)
   {
-    crackTipEnrichementFunctionAtPoint(*_current_elem->node_ptr(_i), _BI);
-    crackTipEnrichementFunctionAtPoint(*_current_elem->node_ptr(_j), _BJ);
+    EnrichFunctionUtility::crackTipEnrichementFunctionAtPoint(
+        _crack_front_definition, *_current_elem->node_ptr(_i), _BI);
+    EnrichFunctionUtility::crackTipEnrichementFunctionAtPoint(
+        _crack_front_definition, *_current_elem->node_ptr(_j), _BJ);
 
-    crackTipEnrichementFunctionAtPoint(_q_point[_qp], _B);
+    EnrichFunctionUtility::crackTipEnrichementFunctionAtPoint(
+        _crack_front_definition, _q_point[_qp], _B);
     unsigned int crack_front_point_index =
-        crackTipEnrichementFunctionDerivativeAtPoint(_q_point[_qp], _dBx);
+        EnrichFunctionUtility::crackTipEnrichementFunctionDerivativeAtPoint(
+            _crack_front_definition, _q_point[_qp], _dBx);
 
     for (unsigned int i = 0; i < 4; ++i)
-      rotateFromCrackFrontCoordsToGlobal(_dBx[i], _dBX[i], crack_front_point_index);
+      EnrichFunctionUtility::rotateFromCrackFrontCoordsToGlobal(
+          _crack_front_definition, _dBx[i], _dBX[i], crack_front_point_index);
 
     RealVectorValue grad_B_test(_dBX[_enrichment_component]);
     RealVectorValue grad_B_phi(_dBX[coupled_enrichment_component]);
@@ -160,14 +181,18 @@ CrackTipEnrichmentStressDivergenceTensors::computeQpOffDiagJacobian(unsigned int
   }
   else if (active)
   {
-    crackTipEnrichementFunctionAtPoint(*_current_elem->node_ptr(_i), _BI);
+    EnrichFunctionUtility::crackTipEnrichementFunctionAtPoint(
+        _crack_front_definition, *_current_elem->node_ptr(_i), _BI);
 
-    crackTipEnrichementFunctionAtPoint(_q_point[_qp], _B);
+    EnrichFunctionUtility::crackTipEnrichementFunctionAtPoint(
+        _crack_front_definition, _q_point[_qp], _B);
     unsigned int crack_front_point_index =
-        crackTipEnrichementFunctionDerivativeAtPoint(_q_point[_qp], _dBx);
+        EnrichFunctionUtility::crackTipEnrichementFunctionDerivativeAtPoint(
+            _crack_front_definition, _q_point[_qp], _dBx);
 
     for (unsigned int i = 0; i < 4; ++i)
-      rotateFromCrackFrontCoordsToGlobal(_dBx[i], _dBX[i], crack_front_point_index);
+      EnrichFunctionUtility::rotateFromCrackFrontCoordsToGlobal(
+          _crack_front_definition, _dBx[i], _dBX[i], crack_front_point_index);
 
     RealVectorValue grad_B_test(_dBX[_enrichment_component]);
 

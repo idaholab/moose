@@ -445,31 +445,32 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
   if (_transformed_vars.size() > 0 && useFixedPointAlgorithmUpdateInsteadOfPicard(true))
     transformVariables(transformed_dofs, true);
 
-  if (_problem.haveXFEM() && (_xfem_update_count < _max_xfem_update) && _problem.updateMeshXFEM())
-  {
-    _console << "\nXFEM modified mesh, repeating step" << std::endl;
-    _xfem_repeat_step = true;
-    ++_xfem_update_count;
-  }
-  else
-  {
-    if (_problem.haveXFEM())
-    {
-      _xfem_repeat_step = false;
-      _xfem_update_count = 0;
-      _console << "\nXFEM did not modify mesh, continuing" << std::endl;
-    }
+  // if (_problem.haveXFEM() && (_xfem_update_count < _max_xfem_update) &&
+  // _problem.updateMeshXFEM())
+  // {
+  //   _console << "\nXFEM modified mesh, repeating step" << std::endl;
+  //   _xfem_repeat_step = true;
+  //   ++_xfem_update_count;
+  // }
+  // else
+  // {
+  //   if (_problem.haveXFEM())
+  //   {
+  //     _xfem_repeat_step = false;
+  //     _xfem_update_count = 0;
+  //     _console << "\nXFEM did not modify mesh, continuing" << std::endl;
+  //   }
 
-    _problem.onTimestepEnd();
-    _problem.execute(EXEC_TIMESTEP_END);
+  _problem.onTimestepEnd();
+  _problem.execute(EXEC_TIMESTEP_END);
 
-    _problem.execTransfers(EXEC_TIMESTEP_END);
-    if (!_problem.execMultiApps(EXEC_TIMESTEP_END, auto_advance))
-    {
-      _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP;
-      return false;
-    }
+  _problem.execTransfers(EXEC_TIMESTEP_END);
+  if (!_problem.execMultiApps(EXEC_TIMESTEP_END, auto_advance))
+  {
+    _fixed_point_status = MooseFixedPointConvergenceReason::DIVERGED_FAILED_MULTIAPP;
+    return false;
   }
+  //}
 
   if (_fail_step)
   {

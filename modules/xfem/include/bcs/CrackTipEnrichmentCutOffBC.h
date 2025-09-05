@@ -22,6 +22,7 @@ public:
   static InputParameters validParams();
 
   CrackTipEnrichmentCutOffBC(const InputParameters & parameters);
+  virtual void initialSetup() override final;
 
 protected:
   virtual bool shouldApply() const override;
@@ -29,5 +30,5 @@ protected:
   const Real _cut_off_radius;
 
 private:
-  const CrackFrontDefinition & _crack_front_definition;
+  const CrackFrontDefinition * _crack_front_definition;
 };

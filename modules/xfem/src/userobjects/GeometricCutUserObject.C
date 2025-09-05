@@ -28,7 +28,11 @@ GeometricCutUserObject::validParams()
   exec.addAvailableFlags(EXEC_XFEM_MARK);
   params.setDocString("execute_on", exec.getDocString());
   params.set<ExecFlagEnum>("execute_on") = EXEC_XFEM_MARK;
-
+  // FIXME LYNN:
+  // use xfem order gropu to makes xfem cutters execute before Interaction integral
+  // this seems bad and it should be done by an action. Maybe a special domain integral action that
+  // is just for xfem that could also setup the xfemcutuserobjects:
+  params.set<int>("execution_order_group") = -2;
   return params;
 }
 

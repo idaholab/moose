@@ -100,6 +100,9 @@ MeshCut2DFractureUserObject::initialize()
   _crack_front_definition->updateNumberOfCrackFrontPoints(
       _original_and_current_front_node_ids.size());
   _crack_front_definition->isCutterModified(_is_mesh_modified);
+
+  // std::cout << "MeshCut2DFractureUserObject::initialize(): "
+  //         << *_crack_front_definition->getCrackFrontPoint(0) << "\n";
 }
 
 void

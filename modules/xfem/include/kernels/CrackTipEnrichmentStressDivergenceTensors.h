@@ -13,7 +13,7 @@
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 #include "CrackFrontDefinition.h"
-#include "EnrichmentFunctionCalculation.h"
+#include "EnrichFunctionUtility.h"
 
 // Forward Declarations
 
@@ -22,13 +22,14 @@
  * displacement variables.
  *
  */
-class CrackTipEnrichmentStressDivergenceTensors : public ALEKernel,
-                                                  public EnrichmentFunctionCalculation
+class CrackTipEnrichmentStressDivergenceTensors : public ALEKernel
 {
 public:
   static InputParameters validParams();
 
   CrackTipEnrichmentStressDivergenceTensors(const InputParameters & parameters);
+
+  virtual void initialSetup() override final;
 
 protected:
   virtual Real computeQpResidual() override;
@@ -56,6 +57,8 @@ protected:
   /// Coupled displacement variables
   unsigned int _ndisp;
   std::vector<unsigned int> _disp_var;
+
+  const CrackFrontDefinition * _crack_front_definition;
 
 private:
   /// enrichment function value

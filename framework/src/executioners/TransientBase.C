@@ -325,6 +325,11 @@ TransientBase::execute()
     takeStep();
     endStep();
     postStep();
+    if (_problem.haveXFEM() && lastSolveConverged())
+    {
+      _problem.updateMeshXFEM();
+      _xfem_repeat_step = false;
+    }
   }
 
   if (lastSolveConverged())

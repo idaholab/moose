@@ -41,8 +41,6 @@ MeshCut2DUserObjectBase::MeshCut2DUserObjectBase(const InputParameters & paramet
                      : nullptr),
     _is_mesh_modified(false)
 {
-  _depend_uo.insert(getParam<UserObjectName>("crack_front_definition"));
-
   // only the Exodus type is currently supported
   MeshFileName cutterMeshFileName = getParam<MeshFileName>("mesh_file");
   _cutter_mesh = std::make_unique<ReplicatedMesh>(_communicator);
@@ -283,8 +281,6 @@ MeshCut2DUserObjectBase::getCrackPlaneNormals(unsigned int number_crack_front_po
 void
 MeshCut2DUserObjectBase::findOriginalCrackFrontNodes()
 {
-  std::unique_ptr<PointLocatorBase> pl = _mesh.getPointLocator();
-  pl->enable_out_of_mesh_mode();
   std::unordered_set boundary_nodes = MeshTools::find_boundary_nodes(*_cutter_mesh);
   for (const auto & node : boundary_nodes)
   {
@@ -293,12 +289,52 @@ MeshCut2DUserObjectBase::findOriginalCrackFrontNodes()
     mooseAssert(this_node, "Node is NULL");
     Point & this_point = *this_node;
 
-    const Elem * elem = (*pl)(this_point);
-    if (elem != NULL)
+    bool is_on_bc = pointOnEdgeBoundary(this_point);
+    if (!is_on_bc)
       _original_and_current_front_node_ids.push_back(std::make_pair(node, node));
   }
   std::sort(_original_and_current_front_node_ids.begin(),
             _original_and_current_front_node_ids.end());
+}
+
+bool
+MeshCut2DUserObjectBase::pointOnEdgeBoundary(const Point & point, Real tolerance)
+{
+  for (const auto & bnd_elem : as_range(_mesh.bndElemsBegin(), _mesh.bndElemsEnd()))
+  {
+    auto side = bnd_elem->_elem->side_ptr(bnd_elem->_side);
+
+    if (side->n_nodes() == 2)
+    {
+      // Create vectors for the endpoints of the edge
+      Point p1 = side->point(0);
+      Point p2 = side->point(1);
+
+      // Compute the vector from p1 to p2 (edge vector) and from p1 to the point
+      Point edge_vector = p2 - p1;
+      Point point_vector = point - p1;
+
+      // Compute the cross product magnitude to find if the point is collinear with the edge
+      Real cross_product_magnitude = std::sqrt(
+          std::pow(edge_vector(1) * point_vector(2) - edge_vector(2) * point_vector(1), 2) +
+          std::pow(edge_vector(2) * point_vector(0) - edge_vector(0) * point_vector(2), 2) +
+          std::pow(edge_vector(0) * point_vector(1) - edge_vector(1) * point_vector(0), 2));
+
+      // Check if the point lies on the edge within a tolerance
+      if (cross_product_magnitude < tolerance)
+      {
+        // Check if the point lies within the edge segment bounds
+        Real dot_product = point_vector * edge_vector;
+        Real edge_length_squared = edge_vector * edge_vector;
+
+        if (dot_product >= 0 && dot_product <= edge_length_squared)
+          return true;
+      }
+    }
+    else
+      mooseError("Current implementation only supports 2D problem!\n");
+  }
+  return false;
 }
 
 void
