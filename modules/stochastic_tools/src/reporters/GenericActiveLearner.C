@@ -71,6 +71,9 @@ GenericActiveLearner::GenericActiveLearner(const InputParameters & parameters)
 void
 GenericActiveLearner::initialize()
 {
+  /* Setting up the variable sizes to facilitate active learning.
+  They need to be re-init every outer iteration.*/
+
   // Check whether the selected sampler is the right type
   if (!_al_sampler)
     paramError("sampler", "The selected sampler is not of type GenericActiveLearningSampler.");
@@ -79,7 +82,6 @@ GenericActiveLearner::initialize()
   _n_dim = _sampler.getNumberOfCols();
   _props = _al_sampler->getNumParallelProposals();
 
-  // Setting up the variable sizes to facilitate active learning
   _inputs_test = _al_sampler->getSampleTries();
   _gp_outputs_test.resize(_inputs_test.size());
   _gp_std_test.resize(_inputs_test.size());
@@ -95,14 +97,11 @@ void
 GenericActiveLearner::setupGPData(const std::vector<Real> & data_out,
                                   const DenseMatrix<Real> & data_in)
 {
-  std::vector<Real> tmp;
-  tmp.resize(_n_dim);
   for (unsigned int i = 0; i < data_out.size(); ++i)
   {
     for (unsigned int j = 0; j < _n_dim; ++j)
-      tmp[j] = data_in(i, j);
-    _inputs_required[i] = tmp;
-    _gp_inputs.push_back(tmp);
+      _inputs_required[i][j] = data_in(i, j);
+    _gp_inputs.push_back(_inputs_required[i]);
     _gp_outputs.push_back(data_out[i]);
   }
 }
@@ -133,11 +132,11 @@ GenericActiveLearner::getAcquisition(std::vector<Real> & acq_new,
   std::vector<Real> acq;
   acq.resize(_inputs_test.size());
   includeAdditionalInputs();
-  _acquisition_obj->computeAcquisition(
+  _acquisition_obj.computeAcquisition(
       acq, _gp_outputs_test, _gp_std_test, _inputs_test_modified, _gp_inputs, _generic);
   acq_new = acq;
   if (_penalize_acquisition)
-    _acquisition_obj->penalizeAcquisition(
+    _acquisition_obj.penalizeAcquisition(
         acq_new, indices, acq, _length_scales, _inputs_test_modified);
 }
 
@@ -152,14 +151,8 @@ GenericActiveLearner::computeConvergenceValue()
 void
 GenericActiveLearner::evaluateGPTest()
 {
-  std::vector<Real> tmp;
-  tmp.resize(_n_dim);
   for (unsigned int i = 0; i < _gp_outputs_test.size(); ++i)
-  {
-    for (unsigned int j = 0; j < _n_dim; ++j)
-      tmp[j] = _inputs_test[i][j];
-    _gp_outputs_test[i] = _gp_eval.evaluate(tmp, _gp_std_test[i]);
-  }
+    _gp_outputs_test[i] = _gp_eval.evaluate(_inputs_test[i], _gp_std_test[i]);
 }
 
 void
@@ -197,7 +190,7 @@ GenericActiveLearner::execute()
 
     // Retrain the GP and get the length scales
     _al_gp.reTrain(_gp_inputs, _gp_outputs);
-    _al_gp.getLengthScales(_length_scales);
+    _length_scales = _al_gp.getLengthScales();
 
     // Evaluate the GP on all the test samples sent by the Sampler
     evaluateGPTest();
@@ -213,15 +206,13 @@ GenericActiveLearner::execute()
     getAcquisition(acq_new, indices);
 
     // Output the acquisition function values and the best ordering of the indices
-    for (unsigned int i = 0; i < _props; ++i)
-    {
-      _sorted_indices[i] = indices[i];
-      _acquisition_value[i] = acq_new[i];
-    }
+    std::copy_n(indices.begin(), _props, _sorted_indices.begin());
+    std::copy_n(acq_new.begin(), _props, _acquisition_value.begin());
   }
   else
-    for (unsigned int i = 0; i < _props; ++i)
-      _sorted_indices[i] = i;
+    // for (unsigned int i = 0; i < _props; ++i)
+    //   _sorted_indices[i] = i;
+    std::iota(_sorted_indices.begin(), _sorted_indices.end(), 0);
 
   // Track the current step
   _check_step = _t_step;

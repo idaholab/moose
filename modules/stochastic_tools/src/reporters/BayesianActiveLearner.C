@@ -20,7 +20,7 @@ BayesianActiveLearner::validParams()
       "A reporter to support parallel active learning for Bayesian UQ tasks.");
   params.addRequiredParam<std::vector<UserObjectName>>("likelihoods", "Names of likelihoods.");
   params.addParam<ReporterValueName>(
-      "noise", "noise", "Model noise term to pass to Likelihoods object.");
+      "noise", "noise", "Name of the model noise term to pass to Likelihoods object.");
   return params;
 }
 
@@ -33,15 +33,6 @@ BayesianActiveLearner::BayesianActiveLearner(const InputParameters & parameters)
     _var_test(_bayes_al_sampler->getVarSampleTries()),
     _noise(declareValue<Real>("noise"))
 {
-}
-
-void
-BayesianActiveLearner::initialize()
-{
-  // Check whether the selected sampler is BayesianActiveLearningSampler or not
-  if (!_bayes_al_sampler)
-    paramError("sampler", "The selected sampler is not of type BayesianActiveLearningSampler.");
-
   // Filling the `likelihoods` vector with the user-provided distributions.
   for (const UserObjectName & name : getParam<std::vector<UserObjectName>>("likelihoods"))
     _likelihoods.push_back(getLikelihoodFunctionByName(name));
@@ -50,13 +41,14 @@ BayesianActiveLearner::initialize()
   _num_confg_params = _bayes_al_sampler->getNumberOfConfigParams();
 
   // Resize the length scales depending upon whether variance is included
+  _n_dim = _sampler.getNumberOfCols() - _bayes_al_sampler->getNumberOfConfigParams();
+  _n_dim_plus_var = _n_dim + 1;
   if (_var_prior)
-    _length_scales.resize(_n_dim + 1);
+    _length_scales.resize(_n_dim_plus_var);
   else
     _length_scales.resize(_n_dim);
 
   // Fetching the sampler characteristics
-  _n_dim = _sampler.getNumberOfCols() - _bayes_al_sampler->getNumberOfConfigParams();
   _props = _bayes_al_sampler->getNumParallelProposals();
 
   // Resize the log-likelihood vector to the number of parallel proposals
@@ -67,10 +59,17 @@ BayesianActiveLearner::initialize()
   _gp_outputs_test.resize(_inputs_test.size());
   _gp_std_test.resize(_inputs_test.size());
   _acquisition_value.resize(_props);
-  _length_scales.resize(_n_dim);
   _eval_outputs_current.resize(_props);
   _generic.resize(1);
   _sorted_indices.resize(_props);
+}
+
+void
+BayesianActiveLearner::initialize()
+{
+  // Check whether the selected sampler is BayesianActiveLearningSampler or not
+  if (!_bayes_al_sampler)
+    paramError("sampler", "The selected sampler is not of type BayesianActiveLearningSampler.");
 }
 
 void
@@ -80,7 +79,7 @@ BayesianActiveLearner::setupGPData(const std::vector<Real> & data_out,
   std::vector<Real> tmp;
   computeLogLikelihood(data_out);
   if (_var_prior)
-    tmp.resize(_n_dim + 1);
+    tmp.resize(_n_dim_plus_var);
   else
     tmp.resize(_n_dim);
   for (unsigned int i = 0; i < _props; ++i)
@@ -100,14 +99,12 @@ BayesianActiveLearner::setupGPData(const std::vector<Real> & data_out,
 void
 BayesianActiveLearner::computeLogLikelihood(const std::vector<Real> & data_out)
 {
+  _log_likelihood.assign(_props, 0.0);
   std::vector<Real> out1(_num_confg_values);
   for (unsigned int i = 0; i < _props; ++i)
   {
-    _log_likelihood[i] = 0.0;
     for (unsigned int j = 0; j < _num_confg_values; ++j)
-    {
       out1[j] = data_out[j * _props + i];
-    }
     if (_var_prior)
     {
       _noise = std::sqrt(_new_var_samples[i]);
@@ -138,13 +135,12 @@ BayesianActiveLearner::evaluateGPTest()
 {
   std::vector<Real> tmp;
   if (_var_prior)
-    tmp.resize(_n_dim + 1);
+    tmp.resize(_n_dim_plus_var);
   else
     tmp.resize(_n_dim);
   for (unsigned int i = 0; i < _gp_outputs_test.size(); ++i)
   {
-    for (unsigned int j = 0; j < _n_dim; ++j)
-      tmp[j] = _inputs_test[i][j];
+    std::copy(_inputs_test[i].begin(), _inputs_test[i].end(), tmp.begin());
     if (_var_prior)
       tmp[_n_dim] = _var_test[i];
     _gp_outputs_test[i] = _gp_eval.evaluate(tmp, _gp_std_test[i]);
@@ -154,18 +150,8 @@ BayesianActiveLearner::evaluateGPTest()
 void
 BayesianActiveLearner::includeAdditionalInputs()
 {
-  _inputs_test_modified.resize(_inputs_test.size());
-  std::vector<Real> tmp;
+  _inputs_test_modified = _inputs_test;
   if (_var_prior)
-    tmp.resize(_n_dim + 1);
-  else
-    tmp.resize(_n_dim);
-  for (unsigned int i = 0; i < _inputs_test.size(); ++i)
-  {
-    for (unsigned int j = 0; j < _n_dim; ++j)
-      tmp[j] = _inputs_test[i][j];
-    if (_var_prior)
-      tmp[_n_dim] = _var_test[i];
-    _inputs_test_modified[i] = tmp;
-  }
+    for (unsigned int i = 0; i < _inputs_test.size(); ++i)
+      _inputs_test_modified[i].push_back(_var_test[i]);
 }

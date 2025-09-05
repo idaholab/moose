@@ -26,12 +26,12 @@ UFunction::UFunction(const InputParameters & parameters)
 }
 
 void
-UFunction::computeAcquisition(std::vector<Real> & acq,
-                              const std::vector<Real> & gp_mean,
-                              const std::vector<Real> & gp_std,
-                              const std::vector<std::vector<Real>> & /*test_inputs*/,
-                              const std::vector<std::vector<Real>> & /*train_inputs*/,
-                              const std::vector<Real> & /*generic*/) const
+UFunction::computeAcquisitionInternal(std::vector<Real> & acq,
+                                      const std::vector<Real> & gp_mean,
+                                      const std::vector<Real> & gp_std,
+                                      const std::vector<std::vector<Real>> & /*test_inputs*/,
+                                      const std::vector<std::vector<Real>> & /*train_inputs*/,
+                                      const std::vector<Real> & /*generic*/) const
 {
   for (unsigned int i = 0; i < gp_mean.size(); ++i)
     acq[i] = std::abs(gp_mean[i]) / gp_std[i];
