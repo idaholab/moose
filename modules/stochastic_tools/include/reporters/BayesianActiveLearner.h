@@ -47,9 +47,6 @@ private:
   /// Bayesian Active Learning Sampler
   const BayesianActiveLearningSampler * const _bayes_al_sampler;
 
-  /// Storage for all the proposed samples to test the GP model
-  // std::vector<std::vector<Real>> _inputs_test;
-
   /// Storage for new proposed variance samples
   const std::vector<Real> & _new_var_samples;
 
@@ -73,4 +70,7 @@ private:
 
   /// Storage for the computed log-likelihood values in each iteration of active learning
   std::vector<Real> _log_likelihood;
+
+  /// The input dimension for GP for Bayesian problems with var, equal to Sampler columns + 1
+  unsigned int _n_dim_plus_var;
 };

@@ -25,7 +25,6 @@ public:
   static InputParameters validParams();
 
   GPAffineInvariantDifferentialDecision(const InputParameters & parameters);
-  virtual void initialize() override;
 
 protected:
   virtual void computeEvidence(std::vector<Real> & evidence,
@@ -39,13 +38,15 @@ protected:
                            const std::vector<Real> & tv,
                            const unsigned int & parallel_index) override;
 
+  bool usingGP() const override { return true; }
+
 private:
   /**
    * Return the corrected GP output after using the right variance value
-   * @param GPoutput The current value of the GP output using incorrect variance
-   * @param input_matrix The required value of the variance
+   * @param gp_output The current value of the GP output using incorrect variance
+   * @param true_variance The required value of the variance
    */
-  Real correctGP(const Real & GPoutput, const Real & trueVariance);
+  Real correctGP(const Real & gp_output, const Real & true_variance) const;
 
   /// Bool to correct the GP predicted output to adjust for the right variance
   const bool & _correct_GP_output;
@@ -57,7 +58,7 @@ private:
   const AffineInvariantDES * const _aides;
 
   /// The GP evaluator object
-  const SurrogateModel * _gp_eval;
+  const SurrogateModel & _gp_eval;
 
   /// The GP estimated value of the log-likelihood
   std::vector<Real> & _estimated_loglikelihood;

@@ -26,7 +26,7 @@ ExpectedImprovementGlobalFit::ExpectedImprovementGlobalFit(const InputParameters
 }
 
 void
-ExpectedImprovementGlobalFit::computeAcquisition(
+ExpectedImprovementGlobalFit::computeAcquisitionInternal(
     std::vector<Real> & acq,
     const std::vector<Real> & gp_mean,
     const std::vector<Real> & gp_std,
@@ -43,10 +43,9 @@ ExpectedImprovementGlobalFit::computeAcquisition(
 }
 
 void
-ExpectedImprovementGlobalFit::computeDistance(
-    unsigned int & req_index,
-    const std::vector<Real> & current_input,
-    const std::vector<std::vector<Real>> & train_inputs) const
+ExpectedImprovementGlobalFit::computeDistance(unsigned int & req_index,
+                                              const std::vector<Real> & current_input,
+                                              const std::vector<std::vector<Real>> & train_inputs)
 {
   Real ref_distance = std::numeric_limits<Real>::max();
   Real distance;

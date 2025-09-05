@@ -62,6 +62,9 @@ protected:
    */
   virtual void nextSeeds() {}
 
+  /// Flag to specify if a pre-trained Gaussian process model is used
+  virtual bool usingGP() const { return false; }
+
   /// Model input data that is uncertain
   std::vector<std::vector<Real>> & _inputs;
 
@@ -98,9 +101,6 @@ protected:
   /// Storage for the prior over the variance
   const Distribution * _var_prior;
 
-  /// Flag to specify if a pre-trained Gaussian process model is used
-  bool _using_GP;
-
   /// Transfer the right outputs to the file
   std::vector<Real> & _outputs_required;
 
@@ -118,6 +118,9 @@ protected:
 
   /// Storage for previous outputs
   std::vector<Real> _outputs_prev;
+
+  /// Current output values
+  const std::vector<Real> * _output_value;
 
   /// Communicator that was split based on samples that have rows
   libMesh::Parallel::Communicator & _local_comm;

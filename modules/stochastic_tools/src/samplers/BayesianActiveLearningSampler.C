@@ -31,11 +31,11 @@ BayesianActiveLearningSampler::validParams()
 BayesianActiveLearningSampler::BayesianActiveLearningSampler(const InputParameters & parameters)
   : PMCMCBase(parameters),
     _sorted_indices(getReporterValue<std::vector<unsigned int>>("sorted_indices")),
-    _num_tries(getParam<unsigned int>("num_tries"))
+    _num_tries(getParam<unsigned int>("num_tries")),
+    _inputs_test(_num_tries, std::vector<Real>(_priors.size())),
+    _var_test(_num_tries),
+    _sample_vector(_priors.size())
 {
-  _inputs_test.resize(_num_tries, std::vector<Real>(_priors.size()));
-  _var_test.resize(_num_tries);
-  _sample_vector.resize(_priors.size());
 }
 
 void
@@ -67,8 +67,7 @@ BayesianActiveLearningSampler::proposeSamples(const unsigned int seed_value)
   {
     if (_t_step <= 1)
     {
-      fillVector(_sample_vector, seed_value);
-      _new_samples[i] = _sample_vector;
+      fillVector(_new_samples[i], seed_value);
       if (_var_prior)
         _new_var_samples[i] = _var_prior->quantile(getRand(seed_value));
     }

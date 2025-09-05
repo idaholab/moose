@@ -29,12 +29,13 @@ ExpectedImprovement::ExpectedImprovement(const InputParameters & parameters)
 }
 
 void
-ExpectedImprovement::computeAcquisition(std::vector<Real> & acq,
-                                        const std::vector<Real> & gp_mean,
-                                        const std::vector<Real> & gp_std,
-                                        const std::vector<std::vector<Real>> & /*test_inputs*/,
-                                        const std::vector<std::vector<Real>> & /*train_inputs*/,
-                                        const std::vector<Real> & generic) const
+ExpectedImprovement::computeAcquisitionInternal(
+    std::vector<Real> & acq,
+    const std::vector<Real> & gp_mean,
+    const std::vector<Real> & gp_std,
+    const std::vector<std::vector<Real>> & /*test_inputs*/,
+    const std::vector<std::vector<Real>> & /*train_inputs*/,
+    const std::vector<Real> & generic) const
 {
   auto maxIt = std::max_element(generic.begin(), generic.end());
   Real z;

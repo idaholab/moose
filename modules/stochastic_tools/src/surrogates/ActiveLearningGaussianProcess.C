@@ -107,17 +107,16 @@ ActiveLearningGaussianProcess::reTrain(const std::vector<std::vector<Real>> & in
   _gp.setupCovarianceMatrix(_training_params, _training_data, _optimization_opts);
 }
 
-void
-ActiveLearningGaussianProcess::getLengthScales(std::vector<Real> & length_scales) const
+const std::vector<Real> &
+ActiveLearningGaussianProcess::getLengthScales() const
 {
-  length_scales = _gp.getScales();
+  return _gp.getLengthScales();
 }
 
-void
-ActiveLearningGaussianProcess::getTrainingStandardizer(
-    StochasticTools::Standardizer & standardizer) const
+const StochasticTools::Standardizer &
+ActiveLearningGaussianProcess::getTrainingStandardizer() const
 {
-  standardizer = _gp.getDataStandardizer();
+  return _gp.getDataStandardizer();
 }
 
 void

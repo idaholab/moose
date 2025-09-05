@@ -49,6 +49,9 @@ PMCMCDecision::PMCMCDecision(const InputParameters & parameters)
     _priors(_pmcmc->getPriors()),
     _var_prior(_pmcmc->getVarPrior()),
     _outputs_required(declareValue<std::vector<Real>>("outputs_required")),
+    _output_value(isParamValid("output_value") ? &getReporterValue<std::vector<Real>>(
+                                                     "output_value", REPORTER_MODE_DISTRIBUTED)
+                                               : nullptr),
     _local_comm(_sampler.getLocalComm()),
     _check_step(std::numeric_limits<int>::max())
 {
@@ -77,8 +80,7 @@ PMCMCDecision::PMCMCDecision(const InputParameters & parameters)
 void
 PMCMCDecision::initialize()
 {
-  _using_GP = false;
-  if (!isParamValid("output_value"))
+  if (!isParamValid("output_value") && !usingGP())
     paramError("output_value", "Value of the model output from the SubApp should be specified.");
 }
 
@@ -166,15 +168,13 @@ PMCMCDecision::execute()
       data_in(ss, j) = data[j];
   }
   _local_comm.sum(data_in.get_values());
-  if (!_using_GP)
+  if (!usingGP())
   {
-    const auto & _output_value =
-        getReporterValue<std::vector<Real>>("output_value", REPORTER_MODE_DISTRIBUTED);
-    _outputs_required = _output_value;
+    _outputs_required = *_output_value;
     _local_comm.allgather(_outputs_required);
   }
 
-  // Compute the evidence and transition vectors
+  // Compute the evidence and transitimkon vectors
   std::vector<Real> evidence(_props);
   if (_t_step > _pmcmc->decisionStep())
   {
@@ -198,7 +198,7 @@ PMCMCDecision::execute()
   // Store data from previous step
   _data_prev = data_in;
   _var_prev = _variance;
-  if (!_using_GP)
+  if (!usingGP())
     _outputs_prev = _outputs_required;
 
   // Track the current step

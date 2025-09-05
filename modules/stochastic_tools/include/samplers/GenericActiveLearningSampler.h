@@ -70,7 +70,4 @@ private:
 
   /// Storage for all the proposed samples
   std::vector<std::vector<Real>> _inputs_all;
-
-  /// A temporary vector to facilitate the sampling
-  std::vector<Real> _sample_vector;
 };

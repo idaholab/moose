@@ -162,7 +162,7 @@ GaussianProcess::tuneHyperParamsAdam(const RealEigenMatrix & training_params,
   Real b1 = opts.b1;
   Real b2 = opts.b2;
   Real eps = opts.eps;
-  Real lambda = 1e-4;
+  static constexpr Real lambda = 1e-4;
 
   std::vector<Real> m0(_num_tunable, 0.0);
   std::vector<Real> v0(_num_tunable, 0.0);
