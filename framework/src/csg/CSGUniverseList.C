@@ -22,7 +22,7 @@ CSGUniverseList::CSGUniverseList()
 }
 
 CSGUniverse &
-CSGUniverseList::getUniverse(const std::string & name)
+CSGUniverseList::getUniverse(const std::string & name) const
 {
   auto univ = _universes.find(name);
   if (univ == _universes.end())

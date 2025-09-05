@@ -96,11 +96,12 @@ CSGBase::addCellToUniverse(const CSGUniverse & universe, const CSGCell & cell)
     mooseError("A cell named " + cell.getName() + " is being added to universe " +
                universe.getName() +
                " that is different from the cell of the same name in the CSGBase instance.");
-  auto & univ = _universe_list.getUniverse(universe.getName());
-  if (univ != universe)
+  // make sure universe is a part of this CSGBase instance
+  if (!checkUniverseInBase(universe))
     mooseError("Cells are being added to a universe named " + universe.getName() +
                " that is different " +
                "from the universe of the same name in the CSGBase instance.");
+  auto & univ = _universe_list.getUniverse(universe.getName());
   univ.addCell(cell);
 }
 
@@ -120,11 +121,12 @@ CSGBase::removeCellFromUniverse(const CSGUniverse & universe, const CSGCell & ce
     mooseError("A cell named " + cell.getName() + " is being removed from universe " +
                universe.getName() +
                " that is different from the cell of the same name in the CSGBase instance.");
-  auto & univ = _universe_list.getUniverse(universe.getName());
-  if (univ != universe)
+  // make sure universe is a part of this CSGBase instance
+  if (!checkUniverseInBase(universe))
     mooseError("Cells are being removed from a universe named " + universe.getName() +
                " that is different " +
                "from the universe of the same name in the CSGBase instance.");
+  auto & univ = _universe_list.getUniverse(universe.getName());
   univ.removeCell(cell.getName());
 }
 
@@ -274,6 +276,16 @@ CSGBase::checkCellInBase(const CSGCell & cell) const
   auto & list_cell = _cell_list.getCell(name);
   // return whether that the cell in the list is the same as the cell provided (in memory)
   return &cell == &list_cell;
+}
+
+bool
+CSGBase::checkUniverseInBase(const CSGUniverse & universe) const
+{
+  auto name = universe.getName();
+  // if no universe by this name exists, an error will be produced by getUniverse
+  auto & list_univ = _universe_list.getUniverse(name);
+  // return whether that the cell in the list is the same as the cell provided (in memory)
+  return &universe == &list_univ;
 }
 
 void

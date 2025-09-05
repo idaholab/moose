@@ -405,6 +405,9 @@ private:
   // check that cell being accessed is a part of this CSGBase instance
   bool checkCellInBase(const CSGCell & cell) const;
 
+  // check that universe being accessed is a part of this CSGBase instance
+  bool checkUniverseInBase(const CSGUniverse & universe) const;
+
   /// List of surfaces associated with CSG object
   CSGSurfaceList _surface_list;
 
