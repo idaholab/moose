@@ -27,7 +27,7 @@ ProbabilityofImprovement::ProbabilityofImprovement(const InputParameters & param
 }
 
 void
-ProbabilityofImprovement::computeAcquisition(
+ProbabilityofImprovement::computeAcquisitionInternal(
     std::vector<Real> & acq,
     const std::vector<Real> & gp_mean,
     const std::vector<Real> & gp_std,

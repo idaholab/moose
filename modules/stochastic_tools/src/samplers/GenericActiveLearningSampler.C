@@ -61,7 +61,6 @@ GenericActiveLearningSampler::GenericActiveLearningSampler(const InputParameters
 
   // Setting the sizes for the different vectors enabling sampling and selection
   _inputs_all.resize(_num_tries, std::vector<Real>(_distributions.size(), 0.0));
-  _sample_vector.resize(_distributions.size(), 0.0);
   _new_samples.resize(_num_parallel_proposals, std::vector<Real>(_distributions.size(), 0.0));
 
   setNumberOfRandomSeeds(getParam<unsigned int>("num_random_seeds"));
@@ -93,10 +92,7 @@ GenericActiveLearningSampler::sampleSetUp(const Sampler::SampleMode /*mode*/)
   for (dof_id_type i = 0; i < _num_parallel_proposals; ++i)
   {
     if (_t_step <= 1)
-    {
-      fillVector(_sample_vector, _t_step);
-      _new_samples[i] = _sample_vector;
-    }
+      fillVector(_new_samples[i], _t_step);
     else
       _new_samples[i] = _inputs_all[_sorted_indices[i]];
   }
@@ -104,10 +100,7 @@ GenericActiveLearningSampler::sampleSetUp(const Sampler::SampleMode /*mode*/)
   /* Finally, generate several new samples randomly for the GP to try and pass it to the
   reporter */
   for (dof_id_type i = 0; i < _num_tries; ++i)
-  {
-    fillVector(_sample_vector, _t_step);
-    _inputs_all[i] = _sample_vector;
-  }
+    fillVector(_inputs_all[i], _t_step);
 }
 
 Real

@@ -36,7 +36,7 @@ GPAffineInvariantDifferentialDecision::GPAffineInvariantDifferentialDecision(
     _correct_GP_output(getParam<bool>("correct_GP_output")),
     _incorrect_variance(getParam<Real>("incorrect_variance")),
     _aides(dynamic_cast<const AffineInvariantDES *>(&_sampler)),
-    _gp_eval(&getSurrogateModel<GaussianProcessSurrogate>("gp_evaluator")),
+    _gp_eval(getSurrogateModel<GaussianProcessSurrogate>("gp_evaluator")),
     _estimated_loglikelihood(declareValue<std::vector<Real>>("estimated_loglikelihood"))
 {
   // Check whether the selected sampler is a differential evolution sampler or not
@@ -46,19 +46,14 @@ GPAffineInvariantDifferentialDecision::GPAffineInvariantDifferentialDecision(
   _estimated_loglikelihood.resize(_props);
 }
 
-void
-GPAffineInvariantDifferentialDecision::initialize()
-{
-  _using_GP = true;
-}
-
 Real
-GPAffineInvariantDifferentialDecision::correctGP(const Real & GPoutput, const Real & trueVariance)
+GPAffineInvariantDifferentialDecision::correctGP(const Real & gp_output,
+                                                 const Real & true_variance) const
 {
-  Real correctGP = GPoutput;
+  Real correctGP = gp_output;
   correctGP -= _num_confg_values * std::log(1.0 / (std::sqrt(2.0 * _incorrect_variance * M_PI)));
-  correctGP = correctGP * _incorrect_variance / trueVariance;
-  correctGP += _num_confg_values * std::log(1.0 / (std::sqrt(2.0 * trueVariance * M_PI)));
+  correctGP = correctGP * _incorrect_variance / true_variance;
+  correctGP += _num_confg_values * std::log(1.0 / (std::sqrt(2.0 * true_variance * M_PI)));
   return correctGP;
 }
 
@@ -82,13 +77,13 @@ GPAffineInvariantDifferentialDecision::computeEvidence(std::vector<Real> & evide
     if (_var_prior)
       estimated_evidence += (std::log(_var_prior->pdf(_new_var_samples[i])) -
                              std::log(_var_prior->pdf(_var_prev[i])));
-    GP_pred = _gp_eval->evaluate(tmp);
+    GP_pred = _gp_eval.evaluate(tmp);
     _estimated_loglikelihood[i] = GP_pred;
     estimated_evidence +=
         (_var_prior && _correct_GP_output) ? correctGP(GP_pred, _new_var_samples[i]) : GP_pred;
     for (unsigned int j = 0; j < _priors.size(); ++j)
       tmp[j] = _data_prev(i, j);
-    GP_pred = _gp_eval->evaluate(tmp);
+    GP_pred = _gp_eval.evaluate(tmp);
     estimated_evidence -=
         (_var_prior && _correct_GP_output) ? correctGP(GP_pred, _var_prev[i]) : GP_pred;
     evidence[i] = estimated_evidence;

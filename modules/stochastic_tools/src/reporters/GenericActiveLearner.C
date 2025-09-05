@@ -133,11 +133,11 @@ GenericActiveLearner::getAcquisition(std::vector<Real> & acq_new,
   std::vector<Real> acq;
   acq.resize(_inputs_test.size());
   includeAdditionalInputs();
-  _acquisition_obj->computeAcquisition(
+  _acquisition_obj.computeAcquisition(
       acq, _gp_outputs_test, _gp_std_test, _inputs_test_modified, _gp_inputs, _generic);
   acq_new = acq;
   if (_penalize_acquisition)
-    _acquisition_obj->penalizeAcquisition(
+    _acquisition_obj.penalizeAcquisition(
         acq_new, indices, acq, _length_scales, _inputs_test_modified);
 }
 
@@ -197,7 +197,7 @@ GenericActiveLearner::execute()
 
     // Retrain the GP and get the length scales
     _al_gp.reTrain(_gp_inputs, _gp_outputs);
-    _al_gp.getLengthScales(_length_scales);
+    _length_scales = _al_gp.getLengthScales();
 
     // Evaluate the GP on all the test samples sent by the Sampler
     evaluateGPTest();

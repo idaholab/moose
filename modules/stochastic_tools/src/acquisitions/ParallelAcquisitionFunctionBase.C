@@ -25,12 +25,69 @@ ParallelAcquisitionFunctionBase::ParallelAcquisitionFunctionBase(const InputPara
 }
 
 void
+ParallelAcquisitionFunctionBase::computeAcquisition(
+    std::vector<Real> & acq,
+    const std::vector<Real> & gp_mean,
+    const std::vector<Real> & gp_std,
+    const std::vector<std::vector<Real>> & test_inputs,
+    const std::vector<std::vector<Real>> & train_inputs,
+    const std::vector<Real> & generic) const
+{
+  // Basic container consistency
+  const std::size_t n_test = test_inputs.size();
+  if (n_test == 0)
+    mooseError("computeAcquisition: test_inputs must be non-empty.");
+
+  if (gp_mean.size() != n_test || gp_std.size() != n_test)
+    mooseError("computeAcquisition: gp_mean, gp_std, and test_inputs must have the same length (",
+               gp_mean.size(),
+               ", ",
+               gp_std.size(),
+               ", ",
+               n_test,
+               ").");
+
+  if (acq.size() != n_test)
+    mooseError("computeAcquisition: output 'acq' must be pre-sized to test_inputs.size().");
+
+  // Dimensionality checks (all rows same dim; train dim matches test dim)
+  const std::size_t dim = test_inputs.front().size();
+  if (dim == 0)
+    mooseError("computeAcquisition: test_inputs row dimension must be > 0.");
+
+  for (const auto & x : test_inputs)
+    if (x.size() != dim)
+      mooseError("computeAcquisition: all test_inputs rows must have the same dimension.");
+
+  for (const auto & x : train_inputs)
+    if (x.size() != dim)
+      mooseError("computeAcquisition: train_inputs rows must match test_inputs dimension.");
+
+  // Hand off to the derived implementation
+  computeAcquisitionInternal(acq, gp_mean, gp_std, test_inputs, train_inputs, generic);
+}
+
+void
 ParallelAcquisitionFunctionBase::penalizeAcquisition(std::vector<Real> & modified_acq,
                                                      std::vector<unsigned int> & sorted_indices,
                                                      const std::vector<Real> & acq,
                                                      const std::vector<Real> & length_scales,
                                                      const std::vector<std::vector<Real>> & inputs)
 {
+  const std::size_t n = inputs.size();
+  if (n == 0)
+    mooseError("penalizeAcquisition: 'inputs' must be non-empty.");
+  if (modified_acq.size() != n || sorted_indices.size() != n || acq.size() != n)
+    mooseError(
+        "penalizeAcquisition: modified_acq, sorted_indices, and acq must match inputs.size().");
+
+  const std::size_t dim = inputs.front().size();
+  for (const auto & x : inputs)
+    if (x.size() != dim)
+      mooseError("penalizeAcquisition: all input rows must have the same dimension.");
+  if (length_scales.size() != dim)
+    mooseError("penalizeAcquisition: length_scales must match input dimension.");
+
   std::vector<Real> negate_acq = acq;
   std::transform(negate_acq.cbegin(), negate_acq.cend(), negate_acq.begin(), std::negate<double>());
   std::vector<size_t> ind;
@@ -58,6 +115,9 @@ ParallelAcquisitionFunctionBase::computeCorrelation(Real & corr,
                                                     const std::vector<Real> & input2,
                                                     const std::vector<Real> & length_scales)
 {
+  if (input1.size() != input2.size() || input1.size() != length_scales.size())
+    mooseError("computeCorrelation: input1, input2, and length_scales must be the same size.");
+
   corr = 0.0;
   for (unsigned int i = 0; i < input1.size(); ++i)
     corr -= Utility::pow<2>(input1[i] - input2[i]) / (2.0 * Utility::pow<2>(length_scales[i]));

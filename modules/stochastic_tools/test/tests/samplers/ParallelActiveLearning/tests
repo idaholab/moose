@@ -38,7 +38,7 @@
       input = parallelAL.i
       allow_test_objects = true
       jsondiff = 'al_cov.json'
-      cli_args = "ParallelAcquisition/expectedimprovement/type='CoefficientofVariation' Outputs/file_base='al_cov'"
+      cli_args = "ParallelAcquisition/expectedimprovement/type='CoefficientOfVariation' Outputs/file_base='al_cov'"
       min_parallel = 1
       max_parallel = 1
       detail = 'using the Coefficient of Variation acquisition; '

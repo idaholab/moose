@@ -18,7 +18,6 @@
 #include "GaussianProcessSurrogate.h"
 #include "ParallelAcquisitionFunctionBase.h"
 #include "ParallelAcquisitionInterface.h"
-#include <Eigen/Dense>
 
 /**
  * A generic reporter to support parallel active learning: re-trains GP and picks the next best
@@ -105,7 +104,7 @@ protected:
   const SurrogateModel & _gp_eval;
 
   /// Storage for the parallel acquisition object to be utilized
-  ParallelAcquisitionFunctionBase * _acquisition_obj;
+  ParallelAcquisitionFunctionBase & _acquisition_obj;
 
   /// The acquistion function values in the current iteration
   std::vector<Real> & _acquisition_value;
