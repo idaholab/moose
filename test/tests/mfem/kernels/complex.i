@@ -124,7 +124,7 @@
 [Executioner]
   type = MFEMSteady
   numeric_type = complex
-  assembly_level = partial
+  assembly_level = legacy
 []
 
 [Outputs]
