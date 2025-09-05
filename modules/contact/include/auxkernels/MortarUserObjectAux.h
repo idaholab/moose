@@ -26,7 +26,7 @@ class PenaltyFrictionUserObject;
 /**
  * Auxiliary kernel to output mortar penalty contact quantities of interest
  */
-class PenaltyMortarUserObjectAux : public AuxKernel
+class MortarUserObjectAux : public AuxKernel
 {
 public:
   static InputParameters validParams();
@@ -35,7 +35,7 @@ public:
    * Factory constructor, takes parameters so that all derived classes can be built using the
    * constructor.
    */
-  PenaltyMortarUserObjectAux(const InputParameters & parameters);
+  MortarUserObjectAux(const InputParameters & parameters);
 
 protected:
   /// What type of contact quantity we are querying
