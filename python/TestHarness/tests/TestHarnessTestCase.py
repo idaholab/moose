@@ -20,6 +20,7 @@ from TestHarness import TestHarness
 import pyhit
 
 MOOSE_DIR = os.getenv('MOOSE_DIR')
+MOOSE_EXE = 'moose_test-opt'
 TEST_DIR = os.path.join(MOOSE_DIR, 'test')
 
 
@@ -90,8 +91,8 @@ class TestHarnessTestCase(unittest.TestCase):
                     f.write(test_spec)
 
                 # Link the moose-exe so that it can be found
-                moose_exe = os.path.join(TEST_DIR, 'moose_test-opt')
-                os.symlink(moose_exe, os.path.join(test_root, 'moose_test-opt'))
+                moose_exe = os.path.join(TEST_DIR, MOOSE_EXE)
+                os.symlink(moose_exe, os.path.join(test_root, MOOSE_EXE))
 
             cwd = os.getcwd()
             os.chdir(test_root)
