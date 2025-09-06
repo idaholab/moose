@@ -1,0 +1,56 @@
+[Tests]
+  issues = '#30655'
+
+  [conduction]
+    design = 'KokkosHeatConduction.md KokkosHeatConductionMaterial.md'
+    requirement = 'The Kokkos system shall compute temperature field through conduction'
+    [material]
+      type = 'Exodiff'
+      input = 'kokkos_conduction.i'
+      exodiff = 'kokkos_conduction_out.e'
+      detail = 'with thermal conductivity provided by material,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [default_property]
+      type = 'Exodiff'
+      input = 'kokkos_conduction.i'
+      exodiff = 'kokkos_conduction_out.e'
+      detail = 'with thermal conductivity provided as default material property.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+      prereq = 'conduction/material'
+    []
+  []
+
+  [convective]
+    design = 'KokkosConvectiveHeatFluxBC.md KokkosCoupledConvectiveHeatFluxBC.md'
+    requirement = 'The Kokkos system shall provide convective heat flux boundary condition where far-field temperature and convective heat transfer coefficient are given as'
+    [constant]
+      type = 'Exodiff'
+      input = 'kokkos_convective_heat_flux.i'
+      exodiff = 'kokkos_convective_heat_flux_out.e'
+      detail = 'constants,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [material]
+      type = 'Exodiff'
+      input = 'kokkos_convective_heat_flux.i'
+      cli_args = 'KokkosBCs/right/T_infinity=Tinf KokkosBCs/right/heat_transfer_coefficient=htc'
+      exodiff = 'kokkos_convective_heat_flux_out.e'
+      detail = 'material properties,'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+      prereq = 'convective/constant'
+    []
+    [coupled]
+      type = 'Exodiff'
+      input = 'kokkos_coupled_convective_heat_flux.i'
+      exodiff = 'kokkos_coupled_convective_heat_flux_out.e'
+      detail = 'spatially varying variables.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+  []
+[]

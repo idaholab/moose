@@ -35,12 +35,6 @@ InputParameters validParams();
 class FunctionInterface
 {
 public:
-  /**
-   * @param params The parameters used by the object being instantiated. This
-   *        class needs them so it can get the function named in the input file,
-   *        but the object calling getFunction only needs to use the name on the
-   *        left hand side of the statement "function = func_name"
-   */
   FunctionInterface(const MooseObject * moose_object);
 
   static InputParameters validParams();

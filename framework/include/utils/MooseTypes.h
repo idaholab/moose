@@ -1204,6 +1204,8 @@ extern const TagName OLD_SOLUTION_TAG;
 extern const TagName OLDER_SOLUTION_TAG;
 extern const TagName PREVIOUS_NL_SOLUTION_TAG;
 extern const TagName PREVIOUS_FP_SOLUTION_TAG;
+extern const TagName SOLUTION_DOT_TAG;
+extern const TagName SOLUTION_DOTDOT_TAG;
 
 enum class FEBackend
 {
@@ -1213,6 +1215,13 @@ enum class FEBackend
   MFEM
 #endif
 };
+
+#ifdef MOOSE_KOKKOS_ENABLED
+namespace Kokkos
+{
+extern const std::string KOKKOS_OBJECT_PARAM;
+}
+#endif
 }
 
 /// macros for adding Tensor index enums locally
