@@ -20,6 +20,7 @@
 #include "wasphit/HITNodeView.h"
 #include "waspsiren/SIRENInterpreter.h"
 #include "waspsiren/SIRENResultSet.h"
+#include "waspplot/CustomPlotFile.h"
 #include <string>
 #include <memory>
 #include <set>
@@ -333,6 +334,40 @@ private:
                                     const std::string & subblock_type,
                                     const std::set<std::string> & existing_params,
                                     const std::string & indent_spaces);
+
+  /**
+   * Gather extension responses - specific to this server implemention.
+   * @param extensionResponses - data array of custom responses to fill
+   * @param extensionMethod - name for current extension request method
+   * @param line - zero-based line to use for logic of custom extension
+   * @param character - zero-based column for logic of custom extension
+   * @return - true if request successfully handled with response built
+   */
+  bool gatherExtensionResponses(wasp::DataArray & extensionResponses,
+                                const std::string & extensionMethod,
+                                int line,
+                                int character);
+
+  /**
+   * Build CustomPlot extension responses when method name is plotting.
+   * @param plottingResponses - array to fill with CustomPlot responses
+   * @param line - zero-based line to use for logic of custom extension
+   * @param character - zero-based column for logic of custom extension
+   * @return - true if request successfully handled with response built
+   */
+  bool gatherPlottingResponses(wasp::DataArray & plottingResponses, int line, int character);
+
+  /**
+   * Build CustomPlot graph with provided keys, values, and plot title.
+   * @param plot_object - CustomPlot object to be built into line graph
+   * @param plot_title - title for plot composed of block name and type
+   * @param graph_keys - abscissa values from function for graph x-axis
+   * @param graph_vals - ordinate values from function for graph y-axis
+   */
+  void buildLineGraphPlot(wasp::CustomPlot & plot_object,
+                          const std::string & plot_title,
+                          const std::vector<double> & graph_keys,
+                          const std::vector<double> & graph_vals);
 
   /**
    * Read from connection into object - specific to this server's connection.
