@@ -58,7 +58,7 @@ k2 = 0.2
       passive_scalar_diffusivity = '${k1} ${k2}'
 
       passive_scalar_inlet_types = 'fixed-value fixed-value'
-      passive_scalar_inlet_function = '1; 2'
+      passive_scalar_inlet_functors = '1; 2'
 
       passive_scalar_advection_interpolation = ${advected_interp_method}
       passive_scalar_two_term_bc_expansion = false

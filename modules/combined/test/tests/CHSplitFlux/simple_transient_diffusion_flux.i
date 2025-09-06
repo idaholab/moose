@@ -82,7 +82,7 @@
     M_name = mobility_prop
     tensors = mobility_tensor
     weights = var_dep
-    args = c
+    coupled_variables = c
   [../]
 []
 

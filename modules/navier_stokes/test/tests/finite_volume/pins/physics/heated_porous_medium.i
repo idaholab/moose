@@ -40,12 +40,12 @@ cp_solid = 1000
         # Boundary conditions
         inlet_boundaries = 'left'
         momentum_inlet_types = 'fixed-velocity'
-        momentum_inlet_function = '1 0'
+        momentum_inlet_functors = '1 0'
         wall_boundaries = 'top bottom'
         momentum_wall_types = 'noslip slip'
         outlet_boundaries = 'right'
         momentum_outlet_types = 'fixed-pressure'
-        pressure_function = '0'
+        pressure_functors = '0'
 
         mass_advection_interpolation = 'average'
         momentum_advection_interpolation = 'average'
@@ -62,9 +62,9 @@ cp_solid = 1000
 
         # See Flow for inlet and wall boundaries
         energy_inlet_types = 'fixed-temperature'
-        energy_inlet_function = '300'
+        energy_inlet_functors = '300'
         energy_wall_types = 'heatflux heatflux'
-        energy_wall_function = '0 0'
+        energy_wall_functors = '0 0'
 
         ambient_convection_alpha = 'h_cv'
         ambient_temperature = 'T_solid'

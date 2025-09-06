@@ -40,7 +40,7 @@
   [P_ak]
     type = ParsedAux
     variable = P
-    function = 'pow(x + 1, 2) + pow(2*(y + 1), 2) - (50 * z)'
+    expression = 'pow(x + 1, 2) + pow(2*(y + 1), 2) - (50 * z)'
     use_xyzt = true
     execute_on = 'INITIAL TIMESTEP_BEGIN'
   []
@@ -48,7 +48,7 @@
   [T_ak]
     type = ParsedAux
     variable = T
-    function = 'pow(x + 0.5, 2) + pow(2*(y + 0.5), 2) + (50 * z)'
+    expression = 'pow(x + 0.5, 2) + pow(2*(y + 0.5), 2) + (50 * z)'
     use_xyzt = true
     execute_on = 'INITIAL TIMESTEP_BEGIN'
   []

@@ -281,7 +281,7 @@
     type = CompositeEigenstrain
     tensors = 'shear1  shear2  expand3'
     weights = 'weight1 weight2 weight3'
-    args = c
+    coupled_variables = c
     eigenstrain_name = eigenstrain
   [../]
 
@@ -309,7 +309,7 @@
   [./elastic_free_energy]
     type = ElasticEnergyMaterial
     f_name = Fe
-    args = 'c'
+    coupled_variables = 'c'
     outputs = exodus
     output_properties = Fe
   [../]

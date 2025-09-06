@@ -37,8 +37,6 @@ SideSetsFromNormalsGenerator::validParams()
       "Adds a new named sideset to the mesh for all faces matching the specified normal.");
   params.addRequiredParam<std::vector<Point>>(
       "normals", "A list of normals for which to start painting sidesets");
-  params.addParam<Real>("tolerance", "Tolerance for comparing the face normal");
-  params.deprecateParam("tolerance", "normal_tol", "4/01/2025");
 
   // We want to use a different normal_tol for this generator than from the base class to preserve
   // old behavior.

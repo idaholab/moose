@@ -100,13 +100,13 @@ velocity_interp_method = 'rc'
     type = INSFVInletVelocityBC
     boundary = 'left'
     variable = vel_x
-    function = '1'
+    functor = '1'
   []
   [inlet-v]
     type = INSFVInletVelocityBC
     boundary = 'left'
     variable = vel_y
-    function = '0'
+    functor = '0'
   []
   [walls-u]
     type = INSFVNoSlipWallBC

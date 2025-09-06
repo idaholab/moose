@@ -115,8 +115,8 @@ InputParameters
 JvarMapInterfaceBase<T>::validParams()
 {
   auto params = T::validParams();
-  params.addCoupledVar("args", "Vector of nonlinear variable arguments this object depends on");
-  params.deprecateCoupledVar("args", "coupled_variables", "02/07/2024");
+  params.addCoupledVar("coupled_variables",
+                       "Vector of nonlinear variable arguments this object depends on");
 
   return params;
 }
