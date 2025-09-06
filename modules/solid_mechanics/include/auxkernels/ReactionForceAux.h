@@ -12,7 +12,7 @@
 #include "TagVectorAux.h"
 
 /**
- * ReactionForceAux returns the reaction force corresponds to each DOF.
+ * ReactionForceAux returns the reaction force corresponding to each DOF.
  */
 class ReactionForceAux : public TagVectorAux
 {

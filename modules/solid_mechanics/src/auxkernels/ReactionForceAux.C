@@ -15,8 +15,9 @@ InputParameters
 ReactionForceAux::validParams()
 {
   InputParameters params = TagVectorAux::validParams();
-  params.addClassDescription("Couple a tagged residual, and return its DOF value. The returned "
-                             "value has units consistent with the simulation setup.");
+  params.addClassDescription("Extract the value of the residual from an appropriately formed tag "
+                             "vector and save those values as reaction forces in an AuxVariable");
+
   params.set<bool>("remove_variable_scaling") = true;
   params.suppressParameter<bool>("remove_variable_scaling");
   params.suppressParameter<bool>("scaled");
