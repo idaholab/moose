@@ -30,4 +30,7 @@ protected:
   const std::vector<VariableName> & _pressure_var;
   /// Gravity vector
   const RealVectorValue _gravity;
+
+  /// Vector of vectors, indexed by (i, j), of whether primary solver species 'i' is present in reaction 'j'
+  std::vector<std::vector<bool>> _primary_participation;
 };
