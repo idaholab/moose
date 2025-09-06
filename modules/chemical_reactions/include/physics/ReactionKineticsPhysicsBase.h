@@ -46,12 +46,9 @@ protected:
   /// Number of auxiliary species
   const unsigned int _num_aux_species;
   /// Reaction network after being parsed in initializePhysics()
-  std::vector<ReactionNetworkUtils::Reaction> _reactions;
-
+  const std::vector<ReactionNetworkUtils::Reaction> _reactions;
   /// Number of reactions involved in the network
-  unsigned int _num_reactions;
-  /// Vector of vectors, indexed by (i, j), of whether primary solver species 'i' is present in reaction 'j'
-  std::vector<std::vector<bool>> _primary_participation;
+  const unsigned int _num_reactions;
 
 private:
   /// Add solver variables (currently coded for CGFE)

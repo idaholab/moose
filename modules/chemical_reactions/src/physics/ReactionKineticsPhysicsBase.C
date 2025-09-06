@@ -42,14 +42,15 @@ ReactionKineticsPhysicsBase::validParams()
   return params;
 }
 
-ReactionKineticsPhysicsBase::ReactionKineticsPhysicsBase(
-    const InputParameters & parameters)
+ReactionKineticsPhysicsBase::ReactionKineticsPhysicsBase(const InputParameters & parameters)
   : PhysicsBase(parameters),
     _solver_species(getParam<std::vector<VariableName>>("solver_variables")),
     _num_solver_species(_solver_species.size()),
     _aux_species(getParam<std::vector<AuxVariableName>>("auxiliary_variables")),
     _num_aux_species(_aux_species.size()),
-    _reactions(ReactionNetworkUtils::parseReactionNetwork(getParam<std::string>("reactions"), _verbose))
+    _reactions(
+        ReactionNetworkUtils::parseReactionNetwork(getParam<std::string>("reactions"), _verbose)),
+    _num_reactions(_reactions.size())
 {
   // Keep track of variables
   for (const auto & var_name : _solver_species)
