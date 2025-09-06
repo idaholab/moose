@@ -1,5 +1,4 @@
 [Tests]
-  issues = '#18436'
   design = 'meshgenerators/SideSetsFromNodeSetsGenerator.md'
 
   [node_to_side]
@@ -8,6 +7,18 @@
     exodiff = 'from_nodes_in.e'
     cli_args = "--mesh-only"
     recover = false
+    exodiff_opts = '-pedantic'
     requirement = 'The system shall be able to create side sets from all node sets.'
+    issues = '#18436'
+  []
+  [node_to_side_selective]
+    type = 'Exodiff'
+    input = 'from_nodes_selective.i'
+    exodiff = 'from_nodes_selective_in.e'
+    cli_args = "--mesh-only"
+    recover = false
+    exodiff_opts = '-pedantic'
+    requirement = 'The system shall be able to create side sets from a selection of node sets.'
+    issues = '#31452'
   []
 []
