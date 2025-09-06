@@ -20,6 +20,10 @@ must be vector-valued. Numeric constant vector values can also be
 specified, but must be enclosed in curly braces to mark the start and
 end of the vector, e.g. `{1. 0. 0.}`.
 
+## Example Input File Syntax
+
+!listing test/tests/mfem/kernels/gravity.i block=/FunctorMaterials remove=Rigidium Bendium
+
 !syntax parameters /FunctorMaterials/MFEMGenericFunctorVectorMaterial
 
 !syntax inputs /FunctorMaterials/MFEMGenericFunctorVectorMaterial

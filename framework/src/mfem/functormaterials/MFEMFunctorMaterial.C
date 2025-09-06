@@ -12,8 +12,6 @@
 #include "MFEMFunctorMaterial.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMFunctorMaterial);
-
 InputParameters
 MFEMFunctorMaterial::validParams()
 {

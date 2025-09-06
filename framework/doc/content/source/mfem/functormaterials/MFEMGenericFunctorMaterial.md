@@ -13,6 +13,10 @@ one or more subdomains of the mesh, given by the [!param](/FunctorMaterials/MFEM
 entire mesh if missing. The scalar material properties are named according to members in the
 [!param](/FunctorMaterials/MFEMGenericFunctorMaterial/prop_names) parameter, with respective coefficients used to get property values given by the members of [!param](/FunctorMaterials/MFEMGenericFunctorMaterial/prop_values).
 
+## Example Input File Syntax
+
+!listing test/tests/mfem/kernels/gravity.i block=/FunctorMaterials remove=RigidiumWeightDensity BendiumWeightDensity
+
 !syntax parameters /FunctorMaterials/MFEMGenericFunctorMaterial
 
 !syntax inputs /FunctorMaterials/MFEMGenericFunctorMaterial

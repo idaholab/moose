@@ -4,7 +4,7 @@
 
 ## Summary
 
-!syntax description /FunctorMaterials/MFEMFunctorMaterial
+Base class for declaration of material properties to add to MFEM problems.
 
 ## Overview
 
@@ -15,16 +15,6 @@ subdomains in the mesh.
 `MFEMFunctorMaterial` is intended to allow the specification of `mfem::Coefficient`,
 `mfem::VectorCoefficient`, and `mfem::MatrixCoefficient` objects to add to the MFEM problem in a
 manner consistent with the standard MOOSE Materials system.
-
-## Example Input File Syntax
-
-!listing test/tests/mfem/kernels/gravity.i block=/FunctorMaterials
-
-!syntax parameters /FunctorMaterials/MFEMFunctorMaterial
-
-!syntax inputs /FunctorMaterials/MFEMFunctorMaterial
-
-!syntax children /FunctorMaterials/MFEMFunctorMaterial
 
 !if-end!
 
