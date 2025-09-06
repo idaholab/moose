@@ -77,7 +77,7 @@
   type = Steady
   solve_type = 'PJFNK'
   [Adaptivity]
-    switch_h_to_p_refinement = true
+    adaptivity_type = p
     steps = 2
     refine_fraction = 1.0
     coarsen_fraction = 0
