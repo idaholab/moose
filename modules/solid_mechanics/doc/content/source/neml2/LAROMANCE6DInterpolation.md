@@ -1,5 +1,7 @@
 # LAROMANCE6DInterpolation
 
+!if! function=hasCapability('neml2')
+
 !alert note
 This is a NEML2 model. See the [NEML2 syntax documentation](syntax/NEML2/index.md) for guidance on using NEML2 models in a MOOSE simulation.
 
@@ -16,3 +18,9 @@ An example input for a NEML2 LAROMANCE model is shown below for inelastic plasti
 !listing test/tests/neml2/laromance/models/laromance_matl_radial_return.i block=Models/rom_ep
 
 !bibtex bibliography
+
+!if-end!
+
+!else
+
+!include neml2/neml2_warning.md
