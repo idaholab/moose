@@ -246,9 +246,12 @@ protected:
    * When this is called, we are knowingly not using the value of these parameters. This routine
    * checks whether these parameters simply have defaults or were passed by the user
    * @param param_names the parameters we are ignoring
+   * @param object_type the type of the object we are not building (thus ignoring the parameters)
+   * @param object_name the name of the object we are not building
    */
   void reportPotentiallyMissedParameters(const std::vector<std::string> & param_names,
-                                         const std::string & object_type) const;
+                                         const std::string & object_type,
+                                         const std::string & object_name = "") const;
 
   /// Additional checks performed near the end of the setup phase
   virtual void checkIntegrity() const {}
