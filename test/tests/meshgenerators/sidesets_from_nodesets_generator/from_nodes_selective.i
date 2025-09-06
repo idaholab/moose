@@ -11,12 +11,14 @@
     input = 'gmg'
     new_nodeset_name = 'included'
     expression = 'x>0.4999 & x<0.5001'
+    allow_distributed_meshes = true
   []
   [not_included]
     type = ParsedGenerateNodeset
     input = 'included'
     new_nodeset_name = 'not_included'
     expression = 'y>0.4999 & y<0.5001'
+    allow_distributed_meshes = true
   []
   [create_sideset]
     type = SideSetsFromNodeSetsGenerator
