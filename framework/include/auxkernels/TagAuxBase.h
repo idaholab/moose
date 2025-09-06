@@ -50,10 +50,12 @@ TagAuxBase<T>::validParams()
                                "The coupled variable whose components are coupled to AuxVariable");
   params.set<ExecFlagEnum>("execute_on", true) = {EXEC_TIMESTEP_END};
   params.suppressParameter<ExecFlagEnum>("execute_on");
-  params.addParam<bool>("scaled",
-                        true,
-                        "Return value depending on the variable scaling/autoscaling. Set this to "
-                        "false to obtain unscaled physical reaction forces.");
+  params.addDeprecatedParam<bool>(
+      "scaled",
+      true,
+      "Return value depending on the variable scaling/autoscaling. Set this to "
+      "false to obtain unscaled physical reaction forces.",
+      "This parameter has been deprecated.");
   return params;
 }
 

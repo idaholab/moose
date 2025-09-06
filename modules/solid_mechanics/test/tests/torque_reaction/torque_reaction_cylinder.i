@@ -19,33 +19,33 @@
 []
 
 [GlobalParams]
-  volumetric_locking_correction=true
+  volumetric_locking_correction = true
 []
 
 [AuxVariables]
-  [./saved_x]
-  [../]
-  [./saved_y]
-  [../]
-  [./saved_z]
-  [../]
+  [saved_x]
+  []
+  [saved_y]
+  []
+  [saved_z]
+  []
 []
 
 [AuxKernels]
   [saved_x]
-    type = TagVectorAux
+    type = ReactionForceAux
     vector_tag = 'ref'
     v = 'disp_x'
     variable = 'saved_x'
   []
   [saved_y]
-    type = TagVectorAux
+    type = ReactionForceAux
     vector_tag = 'ref'
     v = 'disp_y'
     variable = 'saved_y'
   []
   [saved_z]
-    type = TagVectorAux
+    type = ReactionForceAux
     vector_tag = 'ref'
     v = 'disp_z'
     variable = 'saved_z'
@@ -62,25 +62,25 @@
 []
 
 [BCs]
-  [./bottom_x]
+  [bottom_x]
     type = DirichletBC
     variable = disp_x
     boundary = 1
     value = 0.0
-  [../]
-  [./bottom_y]
+  []
+  [bottom_y]
     type = DirichletBC
     variable = disp_y
     boundary = 1
     value = 0.0
-  [../]
-  [./bottom_z]
+  []
+  [bottom_z]
     type = DirichletBC
     variable = disp_z
     boundary = 1
     value = 0.0
-  [../]
-  [./top_x]
+  []
+  [top_x]
     type = DisplacementAboutAxis
     boundary = 2
     function = '0.1*t'
@@ -89,8 +89,8 @@
     axis_direction = '0 -1.0 1.0'
     component = 0
     variable = disp_x
-  [../]
-  [./top_y]
+  []
+  [top_y]
     type = DisplacementAboutAxis
     boundary = 2
     function = '0.1*t'
@@ -99,8 +99,8 @@
     axis_direction = '0 -1.0 1.0'
     component = 1
     variable = disp_y
-  [../]
-  [./top_z]
+  []
+  [top_z]
     type = DisplacementAboutAxis
     boundary = 2
     function = '0.1*t'
@@ -109,18 +109,18 @@
     axis_direction = '0 -1.0 1.0'
     component = 2
     variable = disp_z
-  [../]
+  []
 []
 
 [Materials]
-  [./elasticity_tensor]
+  [elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     youngs_modulus = 207000
     poissons_ratio = 0.3
-  [../]
-  [./elastic_stress]
+  []
+  [elastic_stress]
     type = ComputeFiniteStrainElasticStress
-  [../]
+  []
 []
 
 [Executioner]
@@ -147,13 +147,13 @@
 []
 
 [Postprocessors]
-  [./torque]
+  [torque]
     type = TorqueReaction
     boundary = 2
     reaction_force_variables = 'saved_x saved_y saved_z'
     axis_origin = '10. 10. 10.'
     direction_vector = '0 -1.0 1.0'
-  [../]
+  []
 []
 
 [Outputs]
