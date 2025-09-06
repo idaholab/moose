@@ -25,6 +25,7 @@ public:
 protected:
   virtual Real computeValue() override;
 
+  /// Whether to remove variable scaling from the returned value
   const bool _unscaled;
   const VariableValue & _v;
   const MooseVariableBase & _v_var;

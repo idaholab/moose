@@ -15,9 +15,14 @@ InputParameters
 TagVectorAux::validParams()
 {
   InputParameters params = TagAuxBase<AuxKernel>::validParams();
-  params.addClassDescription("Couple a tagged vector, and return its DOF value");
-  params.addRequiredParam<TagName>("vector_tag", "Name of the vector tag");
-  params.addParam<bool>("remove_variable_scaling", false, "Remove variable scaling from DOF value");
+  params.addClassDescription("Extract DOF values from a tagged vector into an AuxVariable");
+  params.addRequiredParam<TagName>("vector_tag", "Name of the vector tag to extract values from");
+  params.addParam<bool>(
+      "remove_variable_scaling",
+      false,
+      "Whether to remove variable scaling from DOF value. If false, values are directly extracted "
+      "from the tag vector, and potentially with scaling applied. If true, any scaling of "
+      "variables is undone in the reported values.");
   return params;
 }
 
@@ -31,8 +36,13 @@ TagVectorAux::TagVectorAux(const InputParameters & parameters)
   checkCoupledVariable(&_v_var, &_var);
 
   if (isParamSetByUser("scaled"))
+  {
     mooseDeprecated("The 'scaled' parameter has been deprecated. Please use the "
                     "'remove_variable_scaling' parameter instead.");
+    if (isParamSetByUser("remove_variable_scaling"))
+      paramError("You cannot set both the 'scaled' and 'remove_variable_scaling' parameters. "
+                 "Please use only the 'remove_variable_scaling' parameter.");
+  }
 }
 
 Real
