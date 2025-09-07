@@ -10,6 +10,7 @@
 #pragma once
 
 #include <string>
+#include "MooseTypes.h"
 
 namespace ReactionNetworkUtils
 {
@@ -37,7 +38,10 @@ struct Reaction
   /// Get the stoeichiometric coefficients for each species in the reaction
   std::vector<Real> getStoichiometricCoefficients() const;
 
-  /// Get all product species involved in the reaction
+  /// Get all reactant species involved in the reaction (on LHS)
+  std::vector<VariableName> getReactantSpecies() const;
+
+  /// Get all product species involved in the reaction (on RHS)
   std::vector<std::string> getProductSpecies() const;
 
   /// Whether the reaction has the metadata with the given type
