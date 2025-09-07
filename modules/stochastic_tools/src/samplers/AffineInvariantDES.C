@@ -40,7 +40,7 @@ AffineInvariantDES::validParams()
 AffineInvariantDES::AffineInvariantDES(const InputParameters & parameters)
   : PMCMCBase(parameters),
     _previous_state(getReporterValue<std::vector<std::vector<Real>>>("previous_state")),
-    _previous_state_var(getReporterValue<std::vector<Real>>("previous_state_var")),
+    _previous_state_var(getReporterValue<std::vector<std::vector<Real>>>("previous_state_var")),
     _tuning_option(getParam<MooseEnum>("tuning_option"))
 {
   if (_num_parallel_proposals < 5)
@@ -112,15 +112,19 @@ AffineInvariantDES::proposeSamples(const unsigned int seed_value)
     }
     if (_var_prior)
     {
-      computeDifferential(_previous_state_var[index_req1],
-                          _previous_state_var[index_req2],
-                          getRand(seed_value),
-                          1.0,
-                          diff);
-      _new_var_samples[j] = (_t_step > decisionStep()) ? (_previous_state_var[j] + diff)
-                                                       : _var_prior->quantile(getRand(seed_value));
-      if (_new_var_samples[j] < 0.0)
-        indicator = 1;
+      for (unsigned int i = 0; i < _num_variances; ++i)
+      {
+        computeDifferential(_previous_state_var[i][index_req1],
+                            _previous_state_var[i][index_req2],
+                            getRand(seed_value),
+                            1.0,
+                            diff);
+        _new_var_samples[i][j] = (_t_step > decisionStep())
+                                     ? (_previous_state_var[i][j] + diff)
+                                     : _var_prior->quantile(getRand(seed_value));
+        if (_new_var_samples[i][j] < 0.0)
+          indicator = 1;
+      }
     }
     if (!indicator)
       ++j;

@@ -12,29 +12,36 @@
     mean = 0.0
     standard_deviation = 1.0
   []
+  [variance]
+    type = Uniform
+    lower_bound = 0.0
+    upper_bound = 0.5
+  []
 []
 
 [Likelihood]
   [gaussian]
     type = Gaussian
-    noise = 'noise_specified/noise_specified'
-    file_name = 'exp_0_05.csv'
+    noise = 'mcmc_reporter/noise'
+    file_name = 'exp_multiNoise.csv'
     log_likelihood = true
+    exp_groups_file_name = 'expGroups.csv'
   []
 []
 
 [Samplers]
   [sample]
-    type = IndependentGaussianMH
+    type = AffineInvariantDES
     prior_distributions = 'left right'
-    # previous_state = 'mcmc_reporter/inputs'
-    num_parallel_proposals = 5
-    file_name = 'confg.csv'
+    num_parallel_proposals = 16
+    file_name = 'confg_MultiExp.csv'
     execute_on = PRE_MULTIAPP_SETUP
     seed = 2547
-    std_prop = '0.05 0.05'
     initial_values = '0.1 0.1'
-    seed_inputs = 'mcmc_reporter/seed_input'
+    previous_state = 'mcmc_reporter/inputs'
+    previous_state_var = 'mcmc_reporter/variance'
+    prior_variance = 'variance'
+    num_exp_groups = 2
   []
 []
 
@@ -69,13 +76,8 @@
   [constant]
     type = StochasticReporter
   []
-  [noise_specified]
-    type = ConstantReporter
-    real_vector_names = 'noise_specified'
-    real_vector_values = '0.05'
-  []
   [mcmc_reporter]
-    type = IndependentMHDecision
+    type = AffineInvariantDifferentialDecision
     output_value = constant/reporter_transfer:average:value
     sampler = sample
     likelihoods = 'gaussian'
@@ -84,11 +86,11 @@
 
 [Executioner]
   type = Transient
-  num_steps = 5
+  num_steps = 500
 []
 
 [Outputs]
-  file_base = 'imh_5prop'
+  file_base = 'des_5prop_var_multi'
   [out]
     type = JSON
     execute_system_information_on = NONE

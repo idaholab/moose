@@ -24,15 +24,18 @@ ExtremeValue::ExtremeValue(const InputParameters & parameters) : Gaussian(parame
 
 Real
 ExtremeValue::function(const std::vector<Real> & exp,
+                       const std::vector<Real> & exp_group,
                        const std::vector<Real> & model,
-                       const Real & noise,
+                       const std::vector<Real> & noise,
                        const bool & log_likelihood)
 {
   Real result = 0.0;
+  unsigned int group_ind;
   for (unsigned i = 0; i < exp.size(); ++i)
   {
-    Real x = (exp[i] - model[i]) / noise;
-    Real pdf = std::exp(-(x + std::exp(-x))) / noise;
+    group_ind = exp_group[i];
+    Real x = (exp[i] - model[i]) / noise[group_ind];
+    Real pdf = std::exp(-(x + std::exp(-x))) / noise[group_ind];
     result += std::log(pdf);
   }
   if (!log_likelihood)
@@ -43,5 +46,5 @@ ExtremeValue::function(const std::vector<Real> & exp,
 Real
 ExtremeValue::function(const std::vector<Real> & x) const
 {
-  return function(_exp_values, x, _noise, _log_likelihood);
+  return function(_exp_values, _exp_groups, x, _noise, _log_likelihood);
 }

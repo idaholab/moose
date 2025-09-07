@@ -29,7 +29,7 @@ AffineInvariantStretchSampler::AffineInvariantStretchSampler(const InputParamete
   : PMCMCBase(parameters),
     _step_size(getParam<Real>("step_size")),
     _previous_state(getReporterValue<std::vector<std::vector<Real>>>("previous_state")),
-    _previous_state_var(getReporterValue<std::vector<Real>>("previous_state_var"))
+    _previous_state_var(getReporterValue<std::vector<std::vector<Real>>>("previous_state_var"))
 {
   if (_num_parallel_proposals < 3)
     paramError("num_parallel_proposals",
@@ -70,13 +70,16 @@ AffineInvariantStretchSampler::proposeSamples(const unsigned int seed_value)
     }
     if (_var_prior)
     {
-      _new_var_samples[j] =
-          (_t_step > decisionStep())
-              ? (_previous_state_var[index_req] +
-                 _affine_step[j] * (_previous_state_var[j] - _previous_state_var[index_req]))
-              : _var_prior->quantile(getRand(seed_value));
-      if (_new_var_samples[j] < 0.0)
-        indicator = 1;
+      for (unsigned int i = 0; i < _num_variances; ++i)
+      {
+        _new_var_samples[i][j] = (_t_step > decisionStep())
+                                     ? (_previous_state_var[i][index_req] +
+                                        _affine_step[j] * (_previous_state_var[i][j] -
+                                                           _previous_state_var[i][index_req]))
+                                     : _var_prior->quantile(getRand(seed_value));
+        if (_new_var_samples[i][j] < 0.0)
+          indicator = 1;
+      }
     }
     if (!indicator)
       ++j;
