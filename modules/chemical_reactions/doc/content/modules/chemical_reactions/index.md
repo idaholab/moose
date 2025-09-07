@@ -186,6 +186,10 @@ The total volume fraction of a given mineral species can be calculated using a
 
 ## Reaction network parser id=parser
 
+!alert note
+This reaction parser is not the one used by the [AqueousReactionsEquilibriumPhysics.md].
+See [ReactionNetworkUtils.md] for that parser and its slightly different but more general syntax.
+
 The chemical reactions module includes a reaction network parser in the `Actions` system that enables
 chemical reactions to be specified in a natural form in the input file. The parser then adds all
 required `Variables`, `AuxVariables`, `Kernels` and `AuxKernels` to represent the total geochemical
