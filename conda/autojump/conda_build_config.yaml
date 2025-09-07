@@ -9,7 +9,7 @@ macos_min_version:                                          # [osx]
 
 macos_machine:                                              # [osx]
   - x86_64-apple-darwin13.4.0                               # [not arm64 and osx]
-  - arm64-apple-darwin20.0.0                                # [arm64]
+  - arm64-apple-darwin24.6.0                                # [arm64]
 
 MACOSX_DEPLOYMENT_TARGET:                                   # [osx]
   - 10.12                                                   # [not arm64 and osx]
