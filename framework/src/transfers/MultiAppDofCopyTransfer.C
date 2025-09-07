@@ -119,7 +119,7 @@ MultiAppDofCopyTransfer::initialSetup()
       }
       // We dont even own any of these subapps
       else
-        _from_blocks = {Moose::INVALID_BLOCK_ID};
+        _to_blocks = {Moose::INVALID_BLOCK_ID};
     }
     else
       _to_blocks = to_problem->mesh().meshSubdomains();
