@@ -1,0 +1,10 @@
+[Tests]
+  design = 'ADFluxDivergence.md'
+  [ad_flux_divergence]
+    type = CSVDiff
+    input = 'ad_flux_divergence.i'
+    csvdiff = 'ad_flux_divergence_out.csv'
+    requirement = 'The system shall compute the divergence of a material-supplied flux using ADFluxDivergence.'
+  []
+[]
+
