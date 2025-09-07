@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "PorousFlowFluidPropertiesBase.h"
+#include "PorousFlowMultiComponentFluidBase.h"
 
 class MultiComponentFluidProperties;
 
@@ -19,7 +19,7 @@ class MultiComponentFluidProperties;
  * fraction for a multicompnent fluid defined in the FluidProperties module
  */
 template <bool is_ad>
-class PorousFlowMultiComponentFluidTempl : public PorousFlowFluidPropertiesBaseTempl<is_ad>
+class PorousFlowMultiComponentFluidTempl : public PorousFlowMultiComponentFluidBaseTempl<is_ad>
 {
 public:
   static InputParameters validParams();
@@ -29,18 +29,6 @@ public:
 protected:
   virtual void initQpStatefulProperties() override;
   virtual void computeQpProperties() override;
-
-  /// Derivative of fluid density wrt mass fraction at the qps or nodes
-  MaterialProperty<Real> * const _ddensity_dX;
-
-  /// Derivative of fluid phase viscosity wrt mass fraction at the nodes or qps
-  MaterialProperty<Real> * const _dviscosity_dX;
-
-  /// Derivative of fluid internal_energy wrt mass fraction at the qps or nodes
-  MaterialProperty<Real> * const _dinternal_energy_dX;
-
-  /// Derivative of fluid enthalpy wrt mass fraction at the qps or nodes
-  MaterialProperty<Real> * const _denthalpy_dX;
 
   /// Multicomponent fluid properties UserObject
   const MultiComponentFluidProperties & _fp;
@@ -52,6 +40,10 @@ protected:
   const GenericVariableValue<is_ad> & _X;
 
   usingPorousFlowFluidPropertiesMembers;
+  using PorousFlowMultiComponentFluidBaseTempl<is_ad>::_ddensity_dX;
+  using PorousFlowMultiComponentFluidBaseTempl<is_ad>::_dviscosity_dX;
+  using PorousFlowMultiComponentFluidBaseTempl<is_ad>::_dinternal_energy_dX;
+  using PorousFlowMultiComponentFluidBaseTempl<is_ad>::_denthalpy_dX;
 };
 
 typedef PorousFlowMultiComponentFluidTempl<false> PorousFlowMultiComponentFluid;
