@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef LIBTORCH_ENABLED
 
 #include "Standardizer.h"
 
@@ -15,34 +16,29 @@ namespace StochasticTools
 void
 Standardizer::set(const Real & n)
 {
-  _mean.clear();
-  _stdev.clear();
-  for (unsigned int ii = 0; ii < n; ++ii)
-  {
-    _mean.push_back(0);
-    _stdev.push_back(1);
-  }
+  _mean = torch::zeros({long(n), 1}, at::kDouble);
+  _stdev = torch::ones({long(n), 1}, at::kDouble);
 }
 
 void
 Standardizer::set(const Real & mean, const Real & stdev)
 {
-  _mean.clear();
-  _stdev.clear();
-  _mean.push_back(mean);
-  _stdev.push_back(stdev);
+  std::vector<Real> mean_vec;
+  std::vector<Real> stdev_vec;
+  mean_vec.push_back(mean);
+  stdev_vec.push_back(stdev);
+
+  auto options = torch::TensorOptions().dtype(at::kDouble);
+  _mean = torch::from_blob(mean_vec.data(), {1, 1}, options).to(at::kDouble);
+  _stdev = torch::from_blob(stdev_vec.data(), {1, 1}, options).to(at::kDouble);
 }
 
 void
 Standardizer::set(const Real & mean, const Real & stdev, const Real & n)
 {
-  _mean.clear();
-  _stdev.clear();
-  for (unsigned int ii = 0; ii < n; ++ii)
-  {
-    _mean.push_back(mean);
-    _stdev.push_back(stdev);
-  }
+  auto options = torch::TensorOptions().dtype(at::kDouble);
+  _mean = mean * torch::ones({long(n), 1}, options).to(at::kDouble).clone();
+  _stdev = stdev * torch::ones({long(n), 1}, options).to(at::kDouble).clone();
 }
 
 void
@@ -50,66 +46,64 @@ Standardizer::set(const std::vector<Real> & mean, const std::vector<Real> & stde
 {
   mooseAssert(mean.size() == stdev.size(),
               "Provided mean and standard deviation vectors are of differing size.");
+  auto mean_copy = mean;
+  auto stdev_copy = stdev;
+  auto options = torch::TensorOptions().dtype(at::kDouble);
+  _mean =
+      torch::from_blob(mean_copy.data(), {long(mean.size()), 1}, options).to(at::kDouble).clone();
+  _stdev =
+      torch::from_blob(stdev_copy.data(), {long(stdev.size()), 1}, options).to(at::kDouble).clone();
+}
+
+void
+Standardizer::computeSet(const torch::Tensor & input)
+{
+  // comptue mean and standard deviation
+  auto mean = torch::mean(input, 0, false);
+  auto stdev = torch::std(input, 0, 0, false);
+  mean = torch::resize(mean, {mean.sizes()[0], 1});
+  stdev = torch::resize(stdev, {stdev.sizes()[0], 1});
   _mean = mean;
   _stdev = stdev;
 }
 
 void
-Standardizer::computeSet(const RealEigenMatrix & input)
+Standardizer::getStandardized(torch::Tensor & input) const
 {
-  _mean.clear();
-  _stdev.clear();
-  unsigned int num_samples = input.rows();
-  unsigned int n = input.cols();
-  // comptue mean
-  RealEigenVector mean = input.colwise().mean();
-  // Compute standard deviation
-  RealEigenVector stdev =
-      ((input.rowwise() - mean.transpose()).colwise().squaredNorm() / num_samples)
-          .transpose()
-          .array()
-          .sqrt();
-  // Store in std:vector format
-  _mean.resize(n);
-  _stdev.resize(n);
-  RealEigenVector::Map(&_mean[0], n) = mean;
-  RealEigenVector::Map(&_stdev[0], n) = stdev;
+  torch::Tensor mean = torch::transpose(_mean, 0, 1);
+  torch::Tensor stdev = torch::transpose(_stdev, 0, 1);
+  //  Standardize input tensor
+  input = input - mean;
+  input = input / stdev;
 }
 
 void
-Standardizer::getStandardized(RealEigenMatrix & input) const
+Standardizer::getDestandardized(torch::Tensor & input) const
 {
-  Eigen::Map<const RealEigenVector> mean(_mean.data(), _mean.size());
-  Eigen::Map<const RealEigenVector> stdev(_stdev.data(), _stdev.size());
-  input = (input.rowwise() - mean.transpose()).array().rowwise() / stdev.transpose().array();
+  torch::Tensor mean = torch::transpose(_mean, 0, 1);
+  torch::Tensor stdev = torch::transpose(_stdev, 0, 1);
+  input = ((input * stdev) + mean);
 }
 
 void
-Standardizer::getDestandardized(RealEigenMatrix & input) const
+Standardizer::getDescaled(torch::Tensor & input) const
 {
-  Eigen::Map<const RealEigenVector> mean(_mean.data(), _mean.size());
-  Eigen::Map<const RealEigenVector> stdev(_stdev.data(), _stdev.size());
-  input =
-      (input.array().rowwise() * stdev.transpose().array()).rowwise() + mean.transpose().array();
-}
-
-void
-Standardizer::getDescaled(RealEigenMatrix & input) const
-{
-  Eigen::Map<const RealEigenVector> stdev(_stdev.data(), _stdev.size());
-  input = input.array().rowwise() * stdev.transpose().array();
+  torch::Tensor stdev = torch::transpose(_stdev, 0, 1);
+  input = (input * stdev);
 }
 
 /// Helper for dataStore
 void
 Standardizer::storeHelper(std::ostream & stream, void * context) const
 {
-  unsigned int n = _mean.size();
+  auto mean_accessor = _mean.accessor<Real, 2>();
+  auto stdev_accessor = _stdev.accessor<Real, 2>();
+  unsigned int n = _mean.size(0);
   dataStore(stream, n, context);
   for (unsigned int ii = 0; ii < n; ++ii)
-    dataStore(stream, _mean[ii], context);
+    dataStore(stream, mean_accessor[ii][0], context);
   for (unsigned int ii = 0; ii < n; ++ii)
-    dataStore(stream, _stdev[ii], context);
+    dataStore(stream, stdev_accessor[ii][0], context);
 }
 
 } // StochasticTools namespace
@@ -135,3 +129,5 @@ dataLoad(std::istream & stream, StochasticTools::Standardizer & standardizer, vo
     dataLoad(stream, stdev[ii], context);
   standardizer.set(mean, stdev);
 }
+
+#endif

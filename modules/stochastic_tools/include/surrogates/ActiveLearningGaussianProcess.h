@@ -6,12 +6,13 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef LIBTORCH_ENABLED
 
 #pragma once
 
 #include "ActiveLearningGaussianProcess.h"
 #include "Standardizer.h"
-#include <Eigen/Dense>
+#include "LibtorchUtils.h"
 
 #include "StochasticToolsApp.h"
 #include "LoadSurrogateDataAction.h"
@@ -51,7 +52,7 @@ private:
   StochasticTools::GaussianProcess & _gp;
 
   /// Paramaters (x) used for training, along with statistics
-  RealEigenMatrix & _training_params;
+  torch::Tensor & _training_params;
 
   /// Switch for training param (x) standardization
   bool _standardize_params;
@@ -62,3 +63,5 @@ private:
   /// Struct holding parameters necessary for parameter tuning
   const StochasticTools::GaussianProcess::GPOptimizerOptions _optimization_opts;
 };
+
+#endif

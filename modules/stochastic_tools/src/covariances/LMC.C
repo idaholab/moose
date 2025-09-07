@@ -6,6 +6,7 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef LIBTORCH_ENABLED
 
 #include "LMC.h"
 #include "MooseRandom.h"
@@ -63,31 +64,31 @@ LMC::LMC(const InputParameters & parameters)
 }
 
 void
-LMC::computeCovarianceMatrix(RealEigenMatrix & K,
-                             const RealEigenMatrix & x,
-                             const RealEigenMatrix & xp,
+LMC::computeCovarianceMatrix(torch::Tensor & K,
+                             const torch::Tensor & x,
+                             const torch::Tensor & xp,
                              const bool is_self_covariance) const
 {
   // Create temporary vectors for constructing the covariance matrix
-  RealEigenMatrix K_params = RealEigenMatrix::Zero(x.rows(), xp.rows());
-  RealEigenMatrix B = RealEigenMatrix::Zero(_num_outputs, _num_outputs);
-  K = RealEigenMatrix::Zero(x.rows() * _num_outputs, xp.rows() * _num_outputs);
-  RealEigenMatrix K_working =
-      RealEigenMatrix::Zero(x.rows() * _num_outputs, xp.rows() * _num_outputs);
+  torch::Tensor K_params = torch::zeros({x.sizes()[0], xp.sizes()[0]}, at::kDouble);
+  torch::Tensor B = torch::zeros({_num_outputs, _num_outputs}, at::kDouble);
+  K = torch::zeros({x.sizes()[0] * _num_outputs, xp.sizes()[0] * _num_outputs}, at::kDouble);
+  torch::Tensor K_working =
+      torch::zeros({x.sizes()[0] * _num_outputs, xp.sizes()[0] * _num_outputs}, at::kDouble);
 
   // For every expansion term we add the contribution to the covariance matrix
   for (const auto exp_i : make_range(_num_expansion_terms))
   {
     _covariance_functions[exp_i]->computeCovarianceMatrix(K_params, x, xp, is_self_covariance);
     computeBMatrix(B, exp_i);
-    MathUtils::kron(K_working, B, K_params);
+    K_working = torch::kron(B, K_params);
     K += K_working;
   }
 }
 
 bool
-LMC::computedKdhyper(RealEigenMatrix & dKdhp,
-                     const RealEigenMatrix & x,
+LMC::computedKdhyper(torch::Tensor & dKdhp,
+                     const torch::Tensor & x,
                      const std::string & hyper_param_name,
                      unsigned int ind) const
 {
@@ -106,8 +107,8 @@ LMC::computedKdhyper(RealEigenMatrix & dKdhp,
     const std::string lambda_prefix = "lambda_";
 
     // Allocate storage for the factors of the total gradient matrix
-    RealEigenMatrix dBdhp = RealEigenMatrix::Zero(_num_outputs, _num_outputs);
-    RealEigenMatrix K_params = RealEigenMatrix::Zero(x.rows(), x.rows());
+    torch::Tensor dBdhp = torch::zeros({_num_outputs, _num_outputs}, at::kDouble);
+    torch::Tensor K_params = torch::zeros({x.sizes()[0], x.sizes()[0]}, at::kDouble);
 
     if (name_without_prefix.find(acoeff_prefix) != std::string::npos)
     {
@@ -123,15 +124,15 @@ LMC::computedKdhyper(RealEigenMatrix & dKdhp,
       computeLambdaGradient(dBdhp, number, ind);
       _covariance_functions[number]->computeCovarianceMatrix(K_params, x, x, true);
     }
-    MathUtils::kron(dKdhp, dBdhp, K_params);
+    dKdhp = torch::kron(dBdhp, K_params);
     return true;
   }
   else
   {
     // Allocate storage for the matrix factors
-    RealEigenMatrix B_tmp = RealEigenMatrix::Zero(_num_outputs, _num_outputs);
-    RealEigenMatrix B = RealEigenMatrix::Zero(_num_outputs, _num_outputs);
-    RealEigenMatrix dKdhp_sub = RealEigenMatrix::Zero(x.rows(), x.rows());
+    torch::Tensor B_tmp = torch::zeros({_num_outputs, _num_outputs}, at::kDouble);
+    torch::Tensor B = torch::zeros({_num_outputs, _num_outputs}, at::kDouble);
+    torch::Tensor dKdhp_sub = torch::zeros({x.sizes()[0], x.sizes()[0]}, at::kDouble);
 
     // First, check the dependent covariances
     bool found = false;
@@ -149,7 +150,8 @@ LMC::computedKdhyper(RealEigenMatrix & dKdhp,
       B += B_tmp;
     }
 
-    MathUtils::kron(dKdhp, B, dKdhp_sub);
+    // MathUtils::kron(dKdhp, B, dKdhp_sub);
+    dKdhp = torch::kron(B, dKdhp_sub);
 
     return true;
   }
@@ -158,39 +160,57 @@ LMC::computedKdhyper(RealEigenMatrix & dKdhp,
 }
 
 void
-LMC::computeBMatrix(RealEigenMatrix & Bmat, const unsigned int exp_i) const
+LMC::computeBMatrix(torch::Tensor & Bmat, const unsigned int exp_i) const
 {
+  /*
+  auto Bmat_accessor = Bmat.accessor<Real, 2>();
   const auto & a_coeffs = *_a_coeffs[exp_i];
   const auto & lambda_coeffs = *_lambdas[exp_i];
 
   for (const auto row_i : make_range(_num_outputs))
     for (const auto col_i : make_range(_num_outputs))
     {
-      Bmat(row_i, col_i) = a_coeffs[row_i] * a_coeffs[col_i];
+      Bmat_accessor[row_i][col_i] = a_coeffs[row_i] * a_coeffs[col_i];
       if (row_i == col_i)
-        Bmat(row_i, col_i) += lambda_coeffs[col_i];
+        Bmat_accessor[row_i][col_i] += lambda_coeffs[col_i];
     }
+  */
+  const auto & a_coeffs = *_a_coeffs[exp_i];
+  const auto & lambda_coeffs = *_lambdas[exp_i];
+  std::vector<Real> a_copy = a_coeffs;
+  std::vector<Real> lambda_copy = lambda_coeffs;
+  torch::Tensor a_copy_tensor =
+      torch::from_blob(a_copy.data(), {long(a_copy.size())}, at::kDouble).clone();
+  torch::Tensor lambda_copy_tensor =
+      torch::from_blob(lambda_copy.data(), {long(lambda_copy.size())}, at::kDouble).clone();
+  Bmat = torch::outer(a_copy_tensor, a_copy_tensor);
+  torch::diagonal(Bmat) += lambda_copy_tensor;
 }
 
 void
-LMC::computeAGradient(RealEigenMatrix & grad,
+LMC::computeAGradient(torch::Tensor & grad,
                       const unsigned int exp_i,
                       const unsigned int index) const
 {
   const auto & a_coeffs = *_a_coeffs[exp_i];
   // Add asserts here
-  grad.setZero();
+  grad = torch::zeros({grad.sizes()[0], grad.sizes()[1]}, at::kDouble);
+  auto grad_accessor = grad.accessor<Real, 2>();
   for (const auto col_i : make_range(_num_outputs))
-    grad(index, col_i) = a_coeffs[col_i];
-  const RealEigenMatrix transpose = grad.transpose();
+    grad_accessor[index][col_i] = a_coeffs[col_i];
+  const torch::Tensor transpose = torch::transpose(grad, 0, 1);
   grad = grad + transpose;
 }
 
 void
-LMC::computeLambdaGradient(RealEigenMatrix & grad,
+LMC::computeLambdaGradient(torch::Tensor & grad,
                            const unsigned int /*exp_i*/,
                            const unsigned int index) const
 {
-  grad.setZero();
-  grad(index, index) = 1.0;
+  // grad.setZero();
+  grad = torch::zeros({grad.sizes()[0], grad.sizes()[1]}, at::kDouble);
+  auto grad_accessor = grad.accessor<Real, 2>();
+  grad_accessor[index][index] = 1.0;
 }
+
+#endif

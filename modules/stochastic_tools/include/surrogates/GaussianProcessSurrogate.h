@@ -6,14 +6,16 @@
 //*
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
+#ifdef LIBTORCH_ENABLED
 
 #pragma once
 
 #include "SurrogateModel.h"
 #include "Standardizer.h"
-#include <Eigen/Dense>
 #include "CovarianceInterface.h"
 #include "GaussianProcess.h"
+
+#include "LibtorchUtils.h"
 
 class GaussianProcessSurrogate : public SurrogateModel, public CovarianceInterface
 {
@@ -41,5 +43,7 @@ private:
   StochasticTools::GaussianProcess & _gp;
 
   /// Paramaters (x) used for training
-  const RealEigenMatrix & _training_params;
+  const torch::Tensor & _training_params;
 };
+
+#endif

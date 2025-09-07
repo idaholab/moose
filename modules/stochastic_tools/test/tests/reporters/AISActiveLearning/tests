@@ -8,6 +8,7 @@
       input = ais_al.i
       jsondiff = 'ais_al.json'
       detail = 'using the U learning function.'
+      capabilities = 'libtorch'
     []
   []
 []
