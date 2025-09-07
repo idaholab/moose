@@ -12,8 +12,8 @@
 #include "ReactionKineticsPhysicsBase.h"
 
 /**
- * Creates all the objects needed to solve a reaction network of chemical reactions in a fluid
- * medium with a continuous Galerkin finite element discretization
+ * Creates all the objects needed to solve a reaction network of chemical reactions in an aqueous
+ * medium with a finite element continuous Galerkin discretization.
  */
 class AqueousReactionKinetics : public ReactionKineticsPhysicsBase
 {
@@ -26,25 +26,24 @@ protected:
   virtual void addAuxiliaryVariables() override;
   virtual void addFEKernels() override;
 
-  /// Stoichiometric coefficients for each primary species in each reaction
+  /// Stoichiometric coefficients for each primary species (outer indexing) in each reaction
   std::vector<std::vector<Real>> _stos;
-  /// Weight of each primary species in each reaction
+  /// Stoichiometric coefficients of primary/solver variables (outer indexing) in each reaction
+  std::vector<std::vector<Real>> _sto_u;
+  /// Stoichiometric coefficients of coupled primary variables (outer indexing) in each reaction
+  std::vector<std::vector<std::vector<Real>>> _sto_v;
+  /// Weight of each primary species (outer indexing) in each reaction
   std::vector<std::vector<Real>> _weights;
-  /// Equilibrium constants for each reaction
-  std::vector<Real> _eq_const;
-  /// Equilibrium species
+  /// log10(Equilibrium constants) for each reaction
+  std::vector<Real> _log_eq_const;
+  /// Equilibrium species: only one per reaction. This is a restriction of this implementation
   std::vector<VariableName> _eq_species;
-  /// Set of auxillary species
-  std::set<std::string> _aux_species;
   /// Vector of vectors, indexed by (i, j), of whether primary solver species 'i' is present in reaction 'j'
   std::vector<std::vector<bool>> _primary_participation;
-  /// Stoichiometric coefficients of primary variables in each reaction
-  std::vector<std::vector<Real>> _sto_u;
-  /// Stoichiometric coefficients of coupled primary variables in each reaction
-  std::vector<std::vector<std::vector<Real>>> _sto_v;
   /// Coupled primary species for each reaction
+  /// (outer indexing is primary species, then reactions then innermost is the species in the reaction)
   std::vector<std::vector<std::vector<VariableName>>> _coupled_v;
-  /// Primary species involved in the ith equilibrium reaction
+  /// Primary species involved in the ith equilibrium reaction (outer indexing)
   std::vector<std::vector<VariableName>> _solver_species_involved;
 
   /// Name of the pressure variable
