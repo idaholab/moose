@@ -74,11 +74,7 @@ parseReactionNetwork(const std::string & reaction_network_string, bool output_to
 
   parser["BaseSpecies"] = [](const SemanticValues & vs) { return vs.token(); };
 
-  parser["State"] = [](const SemanticValues & vs)
-  {
-    std::string s = std::string(vs.token());
-    return s.substr(1, s.length() - 2); // remove parentheses
-  };
+  parser["State"] = [](const SemanticValues & vs) { return vs.token(); };
 
   parser["Charge"] = [](const SemanticValues & vs) { return vs.token(); };
 
@@ -96,7 +92,7 @@ parseReactionNetwork(const std::string & reaction_network_string, bool output_to
         {
           std::string val = std::string(std::any_cast<std::string_view>(vs[i]));
           if (val.front() == '(' && val.back() == ')')
-            state = val.substr(1, val.length() - 2);
+            state = val;
           else
             charge = val;
         }
@@ -264,7 +260,12 @@ Reaction::hasMetaData(const std::string & key) const
 const std::string &
 Reaction::getMetaData(const std::string & key) const
 {
-  return libmesh_map_find(metadata, key);
+  // Get a better error
+  if (hasMetaData(key))
+    return libmesh_map_find(metadata, key);
+  else
+    mooseError("MetaData item '" + key + "' was not found in reaction:\n" +
+               Moose::stringify(*this));
 }
 
 // namespace ReactionNetworkUtils
