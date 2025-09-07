@@ -9,18 +9,18 @@
 
 #pragma once
 
-#include "ReactionKineticsPhysicsBase.h"
+#include "ReactionNetworkPhysicsBase.h"
 
 /**
- * Creates all the objects needed to solve a reaction network of chemical reactions in an aqueous
- * medium with a finite element continuous Galerkin discretization.
+ * Creates all the objects needed to solve a reaction network of chemical reactions at equilibrium
+ * in an aqueous medium with a finite element continuous Galerkin discretization.
  */
-class AqueousReactionKinetics : public ReactionKineticsPhysicsBase
+class AqueousReactionsEquilibriumPhysics : public ReactionNetworkPhysicsBase
 {
 public:
   static InputParameters validParams();
 
-  AqueousReactionKinetics(const InputParameters & parameters);
+  AqueousReactionsEquilibriumPhysics(const InputParameters & parameters);
 
 protected:
   virtual void addAuxiliaryKernels() override;
@@ -50,5 +50,4 @@ protected:
   const std::vector<VariableName> & _pressure_var;
   /// Gravity vector
   const RealVectorValue _gravity;
-
 };
