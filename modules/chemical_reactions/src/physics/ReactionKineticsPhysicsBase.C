@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ReactionKineticsPhysicsBase.h"
+#include <sstream>
 
 InputParameters
 ReactionKineticsPhysicsBase::validParams()
@@ -56,7 +57,7 @@ ReactionKineticsPhysicsBase::ReactionKineticsPhysicsBase(const InputParameters &
   for (const auto & var_name : _solver_species)
     saveSolverVariableName(var_name);
   for (const auto & var_name : _aux_species)
-    saveSolverVariableName(var_name);
+    saveAuxVariableName(var_name);
 
   // Parameter checking
   if (isParamSetByUser("additional_source_coefs"))
@@ -68,11 +69,18 @@ ReactionKineticsPhysicsBase::ReactionKineticsPhysicsBase(const InputParameters &
     checkVectorParamsSameLength<VariableName, FunctionName>("solver_variables",
                                                             "initial_conditions");
 
-  addRequiredPhysicsTask("add_preconditioning");
   addRequiredPhysicsTask("add_ic");
   addRequiredPhysicsTask("add_variable");
   addRequiredPhysicsTask("add_aux_variable");
   addRequiredPhysicsTask("init_physics");
+
+  // Parse the lines in the reaction
+  std::stringstream reactions_param(getParam<std::string>("reactions"));
+  std::string line;
+  while (std::getline(reactions_param, line, '\n'))
+    _reactions_input.push_back(line);
+  mooseAssert(_num_reactions == _reactions_input.size(),
+              "Should be the same size. Extra line break in the reaction network?");
 }
 
 void
@@ -84,8 +92,8 @@ ReactionKineticsPhysicsBase::addSolverVariables()
     // If the variable was added outside the Physics
     if (variableExists(var_name, /*error_if_aux*/ true))
     {
-      reportPotentiallyMissedParameters({"variable_order", "system_names", "equation_scaling"},
-                                        "MooseVariable");
+      reportPotentiallyMissedParameters(
+          {"variable_order", "system_names", "equation_scaling"}, "MooseVariable", var_name);
       continue;
     }
 
@@ -109,7 +117,7 @@ ReactionKineticsPhysicsBase::addAuxiliaryVariables()
     // If the variable was added outside the Physics
     if (variableExists(var_name, /*error_if_aux*/ false))
     {
-      reportPotentiallyMissedParameters({"variable_order"}, "MooseVariable");
+      reportPotentiallyMissedParameters({"variable_order"}, "MooseVariable", var_name);
       continue;
     }
 
