@@ -100,11 +100,30 @@ LinearFVAdvectionDiffusionExtrapolatedBC::computeBoundaryValueRHSContribution() 
 Real
 LinearFVAdvectionDiffusionExtrapolatedBC::computeBoundaryGradientMatrixContribution() const
 {
-  return 1.0 / computeCellToFaceDistance();
+  return 0.0; // 1.0 / computeCellToFaceDistance();
+  // return 1.0 / computeCellToFaceDistance();
 }
 
 Real
 LinearFVAdvectionDiffusionExtrapolatedBC::computeBoundaryGradientRHSContribution() const
 {
-  return computeBoundaryValue() / computeCellToFaceDistance();
+  // If we request linear extrapolation, we add the gradient term as well
+  // if (_two_term_expansion)
+  // {
+  //     // We allow internal boundaries too so we need to check which side we are on
+  //   // const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
+  //   // ? _current_face_info->elemInfo()
+  //   // : _current_face_info->neighborInfo();
+  //   // const auto cell_to_face = computeCellToFaceVector();
+  //   // return (_var.gradSln(*elem_info) * cell_to_face) * _current_face_info->faceArea(); // (cell_to_face * _current_face_info->normal());
+  //   // return (_var.gradSln(*elem_info) * _current_face_info->normal()) * (cell_to_face * _current_face_info->normal());
+  //   // return _var.gradSln(*elem_info) * _current_face_info->eCN() / (_current_face_info->eCN() * _current_face_info->normal());
+  //   // return (_var.gradSln(*elem_info) * cell_to_face); // (cell_to_face * _current_face_info->normal());
+
+  //   // return _var.gradSln(*elem_info) * cell_to_face / (cell_to_face * _current_face_info->normal()) * (_current_face_info->eCN() * _current_face_info->normal());
+
+  // }
+
+  return 0.0;
+  // return computeBoundaryValue() / computeCellToFaceDistance();
 }
