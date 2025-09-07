@@ -248,7 +248,8 @@ template <typename T>
 bool
 Reaction::hasMetaData(const std::string & /*key*/) const
 {
-  ::mooseError("Has metadata not implemented for type " + MooseUtils::prettyCppType<T>());
+  mooseError("Has metadata not implemented for type " + MooseUtils::prettyCppType<T>());
+  return false;
 }
 
 bool
