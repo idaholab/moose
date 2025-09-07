@@ -130,7 +130,8 @@ The transport of each primary species is calculated using the following `Kernels
   species
 - [`PrimaryDiffusion`](/PrimaryDiffusion.md) Diffusion of primary species
 
-The transport of primary species present in a secondary species is included using:
+The transport of primary species present in a secondary species can be set using
+the [AqueousReactionsEquilibriumPhysics.md], or with the following kernels:
 
 - [`CoupledBEEquilibriumSub`](/CoupledBEEquilibriumSub.md) Rate of change of
   primary species concentration in an equilibrium secondary species
