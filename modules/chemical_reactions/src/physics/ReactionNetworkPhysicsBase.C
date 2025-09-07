@@ -7,11 +7,11 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ReactionKineticsPhysicsBase.h"
+#include "ReactionNetworkPhysicsBase.h"
 #include <sstream>
 
 InputParameters
-ReactionKineticsPhysicsBase::validParams()
+ReactionNetworkPhysicsBase::validParams()
 {
   InputParameters params = PhysicsBase::validParams();
   params.addClassDescription("Base class to create a reaction network Physics from.");
@@ -43,7 +43,7 @@ ReactionKineticsPhysicsBase::validParams()
   return params;
 }
 
-ReactionKineticsPhysicsBase::ReactionKineticsPhysicsBase(const InputParameters & parameters)
+ReactionNetworkPhysicsBase::ReactionNetworkPhysicsBase(const InputParameters & parameters)
   : PhysicsBase(parameters),
     _solver_species(getParam<std::vector<VariableName>>("solver_variables")),
     _num_solver_species(_solver_species.size()),
@@ -84,7 +84,7 @@ ReactionKineticsPhysicsBase::ReactionKineticsPhysicsBase(const InputParameters &
 }
 
 void
-ReactionKineticsPhysicsBase::addSolverVariables()
+ReactionNetworkPhysicsBase::addSolverVariables()
 {
   for (const auto i : index_range(_solver_species))
   {
@@ -109,7 +109,7 @@ ReactionKineticsPhysicsBase::addSolverVariables()
 }
 
 void
-ReactionKineticsPhysicsBase::addAuxiliaryVariables()
+ReactionNetworkPhysicsBase::addAuxiliaryVariables()
 {
   for (const auto i : index_range(_aux_species))
   {
@@ -130,21 +130,21 @@ ReactionKineticsPhysicsBase::addAuxiliaryVariables()
 }
 
 void
-ReactionKineticsPhysicsBase::addPreconditioning()
+ReactionNetworkPhysicsBase::addPreconditioning()
 {
   // TODO: identify fully independent or sequential groups in the reaction network
   // Solve using a segregated approach in the order of the sequence
 }
 
 void
-ReactionKineticsPhysicsBase::addComponent(const ActionComponent & component)
+ReactionNetworkPhysicsBase::addComponent(const ActionComponent & component)
 {
   for (const auto & block : component.blocks())
     _blocks.push_back(block);
 }
 
 void
-ReactionKineticsPhysicsBase::addInitialConditions()
+ReactionNetworkPhysicsBase::addInitialConditions()
 {
   InputParameters params = getFactory().getValidParams("FunctorIC");
   assignBlocks(params, _blocks);
