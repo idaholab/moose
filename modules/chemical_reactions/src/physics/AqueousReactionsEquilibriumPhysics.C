@@ -7,41 +7,48 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "AqueousReactionKinetics.h"
+#include "AqueousReactionsEquilibriumPhysics.h"
 #include "ReactionNetworkUtils.h"
 
 // Register the actions for the objects actually used
-registerMooseAction("ChemicalReactionsApp", AqueousReactionKinetics, "add_kernel");
-registerMooseAction("ChemicalReactionsApp", AqueousReactionKinetics, "add_aux_kernel");
-registerReactionKineticsPhysicsBaseTasks("ChemicalReactionsApp", AqueousReactionKinetics);
+registerMooseAction("ChemicalReactionsApp", AqueousReactionsEquilibriumPhysics, "add_kernel");
+registerMooseAction("ChemicalReactionsApp", AqueousReactionsEquilibriumPhysics, "add_aux_kernel");
+registerReactionNetworkPhysicsBaseTasks("ChemicalReactionsApp", AqueousReactionsEquilibriumPhysics);
 
 InputParameters
-AqueousReactionKinetics::validParams()
+AqueousReactionsEquilibriumPhysics::validParams()
 {
-  InputParameters params = ReactionKineticsPhysicsBase::validParams();
+  InputParameters params = ReactionNetworkPhysicsBase::validParams();
   params.addClassDescription("Forms the equations for the chemical reaction networks in a fluid"
                              " medium using a continuous Galerkin finite element discretization.");
 
-  // Rename parameters to match the previously existing actions for AqueousEquilibrium ReactionNetwork
+  // Rename parameters to match the previously existing actions for AqueousEquilibrium
+  // ReactionNetwork
   params.renameParam("solver_variables", "primary_species", "The list of primary species to add");
-  params.renameParam("auxiliary_variables", "secondary_species", "The list of secondary species to add");
-  params.renameParam("variable_order", "order", "Order of both the primary and secondary species variables");
+  params.renameParam(
+      "auxiliary_variables", "secondary_species", "The list of secondary species to add");
+  params.renameParam(
+      "variable_order", "order", "Order of both the primary and secondary species variables");
   params.renameParam("equation_scaling", "scaling", "");
   params.setDocString("reactions", "The list of equilibrium reactions occuring in the fluid");
 
-  // To preserve the legacy option to perform Darcy-advection with AqueousEquilibrium ReactionNetwork
+  // To preserve the legacy option to perform Darcy-advection with AqueousEquilibrium
+  // ReactionNetwork
   params.addParam<bool>("add_darcy_advection_term",
-      false,
-      "Whether to add an advection term using the Darcy equation to compute the advecting velocity");
-  params.addParam<std::vector<VariableName>>("pressure", {}, "Pressure variable (for Darcy advection)");
+                        false,
+                        "Whether to add an advection term using the Darcy equation to compute the "
+                        "advecting velocity");
+  params.addParam<std::vector<VariableName>>(
+      "pressure", {}, "Pressure variable (for Darcy advection)");
   params.addParam<RealVectorValue>(
       "gravity", RealVectorValue(0, 0, -9.81), "Gravity vector (for Darcy advection)");
 
   return params;
 }
 
-AqueousReactionKinetics::AqueousReactionKinetics(const InputParameters & parameters)
-  : ReactionKineticsPhysicsBase(parameters),
+AqueousReactionsEquilibriumPhysics::AqueousReactionsEquilibriumPhysics(
+    const InputParameters & parameters)
+  : ReactionNetworkPhysicsBase(parameters),
     _sto_u(_num_solver_species),
     _sto_v(_num_solver_species),
     _weights(_num_solver_species),
@@ -124,7 +131,7 @@ AqueousReactionKinetics::AqueousReactionKinetics(const InputParameters & paramet
 }
 
 void
-AqueousReactionKinetics::addFEKernels()
+AqueousReactionsEquilibriumPhysics::addFEKernels()
 {
   // Add Kernels for each primary species
   // Note that the equations are on a per-species basis!
@@ -186,7 +193,7 @@ AqueousReactionKinetics::addFEKernels()
 }
 
 void
-AqueousReactionKinetics::addAuxiliaryKernels()
+AqueousReactionsEquilibriumPhysics::addAuxiliaryKernels()
 {
   // Add AqueousEquilibriumRxnAux AuxKernels for equilibrium species
   for (const auto j : make_range(_num_reactions))
