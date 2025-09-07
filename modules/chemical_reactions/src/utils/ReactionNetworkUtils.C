@@ -170,37 +170,46 @@ parseReactionNetwork(const std::string & reaction_network_string, bool output_to
     {
       const auto & r = reactions[i];
       std::cout << "Reaction " << i + 1 << ":\n";
-      std::cout << "  Reactants:\n";
-      for (const auto & t : r.reactants)
-      {
-        std::cout << "    " << t.coefficient << " " << t.species;
-        if (t.charge)
-          std::cout << t.charge.value();
-        if (t.state)
-          std::cout << " (" << t.state.value() << ")";
-        std::cout << "\n";
-      }
-      std::cout << "  Products:\n";
-      for (const auto & t : r.products)
-      {
-        std::cout << "    " << t.coefficient << " " << t.species;
-        if (t.charge)
-          std::cout << t.charge.value();
-        if (t.state)
-          std::cout << " (" << t.state.value() << ")";
-        std::cout << "\n";
-      }
-      if (!r.metadata.empty())
-      {
-        std::cout << "  Metadata:\n";
-        for (const auto & [k, v] : r.metadata)
-          std::cout << "    " << k << " = " << v << "\n";
-      }
+      std::cout << Moose::stringify(r) << std::endl;
     }
   }
 
   return reactions;
 }
-
 // namespace ReactionNetworkUtils
+}
+
+namespace Moose
+{
+std::string
+stringify(const ReactionNetworkUtils::Reaction & r)
+{
+  std::string str_out = "  Reactants:\n";
+  for (const auto & t : r.reactants)
+  {
+    str_out += "    " + std::to_string(t.coefficient) + " " + t.species;
+    if (t.charge)
+      str_out += t.charge.value();
+    if (t.state)
+      str_out += " (" + t.state.value() + ")";
+    str_out += "\n";
+  }
+  str_out += "  Products:\n";
+  for (const auto & t : r.products)
+  {
+    str_out += "    " + std::to_string(t.coefficient) + " " + t.species;
+    if (t.charge)
+      str_out += t.charge.value();
+    if (t.state)
+      str_out += " (" + t.state.value() + ")";
+    str_out += "\n";
+  }
+  if (!r.metadata.empty())
+  {
+    str_out += "  Metadata:\n";
+    for (const auto & [k, v] : r.metadata)
+      str_out += "    " + k + " = " + v + "\n";
+  }
+  return str_out;
+}
 }

@@ -38,3 +38,8 @@ struct Reaction
 std::vector<Reaction> parseReactionNetwork(const std::string & reaction_network_string,
                                            bool output_to_cout);
 }
+
+namespace Moose
+{
+std::string stringify(const ReactionNetworkUtils::Reaction & t);
+}
