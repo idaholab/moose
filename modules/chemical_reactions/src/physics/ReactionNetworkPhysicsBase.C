@@ -33,13 +33,6 @@ ReactionNetworkPhysicsBase::validParams()
   // Reaction network
   params.addParam<std::string>("reactions", "The list of chemical reactions");
 
-  // Source terms
-  params.addParam<std::vector<MooseFunctorName>>(
-      "additional_source_functors",
-      "Additional volumetric source terms in each species' equations");
-  params.addParam<std::vector<Real>>(
-      "additional_source_coefs", {1}, "Coefficients multiplying each source");
-
   return params;
 }
 
