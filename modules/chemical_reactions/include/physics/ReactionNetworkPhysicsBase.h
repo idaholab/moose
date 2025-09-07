@@ -14,22 +14,23 @@
 
 class ActionComponent;
 
-#define registerReactionKineticsPhysicsBaseTasks(app_name, derived_name)                           \
+#define registerReactionNetworkPhysicsBaseTasks(app_name, derived_name)                            \
   registerPhysicsBaseTasks(app_name, derived_name);                                                \
   registerMooseAction(app_name, derived_name, "add_variable");                                     \
   registerMooseAction(app_name, derived_name, "add_aux_variable");                                 \
   registerMooseAction(app_name, derived_name, "add_ic")
 
 /**
- * Base class to host all common parameters and attributes of Physics actions to solve the diffusion
- * equation for multiple species
+ * Base class to host all common parameters and attributes of Physics actions to solve equations
+ * for multiple species involved in chemical reactions. For example, reaction kinetics, but also,
+ * equilibrium.
  */
-class ReactionKineticsPhysicsBase : public PhysicsBase
+class ReactionNetworkPhysicsBase : public PhysicsBase
 {
 public:
   static InputParameters validParams();
 
-  ReactionKineticsPhysicsBase(const InputParameters & parameters);
+  ReactionNetworkPhysicsBase(const InputParameters & parameters);
 
   void addComponent(const ActionComponent & component) override;
 
