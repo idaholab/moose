@@ -23,7 +23,7 @@ public:
   AqueousReactionKinetics(const InputParameters & parameters);
 
 protected:
-  virtual void addAuxiliaryVariables() override;
+  virtual void addAuxiliaryKernels() override;
   virtual void addFEKernels() override;
 
   /// Stoichiometric coefficients for each primary species (outer indexing) in each reaction

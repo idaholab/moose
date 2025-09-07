@@ -27,34 +27,40 @@ AqueousReactionKinetics::validParams()
   params.renameParam("auxiliary_variables", "secondary_species", "The list of secondary species to add");
   params.renameParam("variable_order", "order", "Order of both the primary and secondary species variables");
   params.renameParam("equation_scaling", "scaling", "");
-  params.renameParam("reactions", "reactions", "The list of equilibrium reactions occuring in the fluid");
+  params.setDocString("reactions", "The list of equilibrium reactions occuring in the fluid");
 
   // To preserve the legacy option to perform Darcy-advection with AqueousEquilibrium ReactionNetwork
   params.addParam<bool>("add_darcy_advection_term",
       false,
       "Whether to add an advection term using the Darcy equation to compute the advecting velocity");
   params.addParam<std::vector<VariableName>>("pressure", {}, "Pressure variable (for Darcy advection)");
-  params.addParam<RealVectorValue>("gravity", "Gravity vector (for Darcy advection)");
+  params.addParam<RealVectorValue>(
+      "gravity", RealVectorValue(0, 0, -9.81), "Gravity vector (for Darcy advection)");
 
   return params;
 }
 
 AqueousReactionKinetics::AqueousReactionKinetics(const InputParameters & parameters)
   : ReactionKineticsPhysicsBase(parameters),
-    _pressure_var(getParam<std::vector<VariableName>>("pressure")),
-    _gravity(getParam<RealVectorValue>("gravity"))
+    _sto_u(_num_solver_species),
+    _sto_v(_num_solver_species),
+    _weights(_num_solver_species),
+    _primary_participation(_num_solver_species),
+    _coupled_v(_num_solver_species),
+    _pressure_var(getParam<std::vector<VariableName>>("pressure"))
 {
   // Further parse the reactions
   // Keeping the data in these vectors of vectors as an intermediate processing step
-  for (const auto & reaction : _reactions)
+  for (const auto i : index_range(_reactions))
   {
-    _solver_species_involved.push_back(reaction.getSpecies());
+    const auto & reaction = _reactions[i];
+    _solver_species_involved.push_back(reaction.getReactantSpecies());
     _stos.push_back(reaction.getStoichiometricCoefficients());
 
     // There are only one equilibrium species. We look at the output species
     const auto & products = reaction.getProductSpecies();
     if (products.size() != 1)
-      mooseError("Reaction: " + Moose::stringify(reaction) +
+      mooseError("Reaction:\n" + _reactions_input[i] +
                  "\n has more than one product species (on the RHS). This Physics only supports "
                  "one product species per reaction");
     _eq_species.push_back(products[0]);
@@ -65,11 +71,12 @@ AqueousReactionKinetics::AqueousReactionKinetics(const InputParameters & paramet
     else if (reaction.hasMetaData<Real>("K"))
       _log_eq_const.push_back(std::log10(std::stod(reaction.getMetaData("K"))));
     else if (reaction.hasMetaData("K") || reaction.hasMetaData("log10_K"))
-      paramError("Equilibrium constant species in square brackets must be specified as a float, "
+      paramError("reactions",
+                 "Equilibrium constant species in square brackets must be specified as a float, "
                  "not a name");
     else
       paramError("reactions",
-                 "Reaction: '" + Moose::stringify(reaction) +
+                 "Reaction: '" + _reactions_input[i] +
                      "'\n is missing an equilibrium constant [K=] or its logarithm [log10_K=] in "
                      "its metadata");
   }
@@ -86,6 +93,7 @@ AqueousReactionKinetics::AqueousReactionKinetics(const InputParameters & paramet
     _primary_participation[i].resize(_num_reactions, false);
     for (unsigned int j = 0; j < _num_reactions; ++j)
     {
+      // Set the booleans for involvement in a reaction
       for (unsigned int k = 0; k < _solver_species_involved[j].size(); ++k)
         if (_solver_species_involved[j][k] == _solver_species[i])
           _primary_participation[i][j] = true;
@@ -94,6 +102,7 @@ AqueousReactionKinetics::AqueousReactionKinetics(const InputParameters & paramet
       {
         for (unsigned int k = 0; k < _solver_species_involved[j].size(); ++k)
         {
+          // Re-sort the coefficients into a more convenient format
           if (_solver_species_involved[j][k] == _solver_species[i])
           {
             _sto_u[i][j] = _stos[j][k];
@@ -166,7 +175,7 @@ AqueousReactionKinetics::addFEKernels()
           params_conv.set<std::vector<Real>>("sto_v") = _sto_v[i][j];
           params_conv.set<std::vector<VariableName>>("v") = _coupled_v[i][j];
           params_conv.set<std::vector<VariableName>>("p") = _pressure_var;
-          params_conv.set<RealVectorValue>("gravity") = _gravity;
+          params_conv.set<RealVectorValue>("gravity") = getParam<RealVectorValue>("gravity");
           _problem->addKernel("CoupledConvectionReactionSub",
                               _solver_species[i] + "_" + _eq_species[j] + "_conv",
                               params_conv);
@@ -177,19 +186,24 @@ AqueousReactionKinetics::addFEKernels()
 }
 
 void
-AqueousReactionKinetics::addAuxiliaryVariables()
+AqueousReactionKinetics::addAuxiliaryKernels()
 {
   // Add AqueousEquilibriumRxnAux AuxKernels for equilibrium species
   for (const auto j : make_range(_num_reactions))
   {
     // Add these aux-kernels only for the aux species involved in the reaction
+    // we should not be adding them twice, since only 1 eq_species per reaction
     if (std::find(_aux_species.begin(), _aux_species.end(), _eq_species[j]) != _aux_species.end())
     {
       InputParameters params_eq = _factory.getValidParams("AqueousEquilibriumRxnAux");
       assignBlocks(params_eq, _blocks);
       params_eq.set<AuxVariableName>("variable") = _eq_species[j];
       params_eq.defaultCoupledValue("log_k", _log_eq_const[j]);
-      params_eq.set<std::vector<Real>>("sto_v") = _stos[j];
+      mooseAssert(_stos[j].size() >= _solver_species_involved[j].size(),
+                  "Coefs are for solver + auxiliary");
+      std::vector<Real> stos_primary(_stos[j].begin(),
+                                     _stos[j].begin() + _solver_species_involved[j].size());
+      params_eq.set<std::vector<Real>>("sto_v") = stos_primary;
       params_eq.set<std::vector<VariableName>>("v") = _solver_species_involved[j];
       getProblem().addAuxKernel("AqueousEquilibriumRxnAux", "aux_" + _eq_species[j], params_eq);
     }
