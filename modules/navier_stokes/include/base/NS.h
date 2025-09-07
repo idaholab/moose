@@ -187,6 +187,16 @@ enum class WallTreatmentEnum
   NEQ = 3
 };
 
+/**
+ * CHT side options, we want to make sure these can be used as integers
+ * so we are avoiding the enum class here.
+ */
+enum CHTSide
+{
+  SOLID = 0,
+  FLUID = 1
+};
+
 // Turbulence constants
 static constexpr Real von_karman_constant = 0.4187;
 static constexpr Real E_turb_constant = 9.793;
