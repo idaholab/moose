@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "AqueousReactionKinetics.h"
+#include "ReactionNetworkUtils.h"
 
 // Register the actions for the objects actually used
 registerMooseAction("ChemicalReactionsApp", AqueousReactionKinetics, "add_kernel");
@@ -44,8 +45,34 @@ AqueousReactionKinetics::AqueousReactionKinetics(const InputParameters & paramet
     _gravity(getParam<RealVectorValue>("gravity"))
 {
   // Further parse the reactions
-  _stos.push_back(local_stos);
-  _solver_species_involved.push_back(local_species_list);
+  // Keeping the data in these vectors of vectors as an intermediate processing step
+  for (const auto & reaction : _reactions)
+  {
+    _solver_species_involved.push_back(reaction.getSpecies());
+    _stos.push_back(reaction.getStoichiometricCoefficients());
+
+    // There are only one equilibrium species. We look at the output species
+    const auto & products = reaction.getProductSpecies();
+    if (products.size() != 1)
+      mooseError("Reaction: " + Moose::stringify(reaction) +
+                 "\n has more than one product species (on the RHS). This Physics only supports "
+                 "one product species per reaction");
+    _eq_species.push_back(products[0]);
+
+    // If user passed log_K use that, else use K
+    if (reaction.hasMetaData<Real>("log10_K"))
+      _log_eq_const.push_back(std::stod(reaction.getMetaData("log10_K")));
+    else if (reaction.hasMetaData<Real>("K"))
+      _log_eq_const.push_back(std::log10(std::stod(reaction.getMetaData("K"))));
+    else if (reaction.hasMetaData("K") || reaction.hasMetaData("log10_K"))
+      paramError("Equilibrium constant species in square brackets must be specified as a float, "
+                 "not a name");
+    else
+      paramError("reactions",
+                 "Reaction: '" + Moose::stringify(reaction) +
+                     "'\n is missing an equilibrium constant [K=] or its logarithm [log10_K=] in "
+                     "its metadata");
+  }
 
   // For each primary/solver species, we examine the reactions to get the coefficients
   // and various constants
@@ -104,7 +131,7 @@ AqueousReactionKinetics::addFEKernels()
           assignBlocks(params_sub, _blocks);
           params_sub.set<NonlinearVariableName>("variable") = _solver_species[i];
           params_sub.set<Real>("weight") = _weights[i][j];
-          params_sub.defaultCoupledValue("log_k", _eq_const[j]);
+          params_sub.defaultCoupledValue("log_k", _log_eq_const[j]);
           params_sub.set<Real>("sto_u") = _sto_u[i][j];
           params_sub.set<std::vector<Real>>("sto_v") = _sto_v[i][j];
           params_sub.set<std::vector<VariableName>>("v") = _coupled_v[i][j];
@@ -118,7 +145,7 @@ AqueousReactionKinetics::addFEKernels()
           assignBlocks(params_cd, _blocks);
           params_cd.set<NonlinearVariableName>("variable") = _solver_species[i];
           params_cd.set<Real>("weight") = _weights[i][j];
-          params_cd.defaultCoupledValue("log_k", _eq_const[j]);
+          params_cd.defaultCoupledValue("log_k", _log_eq_const[j]);
           params_cd.set<Real>("sto_u") = _sto_u[i][j];
           params_cd.set<std::vector<Real>>("sto_v") = _sto_v[i][j];
           params_cd.set<std::vector<VariableName>>("v") = _coupled_v[i][j];
@@ -134,7 +161,7 @@ AqueousReactionKinetics::addFEKernels()
           assignBlocks(params_conv, _blocks);
           params_conv.set<NonlinearVariableName>("variable") = _solver_species[i];
           params_conv.set<Real>("weight") = _weights[i][j];
-          params_conv.defaultCoupledValue("log_k", _eq_const[j]);
+          params_conv.defaultCoupledValue("log_k", _log_eq_const[j]);
           params_conv.set<Real>("sto_u") = _sto_u[i][j];
           params_conv.set<std::vector<Real>>("sto_v") = _sto_v[i][j];
           params_conv.set<std::vector<VariableName>>("v") = _coupled_v[i][j];
@@ -156,12 +183,12 @@ AqueousReactionKinetics::addAuxiliaryVariables()
   for (const auto j : make_range(_num_reactions))
   {
     // Add these aux-kernels only for the aux species involved in the reaction
-    if (_aux_species.find(_eq_species[j]) != _aux_species.end())
+    if (std::find(_aux_species.begin(), _aux_species.end(), _eq_species[j]) != _aux_species.end())
     {
       InputParameters params_eq = _factory.getValidParams("AqueousEquilibriumRxnAux");
-      assignBlocks(params, _blocks);
+      assignBlocks(params_eq, _blocks);
       params_eq.set<AuxVariableName>("variable") = _eq_species[j];
-      params_eq.defaultCoupledValue("log_k", _eq_const[j]);
+      params_eq.defaultCoupledValue("log_k", _log_eq_const[j]);
       params_eq.set<std::vector<Real>>("sto_v") = _stos[j];
       params_eq.set<std::vector<VariableName>>("v") = _solver_species_involved[j];
       getProblem().addAuxKernel("AqueousEquilibriumRxnAux", "aux_" + _eq_species[j], params_eq);
