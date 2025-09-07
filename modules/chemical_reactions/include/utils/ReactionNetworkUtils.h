@@ -9,8 +9,9 @@
 
 #pragma once
 
-#include <string>
 #include "MooseTypes.h"
+#include <string>
+#include <optional>
 
 namespace ReactionNetworkUtils
 {
