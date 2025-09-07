@@ -111,6 +111,9 @@ protected:
   /// Whether mortar dynamic contact constraints are to be used
   const bool _mortar_dynamics;
 
+  /// Whether to generate contact_pressure, penetration and nodal_area aux variables when using a mortar formulation
+  const bool _add_aux_vars;
+
 private:
   /**
    * Generate mesh and other Moose objects for Mortar contact
