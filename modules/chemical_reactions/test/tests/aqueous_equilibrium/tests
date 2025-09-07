@@ -5,6 +5,12 @@
     exodiff = '1species_out.e'
     rel_err = 1e-5
   [../]
+  [1species_physics]
+    type = 'Exodiff'
+    input = '1species_physics.i'
+    exodiff = '1species_physics_out.e'
+    rel_err = 1e-5
+  []
   [./1species_without_action]
     type = 'Exodiff'
     input = '1species_without_action.i'
@@ -37,6 +43,12 @@
     input = '2species_with_density.i'
     exodiff = '2species_with_density_out.e'
   [../]
+  [2species_with_density_physics]
+    type = 'Exodiff'
+    input = '2species_physics.i'
+    exodiff = '2species_physics_out.e'
+    rel_err = 1e-5
+  []
   [./water_dissociation]
     type = CSVDiff
     input = water_dissociation.i
@@ -47,6 +59,12 @@
     input = co2_h2o.i
     csvdiff = co2_h2o_out.csv
   [../]
+  [co2_h2o_physics]
+    type = CSVDiff
+    input = co2_h2o_physics.i
+    csvdiff = co2_h2o_physics_out.csv
+    ignore_columns = 'co3-- co3^2-'
+  []
   [./calcium_bicarbonate]
     type = CSVDiff
     input = calcium_bicarbonate.i
