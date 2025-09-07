@@ -4,7 +4,7 @@
     type = CSVDiff
     input = 'ad_flux_divergence.i'
     csvdiff = 'ad_flux_divergence_out.csv'
-    requirement = 'The system shall compute the divergence of a material-supplied flux using ADFluxDivergence.'
+    requirement = 'The system shall compute the divergence of a gradient-based flux using ADFluxDivergence.'
   []
 []
 

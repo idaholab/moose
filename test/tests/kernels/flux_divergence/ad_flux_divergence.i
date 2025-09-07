@@ -4,17 +4,6 @@
   nx = 1
 []
 
-[Functions]
-  [x_fn]
-    type = ParsedFunction
-    expression = x
-  []
-  [zero]
-    type = ConstantFunction
-    value = 0
-  []
-[]
-
 [Variables]
   [u]
   []
@@ -25,17 +14,14 @@
     type = ADFluxDivergence
     variable = u
   []
-  [reaction]
-    type = ADReaction
-    variable = u
-  []
 []
 
 [Materials]
   [flux]
-    type = ADGenericFunctionVectorMaterial
-    prop_names = 'flux'
-    prop_values = 'x_fn zero zero'
+    type = ADFluxFromGradientMaterial
+    flux = flux
+    u = u
+    diffusivity = 1.0
   []
 []
 
@@ -44,7 +30,7 @@
     type = DirichletBC
     variable = u
     boundary = left
-    value = 1
+    value = 0
   []
   [right]
     type = DirichletBC
