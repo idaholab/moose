@@ -34,9 +34,6 @@ public:
   void addComponent(const ActionComponent & component) override;
 
 protected:
-  // Notably reads the reaction network
-  virtual void initializePhysicsAdditional() override;
-
   /// Name of the species variables to solve for in the reaction network
   const std::vector<VariableName> & _solver_species;
   /// Number of species to solve for
@@ -45,6 +42,8 @@ protected:
   const std::vector<AuxVariableName> & _aux_species;
   /// Number of auxiliary species
   const unsigned int _num_aux_species;
+  /// Reaction network as a vector of lines for pretty output
+  std::vector<std::string> _reactions_input;
   /// Reaction network after being parsed in initializePhysics()
   const std::vector<ReactionNetworkUtils::Reaction> _reactions;
   /// Number of reactions involved in the network
