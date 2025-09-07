@@ -8,6 +8,9 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ReactionNetworkUtils.h"
+#include "MooseTypes.h"
+#include "MooseUtils.h"
+#include "libmesh/utility.h"
 #include "peglib.h"
 
 namespace ReactionNetworkUtils
@@ -176,6 +179,64 @@ parseReactionNetwork(const std::string & reaction_network_string, bool output_to
 
   return reactions;
 }
+
+std::vector<VariableName>
+Reaction::getSpecies() const
+{
+  std::vector<VariableName> species;
+  for (const auto & term : reactants)
+    species.push_back(term.species);
+  for (const auto & term : products)
+    species.push_back(term.species);
+  return species;
+}
+
+std::vector<Real>
+Reaction::getStoichiometricCoefficients() const
+{
+  std::vector<Real> coeffs;
+  for (const auto & term : reactants)
+    coeffs.push_back(term.coefficient);
+  for (const auto & term : products)
+    coeffs.push_back(term.coefficient);
+  return coeffs;
+}
+
+std::vector<std::string>
+Reaction::getProductSpecies() const
+{
+  std::vector<std::string> species;
+  for (const auto & term : products)
+    species.push_back(term.species);
+  return species;
+}
+
+template <>
+bool
+Reaction::hasMetaData<Real>(const std::string & key) const
+{
+  return metadata.count(key) && MooseUtils::isDigits(libmesh_map_find(metadata, key));
+}
+
+template <typename T>
+bool
+Reaction::hasMetaData(const std::string & /*key*/) const
+{
+  ::mooseError("Has metadata not implemented for type " + MooseUtils::prettyCppType<T>());
+}
+
+bool
+Reaction::hasMetaData(const std::string & key) const
+{
+  return metadata.count(key);
+}
+
+const std::string &
+Reaction::getMetaData(const std::string & key) const
+{
+  return libmesh_map_find(metadata, key);
+}
+
 // namespace ReactionNetworkUtils
 }
 
