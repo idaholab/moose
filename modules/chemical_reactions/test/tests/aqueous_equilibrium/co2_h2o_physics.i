@@ -54,7 +54,7 @@
 []
 
 [Physics]
-  [AqueousReactionKinetics/all]
+  [AqueousReactionsEquilibrium/all]
     primary_species = 'hco3- h+'
     secondary_species = 'co2_aq co3^2- oh-'
     reactions = 'hco3- + h+ -> co2_aq  [log10_K=6.3447]

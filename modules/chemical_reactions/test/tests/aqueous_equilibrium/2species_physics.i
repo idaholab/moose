@@ -43,7 +43,7 @@
 []
 
 [Physics]
-  [AqueousReactionKinetics/all]
+  [AqueousReactionsEquilibrium/all]
     primary_species = 'a b'
     reactions = '2a -> pa2    [log10_K=2]
                  a + b -> pab [log10_K=-2]'
