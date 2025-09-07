@@ -32,6 +32,18 @@
     recover = false # see #19126
     valgrind = HEAVY
   []
+  [transient-physics-defines-fp]
+    type = 'Exodiff'
+    input = 2d-transient-physics.i
+    cli_args = "FunctorMaterials/active='' Physics/NavierStokes/Flow/flow/fp=fp"
+    exodiff = 2d-transient-physics_out.e
+    prereq = 'transient-physics'
+    capabilities = 'method!=dbg'
+    requirement = 'The system shall be able to solve for a transient 2D channel case with a weakly compressible formulation using the shorthand WCNSFV Physics syntax, and using this syntax for the flow equations to define the fluid material properties from the fluid properties object.'
+    abs_zero = 1e-9
+    recover = false # see #19126
+    valgrind = HEAVY
+  []
   [turbulence]
     type = 'Exodiff'
     input = 2d-transient.i
