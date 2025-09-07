@@ -19,6 +19,7 @@ struct Term
 {
   double coefficient;
   std::string species;
+  // State is between parenthesis
   std::optional<std::string> state;
   std::optional<std::string> charge;
 };
