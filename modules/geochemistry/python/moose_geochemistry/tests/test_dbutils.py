@@ -14,10 +14,12 @@ import unittest
 import json
 import io
 from contextlib import redirect_stdout
-# so we can find our libraries, no matter how we're called
-findbin = os.path.dirname(os.path.realpath(sys.argv[0]))
-sys.path.append(os.path.join(findbin, "../"))
-import dbutils
+import importlib.util
+
+if importlib.util.find_spec('moose_geochemistry') is None:
+    _geochemistry_python_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+    sys.path.append(_geochemistry_python_path)
+from moose_geochemistry import dbutils
 
 class TestDBUtils(unittest.TestCase):
     """
