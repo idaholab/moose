@@ -10,7 +10,13 @@ N = 200
 [GlobalParams]
   family = MONOMIAL
   order = CONSTANT
-  gravity = 9.81
+  gravity = gravity
+[]
+
+[AuxVariables]
+  [gravity]
+    initial_condition = 9.81
+  []
 []
 
 [Variables]

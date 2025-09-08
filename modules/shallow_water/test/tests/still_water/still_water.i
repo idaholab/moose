@@ -71,7 +71,6 @@ bathymetry=bump
 [UserObjects]
   [flux_hll]
     type = SWENumericalFluxHLL
-    gravity = 9.81
     dry_depth = 1e-6
     execute_on = 'INITIAL TIMESTEP_END'
   []

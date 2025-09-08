@@ -204,5 +204,6 @@ N = 50
   print_linear_residuals = false
   csv = true
   checkpoint = false
+  execute_on = FINAL
 []
 
