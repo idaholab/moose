@@ -19,6 +19,5 @@ public:
   ADTimeDerivative(const InputParameters & parameters);
 
 protected:
-  const ADMaterialProperty<Real> & _coef;
   virtual ADReal precomputeQpResidual() override;
 };

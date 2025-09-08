@@ -18,18 +18,16 @@ ADTimeDerivative::validParams()
   params.addClassDescription(
       "The time derivative operator with the weak form of $(\\psi_i, "
       "\\alpha \\dot \\frac{\\partial u_h}{\\partial t})$, where \\alpha is the coefficient.");
-  params.addRequiredParam<MaterialPropertyName>("coefficient",
-                                                "The coefficient of the first time derivative");
   return params;
 }
 
 ADTimeDerivative::ADTimeDerivative(const InputParameters & parameters)
-  : ADTimeKernelValue(parameters), _coef(getADMaterialProperty<Real>("density"))
+  : ADTimeKernelValue(parameters)
 {
 }
 
 ADReal
 ADTimeDerivative::precomputeQpResidual()
 {
-  return _coef[_qp] * _u_dot[_qp];
+  return _u_dot[_qp];
 }
