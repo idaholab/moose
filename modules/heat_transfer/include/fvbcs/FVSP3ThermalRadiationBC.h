@@ -46,7 +46,7 @@ protected:
   const Moose::Functor<ADReal> & _psi;
 
   /// Order or radiation moment
-  const MooseEnum & _order;
+  const MooseEnum _order;
 
   /// Coefficients for SP3
   const Moose::Functor<ADReal> & _alpha;

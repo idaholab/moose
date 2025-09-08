@@ -122,7 +122,7 @@ FVSP3ThermalRadiationBC::computeQpResidual()
     thermal_rad_source = -1 * _eta(face, state) * rad_source / (4.0 * libMesh::pi);
   }
   else
-  { // equatino remains in single frequency
+  { // equation for a single frequency
     const auto n1_pow_2 = Utility::pow<2>(_n1(face, state));
     const auto nu = _nu(face, state);
     const auto nu_pow_3 = Utility::pow<3>(nu);

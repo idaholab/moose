@@ -20,15 +20,15 @@ FVSP3TemperatureBC::validParams()
   params.addClassDescription("Semi-Transparent Boundary Condition for SP3 Radiation Temperature");
 
   params.addRequiredParam<MooseFunctorName>("Tb", "The temperature of the boundary");
-  params.addParam<MooseFunctorName>("n1", 1.0, "The refraction coefficient of medium 1.");
-  params.addParam<MooseFunctorName>("n2", 1.0, "The refraction coefficient of medium 2.");
+  params.addParam<MooseFunctorName>("n1", 1.0, "The refraction coefficient of incident medium (cavity).");
+  params.addParam<MooseFunctorName>("n2", 1.0, "The refraction coefficient of transmitting medium (boundary).");
   params.addRequiredParam<MooseFunctorName>("h",
-                                            "The convective heat transfer coefficient of medium.");
+                                            "The convective heat transfer coefficient of incident medium.");
   params.addRequiredParam<MooseFunctorName>("k",
-                                            "The conductive heat transfer coefficient of medium.");
-  params.addRequiredParam<MooseFunctorName>("epsilon", "The optical thickness of the medium.");
-  params.addRequiredParam<MooseFunctorName>("alpha", "The hemispheric emissivity of the medium.");
-  params.addRequiredParam<Real>("nu1", "The maximum opaque frequency of the medium.");
+                                            "The thermal conductivity of incident medium.");
+  params.addRequiredParam<MooseFunctorName>("epsilon", "The optical thickness of incident medium.");
+  params.addRequiredParam<MooseFunctorName>("alpha", "The hemispheric emissivity of incident medium.");
+  params.addRequiredParam<Real>("nu1", "The maximum opaque frequency.");
   params.addRequiredParam<Real>("nu_min", "The minimum frequency");
 
   params.addParam<std::string>("planck_units", "J*s", "Units for the Plank constant");
@@ -65,14 +65,14 @@ FVSP3TemperatureBC::computeQpResidual()
   const auto state = determineState();
 
   // Build the convective source at the boundary
-  const auto T = _var(face, state);
-  const auto Tb = _Tb(face, state);
-  const auto epsilon = _epsilon(face, state);
-  const auto thermal_conv_source =
+  const auto & T = _var(face, state);
+  const auto & Tb = _Tb(face, state);
+  const auto & epsilon = _epsilon(face, state);
+  const auto & thermal_conv_source =
       _h(face, determineState()) * (_Tb(face, determineState()) - _var(face, determineState()));
 
   // Build the radiative source at the boundary
-  const auto n1 = _n1(face, state);
+  const auto & n1 = _n1(face, state);
   const Real abs_tol = 1E-8;
   const Real rel_tol = 1E-6;
 

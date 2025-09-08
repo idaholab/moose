@@ -70,10 +70,11 @@ FVSP3ThermalRadiationDiffusion::computeQpResidual()
         Utility::pow<2>(_optical_thickness(elemArg(), state));
     const auto optical_thickness_neighbor_squared =
         Utility::pow<2>(_optical_thickness(neighborArg(), state));
-    const auto absorptivity_elem =
-        (_absorptivity(elemArg(), state) > 1e-12 ? _absorptivity(elemArg(), state) : 1e-12);
-    const auto absorptivity_neighbor =
-        (_absorptivity(neighborArg(), state) > 1e-12 ? _absorptivity(neighborArg(), state) : 1e-12);
+
+    const auto absorptivity_elem_val = _absorptivity(elemArg(), state);
+    const auto absorptivity_elem = absorptivity_elem_val > 1e-12 ? absorptivity_elem_val : 1e-12;
+    const auto absorptivity_neighbor_val = _absorptivity(neighborArg(), state);
+    const auto absorptivity_neighbor = absorptivity_neighbor_val > 1e-12 ? absorptivity_neighbor_val : 1e-12;
     ;
 
     // Face interpolate coefficients

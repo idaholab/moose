@@ -12,7 +12,7 @@
 #include "FVElementalKernel.h"
 
 /**
- * Computes source the sink terms for the turbulent kinetic energy.
+ * Computes the source and sink terms for the thermal radiation
  */
 class FVSP3ThermalRadiationSourceSink : public FVElementalKernel
 {
@@ -22,13 +22,12 @@ public:
   FVSP3ThermalRadiationSourceSink(const InputParameters & parameters);
 
 protected:
-  /// Overriding residual function
   ADReal computeQpResidual() override;
 
   /// Temperature
   const Moose::Functor<ADReal> & _T;
 
-  /// Frquency
+  /// Frequency
   const Moose::Functor<ADReal> & _nu;
 
   /// Frequency bounds for numerical integration
