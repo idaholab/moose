@@ -24,10 +24,4 @@ ReactionForceAux::validParams()
   return params;
 }
 
-ReactionForceAux::ReactionForceAux(const InputParameters & parameters) : TagVectorAux(parameters)
-{
-  const auto tag_id = _subproblem.getVectorTagID(getParam<TagName>("vector_tag"));
-  const auto tag_type = _subproblem.vectorTagType(tag_id);
-  if (tag_type != Moose::VECTOR_TAG_RESIDUAL)
-    paramError("vector_tag", "The provided tag does not correspond to a residual vector.");
-}
+ReactionForceAux::ReactionForceAux(const InputParameters & parameters) : TagVectorAux(parameters) {}
