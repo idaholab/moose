@@ -19,8 +19,8 @@ protected:
 
   /// Gradient of the coupled variable
   const ADVariableGradient & _grad_u;
-  /// Diffusivity multiplier
-  const Real _diffusivity;
+  /// Diffusivity
+  const ADMaterialProperty<Real> & _diffusivity;
   /// Material property storing the flux vector
   ADMaterialProperty<RealVectorValue> & _flux;
 };
