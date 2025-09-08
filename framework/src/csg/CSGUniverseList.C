@@ -49,9 +49,10 @@ CSGUniverseList::addUniverse(const std::string & name)
 CSGUniverse &
 CSGUniverseList::addUniverse(std::unique_ptr<CSGUniverse> universe)
 {
-  auto [it, inserted] = _universes.emplace(universe->getName(), std::move(universe));
+  auto name = universe->getName();
+  auto [it, inserted] = _universes.emplace(name, std::move(universe));
   if (!inserted)
-    mooseError("Universe with name " + universe->getName() + " already exists in geometry.");
+    mooseError("Universe with name " + name + " already exists in geometry.");
   return *it->second;
 }
 
