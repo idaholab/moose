@@ -32,6 +32,7 @@ const std::string SubChannelApp::LINEAR_HEAT_RATE = "q_prime";
 const std::string SubChannelApp::DUCT_HEAT_FLUX = "duct_heat_flux";
 const std::string SubChannelApp::DUCT_TEMPERATURE = "Tduct";
 const std::string SubChannelApp::DISPLACEMENT = "displacement";
+const std::string SubChannelApp::FRICTION_FACTOR = "ff";
 
 InputParameters
 SubChannelApp::validParams()

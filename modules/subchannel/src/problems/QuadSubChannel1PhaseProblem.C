@@ -204,18 +204,21 @@ QuadSubChannel1PhaseProblem::initializeSolution()
   _aux->solution().close();
 }
 
-Real
+void
 QuadSubChannel1PhaseProblem::computeFrictionFactor(FrictionStruct friction_args)
 {
   auto Re = friction_args.Re;
   auto i_ch = friction_args.i_ch;
+  auto iz = friction_args.iz;
+  auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
   /// Pang, B. et al. KIT, 2013
   if (_default_friction_model)
   {
     Real a, b;
     if (Re < 1)
     {
-      return 64.0;
+      a = 64.0;
+      b = 0.0;
     }
     else if (Re >= 1 and Re < 5000)
     {
@@ -232,7 +235,7 @@ QuadSubChannel1PhaseProblem::computeFrictionFactor(FrictionStruct friction_args)
       a = 0.184;
       b = -0.20;
     }
-    return a * std::pow(Re, b);
+    _ff_soln->set(node, a * std::pow(Re, b));
   }
   /// Todreas-Kazimi NUCLEAR SYSTEMS, second edition, Volume 1, 2011
   else
@@ -340,18 +343,19 @@ QuadSubChannel1PhaseProblem::computeFrictionFactor(FrictionStruct friction_args)
     if (Re < ReL)
     {
       // laminar flow
-      return fL;
+      _ff_soln->set(node, fL);
     }
     else if (Re > ReT)
     {
       // turbulent flow
-      return fT;
+      _ff_soln->set(node, fT);
     }
     else
     {
       // transient flow: psi definition uses a Bulk ReT/ReL number, same for all channels
-      return fL * std::pow((1 - psi), 1.0 / 3.0) * (1 - std::pow(psi, lambda)) +
-             fT * std::pow(psi, 1.0 / 3.0);
+      _ff_soln->set(node,
+                    fL * std::pow((1 - psi), 1.0 / 3.0) * (1 - std::pow(psi, lambda)) +
+                        fT * std::pow(psi, 1.0 / 3.0));
     }
   }
 }

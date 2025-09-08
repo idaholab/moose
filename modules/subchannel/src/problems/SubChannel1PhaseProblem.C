@@ -273,6 +273,7 @@ SubChannel1PhaseProblem::initialSetup()
   _q_prime_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::LINEAR_HEAT_RATE));
   _displacement_soln =
       std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::DISPLACEMENT));
+  _ff_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::FRICTION_FACTOR));
   if (_duct_mesh_exist)
   {
     _duct_heat_flux_soln =
@@ -771,14 +772,15 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         _friction_args.i_ch = i_ch;
         _friction_args.S = S;
         _friction_args.w_perim = w_perim;
-        auto fi = computeFrictionFactor(_friction_args);
+        _friction_args.iz = iz;
+        computeFrictionFactor(_friction_args);
         /// Upwind local form loss
         auto ki = 0.0;
         if ((*_mdot_soln)(node_out) >= 0)
           ki = k_grid[i_ch][iz - 1];
         else
           ki = k_grid[i_ch][iz];
-        auto friction_term = (fi * dz / Dh_i + ki) * 0.5 *
+        auto friction_term = ((*_ff_soln)(node_out)*dz / Dh_i + ki) * 0.5 *
                              (*_mdot_soln)(node_out)*std::abs((*_mdot_soln)(node_out)) /
                              (S * (*_rho_soln)(node_out));
         auto gravity_term = _dir_grav * _g_grav * (*_rho_soln)(node_out)*dz * S;
@@ -835,14 +837,15 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           _friction_args.i_ch = i_ch;
           _friction_args.S = S_interp;
           _friction_args.w_perim = w_perim_interp;
-          auto fi = computeFrictionFactor(_friction_args);
+          _friction_args.iz = iz;
+          computeFrictionFactor(_friction_args);
           /// Upwind local form loss
           auto ki = 0.0;
           if ((*_mdot_soln)(node_out) >= 0)
             ki = k_grid[i_ch][iz - 1];
           else
             ki = k_grid[i_ch][iz];
-          Pe = 1.0 / ((fi * dz / Dh_i + ki) * 0.5) * mdot_loc / std::abs(mdot_loc);
+          Pe = 1.0 / (((*_ff_soln)(node_out)*dz / Dh_i + ki) * 0.5) * mdot_loc / std::abs(mdot_loc);
         }
         auto alpha = computeInterpolationCoefficients(Pe);
 
@@ -1073,15 +1076,16 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         _friction_args.i_ch = i_ch;
         _friction_args.S = S_interp;
         _friction_args.w_perim = w_perim_interp;
-        auto fi = computeFrictionFactor(_friction_args);
+        _friction_args.iz = iz;
+        computeFrictionFactor(_friction_args);
         /// Upwind local form loss
         auto ki = 0.0;
         if ((*_mdot_soln)(node_out) >= 0)
           ki = k_grid[i_ch][iz - 1];
         else
           ki = k_grid[i_ch][iz];
-        auto coef = (fi * dz / Dh_i + ki) * 0.5 * std::abs((*_mdot_soln)(node_out)) /
-                    (S_interp * rho_interp);
+        auto coef = ((*_ff_soln)(node_out)*dz / Dh_i + ki) * 0.5 *
+                    std::abs((*_mdot_soln)(node_out)) / (S_interp * rho_interp);
         if (iz == first_node)
         {
           PetscScalar value_vec = -1.0 * alpha * coef * (*_mdot_soln)(node_in);

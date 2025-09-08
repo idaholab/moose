@@ -251,7 +251,7 @@ TriSubChannel1PhaseProblem::initializeSolution()
   _aux->solution().close();
 }
 
-Real
+void
 TriSubChannel1PhaseProblem::computeFrictionFactor(FrictionStruct friction_args)
 {
   // The upgraded Cheng and Todreas correlation for pressure drop in hexagonal wire-wrapped rod
@@ -260,6 +260,8 @@ TriSubChannel1PhaseProblem::computeFrictionFactor(FrictionStruct friction_args)
   auto i_ch = friction_args.i_ch;
   auto S = friction_args.S;
   auto w_perim = friction_args.w_perim;
+  auto iz = friction_args.iz;
+  auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
   auto Dh_i = 4.0 * S / w_perim;
   Real aL, b1L, b2L, cL;
   Real aT, b1T, b2T, cT;
@@ -422,18 +424,19 @@ TriSubChannel1PhaseProblem::computeFrictionFactor(FrictionStruct friction_args)
   if (Re < ReL)
   {
     // laminar flow
-    return fL;
+    _ff_soln->set(node, fL);
   }
   else if (Re > ReT)
   {
     // turbulent flow
-    return fT;
+    _ff_soln->set(node, fT);
   }
   else
   {
     // transient flow: psi definition uses a Bulk ReT/ReL number, same for all channels
-    return fL * std::pow((1 - psi), 1.0 / 3.0) * (1 - std::pow(psi, lambda)) +
-           fT * std::pow(psi, 1.0 / 3.0);
+    _ff_soln->set(node,
+                  fL * std::pow((1 - psi), 1.0 / 3.0) * (1 - std::pow(psi, lambda)) +
+                      fT * std::pow(psi, 1.0 / 3.0));
   }
 }
 
