@@ -6,14 +6,14 @@
     type = CSVDiff
     input = 'adaptive1D_e1.i'
     csvdiff = 'adaptive1D_e1_csv_y0_0005.csv'
-    requirement = 'The system shell run a short simulation with SP3 kernels and BCs in 1D optically thick cooling'
+    requirement = 'The system shall run a short simulation with SP3 kernels and BCs in 1D optically thick cooling'
   []
 
   [glass_1D_thin]
     type = CSVDiff
     input = 'adaptive1D_e10.i'
     csvdiff = 'adaptive1D_e10_csv_y0_0005.csv'
-    requirement = 'The system shell run a short simulation with SP3 kernels and BCs in 1D optically thin cooling'
+    requirement = 'The system shall run a short simulation with SP3 kernels and BCs in 1D optically thin cooling'
   []
 
   [single_frequency]
