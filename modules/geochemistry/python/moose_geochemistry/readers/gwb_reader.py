@@ -8,8 +8,8 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from dbclass import ThermoDB
-import readers.reader_utils as reader_utils
+from moose_geochemistry.dbclass import ThermoDB
+from moose_geochemistry.readers import reader_utils
 
 def readDatabase(dblist):
     """

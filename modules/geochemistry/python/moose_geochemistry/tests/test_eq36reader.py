@@ -11,11 +11,12 @@
 import os
 import sys
 import unittest
-# so we can find our libraries, no matter how we're called
-findbin = os.path.dirname(os.path.realpath(sys.argv[0]))
-sys.path.append(os.path.join(findbin, "../"))
-from readers import eq36_reader
-from dbclass import ThermoDB
+import importlib.util
+
+if importlib.util.find_spec('moose_geochemistry') is None:
+    _geochemistry_python_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+    sys.path.append(_geochemistry_python_path)
+from moose_geochemistry.readers import eq36_reader
 
 class TestGWBReader(unittest.TestCase):
     """
