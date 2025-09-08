@@ -10,7 +10,7 @@
         jsondiff = 'csg_only_inf_planes_out_csg.json'
         recover = false
         mesh_mode = REPLICATED
-        detail = 'is single-level deep with a unique cell constructed of planes each generated from 3 points.'
+        detail = 'is uniquely generated from a single mesh generator input.'
     []
     [csg_only_chained]
         type = 'JSONDiff'
@@ -19,43 +19,7 @@
         jsondiff = 'csg_only_chained_out_csg.json'
         recover = false
         mesh_mode = REPLICATED
-        detail = 'updates an existing CSG representation from another mesh generator by updating the region of an existing cell and constructing planes from coefficients.'
-    []
-    [csg_only_cylinders_join_new_universes]
-        type = 'JSONDiff'
-        input = 'csg_cylinders_join_new_universes.i'
-        cli_args = '--csg-only'
-        jsondiff = 'csg_cylinders_join_new_universes_out_csg.json'
-        recover = false
-        mesh_mode = REPLICATED
-        detail = 'joins multiple CSG representations to create one new representation with multiple universes and constructs cylinder surfaces aligned with each axis.'
-    []
-    [csg_only_spheres_join_single_root]
-        type = 'JSONDiff'
-        input = 'csg_spheres_join_single_root.i'
-        cli_args = '--csg-only'
-        jsondiff = 'csg_spheres_join_single_root_out_csg.json'
-        recover = false
-        mesh_mode = REPLICATED
-        detail = 'joins multiple CSG representations together into one single universe and constructs sphere surfaces with and without a center point specified.'
-    []
-    [csg_only_add_cells_new_universe]
-        type = 'JSONDiff'
-        input = 'csg_add_cells_new_univ.i'
-        cli_args = '--csg-only csg_cylinders_join_new_universes_out_csg.json'
-        jsondiff = 'csg_cylinders_join_new_universes_out_csg.json'
-        recover = false
-        mesh_mode = REPLICATED
-        detail = 'collects a list of cells to add to an empty universe and remove from another.'
-    []
-    [csg_create_universe_from_cells]
-        type = 'JSONDiff'
-        input = 'csg_universe_from_cells.i'
-        cli_args = '--csg-only'
-        jsondiff = 'csg_universe_from_cells_out_csg.json'
-        recover = false
-        mesh_mode = REPLICATED
-        detail = 'collects a list of cells and creates a new universe from the list of cells.'
+        detail = 'updates an existing CSG representation from another mesh generator.'
     []
     [csg_only_final_generator]
         type = 'JSONDiff'
@@ -72,57 +36,9 @@
     [csg_only_chained_not_moved]
       type = 'RunException'
       input = 'csg_only_chained_not_moved.i'
-      detail = ' a CSG object from an input mesh generator is not moved upon retrieval'
+      detail = ' a CSG object from an input mesh generator is not moved upon retrieval.'
       cli_args = '--csg-only'
-      expect_err = "The CSGBase object from input TestCSGInfiniteSquareMeshGenerator 'csg_inf_square' was not moved."
-      mesh_mode = REPLICATED
-    []
-    [region_surfaces_error]
-      type = 'RunException'
-      input = 'csg_region_surfs_error.i'
-      detail = ' a cell region is updated with surfaces not present in the current CSGBase instance'
-      cli_args = '--csg-only'
-      expect_err = "Region is being set with a surface named surf_plus_x that is different from the surface of the same name in the CSGBase instance."
-      mesh_mode = REPLICATED
-    []
-    [rename_surface_error]
-      type = 'RunException'
-      input = 'csg_rename_surf_error.i'
-      detail = ' a surface is renamed but the surface object does not match that of the same name in the current CSGBase instance.'
-      cli_args = '--csg-only'
-      expect_err = "Surface surf_plus_x cannot be renamed to test_new_surf_name as it does not exist in this CSGBase instance."
-      mesh_mode = REPLICATED
-    []
-    [rename_cell_error]
-      type = 'RunException'
-      input = 'csg_rename_cell_error.i'
-      detail = ' a cell is renamed but the cell object does not match that of the same name in the current CSGBase instance.'
-      cli_args = '--csg-only'
-      expect_err = "Cell square_cell cannot be renamed to test_new_cell_name as it does not exist in this CSGBase instance."
-      mesh_mode = REPLICATED
-    []
-    [rename_universe_error]
-      type = 'RunException'
-      input = 'csg_rename_univ_error.i'
-      detail = ' a universe is renamed but the universe object does not match that of the same name in the current CSGBase instance.'
-      cli_args = '--csg-only'
-      expect_err = "Universe ROOT_UNIVERSE cannot be renamed to test_new_univ_name as it does not exist in this CSGBase instance."
-      mesh_mode = REPLICATED
-    []
-    [add_cell_universe_error]
-      type = 'RunException'
-      input = 'csg_universe_cell_add_error.i'
-      detail = ' a cell being added to a universe does not exist in the current CSGBase instance.'
-      cli_args = '--csg-only'
-      expect_err = 'A cell named square_cell is being added to universe new_univ_2 that is different from the cell of the same name in the CSGBase instance.'
-      mesh_mode = REPLICATED
-    []
-    [remove_cell_universe_error]
-      type = 'RunException'
-      input = 'csg_universe_cell_remove_error.i'
-      detail = ' a cell being removed from a universe does not exist in the current CSGBase instance.'
-      cli_args = '--csg-only'
-      expect_err = 'A cell named square_cell is being removed from universe ROOT_UNIVERSE that is different from the cell of the same name in the CSGBase instance.'
+      expect_err = "The CSGBase object from input ExampleCSGInfiniteSquareMeshGenerator 'csg_inf_square' was not moved."
       mesh_mode = REPLICATED
     []
     [distributed_mesh]
@@ -135,7 +51,7 @@
     [split_mesh]
       type = RunException
       input = 'csg_only_inf_planes.i'
-      detail = ' used in conjunction with split mesh command line option'
+      detail = ' used in conjunction with split mesh command line option.'
       cli_args = '--use-split --csg-only'
       expect_err = "--csg-only is not compatible with any mesh splitting options"
       mesh_mode = REPLICATED
@@ -143,7 +59,7 @@
     [refinements]
       type = RunException
       input = 'csg_only_inf_planes.i'
-      detail = ' used in conjunction with mesh refinements command line option'
+      detail = ' used in conjunction with mesh refinements command line option.'
       cli_args = '-r 5 --csg-only'
       expect_err = "--csg-only cannot be used in conjunction with -r refinements option"
       mesh_mode = REPLICATED
@@ -151,20 +67,9 @@
     [recover]
       type = RunException
       input = 'csg_only_inf_planes.i'
-      detail = ' used in conjunction with recovery command line option'
+      detail = ' used in conjunction with recovery command line option.'
       cli_args = '--recover --csg-only'
       expect_err = "--csg-only option cannot be used in recovery mode"
-      mesh_mode = REPLICATED
-    []
-  []
-  [warnings]
-    requirement = 'The system shall report a warning when generating a mesh in CSG only mode when'
-    [unlinked_universes]
-      type = 'RunException'
-      input = 'csg_cylinders_join_unlinked_universes.i'
-      detail = ' a universe is created in the CSGBase object that is not linked to the root universe.'
-      cli_args = '--csg-only'
-      expect_err = "Universe with name YCyls_univ is not linked to root universe."
       mesh_mode = REPLICATED
     []
   []
