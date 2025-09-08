@@ -194,6 +194,12 @@ public:
   unsigned int getBlocksMaxDimension(const std::vector<SubdomainName> & blocks) const;
 
   /**
+   * Returns whether it is is possible that any side of the element is part of a boundary
+   * This is a heuristic to skip side lookups if the element is not involved with any boundary
+   */
+  bool elementMayHaveASideOnABoundary(const Elem * const elem) const;
+
+  /**
    * Returns a vector of boundary IDs for the requested element on the
    * requested side.
    */
@@ -1554,6 +1560,9 @@ protected:
 
   /// list of nodes that belongs to a specified nodeset: indexing [nodeset_id] -> [array of node ids]
   std::map<boundary_id_type, std::vector<dof_id_type>> _node_set_nodes;
+
+  /// list of elements that have a side that are part of ANY sideset
+  std::unordered_map<const Elem *, bool> _active_local_elem_has_any_side_on_boundary;
 
   std::set<unsigned int> _ghosted_boundaries;
   std::vector<Real> _ghosted_boundaries_inflation;

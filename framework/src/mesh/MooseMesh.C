@@ -1462,13 +1462,27 @@ MooseMesh::cacheInfo()
   _communicator.set_union(_lower_d_interior_blocks);
   _communicator.set_union(_lower_d_boundary_blocks);
 
+  // Keep track of which element may be near a boundary. The top parent is enough if
+  // using AMR and boundaries are not running inside a h-refined element
+  const auto & elem_to_side_pairs_map = mesh.get_boundary_info().get_sideset_map();
+  for (const auto & elem : mesh.active_local_element_ptr_range())
+    if (mesh.get_boundary_info().is_children_on_boundary_side())
+      _active_local_elem_has_any_side_on_boundary[elem] =
+          (elem_to_side_pairs_map.count(elem) > 0);
+    else
+      _active_local_elem_has_any_side_on_boundary[elem->top_parent()] =
+        (elem_to_side_pairs_map.count(elem->top_parent()) > 0);
+
   for (const auto & elem : mesh.active_local_element_ptr_range())
   {
+    const bool any_bdy_to_consider = elementMayHaveASideOnABoundary(elem);
     SubdomainID subdomain_id = elem->subdomain_id();
     auto & sub_data = _sub_to_data[subdomain_id];
     for (unsigned int side = 0; side < elem->n_sides(); side++)
     {
-      std::vector<BoundaryID> boundary_ids = getBoundaryIDs(elem, side);
+      std::vector<BoundaryID> boundary_ids;
+      if (any_bdy_to_consider)
+        boundary_ids = getBoundaryIDs(elem, side);
       sub_data.boundary_ids.insert(boundary_ids.begin(), boundary_ids.end());
 
       Elem * neig = elem->neighbor_ptr(side);
@@ -2963,6 +2977,15 @@ MooseMesh::getBlocksMaxDimension(const std::vector<SubdomainName> & blocks) cons
   // Get the maximumal globally
   _communicator.max(dim);
   return dim;
+}
+
+bool
+MooseMesh::elementMayHaveASideOnABoundary(const Elem * const elem) const
+{
+  if (!getMesh().get_boundary_info().is_children_on_boundary_side())
+    return libmesh_map_find(_active_local_elem_has_any_side_on_boundary, elem->top_parent());
+  else
+    return libmesh_map_find(_active_local_elem_has_any_side_on_boundary, elem);
 }
 
 std::vector<BoundaryID>
