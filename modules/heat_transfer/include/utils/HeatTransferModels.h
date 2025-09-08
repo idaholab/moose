@@ -87,7 +87,6 @@ cylindricalGapRadiationHeatFlux(const T1 & r_inner,
   return sigma * (std::pow(T_inner, 4) - std::pow(T_outer, 4)) / rad_resistance;
 }
 
-
 /**
  * Error-controlled adaptive Simpson integrator.
  *
@@ -138,9 +137,25 @@ adaptiveSimpson(const Fun & f,
   return recurse(a, b, S0, tol, max_depth);
 }
 
-/* ------------------------------------------------------------------ */
-/*                   Band-integrated Plank emission                   */
-/* ------------------------------------------------------------------ */
+/**
+ * Band-integrated Planck emission
+ * \f$ 4\pi\,\kappa \int_{\nu_a}^{\nu_b} B_\nu(T, n_1)\, d\nu \f$.
+ *
+ * Computes the band emissive power (per unit volume) for a participating medium
+ * with refractive index n1 and absorption coefficient kappa over the frequency
+ * band [nu_a, nu_b]. Uses the same adaptive Simpson integrator above.
+ *
+ * @param[in] n1              Refractive index of incident medium
+ * @param[in] kappa           Absorption coefficient
+ * @param[in] T               Temperature
+ * @param[in] nu_a            Lower frequency bound
+ * @param[in] nu_b            Upper frequency bound
+ * @param[in] abs_tol         Absolute tolerance for the integrator (default 1e-8)
+ * @param[in] rel_tol         Relative tolerance for the integrator (default 1e-6)
+ * @param[in] planck_units    Units string for Planck constant (default "J*s")
+ * @param[in] sol_units       Units string for speed of light (default "m/s")
+ * @param[in] boltzmann_units Units string for Boltzmann constant (default "J/K")
+ */
 template <typename Scalar>
 Scalar
 integratedPlanckBand(Scalar n1,
@@ -150,17 +165,17 @@ integratedPlanckBand(Scalar n1,
                      Scalar nu_b,
                      Scalar abs_tol = Scalar(1E-8),
                      Scalar rel_tol = Scalar(1E-6),
-                     const std::string & plank_units = "J*s",
+                     const std::string & planck_units = "J*s",
                      const std::string & sol_units = "m/s",
                      const std::string & boltzmann_units = "J/K")
 {
-  const auto hp = HeatConduction::Constants::PlanckConstant(plank_units);
-  const auto c0 = HeatConduction::Constants::SpeedOfLight(sol_units);
-  const auto kb = HeatConduction::Constants::BoltzmannConstant(boltzmann_units);
+  const auto hp = HeatConduction::Constants::planckConstant(planck_units);
+  const auto c0 = HeatConduction::Constants::speedOfLight(sol_units);
+  const auto kb = HeatConduction::Constants::boltzmannConstant(boltzmann_units);
 
   const Scalar n1_sq = n1 * n1;
 
-  // Plank spectrum
+  // Planck spectrum
   auto planck = [=](Scalar nu) -> Scalar
   {
     const Scalar pre = Scalar(2) * n1_sq * hp * nu * nu * nu / Utility::pow<2>(c0);

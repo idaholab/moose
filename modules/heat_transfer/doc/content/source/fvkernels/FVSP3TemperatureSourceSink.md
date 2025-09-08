@@ -11,7 +11,7 @@ The temperature source implemented reads as follows [!citep](larsen2002):
 
 where:
 
-- $\kappa$ is the absorpsivity of medium (SI unit ($m^{-1}$))
+- $\kappa$ is the absorptivity of medium (SI unit ($m^{-1}$))
 - $\psi_1$ is the first order radiative heat flux moment integrated in frequency band \[$\nu_i$, $\nu_{i+1}$\] (SI unit ($W m^{-2}$))
 - $\psi_2$ is the second order radiative heat flux moment integrated in frequency band \[$\nu_i$, $\nu_{i+1}$\] (SI unit ($W m^{-2}$))
 - $a_1$ is the mixing weight for first order moment (SI unit (-))

@@ -16,7 +16,7 @@
 ///
 ///     - strong form: \nabla \cdot (\epsilon^2 \mu_n^2) / \kappa) \nabla u / coef
 ///
-///     - weak form: \int_{A} (\epsilon^2 \mu_n^2) \nabla u / coef \cdot \vec{n} dA
+///     - Integration by parts: \int_{A} (\epsilon^2 \mu_n^2) \nabla u / coef \cdot \vec{n} dA
 ///
 class FVSP3ThermalRadiationDiffusion : public FVFluxKernel, public FVDiffusionInterpolationInterface
 {
@@ -34,7 +34,7 @@ protected:
   const Moose::Functor<ADReal> & _absorptivity;
 
   /// Order
-  const MooseEnum & _order;
+  const MooseEnum _order;
 
   /// Mu order scaling
   Real _mu_order;

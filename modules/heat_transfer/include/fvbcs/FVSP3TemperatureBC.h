@@ -48,10 +48,10 @@ protected:
   const Moose::Functor<ADReal> & _alpha;
 
   /// Opaque frequency of medium
-  const Real & _nu1;
+  const Real _nu1;
 
   /// Minimum frequency
-  const Real & _nu_min;
+  const Real _nu_min;
 
   /// Units of Constants
   const std::string _planck_units;

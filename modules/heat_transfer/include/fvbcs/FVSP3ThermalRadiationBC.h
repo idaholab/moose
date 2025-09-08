@@ -30,11 +30,11 @@ protected:
   const Moose::Functor<ADReal> & _Tb;
 
   /// Frequency of thermal radiation band
-  const Moose::Functor<ADReal> & _nu;
+  const Real _nu;
 
   /// Frequency bounds of thermal radiation band for numerical integration
-  const Moose::Functor<ADReal> * _nu_low;
-  const Moose::Functor<ADReal> * _nu_high;
+  const Real * _nu_low;
+  const Real * _nu_high;
 
   /// Refraction index
   const Moose::Functor<ADReal> & _n1;
@@ -46,7 +46,7 @@ protected:
   const Moose::Functor<ADReal> & _psi;
 
   /// Order or radiation moment
-  const MooseEnum & _order;
+  const MooseEnum _order;
 
   /// Coefficients for SP3
   const Moose::Functor<ADReal> & _alpha;

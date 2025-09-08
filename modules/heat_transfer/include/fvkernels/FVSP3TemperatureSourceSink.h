@@ -15,7 +15,7 @@
 ///
 ///     - strong form: \int dV \int d\nu \nabla \cdot (1/\kappa) \nabla (a1 * psi_1 + a2 * psi_2)
 ///
-///     - weak form: \int_{A} dA \int d\nu (1/\kappa)_f \nabla (a1 * psi_1 + a2 * psi_2)_f
+///     - Integrated by parts : \int_{A} dA \int d\nu (1/\kappa)_f \nabla (a1 * psi_1 + a2 * psi_2)_f
 ///
 class FVSP3TemperatureSourceSink : public FVFluxKernel
 {
@@ -26,7 +26,7 @@ public:
 protected:
   virtual ADReal computeQpResidual() override;
 
-  /// kappa absorptivities per bank
+  /// kappa absorptivities per band
   const std::vector<MooseFunctorName> & _absorptivity_vec;
 
   /// Order 1 thermal radiation flux moments
@@ -41,6 +41,6 @@ protected:
   std::vector<const Moose::Functor<ADReal> *> _psi2_vec_functors;
 
   /// Closure parameters
-  const Real _a1 = 1. / 30. * (5. - 3. * std::sqrt(5. / 6.)); // * 5.05e-7;
-  const Real _a2 = 1. / 30. * (5. + 3. * std::sqrt(5. / 6.)); // * 5.05e-7;
+  const Real _a1 = 1. / 30. * (5. - 3. * std::sqrt(5. / 6.));
+  const Real _a2 = 1. / 30. * (5. + 3. * std::sqrt(5. / 6.));
 };
