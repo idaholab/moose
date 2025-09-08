@@ -50,32 +50,7 @@ MFEMParsedFunction::MFEMParsedFunction(const InputParameters & parameters)
 
   // base function object
   _func_F = std::make_shared<SymFunction>();
-
-  // set FParser internal feature flags
-  setParserFeatureFlags(_func_F);
-
-  // parse function
-  if (_func_F->Parse(_function, variables) >= 0)
-    mooseError("Invalid function\n", _function, "\nError:\n", _func_F->ErrorMsg());
-
-  // optimize
-  if (!_disable_fpoptimizer)
-    _func_F->Optimize();
-
-  // just-in-time compile
-  if (_enable_jit)
-  {
-    // let rank 0 do the JIT compilation first
-    if (_communicator.rank() != 0)
-      _communicator.barrier();
-
-    _func_F->JITCompile();
-
-    // wait for ranks > 0 to catch up
-    if (_communicator.rank() == 0)
-      _communicator.barrier();
-  }
-
+  parsedFunctionSetup(_func_F, _function, variables, {}, {}, comm());
   // declares MFEMScalarParsedCoefficient
   getMFEMProblem().getCoefficients().declareScalar<MFEMScalarParsedCoefficient>(
       name(), getMFEMProblem().getProblemData().gridfunctions, _var_names, _use_xyzt, _func_F);
