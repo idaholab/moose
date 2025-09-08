@@ -652,7 +652,7 @@ libpath_pcre = $(MOOSE_DIR)/framework/contrib/pcre/$(libname_pcre)
 libname_hit = $(shell grep "dlname='.*'" $(MOOSE_DIR)/framework/contrib/hit/libhit-$(METHOD).la 2>/dev/null | sed -E "s/dlname='(.*)'/\1/g")
 libpath_hit = $(MOOSE_DIR)/framework/contrib/hit/$(libname_hit)
 
-install: all install_all_libs install_bin install_harness install_exodiff install_adreal_monolith install_hit install_data install_testers
+install: all install_all_libs install_bin install_harness install_exodiff install_adreal_monolith install_hit install_data install_python install_testers
 
 install_data::
 	@mkdir -p $(moose_share_dir)
@@ -670,7 +670,7 @@ install_exodiff: all
 	@mkdir -p $(bin_install_dir)
 	@cp $(MOOSE_DIR)/framework/contrib/exodiff/exodiff $(bin_install_dir)/
 
-install_python: $(pyhit_LIB) $(capabilities_LIB)
+install_python:: $(pyhit_LIB) $(capabilities_LIB)
 	@echo "Installing python utilities"
 	@rm -rf $(python_install_dir)
 	@mkdir -p $(python_install_dir)

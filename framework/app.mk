@@ -525,14 +525,25 @@ endif
 # Top level install target for all libraries (.so/.dylib, .la)
 install_all_libs: $(lib_archive_install_targets) $(lib_install_targets)
 
+# Install application data directory if it exists
 ifneq ($(wildcard $(APPLICATION_DIR)/data/.),)
 install_data_$(APPLICATION_NAME)_src := $(APPLICATION_DIR)/data
 install_data_$(APPLICATION_NAME)_dst := $(share_install_dir)
 install_data:: install_data_$(APPLICATION_NAME)
 endif
-
 install_data_%:
 	@echo "Installing data "$($@_dst)"..."
+	@mkdir -p $($@_dst)
+	@cp -r $($@_src) $($@_dst)
+
+# Install application python directory if it exists
+ifneq ($(wildcard $(APPLICATION_DIR)/python/.),)
+install_python_$(APPLICATION_NAME)_src := $(APPLICATION_DIR)/python
+install_python_$(APPLICATION_NAME)_dst := $(share_install_dir)
+install_python:: install_python_$(APPLICATION_NAME)
+endif
+install_python_%:
+	@echo "Installing python "$($@_dst)"..."
 	@mkdir -p $($@_dst)
 	@cp -r $($@_src) $($@_dst)
 
