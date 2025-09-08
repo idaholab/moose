@@ -11,6 +11,10 @@ import os
 import sys
 import json
 import inspect
+from types import ModuleType
+from typing import Optional
+import importlib.util
+import glob
 
 
 class Factory:
@@ -38,29 +42,47 @@ class Factory:
     def loadPlugins(self, base_dirs, plugin_path, attribute):
         for dir in base_dirs:
             dir = os.path.join(dir, plugin_path)
-            if not os.path.exists(dir):
+            if not os.path.isdir(dir):
                 continue
 
-            sys.path.append(os.path.abspath(dir))
-            for file in os.listdir(dir):
-                if file[-2:] == "py":
-                    module_name = file[:-3]
-                    try:
-                        __import__(module_name)
-                        # Search through the module and look for classes that
-                        # have the passed in attribute, which should be a bool and be True
-                        for name, obj in inspect.getmembers(sys.modules[module_name]):
-                            if inspect.isclass(obj) and hasattr(obj, attribute):
-                                at = getattr(obj, attribute)
-                                if isinstance(at, bool) and at:
-                                    self.register(obj, name)
-                    except Exception as e:
-                        print(
-                            '\nERROR: Your Plugin Tester "'
-                            + module_name
-                            + '" failed to import. (skipping)\n\n'
-                            + str(e)
-                        )
+            for file in glob.glob(os.path.join(dir, "*.py")):
+                if file.endswith("__init__.py"):
+                    continue
+
+                module = self._loadModuleFromPath(file)
+                if module is None:
+                    raise ImportError(f"Could not import {file}")
+                    continue
+
+                for name, obj in inspect.getmembers(module, inspect.isclass):
+                    # Ensure class is defined in this exact module
+                    if getattr(obj, "__module__", None) != module.__name__:
+                        continue
+                    # Make sure it has the requested attribute
+                    at = getattr(obj, attribute, None)
+                    if isinstance(at, bool) and at:
+                        self.register(obj, name)
+
+    import pathlib
+    @staticmethod
+    def _loadModuleFromPath(py_path: pathlib.Path) -> Optional[ModuleType]:
+        """
+        Import a Python module from a file path without requiring it to be on sys.path.
+        Returns the loaded module object.
+        """
+        # Create a unique-but-readable module name to avoid collisions
+        unique_suffix = hex(abs(hash(os.path.abspath(py_path))) & 0xFFFFFFFF)[2:]
+        mod_name = os.path.basename(py_path).split(".")[0]
+        mod_name = f"_autoload_{mod_name}_{unique_suffix}"
+
+        spec = importlib.util.spec_from_file_location(mod_name, py_path)
+        if spec is None or spec.loader is None:
+            return None
+        module = importlib.util.module_from_spec(spec)
+        # Register before exec so intra-module relative imports (rare here) can work
+        sys.modules[mod_name] = module
+        spec.loader.exec_module(module)
+        return module
 
     def printDump(self, root_node_name):
         print("[" + root_node_name + "]")
