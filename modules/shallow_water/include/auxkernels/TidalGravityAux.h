@@ -11,6 +11,18 @@
 
 #include "AuxKernel.h"
 
+// declare utility functions for unit testing
+namespace Moose
+{
+namespace astro
+{
+static inline long long daysFromCivil(int y, unsigned m, unsigned d);
+
+// Parses "YYYY-MM-DD HH:MM:SS", applies offset (in hours), and returns seconds since Unix epoch.
+inline std::int64_t toUnixEpoch(const std::string & datetime, double offset_hours);
+}
+}
+
 /**
  * Computes a scalar gravity field g(t,x) including a simple global
  * Sun/Moon tidal correction projected onto the local vertical.
@@ -29,15 +41,15 @@ public:
   static InputParameters validParams();
 
   TidalGravityAux(const InputParameters & parameters);
+  virtual void timestepSetup() override;
 
 protected:
   virtual Real computeValue() override;
-  void updateTidal();
-  std::time_t parseStartDatetimeUTC(const std::string & s) const;
+  std::time_t parseStartDatetime() const;
 
   // Compute Earth-fixed unit direction vectors to Sun and Moon
   // at a given absolute UTC epoch time in seconds since 1970-01-01.
-  void computeSunMoonDirsAtEpoch(Real epoch_seconds,
+  void computeSunMoonDirsAtEpoch(std::time_t epoch_seconds,
                                  RealVectorValue & sun_dir,
                                  RealVectorValue & moon_dir) const;
 
@@ -45,16 +57,14 @@ protected:
   const Real _g0;
   const bool _enable_tides;
   const Real _earth_radius;
-  Real _t0_epoch;               // seconds since Unix epoch (UTC)
+  std::time_t _t0_epoch;                    // seconds since Unix epoch (UTC)
   const std::string _start_datetime; // ISO8601-like string, optional
 
   const Real _mu_sun;
   const Real _sun_distance;
-  const Real _sun_period;
 
   const Real _mu_moon;
   const Real _moon_distance;
-  const Real _moon_period;
 
   // options
   const bool _sun_distance_seasonal;
