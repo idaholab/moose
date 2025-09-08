@@ -410,10 +410,24 @@ QuasiStaticSolidMechanicsPhysics::act()
     if (_lk_homogenization)
     {
       InputParameters params = _factory.getValidParams("MooseVariable");
-      const std::map<bool, std::vector<unsigned int>> mg_order{{true, {1, 4, 9}},
-                                                               {false, {1, 3, 6}}};
+      const std::map<bool, std::vector<unsigned int>> mg_order_max{{true, {1, 4, 9}},
+                                                                   {false, {1, 3, 6}}};
+      std::size_t mg_order = 0;
+      for (auto i : index_range(_constraint_types))
+      {
+        const auto ctype = static_cast<Homogenization::ConstraintType>(_constraint_types.get(i));
+        if (ctype != Homogenization::ConstraintType::None)
+          mg_order++;
+      }
+      if (mg_order > mg_order_max.at(_lk_large_kinematics)[_ndisp - 1])
+        paramError("constraint_types",
+                   "Number of non-none constraint types must not be greater than ",
+                   mg_order_max.at(_lk_large_kinematics)[_ndisp - 1],
+                   ", but ",
+                   mg_order,
+                   " are provided.");
       params.set<MooseEnum>("family") = "SCALAR";
-      params.set<MooseEnum>("order") = mg_order.at(_lk_large_kinematics)[_ndisp - 1];
+      params.set<MooseEnum>("order") = mg_order;
       auto fe_type = AddVariableAction::feType(params);
       auto var_type = AddVariableAction::variableType(fe_type);
       _problem->addVariable(var_type, _hname, params);
