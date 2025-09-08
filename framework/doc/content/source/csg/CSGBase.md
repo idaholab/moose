@@ -40,7 +40,7 @@ The syntax to do this is as follows, where `SurfaceType` should be replaced with
 // the unique surface pointer is made first, creating the surface object
 std::unique_ptr<CSG::CSGSurface> surf_ptr = std::make_unique<SurfaceType>(arguments);
 // and then it is explicitly passed to this CSGBase instance, which holds the memory ownership for the object
-const auto & surface = csg_obj->addSurface(surf_ptr);
+const auto & surface = csg_obj->addSurface(std::move(surf_ptr));
 ```
 
 !alert! note title=Adding surfaces to the CSGBase instance
@@ -60,13 +60,9 @@ Information about how to define new types of surfaces can be found in [source/cs
 | Cylinder | `CSGYCylinder` | creates a cylinder aligned with the y-axis at the specified center location (`x`, `z`) |
 | Cylinder | `CSGZCylinder` | creates a cylinder aligned with the z-axis at the specified center location (`x`, `y`) |
 
-Examples:
+Example:
 
 !listing TestCSGAxialSurfaceMeshGenerator.C start=create end=csg_plane include-end=true
-
-!listing TestCSGSphereAtPointMeshGenerator.C start=create end=halfspace
-
-!listing TestCSGCylindersMeshGenerator.C start=create end=cyl_halfspace
 
 !alert! note title=Including Surface Types
 
@@ -160,9 +156,9 @@ The `CSGUniverse` objects can then be accessed or updated with the following met
 
 Examples:
 
-!listing TestCSGUniverseMeshGenerator.C start=empty end=new_univ include-end=true
+!listing CSGBaseTest.C start=new_univ end=new_univ include-end=true
 
-!listing TestCSGUniverseFromCellsList.C start=collect end=createUniverse include-end=True
+!listing CSGBaseTest.C start=create a list of cells end=createUniverse include-end=True
 
 #### Root Universe
 
@@ -186,13 +182,13 @@ There are multiple ways in which cells can be added to a universe:
 
 2. When a `CSGCell` is created with `createCell`, a pointer to a `CSGUniverse` can be passed as the final argument to indicate that the cell will be created and added directly to that specified universe. In this case, the cell will *not* be added to the root universe. A cell that has a universe fill type cannot be added to the same universe that is being used for the fill. For example, the two snippets below come from the same file where a new universe is initialized and passed by reference to the cell when it is created:
 
-!listing TestCSGUniverseMeshGenerator.C start=empty end=collect
+!listing CSGBaseTest.C start=make a new universe to which the new cells can be added at time of creation end=add_to_univ include-end=true
 
-!listing TestCSGUniverseMeshGenerator.C start=(new_univ) end=createCell include-end=true
+!listing CSGBaseTest.C start=create a cell and add to different universe end=createCell include-end=true
 
 3. A cell or list of cells can be added to an existing universe with the `addCellToUniverse` and `addCellsToUniverse` methods. In this case, if a `CSGCell` exists in another `CSGUniverse` (such as the root universe), it will *not* be removed when being added to another (i.e. if the same behavior as option 2 above is desired, the cell will have to be manually removed from the root universe, as described below). The following is an example where the list of cells is collected first and then added at one time to the existing universe, but this could also be accomplished by using `addCellToUniverse` in a for-loop after each cell is initially created.
 
-!listing TestCSGUniverseMeshGenerator.C start=remove from root end=removeCells include-end=true
+!listing CSGBaseTest.C start=add a list of cells to an existing universe end=addCellsToUniverse include-end=true
 
 Cells can also be removed from a universe in the same way as method 3 above by using the `removeCellFromUniverse` and `removeCellsFromUniverse` methods.
 An example is shown above where the cells are removed from the root universe after they are added to the new universe.
@@ -222,7 +218,7 @@ For all methods listed below, a unique pointer to the `CSGBase` object(s) create
 
 For example:
 
-!listing TestCSGUniverseMeshGenerator.C start=get all CSGBase end=inp_csg_obj include-end=true
+!listing TestCSGAxialSurfaceMeshGenerator.C start=get the existing CSGBase end=csg_obj include-end=true
 
 !alert! note title=Accessing other MeshGenerator objects by name
 
@@ -239,15 +235,15 @@ There are 3 different behaviors for joining bases that are supported depending o
 
 1. No additional arguments: All cells that are in the root universe of the incoming `CSGBase` object will be added to the existing root universe of the current base object, and the root universe from the incoming base will no longer exist.
 
-!listing TestCSGJoinBasesMeshGenerator.C start=getCSGBases end=return
+!listing CSGBaseTest.C start=Case 1 end=joinOtherBase include-end=true
 
 2. One new root universe name (`new_root_name_join`): All cells in the root universe of the incoming base will be used to create a new universe of the name specified by the `new_root_name_join` parameter. These cells will *not* be added to the existing root universe. This new universe will be added as a new non-root universe in the existing base object. *This newly created universe will not be connected to the root universe of the existing `CSGBase` object by default.*
 
-!listing TestCSGUniverseMeshGenerator.C start=incoming root is renamed end=joinOtherBase include-end=true
+!listing CSGBaseTest.C start=Case 2 end=joinOtherBase include-end=true
 
 3. Two new root universe names (`new_root_name_base` and `new_root_name_join`): The cells in the root universe of the current `CSGBase` object will be used to create a new non-root universe of the name specified by the `new_root_name_base` parameter, and the cells in the root universe of the incoming `CSGBase` object will be used to create a separate non-root universe of the name specified by the `new_root_name_join` parameter. *At the end of this join method, the root universe of the current base object will be empty and neither of the two new non-root universes will be connected to the root universe by default.*
 
-!listing TestCSGUniverseMeshGenerator.C start=get just the first two end=joinOtherBase include-end=true
+!listing CSGBaseTest.C start=Case 3 end=joinOtherBase include-end=true
 
 For all of these join methods, any non-root universes will remain unchanged and simply added to the list of universes for the current `CSGBase` object.
 Similarly, all incoming cells and surfaces are added alongside existing cells and surfaces.
