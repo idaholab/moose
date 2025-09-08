@@ -42,8 +42,15 @@ SWENumericalFluxHLL::calcFlux(unsigned int /*iside*/,
   const Real nx = n(0);
   const Real ny = n(1);
 
+  // Input vector layout: [h,hu,hv,(optional)b, g]
+  mooseAssert(uvec1.size() >= 4, "Expected gravity as 4th or 5th entry");
+  mooseAssert(uvec2.size() >= 4, "Expected gravity as 4th or 5th entry");
+  const bool has_b = (uvec1.size() >= 5 && uvec2.size() >= 5);
+  const unsigned int idx_b = 3;
+  const unsigned int idx_g = has_b ? 4 : 3;
+  const Real g_here = uvec1[idx_g];
+
   // Optional hydrostatic reconstruction if bathymetry b is provided
-  const bool has_b = (uvec1.size() >= 4 && uvec2.size() >= 4);
   Real hL = std::max(uvec1[0], 0.0);
   Real huL = (hL > _h_eps) ? uvec1[1] : 0.0;
   Real hvL = (hL > _h_eps) ? uvec1[2] : 0.0;
@@ -53,8 +60,8 @@ SWENumericalFluxHLL::calcFlux(unsigned int /*iside*/,
 
   if (has_b)
   {
-    const Real bL = uvec1[3];
-    const Real bR = uvec2[3];
+    const Real bL = uvec1[idx_b];
+    const Real bR = uvec2[idx_b];
     const Real etaL = hL + bL;
     const Real etaR = hR + bR;
     const Real bstar = std::max(bL, bR);
@@ -74,8 +81,8 @@ SWENumericalFluxHLL::calcFlux(unsigned int /*iside*/,
 
   const Real unL = (hL > _h_eps) ? (huL * nx + hvL * ny) / hL : 0.0;
   const Real unR = (hR > _h_eps) ? (huR * nx + hvR * ny) / hR : 0.0;
-  const Real cL = std::sqrt(_g * std::max(hL, 0.0));
-  const Real cR = std::sqrt(_g * std::max(hR, 0.0));
+  const Real cL = std::sqrt(g_here * std::max(hL, 0.0));
+  const Real cR = std::sqrt(g_here * std::max(hR, 0.0));
   const Real smax = std::max(std::fabs(unL) + cL, std::fabs(unR) + cR);
 
   // Physical flux projected on n (includes pressure term)
@@ -83,8 +90,8 @@ SWENumericalFluxHLL::calcFlux(unsigned int /*iside*/,
   {
     std::vector<Real> f(3, 0.0);
     f[0] = h * un;
-    f[1] = hu * un + 0.5 * _g * h * h * nx;
-    f[2] = hv * un + 0.5 * _g * h * h * ny;
+    f[1] = hu * un + 0.5 * g_here * h * h * nx;
+    f[2] = hv * un + 0.5 * g_here * h * h * ny;
     return f;
   };
 
@@ -185,8 +192,12 @@ SWENumericalFluxHLL::calcJacobian(unsigned int /*iside*/,
   // Recompute smax consistent with calcFlux to add 0.5*smax*I contribution
   const Real nx = n(0);
   const Real ny = n(1);
+  mooseAssert(uvec1.size() >= 4 && uvec2.size() >= 4, "Expected gravity present");
+  const bool has_b = (uvec1.size() >= 5 && uvec2.size() >= 5);
+  const unsigned int idx_b = 3;
+  const unsigned int idx_g = has_b ? 4 : 3;
+  const Real g_here = uvec1[idx_g];
   // Reuse hydrostatic reconstructed states consistent with calcFlux by rebuilding
-  const bool has_b = (uvec1.size() >= 4 && uvec2.size() >= 4);
   Real hL = std::max(uvec1[0], 0.0);
   Real huL = (hL > _h_eps) ? uvec1[1] : 0.0;
   Real hvL = (hL > _h_eps) ? uvec1[2] : 0.0;
@@ -195,8 +206,8 @@ SWENumericalFluxHLL::calcJacobian(unsigned int /*iside*/,
   Real hvR = (hR > _h_eps) ? uvec2[2] : 0.0;
   if (has_b)
   {
-    const Real bL = uvec1[3];
-    const Real bR = uvec2[3];
+    const Real bL = uvec1[idx_b];
+    const Real bR = uvec2[idx_b];
     const Real etaL = hL + bL;
     const Real etaR = hR + bR;
     const Real bstar = std::max(bL, bR);
@@ -215,8 +226,8 @@ SWENumericalFluxHLL::calcJacobian(unsigned int /*iside*/,
   }
   const Real unL = (hL > _h_eps) ? (huL * nx + hvL * ny) / hL : 0.0;
   const Real unR = (hR > _h_eps) ? (huR * nx + hvR * ny) / hR : 0.0;
-  const Real cL = std::sqrt(_g * std::max(hL, 0.0));
-  const Real cR = std::sqrt(_g * std::max(hR, 0.0));
+  const Real cL = std::sqrt(g_here * std::max(hL, 0.0));
+  const Real cR = std::sqrt(g_here * std::max(hR, 0.0));
   const Real smax = std::max(std::fabs(unL) + cL, std::fabs(unR) + cR);
 
   fill_dF(uvec1, nx, ny, jac1);

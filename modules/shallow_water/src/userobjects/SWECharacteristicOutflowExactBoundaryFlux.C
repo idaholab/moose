@@ -16,7 +16,6 @@ SWECharacteristicOutflowExactBoundaryFlux::validParams()
 {
   InputParameters params = BoundaryFluxBase::validParams();
   params.addClassDescription("Characteristic-based outflow flux for SWE using invariant matching.");
-  params.addParam<Real>("gravity", 9.81, "Gravitational acceleration g");
   params.addParam<Real>("dry_depth", 1e-6, "Depth threshold for dry state");
   params.addParam<Real>(
       "target_depth",
@@ -35,7 +34,6 @@ SWECharacteristicOutflowExactBoundaryFlux::validParams()
 SWECharacteristicOutflowExactBoundaryFlux::SWECharacteristicOutflowExactBoundaryFlux(
     const InputParameters & parameters)
   : BoundaryFluxBase(parameters),
-    _g(getParam<Real>("gravity")),
     _h_eps(getParam<Real>("dry_depth")),
     _target_h(getParam<Real>("target_depth")),
     _target_un(getParam<Real>("target_un")),
@@ -52,9 +50,12 @@ SWECharacteristicOutflowExactBoundaryFlux::calcFlux(unsigned int /*iside*/,
                                                     const RealVectorValue & n,
                                                     std::vector<Real> & flux) const
 {
-  mooseAssert(U.size() >= 3, "Expected at least 3 conservative variables");
+  mooseAssert(U.size() >= 4, "Expected [h,hu,hv,(b),g]");
   const Real nx = n(0), ny = n(1);
   const Real tx = -ny, ty = nx;
+  const bool has_b = (U.size() >= 5);
+  const unsigned int idx_g = has_b ? 4 : 3;
+  const Real g_here = U[idx_g];
 
   const Real h = std::max(U[0], 0.0);
   const Real hu = (h > _h_eps) ? U[1] : 0.0;
@@ -62,7 +63,7 @@ SWECharacteristicOutflowExactBoundaryFlux::calcFlux(unsigned int /*iside*/,
 
   const Real un = (h > _h_eps) ? (hu * nx + hv * ny) / h : 0.0;
   const Real ut = (h > _h_eps) ? (hu * tx + hv * ty) / h : 0.0;
-  const Real c = std::sqrt(_g * std::max(h, 0.0));
+  const Real c = std::sqrt(g_here * std::max(h, 0.0));
 
   // if not outflow, no flux
   flux.resize(3);
@@ -77,8 +78,8 @@ SWECharacteristicOutflowExactBoundaryFlux::calcFlux(unsigned int /*iside*/,
   {
     std::vector<Real> f(3, 0.0);
     f[0] = hh * u_n;
-    f[1] = hhu * u_n + _pressure_weight * 0.5 * _g * hh * hh * nx;
-    f[2] = hhv * u_n + _pressure_weight * 0.5 * _g * hh * hh * ny;
+    f[1] = hhu * u_n + _pressure_weight * 0.5 * g_here * hh * hh * nx;
+    f[2] = hhv * u_n + _pressure_weight * 0.5 * g_here * hh * hh * ny;
     return f;
   };
 
@@ -86,12 +87,12 @@ SWECharacteristicOutflowExactBoundaryFlux::calcFlux(unsigned int /*iside*/,
   {
     // Subcritical: match outgoing char (R+) and impose incoming (R-) from target
     const Real RplusL = un + 2.0 * c;
-    const Real c_target = std::sqrt(_g * _target_h);
+    const Real c_target = std::sqrt(g_here * _target_h);
     const Real Rminus_target = _target_un - 2.0 * c_target;
 
     const Real unR = 0.5 * (RplusL + Rminus_target);
     const Real cR = 0.25 * (RplusL - Rminus_target);
-    const Real hR = std::max(0.0, (cR * cR) / _g);
+    const Real hR = std::max(0.0, (cR * cR) / g_here);
     const Real huR = hR * (unR * nx + ut * tx);
     const Real hvR = hR * (unR * ny + ut * ty);
 
@@ -125,7 +126,7 @@ SWECharacteristicOutflowExactBoundaryFlux::calcJacobian(unsigned int /*iside*/,
   const Real hu = (h > _h_eps) ? U[1] : 0.0;
   const Real hv = (h > _h_eps) ? U[2] : 0.0;
   const Real un = (h > _h_eps) ? std::sqrt((hu * hu + hv * hv) / (h * h)) : 0.0; // magnitude
-  const Real c = std::sqrt(_g * std::max(h, 0.0));
+  const Real c = std::sqrt(g_here * std::max(h, 0.0));
   const Real smax = std::fabs(un) + c;
   J.resize(3, 3);
   J.zero();

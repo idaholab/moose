@@ -58,4 +58,8 @@ protected:
   // Bathymetry variable (cell-constant MONOMIAL/CONSTANT), coupled as a primary variable
   const VariableValue & _b1_var; // current element value at face
   const VariableValue & _b2_var; // neighbor element value at face
+
+  // Gravity scalar field (cell-constant MONOMIAL/CONSTANT), required
+  const VariableValue & _g1_var; // current element value at face
+  const VariableValue & _g2_var; // neighbor element value at face
 };

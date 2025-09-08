@@ -31,8 +31,8 @@ protected:
   virtual Real computeQpJacobian() override;
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
-  /// gravitational acceleration
-  const Real _g;
+  /// gravitational acceleration (coupled variable or number)
+  const VariableValue & _g;
   /// coupled depth
   const unsigned int _h_var;
   const VariableValue & _h;

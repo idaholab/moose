@@ -52,6 +52,6 @@ protected:
   const std::map<unsigned int, unsigned int> _jmap;
   const unsigned int _equation_index; // 0:h, 1:hu, 2:hv
 
-  // gravity
-  const Real _g;
+  // gravity (coupled scalar field)
+  const VariableValue & _g;
 };

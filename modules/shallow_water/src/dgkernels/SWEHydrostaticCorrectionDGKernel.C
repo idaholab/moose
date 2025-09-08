@@ -21,7 +21,7 @@ SWEHydrostaticCorrectionDGKernel::validParams()
   params.addRequiredCoupledVar("hu", "Conserved variable: h*u");
   params.addRequiredCoupledVar("hv", "Conserved variable: h*v");
   params.addRequiredCoupledVar("b_var", "Cell-constant bathymetry variable to use at faces");
-  params.addParam<Real>("gravity", 9.81, "Gravitational acceleration g");
+  params.addRequiredCoupledVar("gravity", "Scalar gravity field g");
   return params;
 }
 
@@ -37,7 +37,7 @@ SWEHydrostaticCorrectionDGKernel::SWEHydrostaticCorrectionDGKernel(
     _hv_var(coupled("hv")),
     _jmap(getIndexMapping()),
     _equation_index(_jmap.at(_var.number())),
-    _g(getParam<Real>("gravity"))
+    _g(coupledValue("gravity"))
 {
 }
 
@@ -69,8 +69,8 @@ SWEHydrostaticCorrectionDGKernel::computeQpResidual(Moose::DGResidualType type)
   const Real hLstar = std::max(0.0, etaL - bstar);
   const Real hRstar = std::max(0.0, etaR - bstar);
 
-  const Real psiL = 0.5 * _g * (hL * hL - hLstar * hLstar);
-  const Real psiR = 0.5 * _g * (hR * hR - hRstar * hRstar);
+  const Real psiL = 0.5 * _g[_qp] * (hL * hL - hLstar * hLstar);
+  const Real psiR = 0.5 * _g[_qp] * (hR * hR - hRstar * hRstar);
 
   const Real nx = _normals[_qp](0);
   const Real ny = _normals[_qp](1);
@@ -118,7 +118,7 @@ SWEHydrostaticCorrectionDGKernel::computeQpOffDiagJacobian(Moose::DGJacobianType
       const Real etaL = hL + bL;
       const Real hLstar = std::max(0.0, etaL - bstar);
       // Approximate d/dh [0.5*g*(h^2 - h*^2)] ~ g*(h - h*) when h*>0, else g*h
-      const Real dpsi_dh = (hLstar > 0.0 ? _g * (hL - hLstar) : _g * hL);
+      const Real dpsi_dh = (hLstar > 0.0 ? _g[_qp] * (hL - hLstar) : _g[_qp] * hL);
       return dpsi_dh * ncomp * _phi[_j][_qp] * _test[_i][_qp];
     }
     else
@@ -140,7 +140,7 @@ SWEHydrostaticCorrectionDGKernel::computeQpOffDiagJacobian(Moose::DGJacobianType
       const Real bstar = std::max(bL, bR);
       const Real etaR = hR + bR;
       const Real hRstar = std::max(0.0, etaR - bstar);
-      const Real dpsi_dh = (hRstar > 0.0 ? _g * (hR - hRstar) : _g * hR);
+      const Real dpsi_dh = (hRstar > 0.0 ? _g[_qp] * (hR - hRstar) : _g[_qp] * hR);
       return -dpsi_dh * ncomp * _phi_neighbor[_j][_qp] * _test_neighbor[_i][_qp];
     }
     else

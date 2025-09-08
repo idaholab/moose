@@ -36,6 +36,6 @@ protected:
   // coupled variables indices
   const unsigned int _h_var;
 
-  // gravity
-  const Real _g;
+  // gravity (coupled scalar field)
+  const VariableValue & _g;
 };

@@ -43,6 +43,5 @@ protected:
                DenseMatrix<Real> & J) const;
 
   /// gravity and dry depth for consistency if needed later
-  const Real _g;
   const Real _h_eps;
 };

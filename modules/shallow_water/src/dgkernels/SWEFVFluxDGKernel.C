@@ -23,6 +23,8 @@ SWEFVFluxDGKernel::validParams()
   params.addRequiredParam<UserObjectName>("numerical_flux", "Name of numerical flux user object");
   params.addRequiredCoupledVar(
       "b_var", "Cell-constant bathymetry variable (MONOMIAL/CONSTANT) to use at faces");
+  params.addRequiredCoupledVar(
+      "gravity", "Cell-constant scalar gravity field g (MONOMIAL/CONSTANT) to use at faces");
   return params;
 }
 
@@ -41,7 +43,9 @@ SWEFVFluxDGKernel::SWEFVFluxDGKernel(const InputParameters & parameters)
     _jmap(getIndexMapping()),
     _equation_index(_jmap.at(_var.number())),
     _b1_var(coupledValue("b_var")),
-    _b2_var(coupledNeighborValue("b_var"))
+    _b2_var(coupledNeighborValue("b_var")),
+    _g1_var(coupledValue("gravity")),
+    _g2_var(coupledNeighborValue("gravity"))
 {
 }
 
@@ -52,8 +56,8 @@ SWEFVFluxDGKernel::computeQpResidual(Moose::DGResidualType type)
 {
   const Real bL = _b1_var[_qp];
   const Real bR = _b2_var[_qp];
-  std::vector<Real> U1 = {_h1[_qp], _hu1[_qp], _hv1[_qp], bL};
-  std::vector<Real> U2 = {_h2[_qp], _hu2[_qp], _hv2[_qp], bR};
+  std::vector<Real> U1 = {_h1[_qp], _hu1[_qp], _hv1[_qp], bL, _g1_var[_qp]};
+  std::vector<Real> U2 = {_h2[_qp], _hu2[_qp], _hv2[_qp], bR, _g2_var[_qp]};
 
   const auto & flux = _numerical_flux.getFlux(
       _current_side, _current_elem->id(), _neighbor_elem->id(), U1, U2, _normals[_qp]);
@@ -79,8 +83,8 @@ SWEFVFluxDGKernel::computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigned
 {
   const Real bL = _b1_var[_qp];
   const Real bR = _b2_var[_qp];
-  std::vector<Real> U1 = {_h1[_qp], _hu1[_qp], _hv1[_qp], bL};
-  std::vector<Real> U2 = {_h2[_qp], _hu2[_qp], _hv2[_qp], bR};
+  std::vector<Real> U1 = {_h1[_qp], _hu1[_qp], _hv1[_qp], bL, _g1_var[_qp]};
+  std::vector<Real> U2 = {_h2[_qp], _hu2[_qp], _hv2[_qp], bR, _g2_var[_qp]};
 
   const auto & dF_dUL = _numerical_flux.getJacobian(Moose::Element,
                                                     _current_side,

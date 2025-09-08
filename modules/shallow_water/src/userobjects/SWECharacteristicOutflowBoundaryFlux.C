@@ -16,7 +16,6 @@ SWECharacteristicOutflowBoundaryFlux::validParams()
 {
   InputParameters params = BoundaryFluxBase::validParams();
   params.addClassDescription("Characteristic-inspired outflow flux for SWE (advective-only).");
-  params.addParam<Real>("gravity", 9.81, "Gravitational acceleration g");
   params.addParam<Real>("dry_depth", 1e-6, "Depth threshold for dry state");
   params.addParam<bool>(
       "outflow_only", true, "If true, emit flux only when un>0 (outflow); zero flux otherwise");
@@ -34,7 +33,6 @@ SWECharacteristicOutflowBoundaryFlux::validParams()
 SWECharacteristicOutflowBoundaryFlux::SWECharacteristicOutflowBoundaryFlux(
     const InputParameters & parameters)
   : BoundaryFluxBase(parameters),
-    _g(getParam<Real>("gravity")),
     _h_eps(getParam<Real>("dry_depth")),
     _outflow_only(getParam<bool>("outflow_only")),
     _ramp_time(getParam<Real>("ramp_time")),
@@ -51,8 +49,11 @@ SWECharacteristicOutflowBoundaryFlux::calcFlux(unsigned int /*iside*/,
                                                const RealVectorValue & n,
                                                std::vector<Real> & flux) const
 {
-  mooseAssert(U.size() >= 3, "Expected at least 3 conservative variables");
+  mooseAssert(U.size() >= 4, "Expected [h,hu,hv,(b),g]");
   const Real nx = n(0), ny = n(1);
+  const bool has_b = (U.size() >= 5);
+  const unsigned int idx_g = has_b ? 4 : 3;
+  const Real g_here = U[idx_g];
   const Real h = std::max(U[0], 0.0);
   const Real hu = (h > _h_eps) ? U[1] : 0.0;
   const Real hv = (h > _h_eps) ? U[2] : 0.0;
@@ -81,8 +82,8 @@ SWECharacteristicOutflowBoundaryFlux::calcFlux(unsigned int /*iside*/,
   const Real adv = (_outflow_only ? std::max(un, 0.0) : un);
 
   flux[0] = scale * (h * adv);
-  flux[1] = scale * ((hu * adv) + 0.5 * _g * h * h * nx); // <-- add pressure
-  flux[2] = scale * ((hv * adv) + 0.5 * _g * h * h * ny); // <-- add pressure
+  flux[1] = scale * ((hu * adv) + 0.5 * g_here * h * h * nx); // <-- add pressure
+  flux[2] = scale * ((hv * adv) + 0.5 * g_here * h * h * ny); // <-- add pressure
 }
 
 void
@@ -92,8 +93,11 @@ SWECharacteristicOutflowBoundaryFlux::calcJacobian(unsigned int /*iside*/,
                                                    const RealVectorValue & n,
                                                    DenseMatrix<Real> & J) const
 {
-  mooseAssert(U.size() >= 3, "Expected at least 3 conservative variables");
+  mooseAssert(U.size() >= 4, "Expected [h,hu,hv,(b),g]");
   const Real nx = n(0), ny = n(1);
+  const bool has_b = (U.size() >= 5);
+  const unsigned int idx_g = has_b ? 4 : 3;
+  const Real g_here = U[idx_g];
   const Real h = std::max(U[0], 0.0);
   const Real hu = (h > _h_eps) ? U[1] : 0.0;
   const Real hv = (h > _h_eps) ? U[2] : 0.0;
@@ -134,7 +138,7 @@ SWECharacteristicOutflowBoundaryFlux::calcJacobian(unsigned int /*iside*/,
     J(2, 1) = scale * (hv * d_un_dhu);
     J(2, 2) = scale * (un + hv * d_un_dhv);
 
-    J(1, 0) += scale * _g * h * nx;
-    J(2, 0) += scale * _g * h * ny;
+    J(1, 0) += scale * g_here * h * nx;
+    J(2, 0) += scale * g_here * h * ny;
   }
 }

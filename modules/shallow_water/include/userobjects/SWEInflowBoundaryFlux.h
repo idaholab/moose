@@ -36,7 +36,6 @@ public:
                             DenseMatrix<Real> & jac1) const override;
 
 protected:
-  const Real _g;
   const Real _h_eps;
   const Real _h_in;
   const Real _un_in;

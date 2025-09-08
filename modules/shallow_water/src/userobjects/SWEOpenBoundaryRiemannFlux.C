@@ -17,7 +17,6 @@ SWEOpenBoundaryRiemannFlux::validParams()
   InputParameters params = BoundaryFluxBase::validParams();
   params.addClassDescription(
       "Open/outflow boundary flux for SWE using ghost-state Riemann with HLLC/HLL.");
-  params.addParam<Real>("gravity", 9.81, "Gravitational acceleration g");
   params.addParam<Real>("dry_depth", 1e-6, "Depth threshold for dry state");
 
   MooseEnum farfield_mode("stage dry", "stage");
@@ -40,7 +39,6 @@ SWEOpenBoundaryRiemannFlux::validParams()
 
 SWEOpenBoundaryRiemannFlux::SWEOpenBoundaryRiemannFlux(const InputParameters & parameters)
   : BoundaryFluxBase(parameters),
-    _g(getParam<Real>("gravity")),
     _h_eps(getParam<Real>("dry_depth")),
     _mode(
         [&]()
@@ -66,14 +64,17 @@ SWEOpenBoundaryRiemannFlux::calcFlux(unsigned int iside,
                                      const RealVectorValue & n,
                                      std::vector<Real> & flux) const
 {
-  mooseAssert(Uin.size() >= 3, "Expected at least 3 conservative variables");
+  mooseAssert(Uin.size() >= 4, "Expected [h,hu,hv,(b),g]");
 
   // Outward normal and tangential
   const Real nx = n(0), ny = n(1);
   const Real tx = -ny, ty = nx;
 
   // Interior state (ensure non-negative depth, zero momenta when dry)
-  const bool has_b = (Uin.size() >= 4);
+  const bool has_b = (Uin.size() >= 5);
+  const unsigned int idx_b = 3;
+  const unsigned int idx_g = has_b ? 4 : 3;
+  const Real g_here = Uin[idx_g];
   const Real b_face = has_b ? Uin[3] : 0.0;
   const Real hL = std::max(Uin[0], 0.0);
   const Real huL = (hL > _h_eps) ? Uin[1] : 0.0;
@@ -88,7 +89,7 @@ SWEOpenBoundaryRiemannFlux::calcFlux(unsigned int iside,
 
   const Real unL = (huL * nx + hvL * ny) / hL;
   const Real utL = (huL * tx + hvL * ty) / hL;
-  const Real cL = std::sqrt(_g * hL);
+  const Real cL = std::sqrt(g_here * hL);
 
   // Farfield depth from stage or dry mode
   Real h_inf = 0.0;
@@ -127,11 +128,11 @@ SWEOpenBoundaryRiemannFlux::calcFlux(unsigned int iside,
   {
     // Subcritical: use 1 incoming char from farfield (R-) and outgoing from interior (R+)
     const Real RplusL = unL + 2.0 * cL;
-    const Real c_inf = std::sqrt(_g * h_inf);
+    const Real c_inf = std::sqrt(g_here * h_inf);
     const Real Rminus_inf = _un_infty - 2.0 * c_inf;
     const Real un_star = 0.5 * (RplusL + Rminus_inf);
     const Real c_star = 0.25 * (RplusL - Rminus_inf);
-    const Real h_star = std::max(0.0, (c_star * c_star) / _g);
+    const Real h_star = std::max(0.0, (c_star * c_star) / g_here);
     hR = h_star;
     unR = un_star;
     utR = utL; // preserve tangential velocity
@@ -174,13 +175,16 @@ SWEOpenBoundaryRiemannFlux::calcJacobian(unsigned int iside,
                                          const RealVectorValue & n,
                                          DenseMatrix<Real> & jac1) const
 {
-  mooseAssert(Uin.size() >= 3, "Expected at least 3 conservative variables");
+  mooseAssert(Uin.size() >= 4, "Expected [h,hu,hv,(b),g]");
 
   // Outward normal and tangential
   const Real nx = n(0), ny = n(1);
   const Real tx = -ny, ty = nx;
 
-  const bool has_b = (Uin.size() >= 4);
+  const bool has_b = (Uin.size() >= 5);
+  const unsigned int idx_b = 3;
+  const unsigned int idx_g = has_b ? 4 : 3;
+  const Real g_here = Uin[idx_g];
   const Real b_face = has_b ? Uin[3] : 0.0;
 
   const Real hL = std::max(Uin[0], 0.0);
@@ -196,7 +200,7 @@ SWEOpenBoundaryRiemannFlux::calcJacobian(unsigned int iside,
 
   const Real unL = (huL * nx + hvL * ny) / hL;
   const Real utL = (huL * tx + hvL * ty) / hL;
-  const Real cL = std::sqrt(_g * hL);
+  const Real cL = std::sqrt(g_here * hL);
 
   Real h_inf = 0.0;
   if (_mode == FarfieldMode::Stage)
@@ -225,11 +229,11 @@ SWEOpenBoundaryRiemannFlux::calcJacobian(unsigned int iside,
   else
   {
     const Real RplusL = unL + 2.0 * cL;
-    const Real c_inf = std::sqrt(_g * h_inf);
+    const Real c_inf = std::sqrt(g_here * h_inf);
     const Real Rminus_inf = _un_infty - 2.0 * c_inf;
     const Real un_star = 0.5 * (RplusL + Rminus_inf);
     const Real c_star = 0.25 * (RplusL - Rminus_inf);
-    const Real h_star = std::max(0.0, (c_star * c_star) / _g);
+    const Real h_star = std::max(0.0, (c_star * c_star) / g_here);
     hR = h_star;
     unR = un_star;
     utR = utL;

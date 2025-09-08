@@ -14,7 +14,7 @@
 /**
  * Base class for shallow water numerical fluxes.
  *
- * Provides common parameters like gravity and dry-state threshold.
+ * Provides common parameters like dry-state threshold.
  * Derived classes implement calcFlux/calcJacobian.
  */
 class SWENumericalFluxBase : public InternalSideFluxBase
@@ -26,8 +26,6 @@ public:
   virtual ~SWENumericalFluxBase() {}
 
 protected:
-  /// gravitational acceleration
-  const Real _g;
   /// minimum depth to consider a cell wet
   const Real _h_eps;
 };

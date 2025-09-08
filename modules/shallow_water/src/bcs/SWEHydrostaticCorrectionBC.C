@@ -18,7 +18,7 @@ SWEHydrostaticCorrectionBC::validParams()
   params.addClassDescription(
       "Boundary hydrostatic correction for SWE momentum (cancels wall pressure contribution).");
   params.addRequiredCoupledVar("h", "Conserved variable: h");
-  params.addParam<Real>("gravity", 9.81, "Gravitational acceleration g");
+  params.addRequiredCoupledVar("gravity", "Scalar gravity field g");
   return params;
 }
 
@@ -26,7 +26,7 @@ SWEHydrostaticCorrectionBC::SWEHydrostaticCorrectionBC(const InputParameters & p
   : IntegratedBC(parameters),
     _h(getMaterialProperty<Real>("h")),
     _h_var(coupled("h")),
-    _g(getParam<Real>("gravity"))
+    _g(coupledValue("gravity"))
 {
 }
 
@@ -45,7 +45,7 @@ SWEHydrostaticCorrectionBC::computeQpResidual()
   const Real ncomp = is_hu ? nx : ny;
   const Real h = std::max(_h[_qp], 0.0);
   // Residual contribution: -0.5 * g * h^2 * n_component
-  return (-0.5 * _g * h * h * ncomp) * _test[_i][_qp];
+  return (-0.5 * _g[_qp] * h * h * ncomp) * _test[_i][_qp];
 }
 
 Real
@@ -69,7 +69,7 @@ SWEHydrostaticCorrectionBC::computeQpOffDiagJacobian(unsigned int jvar)
     const Real ncomp = is_hu ? nx : ny;
     const Real h = std::max(_h[_qp], 0.0);
     // d/dh (-0.5 * g * h^2) = -g * h
-    return (-_g * h * ncomp) * _phi[_j][_qp] * _test[_i][_qp];
+    return (-_g[_qp] * h * ncomp) * _phi[_j][_qp] * _test[_i][_qp];
   }
   return 0.0;
 }

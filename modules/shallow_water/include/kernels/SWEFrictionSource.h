@@ -29,7 +29,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
 
   // parameters
-  const Real _g;
+  const VariableValue & _g;
   const Real _n_manning;
   const Real _h_eps;
   const Real _s_eps;

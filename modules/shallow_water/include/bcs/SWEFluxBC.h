@@ -52,4 +52,7 @@ protected:
   // Optional cell-constant bathymetry variable to pass as 4th entry to boundary flux UOs
   const bool _has_b;
   const VariableValue * _b_var_val;
+
+  // Required scalar gravity field to pass to boundary flux UOs
+  const VariableValue & _g_var_val;
 };

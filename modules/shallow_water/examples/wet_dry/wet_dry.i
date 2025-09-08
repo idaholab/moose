@@ -12,6 +12,7 @@
 [GlobalParams]
   family = MONOMIAL
   order = CONSTANT
+  gravity = 9.81
 []
 
 [Variables]
@@ -44,7 +45,6 @@
 [UserObjects]
   [flux]
     type = SWENumericalFluxHLL
-    gravity = 9.81
     dry_depth = 1e-6
     execute_on = 'INITIAL TIMESTEP_END'
   []
@@ -116,6 +116,7 @@
     hv = hv
     numerical_flux = flux
     b_var = b_field
+    gravity = gravity
   []
   [flux_hu]
     type = SWEFVFluxDGKernel
@@ -125,6 +126,7 @@
     hv = hv
     numerical_flux = flux
     b_var = b_field
+    gravity = gravity
   []
   [flux_hv]
     type = SWEFVFluxDGKernel
@@ -134,6 +136,7 @@
     hv = hv
     numerical_flux = flux
     b_var = b_field
+    gravity = gravity
   []
   # Hydrostatic correction to preserve eta = const
   [corr_hu]
@@ -143,6 +146,7 @@
     hu = hu
     hv = hv
     b_var = b_field
+    gravity = gravity
   []
   [corr_hv]
     type = SWEHydrostaticCorrectionDGKernel
@@ -151,6 +155,7 @@
     hu = hu
     hv = hv
     b_var = b_field
+    gravity = gravity
   []
 []
 
@@ -164,6 +169,7 @@
     hu = hu
     hv = hv
     boundary_flux = wall
+    gravity = gravity
   []
   [bchu]
     type = SWEFluxBC
@@ -173,6 +179,7 @@
     hu = hu
     hv = hv
     boundary_flux = wall
+    gravity = gravity
   []
   [bchv]
     type = SWEFluxBC
@@ -182,6 +189,7 @@
     hu = hu
     hv = hv
     boundary_flux = wall
+    gravity = gravity
   []
 []
 

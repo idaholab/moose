@@ -15,14 +15,11 @@ SWENumericalFluxBase::validParams()
   InputParameters params = InternalSideFluxBase::validParams();
   params.addClassDescription(
       "Base for shallow-water numerical fluxes (SWE) with shared parameters.");
-  params.addParam<Real>("gravity", 9.81, "Gravitational acceleration g");
   params.addParam<Real>("dry_depth", 1e-6, "Depth threshold for dry state");
   return params;
 }
 
 SWENumericalFluxBase::SWENumericalFluxBase(const InputParameters & parameters)
-  : InternalSideFluxBase(parameters),
-    _g(getParam<Real>("gravity")),
-    _h_eps(getParam<Real>("dry_depth"))
+  : InternalSideFluxBase(parameters), _h_eps(getParam<Real>("dry_depth"))
 {
 }

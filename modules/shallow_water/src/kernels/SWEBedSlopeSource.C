@@ -17,7 +17,7 @@ SWEBedSlopeSource::validParams()
 {
   InputParameters params = Kernel::validParams();
   params.addClassDescription("Bed slope source for SWE momentum: -g h grad(b) component.");
-  params.addParam<Real>("gravity", 9.81, "Gravitational acceleration g");
+  params.addRequiredCoupledVar("gravity", "Scalar gravity field g");
   params.addRequiredCoupledVar("h", "Conserved variable: h");
   params.addRequiredParam<FunctionName>("bed", "Bed elevation function b(x,y)");
   MooseEnum dir("x=0 y=1");
@@ -27,11 +27,12 @@ SWEBedSlopeSource::validParams()
 
 SWEBedSlopeSource::SWEBedSlopeSource(const InputParameters & parameters)
   : Kernel(parameters),
-    _g(getParam<Real>("gravity")),
+    _g(coupledValue("gravity")),
     _h_var(coupled("h")),
     _h(coupledValue("h")),
     _bed(getFunction("bed")),
     _dir(getParam<MooseEnum>("direction"))
+{
 {
 }
 
@@ -42,7 +43,7 @@ SWEBedSlopeSource::computeQpResidual()
 {
   const auto gradb = _bed.gradient(_t, _q_point[_qp]);
   const Real db = (_dir == 0 ? gradb(0) : gradb(1));
-  const Real S = -_g * _h[_qp] * db;
+  const Real S = -_g[_qp] * _h[_qp] * db;
   return S * _test[_i][_qp];
 }
 
@@ -60,7 +61,7 @@ SWEBedSlopeSource::computeQpOffDiagJacobian(unsigned int jvar)
   {
     const auto gradb = _bed.gradient(_t, _q_point[_qp]);
     const Real db = (_dir == 0 ? gradb(0) : gradb(1));
-    return (-_g * db) * _phi[_j][_qp] * _test[_i][_qp];
+    return (-_g[_qp] * db) * _phi[_j][_qp] * _test[_i][_qp];
   }
   return 0.0;
 }

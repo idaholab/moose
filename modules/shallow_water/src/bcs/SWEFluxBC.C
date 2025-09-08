@@ -23,6 +23,8 @@ SWEFluxBC::validParams()
   params.addCoupledVar("b_var",
                        "Cell-constant bathymetry variable (MONOMIAL/CONSTANT) to pass to the "
                        "boundary flux UO (optional)");
+  params.addRequiredCoupledVar(
+      "gravity", "Cell-constant scalar gravity field g (MONOMIAL/CONSTANT)");
   return params;
 }
 
@@ -41,7 +43,8 @@ SWEFluxBC::SWEFluxBC(const InputParameters & parameters)
     _equation_index(_jmap.at(_var.number())),
     _flux(getUserObject<BoundaryFluxBase>("boundary_flux")),
     _has_b(isCoupled("b_var")),
-    _b_var_val(_has_b ? &coupledValue("b_var") : nullptr)
+    _b_var_val(_has_b ? &coupledValue("b_var") : nullptr),
+    _g_var_val(coupledValue("gravity"))
 {
 }
 
@@ -51,6 +54,7 @@ SWEFluxBC::computeQpResidual()
   std::vector<Real> U = {_h1[_qp], _hu1[_qp], _hv1[_qp]};
   if (_has_b)
     U.push_back((*_b_var_val)[_qp]);
+  U.push_back(_g_var_val[_qp]);
   const auto & F = _flux.getFlux(_current_side, _current_elem->id(), U, _normals[_qp]);
   return F[_equation_index] * _test[_i][_qp];
 }
@@ -67,6 +71,7 @@ SWEFluxBC::computeQpOffDiagJacobian(unsigned int jvar)
   std::vector<Real> U = {_h[_qp], _hu[_qp], _hv[_qp]};
   if (_has_b)
     U.push_back((*_b_var_val)[_qp]);
+  U.push_back(_g_var_val[_qp]);
   const auto & J = _flux.getJacobian(_current_side, _current_elem->id(), U, _normals[_qp]);
   return J(_equation_index, _jmap.at(jvar)) * _phi[_j][_qp] * _test[_i][_qp];
 }

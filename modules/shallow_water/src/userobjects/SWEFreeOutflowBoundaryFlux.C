@@ -16,13 +16,12 @@ SWEFreeOutflowBoundaryFlux::validParams()
 {
   InputParameters params = BoundaryFluxBase::validParams();
   params.addClassDescription("Free outflow boundary flux for SWE: $F(U) \\cdot n$.");
-  params.addParam<Real>("gravity", 9.81, "Gravitational acceleration g");
   params.addParam<Real>("dry_depth", 1e-6, "Depth threshold for dry state");
   return params;
 }
 
 SWEFreeOutflowBoundaryFlux::SWEFreeOutflowBoundaryFlux(const InputParameters & parameters)
-  : BoundaryFluxBase(parameters), _g(getParam<Real>("gravity")), _h_eps(getParam<Real>("dry_depth"))
+  : BoundaryFluxBase(parameters), _h_eps(getParam<Real>("dry_depth"))
 {
 }
 
@@ -35,8 +34,11 @@ SWEFreeOutflowBoundaryFlux::calcFlux(unsigned int /*iside*/,
                                      const RealVectorValue & n,
                                      std::vector<Real> & flux) const
 {
-  mooseAssert(U.size() >= 3, "Expected at least 3 conservative variables");
+  mooseAssert(U.size() >= 4, "Expected [h,hu,hv,(b),g]");
   const Real nx = n(0), ny = n(1);
+  const bool has_b = (U.size() >= 5);
+  const unsigned int idx_g = has_b ? 4 : 3;
+  const Real g_here = U[idx_g];
   const Real h = std::max(U[0], 0.0);
   const Real hu = (h > _h_eps) ? U[1] : 0.0;
   const Real hv = (h > _h_eps) ? U[2] : 0.0;
@@ -44,8 +46,8 @@ SWEFreeOutflowBoundaryFlux::calcFlux(unsigned int /*iside*/,
 
   flux.resize(3);
   flux[0] = h * un;
-  flux[1] = hu * un + 0.5 * _g * h * h * nx;
-  flux[2] = hv * un + 0.5 * _g * h * h * ny;
+  flux[1] = hu * un + 0.5 * g_here * h * h * nx;
+  flux[2] = hv * un + 0.5 * g_here * h * h * ny;
 }
 
 void
@@ -97,6 +99,8 @@ SWEFreeOutflowBoundaryFlux::calcJacobian(unsigned int /*iside*/,
                                          const RealVectorValue & n,
                                          DenseMatrix<Real> & jac1) const
 {
-  mooseAssert(U.size() >= 3, "Expected at least 3 conservative variables");
-  fill_dF(U, n(0), n(1), _g, _h_eps, jac1);
+  mooseAssert(U.size() >= 4, "Expected [h,hu,hv,(b),g]");
+  const bool has_b = (U.size() >= 5);
+  const unsigned int idx_g = has_b ? 4 : 3;
+  fill_dF(U, n(0), n(1), U[idx_g], _h_eps, jac1);
 }

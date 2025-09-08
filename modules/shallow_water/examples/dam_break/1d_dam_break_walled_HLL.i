@@ -10,6 +10,7 @@ N = 200
 [GlobalParams]
   family = MONOMIAL
   order = CONSTANT
+  gravity = 9.81
 []
 
 [Variables]
@@ -103,6 +104,7 @@ N = 200
     hv = hv
     b_var = b_field
     numerical_flux = flux
+    gravity = gravity
   []
   [flux_hu]
     type = SWEFVFluxDGKernel
@@ -112,6 +114,7 @@ N = 200
     hv = hv
     b_var = b_field
     numerical_flux = flux
+    gravity = gravity
   []
   [flux_hv]
     type = SWEFVFluxDGKernel
@@ -121,6 +124,7 @@ N = 200
     hv = hv
     b_var = b_field
     numerical_flux = flux
+    gravity = gravity
   []
 []
 
@@ -134,6 +138,7 @@ N = 200
     hu = hu
     hv = hv
     boundary_flux = wall
+    gravity = gravity
   []
   [bchu]
     type = SWEFluxBC
@@ -143,6 +148,7 @@ N = 200
     hu = hu
     hv = hv
     boundary_flux = wall
+    gravity = gravity
   []
   [bchv]
     type = SWEFluxBC
@@ -152,6 +158,7 @@ N = 200
     hu = hu
     hv = hv
     boundary_flux = wall
+    gravity = gravity
   []
 []
 
@@ -201,4 +208,3 @@ N = 200
   csv = true
   print_linear_residuals = false
 []
-

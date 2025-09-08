@@ -49,13 +49,16 @@ SWENumericalFluxHLLC::calcFlux(unsigned int /*iside*/,
                                const RealVectorValue & n,
                                std::vector<Real> & flux) const
 {
-  mooseAssert(uvec1.size() >= 3 && uvec2.size() >= 3, "Need [h,hu,hv](,b)");
+  mooseAssert(uvec1.size() >= 4 && uvec2.size() >= 4, "Need [h,hu,hv,(b),g]");
+  const bool has_b = (uvec1.size() >= 5 && uvec2.size() >= 5);
+  const unsigned int idx_b = 3;
+  const unsigned int idx_g = has_b ? 4 : 3;
+  const Real g_here = uvec1[idx_g];
 
   const Real nx = n(0), ny = n(1);
   const Real tx = -ny, ty = nx;
 
   // --- hydrostatic reconstruction (Audusse) if b is present
-  const bool has_b = (uvec1.size() >= 4 && uvec2.size() >= 4);
   Real hL = std::max(uvec1[0], 0.0), huL = (hL > _h_eps) ? uvec1[1] : 0.0,
        hvL = (hL > _h_eps) ? uvec1[2] : 0.0;
   Real hR = std::max(uvec2[0], 0.0), huR = (hR > _h_eps) ? uvec2[1] : 0.0,
@@ -63,7 +66,7 @@ SWENumericalFluxHLLC::calcFlux(unsigned int /*iside*/,
 
   if (has_b)
   {
-    const Real bL = uvec1[3], bR = uvec2[3];
+    const Real bL = uvec1[idx_b], bR = uvec2[idx_b];
     const Real etaL = hL + bL, etaR = hR + bR, bstar = std::max(bL, bR);
     const Real hLstar = std::max(0.0, etaL - bstar);
     const Real hRstar = std::max(0.0, etaR - bstar);
@@ -82,8 +85,8 @@ SWENumericalFluxHLLC::calcFlux(unsigned int /*iside*/,
   const Real utL = (hL > _h_eps) ? (huL * tx + hvL * ty) / hL : 0.0;
   const Real unR = (hR > _h_eps) ? (huR * nx + hvR * ny) / hR : 0.0;
   const Real utR = (hR > _h_eps) ? (huR * tx + hvR * ty) / hR : 0.0;
-  const Real cL = std::sqrt(_g * hL);
-  const Real cR = std::sqrt(_g * hR);
+  const Real cL = std::sqrt(g_here * hL);
+  const Real cR = std::sqrt(g_here * hR);
 
   // Wave speeds
   Real SL, SR;
@@ -115,7 +118,7 @@ SWENumericalFluxHLLC::calcFlux(unsigned int /*iside*/,
   const Real denom = AR * hR - AL * hL;
   Real Sstar;
   if (std::abs(denom) > 1e-12)
-    Sstar = (AR * hR * unR - AL * hL * unL + 0.5 * _g * (hL * hL - hR * hR)) / denom;
+    Sstar = (AR * hR * unR - AL * hL * unL + 0.5 * g_here * (hL * hL - hR * hR)) / denom;
   else
     Sstar = 0.5 * (unL + unR);
   // clamp S* within fan to avoid degeneracy
@@ -138,8 +141,8 @@ SWENumericalFluxHLLC::calcFlux(unsigned int /*iside*/,
   {
     std::vector<Real> f(3, 0.0);
     f[0] = h * un;
-    f[1] = hu * un + 0.5 * _g * h * h * nx;
-    f[2] = hv * un + 0.5 * _g * h * h * ny;
+    f[1] = hu * un + 0.5 * g_here * h * h * nx;
+    f[2] = hv * un + 0.5 * g_here * h * h * ny;
     return f;
   };
 
@@ -233,6 +236,11 @@ SWENumericalFluxHLLC::calcJacobian(unsigned int /*iside*/,
 
   const Real nx = n(0), ny = n(1);
 
+  // Local g index follows the same layout assumption as in calcFlux
+  const bool has_b = (uvec1.size() >= 5 && uvec2.size() >= 5);
+  const unsigned int idx_g = has_b ? 4 : 3;
+  const Real g_here = uvec1[idx_g];
+
   auto fill_dF = [&](const std::vector<Real> & U, DenseMatrix<Real> & J)
   {
     const Real h = std::max(U[0], 0.0);
@@ -249,10 +257,10 @@ SWENumericalFluxHLLC::calcJacobian(unsigned int /*iside*/,
       const Real d_un_dh = -qn * invh * invh;
       const Real d_un_dhu = nx * invh;
       const Real d_un_dhv = ny * invh;
-      J(1, 0) = hu * d_un_dh + _g * h * nx;
+      J(1, 0) = hu * d_un_dh + g_here * h * nx;
       J(1, 1) = un + hu * d_un_dhu;
       J(1, 2) = hu * d_un_dhv;
-      J(2, 0) = hv * d_un_dh + _g * h * ny;
+      J(2, 0) = hv * d_un_dh + g_here * h * ny;
       J(2, 1) = hv * d_un_dhu;
       J(2, 2) = un + hv * d_un_dhv;
     }
@@ -268,7 +276,7 @@ SWENumericalFluxHLLC::calcJacobian(unsigned int /*iside*/,
   const Real unL = (hL > _h_eps) ? (huL * nx + hvL * ny) / hL : 0.0;
   const Real unR = (hR > _h_eps) ? (huR * nx + hvR * ny) / hR : 0.0;
   const Real smax =
-      std::max(std::fabs(unL) + std::sqrt(_g * hL), std::fabs(unR) + std::sqrt(_g * hR));
+      std::max(std::fabs(unL) + std::sqrt(g_here * hL), std::fabs(unR) + std::sqrt(g_here * hR));
   for (unsigned i = 0; i < 3; ++i)
   {
     jac1(i, i) += 0.5 * smax;

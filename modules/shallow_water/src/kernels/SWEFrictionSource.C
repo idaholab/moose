@@ -16,7 +16,7 @@ SWEFrictionSource::validParams()
 {
   InputParameters params = Kernel::validParams();
   params.addClassDescription("Manning friction source for SWE momentum equations.");
-  params.addParam<Real>("gravity", 9.81, "Gravitational acceleration g");
+  params.addRequiredCoupledVar("gravity", "Scalar gravity field g");
   params.addRequiredParam<Real>("manning_n", "Manning roughness coefficient n");
   params.addParam<Real>("dry_depth", 1e-6, "Depth threshold for dry state");
   params.addParam<Real>("speed_eps", 1e-12, "Regularization for speed in friction term");
@@ -28,7 +28,7 @@ SWEFrictionSource::validParams()
 
 SWEFrictionSource::SWEFrictionSource(const InputParameters & parameters)
   : Kernel(parameters),
-    _g(getParam<Real>("gravity")),
+    _g(coupledValue("gravity")),
     _n_manning(getParam<Real>("manning_n")),
     _h_eps(getParam<Real>("dry_depth")),
     _s_eps(getParam<Real>("speed_eps")),
@@ -57,7 +57,7 @@ SWEFrictionSource::computeQpResidual()
   // Determine component based on variable
   const bool xmom = (_var.number() == _hu_var);
   const Real comp = xmom ? u : v;
-  const Real S = -_g * _n_manning * _n_manning * comp * s / std::pow(h, 1.0 / 3.0);
+  const Real S = -_g[_qp] * _n_manning * _n_manning * comp * s / std::pow(h, 1.0 / 3.0);
   return S * _test[_i][_qp];
 }
 
@@ -81,7 +81,7 @@ SWEFrictionSource::computeQpOffDiagJacobian(unsigned int jvar)
   const bool xmom = (_var.number() == _hu_var);
 
   // Common prefactor
-  const Real C = _g * _n_manning * _n_manning / std::pow(h, 1.0 / 3.0);
+  const Real C = _g[_qp] * _n_manning * _n_manning / std::pow(h, 1.0 / 3.0);
 
   Real dS = 0.0;
   if (jvar == _hu_var)
@@ -124,11 +124,11 @@ SWEFrictionSource::computeQpOffDiagJacobian(unsigned int jvar)
     const Real ds_dh = (u / s) * du_dh + (v / s) * dv_dh; // ~ -s/h
     const Real d_h_pow = (-1.0 / 3.0) * std::pow(h, -4.0 / 3.0);
     if (xmom)
-      dS = -_g * _n_manning * _n_manning * (du_dh * s + u * ds_dh) * std::pow(h, -1.0 / 3.0) +
-           (-_g * _n_manning * _n_manning * u * s) * d_h_pow;
+      dS = -_g[_qp] * _n_manning * _n_manning * (du_dh * s + u * ds_dh) * std::pow(h, -1.0 / 3.0) +
+           (-_g[_qp] * _n_manning * _n_manning * u * s) * d_h_pow;
     else
-      dS = -_g * _n_manning * _n_manning * (dv_dh * s + v * ds_dh) * std::pow(h, -1.0 / 3.0) +
-           (-_g * _n_manning * _n_manning * v * s) * d_h_pow;
+      dS = -_g[_qp] * _n_manning * _n_manning * (dv_dh * s + v * ds_dh) * std::pow(h, -1.0 / 3.0) +
+           (-_g[_qp] * _n_manning * _n_manning * v * s) * d_h_pow;
     return dS * _phi[_j][_qp] * _test[_i][_qp];
   }
 

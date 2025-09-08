@@ -16,13 +16,12 @@ SWEWallBoundaryFlux::validParams()
 {
   InputParameters params = BoundaryFluxBase::validParams();
   params.addClassDescription("Solid wall boundary flux for SWE: zero normal velocity.");
-  params.addParam<Real>("gravity", 9.81, "Gravitational acceleration g");
   params.addParam<Real>("dry_depth", 1e-6, "Depth threshold for dry state");
   return params;
 }
 
 SWEWallBoundaryFlux::SWEWallBoundaryFlux(const InputParameters & parameters)
-  : BoundaryFluxBase(parameters), _g(getParam<Real>("gravity")), _h_eps(getParam<Real>("dry_depth"))
+  : BoundaryFluxBase(parameters), _h_eps(getParam<Real>("dry_depth"))
 {
 }
 
@@ -35,11 +34,13 @@ SWEWallBoundaryFlux::calcFlux(unsigned int /*iside*/,
                               const RealVectorValue & n,
                               std::vector<Real> & flux) const
 {
-  mooseAssert(U.size() >= 3, "Expected at least 3 conservative variables");
+  mooseAssert(U.size() >= 4, "Expected [h,hu,hv,(b),g]");
   // Reflective (solid) wall using a ghost state built by reflecting normal velocity
-  mooseAssert(U.size() >= 3, "Expected at least 3 conservative variables");
   const Real nx = n(0), ny = n(1);
   const Real tx = -ny, ty = nx;
+  const bool has_b = (U.size() >= 5);
+  const unsigned int idx_g = has_b ? 4 : 3;
+  const Real g_here = U[idx_g];
   const Real h = std::max(U[0], 0.0);
   const Real hu = (h > _h_eps) ? U[1] : 0.0;
   const Real hv = (h > _h_eps) ? U[2] : 0.0;
@@ -59,14 +60,14 @@ SWEWallBoundaryFlux::calcFlux(unsigned int /*iside*/,
   {
     std::vector<Real> f(3, 0.0);
     f[0] = hh * u_n;
-    f[1] = hhu * u_n + 0.5 * _g * hh * hh * nx;
-    f[2] = hhv * u_n + 0.5 * _g * hh * hh * ny;
+    f[1] = hhu * u_n + 0.5 * g_here * hh * hh * nx;
+    f[2] = hhv * u_n + 0.5 * g_here * hh * hh * ny;
     return f;
   };
 
   const auto FL = Fn(h, hu, hv, un);
   const auto FR = Fn(h, huR, hvR, unR);
-  const Real c = std::sqrt(_g * h);
+  const Real c = std::sqrt(g_here * h);
   const Real smax = std::fabs(un) + c; // symmetric here
 
   flux.resize(3);
