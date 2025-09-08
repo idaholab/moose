@@ -131,6 +131,10 @@ SWENumericalFluxHLL::calcJacobian(unsigned int /*iside*/,
   jac1.zero();
   jac2.zero();
 
+  const bool has_b = (uvec1.size() >= 5 && uvec2.size() >= 5);
+  const unsigned int idx_g = has_b ? 4 : 3;
+  const Real g_here = uvec1[idx_g];
+
   // Build dF/dU for each side assuming U=[h,hu,hv]
   auto fill_dF =
       [&](const std::vector<Real> & U, const Real nx, const Real ny, DenseMatrix<Real> & J)
@@ -140,6 +144,7 @@ SWENumericalFluxHLL::calcJacobian(unsigned int /*iside*/,
     const Real hv = (h > _h_eps) ? U[2] : 0.0;
     const Real invh = (h > _h_eps) ? 1.0 / h : 0.0;
     const Real un = (h > _h_eps) ? (hu * nx + hv * ny) * invh : 0.0;
+
 
     // F_n components
     // F0 = h*un = (hu*nx + hv*ny)
@@ -165,7 +170,7 @@ SWENumericalFluxHLL::calcJacobian(unsigned int /*iside*/,
       // dF1/dh = hu*d_un/dh + g*h*nx
       // dF1/dhu = un + hu*d_un/dhu
       // dF1/dhv = hu*d_un/dhv
-      J(1, 0) = hu * d_un_dh + _g * h * nx;
+      J(1, 0) = hu * d_un_dh + g_here * h * nx;
       J(1, 1) = un + hu * d_un_dhu;
       J(1, 2) = hu * d_un_dhv;
 
@@ -173,7 +178,7 @@ SWENumericalFluxHLL::calcJacobian(unsigned int /*iside*/,
       // dF2/dh = hv*d_un/dh + g*h*ny
       // dF2/dhu = hv*d_un/dhu
       // dF2/dhv = un + hv*d_un/dhv
-      J(2, 0) = hv * d_un_dh + _g * h * ny;
+      J(2, 0) = hv * d_un_dh + g_here * h * ny;
       J(2, 1) = hv * d_un_dhu;
       J(2, 2) = un + hv * d_un_dhv;
     }
@@ -193,10 +198,8 @@ SWENumericalFluxHLL::calcJacobian(unsigned int /*iside*/,
   const Real nx = n(0);
   const Real ny = n(1);
   mooseAssert(uvec1.size() >= 4 && uvec2.size() >= 4, "Expected gravity present");
-  const bool has_b = (uvec1.size() >= 5 && uvec2.size() >= 5);
   const unsigned int idx_b = 3;
-  const unsigned int idx_g = has_b ? 4 : 3;
-  const Real g_here = uvec1[idx_g];
+
   // Reuse hydrostatic reconstructed states consistent with calcFlux by rebuilding
   Real hL = std::max(uvec1[0], 0.0);
   Real huL = (hL > _h_eps) ? uvec1[1] : 0.0;

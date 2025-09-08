@@ -37,10 +37,10 @@ N = 200
   []
   [h_init]
     type = ParsedFunction
-    value = "if(x<0.5, hL, hR)"
+    expression = "if(x<0.5, hL, hR)"
     # expression = 'tanh((x-0.5)*10)*0.25+0.75'
-    vars = 'hL hR'
-    vals = 'hL hR'
+    symbol_names = 'hL hR'
+    symbol_values = 'hL hR'
   []
 []
 
@@ -104,7 +104,6 @@ N = 200
     hv = hv
     b_var = b_field
     numerical_flux = flux
-    gravity = gravity
   []
   [flux_hu]
     type = SWEFVFluxDGKernel
@@ -114,7 +113,6 @@ N = 200
     hv = hv
     b_var = b_field
     numerical_flux = flux
-    gravity = gravity
   []
   [flux_hv]
     type = SWEFVFluxDGKernel
@@ -124,7 +122,6 @@ N = 200
     hv = hv
     b_var = b_field
     numerical_flux = flux
-    gravity = gravity
   []
 []
 
@@ -138,7 +135,6 @@ N = 200
     hu = hu
     hv = hv
     boundary_flux = wall
-    gravity = gravity
   []
   [bchu]
     type = SWEFluxBC
@@ -148,7 +144,6 @@ N = 200
     hu = hu
     hv = hv
     boundary_flux = wall
-    gravity = gravity
   []
   [bchv]
     type = SWEFluxBC
@@ -158,7 +153,6 @@ N = 200
     hu = hu
     hv = hv
     boundary_flux = wall
-    gravity = gravity
   []
 []
 

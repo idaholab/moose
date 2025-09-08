@@ -27,12 +27,12 @@
 [Functions]
   [lakebed]
     type = ParsedFunction
-    value = "1.0 - exp(-100*(((x-0.5)/4)^2 + ((y-0.5)/4)^2))"
+    expression = "1.0 - exp(-100*(((x-0.5)/4)^2 + ((y-0.5)/4)^2))"
   []
   [eta]
     # asymmetric surface perturbation
     type = ParsedFunction
-    value = "0.5 + 0.5*exp(-100*((x-0.5)^2 + ((y-0.5)/3)^2))"
+    expression = "0.5 + 0.5*exp(-100*((x-0.5)^2 + ((y-0.5)/3)^2))"
   []
   [h_init]
     type = ParsedFunction
@@ -116,7 +116,6 @@
     hv = hv
     numerical_flux = flux
     b_var = b_field
-    gravity = gravity
   []
   [flux_hu]
     type = SWEFVFluxDGKernel
@@ -126,7 +125,6 @@
     hv = hv
     numerical_flux = flux
     b_var = b_field
-    gravity = gravity
   []
   [flux_hv]
     type = SWEFVFluxDGKernel
@@ -136,7 +134,6 @@
     hv = hv
     numerical_flux = flux
     b_var = b_field
-    gravity = gravity
   []
   # Hydrostatic correction to preserve eta = const
   [corr_hu]
@@ -146,7 +143,6 @@
     hu = hu
     hv = hv
     b_var = b_field
-    gravity = gravity
   []
   [corr_hv]
     type = SWEHydrostaticCorrectionDGKernel
@@ -155,7 +151,6 @@
     hu = hu
     hv = hv
     b_var = b_field
-    gravity = gravity
   []
 []
 
@@ -169,7 +164,6 @@
     hu = hu
     hv = hv
     boundary_flux = wall
-    gravity = gravity
   []
   [bchu]
     type = SWEFluxBC
@@ -179,7 +173,6 @@
     hu = hu
     hv = hv
     boundary_flux = wall
-    gravity = gravity
   []
   [bchv]
     type = SWEFluxBC
@@ -189,7 +182,6 @@
     hu = hu
     hv = hv
     boundary_flux = wall
-    gravity = gravity
   []
 []
 

@@ -33,7 +33,6 @@ SWEBedSlopeSource::SWEBedSlopeSource(const InputParameters & parameters)
     _bed(getFunction("bed")),
     _dir(getParam<MooseEnum>("direction"))
 {
-{
 }
 
 SWEBedSlopeSource::~SWEBedSlopeSource() {}

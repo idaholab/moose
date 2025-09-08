@@ -24,6 +24,7 @@
 [GlobalParams]
   family = MONOMIAL
   order = CONSTANT
+  gravity = 9.81
 []
 
 [Variables]
@@ -47,7 +48,7 @@ bathymetry=bump
   []
   [bump_bathymetry]
     type = ParsedFunction
-    value = "0.1*exp(-100*((x-0.5)^2 + (y-0.5)^2))"
+    expression = "0.1*exp(-100*((x-0.5)^2 + (y-0.5)^2))"
   []
 
   [flat_surface]
@@ -56,12 +57,12 @@ bathymetry=bump
   []
   [bump_surface]
     type = ParsedFunction
-    value = "1 + 0.1*exp(-100*((x-0.5)^2 + (y-0.5)^2))"
+    expression = "1 + 0.1*exp(-100*((x-0.5)^2 + (y-0.5)^2))"
   []
 
   [h_init]
     type = ParsedFunction
-    value = "max(eta-bump, 0)"
+    expression = "max(eta-bump, 0)"
     symbol_names = 'eta bump'
     symbol_values = '${surface}_surface ${bathymetry}_bathymetry'
   []

@@ -47,7 +47,6 @@ protected:
     Dry
   };
 
-  const Real _g;
   const Real _h_eps;
   const FarfieldMode _mode;
   const Real _eta_infty;

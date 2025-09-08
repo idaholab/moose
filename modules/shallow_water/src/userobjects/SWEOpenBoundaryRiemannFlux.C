@@ -72,7 +72,6 @@ SWEOpenBoundaryRiemannFlux::calcFlux(unsigned int iside,
 
   // Interior state (ensure non-negative depth, zero momenta when dry)
   const bool has_b = (Uin.size() >= 5);
-  const unsigned int idx_b = 3;
   const unsigned int idx_g = has_b ? 4 : 3;
   const Real g_here = Uin[idx_g];
   const Real b_face = has_b ? Uin[3] : 0.0;
@@ -182,7 +181,6 @@ SWEOpenBoundaryRiemannFlux::calcJacobian(unsigned int iside,
   const Real tx = -ny, ty = nx;
 
   const bool has_b = (Uin.size() >= 5);
-  const unsigned int idx_b = 3;
   const unsigned int idx_g = has_b ? 4 : 3;
   const Real g_here = Uin[idx_g];
   const Real b_face = has_b ? Uin[3] : 0.0;

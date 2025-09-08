@@ -10,6 +10,7 @@ N = 50
 [GlobalParams]
   family = MONOMIAL
   order = CONSTANT
+  gravity = 9.81
 []
 
 [Variables]
@@ -202,6 +203,6 @@ N = 50
 [Outputs]
   print_linear_residuals = false
   csv = true
-  execute_on = 'FINAL'
+  checkpoint = false
 []
 

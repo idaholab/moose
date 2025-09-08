@@ -90,8 +90,12 @@ SWEWallBoundaryFlux::calcJacobian(unsigned int /*iside*/,
   const Real h = std::max(U[0], 0.0);
   const Real hu = (h > _h_eps) ? U[1] : 0.0;
   const Real hv = (h > _h_eps) ? U[2] : 0.0;
+  const bool has_b = (U.size() >= 5);
+  const unsigned int idx_g = has_b ? 4 : 3;
+  const Real g_here = U[idx_g];
+
   const Real un = (h > _h_eps) ? (hu * nx + hv * ny) / h : 0.0;
-  const Real c = std::sqrt(_g * h);
+  const Real c = std::sqrt(g_here * h);
   const Real smax = std::fabs(un) + c;
   J.resize(3, 3);
   J.zero();
