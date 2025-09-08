@@ -21,7 +21,8 @@ MFEMScalarParsedCoefficient::MFEMScalarParsedCoefficient(
 }
 
 mfem::real_t
-MFEMScalarParsedCoefficient::Eval(mfem::ElementTransformation & T, const mfem::IntegrationPoint & ip)
+MFEMScalarParsedCoefficient::Eval(mfem::ElementTransformation & T,
+                                  const mfem::IntegrationPoint & ip)
 {
   std::vector<mfem::real_t> vals(_var_names.size() + (_use_xyzt ? 4 : 0));
 
@@ -33,10 +34,10 @@ MFEMScalarParsedCoefficient::Eval(mfem::ElementTransformation & T, const mfem::I
     mfem::Vector transip;
     T.Transform(ip, transip);
 
-    for (unsigned i = 0; i < transip.Size(); i++)
+    for (int i = 0; i < transip.Size(); i++)
       vals[_var_names.size() + i] = transip(i);
 
-    for (unsigned i = transip.Size(); i < 3; i++)
+    for (int i = transip.Size(); i < 3; i++)
       vals[_var_names.size() + i] = 0;
 
     vals[_var_names.size() + 3] = GetTime();

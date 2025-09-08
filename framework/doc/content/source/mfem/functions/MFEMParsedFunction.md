@@ -8,11 +8,12 @@
 
 ## Overview
 
-`MFEMParsedFunction` is responsible for parsing expressions that, in addition to being functions of position and time, can also depend on problem variables specified by the user.
+`MFEMParsedFunction` is responsible for parsing expressions that, in addition to being
+functions of position and time, can also depend on problem variables specified by the user.
 
 ## Example Input File Syntax
 
-!listing test/tests/mfem/functions/function_parsed_source.i block=Functions AuxVariables
+!listing test/tests/mfem/functions/parsed_function_source.i block=Functions AuxVariables
 
 !syntax parameters /Functions/MFEMParsedFunction
 
