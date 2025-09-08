@@ -1,0 +1,10 @@
+[Tests]
+  issue = "#31469"
+  design = "ElementHierarchyAux.md"
+  [element_hierarchy]
+    type = Exodiff
+    input = element_hierarchy_test.i
+    exodiff = 'element_hierarchy_test_out.e'
+    requirement = "All the element refinement hierarchy needs to be the same"
+  []
+[]
