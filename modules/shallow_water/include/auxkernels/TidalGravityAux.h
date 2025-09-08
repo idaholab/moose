@@ -33,12 +33,14 @@ public:
 protected:
   virtual Real computeValue() override;
   void updateTidal();
+  std::time_t parseStartDatetimeUTC(const std::string & s) const;
 
   // Parameters
   const Real _g0;
   const bool _enable_tides;
   const Real _earth_radius;
-  const Real _t0_epoch;
+  Real _t0_epoch;               // seconds since Unix epoch (UTC)
+  const std::string _start_datetime; // ISO8601-like string, optional
 
   const Real _mu_sun;
   const Real _sun_distance;
@@ -52,4 +54,3 @@ protected:
   unsigned int _cached_t_step;
   RealVectorValue _a_tide;
 };
-
