@@ -43,12 +43,12 @@ public:
 protected:
   struct FrictionStruct
   {
-    int i_ch;
+    unsigned int i_ch, iz;
     Real Re, S, w_perim;
   } _friction_args;
 
-  /// Returns friction factor
-  virtual Real computeFrictionFactor(FrictionStruct friction_args) = 0;
+  /// populates friction factor variable at specific subchannel node
+  virtual void computeFrictionFactor(FrictionStruct friction_args) = 0;
   /// Computes diversion crossflow per gap for block iblock
   void computeWijFromSolve(int iblock);
   /// Computes net diversion crossflow per channel for block iblock
@@ -199,6 +199,7 @@ protected:
   std::unique_ptr<SolutionHandle> _duct_heat_flux_soln; // Only used for ducted assemblies
   std::unique_ptr<SolutionHandle> _Tduct_soln;          // Only used for ducted assemblies
   std::unique_ptr<SolutionHandle> _displacement_soln;
+  std::unique_ptr<SolutionHandle> _ff_soln;
 
   /// Petsc Functions
   inline PetscErrorCode createPetscVector(Vec & v, PetscInt n)
