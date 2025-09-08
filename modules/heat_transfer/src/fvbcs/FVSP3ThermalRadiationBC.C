@@ -21,11 +21,11 @@ FVSP3ThermalRadiationBC::validParams()
 
   params.addRequiredRangeCheckedParam<MooseFunctorName>(
       "Tb", "Tb>0", "The temperature of the boundary.");
-  params.addRangeCheckedParam<MooseFunctorName>(
+  params.addRangeCheckedParam<Real>(
       "nu", "nu>0", "The mean frequency of the thermal radiation band.");
-  params.addRangeCheckedParam<MooseFunctorName>(
+  params.addRangeCheckedParam<Real>(
       "nu_low", "nu_low>0", "The lower frequency for integration of the thermal radiation band.");
-  params.addRangeCheckedParam<MooseFunctorName>(
+  params.addRangeCheckedParam<Real>(
       "nu_high",
       "nu_high>0",
       "The higher frequency for integration of the thermal radiation band.");
@@ -54,9 +54,9 @@ FVSP3ThermalRadiationBC::validParams()
 FVSP3ThermalRadiationBC::FVSP3ThermalRadiationBC(const InputParameters & parameters)
   : FVFluxBC(parameters),
     _Tb(getFunctor<ADReal>("Tb")),
-    _nu(getFunctor<ADReal>("nu")),
-    _nu_low(isParamValid("nu_low") ? &getFunctor<ADReal>("nu_low") : nullptr),
-    _nu_high(isParamValid("nu_high") ? &getFunctor<ADReal>("nu_high") : nullptr),
+    _nu(getParam<Real>("nu")),
+    _nu_low(isParamValid("nu_low") ? &getParam<Real>("nu_low") : nullptr),
+    _nu_high(isParamValid("nu_high") ? &getParam<Real>("nu_high") : nullptr),
     _n1(getFunctor<ADReal>("refraction_index")),
     _optical_thickness(getFunctor<ADReal>("epsilon")),
     _psi(getFunctor<ADReal>("psi")),
@@ -104,8 +104,8 @@ FVSP3ThermalRadiationBC::computeQpResidual()
   if (_nu_low) // equation integrated by frequency band
   {
     const auto n1 = _n1(face, state);
-    const auto nu_low = (*_nu_low)(face, state);
-    const auto nu_high = (*_nu_high)(face, state);
+    const auto nu_low = (*_nu_low);
+    const auto nu_high = (*_nu_high);
     const Real abs_tol = 1E-8;
     const Real rel_tol = 1E-6;
 
@@ -122,13 +122,13 @@ FVSP3ThermalRadiationBC::computeQpResidual()
     thermal_rad_source = -1 * _eta(face, state) * rad_source / (4.0 * libMesh::pi);
   }
   else
-  { // equatino remains in single frequency
+  { // equation for a single frequency
     const auto n1_pow_2 = Utility::pow<2>(_n1(face, state));
-    const auto nu = _nu(face, state);
+    const auto nu = _nu;
     const auto nu_pow_3 = Utility::pow<3>(nu);
-    const auto hp = HeatConduction::Constants::PlanckConstant(_planck_units);
-    const auto c0 = HeatConduction::Constants::SpeedOfLight(_sol_units);
-    const auto kb = HeatConduction::Constants::BoltzmannConstant(_boltzmann_units);
+    const auto hp = HeatConduction::Constants::planckConstant(_planck_units);
+    const auto c0 = HeatConduction::Constants::speedOfLight(_sol_units);
+    const auto kb = HeatConduction::Constants::boltzmannConstant(_boltzmann_units);
 
     const auto pre_factor = n1_pow_2 * 2.0 * hp * nu_pow_3 / (Utility::pow<2>(c0));
     const auto inv_thermal_source = std::exp(hp * nu / (kb * Tb)) - 1.0;

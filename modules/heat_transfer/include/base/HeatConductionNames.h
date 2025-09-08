@@ -23,7 +23,7 @@ namespace Constants
 static const Real sigma = 5.670374419e-8;
 
 static constexpr Real
-PlanckConstant(const std::optional<std::string> & unit)
+planckConstant(const std::optional<std::string> & unit)
 {
   constexpr Real v = 6.62607015e-34;
 
@@ -34,7 +34,7 @@ PlanckConstant(const std::optional<std::string> & unit)
 }
 
 static constexpr Real
-SpeedOfLight(const std::optional<std::string> & unit)
+speedOfLight(const std::optional<std::string> & unit)
 {
   constexpr Real v = 2.99792458e8;
 
@@ -45,7 +45,7 @@ SpeedOfLight(const std::optional<std::string> & unit)
 }
 
 static constexpr Real
-BoltzmannConstant(const std::optional<std::string> & unit)
+boltzmannConstant(const std::optional<std::string> & unit)
 {
   constexpr Real v = 1.380649e-23;
 

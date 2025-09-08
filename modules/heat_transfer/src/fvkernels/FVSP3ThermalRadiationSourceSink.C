@@ -22,11 +22,11 @@ FVSP3ThermalRadiationSourceSink::validParams()
 
   params.addRequiredRangeCheckedParam<MooseFunctorName>(
       "T", "T>0", "The temperature of the medium.");
-  params.addRequiredRangeCheckedParam<MooseFunctorName>(
+  params.addRequiredRangeCheckedParam<Real>(
       "nu", "nu>0", "The mean frequency of the thermal radiation band.");
-  params.addRangeCheckedParam<MooseFunctorName>(
+  params.addRangeCheckedParam<Real>(
       "nu_low", "nu_low>0", "The lower frequency for integration of the thermal radiation band.");
-  params.addRangeCheckedParam<MooseFunctorName>(
+  params.addRangeCheckedParam<Real>(
       "nu_high",
       "nu_high>0",
       "The higher frequency for integration of the thermal radiation band.");
@@ -44,9 +44,9 @@ FVSP3ThermalRadiationSourceSink::validParams()
 FVSP3ThermalRadiationSourceSink::FVSP3ThermalRadiationSourceSink(const InputParameters & params)
   : FVElementalKernel(params),
     _T(getFunctor<ADReal>("T")),
-    _nu(getFunctor<ADReal>("nu")),
-    _nu_low(isParamValid("nu_low") ? &getFunctor<ADReal>("nu_low") : nullptr),
-    _nu_high(isParamValid("nu_high") ? &getFunctor<ADReal>("nu_high") : nullptr),
+    _nu(getParam<Real>("nu")),
+    _nu_low(isParamValid("nu_low") ? &getParam<Real>("nu_low") : nullptr),
+    _nu_high(isParamValid("nu_high") ? &getParam<Real>("nu_high") : nullptr),
     _n1(getFunctor<ADReal>("refraction_index")),
     _absorptivity(getFunctor<ADReal>("kappa")),
     _planck_units(getParam<std::string>("planck_units")),
@@ -81,8 +81,8 @@ FVSP3ThermalRadiationSourceSink::computeQpResidual()
   {
     const auto n1 = _n1(elem_arg, state);
     const auto kappa = _absorptivity(elem_arg, state);
-    const auto nu_low = (*_nu_low)(elem_arg, state);
-    const auto nu_high = (*_nu_high)(elem_arg, state);
+    const auto nu_low = (*_nu_low);
+    const auto nu_high = (*_nu_high);
     const Real abs_tol = 1E-8;
     const Real rel_tol = 1E-6;
 
@@ -100,11 +100,11 @@ FVSP3ThermalRadiationSourceSink::computeQpResidual()
   else
   {
     const auto n1_pow_2 = Utility::pow<2>(_n1(elem_arg, state));
-    const auto nu = _nu(elem_arg, state);
+    const auto nu = _nu;
     const auto nu_pow_3 = Utility::pow<3>(nu);
-    const auto hp = HeatConduction::Constants::PlanckConstant(_planck_units);
-    const auto c0 = HeatConduction::Constants::SpeedOfLight(_sol_units);
-    const auto kb = HeatConduction::Constants::BoltzmannConstant(_boltzmann_units);
+    const auto hp = HeatConduction::Constants::planckConstant(_planck_units);
+    const auto c0 = HeatConduction::Constants::speedOfLight(_sol_units);
+    const auto kb = HeatConduction::Constants::boltzmannConstant(_boltzmann_units);
 
     const auto pre_factor = n1_pow_2 * 2.0 * hp * nu_pow_3 / (Utility::pow<2>(c0));
     const auto inv_thermal_source = std::exp(hp * nu / (kb * T)) - 1.0;

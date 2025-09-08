@@ -67,14 +67,14 @@ FVSP3TemperatureBC::computeQpResidual()
   const auto state = determineState();
 
   // Build the convective source at the boundary
-  const auto T = _var(face, state);
-  const auto Tb = _Tb(face, state);
-  const auto epsilon = _epsilon(face, state);
-  const auto thermal_conv_source =
+  const auto & T = _var(face, state);
+  const auto & Tb = _Tb(face, state);
+  const auto & epsilon = _epsilon(face, state);
+  const auto & thermal_conv_source =
       _h(face, determineState()) * (_Tb(face, determineState()) - _var(face, determineState()));
 
   // Build the radiative source at the boundary
-  const auto n1 = _n1(face, state);
+  const auto & n1 = _n1(face, state);
   const Real abs_tol = 1E-8;
   const Real rel_tol = 1E-6;
 
