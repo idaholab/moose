@@ -1,6 +1,6 @@
 [Mesh]
   [csg_inf_square]
-    type = TestCSGInfiniteSquareMeshGenerator
+    type = ExampleCSGInfiniteSquareMeshGenerator
     side_length = 5
   []
   [csg_cube]
