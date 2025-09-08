@@ -618,6 +618,23 @@ TEST(CSGBaseTest, joinOtherBaseTwoNewRoot)
   ASSERT_EQ(2, base1->getAllSurfaces().size());
 }
 
-TEST(CSGBaseTest, testUniverseLinking) {}
+/// test CSGBase::checkUniverseLinking / getLinkedUniverses
+TEST(CSGBaseTest, testUniverseLinking)
+{
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  auto & univ1 = csg_obj->createUniverse("univ1");
 
+  // new universe is not inherently linked to ROOT_UNIVERSE, should raise warning when checked
+  Moose::UnitUtils::assertThrows([&csg_obj]() { csg_obj->checkUniverseLinking(); },
+                                 "Universe with name univ1 is not linked to root universe.");
+
+  // link the universe by adding it to a cell that is created in root
+  std::unique_ptr<CSG::CSGSphere> surf1 = std::make_unique<CSG::CSGSphere>("surf1", 1.0);
+  const auto & s1 = csg_obj->addSurface(std::move(surf1));
+  csg_obj->createCell("c1", univ1, +s1);
+
+  // no warning should be raised because it is a part of c1, which is a part of root
+  // linking tree: ROOT_UNIVERSE -> c1 -> univ1
+  ASSERT_NO_THROW(csg_obj->checkUniverseLinking());
+}
 }

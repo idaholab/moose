@@ -422,6 +422,7 @@ private:
   ///@{
   FRIEND_TEST(CSGBaseTest, testCheckRegionSurfaces);
   FRIEND_TEST(CSGBaseTest, testAddGetSurface);
+  FRIEND_TEST(CSGBaseTest, testUniverseLinking);
   ///@}
 };
 } // namespace CSG
