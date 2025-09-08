@@ -4,7 +4,7 @@
   type = GeneratedMesh
   dim = 2
   nx = 200
-  ny = 4
+  ny = 5
   xmax = 1.0
   ymax = 0.02
 []
@@ -62,8 +62,8 @@
     weight_model = inverse_distance2
     dry_depth = 1e-6
     positivity_guard = true
-    boundary_list = []
-    boundary_condition_user_object_list = []
+    boundary_list = ''
+    boundary_condition_user_object_list = ''
     execute_on = 'INITIAL TIMESTEP_BEGIN TIMESTEP_END'
   []
   [limiter2d]
@@ -200,9 +200,9 @@
 [VectorPostprocessors]
   [h_line]
     type = LineValueSampler
-    start_point = '0.0 0.01 0.0'
-    end_point   = '1.0 0.01 0.0'
-    num_points = 200
+    start_point = '${fparse 0.5 * ${Mesh/xmax} / ${Mesh/nx}} 0.01 0.0'
+    end_point   = '${fparse ${Mesh/xmax} * (1 - 0.5 / ${Mesh/nx})} 0.01 0.0'
+    num_points = ${Mesh/nx}
     sort_by = x
     variable = h
   []

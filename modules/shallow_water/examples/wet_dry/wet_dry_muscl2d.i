@@ -59,8 +59,8 @@
     weight_model = inverse_distance2
     dry_depth = 1e-6
     positivity_guard = true
-    boundary_list = []
-    boundary_condition_user_object_list = []
+    boundary_list = ''
+    boundary_condition_user_object_list = ''
     execute_on = 'INITIAL TIMESTEP_BEGIN TIMESTEP_END'
   []
   [limiter2d]
