@@ -55,7 +55,7 @@ CSGBase::createCell(const std::string & name,
                     const CSGUniverse * add_to_univ)
 {
   checkRegionSurfaces(region);
-  if (add_to_univ && (fill_univ == *add_to_univ))
+  if (add_to_univ && (&fill_univ == add_to_univ))
     mooseError("Cell " + name +
                " cannot be filled with the same universe to which it is being added.");
 

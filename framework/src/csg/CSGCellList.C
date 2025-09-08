@@ -17,9 +17,10 @@ CSGCellList::CSGCellList() {}
 CSGCell &
 CSGCellList::addCell(std::unique_ptr<CSGCell> cell)
 {
-  auto [it, inserted] = _cells.emplace(cell->getName(), std::move(cell));
+  auto name = cell->getName();
+  auto [it, inserted] = _cells.emplace(name, std::move(cell));
   if (!inserted)
-    mooseError("Cell with name " + cell->getName() + " already exists in geometry.");
+    mooseError("Cell with name " + name + " already exists in geometry.");
   return *it->second;
 }
 

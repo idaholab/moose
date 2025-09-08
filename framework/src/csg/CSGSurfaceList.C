@@ -41,9 +41,10 @@ CSGSurfaceList::getAllSurfaces() const
 CSGSurface &
 CSGSurfaceList::addSurface(std::unique_ptr<CSGSurface> surf)
 {
-  auto [it, inserted] = _surfaces.emplace(surf->getName(), std::move(surf));
+  auto surf_name = surf->getName();
+  auto [it, inserted] = _surfaces.emplace(surf_name, std::move(surf));
   if (!inserted)
-    mooseError("Surface with name " + surf->getName() + " already exists in geometry.");
+    mooseError("Surface with name " + surf_name + " already exists in geometry.");
   return *it->second;
 }
 
