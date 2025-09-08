@@ -323,6 +323,7 @@ TEST(CSGBaseTest, testCreateUniverse)
     const auto & s1 = csg_obj->addSurface(std::move(surf1));
     auto & c1 = csg_obj->createCell("c1", +s1);
     auto & c2 = csg_obj->createCell("c2", -s1);
+    // create a list of cells to be added to the universe
     std::vector<std::reference_wrapper<const CSG::CSGCell>> cells = {c1, c2};
     auto & univ = csg_obj->createUniverse("louise", cells);
     ASSERT_NO_THROW(csg_obj->getUniverseByName("louise")); // no throw confirms existence
@@ -383,7 +384,7 @@ TEST(CSGBaseTest, testAddCellToUniverse)
 
   auto & univ = csg_obj->createUniverse("univ");
 
-  // add list of cells
+  // add a list of cells to an existing universe
   {
     std::vector<std::reference_wrapper<const CSG::CSGCell>> cells = {c1, c2};
     csg_obj->addCellsToUniverse(univ, cells);
@@ -500,13 +501,13 @@ TEST(CSGBaseTest, testGetUniverse)
 /// test CSGBase::joinOtherBase no passed name
 TEST(CSGBaseTest, joinOtherBaseJoinRoot)
 {
-  // create two separate bases to join
+  // Case 1: Create two CSGBase objects to join together into a single root
+  // CSGBase 1: only one cell, which lives in the ROOT_UNIVERSE
   std::unique_ptr<CSGBase> base1 = std::make_unique<CSG::CSGBase>();
   std::unique_ptr<CSG::CSGSphere> surf_ptr1 = std::make_unique<CSG::CSGSphere>("s1", 1.0);
   const auto & surf1 = base1->addSurface(std::move(surf_ptr1));
   auto & c1 = base1->createCell("c1", +surf1);
-
-  // second base has two total unverses with a cell in each
+  // CSGBase 2: two total unverses (ROOT_UNIVERSE and extra_univ) with a cell in each
   std::unique_ptr<CSGBase> base2 = std::make_unique<CSG::CSGBase>();
   std::unique_ptr<CSG::CSGSphere> surf_ptr2 = std::make_unique<CSG::CSGSphere>("s2", 1.0);
   const auto & surf2 = base2->addSurface(std::move(surf_ptr2));
@@ -514,7 +515,10 @@ TEST(CSGBaseTest, joinOtherBaseJoinRoot)
   auto & extra_univ = base2->createUniverse("extra_univ");
   auto & c3 = base2->createCell("c3", -surf2, &extra_univ);
 
-  // all cells from root 2 should join into root 1, keep extra univ separate
+  // Joining: two universes will remain
+  // base1 ROOT_UNIVERSE will gain all cells from base2 ROOT_UNIVERSE
+  // base2 ROOT_UNIVERSE will not exist as a separate universe
+  // the "extra_univ" in base2 will remain a separate univserse
   base1->joinOtherBase(std::move(base2));
 
   // expect 2 universes: root and extra
@@ -535,13 +539,13 @@ TEST(CSGBaseTest, joinOtherBaseJoinRoot)
 /// test CSGBase::joinOtherBase one passed name
 TEST(CSGBaseTest, joinOtherBaseOneNewRoot)
 {
-  // create two separate bases to join
+  // Case 2: Create two CSGBase objects to join together but keep incoming root separate
+  // CSGBase 1: only one cell, which lives in the ROOT_UNIVERSE
   std::unique_ptr<CSGBase> base1 = std::make_unique<CSG::CSGBase>();
   std::unique_ptr<CSG::CSGSphere> surf_ptr1 = std::make_unique<CSG::CSGSphere>("s1", 1.0);
   const auto & surf1 = base1->addSurface(std::move(surf_ptr1));
   auto & c1 = base1->createCell("c1", +surf1);
-
-  // second base has two total unverses with a cell in each
+  // CSGBase 2: two total unverses (ROOT_UNIVERSE and extra_univ) with a cell in each
   std::unique_ptr<CSGBase> base2 = std::make_unique<CSG::CSGBase>();
   std::unique_ptr<CSG::CSGSphere> surf_ptr2 = std::make_unique<CSG::CSGSphere>("s2", 1.0);
   const auto & surf2 = base2->addSurface(std::move(surf_ptr2));
@@ -549,7 +553,10 @@ TEST(CSGBaseTest, joinOtherBaseOneNewRoot)
   auto & extra_univ = base2->createUniverse("extra_univ");
   auto & c3 = base2->createCell("c3", -surf2, &extra_univ);
 
-  // all cells from root 2 should create new universe "new_univ", keep extra univ separate
+  // Joining: three universes will remain
+  // base1 ROOT_UNIVERSE will remain untouched
+  // all cells from ROOT_UNIVERSE in base2 create new universe called "new_univ"
+  // the "extra_univ" in base2 will remain a separate univserse
   std::string new_root_name = "new_univ";
   base1->joinOtherBase(std::move(base2), new_root_name);
 
@@ -576,13 +583,13 @@ TEST(CSGBaseTest, joinOtherBaseOneNewRoot)
 /// test CSGBase::joinOtherBase two passed names
 TEST(CSGBaseTest, joinOtherBaseTwoNewRoot)
 {
-  // create two separate bases to join
+  // Case 3: Create two CSGBase objects to join together with each root becoming a new universe
+  // CSGBase 1: only one cell, which lives in the ROOT_UNIVERSE
   std::unique_ptr<CSGBase> base1 = std::make_unique<CSG::CSGBase>();
   std::unique_ptr<CSG::CSGSphere> surf_ptr1 = std::make_unique<CSG::CSGSphere>("s1", 1.0);
   const auto & surf1 = base1->addSurface(std::move(surf_ptr1));
   auto & c1 = base1->createCell("c1", +surf1);
-
-  // second base has two total unverses with a cell in each
+  // CSGBase 2: two total unverses (ROOT_UNIVERSE and extra_univ) with a cell in each
   std::unique_ptr<CSGBase> base2 = std::make_unique<CSG::CSGBase>();
   std::unique_ptr<CSG::CSGSphere> surf_ptr2 = std::make_unique<CSG::CSGSphere>("s2", 1.0);
   const auto & surf2 = base2->addSurface(std::move(surf_ptr2));
@@ -590,9 +597,11 @@ TEST(CSGBaseTest, joinOtherBaseTwoNewRoot)
   auto & extra_univ = base2->createUniverse("extra_univ");
   auto & c3 = base2->createCell("c3", -surf2, &extra_univ);
 
-  // all cells from root 1 go into new univ 1,
-  // all cells from root 2 go into new univ 2
-  // keep extra univ separate
+  // Joining: four universes will remain
+  // all cells from base1 ROOT_UNIVERSE will be moved to a new universe called "new_univ1"
+  // all cells from base2 ROOT_UNIVERSE will be moved to a new universe called "new_univ2"
+  // base1 ROOT_UNIVERSE will be empty
+  // the "extra_univ" in base2 will remain a separate univserse
   std::string new_name1 = "new_univ1";
   std::string new_name2 = "new_univ2";
   base1->joinOtherBase(std::move(base2), new_name1, new_name2);

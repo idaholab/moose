@@ -72,12 +72,9 @@ Surfaces contain the following information:
 | `CSG::CSGYCylinder` | $(x - x_0)^2 + (z - z_0)^2 = r^2$               | `x0`, `z0`, `r`       |
 | `CSG::CSGZCylinder` | $(x - x_0)^2 + (y - y_0)^2 = r^2$               | `x0`, `y0`, `r`       |
 
-Below are example [!ac](JSON) surface outputs for two `CSG::CSGSphere`s (one of radius 3 centered at the origin, and one of radius 5 centered at $(-3, -2, -1)$), a `CSG::CSGPlane` at $x=-2.5$, and two `CSG::CSGYCylinder`s of radius 2 and 4, both centered at $(-10, -10)$.
+Below is an example [!ac](JSON) surface output for a model with a `CSG::CSGPlane` at $x=-2.0$ and a `CSG::CSGPlane` at $y=-2.0$.
 
-!listing csg_spheres_join_single_root_out_csg.json start="SURFACES" end="inf_square_surf_minus_y"
-
-!listing csg_cylinders_join_new_universes_out_csg.json start="YCyls_surf_cyl_y_0" end="YCyls_x_neg_surf"
-
+!listing csg_only_inf_planes_out_csg.json start="SURFACES" end="inf_square_surf_plus_x"
 
 ### Cells
 
@@ -104,6 +101,6 @@ An example of a cell defined as the space inside a box made of six planes and fi
 Universes are simply defined by the list of the names of the `CELLS` that are contained in that universe.
 If the universe is also the root universe, it will have the designator `"ROOT": true`.
 An example of universe output for multiple universes containing various concentric cylinder cells is below.
-In this example, the cells named `CylsUniverse_box`, `XCyls_cell`, `YCyls_cell`, and `ZCyls_cell` are filled with other universes listed, forming a tree of connectedness tracing back to the `ROOT_UNIVERSE`.
+In this example, there is one universe, the default `"ROOT_UNIVERSE"`, which contains one cell and is labeled as being the root universe.
 
-!listing csg_cylinders_join_new_universes_out_csg.json start="UNIVERSES"
+!listing csg_only_chained_out_csg.json start="UNIVERSES"
