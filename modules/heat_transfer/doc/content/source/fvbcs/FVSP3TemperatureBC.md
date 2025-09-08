@@ -4,7 +4,7 @@ This boundary condition implements the Robin boundary conditions for the Tempera
 
 ## Overview
 
-The Robin boudnary condition implemented reads as follows [!citep](larsen2002):
+The Robin boundary condition implemented reads as follows [!citep](larsen2002):
 \begin{equation}
 \frac{1}{\varepsilon k}
 \left[
@@ -16,19 +16,19 @@ h\,(T_b - T) +
 
 where:
 
-- $\varepsilon$ is the optical thickenss of medium (SI unit (-))
+- $\varepsilon$ is the optical thickness of medium (SI unit (-))
 - $k$ is the thermal conductivity of medium (SI unit ($W m^{-1} K^{-1}$))
 - $h$ is the convective heat transfer coefficient of medium (SI unit ($W m^{-2} K^{-1}$))
-- $T_b$ is the ambient temperature (SI unit (K))
-- $n_1$ is the refraction coefficient of medium 1 (SI unit (-))
-- $n_2$ is the refraction coefficient of medium 2 (SI unit (-))
+- $T_b$ is the ambient (boundary) temperature (SI unit (K))
+- $n_1$ is the refraction coefficient of incident medium (cavity) (SI unit (-))
+- $n_2$ is the refraction coefficient of transmitting medium (boundary) (SI unit (-))
 - $\alpha$ is the hemispheric emissivity of the medium (SI unit (-))
 - $\nu_{1}$ is the maximum opaque frequency of the medium (SI units ($s^{-1}$))
 - $B$ is the monochromatic black body radiation intensity from under Planck function (SI unit ($W sr^{-1} m^{-2}$))
 
 Plank function:
 \begin{equation}
-{B_m}({T},{\nu}) = {\frac{n_m^2}{c_0^2}}{\frac{2{h_p}{\nu^3}}{e^{{{h_p}{\nu}}/{({k_B}{T})}}-1}}
+{B}({T},{\nu}) = {\frac{n_1^2}{c_0^2}}{\frac{2{h_p}{\nu^3}}{e^{{{h_p}{\nu}}/{({k_B}{T})}}-1}}
 \end{equation}
 
 with:
