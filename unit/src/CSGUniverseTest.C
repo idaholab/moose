@@ -98,18 +98,6 @@ TEST(CSGUniverseTest, testAddCell)
                                    "Skipping cell insertion for cell with duplicate name.");
     ASSERT_EQ(3, cells_univ.getAllCells().size());
   }
-  // remove cell
-  {
-    cells_univ.removeCell("cell3");
-    ASSERT_EQ(2, cells_univ.getAllCells().size());
-    ASSERT_FALSE(cells_univ.hasCell("cell3"));
-  }
-  // try to remove cell that does not exist in universe
-  {
-    Moose::UnitUtils::assertThrows(
-        [&cells_univ]() { cells_univ.removeCell("cell3"); },
-        "Cannot remove cell. Cell with name cell3 does not exist in universe");
-  }
 }
 
 // CSGUniverse::removeCell
