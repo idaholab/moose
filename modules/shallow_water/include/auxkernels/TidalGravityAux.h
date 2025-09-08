@@ -35,6 +35,12 @@ protected:
   void updateTidal();
   std::time_t parseStartDatetimeUTC(const std::string & s) const;
 
+  // Compute Earth-fixed unit direction vectors to Sun and Moon
+  // at a given absolute UTC epoch time in seconds since 1970-01-01.
+  void computeSunMoonDirsAtEpoch(Real epoch_seconds,
+                                 RealVectorValue & sun_dir,
+                                 RealVectorValue & moon_dir) const;
+
   // Parameters
   const Real _g0;
   const bool _enable_tides;
@@ -49,6 +55,9 @@ protected:
   const Real _mu_moon;
   const Real _moon_distance;
   const Real _moon_period;
+
+  // options
+  const bool _sun_distance_seasonal;
 
   // Cache
   unsigned int _cached_t_step;
