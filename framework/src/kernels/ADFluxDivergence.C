@@ -16,7 +16,6 @@ ADFluxDivergence::validParams()
 {
   InputParameters params = ADKernel::validParams();
   params.addClassDescription("Computes divergence of a flux vector provided by a material.");
-  params.addParam<std::string>("base_name", "Material property base name");
   params.addParam<MaterialPropertyName>(
       "flux", "flux", "Name of the flux vector material property");
   return params;
@@ -24,9 +23,7 @@ ADFluxDivergence::validParams()
 
 ADFluxDivergence::ADFluxDivergence(const InputParameters & parameters)
   : ADKernel(parameters),
-    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
-    _flux(
-        getADMaterialProperty<RealVectorValue>(_base_name + getParam<MaterialPropertyName>("flux")))
+    _flux(getADMaterialProperty<RealVectorValue>(getParam<MaterialPropertyName>("flux")))
 {
 }
 

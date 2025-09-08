@@ -26,9 +26,6 @@ public:
 protected:
   ADReal computeQpResidual() override;
 
-  /// Optional base name for material properties
-  const std::string _base_name;
-
   /// Flux vector material property
   const ADMaterialProperty<RealVectorValue> & _flux;
 };
