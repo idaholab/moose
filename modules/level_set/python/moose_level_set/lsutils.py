@@ -1,4 +1,3 @@
-#!/usr/bin/env/python3
 #* This file is part of the MOOSE framework
 #* https://mooseframework.inl.gov
 #*
@@ -10,7 +9,6 @@
 
 import os
 import glob
-import vtk
 import argparse
 import chigger
 
