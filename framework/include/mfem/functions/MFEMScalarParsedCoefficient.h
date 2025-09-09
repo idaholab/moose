@@ -11,24 +11,24 @@
 
 #pragma once
 
-#include "MFEMContainers.h"
+#include "CoefficientManager.h"
 #include "FunctionParserUtils.h"
 
 /**
- * Define a coefficient that, given a set of grid functions u, v, w, ...,
- * and a function func, returns func(x, y, z, t, u, v, w, ...)
+ * Define a coefficient that, given a set of (possibly gridfunction) coefficients
+ * u, v, w, ..., and a function func, returns func(x, y, z, t, u, v, w, ...)
  */
 class MFEMScalarParsedCoefficient : public mfem::Coefficient
 {
 private:
-  const Moose::MFEM::GridFunctions & _gridfunctions;
-  const std::vector<VariableName> & _var_names;
+  Moose::MFEM::CoefficientManager & _coefficients;
+  const std::vector<MFEMScalarCoefficientName> & _coef_names;
   bool _use_xyzt;
   const FunctionParserUtils<false>::SymFunctionPtr & _func;
 
 public:
-  MFEMScalarParsedCoefficient(const Moose::MFEM::GridFunctions & gridfunctions,
-                              const std::vector<VariableName> & var_names,
+  MFEMScalarParsedCoefficient(Moose::MFEM::CoefficientManager & coefficients,
+                              const std::vector<MFEMScalarCoefficientName> & coef_names,
                               bool use_xyzt,
                               const FunctionParserUtils<false>::SymFunctionPtr & func);
 
