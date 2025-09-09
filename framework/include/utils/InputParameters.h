@@ -1854,6 +1854,11 @@ InputParameters::addCommandLineParamHelper(const std::string & name,
                 "This type is not a supported command line parameter type. See "
                 "CommandLine::populateCommandLineParams to add it as a supported type.");
 
+  if (!hasBase() || getBase() != "Application")
+    mooseError("While adding command line parameter '",
+               name,
+               "': Command line parameters can only be added to applications.");
+
   auto & cl_data = at(name)._cl_data;
   cl_data = CommandLineMetadata();
 

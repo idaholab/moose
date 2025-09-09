@@ -184,7 +184,9 @@ TEST(ParameterExtractionTest, extractSetCatch)
 TEST(ParameterExtractionTest, extractCommandLineParameter)
 {
   auto params = emptyInputParameters();
+  params.registerBase("Application"); // required for command line params
   params.addCommandLineParam<bool>("foo", "--foo", "doc");
+  params.enableInputCommandLineParam("foo");
   const auto root = buildTestRoot({"Section/foo=true"});
   const auto node = root->find("Section/foo");
   ASSERT_NE(node, nullptr);
