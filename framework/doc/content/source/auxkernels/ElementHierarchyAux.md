@@ -6,7 +6,7 @@
 
 ElementHierarchyAux stores the element hierarchy (how many times the element went through
 refinement process during AMR) in an aux variable. If the elements don't go through refinement then
-by default it's hierarchy is zero. 
+by default its hierarchy is zero. 
 
 ## Example Input Syntax
 
