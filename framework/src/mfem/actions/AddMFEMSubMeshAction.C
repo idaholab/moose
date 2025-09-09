@@ -17,7 +17,7 @@ InputParameters
 AddMFEMSubMeshAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  params.addClassDescription("Add a MFEM SubMesh object to the simulation.");
+  params.addClassDescription("Add an MFEM SubMesh object to the simulation.");
   return params;
 }
 
