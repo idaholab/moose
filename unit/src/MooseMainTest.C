@@ -125,7 +125,7 @@ TEST(MooseMainTest, createMultiAppApplicationOverrideError)
   const std::string arg = "subapp:Application/type=foo";
   Args args({arg});
   Moose::UnitUtils::assertThrows<MooseRuntimeError>(
-      [&args, &arg]() { Moose::createMooseApp("MooseUnitApp", args.argc(), args.argv()); },
+      [&args]() { Moose::createMooseApp("MooseUnitApp", args.argc(), args.argv()); },
       "For command line argument '" + arg +
           "': overriding the application type for MultiApps via command line is not allowed.");
 }
