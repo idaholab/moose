@@ -127,6 +127,13 @@ Three types of cell fills are currently supported: void, material, and universe.
 If creating a void cell, no fill has to be passed to the creation method.
 To create a cell with a material fill, simply provide it with a name of a material as a string.
 For a cell with a `CSGUniverse` fill, pass it a shared pointer to the `CSGUniverse`.
+Some examples of creating the different types of cells are shown below:
+
+!listing CSGBaseTest.C start=create a void cell with name cname1 and defined by region reg1 end=csg_obj include-end=true
+
+!listing CSGBaseTest.C start=create a material-filled cell end=csg_obj include-end=true
+
+!listing CSGBaseTest.C start=create a universe-filled cell end=csg_obj include-end=true
 
 !alert! note title=Materials as Placeholders
 
@@ -166,8 +173,8 @@ All universes in a model should be able to be traced back, through the hierarchi
 Because universes are a collection of cells and cells can be filled with universe, a tree of universes can be constructed such that the root universe is the collection of all cells in the model.
 When a `CSGBase` object is first [initialized](#initialization), a root `CSGUniverse` called `ROOT_UNIVERSE` is created by default.
 Every `CSGCell` that is created will be added to the root universe unless otherwise specified (as described [below](#adding-or-removing-cells)).
-The root universe exists by default and cannot be changed except when joining `CSGBase` objects, as described [below](#updating-existing-csgbase-objects).
-However, the name of the root universe can be updated, though it won't change the object and its contents.
+The root universe exists by default, and which universe is set as the root cannot be changed, except when joining `CSGBase` objects, as described [below](#updating-existing-csgbase-objects).
+However, the name of the root universe can be updated and cells can be manually added or removed using the same methods described [above](#universes).
 
 Methods available for managing the root universe:
 
@@ -237,7 +244,7 @@ There are 3 different behaviors for joining bases that are supported depending o
 
 !listing CSGBaseTest.C start=Case 1 end=joinOtherBase include-end=true
 
-2. One new root universe name (`new_root_name_join`): All cells in the root universe of the incoming base will be used to create a new universe of the name specified by the `new_root_name_join` parameter. These cells will *not* be added to the existing root universe. This new universe will be added as a new non-root universe in the existing base object. *This newly created universe will not be connected to the root universe of the existing `CSGBase` object by default.*
+2. One new root universe name (`new_root_name_join`): All cells in the root universe of the incoming base will be used to create a new universe of the name specified by the `new_root_name_join` parameter. These cells will *not* be added to the existing root universe, which will remain unchanged. This new universe will be added as a new non-root universe in the existing base object. *This newly created universe will not be connected to the root universe of the existing `CSGBase` object by default.*
 
 !listing CSGBaseTest.C start=Case 2 end=joinOtherBase include-end=true
 

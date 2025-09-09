@@ -147,6 +147,7 @@ TEST(CSGBaseTest, testCreateCell)
   {
     // create cell to be auto added to root universe
     std::string cname1 = "void_cell1";
+    // create a void cell with name cname1 and defined by region reg1
     csg_obj->createCell(cname1, reg1);
     // create a cell and add to different universe, not root
     std::string cname2 = "void_cell2";
@@ -164,6 +165,8 @@ TEST(CSGBaseTest, testCreateCell)
   {
     // create cell to be auto added to root universe
     std::string cname1 = "mat_cell1";
+    // create a material-filled cell with name cname1, a fill with material matname,
+    // and defined by region reg1
     csg_obj->createCell(cname1, "matname", reg1);
     // create a cell and add to different universe, not root
     std::string cname2 = "mat_cell2";
@@ -183,6 +186,8 @@ TEST(CSGBaseTest, testCreateCell)
 
     // create cell to be auto added to root universe
     std::string cname1 = "univ_cell1";
+    // create a universe-filled cell with name cname1, a fill of universe new_univ,
+    // and defined by region reg1
     csg_obj->createCell(cname1, new_univ, reg1);
     // create a cell and add to different universe, not root
     std::string cname2 = "univ_cell2";
@@ -518,7 +523,7 @@ TEST(CSGBaseTest, joinOtherBaseJoinRoot)
   // Joining: two universes will remain
   // base1 ROOT_UNIVERSE will gain all cells from base2 ROOT_UNIVERSE
   // base2 ROOT_UNIVERSE will not exist as a separate universe
-  // the "extra_univ" in base2 will remain a separate univserse
+  // the "extra_univ" in base2 will remain a separate universe
   base1->joinOtherBase(std::move(base2));
 
   // expect 2 universes: root and extra
@@ -556,7 +561,7 @@ TEST(CSGBaseTest, joinOtherBaseOneNewRoot)
   // Joining: three universes will remain
   // base1 ROOT_UNIVERSE will remain untouched
   // all cells from ROOT_UNIVERSE in base2 create new universe called "new_univ"
-  // the "extra_univ" in base2 will remain a separate univserse
+  // the "extra_univ" in base2 will remain a separate universe
   std::string new_root_name = "new_univ";
   base1->joinOtherBase(std::move(base2), new_root_name);
 
@@ -601,7 +606,7 @@ TEST(CSGBaseTest, joinOtherBaseTwoNewRoot)
   // all cells from base1 ROOT_UNIVERSE will be moved to a new universe called "new_univ1"
   // all cells from base2 ROOT_UNIVERSE will be moved to a new universe called "new_univ2"
   // base1 ROOT_UNIVERSE will be empty
-  // the "extra_univ" in base2 will remain a separate univserse
+  // the "extra_univ" in base2 will remain a separate universe
   std::string new_name1 = "new_univ1";
   std::string new_name2 = "new_univ2";
   base1->joinOtherBase(std::move(base2), new_name1, new_name2);
