@@ -5,7 +5,7 @@
     type = CSVDiff
     input = fuel_assembly.i
     # Make the test a little cheaper
-    cli_args = "Problem/P_tol=1e-1 MultiApps/viz/cli_args='n_cells=50'"
+    cli_args = "SubChannel/P_tol=1e-1 MultiApps/viz/cli_args='n_cells=50'"
     # Differences between macos & civet
     rel_err = 6e-4
     abs_zero = 1e-8
@@ -19,7 +19,7 @@
 
     # Runtime goes from 160 to ~300 depending on the civet machine
     heavy = true
-    capabilities = 'method=opt'
+    capabilities = 'method!=dbg'
     max_time = 400
   []
 []
