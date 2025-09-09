@@ -1,3 +1,7 @@
+[Application]
+  allow_test_objects = true
+[]
+
 [Mesh]
   active = gmg_2d
   [gmg_2d]

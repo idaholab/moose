@@ -11,7 +11,6 @@
       cli_args = 'Mesh/gmg/dim=2
                   RayBCs/active=kill_2d
                   Outputs/file_base=backface_culling_2d_out'
-      allow_test_objects = true
       detail = 'two-dimensional meshes '
     []
     [3d]
@@ -23,7 +22,6 @@
                   RayBCs/active=kill_3d
                   Outputs/file_base=backface_culling_3d_out
                   UserObjects/study/edge_to_edge=true'
-      allow_test_objects = true
       detail = 'and for three-dimensional meshes.'
     []
   []

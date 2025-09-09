@@ -1,3 +1,7 @@
+[Application]
+  allow_test_objects = true
+[]
+
 [Mesh]
   [file]
     type = FileMeshGenerator

@@ -1,5 +1,9 @@
 !include line_source_base.i
 
+[Application]
+  allow_test_objects = true
+[]
+
 [Problem]
   not_zeroed_tag_vectors = ray_residual
 []
