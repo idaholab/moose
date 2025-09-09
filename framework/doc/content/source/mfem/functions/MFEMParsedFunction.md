@@ -9,7 +9,8 @@
 ## Overview
 
 `MFEMParsedFunction` is responsible for parsing expressions that, in addition to being
-functions of position and time, can also depend on problem variables specified by the user.
+functions of position and time, can also depend on problem coefficients, including
+any problem variables, specified by the user.
 
 ## Example Input File Syntax
 
