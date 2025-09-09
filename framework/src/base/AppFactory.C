@@ -102,6 +102,7 @@ AppFactory::createAppShared(const std::string & default_app_type,
 
   // Populate the -i and --app parameters early
   auto command_line_params = emptyInputParameters();
+  command_line_params.registerBase("Application");
   MooseApp::addInputParam(command_line_params);
   MooseApp::addAppParam(command_line_params);
   {
