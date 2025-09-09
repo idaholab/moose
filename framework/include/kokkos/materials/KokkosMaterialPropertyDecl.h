@@ -16,6 +16,7 @@
 #include <typeindex>
 
 class MooseMesh;
+class MaterialBase;
 
 namespace Moose
 {
@@ -43,7 +44,7 @@ struct PropRecord
   /**
    * List of declaring materials
    */
-  std::set<const MaterialBase *> declarers;
+  std::set<const ::MaterialBase *> declarers;
   /**
    * Property name
    */

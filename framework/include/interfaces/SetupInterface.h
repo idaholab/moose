@@ -25,6 +25,13 @@ class SetupInterface
 public:
   SetupInterface(const MooseObject * moose_object);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  SetupInterface(const SetupInterface & object, const Moose::Kokkos::FunctorCopy &);
+#endif
+
   virtual ~SetupInterface();
 
   static InputParameters validParams();

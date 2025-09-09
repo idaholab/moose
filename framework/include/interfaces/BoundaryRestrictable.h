@@ -59,13 +59,11 @@ public:
                        const std::set<SubdomainID> & block_ids,
                        bool nodal);
 
-#ifdef MOOSE_KOKKOS_SCOPE
+#ifdef MOOSE_KOKKOS_ENABLED
   /**
-   * Class copy constructor
-   * Used for dispatching Kokkos functor.
-   * Only defined for Kokkos objects.
+   * Special constructor used for Kokkos functor copy during parallel dispatch
    */
-  BoundaryRestrictable(const BoundaryRestrictable & object);
+  BoundaryRestrictable(const BoundaryRestrictable & object, const Moose::Kokkos::FunctorCopy &);
 #endif
 
   /**

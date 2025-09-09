@@ -19,16 +19,21 @@ CoupleableMooseVariableDependencyIntermediateInterface::
     ScalarCoupleable(moose_object),
     MooseVariableDependencyInterface(moose_object)
 {
-#ifdef MOOSE_KOKKOS_ENABLED
-  // Calling this constructor while not executing actions means this object is being
-  // copy-constructed
-  if (moose_object->isKokkosObject() && !moose_object->getMooseApp().currentlyExecutingActions())
-    return;
-#endif
-
   for (MooseVariableFEBase * coupled_var : getCoupledMooseVars())
     addMooseVariableDependency(coupled_var);
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+CoupleableMooseVariableDependencyIntermediateInterface::
+    CoupleableMooseVariableDependencyIntermediateInterface(
+        const CoupleableMooseVariableDependencyIntermediateInterface & object,
+        const Moose::Kokkos::FunctorCopy & key)
+  : Coupleable(object, key),
+    ScalarCoupleable(object, key),
+    MooseVariableDependencyInterface(object, key)
+{
+}
+#endif
 
 const VariableValue &
 CoupleableMooseVariableDependencyIntermediateInterface::coupledValueByName(

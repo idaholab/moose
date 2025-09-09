@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "MooseTypes.h"
+
 // Forward declarations
 class FEProblemBase;
 class InputParameters;
@@ -22,6 +24,13 @@ public:
   static InputParameters validParams();
 
   MeshChangedInterface(const InputParameters & params);
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  MeshChangedInterface(const MeshChangedInterface & object, const Moose::Kokkos::FunctorCopy &);
+#endif
 
   virtual ~MeshChangedInterface() = default;
 

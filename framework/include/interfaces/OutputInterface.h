@@ -41,6 +41,13 @@ public:
    */
   OutputInterface(const InputParameters & parameters, bool build_list = true);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  OutputInterface(const OutputInterface & object, const Moose::Kokkos::FunctorCopy &);
+#endif
+
   static InputParameters validParams();
 
   /**

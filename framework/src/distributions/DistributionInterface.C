@@ -25,13 +25,17 @@ DistributionInterface::DistributionInterface(const MooseObject * moose_object)
     _dni_feproblem(*_dni_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _dni_moose_object_ptr(moose_object)
 {
-#ifdef MOOSE_KOKKOS_ENABLED
-  // Calling this constructor while not executing actions means this object is being
-  // copy-constructed
-  if (moose_object->isKokkosObject() && !moose_object->getMooseApp().currentlyExecutingActions())
-    return;
-#endif
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+DistributionInterface::DistributionInterface(const DistributionInterface & object,
+                                             const Moose::Kokkos::FunctorCopy &)
+  : _dni_params(object._dni_params),
+    _dni_feproblem(object._dni_feproblem),
+    _dni_moose_object_ptr(object._dni_moose_object_ptr)
+{
+}
+#endif
 
 const Distribution &
 DistributionInterface::getDistribution(const std::string & name) const

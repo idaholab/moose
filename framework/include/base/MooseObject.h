@@ -31,6 +31,13 @@ public:
 
   MooseObject(const InputParameters & parameters);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  MooseObject(const MooseObject & object, const Moose::Kokkos::FunctorCopy &);
+#endif
+
   virtual ~MooseObject() = default;
 
   /**

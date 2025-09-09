@@ -10,8 +10,16 @@
 #include "BlockRestrictable.h"
 #include "MooseMesh.h"
 
-BlockRestrictable::BlockRestrictable(const BlockRestrictable & object)
-  : BlockRestrictable(object._moose_object, false)
+BlockRestrictable::BlockRestrictable(const BlockRestrictable & object,
+                                     const Moose::Kokkos::FunctorCopy &)
+  : _blk_dual_restrictable(object._blk_dual_restrictable),
+    _blk_feproblem(object._blk_feproblem),
+    _blk_mesh(object._blk_mesh),
+    _boundary_ids(object._boundary_ids),
+    _blk_tid(object._blk_tid),
+    _blk_name(object._blk_name),
+    _blk_dim(object._blk_dim),
+    _moose_object(object._moose_object)
 {
   _kokkos_element_ids = object._kokkos_element_ids;
   _kokkos_node_ids = object._kokkos_node_ids;

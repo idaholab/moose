@@ -24,13 +24,17 @@ FunctionInterface::FunctionInterface(const MooseObject * moose_object)
     _fni_feproblem(*_fni_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _fni_tid(_fni_params.have_parameter<THREAD_ID>("_tid") ? _fni_params.get<THREAD_ID>("_tid") : 0)
 {
-#ifdef MOOSE_KOKKOS_ENABLED
-  // Calling this constructor while not executing actions means this object is being
-  // copy-constructed
-  if (moose_object->isKokkosObject() && !moose_object->getMooseApp().currentlyExecutingActions())
-    return;
-#endif
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+FunctionInterface::FunctionInterface(const FunctionInterface & object,
+                                     const Moose::Kokkos::FunctorCopy &)
+  : _fni_params(object._fni_params),
+    _fni_feproblem(object._fni_feproblem),
+    _fni_tid(object._fni_tid)
+{
+}
+#endif
 
 const Function &
 FunctionInterface::getFunction(const std::string & name) const

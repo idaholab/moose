@@ -92,7 +92,7 @@ ResidualObject::ResidualObject(const InputParameters & parameters,
 }
 
 ResidualObject::ResidualObject(const ResidualObject & object)
-  : ::ResidualObject(object.parameters(), object.isNodal()),
+  : ::ResidualObject(object, {}),
     MeshHolder(object),
     AssemblyHolder(object),
     SystemHolder(object),

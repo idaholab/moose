@@ -45,13 +45,6 @@ MooseObject::validParams()
 MooseObject::MooseObject(const InputParameters & parameters)
   : ParallelParamObject(parameters), _enabled(getParam<bool>("enable"))
 {
-#ifdef MOOSE_KOKKOS_ENABLED
-  // Calling this constructor while not executing actions means this object is being
-  // copy-constructed
-  if (isKokkosObject() && !_app.currentlyExecutingActions())
-    return;
-#endif
-
   if (Registry::isRegisteredObj(type()) && _app.getFactory().currentlyConstructing() != &parameters)
     mooseError(
         "This registered object was not constructed using the Factory, which is not supported.");
@@ -63,6 +56,13 @@ const std::string not_shared_error =
     "MooseObject::getSharedPtr() must only be called for objects that are managed by a "
     "shared pointer. Make sure this object is build using Factory::create(...).";
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+MooseObject::MooseObject(const MooseObject & object, const Moose::Kokkos::FunctorCopy &)
+  : ParallelParamObject(object), _enabled(object._enabled)
+{
+}
+#endif
 
 std::shared_ptr<MooseObject>
 MooseObject::getSharedPtr()

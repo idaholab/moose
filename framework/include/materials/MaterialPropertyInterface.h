@@ -73,6 +73,14 @@ public:
                             const std::set<SubdomainID> & block_ids,
                             const std::set<BoundaryID> & boundary_ids);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  MaterialPropertyInterface(const MaterialPropertyInterface & object,
+                            const Moose::Kokkos::FunctorCopy &);
+#endif
+
   static InputParameters validParams();
 
   /// The material property ID for a default (parsed from input) property

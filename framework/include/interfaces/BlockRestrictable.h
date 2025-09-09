@@ -91,13 +91,11 @@ public:
    */
   BlockRestrictable(const MooseObject * moose_object, const std::set<BoundaryID> & boundary_ids);
 
-#ifdef MOOSE_KOKKOS_SCOPE
+#ifdef MOOSE_KOKKOS_ENABLED
   /**
-   * Class copy constructor
-   * Used for dispatching Kokkos functor.
-   * Only defined for Kokkos objects.
+   * Special constructor used for Kokkos functor copy during parallel dispatch
    */
-  BlockRestrictable(const BlockRestrictable & object);
+  BlockRestrictable(const BlockRestrictable & object, const Moose::Kokkos::FunctorCopy &);
 #endif
 
   /**

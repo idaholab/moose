@@ -58,13 +58,6 @@ TaggingInterface::TaggingInterface(const MooseObject * moose_object)
     _moose_object(*moose_object),
     _tag_params(_moose_object.parameters())
 {
-#ifdef MOOSE_KOKKOS_ENABLED
-  // Calling this constructor while not executing actions means this object is being
-  // copy-constructed
-  if (moose_object->isKokkosObject() && !moose_object->getMooseApp().currentlyExecutingActions())
-    return;
-#endif
-
   auto & vector_tag_names = _tag_params.get<MultiMooseEnum>("vector_tags");
 
   if (!vector_tag_names.isValid())
@@ -162,6 +155,16 @@ TaggingInterface::TaggingInterface(const MooseObject * moose_object)
     }
   }
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+TaggingInterface::TaggingInterface(const TaggingInterface & object,
+                                   const Moose::Kokkos::FunctorCopy &)
+  : _subproblem(object._subproblem),
+    _moose_object(object._moose_object),
+    _tag_params(object._tag_params)
+{
+}
+#endif
 
 void
 TaggingInterface::useVectorTag(const TagName & tag_name, VectorTagsKey)

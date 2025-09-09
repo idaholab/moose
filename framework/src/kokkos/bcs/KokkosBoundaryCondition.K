@@ -33,7 +33,7 @@ BoundaryCondition::BoundaryCondition(const InputParameters & parameters,
 }
 
 BoundaryCondition::BoundaryCondition(const BoundaryCondition & object)
-  : ResidualObject(object), BoundaryRestrictableRequired(object)
+  : ResidualObject(object), BoundaryRestrictableRequired(object, {})
 {
 }
 

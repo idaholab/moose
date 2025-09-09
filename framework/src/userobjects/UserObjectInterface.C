@@ -29,13 +29,17 @@ UserObjectInterface::UserObjectInterface(const MooseObject * moose_object)
                  ? _uoi_moose_object.parameters().get<THREAD_ID>("_tid")
                  : 0)
 {
-#ifdef MOOSE_KOKKOS_ENABLED
-  // Calling this constructor while not executing actions means this object is being
-  // copy-constructed
-  if (moose_object->isKokkosObject() && !moose_object->getMooseApp().currentlyExecutingActions())
-    return;
-#endif
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+UserObjectInterface::UserObjectInterface(const UserObjectInterface & object,
+                                         const Moose::Kokkos::FunctorCopy &)
+  : _uoi_moose_object(object._uoi_moose_object),
+    _uoi_feproblem(object._uoi_feproblem),
+    _uoi_tid(object._uoi_tid)
+{
+}
+#endif
 
 UserObjectName
 UserObjectInterface::getUserObjectName(const std::string & param_name) const

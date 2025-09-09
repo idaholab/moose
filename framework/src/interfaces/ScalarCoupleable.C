@@ -31,13 +31,6 @@ ScalarCoupleable::ScalarCoupleable(const MooseObject * moose_object)
                         ? _sc_parameters.get<bool>("implicit")
                         : true)
 {
-#ifdef MOOSE_KOKKOS_ENABLED
-  // Calling this constructor while not executing actions means this object is being
-  // copy-constructed
-  if (moose_object->isKokkosObject() && !moose_object->getMooseApp().currentlyExecutingActions())
-    return;
-#endif
-
   SubProblem & problem = *_sc_parameters.getCheckedPointerParam<SubProblem *>("_subproblem");
 
   // Coupling
@@ -72,6 +65,21 @@ ScalarCoupleable::ScalarCoupleable(const MooseObject * moose_object)
     }
   }
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+ScalarCoupleable::ScalarCoupleable(const ScalarCoupleable & object,
+                                   const Moose::Kokkos::FunctorCopy &)
+  : _sc_fe_problem(object._sc_fe_problem),
+    _sc_tid(object._sc_tid),
+    _real_zero(object._real_zero),
+    _scalar_zero(object._scalar_zero),
+    _point_zero(object._point_zero),
+    _sc_parameters(object._sc_parameters),
+    _sc_name(object._sc_name),
+    _sc_is_implicit(object._sc_is_implicit)
+{
+}
+#endif
 
 bool
 ScalarCoupleable::isCoupledScalar(const std::string & var_name_in, unsigned int i) const

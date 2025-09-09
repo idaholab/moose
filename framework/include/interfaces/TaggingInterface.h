@@ -58,6 +58,13 @@ class TaggingInterface
 public:
   TaggingInterface(const MooseObject * moose_object);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  TaggingInterface(const TaggingInterface & object, const Moose::Kokkos::FunctorCopy &);
+#endif
+
   virtual ~TaggingInterface();
 
   static InputParameters validParams();

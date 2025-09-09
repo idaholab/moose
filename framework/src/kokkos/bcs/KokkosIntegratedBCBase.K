@@ -36,8 +36,8 @@ IntegratedBCBase::IntegratedBCBase(const InputParameters & parameters,
 
 IntegratedBCBase::IntegratedBCBase(const IntegratedBCBase & object)
   : BoundaryCondition(object),
-    CoupleableMooseVariableDependencyIntermediateInterface(&object, false),
-    MaterialPropertyInterface(&object, Moose::EMPTY_BLOCK_IDS, boundaryIDs())
+    CoupleableMooseVariableDependencyIntermediateInterface(object, {}),
+    MaterialPropertyInterface(object, {})
 {
 }
 

@@ -50,13 +50,6 @@ BlockRestrictable::BlockRestrictable(const MooseObject * moose_object, bool init
     _blk_dim(libMesh::invalid_uint),
     _moose_object(moose_object)
 {
-#ifdef MOOSE_KOKKOS_ENABLED
-  // Calling this constructor while not executing actions means this object is being
-  // copy-constructed
-  if (moose_object->isKokkosObject() && !moose_object->getMooseApp().currentlyExecutingActions())
-    return;
-#endif
-
   if (initialize)
     initializeBlockRestrictable(_moose_object);
 }

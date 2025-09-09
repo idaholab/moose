@@ -357,11 +357,6 @@ public:
                          const InputParameters & params);
 
   /**
-   * Returns whether the simulation is currently executing actions
-   */
-  bool currentlyExecutingActions() const { return _action_warehouse.getCurrentAction() != nullptr; }
-
-  /**
    * @return The Parser
    **/
   ///@{

@@ -23,12 +23,6 @@ Restartable::Restartable(const MooseObject * moose_object, const std::string & s
                     ? moose_object->parameters().get<THREAD_ID>("_tid")
                     : 0)
 {
-#ifdef MOOSE_KOKKOS_ENABLED
-  // Calling this constructor while not executing actions means this object is being
-  // copy-constructed
-  if (moose_object->isKokkosObject() && !moose_object->getMooseApp().currentlyExecutingActions())
-    return;
-#endif
 }
 
 Restartable::Restartable(const MooseObject * moose_object,
@@ -52,6 +46,18 @@ Restartable::Restartable(MooseApp & moose_app,
     _restartable_name(name)
 {
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+Restartable::Restartable(const Restartable & object, const Moose::Kokkos::FunctorCopy &)
+  : _restartable_app(object._restartable_app),
+    _restartable_system_name(object._restartable_system_name),
+    _restartable_tid(object._restartable_tid),
+    _restartable_read_only(object._restartable_read_only),
+    _metaname(object._metaname),
+    _restartable_name(object._restartable_name)
+{
+}
+#endif
 
 RestartableDataValue &
 Restartable::registerRestartableDataOnApp(std::unique_ptr<RestartableDataValue> data,

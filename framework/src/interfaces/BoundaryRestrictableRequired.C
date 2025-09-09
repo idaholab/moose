@@ -36,3 +36,11 @@ BoundaryRestrictableRequired::BoundaryRestrictableRequired(const MooseObject * m
   : BoundaryRestrictable(moose_object, nodal)
 {
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+BoundaryRestrictableRequired::BoundaryRestrictableRequired(
+    const BoundaryRestrictableRequired & object, const Moose::Kokkos::FunctorCopy & key)
+  : BoundaryRestrictable(object, key)
+{
+}
+#endif
