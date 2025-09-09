@@ -35,4 +35,24 @@
     design = 'PiecewiseConstant.md'
     requirement = 'The system shall be able to use automatic differentiation instantiations of piecewise linear functions.'
   []
+
+  [dont_execute_when_not_needed]
+    requirement = 'The system shall be able to not compute face material properties when not needed'
+    issues = '#31418'
+    [boundary]
+      type = RunApp
+      input = 'dont_execute_when_not_needed.i'
+      absent_out = 'Erroring on boundary'
+      detail = 'such as on faces where no boundary condition use material properties'
+      mesh_mode = 'replicated'
+    []
+    [interface]
+      type = RunApp
+      input = 'dont_execute_when_not_needed.i'
+      cli_args = "InterfaceKernels/inactive=''"
+      absent_out = 'Erroring on boundary'
+      detail = 'or on interfaces where no interface kernels use material properties.'
+      mesh_mode = 'replicated'
+    []
+  []
 []
