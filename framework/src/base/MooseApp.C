@@ -112,6 +112,8 @@ MooseApp::validParams()
 {
   InputParameters params = MooseBase::validParams();
 
+  params.registerBase("Application");
+
   MooseApp::addAppParam(params);
   MooseApp::addInputParam(params);
 
@@ -434,8 +436,6 @@ MooseApp::validParams()
       "Executes the [NEML2] block to parse the input file and terminate.");
 
   MooseApp::addAppParam(params);
-
-  params.registerBase("Application");
 
   return params;
 }
