@@ -8,10 +8,9 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "TidalGravityAux.h"
-// Standard
+
 #include <cmath>
 #include <ctime>
-#include <iomanip>
 #include <sstream>
 #include <chrono>
 #include <cctype>
@@ -213,7 +212,7 @@ moonVector(std::chrono::time_point<clock_t, Dur> tp_utc)
 } // namespace astro
 } // namespace Moose
 
-    registerMooseObject("ShallowWaterApp", TidalGravityAux);
+registerMooseObject("ShallowWaterApp", TidalGravityAux);
 
 InputParameters
 TidalGravityAux::validParams()
@@ -224,11 +223,11 @@ TidalGravityAux::validParams()
 
   params.addParam<Real>("g0", 9.80665, "Base gravitational magnitude [m/s^2]");
   params.addParam<bool>("enable_tides", true, "Enable Sun/Moon tidal correction");
-  params.addParam<std::time_t>("simulation_start_epoch",
-                        0.0,
-                        "Absolute UTC time (s since 1970-01-01) corresponding to simulation t=0.");
-  params.addParam<std::string>(
-      "simulation_start_datetime", "", "Start date/time for t=0 in %Y-%m-%d %H:%M:%S format.");
+  params.addParam<std::time_t>(
+      "simulation_start_epoch",
+      "Absolute UTC time (s since 1970-01-01) corresponding to simulation t=0.");
+  params.addParam<std::string>("simulation_start_datetime",
+                               "Start date/time for t=0 in %Y-%m-%d %H:%M:%S format.");
   params.addParam<Real>("simulation_timezone",
                         0.0,
                         "Offset from UTC in hours (allows `simulation_start_datetime` to be "
@@ -251,14 +250,11 @@ TidalGravityAux::TidalGravityAux(const InputParameters & parameters)
     _g0(getParam<Real>("g0")),
     _enable_tides(getParam<bool>("enable_tides")),
     _earth_radius(getParam<Real>("earth_radius")),
-    _t0_epoch(getParam<Real>("simulation_start_epoch")),
     _mu_sun(getParam<Real>("mu_sun")),
     _sun_distance(getParam<Real>("sun_distance")),
     _mu_moon(getParam<Real>("mu_moon")),
     _moon_distance(getParam<Real>("moon_distance")),
-    _sun_distance_seasonal(getParam<MooseEnum>("sun_distance_model") == "seasonal"),
-    _cached_t_step(std::numeric_limits<unsigned int>::max()),
-    _a_tide(0.0, 0.0, 0.0)
+    _sun_distance_seasonal(getParam<MooseEnum>("sun_distance_model") == "seasonal")
 {
   if (isParamValid("simulation_start_epoch") == isParamValid("simulation_start_datetime"))
     mooseError("Specify either `simulation_start_epoch` or `simulation_start_datetime`.");
@@ -276,13 +272,18 @@ TidalGravityAux::TidalGravityAux(const InputParameters & parameters)
 }
 
 void
+TidalGravityAux::initialSetup()
+{
+  timestepSetup();
+}
+
+void
 TidalGravityAux::timestepSetup()
 {
   const std::time_t t_abs = _t0_epoch + static_cast<std::time_t>(_t);
 
   // Get Earth-fixed unit vectors toward Sun and Moon at this absolute time
-  RealVectorValue s_hat(0, 0, 0), m_hat(0, 0, 0);
-  computeSunMoonDirsAtEpoch(t_abs, s_hat, m_hat);
+  const auto [d_sun, d_moon] = computeSunMoonDirsAtEpoch(t_abs);
 
   // Determine Sun-Earth distance model
   Real r_sun = _sun_distance;
@@ -296,21 +297,31 @@ TidalGravityAux::timestepSetup()
     r_sun = R_AU * AU;
   }
   const Real r_moon = _moon_distance;
-  const Real a_sun = 2.0 * _mu_sun * _earth_radius / (r_sun * r_sun * r_sun);
-  const Real a_moon = 2.0 * _mu_moon * _earth_radius / (r_moon * r_moon * r_moon);
 
-  _a_tide = (_enable_tides ? (a_sun * s_hat + a_moon * m_hat) : RealVectorValue(0, 0, 0));
+  _p_sun = d_sun * r_sun;
+  _p_moon = d_moon * r_moon;
 }
 
 Real
 TidalGravityAux::computeValue()
 {
   const Real rmag = _q_point[_qp].norm();
-  RealVectorValue n_r(0, 0, 1);
-  if (rmag > 0.0)
-    n_r = _q_point[_qp] / rmag;
-  const auto gvec = (-_g0) * n_r + _a_tide;
-  return -gvec * n_r;
+  mooseAssert(rmag > 0.0, "qp must not lie at the origin");
+  const auto n_r = _q_point[_qp] / rmag;
+
+  // distance from point on the surface
+  auto d_sun = (_p_sun - _q_point[_qp]);
+  const auto r_sun = d_sun.norm();
+  d_sun /= r_sun;
+
+  auto d_moon = (_p_moon - _q_point[_qp]);
+  const auto r_moon = d_moon.norm();
+  d_moon /= r_moon;
+
+  const Real a_sun = 2.0 * _mu_sun * _earth_radius / (r_sun * r_sun * r_sun);
+  const Real a_moon = 2.0 * _mu_moon * _earth_radius / (r_moon * r_moon * r_moon);
+
+  return n_r * (n_r * _g0 + d_moon * a_moon + d_sun * a_sun);
 }
 
 std::time_t
@@ -330,14 +341,13 @@ TidalGravityAux::parseStartDatetime() const
 }
 
 // Integrate ephemerides utilities for directions
-void
-TidalGravityAux::computeSunMoonDirsAtEpoch(std::time_t epoch_seconds,
-                                           RealVectorValue & sunVector,
-                                           RealVectorValue & moonVector) const
+std::pair<RealVectorValue, RealVectorValue>
+TidalGravityAux::computeSunMoonDirsAtEpoch(std::time_t epoch_seconds) const
 {
   using namespace std::chrono;
   const auto tp = Moose::astro::SysTimeNs(seconds(epoch_seconds));
 
-  sunVector = Moose::astro::sunVector(tp);
-  moonVector = Moose::astro::moonVector(tp);
+  const auto sunVector = Moose::astro::sunVector(tp);
+  const auto moonVector = Moose::astro::moonVector(tp);
+  return {sunVector, moonVector};
 }

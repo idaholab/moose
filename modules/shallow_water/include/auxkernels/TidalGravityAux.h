@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "Assembly.h"
 #include "AuxKernel.h"
 
 // declare utility functions for unit testing
@@ -42,6 +43,7 @@ public:
 
   TidalGravityAux(const InputParameters & parameters);
   virtual void timestepSetup() override;
+  virtual void initialSetup() override;
 
 protected:
   virtual Real computeValue() override;
@@ -49,15 +51,14 @@ protected:
 
   // Compute Earth-fixed unit direction vectors to Sun and Moon
   // at a given absolute UTC epoch time in seconds since 1970-01-01.
-  void computeSunMoonDirsAtEpoch(std::time_t epoch_seconds,
-                                 RealVectorValue & sun_dir,
-                                 RealVectorValue & moon_dir) const;
+  std::pair<RealVectorValue, RealVectorValue>
+  computeSunMoonDirsAtEpoch(std::time_t epoch_seconds) const;
 
   // Parameters
   const Real _g0;
   const bool _enable_tides;
   const Real _earth_radius;
-  std::time_t _t0_epoch;                    // seconds since Unix epoch (UTC)
+  std::time_t _t0_epoch;             // seconds since Unix epoch (UTC)
   const std::string _start_datetime; // ISO8601-like string, optional
 
   const Real _mu_sun;
@@ -69,7 +70,7 @@ protected:
   // options
   const bool _sun_distance_seasonal;
 
-  // Cache
-  unsigned int _cached_t_step;
-  RealVectorValue _a_tide;
+  // positions of moon and sun
+  RealVectorValue _p_sun;
+  RealVectorValue _p_moon;
 };
