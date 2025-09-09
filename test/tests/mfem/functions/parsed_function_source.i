@@ -51,9 +51,9 @@
 [Functions]
   [force]
     type = MFEMParsedFunction
-    expression = 'aux_var*sin(y*x)'
+    expression = aux_var*sin(y*x)
+    coefficients = aux_var
     use_xyzt = true
-    var_names = 'aux_var'
   []
 []
 

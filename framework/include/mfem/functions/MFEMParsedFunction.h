@@ -11,11 +11,12 @@
 
 #pragma once
 
-#include "FunctionParserUtils.h"
 #include "MFEMGeneralUserObject.h"
+#include "FunctionParserUtils.h"
 
 /**
- * Declares arbitrary parsed function of position, time, and any number of problem variables.
+ * Declares arbitrary parsed function of position, time, and any number of
+ * problem coefficients, including any problem variables.
  */
 class MFEMParsedFunction : public MFEMGeneralUserObject, public FunctionParserUtils<false>
 {
@@ -23,13 +24,11 @@ public:
   static InputParameters validParams();
 
   MFEMParsedFunction(const InputParameters & parameters);
-  virtual ~MFEMParsedFunction();
+  virtual ~MFEMParsedFunction() = default;
 
 protected:
-  /// function expression
-  std::string _function;
-  /// function variables
-  const std::vector<VariableName> & _var_names;
+  /// function coefficients (may include variables)
+  const std::vector<MFEMScalarCoefficientName> & _coef_names;
   /// import coordinates and time
   const bool _use_xyzt;
   /// coordinate and time variable names

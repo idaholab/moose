@@ -12,11 +12,11 @@
 #include "MFEMScalarParsedCoefficient.h"
 
 MFEMScalarParsedCoefficient::MFEMScalarParsedCoefficient(
-    const Moose::MFEM::GridFunctions & gridfunctions,
-    const std::vector<VariableName> & var_names,
+    Moose::MFEM::CoefficientManager & coefficients,
+    const std::vector<MFEMScalarCoefficientName> & coef_names,
     bool use_xyzt,
     const FunctionParserUtils<false>::SymFunctionPtr & func)
-  : _gridfunctions(gridfunctions), _var_names(var_names), _use_xyzt(use_xyzt), _func(func)
+  : _coefficients(coefficients), _coef_names(coef_names), _use_xyzt(use_xyzt), _func(func)
 {
 }
 
@@ -24,10 +24,10 @@ mfem::real_t
 MFEMScalarParsedCoefficient::Eval(mfem::ElementTransformation & T,
                                   const mfem::IntegrationPoint & ip)
 {
-  std::vector<mfem::real_t> vals(_var_names.size() + (_use_xyzt ? 4 : 0));
+  std::vector<mfem::real_t> vals(_coef_names.size() + (_use_xyzt ? 4 : 0));
 
-  for (unsigned i = 0; i < _var_names.size(); i++)
-    vals[i] = _gridfunctions.GetRef(_var_names[i]).GetValue(T, ip);
+  for (unsigned i = 0; i < _coef_names.size(); i++)
+    vals[i] = _coefficients.getScalarCoefficient(_coef_names[i]).Eval(T, ip);
 
   if (_use_xyzt)
   {
@@ -35,12 +35,12 @@ MFEMScalarParsedCoefficient::Eval(mfem::ElementTransformation & T,
     T.Transform(ip, transip);
 
     for (int i = 0; i < transip.Size(); i++)
-      vals[_var_names.size() + i] = transip(i);
+      vals[_coef_names.size() + i] = transip(i);
 
     for (int i = transip.Size(); i < 3; i++)
-      vals[_var_names.size() + i] = 0;
+      vals[_coef_names.size() + i] = 0;
 
-    vals[_var_names.size() + 3] = GetTime();
+    vals[_coef_names.size() + 3] = GetTime();
   }
 
   return _func->Eval(vals.data());
