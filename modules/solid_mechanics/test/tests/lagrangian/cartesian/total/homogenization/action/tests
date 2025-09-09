@@ -19,4 +19,10 @@
     abs_zero = 1e-6
     heavy = true
   []
+  [mixed_pbc_symmetry_2d]
+    type = Exodiff
+    input = '2d_pbc_symmetry.i'
+    exodiff = '2d_pbc_symmetry_out.e'
+    requirement = 'Action supports the application of periodic strain conditions and symmetry in 2D.'
+  []
 []
