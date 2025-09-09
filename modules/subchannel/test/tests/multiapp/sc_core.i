@@ -60,58 +60,59 @@ duct_inside = '${fparse 11.43*2*scale_factor}'
   []
 []
 
-[AuxVariables]
-  [mdot]
-    block = subchannel
-  []
-  [SumWij]
-    block = subchannel
-  []
-  [P]
-    block = subchannel
-  []
-  [DP]
-    block = subchannel
-  []
-  [h]
-    block = subchannel
-  []
-  [T]
-    block = subchannel
-  []
-  [Tpin]
-    block = fuel_pins
-  []
-  [Dpin]
-    block = fuel_pins
-  []
-  [rho]
-    block = subchannel
-  []
-  [S]
-    block = subchannel
-  []
-  [w_perim]
-    block = subchannel
-  []
-  [q_prime]
-    block = fuel_pins
-  []
-  [mu]
-    block = subchannel
-  []
-  [duct_heat_flux]
-    block = duct
-    initial_condition = 0
-  []
-  [Tduct]
-    block = duct
-  []
-  [displacement]
-    block = subchannel
-    initial_condition = 0
-  []
-[]
+# All needed aux variables are automatically loaded if [SubChannel] block exists
+# [AuxVariables]
+#   [mdot]
+#     block = subchannel
+#   []
+#   [SumWij]
+#     block = subchannel
+#   []
+#   [P]
+#     block = subchannel
+#   []
+#   [DP]
+#     block = subchannel
+#   []
+#   [h]
+#     block = subchannel
+#   []
+#   [T]
+#     block = subchannel
+#   []
+#   [Tpin]
+#     block = fuel_pins
+#   []
+#   [Dpin]
+#     block = fuel_pins
+#   []
+#   [rho]
+#     block = subchannel
+#   []
+#   [S]
+#     block = subchannel
+#   []
+#   [w_perim]
+#     block = subchannel
+#   []
+#   [q_prime]
+#     block = fuel_pins
+#   []
+#   [mu]
+#     block = subchannel
+#   []
+#   [q_prime_duct]
+#     block = duct
+#     initial_condition = 0
+#   []
+#   [Tduct]
+#     block = duct
+#   []
+#   [displacement]
+#     block = subchannel
+#     initial_condition = 0
+#   []
+# []
 
 [FluidProperties]
   [sodium]
@@ -126,7 +127,7 @@ duct_inside = '${fparse 11.43*2*scale_factor}'
   []
 []
 
-[Problem]
+[SubChannel]
   type = TriSubChannel1PhaseProblem
   fp = sodium
   n_blocks = 1
