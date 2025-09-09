@@ -294,7 +294,7 @@
 
 [Preconditioning]
   [./SMP]
-    type = SMP
+    type = FDP
     full = true
   [../]
 []
@@ -305,7 +305,7 @@
   # num_steps = 60
   dt = 0.1
   dtmin = 0.1
-  solve_type = 'PJFNK'
+  solve_type = 'NEWTON'
   petsc_options_iname = '-pc_type -pc_factor_shift_type'
   petsc_options_value = 'lu       NONZERO'
   line_search = none
