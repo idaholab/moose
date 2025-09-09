@@ -28,6 +28,13 @@ public:
 
   UserObjectInterface(const MooseObject * moose_object);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  UserObjectInterface(const UserObjectInterface & object, const Moose::Kokkos::FunctorCopy &);
+#endif
+
   /**
    * @return The name of the user object associated with the parameter \p param_name
    */

@@ -34,9 +34,9 @@ NodalKernelBase::NodalKernelBase(const InputParameters & parameters, Moose::VarF
 
 NodalKernelBase::NodalKernelBase(const NodalKernelBase & object)
   : ResidualObject(object),
-    BlockRestrictable(object),
-    BoundaryRestrictable(object),
-    CoupleableMooseVariableDependencyIntermediateInterface(&object, true)
+    BlockRestrictable(object, {}),
+    BoundaryRestrictable(object, {}),
+    CoupleableMooseVariableDependencyIntermediateInterface(object, {})
 {
 }
 

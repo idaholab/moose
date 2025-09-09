@@ -256,8 +256,8 @@ Material<Derived>::Material(const InputParameters & parameters)
 template <typename Derived>
 Material<Derived>::Material(const Material & object)
   : MaterialBase(object),
-    Coupleable(&object, false),
-    MaterialPropertyInterface(&object, object.blockIDs(), object.boundaryIDs()),
+    Coupleable(object, {}),
+    MaterialPropertyInterface(object, {}),
     _bnd(object._bnd),
     _neighbor(object._neighbor),
     _default_init(object._default_init),

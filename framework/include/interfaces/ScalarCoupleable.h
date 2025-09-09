@@ -38,6 +38,13 @@ public:
    */
   ScalarCoupleable(const MooseObject * moose_object);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  ScalarCoupleable(const ScalarCoupleable & object, const Moose::Kokkos::FunctorCopy &);
+#endif
+
   /**
    * Get the list of coupled scalar variables
    * @return The list of coupled variables

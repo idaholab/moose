@@ -29,6 +29,13 @@ public:
 
   DistributionInterface(const MooseObject * moose_object);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  DistributionInterface(const DistributionInterface & object, const Moose::Kokkos::FunctorCopy &);
+#endif
+
   ///@{
   /**
    * Get a distribution with a given name

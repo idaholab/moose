@@ -39,6 +39,14 @@ class SolutionInvalidInterface
 public:
   SolutionInvalidInterface(const MooseObject * const moose_object);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  SolutionInvalidInterface(const SolutionInvalidInterface & object,
+                           const Moose::Kokkos::FunctorCopy &);
+#endif
+
 protected:
   template <bool warning>
   void flagInvalidSolutionInternal(const InvalidSolutionID invalid_solution_id) const;

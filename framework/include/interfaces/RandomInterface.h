@@ -33,6 +33,13 @@ public:
                   THREAD_ID tid,
                   bool is_nodal);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  RandomInterface(const RandomInterface & object, const Moose::Kokkos::FunctorCopy &);
+#endif
+
   ~RandomInterface();
 
   static InputParameters validParams();

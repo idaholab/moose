@@ -53,13 +53,31 @@ ResidualObject::ResidualObject(const InputParameters & parameters, bool is_nodal
     _assembly(_subproblem.assembly(_tid, _sys.number())),
     _mesh(_subproblem.mesh())
 {
-#ifdef MOOSE_KOKKOS_ENABLED
-  // Calling this constructor while not executing actions means this object is being
-  // copy-constructed
-  if (isKokkosObject() && !_fe_problem.getMooseApp().currentlyExecutingActions())
-    return;
-#endif
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+ResidualObject::ResidualObject(const ResidualObject & object,
+                               const Moose::Kokkos::FunctorCopy & key)
+  : MooseObject(object, key),
+    SetupInterface(object, key),
+    FunctionInterface(object, key),
+    UserObjectInterface(object, key),
+    TransientInterface(object, key),
+    PostprocessorInterface(object, key),
+    VectorPostprocessorInterface(object, key),
+    RandomInterface(object, key),
+    Restartable(object, key),
+    MeshChangedInterface(object, key),
+    TaggingInterface(object, key),
+    _subproblem(object._subproblem),
+    _fe_problem(object._fe_problem),
+    _sys(object._sys),
+    _tid(object._tid),
+    _assembly(object._assembly),
+    _mesh(object._mesh)
+{
+}
+#endif
 
 void
 ResidualObject::prepareShapes(const unsigned int var_num)

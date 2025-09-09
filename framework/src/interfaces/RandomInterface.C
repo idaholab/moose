@@ -39,14 +39,22 @@ RandomInterface::RandomInterface(const InputParameters & parameters,
     _curr_node(problem.assembly(tid, 0).node()),
     _curr_element(problem.assembly(tid, 0).elem())
 {
-#ifdef MOOSE_KOKKOS_ENABLED
-  // Calling this constructor while not executing actions means this object is being
-  // copy-constructed
-  if (parameters.isParamValid(Moose::Kokkos::KOKKOS_OBJECT_PARAM) &&
-      !problem.getMooseApp().currentlyExecutingActions())
-    return;
-#endif
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+RandomInterface::RandomInterface(const RandomInterface & object, const Moose::Kokkos::FunctorCopy &)
+  : _random_data(object._random_data),
+    _generator(object._generator),
+    _ri_problem(object._ri_problem),
+    _ri_name(object._ri_name),
+    _master_seed(object._master_seed),
+    _is_nodal(object._is_nodal),
+    _reset_on(object._reset_on),
+    _curr_node(object._curr_node),
+    _curr_element(object._curr_element)
+{
+}
+#endif
 
 RandomInterface::~RandomInterface() {}
 

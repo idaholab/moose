@@ -116,6 +116,45 @@ MaterialBase::MaterialBase(const InputParameters & parameters)
 {
 }
 
+#ifdef MOOSE_KOKKOS_ENABLED
+MaterialBase::MaterialBase(const MaterialBase & object, const Moose::Kokkos::FunctorCopy & key)
+  : MooseObject(object, key),
+    BlockRestrictable(object, key),
+    BoundaryRestrictable(object, key),
+    SetupInterface(object, key),
+    MooseVariableDependencyInterface(object, key),
+    ScalarCoupleable(object, key),
+    FunctionInterface(object, key),
+    DistributionInterface(object, key),
+    UserObjectInterface(object, key),
+    TransientInterface(object, key),
+    PostprocessorInterface(object, key),
+    VectorPostprocessorInterface(object, key),
+    DependencyResolverInterface(object, key),
+    Restartable(object, key),
+    MeshChangedInterface(object, key),
+    OutputInterface(object, key),
+    RandomInterface(object, key),
+    ElementIDInterface(object, key),
+    GeometricSearchInterface(object, key),
+    ADFunctorInterface(object, key),
+    SolutionInvalidInterface(object, key),
+    _subproblem(object._subproblem),
+    _fe_problem(object._fe_problem),
+    _tid(object._tid),
+    _assembly(object._assembly),
+    _coord(object._coord),
+    _normals(object._normals),
+    _mesh(object._mesh),
+    _coord_sys(object._coord_sys),
+    _compute(object._compute),
+    _has_stateful_property(object._has_stateful_property),
+    _declare_suffix(object._declare_suffix),
+    _force_stateful_init(object._force_stateful_init)
+{
+}
+#endif
+
 void
 MaterialBase::initStatefulProperties(unsigned int n_points)
 {
