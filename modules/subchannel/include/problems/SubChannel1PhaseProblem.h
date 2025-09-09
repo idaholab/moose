@@ -206,6 +206,8 @@ protected:
   /// The direction of gravity
   const MooseEnum _gravity_direction;
   const Real _dir_grav;
+  /// The friction model used
+  const MooseEnum _friction_model;
   /// Flag to define the usage of a implicit or explicit solution
   const bool _implicit_bool;
   /// Flag to define the usage of staggered or collocated pressure

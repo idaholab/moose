@@ -37,7 +37,6 @@ QuadSubChannel1PhaseProblem::QuadSubChannel1PhaseProblem(const InputParameters &
   : SubChannel1PhaseProblem(params),
     _subchannel_mesh(SCM::getMesh<QuadSubChannelMesh>(_mesh)),
     _beta(getParam<Real>("beta")),
-    _default_friction_model(getParam<bool>("default_friction_model")),
     _constant_beta(getParam<bool>("constant_beta"))
 {
 }
@@ -212,7 +211,7 @@ QuadSubChannel1PhaseProblem::computeFrictionFactor(FrictionStruct friction_args)
   auto iz = friction_args.iz;
   auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
   /// Pang, B. et al. KIT, 2013
-  if (_default_friction_model)
+  if (_friction_model == 0) // default
   {
     Real a, b;
     if (Re < 1)
@@ -238,7 +237,7 @@ QuadSubChannel1PhaseProblem::computeFrictionFactor(FrictionStruct friction_args)
     _ff_soln->set(node, a * std::pow(Re, b));
   }
   /// Todreas-Kazimi NUCLEAR SYSTEMS, second edition, Volume 1, 2011
-  else
+  else if (_friction_model == 1) // non-default
   {
     Real aL, b1L, b2L, cL;
     Real aT, b1T, b2T, cT;
@@ -357,6 +356,14 @@ QuadSubChannel1PhaseProblem::computeFrictionFactor(FrictionStruct friction_args)
                     fL * std::pow((1 - psi), 1.0 / 3.0) * (1 - std::pow(psi, lambda)) +
                         fT * std::pow(psi, 1.0 / 3.0));
     }
+  }
+  else if (_friction_model == 2)
+  {
+    // Do nothing the user should populate the aux variable ff.
+  }
+  else
+  {
+    mooseError(name(), ": Friction model should be a string: default, non_default, user_defined");
   }
 }
 

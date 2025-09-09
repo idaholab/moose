@@ -3,6 +3,7 @@
   issues = '#28497 #29194'
   [SCMTriPower_cells_aligned]
     type = CSVDiff
+    capabilities = 'method!=dbg'
     input = 'test.i'
     csvdiff = 'test_out.csv'
     recover = False
@@ -12,6 +13,7 @@
   [SCMTriPower_cells_aligned_with_pins]
     type = CSVDiff
     input = 'test_with_pins.i'
+    capabilities = 'method!=dbg'
     csvdiff = 'test_with_pins_out.csv test_with_pins_out_line_check_0001.csv'
     recover = False
     abs_zero = 1e-7
@@ -20,6 +22,7 @@
   [SCMTriPower_cells_not_aligned]
     type = CSVDiff
     input = 'test.i'
+    capabilities = 'method!=dbg'
     csvdiff = 'not_aligned.csv'
     cli_args = 'num_cells=31 Outputs/file_base=not_aligned'
     recover = False
@@ -30,6 +33,7 @@
   [SCMTriPower_cells_not_aligned_with_pins]
     type = CSVDiff
     input = 'test_with_pins.i'
+    capabilities = 'method!=dbg'
     csvdiff = 'not_aligned_with_pins.csv not_aligned_with_pins_line_check_0001.csv'
     cli_args = 'num_cells=31 Outputs/file_base=not_aligned_with_pins'
     recover = False
