@@ -13,8 +13,16 @@
 
 #include "MooseMesh.h"
 
-BoundaryRestrictable::BoundaryRestrictable(const BoundaryRestrictable & object)
-  : BoundaryRestrictable(&object._moose_object, object._bnd_nodal)
+BoundaryRestrictable::BoundaryRestrictable(const BoundaryRestrictable & object,
+                                           const Moose::Kokkos::FunctorCopy &)
+  : _bnd_feproblem(object._bnd_feproblem),
+    _bnd_mesh(object._bnd_mesh),
+    _bnd_dual_restrictable(object._bnd_dual_restrictable),
+    _block_ids(object._block_ids),
+    _bnd_tid(object._bnd_tid),
+    _bnd_material_data(object._bnd_material_data),
+    _bnd_nodal(object._bnd_nodal),
+    _moose_object(object._moose_object)
 {
   _kokkos_node_ids = object._kokkos_node_ids;
   _kokkos_element_side_ids = object._kokkos_element_side_ids;

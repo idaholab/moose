@@ -27,6 +27,15 @@ public:
                                                          bool nodal,
                                                          bool is_fv = false);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  CoupleableMooseVariableDependencyIntermediateInterface(
+      const CoupleableMooseVariableDependencyIntermediateInterface & object,
+      const Moose::Kokkos::FunctorCopy & key);
+#endif
+
   /**
    * Returns value of a coupled variable give the variable name
    * @param var_name Name of coupled variable

@@ -52,13 +52,6 @@ BoundaryRestrictable::BoundaryRestrictable(const MooseObject * moose_object, boo
     _bnd_nodal(nodal),
     _moose_object(*moose_object)
 {
-#ifdef MOOSE_KOKKOS_ENABLED
-  // Calling this constructor while not executing actions means this object is being
-  // copy-constructed
-  if (moose_object->isKokkosObject() && !moose_object->getMooseApp().currentlyExecutingActions())
-    return;
-#endif
-
   initializeBoundaryRestrictable();
 }
 

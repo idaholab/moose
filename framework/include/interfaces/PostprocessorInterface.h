@@ -38,6 +38,13 @@ public:
 
   PostprocessorInterface(const FEProblemBase * problem);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  PostprocessorInterface(const PostprocessorInterface & object, const Moose::Kokkos::FunctorCopy &);
+#endif
+
   static InputParameters validParams();
 
   ///@{

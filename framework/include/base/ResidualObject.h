@@ -55,6 +55,13 @@ public:
    */
   ResidualObject(const InputParameters & parameters, bool nodal = false);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  ResidualObject(const ResidualObject & object, const Moose::Kokkos::FunctorCopy & key);
+#endif
+
   /// Compute this object's contribution to the residual
   virtual void computeResidual() = 0;
 

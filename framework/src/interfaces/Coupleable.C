@@ -59,13 +59,6 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
     _obj(moose_object),
     _writable_coupled_variables(libMesh::n_threads())
 {
-#ifdef MOOSE_KOKKOS_ENABLED
-  // Calling this constructor while not executing actions means this object is being
-  // copy-constructed
-  if (moose_object->isKokkosObject() && !moose_object->getMooseApp().currentlyExecutingActions())
-    return;
-#endif
-
   SubProblem & problem = *_c_parameters.getCheckedPointerParam<SubProblem *>("_subproblem");
   _obj->getMooseApp().registerInterfaceObject(*this);
 
@@ -129,6 +122,38 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
     }
   }
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+Coupleable::Coupleable(const Coupleable & object, const Moose::Kokkos::FunctorCopy &)
+  : _c_parameters(object._c_parameters),
+    _c_name(object._c_name),
+    _c_type(object._c_type),
+    _c_fe_problem(object._c_fe_problem),
+    _c_sys(object._c_sys),
+    _new_to_deprecated_coupled_vars(object._new_to_deprecated_coupled_vars),
+    _c_nodal(object._c_nodal),
+    _c_is_implicit(object._c_is_implicit),
+    _c_allow_element_to_nodal_coupling(object._c_allow_element_to_nodal_coupling),
+    _c_tid(object._c_tid),
+    _zero(object._zero),
+    _phi_zero(object._phi_zero),
+    _ad_zero(object._ad_zero),
+    _grad_zero(object._grad_zero),
+    _ad_grad_zero(object._ad_grad_zero),
+    _grad_phi_zero(object._grad_phi_zero),
+    _second_zero(object._second_zero),
+    _ad_second_zero(object._ad_second_zero),
+    _second_phi_zero(object._second_phi_zero),
+    _vector_zero(object._vector_zero),
+    _vector_curl_zero(object._vector_curl_zero),
+    _coupleable_neighbor(object._coupleable_neighbor),
+    _coupleable_max_qps(object._coupleable_max_qps),
+    _is_fv(object._is_fv),
+    _obj(object._obj),
+    _writable_coupled_variables(object._writable_coupled_variables)
+{
+}
+#endif
 
 bool
 Coupleable::isCoupled(const std::string & var_name_in, unsigned int i) const

@@ -57,6 +57,13 @@ public:
    */
   Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv = false);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  Coupleable(const Coupleable & object, const Moose::Kokkos::FunctorCopy &);
+#endif
+
   /**
    * Get the list of coupled variables
    * @return The list of coupled variables

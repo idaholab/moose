@@ -81,15 +81,32 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
     _mi_block_ids(block_ids),
     _mi_boundary_ids(boundary_ids)
 {
-#ifdef MOOSE_KOKKOS_ENABLED
-  // Calling this constructor while not executing actions means this object is being
-  // copy-constructed
-  if (moose_object->isKokkosObject() && !moose_object->getMooseApp().currentlyExecutingActions())
-    return;
-#endif
-
   moose_object->getMooseApp().registerInterfaceObject(*this);
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+MaterialPropertyInterface::MaterialPropertyInterface(const MaterialPropertyInterface & object,
+                                                     const Moose::Kokkos::FunctorCopy &)
+  : _mi_moose_object(object._mi_moose_object),
+    _mi_params(object._mi_params),
+    _mi_name(object._mi_name),
+    _mi_moose_object_name(object._mi_moose_object_name),
+    _mi_feproblem(object._mi_feproblem),
+    _mi_subproblem(object._mi_subproblem),
+    _mi_tid(object._mi_tid),
+    _is_kokkos_object(object._is_kokkos_object),
+    _material_data_type(object._material_data_type),
+    _material_data(object._material_data),
+    _stateful_allowed(object._stateful_allowed),
+    _get_material_property_called(object._get_material_property_called),
+    _get_suffix(object._get_suffix),
+    _use_interpolated_state(object._use_interpolated_state),
+    _mi_boundary_restricted(object._mi_boundary_restricted),
+    _mi_block_ids(object._mi_block_ids),
+    _mi_boundary_ids(object._mi_boundary_ids)
+{
+}
+#endif
 
 MaterialPropertyName
 MaterialPropertyInterface::getMaterialPropertyName(const std::string & name) const

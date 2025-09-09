@@ -33,6 +33,13 @@ class TransientInterface
 public:
   TransientInterface(const MooseObject * moose_object);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  TransientInterface(const TransientInterface & object, const Moose::Kokkos::FunctorCopy &);
+#endif
+
   virtual ~TransientInterface();
 
   static InputParameters validParams();

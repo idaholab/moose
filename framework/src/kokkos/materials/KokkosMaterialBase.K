@@ -11,43 +11,6 @@
 
 #include "FEProblemBase.h"
 
-MaterialBase::MaterialBase(const MaterialBase & object)
-  : MooseObject(object.parameters()),
-    BlockRestrictable(object),
-    BoundaryRestrictable(object),
-    SetupInterface(&object),
-    MooseVariableDependencyInterface(&object),
-    ScalarCoupleable(&object),
-    FunctionInterface(&object),
-    DistributionInterface(&object),
-    UserObjectInterface(&object),
-    TransientInterface(&object),
-    PostprocessorInterface(&object),
-    VectorPostprocessorInterface(&object),
-    DependencyResolverInterface(),
-    Restartable(&object, "MaterialBases"),
-    MeshChangedInterface(object.parameters()),
-    OutputInterface(object.parameters()),
-    RandomInterface(object.parameters(), object._fe_problem, object._tid, false),
-    ElementIDInterface(&object),
-    GeometricSearchInterface(&object),
-    ADFunctorInterface(&object),
-    SolutionInvalidInterface(&object),
-    _subproblem(object._subproblem),
-    _fe_problem(object._fe_problem),
-    _tid(object._tid),
-    _assembly(object._assembly),
-    _coord(object._coord),
-    _normals(object._normals),
-    _mesh(object._mesh),
-    _coord_sys(object._coord_sys),
-    _compute(object._compute),
-    _has_stateful_property(object._has_stateful_property),
-    _declare_suffix(object._declare_suffix),
-    _force_stateful_init(object._force_stateful_init)
-{
-}
-
 namespace Moose
 {
 namespace Kokkos
@@ -83,7 +46,7 @@ MaterialBase::MaterialBase(const InputParameters & parameters)
 }
 
 MaterialBase::MaterialBase(const MaterialBase & object)
-  : ::MaterialBase(object),
+  : ::MaterialBase(object, {}),
     MeshHolder(object),
     AssemblyHolder(object),
     SystemHolder(object),

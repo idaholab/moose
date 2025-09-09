@@ -86,13 +86,11 @@ public:
 
   MaterialBase(const InputParameters & parameters);
 
-#ifdef MOOSE_KOKKOS_SCOPE
+#ifdef MOOSE_KOKKOS_ENABLED
   /**
-   * Class copy constructor
-   * Used for dispatching Kokkos functor.
-   * Only defined for Kokkos objects.
+   * Special constructor used for Kokkos functor copy during parallel dispatch
    */
-  MaterialBase(const MaterialBase & object);
+  MaterialBase(const MaterialBase & object, const Moose::Kokkos::FunctorCopy & key);
 #endif
 
   /**
