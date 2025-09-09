@@ -13,7 +13,7 @@ Pin surface temperature is calculated at the end of the solve, if there is a Pin
 
 ## Example Input File Syntax
 
-!listing /test/tests/problems/Lead-LBE-19pin/test_LEAD-19pin.i block=Problem language=moose
+!listing /test/tests/problems/Lead-LBE-19pin/test_LEAD-19pin.i block=SubChannel language=moose
 
 !syntax parameters /Problem/TriSubChannel1PhaseProblem
 
