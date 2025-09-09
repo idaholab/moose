@@ -15,7 +15,6 @@
  * An aux kernel object which stores the element hierarchy
  * in an aux variable.
  */
-
 class ElementHierarchyAux : public AuxKernel
 {
 
