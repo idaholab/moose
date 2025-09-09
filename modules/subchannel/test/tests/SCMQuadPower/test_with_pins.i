@@ -45,42 +45,6 @@ length = 0.5
   [q_prime_aux]
     block = fuel_pins
   []
-  [q_prime]
-    block = fuel_pins
-  []
-  [mdot]
-    block = sub_channel
-  []
-  [SumWij]
-    block = sub_channel
-  []
-  [P]
-    block = sub_channel
-  []
-  [DP]
-    block = sub_channel
-  []
-  [h]
-    block = sub_channel
-  []
-  [T]
-    block = sub_channel
-  []
-  [Tpin]
-    block = fuel_pins
-  []
-  [rho]
-    block = sub_channel
-  []
-  [mu]
-    block = sub_channel
-  []
-  [S]
-    block = sub_channel
-  []
-  [w_perim]
-    block = sub_channel
-  []
 []
 
 [FluidProperties]

@@ -21,31 +21,7 @@ num_cells = 40
 []
 
 [AuxVariables]
-  [mdot]
-  []
-  [SumWij]
-  []
-  [P]
-  []
-  [DP]
-  []
-  [h]
-  []
-  [T]
-  []
-  [rho]
-  []
-  [S]
-  []
-  [w_perim]
-  []
-  [q_prime]
-  []
   [q_prime_aux]
-  []
-  [mu]
-  []
-  [displacement]
   []
 []
 
@@ -64,7 +40,7 @@ num_cells = 40
   []
 []
 
-[Problem]
+[SubChannel]
   type = TriSubChannel1PhaseProblem
   fp = sodium
   n_blocks = 1
