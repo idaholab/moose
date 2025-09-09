@@ -71,6 +71,8 @@ protected:
   const bool _sun_distance_seasonal;
 
   // positions of moon and sun
-  RealVectorValue _p_sun;
-  RealVectorValue _p_moon;
+  RealVectorValue _d_sun;
+  RealVectorValue _d_moon;
+  Real _r_sun;
+  Real _r_moon;
 };

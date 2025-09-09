@@ -284,44 +284,35 @@ TidalGravityAux::timestepSetup()
 
   // Get Earth-fixed unit vectors toward Sun and Moon at this absolute time
   const auto [d_sun, d_moon] = computeSunMoonDirsAtEpoch(t_abs);
+  _d_sun = d_sun;
+  _d_moon = d_moon;
 
   // Determine Sun-Earth distance model
-  Real r_sun = _sun_distance;
   if (_sun_distance_seasonal)
   {
     const Real JD = 2440587.5 + t_abs / 86400.0;
     const Real n = JD - 2451545.0;
     const Real M = (357.529 + 0.9856003 * n) * (libMesh::pi / 180.0); // mean anomaly [rad]
     const Real R_AU = 1.00014 - 0.01671 * std::cos(M) - 0.00014 * std::cos(2.0 * M);
-    const Real AU = 1.495978707e11;
-    r_sun = R_AU * AU;
+    _r_sun = R_AU * _sun_distance;
   }
-  const Real r_moon = _moon_distance;
+  else
+    _r_sun = _sun_distance;
 
-  _p_sun = d_sun * r_sun;
-  _p_moon = d_moon * r_moon;
+  _r_moon = _moon_distance;
 }
 
 Real
 TidalGravityAux::computeValue()
 {
-  const Real rmag = _q_point[_qp].norm();
-  mooseAssert(rmag > 0.0, "qp must not lie at the origin");
-  const auto n_r = _q_point[_qp] / rmag;
+  const auto & r = _q_point[_qp];
+  mooseAssert(r.norm() > 0.0, "qp must not lie at the origin");
+  const auto d_r = -r / r.norm();
 
-  // distance from point on the surface
-  auto d_sun = (_p_sun - _q_point[_qp]);
-  const auto r_sun = d_sun.norm();
-  d_sun /= r_sun;
+  const auto a_tide = _mu_moon / Utility::pow<3>(_r_moon) * (r - 3.0 * _d_moon * (_d_moon * r)) +
+                      _mu_sun / Utility::pow<3>(_r_sun) * (r - 3.0 * _d_sun * (_d_sun * r));
 
-  auto d_moon = (_p_moon - _q_point[_qp]);
-  const auto r_moon = d_moon.norm();
-  d_moon /= r_moon;
-
-  const Real a_sun = 2.0 * _mu_sun * _earth_radius / (r_sun * r_sun * r_sun);
-  const Real a_moon = 2.0 * _mu_moon * _earth_radius / (r_moon * r_moon * r_moon);
-
-  return n_r * (n_r * _g0 + d_moon * a_moon + d_sun * a_sun);
+  return _g0 + d_r * a_tide;
 }
 
 std::time_t
