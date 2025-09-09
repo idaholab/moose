@@ -28,9 +28,9 @@ num_cells = 40
 [Functions]
   [axial_heat_rate]
     type = ParsedFunction
-    value = '(pi/2)*sin(pi*z/L)'
-    vars = 'L'
-    vals = '${length}'
+    expression = '(pi/2)*sin(pi*z/L)'
+    symbol_names = 'L'
+    symbol_values = '${length}'
   []
 []
 

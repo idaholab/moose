@@ -148,6 +148,8 @@ protected:
   const PetscInt & _maxit;
   /// The interpolation method used in constructing the systems
   const MooseEnum _interpolation_scheme;
+  /// The friction model used
+  const MooseEnum _friction_model;
   /// Flag to define the usage of a implicit or explicit solution
   const bool _implicit_bool;
   /// Flag to define the usage of staggered or collocated pressure
