@@ -13,8 +13,7 @@
 #include "TagAuxBase.h"
 
 /**
- * The value of a tagged vector for a given node and a given variable is coupled to
- * the current AuxVariable. TagVectorAux returns the coupled nodal value.
+ * TagVectorAux returns the coupled DOF value of a tagged vector.
  */
 class TagVectorAux : public TagAuxBase<AuxKernel>
 {
@@ -26,6 +25,8 @@ public:
 protected:
   virtual Real computeValue() override;
 
+  /// Whether to remove variable scaling from the returned value
+  const bool _remove_variable_scaling;
   const VariableValue & _v;
   const MooseVariableBase & _v_var;
 };
