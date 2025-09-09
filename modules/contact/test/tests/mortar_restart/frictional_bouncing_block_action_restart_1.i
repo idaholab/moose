@@ -33,11 +33,15 @@ offset = 1e-2
   []
 []
 
-[Physics/SolidMechanics/QuasiStatic]
-  [all]
-    strain = FINITE
-    generate_output = 'stress_xx stress_yy'
-    block = '1 2'
+[Physics]
+  [SolidMechanics]
+    [QuasiStatic]
+      [all]
+        strain = FINITE
+        generate_output = 'stress_xx stress_yy'
+        block = '1 2'
+      []
+    []
   []
 []
 
@@ -104,17 +108,14 @@ offset = 1e-2
 
 [Executioner]
   type = Transient
-  end_time = 5.25 # 70
+  end_time = 5.5
   dt = 0.25 # 0.1 for finer meshes (uniform_refine)
   dtmin = .01
   solve_type = 'PJFNK'
 
-  petsc_options = '-snes_converged_reason -ksp_converged_reason -pc_svd_monitor '
-                  '-snes_linesearch_monitor'
-  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -pc_factor_shift_type '
-                        '-pc_factor_shift_amount -mat_mffd_err'
-  petsc_options_value = 'lu       superlu_dist                  NONZERO               1e-15          '
-                        '         1e-5'
+  petsc_options = '-snes_converged_reason -ksp_converged_reason -snes_linesearch_monitor'
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type -pc_factor_shift_type -pc_factor_shift_amount -mat_mffd_err'
+  petsc_options_value = 'lu       superlu_dist               NONZERO               1e-15                   1e-5'
   l_max_its = 30
   nl_max_its = 40
   line_search = 'basic'
@@ -147,12 +148,7 @@ offset = 1e-2
 
 [Outputs]
   exodus = true
-  [checkfile]
-    type = CSV
-    show = 'cont_press friction'
-    start_time = 0.0
-    execute_vector_postprocessors_on = FINAL
-  []
+  execute_on = 'final'
   [checkpoint]
     type = Checkpoint
     num_files = 2
@@ -168,20 +164,11 @@ offset = 1e-2
 []
 
 [Postprocessors]
-  active = 'num_nl cumulative_nli contact cumulative_li num_l'
   [num_nl]
     type = NumNonlinearIterations
   []
   [num_l]
     type = NumLinearIterations
-  []
-  [cumulative_nli]
-    type = CumulativeValuePostprocessor
-    postprocessor = num_nl
-  []
-  [cumulative_li]
-    type = CumulativeValuePostprocessor
-    postprocessor = num_l
   []
   [contact]
     type = ContactDOFSetSize

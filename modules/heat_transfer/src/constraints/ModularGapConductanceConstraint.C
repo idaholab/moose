@@ -10,6 +10,7 @@
 #include "ModularGapConductanceConstraint.h"
 #include "GapFluxModelBase.h"
 #include "GapFluxModelPressureDependentConduction.h"
+#include "AutomaticMortarGeneration.h"
 
 #include "MooseError.h"
 
