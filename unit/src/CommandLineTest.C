@@ -174,7 +174,7 @@ TEST(CommandLineTest, parseMultiAppDashedOption)
     CommandLine cl;
     cl.addArgument(arg);
     Moose::UnitUtils::assertThrows<MooseRuntimeError>(
-        [&cl, &arg]() { cl.parse(); },
+        [&cl]() { cl.parse(); },
         "The MultiApp command line argument '" + arg +
             "' sets a command line option.\nMultiApp command line arguments can only be used for "
             "setting HIT parameters.");
