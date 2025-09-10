@@ -37,7 +37,8 @@ HourglassCorrectionQuad4::computeQpResidual()
 {
   // Ensure single quadrature point integration and a QUAD4 element.
   mooseAssert(_qp == 0, "This kernel must only be used with single quadrature point integration.");
-  mooseAssert(_v.size() == 4, "This kernel requires 4 nodal DOF values (QUAD4 elements).");
+  mooseAssert(_current_elem->type() == libMesh::QUAD4, "This kernel only operates on QUAD4 elements.");
+  mooseAssert(_v.size() == 4, "This kernel requires 4 nodal DOF values.");
 
   // 1) Geometry about centroid and invariant metrics
   const Point center = _current_elem->vertex_average();
@@ -59,6 +60,7 @@ HourglassCorrectionQuad4::computeQpResidual()
     A01 += x * y;
     A11 += y * y;
   }
+
   // Invert A robustly
   const Real det = A00 * A11 - A01 * A01;
   const Real eps = 1e-12;
@@ -118,63 +120,6 @@ HourglassCorrectionQuad4::computeQpResidual()
 Real
 HourglassCorrectionQuad4::computeQpJacobian()
 {
-  // Recompute geometry terms (held fixed w.r.t. displacement variable)
-  const Point center = _current_elem->vertex_average();
-  std::array<Point, 4> dx;
-  for (unsigned int i = 0; i < 4; ++i)
-    dx[i] = _current_elem->node_ref(i) - center;
-
-  Real A00 = 0.0, A01 = 0.0, A11 = 0.0;
-  for (unsigned int i = 0; i < 4; ++i)
-  {
-    const Real x = dx[i](0);
-    const Real y = dx[i](1);
-    A00 += x * x;
-    A01 += x * y;
-    A11 += y * y;
-  }
-  const Real det = A00 * A11 - A01 * A01;
-  const Real eps = 1e-12;
-  Real M00, M01, M10, M11;
-  if (std::abs(det) > eps)
-  {
-    const Real inv = 1.0 / det;
-    M00 = A11 * inv;
-    M01 = -A01 * inv;
-    M10 = -A01 * inv;
-    M11 = A00 * inv;
-  }
-  else
-  {
-    const Real reg = std::max(A00 + A11, eps);
-    M00 = 1.0 / std::max(A00, reg);
-    M01 = 0.0;
-    M10 = 0.0;
-    M11 = 1.0 / std::max(A11, reg);
-  }
-
-  // Hourglass geometry vectors p_a = sum_i g_a_i dx_i
-  Real p1x = 0.0, p1y = 0.0, p2x = 0.0, p2y = 0.0;
-  for (unsigned int k = 0; k < 4; ++k)
-  {
-    p1x += _g1[k] * dx[k](0);
-    p1y += _g1[k] * dx[k](1);
-    p2x += _g2[k] * dx[k](0);
-    p2y += _g2[k] * dx[k](1);
-  }
-
-  // c scaling (geometry-only)
-  const Real area = _current_elem->volume();
-  const Real h2 = std::max((A00 + A11) * 0.5, eps);
-  const Real c = _penalty * _mu * (area / h2);
-
-  // Compute s_a(j) = p_a^T M dx_j
-  const Real dxjx = dx[_j](0), dxjy = dx[_j](1);
-  const Real Mdxjx = M00 * dxjx + M01 * dxjy;
-  const Real Mdxjy = M10 * dxjx + M11 * dxjy;
-  const Real s1j = p1x * Mdxjx + p1y * Mdxjy;
-  const Real s2j = p2x * Mdxjx + p2y * Mdxjy;
-
-  // Consistent tangent: K_ij = c * [ g1_i*(g1_j - s1j) + g2_i*(g2_j - s2j) ]
-  return c * (_g1[_i] * (_g1[_j] - s1j) + _g2[_i] * (_g2[_j] - s2j));
+  mooseWarning("This kernel should only be used with explicit time integration.");
+  return 0.0;
 }
