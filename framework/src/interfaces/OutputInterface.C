@@ -56,7 +56,7 @@ OutputInterface::OutputInterface(const InputParameters & parameters, bool build_
 }
 
 #ifdef MOOSE_KOKKOS_ENABLED
-OutputInterface::OutputInterface(const OutputInterface & object, Moose::Kokkos::FunctorCopy)
+OutputInterface::OutputInterface(const OutputInterface & object, const Moose::Kokkos::FunctorCopy &)
   : _oi_moose_app(object._oi_moose_app),
     _oi_output_warehouse(object._oi_output_warehouse),
     _oi_outputs(object._oi_outputs)

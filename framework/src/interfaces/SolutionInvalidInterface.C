@@ -23,7 +23,7 @@ SolutionInvalidInterface::SolutionInvalidInterface(const MooseObject * const moo
 
 #ifdef MOOSE_KOKKOS_ENABLED
 SolutionInvalidInterface::SolutionInvalidInterface(const SolutionInvalidInterface & object,
-                                                   Moose::Kokkos::FunctorCopy)
+                                                   const Moose::Kokkos::FunctorCopy &)
   : _si_moose_object(object._si_moose_object), _si_problem(object._si_problem)
 {
 }

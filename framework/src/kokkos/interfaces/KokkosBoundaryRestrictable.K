@@ -14,7 +14,7 @@
 #include "MooseMesh.h"
 
 BoundaryRestrictable::BoundaryRestrictable(const BoundaryRestrictable & object,
-                                           Moose::Kokkos::FunctorCopy)
+                                           const Moose::Kokkos::FunctorCopy &)
   : _bnd_feproblem(object._bnd_feproblem),
     _bnd_mesh(object._bnd_mesh),
     _bnd_dual_restrictable(object._bnd_dual_restrictable),

@@ -157,7 +157,8 @@ TaggingInterface::TaggingInterface(const MooseObject * moose_object)
 }
 
 #ifdef MOOSE_KOKKOS_ENABLED
-TaggingInterface::TaggingInterface(const TaggingInterface & object, Moose::Kokkos::FunctorCopy)
+TaggingInterface::TaggingInterface(const TaggingInterface & object,
+                                   const Moose::Kokkos::FunctorCopy &)
   : _subproblem(object._subproblem),
     _moose_object(object._moose_object),
     _tag_params(object._tag_params)

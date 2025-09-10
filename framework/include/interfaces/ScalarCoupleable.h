@@ -42,7 +42,7 @@ public:
   /**
    * Special constructor used for Kokkos functor copy during parallel dispatch
    */
-  ScalarCoupleable(const ScalarCoupleable & object, Moose::Kokkos::FunctorCopy);
+  ScalarCoupleable(const ScalarCoupleable & object, const Moose::Kokkos::FunctorCopy & key);
 #endif
 
   /**

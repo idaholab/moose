@@ -43,7 +43,8 @@ public:
   /**
    * Special constructor used for Kokkos functor copy during parallel dispatch
    */
-  SolutionInvalidInterface(const SolutionInvalidInterface & object, Moose::Kokkos::FunctorCopy);
+  SolutionInvalidInterface(const SolutionInvalidInterface & object,
+                           const Moose::Kokkos::FunctorCopy & key);
 #endif
 
 protected:

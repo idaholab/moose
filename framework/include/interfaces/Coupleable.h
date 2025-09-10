@@ -61,7 +61,7 @@ public:
   /**
    * Special constructor used for Kokkos functor copy during parallel dispatch
    */
-  Coupleable(const Coupleable & object, Moose::Kokkos::FunctorCopy);
+  Coupleable(const Coupleable & object, const Moose::Kokkos::FunctorCopy & key);
 #endif
 
   /**

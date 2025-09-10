@@ -27,7 +27,8 @@ FunctionInterface::FunctionInterface(const MooseObject * moose_object)
 }
 
 #ifdef MOOSE_KOKKOS_ENABLED
-FunctionInterface::FunctionInterface(const FunctionInterface & object, Moose::Kokkos::FunctorCopy)
+FunctionInterface::FunctionInterface(const FunctionInterface & object,
+                                     const Moose::Kokkos::FunctorCopy &)
   : _fni_params(object._fni_params),
     _fni_feproblem(object._fni_feproblem),
     _fni_tid(object._fni_tid)
