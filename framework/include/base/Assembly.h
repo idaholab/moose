@@ -64,13 +64,12 @@ class XFEMInterface;
 class SubProblem;
 class NodeFaceConstraint;
 
-namespace Moose
-{
-namespace Kokkos
+#ifdef MOOSE_KOKKOS_ENABLED
+namespace Moose::Kokkos
 {
 class Assembly;
 }
-}
+#endif
 
 // Assembly.h does not import Moose.h nor libMeshReducedNamespace.h
 using libMesh::FEBase;
@@ -220,12 +219,14 @@ public:
     return constify_ref(_vector_fe_face_neighbor[dim][type]);
   }
 
+#ifdef MOOSE_KOKKOS_ENABLED
   /**
    * Key structure for APIs manipulating internal shape and quadrature data. Developers in blessed
    * classes may create keys using simple curly braces \p {} or may be more explicit and use \p
    * Assembly::InternalDataKey{}
    */
   using InternalDataKey = Moose::PassKey<Moose::Kokkos::Assembly>;
+#endif
 
   /**
    * Returns the reference to the current quadrature being used
@@ -239,6 +240,7 @@ public:
    */
   libMesh::QBase * const & writeableQRule() { return _current_qrule; }
 
+#ifdef MOOSE_KOKKOS_ENABLED
   /**
    * Returns the pointer to the quadrature of specified block and dimension
    * @return A pointer.
@@ -247,6 +249,7 @@ public:
   {
     return qrules(dim, block).vol.get();
   }
+#endif
 
   /**
    * Returns the reference to the quadrature points
@@ -324,6 +327,7 @@ public:
    */
   libMesh::QBase * const & writeableQRuleFace() { return _current_qrule_face; }
 
+#ifdef MOOSE_KOKKOS_ENABLED
   /**
    * Returns the pointer to the quadrature used on a face of specified block and dimension
    * @return A pointer.
@@ -332,6 +336,7 @@ public:
   {
     return qrules(dim, block).face.get();
   }
+#endif
 
   /**
    * Returns the reference to the current quadrature being used

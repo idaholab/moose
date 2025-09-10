@@ -34,7 +34,7 @@ VectorPostprocessorInterface::VectorPostprocessorInterface(const MooseObject * m
 
 #ifdef MOOSE_KOKKOS_ENABLED
 VectorPostprocessorInterface::VectorPostprocessorInterface(
-    const VectorPostprocessorInterface & object, const Moose::Kokkos::FunctorCopy &)
+    const VectorPostprocessorInterface & object, Moose::Kokkos::FunctorCopy)
   : _broadcast_by_default(object._broadcast_by_default),
     _vpi_moose_object(object._vpi_moose_object),
     _vpi_feproblem(object._vpi_feproblem),

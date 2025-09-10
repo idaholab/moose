@@ -26,7 +26,7 @@ MeshChangedInterface::MeshChangedInterface(const InputParameters & params)
 
 #ifdef MOOSE_KOKKOS_ENABLED
 MeshChangedInterface::MeshChangedInterface(const MeshChangedInterface & object,
-                                           const Moose::Kokkos::FunctorCopy &)
+                                           Moose::Kokkos::FunctorCopy)
   : _mci_feproblem(object._mci_feproblem)
 {
 }

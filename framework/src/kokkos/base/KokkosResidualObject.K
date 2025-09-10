@@ -32,7 +32,7 @@ ResidualObject::validParams()
   params.addParamNamesToGroup("use_displaced_mesh", "Advanced");
   params.addCoupledVar("displacements", "The displacements");
 
-  params.addPrivateParam<bool>(KOKKOS_OBJECT_PARAM, true);
+  params.addPrivateParam<bool>(MooseBase::kokkos_object_param, true);
 
   return params;
 }

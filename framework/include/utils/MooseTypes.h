@@ -1219,33 +1219,9 @@ enum class FEBackend
 #ifdef MOOSE_KOKKOS_ENABLED
 namespace Kokkos
 {
-extern const std::string KOKKOS_OBJECT_PARAM;
-
-class ResidualObject;
-class KernelBase;
-class NodalKernelBase;
-class BoundaryCondition;
-class IntegratedBCBase;
-class NodalBCBase;
-class MaterialBase;
-template <typename Derived>
-class Material;
-
-// Passkey for calling special constructors for functor copy
-class FunctorCopy
+// Tag for calling special constructors for functor copy
+struct FunctorCopy
 {
-  friend class ResidualObject;
-  friend class KernelBase;
-  friend class NodalKernelBase;
-  friend class BoundaryCondition;
-  friend class IntegratedBCBase;
-  friend class NodalBCBase;
-  friend class MaterialBase;
-  template <typename Derived>
-  friend class Material;
-
-  FunctorCopy() {}
-  FunctorCopy(const FunctorCopy &) {}
 };
 }
 #endif

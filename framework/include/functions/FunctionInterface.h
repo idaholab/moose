@@ -41,7 +41,7 @@ public:
   /**
    * Special constructor used for Kokkos functor copy during parallel dispatch
    */
-  FunctionInterface(const FunctionInterface & object, const Moose::Kokkos::FunctorCopy &);
+  FunctionInterface(const FunctionInterface & object, Moose::Kokkos::FunctorCopy);
 #endif
 
   static InputParameters validParams();

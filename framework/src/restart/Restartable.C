@@ -48,7 +48,7 @@ Restartable::Restartable(MooseApp & moose_app,
 }
 
 #ifdef MOOSE_KOKKOS_ENABLED
-Restartable::Restartable(const Restartable & object, const Moose::Kokkos::FunctorCopy &)
+Restartable::Restartable(const Restartable & object, Moose::Kokkos::FunctorCopy)
   : _restartable_app(object._restartable_app),
     _restartable_system_name(object._restartable_system_name),
     _restartable_tid(object._restartable_tid),
