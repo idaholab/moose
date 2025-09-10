@@ -147,7 +147,7 @@
     type = 'RunException'
     input = 2d-rc-error-action.i
     requirement = 'The system shall throw an error if consistent scaling is defined without using friction correction'
-    cli_args = "Modules/NavierStokesFV/consistent_scaling='true'"
+    cli_args = "Modules/NavierStokesFV/consistent_scaling='0.5'"
     expect_err = "(Consistent scaling should not be defined if friction correction is "
                  "disabled!|Parameter 'use_friction_correction' cannot be set to false if parameter "
                  "'consistent_scaling' is set by the user)"
