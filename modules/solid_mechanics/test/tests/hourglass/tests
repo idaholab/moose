@@ -63,6 +63,7 @@
       ratio_tol = 1E-5
       difference_tol = 1E10
       cli_args = 'Executioner/num_steps=5 Executioner/dt=1'
+      skip = "explicit only"
     []
   []
 []
