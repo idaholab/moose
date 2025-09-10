@@ -981,34 +981,34 @@ InputParameters::getObjectName() const
 }
 
 void
-InputParameters::addParamNamesToGroup(const std::string & space_delim_names,
-                                      const std::string group_name)
+InputParameters::addParamNamesToGroup(const std::vector<std::string> & names,
+                                      const std::string & group_name)
 {
-  std::vector<std::string> elements;
-  MooseUtils::tokenize(space_delim_names, elements, 1, " \t\n\v\f\r"); // tokenize on whitespace
-
-  // Since we don't require types (templates) for this method, we need
-  // to get a raw list of parameter names to compare against.
-  std::set<std::string> param_names;
-  for (const auto & it : *this)
-    param_names.insert(it.first);
-
-  for (const auto & param_name : elements)
-    if (_params.count(param_name) > 0)
-      _params[param_name]._group = group_name;
+  for (const auto & name : names)
+    if (const auto it = _params.find(name); it != _params.end())
+      it->second._group = group_name;
     else
       mooseError("Unable to find a parameter with name: ",
-                 param_name,
+                 name,
                  " when adding to group ",
                  group_name,
                  '.');
 }
 
 void
+InputParameters::addParamNamesToGroup(const std::string & space_delim_names,
+                                      const std::string & group_name)
+{
+  std::vector<std::string> elements;
+  MooseUtils::tokenize(space_delim_names, elements, 1, " \t\n\v\f\r"); // tokenize on whitespace
+  addParamNamesToGroup(elements, group_name);
+}
+
+void
 InputParameters::renameParameterGroup(const std::string & old_name, const std::string & new_name)
 {
   for (auto & param : _params)
-    if (param.second._group == old_name)
+    if (param.second._group && *param.second._group == old_name)
       param.second._group = new_name;
 }
 
@@ -1072,16 +1072,6 @@ InputParameters::commandLineParamSet(const std::string & name,
   if (command_line_node)
     setHitNode(name, *command_line_node, {});
   cl_data->set_switch = cl_switch;
-}
-
-std::string
-InputParameters::getGroupName(const std::string & param_name_in) const
-{
-  const auto param_name = checkForRename(param_name_in);
-  auto it = _params.find(param_name);
-  if (it != _params.end())
-    return it->second._group;
-  return std::string();
 }
 
 void
@@ -1633,10 +1623,23 @@ std::set<std::string>
 InputParameters::getGroupParameters(const std::string & group) const
 {
   std::set<std::string> names;
-  for (auto it = _params.begin(); it != _params.end(); ++it)
-    if (it->second._group == group)
-      names.emplace(it->first);
+  for (const auto & [name, metadata] : _params)
+    if (metadata._group && *metadata._group == group)
+      names.emplace(name);
   return names;
+}
+
+const std::string *
+InputParameters::queryParameterGroup(const std::string & name) const
+{
+  if (const auto it = _params.find(checkForRename(name)); it != _params.end())
+  {
+    if (const auto & group = it->second._group)
+      return &*group;
+    return nullptr;
+  }
+
+  mooseError("InputParameters::getParameterGroup: Parameter ", name, " does not exist");
 }
 
 std::set<std::string>

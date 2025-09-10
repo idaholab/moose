@@ -506,11 +506,19 @@ public:
   const std::string & getDescription(const std::string & name) const;
 
   /**
-   * This method takes a space delimited list of parameter names and adds them to the specified
-   * group name.
-   * This information is used in the GUI to group parameters into logical sections.
+   * Take the parameter names in \p names and add them to the parameter group \p group_name
+   *
+   * This information is used in documentation to group parameters into logical sections.
    */
-  void addParamNamesToGroup(const std::string & space_delim_names, const std::string group_name);
+  void addParamNamesToGroup(const std::vector<std::string> & names, const std::string & group_name);
+
+  /**
+   * Take the space delimited parameter names in \p space_delim_names and add them to
+   * the parameter group \p group_name
+   *
+   * This information is used in documentation to group parameters into logical sections.
+   */
+  void addParamNamesToGroup(const std::string & space_delim_names, const std::string & group_name);
 
   /**
    * This method renames a parameter group
@@ -518,12 +526,6 @@ public:
    * @param new_name new name of the parameter group
    */
   void renameParameterGroup(const std::string & old_name, const std::string & new_name);
-
-  /**
-   * This method retrieves the group name for the passed parameter name if one exists.  Otherwise an
-   * empty string is returned.
-   */
-  std::string getGroupName(const std::string & param_name) const;
 
   /**
    * This method suppresses an inherited parameter so that it isn't required or valid
@@ -1121,6 +1123,11 @@ public:
   std::set<std::string> getGroupParameters(const std::string & group) const;
 
   /**
+   * Gets the group a parameter is in, if any
+   */
+  const std::string * queryParameterGroup(const std::string & name) const;
+
+  /**
    * Provide a set of reserved values for a parameter. These are values that are in addition
    * to the normal set of values the parameter can take.
    */
@@ -1454,8 +1461,8 @@ private:
     std::optional<CommandLineMetadata> _cl_data;
     /// The searched path information pertaining to a DataFileName parameter
     std::optional<Moose::DataFileUtils::Path> _data_file_name_path;
-    /// The names of the parameters organized into groups
-    std::string _group;
+    /// The names of the parameters organized into groups, if any
+    std::optional<std::string> _group;
     /// The map of functions used for range checked parameters
     std::string _range_function;
     /// directions for auto build vectors (base_, 5) -> "base_0 base_1 base_2 base_3 base_4")

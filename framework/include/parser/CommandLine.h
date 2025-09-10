@@ -60,6 +60,8 @@ public:
   {
     /// The description (doc string) for the parameter
     std::string description;
+    /// The group the parameter is in (if any)
+    std::optional<std::string> group;
     /// The command line metadata for the parameter
     InputParameters::CommandLineMetadata metadata;
   };

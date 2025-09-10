@@ -21,6 +21,6 @@
     type = TransientMultiApp
     app_type = MooseTestApp
     input_files = sub.i
-    cli_args = --append-header=sub
+    cli_args = Application/append_header=sub
   []
 []

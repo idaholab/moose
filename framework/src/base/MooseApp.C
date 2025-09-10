@@ -36,7 +36,6 @@
 #include "ConsoleUtils.h"
 #include "JsonSyntaxTree.h"
 #include "JsonInputFileFormatter.h"
-#include "SONDefinitionFormatter.h"
 #include "RelationshipManager.h"
 #include "ProxyRelationshipManager.h"
 #include "Registry.h"
@@ -117,156 +116,192 @@ MooseApp::validParams()
   params.allowCommandLineParams({});
   params.registerBase("Application");
 
+  /*******************************************************************************/
+  /* Command line: Ungrouped                                                     */
+  /*******************************************************************************/
+
   params.addCommandLineParam<std::string>(
-      "type", "--app <type>", "Specify the application type to run (case-sensitive)");
+      "type", "--app <type>", "Application type to run (case-sensitive)");
   params.enableInputCommandLineParam("type");
 
+  params.addCommandLineParam<bool>("help", "-h --help", "Displays CLI usage statement and exit");
+
   params.addCommandLineParam<std::vector<std::string>>(
-      "input_file", "-i <input file(s)>", "Specify input file(s); multiple files are merged");
+      "input_file", "-i <input file(s)>", "Input file(s) to run; multiple are merged");
 
-  params.addCommandLineParam<bool>("display_version", "-v --version", "Print application version");
+  params.addCommandLineParam<bool>("show_type", "--show-type", "Output application type and exit");
+
+  params.addCommandLineParam<bool>(
+      "display_version", "-v --version", "Output application version and exit");
+
+  params.addCommandLineParam<bool>(
+      "show_inputs",
+      "--show-copyable-inputs",
+      "Output input directories able to be copied with --copy-inputs and exit");
+
+  params.addCommandLineParam<std::string>(
+      "copy_inputs", "--copy-inputs <dir>", "Copy installed inputs for <dir> to <appname>/<dir>");
 
   params.addOptionalValuedCommandLineParam<std::string>(
-      "mesh_only",
-      "--mesh-only <optional path>",
+      "run",
+      "--run <test harness args>",
       "",
-      "Build and output the mesh only (Default: \"<input_file_name>_in.e\")");
-  params.addOptionalValuedCommandLineParam<std::string>(
-      "csg_only",
-      "--csg-only <optional path>",
-      "",
-      "Setup and output the input mesh in CSG format only (Default: "
-      "\"<input_file_name>_out_csg.json\")");
-  params.addCommandLineParam<bool>(
-      "show_input", "--show-input", "Shows the parsed input file before running the simulation");
-  params.setGlobalCommandLineParam("show_input");
-  params.enableInputCommandLineParam("show_input");
+      "Run the inputs in the current directory copied to a user-writable location by "
+      "\"--copy-inputs\"");
 
   params.addCommandLineParam<bool>(
-      "show_outputs", "--show-outputs", "Shows the output execution time information");
-  params.setGlobalCommandLineParam("show_outputs");
-  params.enableInputCommandLineParam("show_outputs");
+      "show_docs", "--docs", "Print url/path to the documentation website");
+
+  /*******************************************************************************/
+  /* Command line: Capabilities                                                  */
+  /*******************************************************************************/
+
+  params.addCommandLineParam<std::string>(
+      "check_capabilities",
+      "--check-capabilities",
+      "Check <caps> against registered capabilities and exit based on fulfillment");
+
+  params.addCommandLineParam<bool>("show_capabilities",
+                                   "--show-capabilities",
+                                   "Dump the registered capabilities in JSON format");
+
+  params.addCommandLineParam<std::string>(
+      "required_capabilities",
+      "--required-capabilities <caps>",
+      "Check <caps> against registered capabilities and exit if not met");
+
+  params.addParamNamesToGroup({"show_capabilities", "required_capabilities", "check_capabilities"},
+                              "Capabilities");
+
+  /*******************************************************************************/
+  /* Command line: Debugging                                                     */
+  /*******************************************************************************/
+
+  params.addCommandLineParam<std::string>(
+      "start_in_debugger",
+      "--start-in-debugger <debugger>",
+      "Start the application and attach a debugger; launch xterm windows using <debugger>");
+
+  params.addCommandLineParam<unsigned int>(
+      "stop_for_debugger",
+      "--stop-for-debugger <sec>",
+      "Pauses during startup for <sec> to allow for connection of debuggers");
+
+#ifdef HAVE_GPERFTOOLS
+  params.addCommandLineParam<std::string>(
+      "gperf_profiler_on",
+      "--gperf-profiler-on <ranks>",
+      "To generate profiling report only on comma-separated list of MPI ranks");
+  params.addParamNamesToGroup("gperf_profiler_on", "Debugging");
+#endif
+
+  params.addParamNamesToGroup("start_in_debugger stop_for_debugger", "Debugging");
+
+  /*******************************************************************************/
+  /* Command line: Error handling                                                */
+  /*******************************************************************************/
+
+  params.addCommandLineParam<bool>("allow_unused",
+                                   "-w --allow-unused",
+                                   "Warn on unused input file parameters instead of erroring");
+  params.setGlobalCommandLineParam("allow_unused");
+
+  params.addCommandLineParam<bool>("error", "--error", "Error on warnings");
+  params.setGlobalCommandLineParam("error");
+  params.enableInputCommandLineParam("error");
 
   params.addCommandLineParam<bool>(
-      "show_controls", "--show-controls", "Shows the Control logic available and executed");
-  params.setGlobalCommandLineParam("show_controls");
-  params.enableInputCommandLineParam("show_controls");
+      "error_unused", "-e --error-unused", "Error on unused input file options");
+  params.setGlobalCommandLineParam("error_unused");
 
   params.addCommandLineParam<bool>(
-      "no_color", "--no-color", "Disable coloring of all Console outputs");
-  params.setGlobalCommandLineParam("no_color");
-  params.enableInputCommandLineParam("no_color");
+      "error_override", "-o --error-override", "Error on overridden parameters");
+  params.setGlobalCommandLineParam("error_override");
 
-  MooseEnum colors("auto on off", "on");
+  params.addCommandLineParam<bool>(
+      "error_deprecated", "--error-deprecated", "Error on deprecation warnings");
+  params.setGlobalCommandLineParam("error_deprecated");
+
+  params.addCommandLineParam<bool>("trap_fpe",
+                                   "--trap-fpe",
+                                   "Enable floating point exception handling"
+#ifdef DEBUG
+                                   " (automatic due to debug build)"
+#endif
+  );
+  params.setGlobalCommandLineParam("trap_fpe");
+  params.enableInputCommandLineParam("trap_fpe");
+
+  params.addCommandLineParam<bool>("no_trap_fpe",
+                                   "--no-trap-fpe",
+                                   "Disable floating point exception handling"
+#ifndef DEBUG
+                                   " (unused due to non-debug build)"
+#endif
+  );
+  params.setGlobalCommandLineParam("no_trap_fpe");
+  params.enableInputCommandLineParam("no_trap_fpe");
+
+  params.addCommandLineParam<bool>(
+      "no_gdb_backtrace", "--no-gdb-backtrace", "Disable gdb backtraces");
+  params.setGlobalCommandLineParam("no_gdb_backtrace");
+  params.enableInputCommandLineParam("no_gdb_backtrace");
+
+  params.addParamNamesToGroup({"allow_unused",
+                               "error_unused",
+                               "error_override",
+                               "error_deprecated",
+                               "trap_fpe",
+                               "no_trap_fpe",
+                               "no_gdb_backtrace",
+                               "error"},
+                              "Error handling");
+
+  /*******************************************************************************/
+  /* Command line: Execution                                                     */
+  /*******************************************************************************/
+
+  params.addCommandLineParam<unsigned int>(
+      "n_threads", "--n-threads <n>", "Run with <n> threads per process");
+  // This probably shouldn't be global, but the implications of removing this are currently
+  // unknown and we need to manage it with libmesh better
+  params.setGlobalCommandLineParam("n_threads");
+
+  params.addCommandLineParam<std::string>(
+      "timpi_sync",
+      "--timpi-sync <type=nbx>",
+      "nbx",
+      "Set the sync type used in spare parallel communitations within TIMPI");
+  params.setGlobalCommandLineParam("timpi_sync");
+
+  const MooseEnum compute_device_type("cpu cuda mps hip ceed-cpu ceed-cuda ceed-hip", "cpu");
   params.addCommandLineParam<MooseEnum>(
-      "color", "--color <auto,on,off=on>", colors, "Whether to use color in console output");
-  params.setGlobalCommandLineParam("color");
-  params.enableInputCommandLineParam("color");
-
-  params.addCommandLineParam<bool>("help", "-h --help", "Displays CLI usage statement");
+      "compute_device",
+      "--compute-device",
+      compute_device_type,
+      "Device type to run accelerated (libtorch, MFEM) computations on");
+  params.enableInputCommandLineParam("compute_device");
 
   params.addCommandLineParam<bool>(
-      "minimal",
-      "--minimal",
-      "Ignore input file and build a minimal application with Transient executioner");
+      "use_executor", "--executor", "Use the Executor system instead of Executioners");
+
+  params.addParamNamesToGroup({"n_threads", "timpi_sync", "compute_device", "use_executor"},
+                              "Execution");
+
+  /*******************************************************************************/
+  /* Command line: Language server                                               */
+  /*******************************************************************************/
 
   params.addCommandLineParam<bool>(
       "language_server",
       "--language-server",
       "Starts a process to communicate with development tools using the language server protocol");
 
-  params.addCommandLineParam<bool>(
-      "definition", "--definition", "Shows a SON style input definition dump for input validation");
-  params.addCommandLineParam<bool>("dump", "--dump", "Shows a dump of available input file syntax");
-  params.addCommandLineParam<std::string>(
-      "dump_search",
-      "--dump-search <search>",
-      "Shows a dump of available input syntax matching a search");
-  params.addCommandLineParam<bool>("registry", "--registry", "Lists all known objects and actions");
-  params.addCommandLineParam<bool>(
-      "registry_hit", "--registry-hit", "Lists all known objects and actions in hit format");
-  params.addCommandLineParam<bool>(
-      "use_executor", "--executor", "Use the new Executor system instead of Executioners");
+  params.addParamNamesToGroup("language_server", "Language server");
 
-  params.addCommandLineParam<bool>(
-      "show_type", "--show-type", "Return the name of the application object");
-  params.addCommandLineParam<bool>("yaml", "--yaml", "Dumps all input file syntax in YAML format");
-  params.addCommandLineParam<std::string>(
-      "yaml_search", "--yaml-search", "Dumps input file syntax matching a search in YAML format");
-  params.addCommandLineParam<bool>("json", "--json", "Dumps all input file syntax in JSON format");
-  params.addCommandLineParam<std::string>(
-      "json_search", "--json-search", "Dumps input file syntax matching a search in JSON format");
-  params.addCommandLineParam<bool>(
-      "syntax", "--syntax", "Dumps the associated Action syntax paths ONLY");
-  params.addCommandLineParam<bool>(
-      "show_docs", "--docs", "Print url/path to the documentation website");
-  params.addCommandLineParam<bool>(
-      "show_capabilities", "--show-capabilities", "Dumps the capability registry in JSON format.");
-  params.addCommandLineParam<std::string>(
-      "required_capabilities",
-      "--required-capabilities",
-      "A list of conditions that is checked against the registered capabilities (see "
-      "--show-capabilities). The executable will terminate early if the conditions are not met.");
-  params.addCommandLineParam<std::string>(
-      "check_capabilities",
-      "--check-capabilities",
-      "A list of conditions that is checked against the registered capabilities. Will exit based "
-      "on whether or not the capaiblities are fulfilled. Does not check dynamically loaded apps.");
-  params.addCommandLineParam<bool>("check_input",
-                                   "--check-input",
-                                   "Check the input file (i.e. requires -i <filename>) and quit");
-  params.setGlobalCommandLineParam("check_input");
-  params.addCommandLineParam<bool>(
-      "show_inputs",
-      "--show-copyable-inputs",
-      "Shows the directories able to be copied into a user-writable location");
-
-  params.addCommandLineParam<std::string>(
-      "copy_inputs",
-      "--copy-inputs <dir>",
-      "Copies installed inputs (e.g. tests, examples, etc.) to a directory <appname>_<dir>");
-  // TODO: Should this remain a bool? It can't be a regular argument because it contains
-  // values that have dashes in it, so it'll get treated as another arg
-  params.addOptionalValuedCommandLineParam<std::string>(
-      "run",
-      "--run <test harness args>",
-      "",
-      "Runs the inputs in the current directory copied to a "
-      "user-writable location by \"--copy-inputs\"");
-
-  params.addCommandLineParam<bool>(
-      "list_constructed_objects",
-      "--list-constructed-objects",
-      "List all moose object type names constructed by the master app factory");
-
-  params.addCommandLineParam<unsigned int>(
-      "n_threads", "--n-threads=<n>", "Runs the specified number of threads per process");
-  // This probably shouldn't be global, but the implications of removing this are currently
-  // unknown and we need to manage it with libmesh better
-  params.setGlobalCommandLineParam("n_threads");
-
-  params.addCommandLineParam<bool>("allow_unused",
-                                   "-w --allow-unused",
-                                   "Warn about unused input file options instead of erroring");
-  params.setGlobalCommandLineParam("allow_unused");
-  params.addCommandLineParam<bool>(
-      "error_unused", "-e --error-unused", "Error when encountering unused input file options");
-  params.setGlobalCommandLineParam("error_unused");
-  params.addCommandLineParam<bool>(
-      "error_override",
-      "-o --error-override",
-      "Error when encountering overridden or parameters supplied multiple times");
-  params.setGlobalCommandLineParam("error_override");
-  params.addCommandLineParam<bool>(
-      "error_deprecated", "--error-deprecated", "Turn deprecated code messages into Errors");
-  params.setGlobalCommandLineParam("error_deprecated");
-
-  params.addCommandLineParam<bool>("distributed_mesh",
-                                   "--distributed-mesh",
-                                   "Forces the use of a distributed finite element mesh");
-  // Would prefer that this parameter isn't global, but we rely on it too much
-  // in tests to be able to go back on that decision now
-  params.setGlobalCommandLineParam("distributed_mesh");
+  /*******************************************************************************/
+  /* Command line: Mesh                                                          */
+  /*******************************************************************************/
 
   params.addCommandLineParam<std::string>(
       "split_mesh",
@@ -280,14 +315,121 @@ MooseApp::validParams()
   params.addCommandLineParam<bool>("use_split", "--use-split", "Use split distributed mesh files");
 
   params.addCommandLineParam<unsigned int>(
-      "refinements", "-r <num refinements>", "Specify additional initial uniform mesh refinements");
+      "refinements", "-r <n>", "Initially refine the mesh <n> times");
   params.enableInputCommandLineParam("refinements");
+
+  params.addCommandLineParam<bool>("distributed_mesh",
+                                   "--distributed-mesh",
+                                   "Force the use of a distributed finite element mesh");
+
+  params.addOptionalValuedCommandLineParam<std::string>(
+      "mesh_only",
+      "--mesh-only <optional path>",
+      "",
+      "Build and output the mesh only (Default: \"<input_file_name>_in.e\")");
+
+  params.addOptionalValuedCommandLineParam<std::string>(
+      "csg_only",
+      "--csg-only <optional path>",
+      "",
+      "Setup and output the input mesh in CSG format only (Default: "
+      "\"<input_file_name>_out_csg.json\")");
+
+  params.addParamNamesToGroup({"split_mesh",
+                               "split_file",
+                               "use_split",
+                               "refinements",
+                               "distributed_mesh",
+                               "mesh_only",
+                               "csg_only"},
+                              "Mesh");
+
+  /*******************************************************************************/
+  /* Command line: NEML2                                                         */
+  /*******************************************************************************/
+
+  params.addCommandLineParam<bool>("parse_neml2_only",
+                                   "--parse-neml2-only",
+                                   "Execute the [NEML2] block to parse the input file and exit");
+
+  params.addParamNamesToGroup("parse_neml2_only", "NEML2");
+
+  /*******************************************************************************/
+  /* Command line: On-screen output                                              */
+  /*******************************************************************************/
+
+  params.addCommandLineParam<bool>(
+      "show_input", "--show-input", "Show the parsed input file before running the simulation");
+  params.setGlobalCommandLineParam("show_input");
+  params.enableInputCommandLineParam("show_input");
+
+  params.addCommandLineParam<bool>(
+      "show_outputs", "--show-outputs", "Show the output execution time information");
+  params.setGlobalCommandLineParam("show_outputs");
+  params.enableInputCommandLineParam("show_outputs");
+
+  params.addCommandLineParam<bool>(
+      "show_controls", "--show-controls", "Show the Control logic available and executed");
+  params.setGlobalCommandLineParam("show_controls");
+  params.enableInputCommandLineParam("show_controls");
+
+  params.addCommandLineParam<bool>("no_color", "--no-color", "Disable coloring of console output");
+  params.setGlobalCommandLineParam("no_color");
+  params.enableInputCommandLineParam("no_color");
+
+  MooseEnum colors("auto on off", "on");
+  params.addCommandLineParam<MooseEnum>(
+      "color", "--color <auto,on,off=on>", colors, "Whether to use color in console output");
+  params.setGlobalCommandLineParam("color");
+  params.enableInputCommandLineParam("color");
+
+  params.addCommandLineParam<bool>(
+      "keep_cout", "--keep-cout", "Keep standard output from all processors in parallel");
+  params.setGlobalCommandLineParam("keep_cout");
+
+  params.addCommandLineParam<bool>("redirect_stdout",
+                                   "--redirect-stdout",
+                                   "Keep standard output from all processors in parallel");
+  params.setGlobalCommandLineParam("redirect_stdout");
+
+  params.addCommandLineParam<bool>(
+      "suppress_header", "--suppress-header", false, "Disable application header output");
+  params.setGlobalCommandLineParam("suppress_header");
+  params.enableInputCommandLineParam("suppress_header");
+
+  params.addCommandLineParam<bool>("show_data_params",
+                                   "--show-data-params",
+                                   false,
+                                   "Output paths for all DataFileName parameters in the header");
+  params.enableInputCommandLineParam("show_data_params");
+
+  params.addCommandLineParam<bool>("show_data_paths",
+                                   "--show-data-paths",
+                                   false,
+                                   "Output registered data paths for searching in the header");
+  params.enableInputCommandLineParam("show_data_paths");
+
+  params.addParamNamesToGroup({"show_input",
+                               "show_outputs",
+                               "show_controls",
+                               "no_color",
+                               "color",
+                               "keep_cout",
+                               "redirect_stdout",
+                               "suppress_header",
+                               "show_data_params",
+                               "show_data_paths"},
+                              "On-screen output");
+
+  /*******************************************************************************/
+  /* Command line: Restart and recover                                           */
+  /*******************************************************************************/
 
   params.addOptionalValuedCommandLineParam<std::string>(
       "recover",
-      "--recover <optional file base>",
+      "--recover <optional base>",
       "",
-      "Continue the calculation. Without <file base>, the most recent recovery file will be used");
+      "Recover a calculation; without <optional base>, use the most recent recovery file");
   params.setGlobalCommandLineParam("recover");
   params.addCommandLineParam<bool>(
       "force_restart",
@@ -295,12 +437,47 @@ MooseApp::validParams()
       "Forcefully load checkpoints despite possible incompatibilities");
   params.setGlobalCommandLineParam("force_restart");
 
-  params.addCommandLineParam<bool>("suppress_header",
-                                   "--suppress-header",
-                                   false,
-                                   "Disables the output of the application header.");
-  params.setGlobalCommandLineParam("suppress_header");
-  params.enableInputCommandLineParam("suppress_header");
+  params.addParamNamesToGroup("recover force_restart", "Restart and recover");
+
+  /*******************************************************************************/
+  /* Command line: Syntax dumping                                                */
+  /*******************************************************************************/
+
+  params.addCommandLineParam<bool>("yaml", "--yaml", "Dump input file syntax in YAML format");
+  params.addCommandLineParam<std::string>(
+      "yaml_search", "--yaml-search <search>", "Dump matching input file syntax in YAML format");
+
+  params.addCommandLineParam<bool>("json", "--json", "Dump input file syntax in JSON format");
+  params.addCommandLineParam<std::string>(
+      "json_search", "--json-search <search>", "Dump matching input file syntax in JSON format");
+
+  params.addCommandLineParam<bool>("syntax", "--syntax", "Dump Action syntax paths");
+
+  params.addCommandLineParam<bool>(
+      "list_constructed_objects",
+      "--list-constructed-objects",
+      "Dump moose object type names constructed by the master app factory");
+
+  params.addCommandLineParam<bool>("dump", "--dump", "Dump input file syntax in HIT format");
+  params.addCommandLineParam<std::string>(
+      "dump_search", "--dump-search <search>", "Dump matching input file syntax in HIT format");
+
+  params.addParamNamesToGroup({"yaml",
+                               "yaml_search",
+                               "json",
+                               "json_search",
+                               "syntax",
+                               "list_constructed_objects",
+                               "dump",
+                               "dump_search"},
+                              "Syntax dumping");
+
+  /*******************************************************************************/
+  /* Command line: Testing                                                       */
+  /*******************************************************************************/
+
+  params.addCommandLineParam<bool>(
+      "minimal", "--minimal", "Ignore input and build a minimal Transient application");
 
   params.addCommandLineParam<bool>(
       "test_checkpoint_half_transient",
@@ -313,126 +490,94 @@ MooseApp::validParams()
                                    "Test re-running the middle timestep; used by the TestHarness");
 
   params.addCommandLineParam<bool>(
-      "trap_fpe",
-      "--trap-fpe",
-      "Enable floating point exception handling in critical sections of code"
-#ifdef DEBUG
-      " (automatic due to debug build)"
-#endif
-  );
-  params.setGlobalCommandLineParam("trap_fpe");
-  params.enableInputCommandLineParam("trap_fpe");
-
-  params.addCommandLineParam<bool>(
-      "no_trap_fpe",
-      "--no-trap-fpe",
-      "Disable floating point exception handling in critical sections of code"
-#ifndef DEBUG
-      " (unused due to non-debug build)"
-#endif
-  );
-  params.setGlobalCommandLineParam("no_trap_fpe");
-  params.enableInputCommandLineParam("no_trap_fpe");
-
-  params.addCommandLineParam<bool>(
-      "no_gdb_backtrace", "--no-gdb-backtrace", "Disables gdb backtraces.");
-  params.setGlobalCommandLineParam("no_gdb_backtrace");
-  params.enableInputCommandLineParam("no_gdb_backtrace");
-
-  params.addCommandLineParam<bool>("error", "--error", "Turn all warnings into errors");
-  params.setGlobalCommandLineParam("error");
-  params.enableInputCommandLineParam("error");
-
-  params.addCommandLineParam<bool>("timing",
-                                   "-t --timing",
-                                   "Enable all performance logging for timing; disables screen "
-                                   "output of performance logs for all Console objects");
-  params.setGlobalCommandLineParam("timing");
-  params.enableInputCommandLineParam("timing");
-
-  params.addCommandLineParam<bool>(
-      "no_timing", "--no-timing", "Disabled performance logging; overrides -t or --timing");
-  params.setGlobalCommandLineParam("no_timing");
-  params.enableInputCommandLineParam("no_timing");
-
-  params.addCommandLineParam<bool>(
       "allow_test_objects", "--allow-test-objects", "Register test objects and syntax");
   params.setGlobalCommandLineParam("allow_test_objects");
   params.enableInputCommandLineParam("allow_test_objects");
 
-  // Options ignored by MOOSE but picked up by libMesh, these are here so that they are displayed in
-  // the application help
   params.addCommandLineParam<bool>(
-      "keep_cout",
-      "--keep-cout",
-      "Keep standard output from all processors when running in parallel");
-  params.setGlobalCommandLineParam("keep_cout");
-  params.addCommandLineParam<bool>(
-      "redirect_stdout",
-      "--redirect-stdout",
-      "Keep standard output from all processors when running in parallel");
-  params.setGlobalCommandLineParam("redirect_stdout");
+      "check_input", "--check-input", "Check the input file (requires -i <filename>) and exit");
+  params.setGlobalCommandLineParam("check_input");
 
-  params.addCommandLineParam<std::string>(
-      "timpi_sync",
-      "--timpi-sync <type=nbx>",
-      "nbx",
-      "Changes the sync type used in spare parallel communitations within TIMPI");
-  params.setGlobalCommandLineParam("timpi_sync");
+  params.addParamNamesToGroup({"minimal",
+                               "test_checkpoint_half_transient",
+                               "test_restep",
+                               "allow_test_objects",
+                               "check_input"},
+                              "Testing");
 
-  // Options for debugging
-  params.addCommandLineParam<std::string>("start_in_debugger",
-                                          "--start-in-debugger <debugger>",
-                                          "Start the application and attach a debugger; this will "
-                                          "launch xterm windows using <debugger>");
-
-  params.addCommandLineParam<unsigned int>(
-      "stop_for_debugger",
-      "--stop-for-debugger <seconds>",
-      "Pauses the application during startup for <seconds> to allow for connection of debuggers");
+  /*******************************************************************************/
+  /* Command line: Timing                                                        */
+  /*******************************************************************************/
 
   params.addCommandLineParam<bool>(
-      "perf_graph_live_all", "--perf-graph-live-all", "Forces printing of ALL progress messages");
+      "timing",
+      "-t --timing",
+      "Enable performance logging; disable screen output of performance for Console objects");
+  params.setGlobalCommandLineParam("timing");
+  params.enableInputCommandLineParam("timing");
+
+  params.addCommandLineParam<bool>(
+      "no_timing", "--no-timing", "Disable performance logging; overrides -t/--timing");
+  params.setGlobalCommandLineParam("no_timing");
+  params.enableInputCommandLineParam("no_timing");
+
+  params.addCommandLineParam<bool>(
+      "perf_graph_live_all", "--perf-graph-live-all", "Forces printing of all progress messages");
   params.setGlobalCommandLineParam("perf_graph_live_all");
   params.enableInputCommandLineParam("perf_graph_live_all");
 
   params.addCommandLineParam<bool>(
-      "disable_perf_graph_live", "--disable-perf-graph-live", "Disables PerfGraph live printing");
+      "disable_perf_graph_live", "--disable-perf-graph-live", "Disable PerfGraph live printing");
   params.setGlobalCommandLineParam("disable_perf_graph_live");
   params.enableInputCommandLineParam("disable_perf_graph_live");
 
-  const MooseEnum compute_device_type("cpu cuda mps hip ceed-cpu ceed-cuda ceed-hip", "cpu");
-  params.addCommandLineParam<MooseEnum>(
-      "compute_device",
-      "--compute-device",
-      compute_device_type,
-      "The device type we want to run accelerated (libtorch, MFEM) computations on.");
-  params.enableInputCommandLineParam("compute_device");
+  params.addParamNamesToGroup(
+      {"timing", "no_timing", "perf_graph_live_all", "disable_perf_graph_live"}, "Timing");
 
-#ifdef HAVE_GPERFTOOLS
-  params.addCommandLineParam<std::string>(
-      "gperf_profiler_on",
-      "--gperf-profiler-on <ranks>",
-      "To generate profiling report only on comma-separated list of MPI ranks");
-#endif
+  /*******************************************************************************/
+  /* Input: Legacy behavior                                                      */
+  /*******************************************************************************/
 
-  params.addCommandLineParam<bool>(
-      "show_data_params",
-      "--show-data-params",
+  params.addParam<bool>(
+      "use_legacy_material_output",
+      true,
+      "Set false to allow material properties to be output on INITIAL, not just TIMESTEP_END.");
+
+  params.addParam<bool>(
+      "use_legacy_initial_residual_evaluation_behavior",
+      true,
+      "The legacy behavior performs an often times redundant residual evaluation before the "
+      "solution modifying objects are executed prior to the initial (0th nonlinear iteration) "
+      "residual evaluation. The new behavior skips that redundant residual evaluation unless the "
+      "parameter Executioner/use_pre_SMO_residual is set to true.");
+
+  params.addParamNamesToGroup(
+      "use_legacy_material_output use_legacy_initial_residual_evaluation_behavior",
+      "Legacy behavior");
+
+  /*******************************************************************************/
+  /* Input: Mesh generation                                                      */
+  /*******************************************************************************/
+
+  params.addParam<bool>(
+      MeshGeneratorSystem::allow_data_driven_param,
       false,
-      "Show found paths for all DataFileName parameters in the header");
-  params.enableInputCommandLineParam("show_data_params");
+      "Set true to enable data-driven mesh generation, which is an experimental feature");
 
-  params.addCommandLineParam<bool>("show_data_paths",
-                                   "--show-data-paths",
-                                   false,
-                                   "Show registered data paths for searching in the header");
-  params.enableInputCommandLineParam("show_data_paths");
+  params.addParamNamesToGroup(MeshGeneratorSystem::allow_data_driven_param, "Mesh generation");
 
-  params.addCommandLineParam<bool>(
-      "parse_neml2_only",
-      "--parse-neml2-only",
-      "Executes the [NEML2] block to parse the input file and terminate.");
+  /*******************************************************************************/
+  /* Input: Automatic scaling                                                    */
+  /*******************************************************************************/
+
+  params.addParam<bool>(
+      "automatic_automatic_scaling", false, "Whether to turn on automatic scaling by default");
+
+  params.addParamNamesToGroup("automatic_automatic_scaling", "Automatic scaling");
+
+  /*******************************************************************************/
+  /* Private parameters                                                          */
+  /*******************************************************************************/
 
   params.addPrivateParam<std::shared_ptr<CommandLine>>("_command_line");
   params.addPrivateParam<std::shared_ptr<Parallel::Communicator>>("_comm");
@@ -449,27 +594,6 @@ MooseApp::validParams()
   params.addPrivateParam<std::shared_ptr<mfem::Device>>("_mfem_device");
   params.addPrivateParam<std::set<std::string>>("_mfem_devices");
 #endif
-
-  params.addParam<bool>(
-      "use_legacy_material_output",
-      true,
-      "Set false to allow material properties to be output on INITIAL, not just TIMESTEP_END.");
-
-  params.addParam<bool>(
-      "use_legacy_initial_residual_evaluation_behavior",
-      true,
-      "The legacy behavior performs an often times redundant residual evaluation before the "
-      "solution modifying objects are executed prior to the initial (0th nonlinear iteration) "
-      "residual evaluation. The new behavior skips that redundant residual evaluation unless the "
-      "parameter Executioner/use_pre_SMO_residual is set to true.");
-
-  params.addParam<bool>(
-      MeshGeneratorSystem::allow_data_driven_param,
-      false,
-      "Set true to enable data-driven mesh generation, which is an experimental feature");
-
-  params.addParam<bool>(
-      "automatic_automatic_scaling", false, "Whether to turn on automatic scaling by default");
 
   return params;
 }
@@ -1424,86 +1548,6 @@ MooseApp::setupOptions()
     }
     else
       mooseError("Search parameter '", search, "' was not found in the registered syntax.");
-  }
-  else if (getParam<bool>("registry"))
-  {
-    _perf_graph.disableLivePrint();
-
-    Moose::out << "Label\tType\tName\tClass\tFile\n";
-
-    auto & objmap = Registry::allObjects();
-    for (auto & entry : objmap)
-      for (auto & obj : entry.second)
-        Moose::out << entry.first << "\tobject\t" << obj->name() << "\t" << obj->_classname << "\t"
-                   << obj->_file << "\n";
-
-    auto & actmap = Registry::allActions();
-    for (auto & entry : actmap)
-    {
-      for (auto & act : entry.second)
-        Moose::out << entry.first << "\taction\t" << act->_name << "\t" << act->_classname << "\t"
-                   << act->_file << "\n";
-    }
-    _early_exit_param = "--registry";
-    _ready_to_exit = true;
-  }
-  else if (getParam<bool>("registry_hit"))
-  {
-    _perf_graph.disableLivePrint();
-
-    Moose::out << "### START REGISTRY DATA ###\n";
-
-    hit::Section root("");
-    auto sec = new hit::Section("registry");
-    root.addChild(sec);
-    auto objsec = new hit::Section("objects");
-    sec->addChild(objsec);
-
-    auto & objmap = Registry::allObjects();
-    for (auto & entry : objmap)
-      for (auto & obj : entry.second)
-      {
-        auto ent = new hit::Section("entry");
-        objsec->addChild(ent);
-        ent->addChild(new hit::Field("label", hit::Field::Kind::String, entry.first));
-        ent->addChild(new hit::Field("type", hit::Field::Kind::String, "object"));
-        ent->addChild(new hit::Field("name", hit::Field::Kind::String, obj->name()));
-        ent->addChild(new hit::Field("class", hit::Field::Kind::String, obj->_classname));
-        ent->addChild(new hit::Field("file", hit::Field::Kind::String, obj->_file));
-      }
-
-    auto actsec = new hit::Section("actions");
-    sec->addChild(actsec);
-    auto & actmap = Registry::allActions();
-    for (auto & entry : actmap)
-      for (auto & act : entry.second)
-      {
-        auto ent = new hit::Section("entry");
-        actsec->addChild(ent);
-        ent->addChild(new hit::Field("label", hit::Field::Kind::String, entry.first));
-        ent->addChild(new hit::Field("type", hit::Field::Kind::String, "action"));
-        ent->addChild(new hit::Field("task", hit::Field::Kind::String, act->_name));
-        ent->addChild(new hit::Field("class", hit::Field::Kind::String, act->_classname));
-        ent->addChild(new hit::Field("file", hit::Field::Kind::String, act->_file));
-      }
-
-    Moose::out << root.render();
-
-    Moose::out << "\n### END REGISTRY DATA ###\n";
-    _early_exit_param = "--registry_hit";
-    _ready_to_exit = true;
-  }
-  else if (getParam<bool>("definition"))
-  {
-    _perf_graph.disableLivePrint();
-
-    JsonSyntaxTree tree("");
-    _builder.buildJsonSyntaxTree(tree);
-    SONDefinitionFormatter formatter;
-    Moose::out << "%-START-SON-DEFINITION-%\n"
-               << formatter.toString(tree.getRoot()) << "\n%-END-SON-DEFINITION-%\n";
-    _early_exit_param = "--definition";
-    _ready_to_exit = true;
   }
   else if (getParam<bool>("yaml") || isParamSetByUser("yaml_search"))
   {

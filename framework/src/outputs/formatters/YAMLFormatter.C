@@ -97,9 +97,8 @@ YAMLFormatter::printParams(const std::string & prefix,
     oss << "\n"
         << indent << "    cpp_type: " << params.type(iter.first) << "\n"
         << indent << "    group_name: ";
-    std::string group_name = params.getGroupName(iter.first);
-    if (!group_name.empty())
-      oss << "'" << group_name << "'";
+    if (const auto group_ptr = params.queryParameterGroup(iter.first))
+      oss << "'" << *group_ptr << "'";
     oss << "\n";
 
     oss << indent << "    doc_unit: ";

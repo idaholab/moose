@@ -138,7 +138,10 @@ JsonSyntaxTree::setParams(InputParameters * params, bool search_match, nlohmann:
     std::string t = MooseUtils::prettyCppType(params->type(iter.first));
     param_json["cpp_type"] = t;
     param_json["basic_type"] = basicCppType(t);
-    param_json["group_name"] = params->getGroupName(iter.first);
+    if (const auto group_ptr = params->queryParameterGroup(iter.first))
+      param_json["group_name"] = *group_ptr;
+    else
+      param_json["group_name"] = "";
     param_json["name"] = iter.first;
 
     std::string doc = params->getDocString(iter.first);

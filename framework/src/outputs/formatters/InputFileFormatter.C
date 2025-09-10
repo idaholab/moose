@@ -160,14 +160,13 @@ InputFileFormatter::printParams(const std::string & /*prefix*/,
             oss << " ...\n"
                 << "  " << std::setw(63) << "# " << elements[i];
         }
-        const std::string group = params.getGroupName(iter.first);
-        if (!group.empty())
+        if (const auto group_ptr = params.queryParameterGroup(iter.first))
         {
           if (MooseUtils::trim(doc) != "")
             oss << " ...\n"
-                << "  " << std::setw(70) << "# Group: " << group;
+                << "  " << std::setw(70) << "# Group: " << *group_ptr;
           else
-            oss << std::right << std::setw(l_offset) << "# Group: " << group;
+            oss << std::right << std::setw(l_offset) << "# Group: " << *group_ptr;
         }
       }
       oss << std::endl;

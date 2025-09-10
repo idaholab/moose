@@ -123,7 +123,7 @@
       type = RunApp
       input = checkpoint.i
       recover = false
-      cli_args = 'Outputs/file_base=checkpoint_wall_time_interval_out --output-wall-time-interval 0.02'
+      cli_args = 'Outputs/file_base=checkpoint_wall_time_interval_out Application/output_wall_time_interval=0.02'
       expect_out = "Checkpoint:\s+ Wall Time Interval:\s+ Every 0.02 s\s+ User Checkpoint:\s+ Disabled\s+ # Checkpoints Kept:\s+ 2\s+ Execute On:\s+ TIMESTEP_END"
       detail = " at specified wall time intervals and"
     []
@@ -143,7 +143,7 @@
       type = RunApp
       input = checkpoint.i
       recover = false
-      cli_args = 'Outputs/file_base=checkpoint_wall_time_interval_disabled_out --output-wall-time-interval 0.02 Outputs/wall_time_checkpoint=false'
+      cli_args = 'Outputs/file_base=checkpoint_wall_time_interval_disabled_out Application/output_wall_time_interval=0.02 Outputs/wall_time_checkpoint=false'
       expect_out = "Checkpoint:\s+ Wall Time Interval:\s+ Disabled\s+ User Checkpoint:\s+ Disabled"
       absent_out = "# Checkpoints Kept:\s+ 2\s+ Execute On:\s+ TIMESTEP_END"
       detail = " with an option to disable wall time checkpoints and"
@@ -157,18 +157,10 @@
       detail = " not recover."
     []
 
-    [output_wall_time_interval_error]
-      type = 'RunException'
-      input = 'checkpoint.i'
-      cli_args = '--output-wall-time-interval -1'
-      expect_err = 'output-wall-time-interval must be greater than zero.'
-      detail = ' catching invalid values of output-wall-time-interval.'
-    []
-
     [wall_time_interval_tiny]
       type = CheckFiles
       input = checkpoint.i
-      cli_args = 'Outputs/file_base=checkpoint_wall_time_interval_tiny_out --output-wall-time-interval 1e-50'
+      cli_args = 'Outputs/file_base=checkpoint_wall_time_interval_tiny_out Application/output_wall_time_interval=1e-50'
       recover = false
 
       check_files = "checkpoint_wall_time_interval_tiny_out_cp/0010-restart-0.rd/data "
@@ -194,7 +186,7 @@
     [wall_time_interval_multiapp]
       type = CheckFiles
       input = checkpoint_parent.i
-      cli_args = '--output-wall-time-interval 1e-50'
+      cli_args = 'Application/output_wall_time_interval=1e-50'
       expect_out = "Checkpoint:\s+ Wall Time Interval:\s+ Every 1e-50 s\s+ User Checkpoint:\s+ Outputs/checkpoint\s+ # Checkpoints Kept:\s+ 2\s+ Execute On:\s+ TIMESTEP_END"
       recover = false
 
@@ -292,7 +284,7 @@
       type = RunApp
       input = checkpoint_block.i
       recover = false
-      cli_args = 'Outputs/file_base=checkpoint_block_wall_time_interval_out --output-wall-time-interval 0.02'
+      cli_args = 'Outputs/file_base=checkpoint_block_wall_time_interval_out Application/output_wall_time_interval=0.02'
       expect_out = "Checkpoint:\s+ Wall Time Interval:\s+ Every 0.02 s\s+ User Checkpoint:\s+ Outputs/out\s+ # Checkpoints Kept:\s+ 2\s+ Execute On:\s+ TIMESTEP_END"
       detail = "at specified wall time intervals"
     []
@@ -312,7 +304,7 @@
       type = RunApp
       input = checkpoint_block.i
       recover = false
-      cli_args = 'Outputs/file_base=checkpoint_block_wall_time_interval_disabled_out --output-wall-time-interval 0.02 Outputs/out/wall_time_checkpoint=false'
+      cli_args = 'Outputs/file_base=checkpoint_block_wall_time_interval_disabled_out Application/output_wall_time_interval=0.02 Outputs/out/wall_time_checkpoint=false'
       expect_out = "Checkpoint:\s+ Wall Time Interval:\s+ Disabled\s+ User Checkpoint:\s+ Outputs/out\s+ # Checkpoints Kept:\s+ 2\s+ Execute On:\s+ TIMESTEP_END"
       detail = " with an option to disable wall time checkpoints and"
     []

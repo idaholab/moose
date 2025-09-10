@@ -76,13 +76,13 @@ Checkpoint::Checkpoint(const InputParameters & parameters)
   validateExecuteOn();
 
   // The following updates the value of _wall_time_interval if the
-  // '--output-wall-time-interval' command line parameter is used.
+  // 'output_wall_time_intergal' command line parameter is used.
   // If it is not used, _wall_time_interval keeps its current value.
-  // 'The --output-wall-time-interval parameter is necessary for testing
+  // The output_wall_time_intergal' parameter is necessary for testing
   // and should only be used in the test suite.
   Output::setWallTimeIntervalFromCommandLineParam();
 
-  // We want to do this here so it overrides --output-wall-time-interval
+  // We want to do this here so it overrides 'output_wall_time_intergal'
   if (!getParam<bool>("wall_time_checkpoint"))
     _wall_time_interval = std::numeric_limits<Real>::max();
 }
