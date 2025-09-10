@@ -116,6 +116,10 @@ NonlinearThread::subdomainChanged()
     }
   }
 
+  // Cache these to avoid computing them on every side
+  _subdomain_has_dg = _dg_warehouse->hasActiveBlockObjects(_subdomain, _tid);
+  _subdomain_has_hdg = _hdg_warehouse->hasActiveBlockObjects(_subdomain, _tid);
+
   _fe_problem.setActiveElementalMooseVariables(needed_moose_vars, _tid);
   _fe_problem.setActiveFEVariableCoupleableVectorTags(needed_fe_var_vector_tags, _tid);
   _fe_problem.prepareMaterials(needed_mat_props, _subdomain, _tid);
@@ -236,7 +240,7 @@ NonlinearThread::computeOnInterface(BoundaryID bnd_id)
 void
 NonlinearThread::onInternalSide(const Elem * elem, unsigned int side)
 {
-  if (_should_execute_dg && _dg_warehouse->hasActiveBlockObjects(_subdomain, _tid))
+  if (_should_execute_dg)
   {
     // Pointer to the neighbor we are currently working on.
     const Elem * neighbor = elem->neighbor_ptr(side);
@@ -258,7 +262,7 @@ NonlinearThread::onInternalSide(const Elem * elem, unsigned int side)
       accumulateNeighborLower();
     }
   }
-  if (_hdg_warehouse->hasActiveBlockObjects(_subdomain, _tid))
+  if (_subdomain_has_hdg)
   {
     // Set up Sentinel class so that, after we swap in reinitMaterialsFace in prepareFace, even if
     // one of our callees throws we remember to swap back during stack unwinding. We put our
@@ -438,7 +442,11 @@ NonlinearThread::prepareFace(const Elem * const elem,
 bool
 NonlinearThread::shouldComputeInternalSide(const Elem & elem, const Elem & neighbor) const
 {
-  _should_execute_dg =
-      ThreadedElementLoop<ConstElemRange>::shouldComputeInternalSide(elem, neighbor);
-  return _should_execute_dg || _hdg_warehouse->hasActiveBlockObjects(_subdomain, _tid);
+  // ThreadedElementLoop<ConstElemRange>::shouldComputeInternalSide gets expensive on high
+  // h-refinement cases so we avoid it if possible
+  _should_execute_dg = false;
+  if (_subdomain_has_dg)
+    _should_execute_dg =
+        ThreadedElementLoop<ConstElemRange>::shouldComputeInternalSide(elem, neighbor);
+  return _subdomain_has_hdg || _should_execute_dg;
 }

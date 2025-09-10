@@ -172,4 +172,8 @@ private:
   /// method which checks things like whether the elem id is less than the neighbor id such that we
   /// make sure we do not execute DGKernels twice on the same face
   mutable bool _should_execute_dg;
+  /// Whether the subdomain has DGKernels
+  bool _subdomain_has_dg;
+  /// Whether the subdomain has HDGKernels
+  bool _subdomain_has_hdg;
 };

@@ -41,29 +41,25 @@ MFEMBlockRestrictable::MFEMBlockRestrictable(const InputParameters & parameters,
 mfem::Array<int>
 MFEMBlockRestrictable::subdomainsToAttributes(const std::vector<SubdomainName> & subdomain_names)
 {
-  mfem::Array<int> attributes(subdomain_names.size());
+  mfem::Array<int> attributes;
   auto & mesh = getMesh();
-  std::transform(
-      subdomain_names.begin(),
-      subdomain_names.end(),
-      attributes.begin(),
-      [&mesh](const SubdomainName & subdomain) -> int
-      {
-        try
-        {
-          // Is this a block ID?
-          return std::stoi(subdomain);
-        }
-        catch (...)
-        {
-          // It was not
-          auto & subdomain_ids = mesh.attribute_sets.GetAttributeSet(subdomain);
-          if (subdomain_ids.Size() != 1)
-            mooseError(
-                "There should be a 1-to-1 correspondence between subdomain name and subdomain ID");
-          return subdomain_ids[0];
-        }
-      });
+
+  for (const SubdomainName & subdomain_name : subdomain_names)
+  {
+    try
+    {
+      // Is this a block ID?
+      const int attribute_id = std::stoi(subdomain_name);
+      attributes.Append(attribute_id);
+    }
+    catch (...)
+    {
+      // It was not
+      auto & subdomain_ids = mesh.attribute_sets.GetAttributeSet(subdomain_name);
+      for (const auto & subdomain_id : subdomain_ids)
+        attributes.Append(subdomain_id);
+    }
+  }
   return attributes;
 }
 
