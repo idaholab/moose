@@ -35,7 +35,7 @@ public:
   /**
    * Special constructor used for Kokkos functor copy during parallel dispatch
    */
-  MooseObject(const MooseObject & object, Moose::Kokkos::FunctorCopy);
+  MooseObject(const MooseObject & object, const Moose::Kokkos::FunctorCopy & key);
 #endif
 
   virtual ~MooseObject() = default;

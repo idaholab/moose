@@ -34,7 +34,10 @@ public:
   /**
    * Special constructor used for Kokkos functor copy during parallel dispatch
    */
-  DependencyResolverInterface(const DependencyResolverInterface &, Moose::Kokkos::FunctorCopy) {}
+  DependencyResolverInterface(const DependencyResolverInterface &,
+                              const Moose::Kokkos::FunctorCopy &)
+  {
+  }
 #endif
 
   /**

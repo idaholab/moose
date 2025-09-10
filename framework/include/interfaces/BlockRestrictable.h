@@ -94,7 +94,7 @@ public:
   /**
    * Special constructor used for Kokkos functor copy during parallel dispatch
    */
-  BlockRestrictable(const BlockRestrictable & object, Moose::Kokkos::FunctorCopy);
+  BlockRestrictable(const BlockRestrictable & object, const Moose::Kokkos::FunctorCopy & key);
 #endif
 
   /**

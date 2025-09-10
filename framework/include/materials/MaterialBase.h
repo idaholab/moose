@@ -90,7 +90,7 @@ public:
   /**
    * Special constructor used for Kokkos functor copy during parallel dispatch
    */
-  MaterialBase(const MaterialBase & object, Moose::Kokkos::FunctorCopy);
+  MaterialBase(const MaterialBase & object, const Moose::Kokkos::FunctorCopy & key);
 #endif
 
   /**

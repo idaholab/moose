@@ -61,7 +61,7 @@ public:
   /**
    * Special constructor used for Kokkos functor copy during parallel dispatch
    */
-  TaggingInterface(const TaggingInterface & object, Moose::Kokkos::FunctorCopy);
+  TaggingInterface(const TaggingInterface & object, const Moose::Kokkos::FunctorCopy & key);
 #endif
 
   virtual ~TaggingInterface();

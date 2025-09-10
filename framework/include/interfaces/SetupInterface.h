@@ -29,7 +29,7 @@ public:
   /**
    * Special constructor used for Kokkos functor copy during parallel dispatch
    */
-  SetupInterface(const SetupInterface & object, Moose::Kokkos::FunctorCopy);
+  SetupInterface(const SetupInterface & object, const Moose::Kokkos::FunctorCopy & key);
 #endif
 
   virtual ~SetupInterface();

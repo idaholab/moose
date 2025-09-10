@@ -86,7 +86,7 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
 
 #ifdef MOOSE_KOKKOS_ENABLED
 MaterialPropertyInterface::MaterialPropertyInterface(const MaterialPropertyInterface & object,
-                                                     Moose::Kokkos::FunctorCopy)
+                                                     const Moose::Kokkos::FunctorCopy &)
   : _mi_moose_object(object._mi_moose_object),
     _mi_params(object._mi_params),
     _mi_name(object._mi_name),

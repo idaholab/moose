@@ -42,7 +42,7 @@ RandomInterface::RandomInterface(const InputParameters & parameters,
 }
 
 #ifdef MOOSE_KOKKOS_ENABLED
-RandomInterface::RandomInterface(const RandomInterface & object, Moose::Kokkos::FunctorCopy)
+RandomInterface::RandomInterface(const RandomInterface & object, const Moose::Kokkos::FunctorCopy &)
   : _random_data(object._random_data),
     _generator(object._generator),
     _ri_problem(object._ri_problem),

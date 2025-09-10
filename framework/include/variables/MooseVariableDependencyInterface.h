@@ -35,7 +35,7 @@ public:
    * Special constructor used for Kokkos functor copy during parallel dispatch
    */
   MooseVariableDependencyInterface(const MooseVariableDependencyInterface &,
-                                   Moose::Kokkos::FunctorCopy);
+                                   const Moose::Kokkos::FunctorCopy & key);
 #endif
 
   /**

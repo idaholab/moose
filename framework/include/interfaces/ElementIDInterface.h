@@ -31,7 +31,7 @@ public:
   /**
    * Special constructor used for Kokkos functor copy during parallel dispatch
    */
-  ElementIDInterface(const ElementIDInterface & object, Moose::Kokkos::FunctorCopy);
+  ElementIDInterface(const ElementIDInterface & object, const Moose::Kokkos::FunctorCopy & key);
 #endif
 
   virtual ~ElementIDInterface() {}

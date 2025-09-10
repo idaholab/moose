@@ -29,7 +29,7 @@ public:
   /**
    * Special constructor used for Kokkos functor copy during parallel dispatch
    */
-  MeshChangedInterface(const MeshChangedInterface & object, Moose::Kokkos::FunctorCopy);
+  MeshChangedInterface(const MeshChangedInterface & object, const Moose::Kokkos::FunctorCopy & key);
 #endif
 
   virtual ~MeshChangedInterface() = default;

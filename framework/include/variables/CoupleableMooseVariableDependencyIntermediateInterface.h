@@ -33,7 +33,7 @@ public:
    */
   CoupleableMooseVariableDependencyIntermediateInterface(
       const CoupleableMooseVariableDependencyIntermediateInterface & object,
-      Moose::Kokkos::FunctorCopy);
+      const Moose::Kokkos::FunctorCopy & key);
 #endif
 
   /**
