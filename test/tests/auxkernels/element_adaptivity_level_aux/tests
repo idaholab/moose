@@ -1,6 +1,6 @@
 [Tests]
   issue = "#31469"
-  design = "ElementHierarchyAux.md"
+  design = "ElementAdaptivityLevelAux.md"
   [element_hierarchy]
     type = Exodiff
     input = element_hierarchy_test.i

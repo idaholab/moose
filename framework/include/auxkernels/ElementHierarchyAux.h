@@ -15,13 +15,15 @@
  * An aux kernel object which stores the element hierarchy
  * in an aux variable.
  */
-class ElementHierarchyAux : public AuxKernel
+class ElementAdaptivityLevelAux : public AuxKernel
 {
 
 public:
   static InputParameters validParams();
-  ElementHierarchyAux(const InputParameters & parameters);
+  ElementAdaptivityLevelAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;
+
+  const enum class LevelType { H = 0, P = 1 } _level_type;
 };

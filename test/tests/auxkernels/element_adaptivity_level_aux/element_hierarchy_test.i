@@ -27,7 +27,8 @@
 
 [AuxKernels]
   [hierarchy_aux_kernel]
-    type=ElementHierarchyAux
+    type=ElementAdaptivityLevelAux
+    level='h'
     variable=hierarchy
   []
 
