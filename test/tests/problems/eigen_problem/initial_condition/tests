@@ -34,7 +34,7 @@
   [output_inverse_eigenvalue]
     type = 'RunApp'
     input = 'ne_ic.i'
-    cli_args = '--output-inverse-eigenvalue
+    cli_args = 'Application/output_inverse_eigenvalue=true
                 Outputs/csv=false'
     expect_out = 'Iteration\s+[0-9]\s+k-eigenvalue\s+=\s+5.00146'
     capabilities = 'slepc>=3.8.0'
