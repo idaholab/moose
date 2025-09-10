@@ -787,3 +787,12 @@ TEST(InputParametersTest, queryAndGetObjectType)
   ASSERT_EQ(*type_ptr, object_type);
   ASSERT_EQ(params.getObjectType(), *type_ptr);
 }
+
+TEST(InputParametersTest, addCommandLineParamNotEnabled)
+{
+  InputParameters params = emptyInputParameters();
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+      [&params]() { params.addCommandLineParam<bool>("foo", "--foo", "doc"); },
+      "While adding command line parameter 'foo': Command line parameters are not enabled for this "
+      "object.");
+}
