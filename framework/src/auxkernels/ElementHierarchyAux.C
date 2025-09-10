@@ -7,25 +7,36 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ElementHierarchyAux.h"
+#include "ElementAdaptivityLevelAux.h"
 
-registerMooseObject("MooseApp", ElementHierarchyAux);
+registerMooseObject("MooseApp", ElementAdaptivityLevelAux);
 
 InputParameters
-ElementHierarchyAux::validParams()
+ElementAdaptivityLevelAux::validParams()
 {
   InputParameters params = AuxKernel::validParams();
   params.addClassDescription("stores the element hierarchy in a aux variable");
+  params.addRequiredParam<MooseEnum>(
+      "level", MooseEnum("h p"), "The type of adaptivity level to compute.");
 
   return params;
 }
 
-ElementHierarchyAux::ElementHierarchyAux(const InputParameters & parameters) : AuxKernel(parameters)
+ElementAdaptivityLevelAux::ElementAdaptivityLevelAux(const InputParameters & parameters)
+  : AuxKernel(parameters), _level_type(getParam<MooseEnum>("level").getEnum<LevelType>())
 {
 }
 
 Real
-ElementHierarchyAux::computeValue()
+ElementAdaptivityLevelAux::computeValue()
 {
-  return static_cast<Real>(_current_elem->level());
+  // Only check if the user asked to compute p level
+  // if it's not p level then presume that h adaptivity level was asked
+  switch (_level_type)
+  {
+    case LevelType::P:
+      return static_cast<Real>(_current_elem->p_level());
+    default:
+      return static_cast<Real>(_current_elem->level());
+  }
 }
