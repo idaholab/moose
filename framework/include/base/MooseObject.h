@@ -35,7 +35,7 @@ public:
   /**
    * Special constructor used for Kokkos functor copy during parallel dispatch
    */
-  MooseObject(const MooseObject & object, const Moose::Kokkos::FunctorCopy &);
+  MooseObject(const MooseObject & object, Moose::Kokkos::FunctorCopy);
 #endif
 
   virtual ~MooseObject() = default;
@@ -53,10 +53,13 @@ public:
   std::shared_ptr<const MooseObject> getSharedPtr() const;
 
 #ifdef MOOSE_KOKKOS_ENABLED
-  bool isKokkosObject() const
-  {
-    return parameters().isParamValid(Moose::Kokkos::KOKKOS_OBJECT_PARAM);
-  }
+  /**
+   * Get whether this object is a Kokkos functor
+   * The parameter is set by the Kokkos base classes:
+   * - Moose::Kokkos::ResidualObject in KokkosResidualObject.K
+   * - Moose::Kokkos::MaterialBase in KokkosMaterialBase.K
+   */
+  bool isKokkosObject() const { return parameters().isParamValid(MooseBase::kokkos_object_param); }
 #endif
 
 protected:

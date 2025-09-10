@@ -23,7 +23,7 @@ MooseVariableDependencyInterface::MooseVariableDependencyInterface(const MooseOb
 
 #ifdef MOOSE_KOKKOS_ENABLED
 MooseVariableDependencyInterface::MooseVariableDependencyInterface(
-    const MooseVariableDependencyInterface &, const Moose::Kokkos::FunctorCopy &)
+    const MooseVariableDependencyInterface &, Moose::Kokkos::FunctorCopy)
 {
 }
 #endif

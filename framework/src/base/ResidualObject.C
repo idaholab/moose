@@ -56,19 +56,18 @@ ResidualObject::ResidualObject(const InputParameters & parameters, bool is_nodal
 }
 
 #ifdef MOOSE_KOKKOS_ENABLED
-ResidualObject::ResidualObject(const ResidualObject & object,
-                               const Moose::Kokkos::FunctorCopy & key)
-  : MooseObject(object, key),
-    SetupInterface(object, key),
-    FunctionInterface(object, key),
-    UserObjectInterface(object, key),
-    TransientInterface(object, key),
-    PostprocessorInterface(object, key),
-    VectorPostprocessorInterface(object, key),
-    RandomInterface(object, key),
-    Restartable(object, key),
-    MeshChangedInterface(object, key),
-    TaggingInterface(object, key),
+ResidualObject::ResidualObject(const ResidualObject & object, Moose::Kokkos::FunctorCopy)
+  : MooseObject(object, {}),
+    SetupInterface(object, {}),
+    FunctionInterface(object, {}),
+    UserObjectInterface(object, {}),
+    TransientInterface(object, {}),
+    PostprocessorInterface(object, {}),
+    VectorPostprocessorInterface(object, {}),
+    RandomInterface(object, {}),
+    Restartable(object, {}),
+    MeshChangedInterface(object, {}),
+    TaggingInterface(object, {}),
     _subproblem(object._subproblem),
     _fe_problem(object._fe_problem),
     _sys(object._sys),

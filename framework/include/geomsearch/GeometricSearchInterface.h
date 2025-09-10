@@ -31,8 +31,7 @@ public:
   /**
    * Special constructor used for Kokkos functor copy during parallel dispatch
    */
-  GeometricSearchInterface(const GeometricSearchInterface & object,
-                           const Moose::Kokkos::FunctorCopy &);
+  GeometricSearchInterface(const GeometricSearchInterface & object, Moose::Kokkos::FunctorCopy);
 #endif
 
   /**

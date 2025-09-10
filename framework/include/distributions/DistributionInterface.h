@@ -33,7 +33,7 @@ public:
   /**
    * Special constructor used for Kokkos functor copy during parallel dispatch
    */
-  DistributionInterface(const DistributionInterface & object, const Moose::Kokkos::FunctorCopy &);
+  DistributionInterface(const DistributionInterface & object, Moose::Kokkos::FunctorCopy);
 #endif
 
   ///@{

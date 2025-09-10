@@ -77,8 +77,7 @@ public:
   /**
    * Special constructor used for Kokkos functor copy during parallel dispatch
    */
-  MaterialPropertyInterface(const MaterialPropertyInterface & object,
-                            const Moose::Kokkos::FunctorCopy &);
+  MaterialPropertyInterface(const MaterialPropertyInterface & object, Moose::Kokkos::FunctorCopy);
 #endif
 
   static InputParameters validParams();

@@ -32,7 +32,7 @@ public:
   /**
    * Special constructor used for Kokkos functor copy during parallel dispatch
    */
-  UserObjectInterface(const UserObjectInterface & object, const Moose::Kokkos::FunctorCopy &);
+  UserObjectInterface(const UserObjectInterface & object, Moose::Kokkos::FunctorCopy);
 #endif
 
   /**
