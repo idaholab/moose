@@ -23,6 +23,23 @@ buildTestRoot(const std::vector<std::string> & params)
   return std::unique_ptr<const hit::Node>(hit::parse("file", MooseUtils::stringJoin(params, "\n")));
 }
 
+std::pair<std::unique_ptr<const hit::Node>, std::vector<const hit::Node *>>
+buildTestRootWithNodes(const std::vector<std::string> & params)
+{
+  std::unique_ptr<const hit::Node> root = buildTestRoot(params);
+  std::vector<const hit::Node *> nodes;
+  for (const auto & param : params)
+    nodes.push_back(root->find(MooseUtils::split(param, "=")[0], true));
+  return {std::move(root), nodes};
+}
+
+bool
+hasExtractedNode(const Moose::ParameterExtraction::ExtractionInfo & info, const hit::Node & node)
+{
+  const auto & nodes = info.extracted_nodes;
+  return std::find(nodes.begin(), nodes.end(), &node) != nodes.end();
+}
+
 using Moose::ParameterExtraction::extract;
 
 /**
@@ -62,31 +79,30 @@ TEST(ParameterExtractionTest, extractSetHitNode)
 {
   auto params = emptyInputParameters();
   params.addParam<bool>("foo", "doc");
-  const auto root = buildTestRoot({"Section/foo=true"});
-  const auto node = root->find("Section/foo");
+  const auto [root, nodes] = buildTestRootWithNodes({"Section/foo=true"});
   const auto info = extract(*root, "Section", params);
-  ASSERT_NE(node, nullptr);
   ASSERT_TRUE(info.errors.empty());
-  ASSERT_EQ(params.getHitNode("foo"), node);
+  ASSERT_EQ(params.getHitNode("foo"), nodes[0]);
 }
 
 /**
- * Test that extracted variables are marked as extracted
+ * Test that extracted nodes are marked as extracted
  */
 TEST(ParameterExtractionTest, extractSetExtractedVariables)
 {
   auto params = emptyInputParameters();
   params.addParam<bool>("foo", "doc");
   params.addParam<bool>("bar", "doc");
-  const auto root =
-      buildTestRoot({"GlobalParams/foo=true", "Section/bar=true", "Section/unused=abcd"});
-  ASSERT_NE(root->find("Section/unused"), nullptr);
+  const auto [root, nodes] =
+      buildTestRootWithNodes({"GlobalParams/foo=true", "Section/bar=true", "Section/unused=abcd"});
   const auto info = extract(*root, "Section", params);
   ASSERT_TRUE(info.errors.empty());
-  const auto & vars = info.extracted_variables;
-  ASSERT_NE(std::find(vars.begin(), vars.end(), "GlobalParams/foo"), vars.end());
-  ASSERT_NE(std::find(vars.begin(), vars.end(), "Section/bar"), vars.end());
-  ASSERT_EQ(std::find(vars.begin(), vars.end(), "Section/unused"), vars.end());
+  ASSERT_EQ(info.extracted_nodes.size(), 2);
+  ASSERT_TRUE(hasExtractedNode(info, *nodes[0]));
+  ASSERT_TRUE(hasExtractedNode(info, *nodes[1]));
+  ASSERT_FALSE(hasExtractedNode(info, *nodes[2]));
+  ASSERT_TRUE(params.isParamSetByUser("foo"));
+  ASSERT_TRUE(params.isParamSetByUser("bar"));
 }
 
 /**
@@ -100,35 +116,41 @@ TEST(ParameterExtractionTest, extractSetDeprecated)
     params.addDeprecatedParam<bool>("foo", false, "doc", "dep_message");
     return params;
   };
-  const auto setup_root = []() { return buildTestRoot({"Section/foo=true"}); };
+  const auto setup_root = []() { return buildTestRootWithNodes({"Section/foo=true"}); };
 
   // No object type set, so deprecated key doesn't have the object
   {
     auto params = setup_params();
-    const auto root = setup_root();
+    const auto [root, nodes] = setup_root();
     const auto info = extract(*root, "Section", params);
     ASSERT_TRUE(info.errors.empty());
     ASSERT_EQ(info.deprecated_params.size(), 1);
     const auto it = info.deprecated_params.find("foo");
     ASSERT_TRUE(it != info.deprecated_params.end());
+    ASSERT_EQ(info.extracted_nodes.size(), 1);
+    ASSERT_TRUE(hasExtractedNode(info, *nodes[0]));
     ASSERT_EQ(it->second,
               "file:1.1:\nSection/foo: The parameter 'foo' is deprecated.\ndep_message");
     ASSERT_TRUE(params.get<bool>("foo"));
+    ASSERT_TRUE(params.isParamSetByUser("foo"));
   }
 
   // Object type set, so deprecated key has the object prefix
   {
     auto params = setup_params();
     params.set<std::string>(MooseBase::type_param) = "type";
-    const auto root = setup_root();
+    const auto [root, nodes] = setup_root();
     const auto info = extract(*root, "Section", params);
     ASSERT_TRUE(info.errors.empty());
     ASSERT_EQ(info.deprecated_params.size(), 1);
     const auto it = info.deprecated_params.find("type_foo");
     ASSERT_TRUE(it != info.deprecated_params.end());
+    ASSERT_EQ(info.extracted_nodes.size(), 1);
+    ASSERT_TRUE(hasExtractedNode(info, *nodes[0]));
     ASSERT_EQ(it->second,
               "file:1.1:\nSection/foo: The parameter 'foo' is deprecated.\ndep_message");
     ASSERT_TRUE(params.get<bool>("foo"));
+    ASSERT_TRUE(params.isParamSetByUser("foo"));
   }
 
   // Don't report deprecated for global params (are we sure we want to do this?)
@@ -140,6 +162,7 @@ TEST(ParameterExtractionTest, extractSetDeprecated)
     ASSERT_TRUE(info.errors.empty());
     ASSERT_TRUE(info.deprecated_params.empty());
     ASSERT_TRUE(params.get<bool>("foo"));
+    ASSERT_TRUE(params.isParamSetByUser("foo"));
   }
 }
 
@@ -150,15 +173,16 @@ TEST(ParameterExtractionTest, extractGlobal)
 {
   auto params = emptyInputParameters();
   params.addParam<bool>("foo", false, "doc");
-  const auto root = buildTestRoot({"GlobalParams/foo=true"});
-  const auto node = root->find("GlobalParams/foo");
-  ASSERT_NE(node, nullptr);
+  const auto [root, nodes] = buildTestRootWithNodes({"GlobalParams/foo=true"});
   const auto info = extract(*root, "Section", params);
   ASSERT_TRUE(info.errors.empty());
+  ASSERT_EQ(info.extracted_nodes.size(), 1);
+  ASSERT_TRUE(hasExtractedNode(info, *nodes[0]));
   ASSERT_TRUE(params.isParamSetByUser("foo"));
-  ASSERT_EQ(params.getHitNode("foo"), node);
-  ASSERT_TRUE(Moose::ParseUtils::isGlobal(*node));
+  ASSERT_EQ(params.getHitNode("foo"), nodes[0]);
+  ASSERT_TRUE(Moose::ParseUtils::isGlobal(*nodes[0]));
   ASSERT_TRUE(params.get<bool>("foo"));
+  ASSERT_TRUE(params.isParamSetByUser("foo"));
 }
 
 /**
@@ -168,13 +192,13 @@ TEST(ParameterExtractionTest, extractSetCatch)
 {
   auto params = emptyInputParameters();
   params.addParam<bool>("foo", "doc");
-  const auto root = buildTestRoot({"Section/foo=a"});
-  const auto node = root->find("Section/foo");
-  ASSERT_NE(node, nullptr);
+  const auto [root, nodes] = buildTestRootWithNodes({"Section/foo=a"});
   const auto info = extract(*root, "Section", params);
   ASSERT_EQ(info.errors.size(), 1);
   ASSERT_EQ(info.errors[0].message, "invalid boolean syntax for parameter: foo='a'");
-  ASSERT_EQ(info.errors[0].node, node);
+  ASSERT_EQ(info.errors[0].node, nodes[0]);
+  ASSERT_TRUE(info.extracted_nodes.empty());
+  ASSERT_FALSE(params.isParamSetByUser("foo"));
 }
 
 /**
@@ -187,14 +211,15 @@ TEST(ParameterExtractionTest, extractCommandLineParameter)
   params.registerBase("Application"); // required for command line params
   params.addCommandLineParam<bool>("foo", "--foo", "doc");
   params.enableInputCommandLineParam("foo");
-  const auto root = buildTestRoot({"Section/foo=true"});
-  const auto node = root->find("Section/foo");
-  ASSERT_NE(node, nullptr);
+  const auto [root, nodes] = buildTestRootWithNodes({"Section/foo=true"});
   const auto info = extract(*root, "Section", params);
   ASSERT_TRUE(info.errors.empty());
+  ASSERT_EQ(info.extracted_nodes.size(), 1);
+  ASSERT_TRUE(hasExtractedNode(info, *nodes[0]));
   ASSERT_TRUE(params.isParamSetByUser("foo"));
   ASSERT_TRUE(params.get<bool>("foo"));
-  ASSERT_EQ(params.getHitNode("foo"), node);
+  ASSERT_EQ(params.getHitNode("foo"), nodes[0]);
+  ASSERT_TRUE(params.isParamSetByUser("foo"));
 }
 
 /**
@@ -205,15 +230,16 @@ TEST(ParameterExtractionTest, extractVectorVariableName)
 {
   auto params = emptyInputParameters();
   params.addParam<std::vector<VariableName>>("names", "doc");
-  const auto root = buildTestRoot({"Section/names=\"1\""});
-  const auto node = root->find("Section/names");
-  ASSERT_NE(node, nullptr);
+  const auto [root, nodes] = buildTestRootWithNodes({"Section/names=\"1\""});
   const auto info = extract(*root, "Section", params);
   ASSERT_TRUE(info.errors.empty());
+  ASSERT_EQ(info.extracted_nodes.size(), 1);
+  ASSERT_TRUE(hasExtractedNode(info, *nodes[0]));
   ASSERT_TRUE(params.isParamSetByUser("names"));
   ASSERT_TRUE(params.get<std::vector<VariableName>>("names").empty());
   ASSERT_EQ(params.numberDefaultCoupledValues("names"), 1);
   ASSERT_EQ(params.defaultCoupledValue("names"), 1);
+  ASSERT_TRUE(params.isParamSetByUser("names"));
 }
 
 /**
@@ -224,15 +250,15 @@ TEST(ParameterExtractionTest, extractVectorVariableNameError)
 {
   auto params = emptyInputParameters();
   params.addParam<std::vector<VariableName>>("names", "doc");
-  const auto root = buildTestRoot({"Section/names=\"1 a\""});
-  const auto node = root->find("Section/names");
-  ASSERT_NE(node, nullptr);
+  const auto [root, nodes] = buildTestRootWithNodes({"Section/names=\"1 a\""});
   const auto info = extract(*root, "Section", params);
   ASSERT_EQ(info.errors.size(), 1);
   ASSERT_EQ(info.errors[0].message,
             "invalid value for 'Section/names': coupled vectors where some parameters are reals "
             "and others are variables are not supported");
-  ASSERT_EQ(info.errors[0].node, node);
+  ASSERT_EQ(info.errors[0].node, nodes[0]);
+  ASSERT_TRUE(hasExtractedNode(info, *nodes[0]));
+  ASSERT_TRUE(params.isParamSetByUser("names"));
 }
 
 /**
@@ -254,18 +280,20 @@ TEST(ParameterExtractionTest, extractRangeChecked)
     const auto root = buildTestRoot({"Section/foo=2"});
     const auto info = extract(*root, "Section", params);
     ASSERT_TRUE(info.errors.empty());
+    ASSERT_TRUE(params.isParamSetByUser("foo"));
   }
   // failed
   {
     auto params = setup_params();
-    const auto root = buildTestRoot({"Section/foo=0"});
-    const auto node = root->find("Section/foo");
-    ASSERT_NE(node, nullptr);
+    const auto [root, nodes] = buildTestRootWithNodes({"Section/foo=0"});
     const auto info = extract(*root, "Section", params);
     ASSERT_EQ(info.errors.size(), 1);
     ASSERT_EQ(info.errors[0].message,
               "Range check failed for parameter Section/foo; expression = 'foo > 1', value = 0");
-    ASSERT_EQ(info.errors[0].node, node);
+    ASSERT_EQ(info.errors[0].node, nodes[0]);
+    ASSERT_EQ(info.extracted_nodes.size(), 1);
+    ASSERT_TRUE(hasExtractedNode(info, *nodes[0]));
+    ASSERT_TRUE(params.isParamSetByUser("foo"));
   }
 }
 
@@ -285,13 +313,12 @@ TEST(ParameterExtractionTest, extractPrivate)
   // Set directly, is an error
   {
     auto params = setup_params();
-    const auto root = buildTestRoot({"Section/foo=true"});
-    const auto node = root->find("Section/foo");
-    ASSERT_NE(node, nullptr);
+    const auto [root, nodes] = buildTestRootWithNodes({"Section/foo=true"});
     const auto info = extract(*root, "Section", params);
     ASSERT_EQ(info.errors.size(), 1);
     ASSERT_EQ(info.errors[0].message, "parameter 'Section/foo' is private and cannot be set");
-    ASSERT_EQ(info.errors[0].node, node);
+    ASSERT_EQ(info.errors[0].node, nodes[0]);
+    ASSERT_TRUE(info.extracted_nodes.empty());
     ASSERT_FALSE(params.isParamSetByUser("foo"));
   }
   // Set in global, is just a skip
@@ -300,6 +327,7 @@ TEST(ParameterExtractionTest, extractPrivate)
     const auto root = buildTestRoot({"GlobalParams/foo=true"});
     const auto info = extract(*root, "Section", params);
     ASSERT_TRUE(info.errors.empty());
+    ASSERT_TRUE(info.extracted_nodes.empty());
     ASSERT_FALSE(params.isParamSetByUser("foo"));
   }
 }
@@ -320,33 +348,37 @@ TEST(ParameterExtractionTest, extractAliases)
   // use old name
   {
     auto params = setup_params();
-    const auto root = buildTestRoot({"Section/foo=true"});
+    const auto [root, nodes] = buildTestRootWithNodes({"Section/foo=true"});
     const auto info = extract(*root, "Section", params);
     ASSERT_TRUE(info.errors.empty());
+    ASSERT_EQ(info.extracted_nodes.size(), 1);
+    ASSERT_TRUE(hasExtractedNode(info, *nodes[0]));
     ASSERT_TRUE(params.get<bool>("new_foo"));
+    ASSERT_TRUE(params.isParamSetByUser("new_foo"));
   }
   // use new name
   {
     auto params = setup_params();
-    const auto root = buildTestRoot({"Section/new_foo=true"});
+    const auto [root, nodes] = buildTestRootWithNodes({"Section/new_foo=true"});
     const auto info = extract(*root, "Section", params);
     ASSERT_TRUE(info.errors.empty());
+    ASSERT_EQ(info.extracted_nodes.size(), 1);
+    ASSERT_TRUE(hasExtractedNode(info, *nodes[0]));
     ASSERT_TRUE(params.get<bool>("new_foo"));
+    ASSERT_TRUE(params.isParamSetByUser("new_foo"));
   }
   // prefer new name, and old is not extracted (will result in unused var error)
   {
     auto params = setup_params();
-    const auto root = buildTestRoot({"Section/foo=false", "Section/new_foo=true"});
-    const auto foo_node = root->find("Section/foo");
-    ASSERT_NE(foo_node, nullptr);
-    const auto new_foo_node = root->find("Section/new_foo");
-    ASSERT_NE(new_foo_node, nullptr);
+    const auto [root, nodes] =
+        buildTestRootWithNodes({"Section/foo=false", "Section/new_foo=true"});
     const auto info = extract(*root, "Section", params);
     ASSERT_TRUE(info.errors.empty());
-    ASSERT_EQ(info.extracted_variables.size(), 1);
-    ASSERT_EQ(info.extracted_variables[0], "Section/new_foo");
+    ASSERT_EQ(info.extracted_nodes.size(), 1);
+    ASSERT_TRUE(hasExtractedNode(info, *nodes[1]));
     ASSERT_TRUE(params.get<bool>("new_foo"));
-    ASSERT_EQ(params.getHitNode("new_foo"), new_foo_node);
+    ASSERT_EQ(params.getHitNode("new_foo"), nodes[1]);
+    ASSERT_TRUE(params.isParamSetByUser("new_foo"));
   }
 }
 
@@ -364,12 +396,15 @@ TEST(ParameterExtractionTest, extractFromMergedCommandLine)
     const std::unique_ptr<hit::Node> cli_root(
         hit::parse(Moose::hit_command_line_filename, "Section/foo=fromcli\n"));
     hit::merge(cli_root.get(), root.get());
-    const auto info = extract(*root, cli_root.get(), "Section", params);
-    ASSERT_TRUE(info.errors.empty());
-    ASSERT_EQ(params.get<std::string>("foo"), "fromcli");
     const auto node = cli_root->find("Section/foo");
     ASSERT_NE(node, nullptr);
+    const auto info = extract(*root, cli_root.get(), "Section", params);
+    ASSERT_TRUE(info.errors.empty());
+    ASSERT_EQ(info.extracted_nodes.size(), 1);
+    ASSERT_TRUE(hasExtractedNode(info, *node));
+    ASSERT_EQ(params.get<std::string>("foo"), "fromcli");
     ASSERT_EQ(params.getHitNode("foo"), node);
+    ASSERT_TRUE(params.isParamSetByUser("foo"));
   }
 
   // error, associated with the cli node
@@ -379,11 +414,67 @@ TEST(ParameterExtractionTest, extractFromMergedCommandLine)
     const std::unique_ptr<hit::Node> root(hit::parse("file", "Section/foo=true\n"));
     const std::unique_ptr<hit::Node> cli_root(
         hit::parse(Moose::hit_command_line_filename, "Section/foo=abcd\n"));
+    const auto node = cli_root->find("Section/foo");
+    ASSERT_NE(node, nullptr);
     hit::merge(cli_root.get(), root.get());
     const auto info = extract(*root, cli_root.get(), "Section", params);
     ASSERT_EQ(info.errors.size(), 1);
-    const auto node = cli_root->find("Section/foo");
-    ASSERT_NE(node, nullptr);
     ASSERT_EQ(info.errors[0].node, node);
+    ASSERT_TRUE(info.extracted_nodes.empty());
+    ASSERT_FALSE(params.isParamSetByUser("foo"));
+  }
+}
+
+/**
+ * Check that only command line input parameters that have
+ * the input flag enabled are parsed, and otherwise will
+ * return an error
+ */
+TEST(ParameterExtractionTest, extractCommandLineParam)
+{
+  // success
+  {
+    auto params = emptyInputParameters();
+    params.registerBase("Application"); // required for command line params
+    params.addCommandLineParam<std::string>("foo", "--foo", "doc");
+    params.enableInputCommandLineParam("foo");
+    const auto [root, nodes] = buildTestRootWithNodes({"Application/foo=bar"});
+    const auto info = extract(*root, "Application", params);
+    ASSERT_TRUE(info.errors.empty());
+    ASSERT_EQ(info.extracted_nodes.size(), 1);
+    ASSERT_TRUE(hasExtractedNode(info, *nodes[0]));
+    ASSERT_EQ(params.get<std::string>("foo"), "bar");
+    ASSERT_EQ(params.getHitNode("foo"), nodes[0]);
+    ASSERT_TRUE(params.isParamSetByUser("foo"));
+  }
+
+  // not enabled
+  {
+    auto params = emptyInputParameters();
+    params.registerBase("Application"); // required for command line params
+    params.addCommandLineParam<std::string>("foo", "-f --foo", "doc");
+    const auto [root, nodes] = buildTestRootWithNodes({"Application/foo=bar"});
+    const auto info = extract(*root, "Application", params);
+    ASSERT_EQ(info.errors.size(), 1);
+    ASSERT_EQ(
+        info.errors[0].message,
+        "parameter 'Application/foo' may only be set via the command line switch(es) '-f, --foo'");
+    ASSERT_EQ(info.errors[0].node, nodes[0]);
+    ASSERT_TRUE(info.extracted_nodes.empty());
+    ASSERT_EQ(params.getHitNode("foo"), nullptr);
+    ASSERT_FALSE(params.isParamSetByUser("foo"));
+  }
+
+  // not enabled, but global, so skipped and not applied
+  {
+    auto params = emptyInputParameters();
+    params.registerBase("Application"); // required for command line params
+    params.addCommandLineParam<std::string>("foo", "-f --foo", "doc");
+    const auto [root, nodes] = buildTestRootWithNodes({"GlobalParams/foo=bar"});
+    const auto info = extract(*root, "Application", params);
+    ASSERT_TRUE(info.errors.empty());
+    ASSERT_TRUE(info.extracted_nodes.empty());
+    ASSERT_EQ(params.getHitNode("foo"), nullptr);
+    ASSERT_FALSE(params.isParamSetByUser("foo"));
   }
 }

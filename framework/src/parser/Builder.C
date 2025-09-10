@@ -688,7 +688,18 @@ void
 Builder::appendExtractionInfo(const ParameterExtraction::ExtractionInfo & info)
 {
   Moose::ParseUtils::appendErrorMessages(_errors, info.errors);
-  _extracted_vars.insert(info.extracted_variables.begin(), info.extracted_variables.end());
+
+  // Append to the variables we have extracted, which also
+  // includes the paths that have errors (so that we don't
+  // report both an error and an unused variable)
+  for (const auto & error : info.errors)
+  {
+    mooseAssert(error.node, "Should have a node");
+    _extracted_vars.insert(error.node->fullpath());
+  }
+  for (const auto node_ptr : info.extracted_nodes)
+    _extracted_vars.insert(node_ptr->fullpath());
+
   for (const auto & [k, v] : info.deprecated_params)
     _deprecated_params.emplace(k, v);
 }

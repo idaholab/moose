@@ -98,6 +98,7 @@ MooseApp::addAppParam(InputParameters & params)
 {
   params.addCommandLineParam<std::string>(
       "type", "--app <type>", "Specify the application type to run (case-sensitive)");
+  params.enableInputCommandLineParam("type");
 }
 
 void
@@ -128,23 +129,31 @@ MooseApp::validParams()
   params.addCommandLineParam<bool>(
       "show_input", "--show-input", "Shows the parsed input file before running the simulation");
   params.setGlobalCommandLineParam("show_input");
+  params.enableInputCommandLineParam("show_input");
+
   params.addCommandLineParam<bool>(
       "show_outputs", "--show-outputs", "Shows the output execution time information");
   params.setGlobalCommandLineParam("show_outputs");
+  params.enableInputCommandLineParam("show_outputs");
+
   params.addCommandLineParam<bool>(
       "show_controls", "--show-controls", "Shows the Control logic available and executed");
   params.setGlobalCommandLineParam("show_controls");
+  params.enableInputCommandLineParam("show_controls");
 
   params.addCommandLineParam<bool>(
       "no_color", "--no-color", "Disable coloring of all Console outputs");
   params.setGlobalCommandLineParam("no_color");
+  params.enableInputCommandLineParam("no_color");
 
   MooseEnum colors("auto on off", "on");
   params.addCommandLineParam<MooseEnum>(
       "color", "--color <auto,on,off=on>", colors, "Whether to use color in console output");
   params.setGlobalCommandLineParam("color");
+  params.enableInputCommandLineParam("color");
 
   params.addCommandLineParam<bool>("help", "-h --help", "Displays CLI usage statement");
+
   params.addCommandLineParam<bool>(
       "minimal",
       "--minimal",
@@ -261,6 +270,7 @@ MooseApp::validParams()
 
   params.addCommandLineParam<unsigned int>(
       "refinements", "-r <num refinements>", "Specify additional initial uniform mesh refinements");
+  params.enableInputCommandLineParam("refinements");
 
   params.addOptionalValuedCommandLineParam<std::string>(
       "recover",
@@ -279,6 +289,7 @@ MooseApp::validParams()
                                    false,
                                    "Disables the output of the application header.");
   params.setGlobalCommandLineParam("suppress_header");
+  params.enableInputCommandLineParam("suppress_header");
 
   params.addCommandLineParam<bool>(
       "test_checkpoint_half_transient",
@@ -299,6 +310,7 @@ MooseApp::validParams()
 #endif
   );
   params.setGlobalCommandLineParam("trap_fpe");
+  params.enableInputCommandLineParam("trap_fpe");
 
   params.addCommandLineParam<bool>(
       "no_trap_fpe",
@@ -308,28 +320,34 @@ MooseApp::validParams()
       " (unused due to non-debug build)"
 #endif
   );
-
   params.setGlobalCommandLineParam("no_trap_fpe");
+  params.enableInputCommandLineParam("no_trap_fpe");
 
   params.addCommandLineParam<bool>(
       "no_gdb_backtrace", "--no-gdb-backtrace", "Disables gdb backtraces.");
   params.setGlobalCommandLineParam("no_gdb_backtrace");
+  params.enableInputCommandLineParam("no_gdb_backtrace");
 
   params.addCommandLineParam<bool>("error", "--error", "Turn all warnings into errors");
   params.setGlobalCommandLineParam("error");
+  params.enableInputCommandLineParam("error");
 
   params.addCommandLineParam<bool>("timing",
                                    "-t --timing",
                                    "Enable all performance logging for timing; disables screen "
                                    "output of performance logs for all Console objects");
   params.setGlobalCommandLineParam("timing");
+  params.enableInputCommandLineParam("timing");
+
   params.addCommandLineParam<bool>(
       "no_timing", "--no-timing", "Disabled performance logging; overrides -t or --timing");
   params.setGlobalCommandLineParam("no_timing");
+  params.enableInputCommandLineParam("no_timing");
 
   params.addCommandLineParam<bool>(
       "allow_test_objects", "--allow-test-objects", "Register test objects and syntax");
   params.setGlobalCommandLineParam("allow_test_objects");
+  params.enableInputCommandLineParam("allow_test_objects");
 
   // Options ignored by MOOSE but picked up by libMesh, these are here so that they are displayed in
   // the application help
@@ -365,13 +383,12 @@ MooseApp::validParams()
   params.addCommandLineParam<bool>(
       "perf_graph_live_all", "--perf-graph-live-all", "Forces printing of ALL progress messages");
   params.setGlobalCommandLineParam("perf_graph_live_all");
+  params.enableInputCommandLineParam("perf_graph_live_all");
 
   params.addCommandLineParam<bool>(
       "disable_perf_graph_live", "--disable-perf-graph-live", "Disables PerfGraph live printing");
   params.setGlobalCommandLineParam("disable_perf_graph_live");
-
-  params.addParam<bool>(
-      "automatic_automatic_scaling", false, "Whether to turn on automatic scaling by default");
+  params.enableInputCommandLineParam("disable_perf_graph_live");
 
   const MooseEnum compute_device_type("cpu cuda mps hip ceed-cpu ceed-cuda ceed-hip", "cpu");
   params.addCommandLineParam<MooseEnum>(
@@ -379,6 +396,7 @@ MooseApp::validParams()
       "--compute-device",
       compute_device_type,
       "The device type we want to run accelerated (libtorch, MFEM) computations on.");
+  params.enableInputCommandLineParam("compute_device");
 
 #ifdef HAVE_GPERFTOOLS
   params.addCommandLineParam<std::string>(
@@ -392,10 +410,18 @@ MooseApp::validParams()
       "--show-data-params",
       false,
       "Show found paths for all DataFileName parameters in the header");
+  params.enableInputCommandLineParam("show_data_params");
+
   params.addCommandLineParam<bool>("show_data_paths",
                                    "--show-data-paths",
                                    false,
                                    "Show registered data paths for searching in the header");
+  params.enableInputCommandLineParam("show_data_paths");
+
+  params.addCommandLineParam<bool>(
+      "parse_neml2_only",
+      "--parse-neml2-only",
+      "Executes the [NEML2] block to parse the input file and terminate.");
 
   params.addPrivateParam<std::shared_ptr<CommandLine>>("_command_line");
   params.addPrivateParam<std::shared_ptr<Parallel::Communicator>>("_comm");
@@ -417,6 +443,7 @@ MooseApp::validParams()
       "use_legacy_material_output",
       true,
       "Set false to allow material properties to be output on INITIAL, not just TIMESTEP_END.");
+
   params.addParam<bool>(
       "use_legacy_initial_residual_evaluation_behavior",
       true,
@@ -430,10 +457,8 @@ MooseApp::validParams()
       false,
       "Set true to enable data-driven mesh generation, which is an experimental feature");
 
-  params.addCommandLineParam<bool>(
-      "parse_neml2_only",
-      "--parse-neml2-only",
-      "Executes the [NEML2] block to parse the input file and terminate.");
+  params.addParam<bool>(
+      "automatic_automatic_scaling", false, "Whether to turn on automatic scaling by default");
 
   MooseApp::addAppParam(params);
 

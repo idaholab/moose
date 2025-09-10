@@ -97,6 +97,8 @@ public:
     std::optional<std::string> set_switch;
     /// Whether or not the parameter is global (passed to MultiApps)
     bool global = false;
+    /// Whether or not the parameter can be set in input
+    bool input_enabled = false;
   };
 
   /**
@@ -407,6 +409,12 @@ public:
   void setGlobalCommandLineParam(const std::string & name);
 
   /**
+   * Allows the command line parameter with \p name to be set in input
+   * or as a HIT CLI argument.
+   */
+  void enableInputCommandLineParam(const std::string & name);
+
+  /**
    * @param name The name of the parameter
    * @param value The default value of this parameter if it requires one
    * @param doc_string Documentation.  This will be shown for --help
@@ -446,7 +454,7 @@ public:
    *
    * Will return an empty optional if the parameter is not a command line param.
    */
-  std::optional<InputParameters::CommandLineMetadata>
+  const InputParameters::CommandLineMetadata *
   queryCommandLineMetadata(const std::string & name) const;
 
   /**
