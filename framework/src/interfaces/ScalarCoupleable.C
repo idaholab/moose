@@ -67,8 +67,7 @@ ScalarCoupleable::ScalarCoupleable(const MooseObject * moose_object)
 }
 
 #ifdef MOOSE_KOKKOS_ENABLED
-ScalarCoupleable::ScalarCoupleable(const ScalarCoupleable & object,
-                                   const Moose::Kokkos::FunctorCopy &)
+ScalarCoupleable::ScalarCoupleable(const ScalarCoupleable & object, Moose::Kokkos::FunctorCopy)
   : _sc_fe_problem(object._sc_fe_problem),
     _sc_tid(object._sc_tid),
     _real_zero(object._real_zero),

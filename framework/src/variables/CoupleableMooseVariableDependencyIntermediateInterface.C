@@ -27,10 +27,10 @@ CoupleableMooseVariableDependencyIntermediateInterface::
 CoupleableMooseVariableDependencyIntermediateInterface::
     CoupleableMooseVariableDependencyIntermediateInterface(
         const CoupleableMooseVariableDependencyIntermediateInterface & object,
-        const Moose::Kokkos::FunctorCopy & key)
-  : Coupleable(object, key),
-    ScalarCoupleable(object, key),
-    MooseVariableDependencyInterface(object, key)
+        Moose::Kokkos::FunctorCopy)
+  : Coupleable(object, {}),
+    ScalarCoupleable(object, {}),
+    MooseVariableDependencyInterface(object, {})
 {
 }
 #endif

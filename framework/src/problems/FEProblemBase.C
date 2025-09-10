@@ -1170,11 +1170,10 @@ FEProblemBase::initialSetup()
       if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
           _neighbor_material_props.hasStatefulProperties())
         _has_initialized_stateful = true;
-
 #ifdef MOOSE_KOKKOS_ENABLED
-      if (_kokkos_material_props.hasStatefulProperties() ||
-          _kokkos_bnd_material_props.hasStatefulProperties() ||
-          _kokkos_neighbor_material_props.hasStatefulProperties())
+      else if (_kokkos_material_props.hasStatefulProperties() ||
+               _kokkos_bnd_material_props.hasStatefulProperties() ||
+               _kokkos_neighbor_material_props.hasStatefulProperties())
         _has_initialized_stateful = true;
 #endif
     }

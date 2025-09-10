@@ -27,13 +27,12 @@ class MooseObject;
 class SubProblem;
 class Assembly;
 
-namespace Moose
-{
-namespace Kokkos
+#ifdef MOOSE_KOKKOS_ENABLED
+namespace Moose::Kokkos
 {
 class ResidualObject;
-} // namespace Kokkos
-} // namespace Moose
+}
+#endif
 
 template <typename T>
 InputParameters validParams();
@@ -62,7 +61,7 @@ public:
   /**
    * Special constructor used for Kokkos functor copy during parallel dispatch
    */
-  TaggingInterface(const TaggingInterface & object, const Moose::Kokkos::FunctorCopy &);
+  TaggingInterface(const TaggingInterface & object, Moose::Kokkos::FunctorCopy);
 #endif
 
   virtual ~TaggingInterface();
@@ -80,7 +79,9 @@ public:
     friend class LinearSystemContributionObject;
     template <typename>
     friend class MooseObjectTagWarehouse;
+#ifdef MOOSE_KOKKOS_ENABLED
     friend class Moose::Kokkos::ResidualObject;
+#endif
 
     VectorTagsKey() {}
     VectorTagsKey(const VectorTagsKey &) {}
@@ -97,7 +98,9 @@ public:
     friend class LinearSystemContributionObject;
     template <typename>
     friend class MooseObjectTagWarehouse;
+#ifdef MOOSE_KOKKOS_ENABLED
     friend class Moose::Kokkos::ResidualObject;
+#endif
 
     MatrixTagsKey() {}
     MatrixTagsKey(const MatrixTagsKey &) {}

@@ -109,7 +109,7 @@ public:
   /**
    * Special constructor used for Kokkos functor copy during parallel dispatch
    */
-  Restartable(const Restartable & object, const Moose::Kokkos::FunctorCopy &);
+  Restartable(const Restartable & object, Moose::Kokkos::FunctorCopy);
 #endif
 
 protected:

@@ -63,7 +63,7 @@ public:
   /**
    * Special constructor used for Kokkos functor copy during parallel dispatch
    */
-  BoundaryRestrictable(const BoundaryRestrictable & object, const Moose::Kokkos::FunctorCopy &);
+  BoundaryRestrictable(const BoundaryRestrictable & object, Moose::Kokkos::FunctorCopy);
 #endif
 
   /**

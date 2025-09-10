@@ -37,7 +37,7 @@ public:
   /**
    * Special constructor used for Kokkos functor copy during parallel dispatch
    */
-  TransientInterface(const TransientInterface & object, const Moose::Kokkos::FunctorCopy &);
+  TransientInterface(const TransientInterface & object, Moose::Kokkos::FunctorCopy);
 #endif
 
   virtual ~TransientInterface();

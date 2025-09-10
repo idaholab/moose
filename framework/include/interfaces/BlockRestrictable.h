@@ -24,13 +24,12 @@
 class FEProblemBase;
 class MooseMesh;
 
-namespace Moose
-{
-namespace Kokkos
+#ifdef MOOSE_KOKKOS_ENABLED
+namespace Moose::Kokkos
 {
 class Mesh;
-} // namespace Kokkos
-} // namespace Moose
+}
+#endif
 
 class MooseVariableFieldBase;
 
@@ -95,7 +94,7 @@ public:
   /**
    * Special constructor used for Kokkos functor copy during parallel dispatch
    */
-  BlockRestrictable(const BlockRestrictable & object, const Moose::Kokkos::FunctorCopy &);
+  BlockRestrictable(const BlockRestrictable & object, Moose::Kokkos::FunctorCopy);
 #endif
 
   /**

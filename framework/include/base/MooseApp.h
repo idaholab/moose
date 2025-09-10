@@ -84,12 +84,9 @@ class Node;
 }
 
 #ifdef MOOSE_KOKKOS_ENABLED
-namespace Moose
-{
-namespace Kokkos
+namespace Moose::Kokkos
 {
 class MemoryPool;
-}
 }
 #endif
 

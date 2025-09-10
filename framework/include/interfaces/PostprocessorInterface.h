@@ -42,7 +42,7 @@ public:
   /**
    * Special constructor used for Kokkos functor copy during parallel dispatch
    */
-  PostprocessorInterface(const PostprocessorInterface & object, const Moose::Kokkos::FunctorCopy &);
+  PostprocessorInterface(const PostprocessorInterface & object, Moose::Kokkos::FunctorCopy);
 #endif
 
   static InputParameters validParams();

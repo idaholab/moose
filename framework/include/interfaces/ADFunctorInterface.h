@@ -27,7 +27,7 @@ public:
   /**
    * Special constructor used for Kokkos functor copy during parallel dispatch
    */
-  ADFunctorInterface(const ADFunctorInterface & object, const Moose::Kokkos::FunctorCopy & key);
+  ADFunctorInterface(const ADFunctorInterface & object, Moose::Kokkos::FunctorCopy);
 #endif
 
 private:

@@ -98,13 +98,12 @@ class MooseAppCoordTransform;
 class MortarUserObject;
 class SolutionInvalidity;
 
-namespace Moose
-{
-namespace Kokkos
+#ifdef MOOSE_KOKKOS_ENABLED
+namespace Moose::Kokkos
 {
 class MaterialPropertyStorage;
-} // namespace Kokkos
-} // namespace Moose
+}
+#endif
 
 // libMesh forward declarations
 namespace libMesh
