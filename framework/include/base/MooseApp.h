@@ -796,6 +796,11 @@ public:
   virtual std::string header() const;
 
   /**
+   * Returns the number of threads used by this application
+   */
+  unsigned int getNumThreads() const { return libMesh::n_threads(); }
+
+  /**
    * The MultiApp Level
    * @return The current number of levels from the master app
    */

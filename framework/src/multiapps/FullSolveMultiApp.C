@@ -111,6 +111,10 @@ FullSolveMultiApp::solveStep(Real /*dt*/, Real /*target_time*/, bool auto_advanc
     if (!getParam<bool>("keep_full_output_history"))
       _apps[i]->getOutputWarehouse().reset();
 
+    // set number of threads
+    libMesh::libMeshPrivateData::_n_threads = localApp(i)->getNumThreads();
+    omp_set_num_threads(localApp(i)->getNumThreads());
+
     Executioner * ex = _executioners[i];
     ex->execute();
 

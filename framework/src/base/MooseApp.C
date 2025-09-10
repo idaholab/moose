@@ -489,6 +489,7 @@ MooseApp::MooseApp(const InputParameters & parameters)
     _test_checkpoint_half_transient(parameters.get<bool>("test_checkpoint_half_transient")),
     _test_restep(parameters.get<bool>("test_restep")),
     _check_input(getParam<bool>("check_input")),
+    _num_threads(libMesh::command_line_value("--n-threads", 1)),
     _multiapp_level(isParamValid("_multiapp_level") ? getParam<unsigned int>("_multiapp_level")
                                                     : 0),
     _multiapp_number(isParamValid("_multiapp_number") ? getParam<unsigned int>("_multiapp_number")
@@ -519,6 +520,7 @@ MooseApp::MooseApp(const InputParameters & parameters)
                                                 : std::set<std::string>{})
 #endif
 {
+  std::cout << "Creating app " << name() << " type " << type() << " n_threads " << _num_threads << std::endl;
   if (&parameters != &_pars)
   {
     const auto show_trace = Moose::show_trace;
