@@ -12,6 +12,7 @@
 #include "CommandLine.h"
 #include "InputParameters.h"
 #include "MooseEnum.h"
+#include "MooseUnitUtils.h"
 
 #include <type_traits>
 
@@ -172,18 +173,11 @@ TEST(CommandLineTest, parseMultiAppDashedOption)
   {
     CommandLine cl;
     cl.addArgument(arg);
-    try
-    {
-      cl.parse();
-      FAIL();
-    }
-    catch (const std::exception & err)
-    {
-      ASSERT_EQ(std::string(err.what()),
-                "The MultiApp command line argument '" + arg +
-                    "' sets a command line option.\nMultiApp command line arguments can only be "
-                    "used for setting HIT parameters.");
-    }
+    Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+        [&cl, &arg]() { cl.parse(); },
+        "The MultiApp command line argument '" + arg +
+            "' sets a command line option.\nMultiApp command line arguments can only be used for "
+            "setting HIT parameters.");
   };
 
   test("sub:-foo=val");
@@ -224,6 +218,7 @@ TEST(CommandLineTest, populate)
     constexpr bool is_bool = std::is_same_v<type, bool>;
 
     InputParameters params = emptyInputParameters();
+    params.registerBase("Application"); // required for command line params
     params.addCommandLineParam<type>(
         "without_default", "-without-default --without-default", "Doc1");
     // bool doesn't support required or with default
@@ -323,6 +318,7 @@ TEST(CommandLineTest, populate)
       // Test an empty initializer list default
       {
         InputParameters empty_default_params = emptyInputParameters();
+        empty_default_params.registerBase("Application"); // required for command line params
         empty_default_params.addCommandLineParam<type>(
             "empty_default", "--empty-default", {}, "Doc4");
 
@@ -359,26 +355,19 @@ TEST(CommandLineTest, populateBadInterpret)
         typename std::remove_reference<decltype(value_type)>::type>::type;
 
     InputParameters params = emptyInputParameters();
+    params.registerBase("Application"); // required for command line params
     params.addCommandLineParam<type>("value", "--value", "Doc");
 
     CommandLine cl;
     cl.addArgument("/path/to/exe");
     cl.addArgument("--value=" + value);
     cl.parse();
-
-    try
-    {
-      cl.populateCommandLineParams(params);
-      FAIL();
-    }
-    catch (const std::exception & err)
-    {
-      ASSERT_EQ(std::string(err.what()),
-                "While parsing command line option '--value' with value '" + value +
-                    "':\n\nUnable to "
-                    "convert '" +
-                    value + "' to type " + MooseUtils::prettyCppType<type>());
-    }
+    Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+        [&cl, &params]() { cl.populateCommandLineParams(params); },
+        "While parsing command line option '--value' with value '" + value +
+            "':\n\nUnable to "
+            "convert '" +
+            value + "' to type " + MooseUtils::prettyCppType<type>());
   };
 
   test(Real(), "abcd");
@@ -389,28 +378,22 @@ TEST(CommandLineTest, populateBadInterpret)
 TEST(CommandLineTest, populateSameSwitch)
 {
   InputParameters params = emptyInputParameters();
+  params.registerBase("Application"); // required for command line params
   params.addCommandLineParam<bool>("value", "--value", "Doc");
   params.addCommandLineParam<bool>("value2", "--value", "Doc");
 
   CommandLine cl;
   cl.parse();
-
-  try
-  {
-    cl.populateCommandLineParams(params);
-    FAIL();
-  }
-  catch (const std::exception & err)
-  {
-    ASSERT_EQ(std::string(err.what()),
-              "The command line options 'value' and 'value2' both declare the command line switch "
-              "'--value'");
-  }
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+      [&cl, &params]() { cl.populateCommandLineParams(params); },
+      "The command line options 'value' and 'value2' both declare the command line switch "
+      "'--value'");
 }
 
 TEST(CommandLineTest, populateMooseEnum)
 {
   InputParameters params = emptyInputParameters();
+  params.registerBase("Application"); // required for command line params
   const auto default_value = "foo";
   MooseEnum enum_values("foo bar", default_value);
   params.addCommandLineParam<MooseEnum>("value", "--value", enum_values, "Doc");
@@ -434,22 +417,16 @@ TEST(CommandLineTest, populateMooseEnum)
   check("");
   check("foo");
   check("bar");
-  try
-  {
-    check("baz");
-    FAIL();
-  }
-  catch (const std::exception & err)
-  {
-    ASSERT_EQ(std::string(err.what()),
-              "While parsing command line option '--value' with value 'baz':\n\nInvalid option "
-              "\"baz\" in MooseEnum.  Valid options (not case-sensitive) are \"foo bar\".");
-  }
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+      [&check]() { check("baz"); },
+      "While parsing command line option '--value' with value 'baz':\n\nInvalid "
+      "option \"baz\" in MooseEnum.  Valid options (not case-sensitive) are \"foo bar\".");
 }
 
 TEST(CommandLineTest, populateSetByUser)
 {
   InputParameters params = emptyInputParameters();
+  params.registerBase("Application"); // required for command line params
   params.addCommandLineParam<bool>("value", "--value", "Doc");
   EXPECT_FALSE(params.isParamSetByUser("value"));
 
@@ -485,6 +462,7 @@ TEST(CommandLineTest, initSubAppCommandLine)
                        const std::vector<std::string> & subexpected_args)
   {
     InputParameters params = emptyInputParameters();
+    params.registerBase("Application"); // required for command line params
     params.addCommandLineParam<bool>("global", "--global", "Doc1");
     params.setGlobalCommandLineParam("global");
     params.addCommandLineParam<bool>("another_global", "--another-global", "Doc2");
@@ -529,6 +507,7 @@ TEST(CommandLineTest, initSubAppCommandLine)
 TEST(CommandLineTest, globalCommandLineParamSubapp)
 {
   InputParameters params = emptyInputParameters();
+  params.registerBase("Application"); // required for command line params
   params.addCommandLineParam<bool>("global", "--global", "Doc1");
   params.setGlobalCommandLineParam("global");
   InputParameters subapp_params = params;
@@ -555,6 +534,7 @@ TEST(CommandLineTest, globalCommandLineParamSubapp)
 TEST(CommandLineTest, requiredParameter)
 {
   InputParameters params = emptyInputParameters();
+  params.registerBase("Application"); // required for command line params
   params.addRequiredCommandLineParam<std::string>("value", "--value", "Doc");
 
   {
@@ -562,17 +542,9 @@ TEST(CommandLineTest, requiredParameter)
     CommandLine cl;
     cl.addArgument("/path/to/exe");
     cl.parse();
-
-    try
-    {
-      cl.populateCommandLineParams(params_copy);
-      FAIL();
-    }
-    catch (const std::exception & err)
-    {
-      EXPECT_EQ((std::string)err.what(),
-                "Missing required command-line parameter: value\nDoc string: Doc");
-    }
+    Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+        [&cl, &params_copy]() { cl.populateCommandLineParams(params_copy); },
+        "Missing required command-line parameter: value\nDoc string: Doc");
   }
 
   {
@@ -611,18 +583,21 @@ TEST(CommandLineTest, requiredParameterArgument)
 
   {
     InputParameters params = emptyInputParameters();
+    params.registerBase("Application"); // required for command line params
     params.addCommandLineParam<std::string>("value", "--value", "Doc");
     check(params, true);
   }
 
   {
     InputParameters params = emptyInputParameters();
+    params.registerBase("Application"); // required for command line params
     params.addCommandLineParam<std::string>("value", "--value", "some_value", "Doc");
     check(params, false);
   }
 
   {
     InputParameters params = emptyInputParameters();
+    params.registerBase("Application"); // required for command line params
     const auto default_value = "foo";
     MooseEnum enum_values("foo", default_value);
     params.addCommandLineParam<MooseEnum>("value", "--value", enum_values, "Doc");
@@ -633,6 +608,7 @@ TEST(CommandLineTest, requiredParameterArgument)
 TEST(CommandLineTest, duplicateOptions)
 {
   InputParameters params = emptyInputParameters();
+  params.registerBase("Application"); // required for command line params
   params.addCommandLineParam<unsigned int>("value", "-v --value", "Doc");
 
   CommandLine cl;
@@ -660,22 +636,13 @@ TEST(CommandLineTest, unappliedArgument)
     cl.addArgument("/path/to/exe");
     for (const auto & arg : args)
       cl.addArgument(arg);
-
-    try
-    {
-      cl.parse();
-      FAIL();
-    }
-    catch (const std::exception & err)
-    {
-      std::string expected_err = "The command line argument '" + not_applied_arg +
-                                 "' is not applied to an option and is not a HIT parameter.";
-      if (suggestion.size())
-        expected_err +=
-            "\n\nDid you mean to combine this argument with the previous argument, such as:\n\n  " +
-            suggestion + "\n";
-      ASSERT_EQ(std::string(err.what()), expected_err);
-    }
+    std::string expected_err = "The command line argument '" + not_applied_arg +
+                               "' is not applied to an option and is not a HIT parameter.";
+    if (suggestion.size())
+      expected_err +=
+          "\n\nDid you mean to combine this argument with the previous argument, such as:\n\n  " +
+          suggestion + "\n";
+    Moose::UnitUtils::assertThrows<MooseRuntimeError>([&cl]() { cl.parse(); }, expected_err);
   };
 
   test_not_applied({"foo"}, "foo");
@@ -685,6 +652,7 @@ TEST(CommandLineTest, unappliedArgument)
 TEST(CommandLineTest, boolParamWithValue)
 {
   InputParameters params = emptyInputParameters();
+  params.registerBase("Application"); // required for command line params
   params.addCommandLineParam<bool>("value", "--value", "Doc");
 
   CommandLine cl;
@@ -692,18 +660,10 @@ TEST(CommandLineTest, boolParamWithValue)
   cl.addArgument("--value");
   cl.addArgument("foo");
   cl.parse();
-
-  try
-  {
-    cl.populateCommandLineParams(params);
-    FAIL();
-  }
-  catch (const std::exception & err)
-  {
-    ASSERT_EQ(std::string(err.what()),
-              "The command line option '--value' is a boolean and does not support a value but the "
-              "value 'foo' was provided.\nDoc string: Doc");
-  }
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+      [&cl, &params]() { cl.populateCommandLineParams(params); },
+      "The command line option '--value' is a boolean and does not support a value but the value "
+      "'foo' was provided.\nDoc string: Doc");
 }
 
 TEST(CommandLineTest, negativeScalarParam)
@@ -720,6 +680,7 @@ TEST(CommandLineTest, negativeScalarParam)
       cl.parse();
 
       InputParameters params = emptyInputParameters();
+      params.registerBase("Application"); // required for command line params
       params.addCommandLineParam<type>("value", "--value", "Doc");
       cl.populateCommandLineParams(params);
 
@@ -734,6 +695,7 @@ TEST(CommandLineTest, negativeScalarParam)
       cl.parse();
 
       InputParameters params = emptyInputParameters();
+      params.registerBase("Application"); // required for command line params
       params.addCommandLineParam<type>("value", "--value", value - 100, "Doc");
       cl.populateCommandLineParams(params);
 
@@ -757,6 +719,7 @@ TEST(CommandLineTest, mergeArgsForParam)
       cl.parse();
 
       InputParameters params = emptyInputParameters();
+      params.registerBase("Application"); // required for command line params
       params.addCommandLineParam<std::vector<std::string>>("value", "--value", "Doc");
       cl.populateCommandLineParams(params);
 
@@ -773,6 +736,7 @@ TEST(CommandLineTest, mergeArgsForParam)
       cl.parse();
 
       InputParameters params = emptyInputParameters();
+      params.registerBase("Application"); // required for command line params
       params.addCommandLineParam<std::string>("value", "--value", "Doc");
       cl.populateCommandLineParams(params);
 
@@ -799,6 +763,7 @@ TEST(CommandLineTest, findCommandLineParam)
   cl.parse();
 
   InputParameters params = emptyInputParameters();
+  params.registerBase("Application"); // required for command line params
   params.addCommandLineParam<std::string>("value", "--value", "Doc");
   params.addCommandLineParam<std::string>("other_value", "--other_value", "Doc");
   cl.populateCommandLineParams(params);
@@ -810,55 +775,9 @@ TEST(CommandLineTest, findCommandLineParam)
   auto find_other_value = std::as_const(cl).findCommandLineParam("other_value");
   ASSERT_EQ(find_other_value, std::as_const(cl).getEntries().end());
 
-  try
-  {
-    std::as_const(cl).findCommandLineParam("foo");
-    FAIL();
-  }
-  catch (const std::exception & err)
-  {
-    ASSERT_EQ(
-        std::string(err.what()),
-        "CommandLine::findCommandLineParam(): The parameter 'foo' is not a command line parameter");
-  }
-}
-
-TEST(CommandLineTest, disallowApplicationType)
-{
-  {
-    CommandLine cl;
-    cl.addArgument("/path/to/exe");
-    cl.addArgument("Application/type=Foo");
-
-    try
-    {
-      cl.parse();
-    }
-    catch (const std::exception & err)
-    {
-      ASSERT_EQ(std::string(err.what()),
-                "The command line argument 'Application/type=Foo' is not allowed.\nThe application "
-                "type must be set via the --app command line option.");
-    }
-  }
-
-  {
-    CommandLine cl;
-    cl.addArgument("/path/to/exe");
-    cl.addArgument("sub0:Application/type=Foo");
-
-    try
-    {
-      cl.parse();
-    }
-    catch (const std::exception & err)
-    {
-      ASSERT_EQ(std::string(err.what()),
-                "The command line argument 'sub0:Application/type=Foo' is not allowed.\nThe "
-                "application type must be set via the MultiApp type input parameter or the "
-                "Application/type parameter in the MultiApp input.");
-    }
-  }
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+      [&cl]() { std::as_const(cl).findCommandLineParam("foo"); },
+      "CommandLine::findCommandLineParam(): The parameter 'foo' is not a command line parameter");
 }
 
 TEST(CommandLineTest, optionalValuedParam)
@@ -876,6 +795,7 @@ TEST(CommandLineTest, optionalValuedParam)
     cl.parse();
 
     InputParameters params = emptyInputParameters();
+    params.registerBase("Application"); // required for command line params
     params.addOptionalValuedCommandLineParam<std::string>("mesh_only", "--mesh-only", {}, "Doc");
     cl.populateCommandLineParams(params);
 
@@ -894,6 +814,7 @@ TEST(CommandLineTest, optionalValuedParam)
     cl.parse();
 
     InputParameters params = emptyInputParameters();
+    params.registerBase("Application"); // required for command line params
     params.addOptionalValuedCommandLineParam<std::string>("mesh_only", "--mesh-only", {}, "Doc");
     cl.populateCommandLineParams(params);
 
@@ -911,6 +832,7 @@ TEST(CommandLineTest, mergeHIT)
   cl.parse();
 
   InputParameters params = emptyInputParameters();
+  params.registerBase("Application"); // required for command line params
   cl.populateCommandLineParams(params);
 
   ASSERT_EQ(cl.buildHitParams(), args);
@@ -930,18 +852,10 @@ TEST(CommandLineTest, removeArgumentMissing)
 {
   CommandLine cl;
   cl.addArgument("/path/to/exe");
-
   EXPECT_FALSE(cl.hasArgument("--arg"));
-  try
-  {
-    cl.removeArgument("--arg");
-    FAIL();
-  }
-  catch (const std::exception & e)
-  {
-    EXPECT_EQ(std::string(e.what()),
-              "CommandLine::removeArgument(): The argument '--arg' does not exist");
-  }
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+      [&cl]() { cl.removeArgument("--arg"); },
+      "CommandLine::removeArgument(): The argument '--arg' does not exist");
 }
 
 TEST(CommandLineTest, formatEntry)
@@ -985,6 +899,7 @@ TEST(CommandLineTest, combinedKeyValueParamKnownArg)
   ASSERT_FALSE(have_cl_name(arg));
 
   auto params = emptyInputParameters();
+  params.registerBase("Application"); // required for command line params
   params.addCommandLineParam<std::string>("unused", cl_switch, "unused", "unused");
 
   // Population of the command line params should then explicitly

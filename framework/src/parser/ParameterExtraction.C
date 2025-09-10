@@ -77,17 +77,69 @@ extract(const hit::Node & root,
                   Moose::ParseUtils::queryCommandLineNode(*param_node, *command_line_root))
             param_node = command_line_node;
 
+        // Helper for appending an error
+        const auto add_error = [&info, &param_node](const std::string & message)
+        { info.errors.emplace_back(message, param_node); };
+
+        // Private parameter, so end early and don't set
+        if (params.isPrivate(param_name))
+        {
+          // Only error if it's not coming from a global parameter
+          if (!global)
+            add_error("parameter '" + fullpath + "' is private and cannot be set");
+          break;
+        }
+
+        // Check if this is a command line parameter
+        if (const auto cl_data = params.queryCommandLineMetadata(param_name))
+        {
+          // This command line parameter cannot be set in input; if this is
+          // set from a global parameter, ignore it. Otherwise, error
+          if (!cl_data->input_enabled)
+          {
+            if (!global)
+            {
+              const auto switches = MooseUtils::stringJoin(cl_data->switches, ", ");
+              add_error("parameter '" + fullpath +
+                        "' may only be set via the command line switch(es) '" + switches + "'");
+            }
+            break;
+          }
+        }
+
+        // Set the value, capturing errors
+        const auto param_field = dynamic_cast<const hit::Field *>(param_node);
+        mooseAssert(param_field, "Is not a field");
+        try
+        {
+          ParameterRegistry::get().set(*par_unique_ptr, *param_field);
+        }
+        catch (hit::Error & e)
+        {
+          add_error(e.message);
+          break;
+        }
+        catch (std::exception & e)
+        {
+          add_error(e.what());
+          break;
+        }
+
+        // Have successfully extracted from this node
+        info.extracted_nodes.push_back(param_node);
         // Associate the node that we found with the parameters so that
         // messages can be formed with the context of this parameter in input
         params.setHitNode(param_name, *param_node, {});
         // Mark the parameter as set
         params.set_attributes(param_name, false);
-        // Keep track of this variable as extracted so that we can report
-        // errors for unused variables
-        info.extracted_variables.emplace_back(fullpath);
+        // Command line parameters have special isParamValid logic, so
+        // we need to set that they've been set here if so
+        if (params.isCommandLineParameter(param_name))
+          params.commandLineParamSet(param_name, fullpath, param_node, {});
 
         // Check for deprecated parameters if the parameter is not a global param
         if (!global)
+        {
           if (const auto deprecated_message = params.queryDeprecatedParamMessage(param_name))
           {
             std::string key = "";
@@ -96,57 +148,22 @@ extract(const hit::Node & root,
             key += param_name;
             info.deprecated_params.emplace(key, *deprecated_message);
           }
-
-        // Private parameter, don't set
-        if (params.isPrivate(param_name))
-        {
-          // Error if it's not global
-          if (!global)
-            info.errors.emplace_back("parameter '" + fullpath + "' is private and cannot be set",
-                                     param_node);
-          continue;
         }
-
-        // Set the value, capturing errors
-        const auto param_field = dynamic_cast<const hit::Field *>(param_node);
-        mooseAssert(param_field, "Is not a field");
-        bool set_param = false;
-        try
-        {
-          ParameterRegistry::get().set(*par_unique_ptr, *param_field);
-          set_param = true;
-        }
-        catch (hit::Error & e)
-        {
-          info.errors.emplace_back(e.message, param_node);
-        }
-        catch (std::exception & e)
-        {
-          info.errors.emplace_back(e.what(), param_node);
-        }
-
-        // Break if we failed here and don't perform extra checks
-        if (!set_param)
-          break;
-
-        // Command line parameters have special isParamValid logic, so
-        // we need to set that they've been set here if so
-        if (params.isCommandLineParameter(param_name))
-          params.commandLineParamSet(param_name, fullpath, param_node, {});
 
         // Special setup for vector<VariableName>
         if (auto cast_par = dynamic_cast<InputParameters::Parameter<std::vector<VariableName>> *>(
                 par_unique_ptr.get()))
           if (const auto error = params.setupVariableNames(cast_par->set(), *param_node, {}))
-            info.errors.emplace_back(*error, param_node);
+            add_error(*error);
 
         // Possibly perform a range check if this parameter has one
-        if (params.isRangeChecked(param_node->path()))
+        if (params.isRangeChecked(param_name))
           if (const auto error = params.parameterRangeCheck(
                   *par_unique_ptr, param_node->fullpath(), param_node->path(), true))
-            info.errors.emplace_back(error->second, param_node);
+            add_error(error->second);
 
-        // Don't check the other alises since we've found it
+        // Don't check the other alises since we've found it (any aliases that
+        // also match this parameter will end up with an unused warning/error)
         break;
       }
     }
