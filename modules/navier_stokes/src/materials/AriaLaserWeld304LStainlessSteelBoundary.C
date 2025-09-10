@@ -10,7 +10,7 @@
 #include "AriaLaserWeld304LStainlessSteelBoundary.h"
 #include "Assembly.h"
 
-registerMooseObject("NavierStokesTestApp", AriaLaserWeld304LStainlessSteelBoundary);
+registerMooseObject("NavierStokesApp", AriaLaserWeld304LStainlessSteelBoundary);
 
 InputParameters
 AriaLaserWeld304LStainlessSteelBoundary::validParams()
