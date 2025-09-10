@@ -9,7 +9,7 @@
 
 #include "KokkosReactionNodalKernel.h"
 
-registerMooseObject("MooseApp", KokkosReactionNodalKernel);
+registerKokkosResidualObject("MooseApp", KokkosReactionNodalKernel);
 
 InputParameters
 KokkosReactionNodalKernel::validParams()

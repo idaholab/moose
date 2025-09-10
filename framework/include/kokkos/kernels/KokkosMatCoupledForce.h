@@ -18,7 +18,7 @@
  * m_j is a vector of material properties, and v_j is a vector
  * of variables
  */
-class KokkosMatCoupledForce final : public Moose::Kokkos::Kernel<KokkosMatCoupledForce>
+class KokkosMatCoupledForce : public Moose::Kokkos::Kernel
 {
 public:
   static InputParameters validParams();

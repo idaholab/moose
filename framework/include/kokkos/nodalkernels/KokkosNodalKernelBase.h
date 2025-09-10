@@ -44,10 +44,3 @@ public:
 
 } // namespace Kokkos
 } // namespace Moose
-
-#define usingKokkosNodalKernelBaseMembers                                                          \
-  usingKokkosResidualObjectMembers;                                                                \
-                                                                                                   \
-protected:                                                                                         \
-  using Moose::Kokkos::NodalKernelBase::kokkosBlockNodeID;                                         \
-  using Moose::Kokkos::NodalKernelBase::kokkosBoundaryNodeID

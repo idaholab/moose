@@ -9,7 +9,7 @@
 
 #include "KokkosJacobianCheck.h"
 
-registerMooseObject("MooseTestApp", KokkosJacobianCheck);
+registerKokkosResidualObject("MooseTestApp", KokkosJacobianCheck);
 
 InputParameters
 KokkosJacobianCheck::validParams()

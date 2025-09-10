@@ -9,7 +9,7 @@
 
 #include "KokkosCoefDiffusion.h"
 
-registerMooseObject("MooseTestApp", KokkosCoefDiffusion);
+registerKokkosResidualObject("MooseTestApp", KokkosCoefDiffusion);
 
 InputParameters
 KokkosCoefDiffusion::validParams()

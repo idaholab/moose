@@ -9,7 +9,7 @@
 
 #include "KokkosCoupledForce.h"
 
-registerMooseObject("MooseApp", KokkosCoupledForce);
+registerKokkosResidualObject("MooseApp", KokkosCoupledForce);
 
 InputParameters
 KokkosCoupledForce::validParams()

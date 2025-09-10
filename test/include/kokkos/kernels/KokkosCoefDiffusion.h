@@ -11,7 +11,7 @@
 
 #include "KokkosKernel.h"
 
-class KokkosCoefDiffusion final : public Moose::Kokkos::Kernel<KokkosCoefDiffusion>
+class KokkosCoefDiffusion : public Moose::Kokkos::Kernel
 {
 public:
   static InputParameters validParams();

@@ -9,7 +9,7 @@
 
 #include "KokkosStatefulSpatialTest.h"
 
-registerMooseObject("MooseTestApp", KokkosStatefulSpatialTest);
+registerKokkosMaterial("MooseTestApp", KokkosStatefulSpatialTest);
 
 InputParameters
 KokkosStatefulSpatialTest::validParams()

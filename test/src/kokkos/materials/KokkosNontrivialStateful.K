@@ -9,7 +9,7 @@
 
 #include "KokkosNontrivialStateful.h"
 
-registerMooseObject("MooseApp", KokkosNontrivialStateful);
+registerKokkosMaterial("MooseApp", KokkosNontrivialStateful);
 
 // The purpose of this material is to confirm that the load and store functions for Kokkos material
 // properties are only instantiated when they were requested as stateful, so that it doesn't error

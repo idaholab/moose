@@ -20,8 +20,6 @@
  */
 class KokkosCoupledDirichletBC final : public KokkosDirichletBC<KokkosCoupledDirichletBC>
 {
-  usingKokkosDirichletBCMembers(KokkosCoupledDirichletBC);
-
 public:
   static InputParameters validParams();
 

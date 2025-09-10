@@ -11,8 +11,7 @@
 
 #include "KokkosNodalKernel.h"
 
-class KokkosCoupledForceNodalKernel final
-  : public Moose::Kokkos::NodalKernel<KokkosCoupledForceNodalKernel>
+class KokkosCoupledForceNodalKernel : public Moose::Kokkos::NodalKernel
 {
 public:
   static InputParameters validParams();

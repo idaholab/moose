@@ -9,7 +9,7 @@
 
 #include "KokkosMatchedValueBC.h"
 
-registerMooseObject("MooseApp", KokkosMatchedValueBC);
+registerKokkosResidualObject("MooseApp", KokkosMatchedValueBC);
 
 InputParameters
 KokkosMatchedValueBC::validParams()

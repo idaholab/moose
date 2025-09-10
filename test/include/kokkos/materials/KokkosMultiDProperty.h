@@ -12,7 +12,7 @@
 #include "KokkosMaterial.h"
 
 template <unsigned int dimension, typename T>
-class KokkosMultiDProperty : public Moose::Kokkos::Material<KokkosMultiDProperty<dimension, T>>
+class KokkosMultiDProperty : public Moose::Kokkos::Material
 {
 public:
   static InputParameters validParams();
@@ -32,8 +32,7 @@ template <unsigned int dimension, typename T>
 InputParameters
 KokkosMultiDProperty<dimension, T>::validParams()
 {
-  InputParameters params =
-      Moose::Kokkos::Material<KokkosMultiDProperty<dimension, T>>::validParams();
+  InputParameters params = Material::validParams();
   params.addParam<MaterialPropertyName>("name", "The name of the property");
   params.addParam<std::vector<unsigned int>>("dims", "The dimensions of the property");
   return params;
@@ -41,17 +40,16 @@ KokkosMultiDProperty<dimension, T>::validParams()
 
 template <unsigned int dimension, typename T>
 KokkosMultiDProperty<dimension, T>::KokkosMultiDProperty(const InputParameters & parameters)
-  : Moose::Kokkos::Material<KokkosMultiDProperty<dimension, T>>(parameters),
-    _dims(this->template getParam<std::vector<unsigned int>>("dims"))
+  : Material(parameters), _dims(getParam<std::vector<unsigned int>>("dims"))
 {
   if (_dims.size() != dimension)
-    this->paramError("dims", "Should be ", dimension, "-dimension");
+    paramError("dims", "Should be ", dimension, "-dimension");
 
-  _property = this->template declareKokkosProperty<T, dimension>(
-      "name", this->template getParam<std::vector<unsigned int>>("dims"));
+  _property =
+      declareKokkosProperty<T, dimension>("name", getParam<std::vector<unsigned int>>("dims"));
 }
 
-class Kokkos1DRealProperty final : public KokkosMultiDProperty<1, Real>
+class Kokkos1DRealProperty : public KokkosMultiDProperty<1, Real>
 {
 public:
   static InputParameters validParams();
@@ -59,7 +57,7 @@ public:
   Kokkos1DRealProperty(const InputParameters & parameters);
 };
 
-class Kokkos2DRealProperty final : public KokkosMultiDProperty<2, Real>
+class Kokkos2DRealProperty : public KokkosMultiDProperty<2, Real>
 {
 public:
   static InputParameters validParams();
@@ -67,7 +65,7 @@ public:
   Kokkos2DRealProperty(const InputParameters & parameters);
 };
 
-class Kokkos3DRealProperty final : public KokkosMultiDProperty<3, Real>
+class Kokkos3DRealProperty : public KokkosMultiDProperty<3, Real>
 {
 public:
   static InputParameters validParams();
@@ -75,7 +73,7 @@ public:
   Kokkos3DRealProperty(const InputParameters & parameters);
 };
 
-class Kokkos4DRealProperty final : public KokkosMultiDProperty<4, Real>
+class Kokkos4DRealProperty : public KokkosMultiDProperty<4, Real>
 {
 public:
   static InputParameters validParams();
@@ -83,7 +81,7 @@ public:
   Kokkos4DRealProperty(const InputParameters & parameters);
 };
 
-class Kokkos1DIntProperty final : public KokkosMultiDProperty<1, int>
+class Kokkos1DIntProperty : public KokkosMultiDProperty<1, int>
 {
 public:
   static InputParameters validParams();
@@ -91,7 +89,7 @@ public:
   Kokkos1DIntProperty(const InputParameters & parameters);
 };
 
-class Kokkos2DIntProperty final : public KokkosMultiDProperty<2, int>
+class Kokkos2DIntProperty : public KokkosMultiDProperty<2, int>
 {
 public:
   static InputParameters validParams();
@@ -99,7 +97,7 @@ public:
   Kokkos2DIntProperty(const InputParameters & parameters);
 };
 
-class Kokkos3DIntProperty final : public KokkosMultiDProperty<3, int>
+class Kokkos3DIntProperty : public KokkosMultiDProperty<3, int>
 {
 public:
   static InputParameters validParams();
@@ -107,7 +105,7 @@ public:
   Kokkos3DIntProperty(const InputParameters & parameters);
 };
 
-class Kokkos4DIntProperty final : public KokkosMultiDProperty<4, int>
+class Kokkos4DIntProperty : public KokkosMultiDProperty<4, int>
 {
 public:
   static InputParameters validParams();

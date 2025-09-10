@@ -53,5 +53,3 @@ public:
 
 } // namespace Kokkos
 } // namespace Moose
-
-#define usingKokkosNodalBCBaseMembers usingKokkosBoundaryConditionMembers

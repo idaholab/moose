@@ -16,8 +16,7 @@
  * given by auxiliary variables.  Typically used in multi-app coupling scenario. It is possible to
  * couple in a vector variable where each entry corresponds to a "phase".
  */
-class KokkosCoupledConvectiveHeatFluxBC final
-  : public Moose::Kokkos::IntegratedBC<KokkosCoupledConvectiveHeatFluxBC>
+class KokkosCoupledConvectiveHeatFluxBC : public Moose::Kokkos::IntegratedBC
 {
 public:
   static InputParameters validParams();
