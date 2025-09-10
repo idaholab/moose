@@ -124,7 +124,7 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
 }
 
 #ifdef MOOSE_KOKKOS_ENABLED
-Coupleable::Coupleable(const Coupleable & object, Moose::Kokkos::FunctorCopy)
+Coupleable::Coupleable(const Coupleable & object, const Moose::Kokkos::FunctorCopy &)
   : _c_parameters(object._c_parameters),
     _c_name(object._c_name),
     _c_type(object._c_type),

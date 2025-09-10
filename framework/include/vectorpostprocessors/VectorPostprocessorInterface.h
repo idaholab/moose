@@ -37,7 +37,7 @@ public:
    * Special constructor used for Kokkos functor copy during parallel dispatch
    */
   VectorPostprocessorInterface(const VectorPostprocessorInterface & object,
-                               Moose::Kokkos::FunctorCopy);
+                               const Moose::Kokkos::FunctorCopy & key);
 #endif
 
   /**

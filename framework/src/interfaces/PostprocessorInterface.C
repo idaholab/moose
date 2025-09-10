@@ -34,7 +34,7 @@ PostprocessorInterface::PostprocessorInterface(const FEProblemBase * problem)
 
 #ifdef MOOSE_KOKKOS_ENABLED
 PostprocessorInterface::PostprocessorInterface(const PostprocessorInterface & object,
-                                               Moose::Kokkos::FunctorCopy)
+                                               const Moose::Kokkos::FunctorCopy &)
   : _ppi_moose_object(object._ppi_moose_object),
     _ppi_params(object._ppi_params),
     _ppi_feproblem(object._ppi_feproblem)

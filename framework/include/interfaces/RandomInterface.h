@@ -37,7 +37,7 @@ public:
   /**
    * Special constructor used for Kokkos functor copy during parallel dispatch
    */
-  RandomInterface(const RandomInterface & object, Moose::Kokkos::FunctorCopy);
+  RandomInterface(const RandomInterface & object, const Moose::Kokkos::FunctorCopy & key);
 #endif
 
   ~RandomInterface();

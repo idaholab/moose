@@ -36,7 +36,7 @@ SetupInterface::SetupInterface(const MooseObject * moose_object)
 }
 
 #ifdef MOOSE_KOKKOS_ENABLED
-SetupInterface::SetupInterface(const SetupInterface & object, Moose::Kokkos::FunctorCopy)
+SetupInterface::SetupInterface(const SetupInterface & object, const Moose::Kokkos::FunctorCopy &)
   : _execute_enum(object._execute_enum), _current_execute_flag(object._current_execute_flag)
 {
 }

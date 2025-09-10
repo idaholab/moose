@@ -59,7 +59,7 @@ public:
   /**
    * Special constructor used for Kokkos functor copy during parallel dispatch
    */
-  ResidualObject(const ResidualObject & object, Moose::Kokkos::FunctorCopy);
+  ResidualObject(const ResidualObject & object, const Moose::Kokkos::FunctorCopy & key);
 #endif
 
   /// Compute this object's contribution to the residual

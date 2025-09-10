@@ -28,7 +28,7 @@ public:
    * Special constructor used for Kokkos functor copy during parallel dispatch
    */
   BoundaryRestrictableRequired(const BoundaryRestrictableRequired & object,
-                               Moose::Kokkos::FunctorCopy);
+                               const Moose::Kokkos::FunctorCopy & key);
 #endif
 
   static InputParameters validParams();

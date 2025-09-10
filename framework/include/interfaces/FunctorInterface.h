@@ -36,7 +36,7 @@ public:
   /**
    * Special constructor used for Kokkos functor copy during parallel dispatch
    */
-  FunctorInterface(const FunctorInterface & object, Moose::Kokkos::FunctorCopy);
+  FunctorInterface(const FunctorInterface & object, const Moose::Kokkos::FunctorCopy & key);
 #endif
 
   /**
