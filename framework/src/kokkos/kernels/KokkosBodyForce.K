@@ -9,19 +9,25 @@
 
 #include "KokkosBodyForce.h"
 
-registerMooseObjectAliased("MooseApp", KokkosBodyForceKernel, "KokkosBodyForce");
+registerKokkosResidualObject("MooseApp", KokkosBodyForce);
 
 InputParameters
-KokkosBodyForceKernel::validParams()
+KokkosBodyForce::validParams()
 {
-  InputParameters params = KokkosBodyForce::validParams();
+  InputParameters params = Kernel::validParams();
+  params.addParam<Real>("value", 1.0, "Coefficient to multiply by the body force term");
+  params.addParam<PostprocessorName>(
+      "postprocessor", 1, "A postprocessor whose value is multiplied by the body force");
+  params.declareControllable("value");
   params.addClassDescription("Demonstrates the two ways that scalar values can be introduced "
                              "into kernels, e.g. (controllable) constants and postprocessors. "
                              "Implements the weak form $(\\psi_i, -f)$.");
   return params;
 }
 
-KokkosBodyForceKernel::KokkosBodyForceKernel(const InputParameters & parameters)
-  : KokkosBodyForce(parameters)
+KokkosBodyForce::KokkosBodyForce(const InputParameters & parameters)
+  : Kernel(parameters),
+    _scale(getParam<Real>("value")),
+    _postprocessor(getPostprocessorValue("postprocessor"))
 {
 }

@@ -9,10 +9,10 @@
 
 #include "KokkosDirichletBC.h"
 
-registerMooseObjectAliased("MooseApp", KokkosDirichletBCKernel, "KokkosDirichletBC");
+registerKokkosResidualObjectAliased("MooseApp", KokkosDirichletBCWrapper, "KokkosDirichletBC");
 
 InputParameters
-KokkosDirichletBCKernel::validParams()
+KokkosDirichletBCWrapper::validParams()
 {
   InputParameters params = KokkosDirichletBC::validParams();
   params.addClassDescription("Imposes the essential boundary condition $u=g$, where $g$ "
@@ -20,7 +20,7 @@ KokkosDirichletBCKernel::validParams()
   return params;
 }
 
-KokkosDirichletBCKernel::KokkosDirichletBCKernel(const InputParameters & parameters)
+KokkosDirichletBCWrapper::KokkosDirichletBCWrapper(const InputParameters & parameters)
   : KokkosDirichletBC(parameters)
 {
 }

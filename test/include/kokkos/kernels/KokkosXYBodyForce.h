@@ -11,7 +11,7 @@
 
 #include "KokkosBodyForce.h"
 
-class KokkosXYBodyForce final : public KokkosBodyForce<KokkosXYBodyForce>
+class KokkosXYBodyForce : public KokkosBodyForce
 {
 public:
   static InputParameters validParams();

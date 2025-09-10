@@ -11,17 +11,15 @@
 
 #include "KokkosTimeKernel.h"
 
-template <typename Derived>
-class KokkosTimeDerivative : public Moose::Kokkos::TimeKernel<Derived>
+class KokkosTimeDerivative : public Moose::Kokkos::TimeKernel
 {
-  usingKokkosTimeKernelMembers(Derived);
-
 public:
   static InputParameters validParams();
 
   KokkosTimeDerivative(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION void computeJacobianInternal(const Derived * kernel, ResidualDatum & datum) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void computeJacobianInternal(const Derived & kernel, ResidualDatum & datum) const;
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
@@ -36,25 +34,8 @@ protected:
 };
 
 template <typename Derived>
-InputParameters
-KokkosTimeDerivative<Derived>::validParams()
-{
-  InputParameters params = Moose::Kokkos::TimeKernel<Derived>::validParams();
-  params.addParam<bool>("lumping", false, "True for mass matrix lumping, false otherwise");
-  return params;
-}
-
-template <typename Derived>
-KokkosTimeDerivative<Derived>::KokkosTimeDerivative(const InputParameters & parameters)
-  : Moose::Kokkos::TimeKernel<Derived>(parameters),
-    _lumping(this->template getParam<bool>("lumping"))
-{
-}
-
-template <typename Derived>
 KOKKOS_FUNCTION void
-KokkosTimeDerivative<Derived>::computeJacobianInternal(const Derived * kernel,
-                                                       ResidualDatum & datum) const
+KokkosTimeDerivative::computeJacobianInternal(const Derived & kernel, ResidualDatum & datum) const
 {
   using Moose::Kokkos::MAX_CACHED_DOF;
 
@@ -82,7 +63,7 @@ KokkosTimeDerivative<Derived>::computeJacobianInternal(const Derived * kernel,
         unsigned int i = ij % datum.n_jdofs();
         unsigned int j = ij / datum.n_jdofs();
 
-        local_ke[ij - ijb] += datum.JxW(qp) * kernel->computeQpJacobian(i, j, qp, datum);
+        local_ke[ij - ijb] += datum.JxW(qp) * kernel.computeQpJacobian(i, j, qp, datum);
       }
     }
 
@@ -97,29 +78,19 @@ KokkosTimeDerivative<Derived>::computeJacobianInternal(const Derived * kernel,
   }
 }
 
-template <typename Derived>
-KOKKOS_FUNCTION Real
-KokkosTimeDerivative<Derived>::computeQpResidual(const unsigned int i,
-                                                 const unsigned int qp,
-                                                 ResidualDatum & datum) const
+KOKKOS_FUNCTION inline Real
+KokkosTimeDerivative::computeQpResidual(const unsigned int i,
+                                        const unsigned int qp,
+                                        ResidualDatum & datum) const
 {
   return _test(datum, i, qp) * _u_dot(datum, qp);
 }
 
-template <typename Derived>
-KOKKOS_FUNCTION Real
-KokkosTimeDerivative<Derived>::computeQpJacobian(const unsigned int i,
-                                                 const unsigned int j,
-                                                 const unsigned int qp,
-                                                 ResidualDatum & datum) const
+KOKKOS_FUNCTION inline Real
+KokkosTimeDerivative::computeQpJacobian(const unsigned int i,
+                                        const unsigned int j,
+                                        const unsigned int qp,
+                                        ResidualDatum & datum) const
 {
   return _test(datum, i, qp) * _phi(datum, j, qp) * _du_dot_du;
 }
-
-class KokkosTimeDerivativeKernel final : public KokkosTimeDerivative<KokkosTimeDerivativeKernel>
-{
-public:
-  static InputParameters validParams();
-
-  KokkosTimeDerivativeKernel(const InputParameters & parameters);
-};

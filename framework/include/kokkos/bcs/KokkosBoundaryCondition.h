@@ -40,10 +40,3 @@ public:
 
 } // namespace Kokkos
 } // namespace Moose
-
-#define usingKokkosBoundaryConditionMembers                                                        \
-  usingKokkosResidualObjectMembers;                                                                \
-                                                                                                   \
-protected:                                                                                         \
-  using Moose::Kokkos::BoundaryCondition::kokkosBoundaryElementSideID;                             \
-  using Moose::Kokkos::BoundaryCondition::kokkosBoundaryNodeID

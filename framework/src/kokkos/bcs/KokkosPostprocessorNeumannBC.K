@@ -9,7 +9,7 @@
 
 #include "KokkosPostprocessorNeumannBC.h"
 
-registerMooseObject("MooseApp", KokkosPostprocessorNeumannBC);
+registerKokkosResidualObject("MooseApp", KokkosPostprocessorNeumannBC);
 
 InputParameters
 KokkosPostprocessorNeumannBC::validParams()

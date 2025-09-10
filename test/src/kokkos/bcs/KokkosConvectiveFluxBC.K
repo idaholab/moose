@@ -9,7 +9,7 @@
 
 #include "KokkosConvectiveFluxBC.h"
 
-registerMooseObject("MooseApp", KokkosConvectiveFluxBC);
+registerKokkosResidualObject("MooseApp", KokkosConvectiveFluxBC);
 
 InputParameters
 KokkosConvectiveFluxBC::validParams()

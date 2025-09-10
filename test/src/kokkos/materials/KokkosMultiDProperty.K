@@ -9,14 +9,14 @@
 
 #include "KokkosMultiDProperty.h"
 
-registerMooseObject("MooseTestApp", Kokkos1DRealProperty);
-registerMooseObject("MooseTestApp", Kokkos2DRealProperty);
-registerMooseObject("MooseTestApp", Kokkos3DRealProperty);
-registerMooseObject("MooseTestApp", Kokkos4DRealProperty);
-registerMooseObject("MooseTestApp", Kokkos1DIntProperty);
-registerMooseObject("MooseTestApp", Kokkos2DIntProperty);
-registerMooseObject("MooseTestApp", Kokkos3DIntProperty);
-registerMooseObject("MooseTestApp", Kokkos4DIntProperty);
+registerKokkosMaterial("MooseTestApp", Kokkos1DRealProperty);
+registerKokkosMaterial("MooseTestApp", Kokkos2DRealProperty);
+registerKokkosMaterial("MooseTestApp", Kokkos3DRealProperty);
+registerKokkosMaterial("MooseTestApp", Kokkos4DRealProperty);
+registerKokkosMaterial("MooseTestApp", Kokkos1DIntProperty);
+registerKokkosMaterial("MooseTestApp", Kokkos2DIntProperty);
+registerKokkosMaterial("MooseTestApp", Kokkos3DIntProperty);
+registerKokkosMaterial("MooseTestApp", Kokkos4DIntProperty);
 
 InputParameters
 Kokkos1DRealProperty::validParams()

@@ -14,7 +14,7 @@
 /**
  * Dummy class that tests the Jacobian calculation
  */
-class KokkosJacobianCheck final : public Moose::Kokkos::NodalKernel<KokkosJacobianCheck>
+class KokkosJacobianCheck : public Moose::Kokkos::NodalKernel
 {
 public:
   static InputParameters validParams();

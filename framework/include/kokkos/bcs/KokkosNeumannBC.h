@@ -11,7 +11,7 @@
 
 #include "KokkosIntegratedBC.h"
 
-class KokkosNeumannBC final : public Moose::Kokkos::IntegratedBC<KokkosNeumannBC>
+class KokkosNeumannBC : public Moose::Kokkos::IntegratedBC
 {
 public:
   static InputParameters validParams();

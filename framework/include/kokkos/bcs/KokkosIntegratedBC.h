@@ -19,22 +19,9 @@ namespace Kokkos
 /**
  * The base class for a user to derive their own Kokkos integrated boundary conditions.
  *
- * The polymorphic design of the original MOOSE is reproduced statically by leveraging the Curiously
- * Recurring Template Pattern (CRTP), a programming idiom that involves a class template inheriting
- * from a template instantiation of itself. When the user derives their Kokkos object from this
- * class, the inheritance structure will look like:
- *
- * class UserIntegratedBC final : public Moose::Kokkos::IntegratedBC<UserIntegratedBC>
- *
- * It is important to note that the template argument should point to the last derived class.
- * Therefore, if the user wants to define a derived class that can be further inherited, the derived
- * class should be a class template as well. Otherwise, it is recommended to mark the derived class
- * as final to prevent its inheritence by mistake.
- *
- * The user is expected to define computeQpResidual(), computeQpJacobian(), and
- * computeQpOffDiagJacobian() as inlined public methods in their derived class (not virtual
- * override). The signature of computeQpResidual() expected to be defined in the derived class is as
- * follows:
+ * The user should define computeQpResidual(), computeQpJacobian(), and computeQpOffDiagJacobian()
+ * as inlined public methods in their derived class (not virtual override). The signature of
+ * computeQpResidual() expected to be defined in the derived class is as follows:
  *
  * @param i The element-local DOF index
  * @param qp The local quadrature point index
@@ -49,7 +36,6 @@ namespace Kokkos
  * below, and their definition in the derived class is optional. If they are defined in the derived
  * class, they will hide the default definitions in the base class.
  */
-template <typename Derived>
 class IntegratedBC : public IntegratedBCBase
 {
 public:
@@ -106,15 +92,29 @@ public:
   {
     return 0;
   }
+  /**
+   * Get the function pointer of the default computeQpJacobian()
+   * @returns The function pointer
+   */
+  static auto defaultJacobian() { return &IntegratedBC::computeQpJacobian; }
+  /**
+   * Get the function pointer of the default computeQpOffDiagJacobian()
+   * @returns The function pointer
+   */
+  static auto defaultOffDiagJacobian() { return &IntegratedBC::computeQpOffDiagJacobian; }
   ///@}
 
   /**
    * The parallel computation entry functions called by Kokkos
    */
   ///@{
-  KOKKOS_FUNCTION void operator()(ResidualLoop, const ThreadID tid) const;
-  KOKKOS_FUNCTION void operator()(JacobianLoop, const ThreadID tid) const;
-  KOKKOS_FUNCTION void operator()(OffDiagJacobianLoop, const ThreadID tid) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void operator()(ResidualLoop, const ThreadID tid, const Derived & bc) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void operator()(JacobianLoop, const ThreadID tid, const Derived & bc) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void
+  operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & bc) const;
   ///@}
 
   /**
@@ -128,19 +128,22 @@ public:
    * @param bc The boundary condition object of the final derived type
    * @param datum The ResidualDatum object of the current thread
    */
-  KOKKOS_FUNCTION void computeResidualInternal(const Derived * bc, ResidualDatum & datum) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void computeResidualInternal(const Derived & bc, ResidualDatum & datum) const;
   /**
    * Compute diagonal Jacobian
    * @param bc The boundary condition object of the final derived type
    * @param datum The ResidualDatum object of the current thread
    */
-  KOKKOS_FUNCTION void computeJacobianInternal(const Derived * bc, ResidualDatum & datum) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void computeJacobianInternal(const Derived & bc, ResidualDatum & datum) const;
   /**
    * Compute off-diagonal Jacobian
    * @param bc The boundary condition object of the final derived type
    * @param datum The ResidualDatum object of the current thread
    */
-  KOKKOS_FUNCTION void computeOffDiagJacobianInternal(const Derived * bc,
+  template <typename Derived>
+  KOKKOS_FUNCTION void computeOffDiagJacobianInternal(const Derived & bc,
                                                       ResidualDatum & datum) const;
   ///@}
 
@@ -169,113 +172,36 @@ protected:
    * Gradient of the current solution at quadrature points
    */
   const VariableGradient _grad_u;
-
-protected:
-  /**
-   * Get whether computeQpJacobian() was not defined in the derived class
-   * @returns Whether computeQpJacobian() was not defined in the derived class
-   */
-  virtual bool defaultJacobian() const
-  {
-    return &Derived::computeQpJacobian == &IntegratedBC::computeQpJacobian;
-  }
-  /**
-   * Get whether computeQpOffDiagJacobian() was not defined in the derived class
-   * @returns Whether computeQpOffDiagJacobian() was not defined in the derived class
-   */
-  virtual bool defaultOffDiagJacobian() const
-  {
-    return &Derived::computeQpOffDiagJacobian == &IntegratedBC::computeQpOffDiagJacobian;
-  }
 };
 
 template <typename Derived>
-InputParameters
-IntegratedBC<Derived>::validParams()
-{
-  InputParameters params = IntegratedBCBase::validParams();
-  return params;
-}
-
-template <typename Derived>
-IntegratedBC<Derived>::IntegratedBC(const InputParameters & parameters)
-  : IntegratedBCBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD),
-    _test(),
-    _grad_test(),
-    _phi(),
-    _grad_phi(),
-    _u(_var),
-    _grad_u(_var)
-{
-  addMooseVariableDependency(&_var);
-}
-
-template <typename Derived>
-void
-IntegratedBC<Derived>::computeResidual()
-{
-  ::Kokkos::RangePolicy<ResidualLoop, ExecSpace, ::Kokkos::IndexType<ThreadID>> policy(
-      0, numKokkosBoundarySides());
-  ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
-  ::Kokkos::fence();
-}
-
-template <typename Derived>
-void
-IntegratedBC<Derived>::computeJacobian()
-{
-  if (!defaultJacobian())
-  {
-    ::Kokkos::RangePolicy<JacobianLoop, ExecSpace, ::Kokkos::IndexType<ThreadID>> policy(
-        0, numKokkosBoundarySides());
-    ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
-    ::Kokkos::fence();
-  }
-
-  if (!defaultOffDiagJacobian())
-  {
-    auto & sys = kokkosSystem(_kokkos_var.sys());
-
-    _thread.resize({sys.getCoupling(_kokkos_var.var()).size(), numKokkosBoundarySides()});
-
-    ::Kokkos::RangePolicy<OffDiagJacobianLoop, ExecSpace, ::Kokkos::IndexType<ThreadID>> policy(
-        0, _thread.size());
-    ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
-    ::Kokkos::fence();
-  }
-}
-
-template <typename Derived>
 KOKKOS_FUNCTION void
-IntegratedBC<Derived>::operator()(ResidualLoop, const ThreadID tid) const
+IntegratedBC::operator()(ResidualLoop, const ThreadID tid, const Derived & bc) const
 {
-  auto bc = static_cast<const Derived *>(this);
   auto [elem, side] = kokkosBoundaryElementSideID(tid);
 
   ResidualDatum datum(
       elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
 
-  bc->computeResidualInternal(bc, datum);
+  bc.computeResidualInternal(bc, datum);
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-IntegratedBC<Derived>::operator()(JacobianLoop, const ThreadID tid) const
+IntegratedBC::operator()(JacobianLoop, const ThreadID tid, const Derived & bc) const
 {
-  auto bc = static_cast<const Derived *>(this);
   auto [elem, side] = kokkosBoundaryElementSideID(tid);
 
   ResidualDatum datum(
       elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
 
-  bc->computeJacobianInternal(bc, datum);
+  bc.computeJacobianInternal(bc, datum);
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-IntegratedBC<Derived>::operator()(OffDiagJacobianLoop, const ThreadID tid) const
+IntegratedBC::operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & bc) const
 {
-  auto bc = static_cast<const Derived *>(this);
   auto [elem, side] = kokkosBoundaryElementSideID(_thread(tid, 1));
 
   auto & sys = kokkosSystem(_kokkos_var.sys());
@@ -286,12 +212,12 @@ IntegratedBC<Derived>::operator()(OffDiagJacobianLoop, const ThreadID tid) const
 
   ResidualDatum datum(elem, side, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar);
 
-  bc->computeOffDiagJacobianInternal(bc, datum);
+  bc.computeOffDiagJacobianInternal(bc, datum);
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-IntegratedBC<Derived>::computeResidualInternal(const Derived * bc, ResidualDatum & datum) const
+IntegratedBC::computeResidualInternal(const Derived & bc, ResidualDatum & datum) const
 {
   ResidualObject::computeResidualInternal(
       datum,
@@ -302,14 +228,14 @@ IntegratedBC<Derived>::computeResidualInternal(const Derived * bc, ResidualDatum
           datum.reinit();
 
           for (unsigned int i = ib; i < ie; ++i)
-            local_re[i] += datum.JxW(qp) * bc->computeQpResidual(i, qp, datum);
+            local_re[i] += datum.JxW(qp) * bc.computeQpResidual(i, qp, datum);
         }
       });
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-IntegratedBC<Derived>::computeJacobianInternal(const Derived * bc, ResidualDatum & datum) const
+IntegratedBC::computeJacobianInternal(const Derived & bc, ResidualDatum & datum) const
 {
   ResidualObject::computeJacobianInternal(
       datum,
@@ -324,7 +250,7 @@ IntegratedBC<Derived>::computeJacobianInternal(const Derived * bc, ResidualDatum
             unsigned int i = ij % datum.n_jdofs();
             unsigned int j = ij / datum.n_jdofs();
 
-            local_ke[ij] += datum.JxW(qp) * bc->computeQpJacobian(i, j, qp, datum);
+            local_ke[ij] += datum.JxW(qp) * bc.computeQpJacobian(i, j, qp, datum);
           }
         }
       });
@@ -332,8 +258,7 @@ IntegratedBC<Derived>::computeJacobianInternal(const Derived * bc, ResidualDatum
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-IntegratedBC<Derived>::computeOffDiagJacobianInternal(const Derived * bc,
-                                                      ResidualDatum & datum) const
+IntegratedBC::computeOffDiagJacobianInternal(const Derived & bc, ResidualDatum & datum) const
 {
   ResidualObject::computeJacobianInternal(
       datum,
@@ -349,7 +274,7 @@ IntegratedBC<Derived>::computeOffDiagJacobianInternal(const Derived * bc,
             unsigned int j = ij / datum.n_jdofs();
 
             local_ke[ij] +=
-                datum.JxW(qp) * bc->computeQpOffDiagJacobian(i, j, datum.jvar(), qp, datum);
+                datum.JxW(qp) * bc.computeQpOffDiagJacobian(i, j, datum.jvar(), qp, datum);
           }
         }
       });
@@ -357,17 +282,3 @@ IntegratedBC<Derived>::computeOffDiagJacobianInternal(const Derived * bc,
 
 } // namespace Kokkos
 } // namespace Moose
-
-#define usingKokkosIntegratedBCMembers(T)                                                          \
-  usingKokkosIntegratedBCBaseMembers;                                                              \
-                                                                                                   \
-protected:                                                                                         \
-  using Moose::Kokkos::IntegratedBC<T>::_test;                                                     \
-  using Moose::Kokkos::IntegratedBC<T>::_grad_test;                                                \
-  using Moose::Kokkos::IntegratedBC<T>::_phi;                                                      \
-  using Moose::Kokkos::IntegratedBC<T>::_grad_phi;                                                 \
-  using Moose::Kokkos::IntegratedBC<T>::_u;                                                        \
-  using Moose::Kokkos::IntegratedBC<T>::_grad_u;                                                   \
-                                                                                                   \
-public:                                                                                            \
-  using Moose::Kokkos::IntegratedBC<T>::operator()

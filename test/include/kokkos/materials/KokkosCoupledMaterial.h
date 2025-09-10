@@ -14,7 +14,7 @@
 /**
  * A material that couples a material property
  */
-class KokkosCoupledMaterial : public Moose::Kokkos::Material<KokkosCoupledMaterial>
+class KokkosCoupledMaterial : public Moose::Kokkos::Material
 {
 public:
   static InputParameters validParams();

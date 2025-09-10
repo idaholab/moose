@@ -17,7 +17,7 @@
  * Hence, \f$ D\frac{du}{dn}=-\frac{u}{2} \f$ and \f$ -\frac{u}{2} \f$ is substituted into
  * the Neumann BC term produced from integrating the diffusion operator by parts.
  */
-class KokkosVacuumBC final : public Moose::Kokkos::IntegratedBC<KokkosVacuumBC>
+class KokkosVacuumBC : public Moose::Kokkos::IntegratedBC
 {
 public:
   static InputParameters validParams();
