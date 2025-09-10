@@ -25,8 +25,8 @@ struct ExtractionInfo
 {
   /// The errors collected during extraction
   std::vector<hit::ErrorMessage> errors;
-  /// The variables that were extracted
-  std::vector<std::string> extracted_variables;
+  /// The nodes that were extracted successfully
+  std::vector<const hit::Node *> extracted_nodes;
   /// The deprecation warnings (object type/param name) -> (message)
   std::map<std::string, std::string> deprecated_params;
 };
