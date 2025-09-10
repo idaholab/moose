@@ -93,6 +93,22 @@ protected:
   PetscScalar
   computeInterpolatedValue(PetscScalar topValue, PetscScalar botValue, PetscScalar Peclet = 0.0);
 
+  /// inline function that is used to define the gravity direction
+  Real computeGravityDir(const MooseEnum & dir) const
+  {
+    switch (dir)
+    {
+      case 0: // counter_flow
+        return 1.0;
+      case 1: // co_flow
+        return -1.0;
+      case 2: // none
+        return 0.0;
+      default:
+        mooseError(name(), ": Invalid gravity direction: expected counter_flow, co_flow, or none");
+    }
+  }
+
   PetscErrorCode cleanUp();
   SubChannelMesh & _subchannel_mesh;
   /// number of axial blocks
@@ -148,6 +164,9 @@ protected:
   const PetscInt & _maxit;
   /// The interpolation method used in constructing the systems
   const MooseEnum _interpolation_scheme;
+  /// The direction of gravity
+  const MooseEnum _gravity_direction;
+  const Real _dir_grav;
   /// Flag to define the usage of a implicit or explicit solution
   const bool _implicit_bool;
   /// Flag to define the usage of staggered or collocated pressure
