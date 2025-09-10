@@ -218,7 +218,7 @@ TEST(CommandLineTest, populate)
     constexpr bool is_bool = std::is_same_v<type, bool>;
 
     InputParameters params = emptyInputParameters();
-    params.registerBase("Application"); // required for command line params
+    params.allowCommandLineParams({});
     params.addCommandLineParam<type>(
         "without_default", "-without-default --without-default", "Doc1");
     // bool doesn't support required or with default
@@ -318,7 +318,7 @@ TEST(CommandLineTest, populate)
       // Test an empty initializer list default
       {
         InputParameters empty_default_params = emptyInputParameters();
-        empty_default_params.registerBase("Application"); // required for command line params
+        empty_default_params.allowCommandLineParams({}); // required for command line params
         empty_default_params.addCommandLineParam<type>(
             "empty_default", "--empty-default", {}, "Doc4");
 
@@ -355,7 +355,7 @@ TEST(CommandLineTest, populateBadInterpret)
         typename std::remove_reference<decltype(value_type)>::type>::type;
 
     InputParameters params = emptyInputParameters();
-    params.registerBase("Application"); // required for command line params
+    params.allowCommandLineParams({});
     params.addCommandLineParam<type>("value", "--value", "Doc");
 
     CommandLine cl;
@@ -378,7 +378,7 @@ TEST(CommandLineTest, populateBadInterpret)
 TEST(CommandLineTest, populateSameSwitch)
 {
   InputParameters params = emptyInputParameters();
-  params.registerBase("Application"); // required for command line params
+  params.allowCommandLineParams({});
   params.addCommandLineParam<bool>("value", "--value", "Doc");
   params.addCommandLineParam<bool>("value2", "--value", "Doc");
 
@@ -393,7 +393,7 @@ TEST(CommandLineTest, populateSameSwitch)
 TEST(CommandLineTest, populateMooseEnum)
 {
   InputParameters params = emptyInputParameters();
-  params.registerBase("Application"); // required for command line params
+  params.allowCommandLineParams({});
   const auto default_value = "foo";
   MooseEnum enum_values("foo bar", default_value);
   params.addCommandLineParam<MooseEnum>("value", "--value", enum_values, "Doc");
@@ -426,7 +426,7 @@ TEST(CommandLineTest, populateMooseEnum)
 TEST(CommandLineTest, populateSetByUser)
 {
   InputParameters params = emptyInputParameters();
-  params.registerBase("Application"); // required for command line params
+  params.allowCommandLineParams({});
   params.addCommandLineParam<bool>("value", "--value", "Doc");
   EXPECT_FALSE(params.isParamSetByUser("value"));
 
@@ -462,7 +462,7 @@ TEST(CommandLineTest, initSubAppCommandLine)
                        const std::vector<std::string> & subexpected_args)
   {
     InputParameters params = emptyInputParameters();
-    params.registerBase("Application"); // required for command line params
+    params.allowCommandLineParams({});
     params.addCommandLineParam<bool>("global", "--global", "Doc1");
     params.setGlobalCommandLineParam("global");
     params.addCommandLineParam<bool>("another_global", "--another-global", "Doc2");
@@ -507,7 +507,7 @@ TEST(CommandLineTest, initSubAppCommandLine)
 TEST(CommandLineTest, globalCommandLineParamSubapp)
 {
   InputParameters params = emptyInputParameters();
-  params.registerBase("Application"); // required for command line params
+  params.allowCommandLineParams({});
   params.addCommandLineParam<bool>("global", "--global", "Doc1");
   params.setGlobalCommandLineParam("global");
   InputParameters subapp_params = params;
@@ -534,7 +534,7 @@ TEST(CommandLineTest, globalCommandLineParamSubapp)
 TEST(CommandLineTest, requiredParameter)
 {
   InputParameters params = emptyInputParameters();
-  params.registerBase("Application"); // required for command line params
+  params.allowCommandLineParams({});
   params.addRequiredCommandLineParam<std::string>("value", "--value", "Doc");
 
   {
@@ -583,21 +583,21 @@ TEST(CommandLineTest, requiredParameterArgument)
 
   {
     InputParameters params = emptyInputParameters();
-    params.registerBase("Application"); // required for command line params
+    params.allowCommandLineParams({});
     params.addCommandLineParam<std::string>("value", "--value", "Doc");
     check(params, true);
   }
 
   {
     InputParameters params = emptyInputParameters();
-    params.registerBase("Application"); // required for command line params
+    params.allowCommandLineParams({});
     params.addCommandLineParam<std::string>("value", "--value", "some_value", "Doc");
     check(params, false);
   }
 
   {
     InputParameters params = emptyInputParameters();
-    params.registerBase("Application"); // required for command line params
+    params.allowCommandLineParams({});
     const auto default_value = "foo";
     MooseEnum enum_values("foo", default_value);
     params.addCommandLineParam<MooseEnum>("value", "--value", enum_values, "Doc");
@@ -608,7 +608,7 @@ TEST(CommandLineTest, requiredParameterArgument)
 TEST(CommandLineTest, duplicateOptions)
 {
   InputParameters params = emptyInputParameters();
-  params.registerBase("Application"); // required for command line params
+  params.allowCommandLineParams({});
   params.addCommandLineParam<unsigned int>("value", "-v --value", "Doc");
 
   CommandLine cl;
@@ -652,7 +652,7 @@ TEST(CommandLineTest, unappliedArgument)
 TEST(CommandLineTest, boolParamWithValue)
 {
   InputParameters params = emptyInputParameters();
-  params.registerBase("Application"); // required for command line params
+  params.allowCommandLineParams({});
   params.addCommandLineParam<bool>("value", "--value", "Doc");
 
   CommandLine cl;
@@ -680,7 +680,7 @@ TEST(CommandLineTest, negativeScalarParam)
       cl.parse();
 
       InputParameters params = emptyInputParameters();
-      params.registerBase("Application"); // required for command line params
+      params.allowCommandLineParams({});
       params.addCommandLineParam<type>("value", "--value", "Doc");
       cl.populateCommandLineParams(params);
 
@@ -695,7 +695,7 @@ TEST(CommandLineTest, negativeScalarParam)
       cl.parse();
 
       InputParameters params = emptyInputParameters();
-      params.registerBase("Application"); // required for command line params
+      params.allowCommandLineParams({});
       params.addCommandLineParam<type>("value", "--value", value - 100, "Doc");
       cl.populateCommandLineParams(params);
 
@@ -719,7 +719,7 @@ TEST(CommandLineTest, mergeArgsForParam)
       cl.parse();
 
       InputParameters params = emptyInputParameters();
-      params.registerBase("Application"); // required for command line params
+      params.allowCommandLineParams({});
       params.addCommandLineParam<std::vector<std::string>>("value", "--value", "Doc");
       cl.populateCommandLineParams(params);
 
@@ -736,7 +736,7 @@ TEST(CommandLineTest, mergeArgsForParam)
       cl.parse();
 
       InputParameters params = emptyInputParameters();
-      params.registerBase("Application"); // required for command line params
+      params.allowCommandLineParams({});
       params.addCommandLineParam<std::string>("value", "--value", "Doc");
       cl.populateCommandLineParams(params);
 
@@ -763,7 +763,7 @@ TEST(CommandLineTest, findCommandLineParam)
   cl.parse();
 
   InputParameters params = emptyInputParameters();
-  params.registerBase("Application"); // required for command line params
+  params.allowCommandLineParams({});
   params.addCommandLineParam<std::string>("value", "--value", "Doc");
   params.addCommandLineParam<std::string>("other_value", "--other_value", "Doc");
   cl.populateCommandLineParams(params);
@@ -795,7 +795,7 @@ TEST(CommandLineTest, optionalValuedParam)
     cl.parse();
 
     InputParameters params = emptyInputParameters();
-    params.registerBase("Application"); // required for command line params
+    params.allowCommandLineParams({});
     params.addOptionalValuedCommandLineParam<std::string>("mesh_only", "--mesh-only", {}, "Doc");
     cl.populateCommandLineParams(params);
 
@@ -814,7 +814,7 @@ TEST(CommandLineTest, optionalValuedParam)
     cl.parse();
 
     InputParameters params = emptyInputParameters();
-    params.registerBase("Application"); // required for command line params
+    params.allowCommandLineParams({});
     params.addOptionalValuedCommandLineParam<std::string>("mesh_only", "--mesh-only", {}, "Doc");
     cl.populateCommandLineParams(params);
 
@@ -832,7 +832,7 @@ TEST(CommandLineTest, mergeHIT)
   cl.parse();
 
   InputParameters params = emptyInputParameters();
-  params.registerBase("Application"); // required for command line params
+  params.allowCommandLineParams({});
   cl.populateCommandLineParams(params);
 
   ASSERT_EQ(cl.buildHitParams(), args);
@@ -899,7 +899,7 @@ TEST(CommandLineTest, combinedKeyValueParamKnownArg)
   ASSERT_FALSE(have_cl_name(arg));
 
   auto params = emptyInputParameters();
-  params.registerBase("Application"); // required for command line params
+  params.allowCommandLineParams({});
   params.addCommandLineParam<std::string>("unused", cl_switch, "unused", "unused");
 
   // Population of the command line params should then explicitly
@@ -910,4 +910,23 @@ TEST(CommandLineTest, combinedKeyValueParamKnownArg)
   cl.populateCommandLineParams(params);
 
   ASSERT_TRUE(have_cl_name(arg));
+}
+
+/**
+ * Test the "filter_names" option in populateCommmandLineParams
+ */
+TEST(CommandLineTest, populateFiltered)
+{
+  auto params = emptyInputParameters();
+  params.allowCommandLineParams({});
+  params.addCommandLineParam<std::string>("foo", "--foo", "doc");
+  params.addCommandLineParam<std::string>("unused", "--unused", "doc");
+
+  CommandLine cl;
+  cl.addArguments({"--foo=bar", "--unused=baz"});
+  cl.parse();
+  cl.populateCommandLineParams(params, nullptr, std::set<std::string>{"foo"});
+
+  ASSERT_TRUE(params.isParamSetByUser("foo"));
+  ASSERT_FALSE(params.isParamSetByUser("unused"));
 }

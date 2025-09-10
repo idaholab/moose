@@ -676,7 +676,7 @@ TEST(InputParametersTest, fileNames)
 TEST(InputParametersTest, alphaCommandLineParamSwitch)
 {
   InputParameters params = emptyInputParameters();
-  params.registerBase("Application"); // required for command line params
+  params.allowCommandLineParams({});
   Moose::UnitUtils::assertThrows<MooseRuntimeError>(
       [&params]() { params.addCommandLineParam<bool>("1value", "--1value", "Doc"); },
       "The switch '--1value' for the command line parameter '1value' is invalid. It must begin "
@@ -716,7 +716,7 @@ TEST(InputParametersTest, commandLineParamSetNotCLParam)
 TEST(InputParametersTest, commandLineParamFullpath)
 {
   InputParameters params = emptyInputParameters();
-  params.registerBase("Application"); // required for command line params
+  params.allowCommandLineParams({});
   params.addCommandLineParam<bool>("foo", "--foo", "doc");
   params.commandLineParamSet("foo", "--foo", nullptr, {});
   ASSERT_EQ(params.paramFullpath("foo"), "--foo");
@@ -725,7 +725,7 @@ TEST(InputParametersTest, commandLineParamFullpath)
 TEST(InputParametersTest, isCommandLineParameter)
 {
   InputParameters params = emptyInputParameters();
-  params.registerBase("Application"); // required for command line params
+  params.allowCommandLineParams({});
   params.addCommandLineParam<std::string>("cliparam", "--cliparam", "Doc");
   params.addParam<std::string>("noncliparam", "Doc");
 
@@ -751,7 +751,7 @@ TEST(InputParametersTest, commandLineParamKnownArg)
 
   // Adding these arguments should call back to libMesh::add_command_line_name
   InputParameters params = emptyInputParameters();
-  params.registerBase("Application"); // required for command line params
+  params.allowCommandLineParams({});
   const auto combined_switches = MooseUtils::stringJoin(switches, " ");
   params.addCommandLineParam<std::string>("foo", combined_switches, "Doc");
 

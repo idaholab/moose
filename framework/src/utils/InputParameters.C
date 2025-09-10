@@ -41,7 +41,8 @@ InputParameters::InputParameters()
     _show_deprecated_message(true),
     _allow_copy(true),
     _hit_node(nullptr),
-    _finalized(false)
+    _finalized(false),
+    _allow_command_line_params(false)
 {
 }
 
@@ -75,6 +76,7 @@ InputParameters::clear()
   _new_to_old_names.clear();
   _hit_node = nullptr;
   _finalized = false;
+  _allow_command_line_params = false;
 }
 
 void
@@ -172,6 +174,7 @@ InputParameters::operator=(const InputParameters & rhs)
   _new_to_old_names = rhs._new_to_old_names;
   _hit_node = rhs._hit_node;
   _finalized = false;
+  _allow_command_line_params = rhs._allow_command_line_params;
 
   return *this;
 }

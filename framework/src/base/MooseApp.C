@@ -92,6 +92,8 @@
 
 using namespace libMesh;
 
+#define QUOTE(macro) stringifyName(macro)
+
 void
 MooseApp::addAppParam(InputParameters & params)
 {
@@ -112,10 +114,15 @@ MooseApp::validParams()
 {
   InputParameters params = MooseBase::validParams();
 
+  params.allowCommandLineParams({});
   params.registerBase("Application");
 
-  MooseApp::addAppParam(params);
-  MooseApp::addInputParam(params);
+  params.addCommandLineParam<std::string>(
+      "type", "--app <type>", "Specify the application type to run (case-sensitive)");
+  params.enableInputCommandLineParam("type");
+
+  params.addCommandLineParam<std::vector<std::string>>(
+      "input_file", "-i <input file(s)>", "Specify input file(s); multiple files are merged");
 
   params.addCommandLineParam<bool>("display_version", "-v --version", "Print application version");
 
@@ -463,8 +470,6 @@ MooseApp::validParams()
 
   params.addParam<bool>(
       "automatic_automatic_scaling", false, "Whether to turn on automatic scaling by default");
-
-  MooseApp::addAppParam(params);
 
   return params;
 }

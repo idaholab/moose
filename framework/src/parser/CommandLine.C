@@ -292,8 +292,10 @@ CommandLine::buildHitParams()
 }
 
 void
-CommandLine::populateCommandLineParams(InputParameters & params,
-                                       const hit::Node * const command_line_root)
+CommandLine::populateCommandLineParams(
+    InputParameters & params,
+    const hit::Node * const command_line_root /* = nullptr */,
+    const std::optional<std::set<std::string>> & filter_names /* = {} */)
 {
   mooseAssert(!_command_line_params_populated, "Already populated");
 
@@ -303,6 +305,11 @@ CommandLine::populateCommandLineParams(InputParameters & params,
   for (const auto & name_value_pair : params)
   {
     const auto & name = name_value_pair.first;
+
+    // Filter enabled and not in filter
+    if (filter_names && !filter_names->count(name))
+      continue;
+
     if (const auto metadata = params.queryCommandLineMetadata(name))
     {
       auto it_inserted_pair = _command_line_params.emplace(name, CommandLineParam());

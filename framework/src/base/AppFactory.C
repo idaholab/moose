@@ -101,14 +101,12 @@ AppFactory::createAppShared(const std::string & default_app_type,
                   "see'test/src/main.C in MOOSE as an example of moose::main()'. ");
 
   // Populate the -i and --app parameters early
-  auto command_line_params = emptyInputParameters();
-  command_line_params.registerBase("Application");
-  MooseApp::addInputParam(command_line_params);
-  MooseApp::addAppParam(command_line_params);
+  auto command_line_params = AppFactory::instance().getValidParams(default_app_type);
   {
     CommandLine pre_command_line(argc, argv);
     pre_command_line.parse();
-    pre_command_line.populateCommandLineParams(command_line_params, nullptr);
+    pre_command_line.populateCommandLineParams(
+        command_line_params, nullptr, std::set<std::string>{"input_file", "type"});
   }
   const auto & input_filenames = command_line_params.get<std::vector<std::string>>("input_file");
   std::string app_type = command_line_params.get<std::string>("type");

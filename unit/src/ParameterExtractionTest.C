@@ -202,27 +202,6 @@ TEST(ParameterExtractionTest, extractSetCatch)
 }
 
 /**
- * Test that command line parameters are set as set
- * via InputParameters::commandLineParamSet
- */
-TEST(ParameterExtractionTest, extractCommandLineParameter)
-{
-  auto params = emptyInputParameters();
-  params.registerBase("Application"); // required for command line params
-  params.addCommandLineParam<bool>("foo", "--foo", "doc");
-  params.enableInputCommandLineParam("foo");
-  const auto [root, nodes] = buildTestRootWithNodes({"Section/foo=true"});
-  const auto info = extract(*root, "Section", params);
-  ASSERT_TRUE(info.errors.empty());
-  ASSERT_EQ(info.extracted_nodes.size(), 1);
-  ASSERT_TRUE(hasExtractedNode(info, *nodes[0]));
-  ASSERT_TRUE(params.isParamSetByUser("foo"));
-  ASSERT_TRUE(params.get<bool>("foo"));
-  ASSERT_EQ(params.getHitNode("foo"), nodes[0]);
-  ASSERT_TRUE(params.isParamSetByUser("foo"));
-}
-
-/**
  * Test that std::vector<VariableName> parameters are
  * setup appropriately with default values
  */
@@ -435,7 +414,7 @@ TEST(ParameterExtractionTest, extractCommandLineParam)
   // success
   {
     auto params = emptyInputParameters();
-    params.registerBase("Application"); // required for command line params
+    params.allowCommandLineParams({});
     params.addCommandLineParam<std::string>("foo", "--foo", "doc");
     params.enableInputCommandLineParam("foo");
     const auto [root, nodes] = buildTestRootWithNodes({"Application/foo=bar"});
@@ -451,7 +430,7 @@ TEST(ParameterExtractionTest, extractCommandLineParam)
   // not enabled
   {
     auto params = emptyInputParameters();
-    params.registerBase("Application"); // required for command line params
+    params.allowCommandLineParams({});
     params.addCommandLineParam<std::string>("foo", "-f --foo", "doc");
     const auto [root, nodes] = buildTestRootWithNodes({"Application/foo=bar"});
     const auto info = extract(*root, "Application", params);
@@ -468,7 +447,7 @@ TEST(ParameterExtractionTest, extractCommandLineParam)
   // not enabled, but global, so skipped and not applied
   {
     auto params = emptyInputParameters();
-    params.registerBase("Application"); // required for command line params
+    params.allowCommandLineParams({});
     params.addCommandLineParam<std::string>("foo", "-f --foo", "doc");
     const auto [root, nodes] = buildTestRootWithNodes({"GlobalParams/foo=bar"});
     const auto info = extract(*root, "Application", params);
