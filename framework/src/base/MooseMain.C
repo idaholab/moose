@@ -41,7 +41,7 @@ createMooseApp(const std::string & default_app_type, int argc, char * argv[])
 
     // Do not allow overriding Application/type= for subapps
     for (const auto & arg : cl.getArguments())
-      if (std::regex_match(arg, std::regex("[A-Za-z0-9]*:Application/.*")))
+      if (std::regex_match(arg, std::regex("^[A-Za-z0-9]+:Application/type=.*")))
         mooseError(
             "For command line argument '",
             arg,
