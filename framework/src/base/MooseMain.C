@@ -26,18 +26,20 @@ namespace Moose
 std::unique_ptr<MooseApp>
 createMooseApp(const std::string & default_app_type, int argc, char * argv[])
 {
+  auto & app_factory = AppFactory::instance();
+  if (!app_factory.isRegistered(default_app_type))
+    mooseError("createMooseApp: The default app type '" + default_app_type +
+               "' is not a registered application type");
+
   // Parse the command line early in order to determine the application type, from:
   // - the input file, to load and search for Application/type
   // - the --app command line argument
   // - The Application/type= hit command line argument
-  auto command_line_params = emptyInputParameters();
-  command_line_params.registerBase("Application");
+  auto command_line_params = app_factory.getValidParams(default_app_type);
   {
     CommandLine cl(argc, argv);
     cl.parse();
-    MooseApp::addInputParam(command_line_params);
-    MooseApp::addAppParam(command_line_params);
-    cl.populateCommandLineParams(command_line_params, nullptr);
+    cl.populateCommandLineParams(command_line_params, nullptr, std::set<std::string>{"input_file"});
 
     // Do not allow overriding Application/type= for subapps
     for (const auto & arg : cl.getArguments())
@@ -72,7 +74,7 @@ createMooseApp(const std::string & default_app_type, int argc, char * argv[])
     }
 
   const auto & [app_type, node] = *parser->getAppType();
-  if (!AppFactory::instance().isRegistered(app_type))
+  if (app_type != default_app_type && !app_factory.isRegistered(app_type))
   {
     auto error = "'" + app_type + "' is not a registered application type";
     if (node)

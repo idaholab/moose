@@ -142,9 +142,13 @@ public:
    * the prefix for all errors associated with a command line parameter
    * to be attributed with "CLI_ARGS". This should be done for the
    * command line population for MooseApps.
+   *
+   * The \p filter_names option allows for populating only the given
+   * parameter names in the set (defaults to no filtering).
    */
   void populateCommandLineParams(InputParameters & params,
-                                 const hit::Node * const command_line_root = nullptr);
+                                 const hit::Node * const command_line_root = nullptr,
+                                 const std::optional<std::set<std::string>> & filter_names = {});
 
   /**
    * @return An iterator to the beginning of the options

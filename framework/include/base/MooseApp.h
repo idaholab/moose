@@ -1062,9 +1062,6 @@ public:
   template <class T>
   const std::vector<T *> & getInterfaceObjects() const;
 
-  static void addAppParam(InputParameters & params);
-  static void addInputParam(InputParameters & params);
-
   /**
    * Whether or not we are forcefully restarting (allowing the load of potentially
    * incompatibie checkpoints); used within RestartableDataReader
