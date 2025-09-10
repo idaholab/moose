@@ -37,7 +37,9 @@ class FunctionParserBase
 #include <filesystem>
 #include <regex>
 
+#ifdef MOOSE_UNIT_TEST
 #include <gtest/gtest.h>
+#endif
 
 // Forward declarations
 class Action;
@@ -49,6 +51,7 @@ class MooseEnum;
 class MooseObject;
 class MultiMooseEnum;
 class Problem;
+class MooseApp;
 namespace hit
 {
 class Node;
@@ -1346,6 +1349,53 @@ public:
                                                 const hit::Node & node,
                                                 const SetupVariableNamesKey);
 
+  /**
+   * Class that is used as a parameter to commandLineParamSet() that allows only
+   * the CommandLine to set that a parmeter is set by the command line
+   */
+  class AllowCommandLineParamsKey
+  {
+    friend class MooseApp;
+#ifdef MOOSE_UNIT_TEST
+    FRIEND_TEST(CommandLineTest, populate);
+    FRIEND_TEST(CommandLineTest, populateBadInterpret);
+    FRIEND_TEST(CommandLineTest, populateSameSwitch);
+    FRIEND_TEST(CommandLineTest, populateMooseEnum);
+    FRIEND_TEST(CommandLineTest, populateSetByUser);
+    FRIEND_TEST(CommandLineTest, initSubAppCommandLine);
+    FRIEND_TEST(CommandLineTest, globalCommandLineParamSubapp);
+    FRIEND_TEST(CommandLineTest, requiredParameter);
+    FRIEND_TEST(CommandLineTest, requiredParameterArgument);
+    FRIEND_TEST(CommandLineTest, duplicateOptions);
+    FRIEND_TEST(CommandLineTest, boolParamWithValue);
+    FRIEND_TEST(CommandLineTest, negativeScalarParam);
+    FRIEND_TEST(CommandLineTest, mergeArgsForParam);
+    FRIEND_TEST(CommandLineTest, findCommandLineParam);
+    FRIEND_TEST(CommandLineTest, optionalValuedParam);
+    FRIEND_TEST(CommandLineTest, mergeHIT);
+    FRIEND_TEST(CommandLineTest, combinedKeyValueParamKnownArg);
+    FRIEND_TEST(CommandLineTest, populateFiltered);
+    FRIEND_TEST(InputParametersTest, alphaCommandLineParamSwitch);
+    FRIEND_TEST(InputParametersTest, commandLineParamFullpath);
+    FRIEND_TEST(InputParametersTest, isCommandLineParameter);
+    FRIEND_TEST(InputParametersTest, commandLineParamKnownArg);
+    FRIEND_TEST(ParameterExtractionTest, extractCommandLineParam);
+#endif
+    AllowCommandLineParamsKey() {}
+    AllowCommandLineParamsKey(const AllowCommandLineParamsKey &) {}
+  };
+
+  /**
+   * Protected method that allows InputParameters to take command line parameters.
+   *
+   * Command line parameters are only parsed in MooseApp, thus they can only be added
+   * from there (and unit tests)
+   */
+  void allowCommandLineParams(const AllowCommandLineParamsKey)
+  {
+    _allow_command_line_params = true;
+  }
+
 private:
   // Private constructor so that InputParameters can only be created in certain places.
   InputParameters();
@@ -1556,10 +1606,12 @@ private:
   /// Whether or not we've called finalize() on these parameters yet
   bool _finalized;
 
+  /// Whether or not command line parameters are allowed
+  bool _allow_command_line_params = false;
+
   // These are the only objects allowed to _create_ InputParameters
   friend InputParameters emptyInputParameters();
   friend class InputParameterWarehouse;
-  friend class Parser;
   // for the printInputFile function in the action warehouse
   friend class ActionWarehouse;
 };
@@ -1862,10 +1914,10 @@ InputParameters::addCommandLineParamHelper(const std::string & name,
                 "This type is not a supported command line parameter type. See "
                 "CommandLine::populateCommandLineParams to add it as a supported type.");
 
-  if (!hasBase() || getBase() != "Application")
+  if (!_allow_command_line_params)
     mooseError("While adding command line parameter '",
                name,
-               "': Command line parameters can only be added to applications.");
+               "': Command line parameters are not enabled for this object.");
 
   auto & cl_data = at(name)._cl_data;
   cl_data = CommandLineMetadata();
