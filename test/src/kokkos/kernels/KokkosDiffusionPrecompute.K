@@ -9,7 +9,7 @@
 
 #include "KokkosDiffusionPrecompute.h"
 
-registerMooseObject("MooseTestApp", KokkosDiffusionPrecompute);
+registerKokkosResidualObject("MooseTestApp", KokkosDiffusionPrecompute);
 
 InputParameters
 KokkosDiffusionPrecompute::validParams()

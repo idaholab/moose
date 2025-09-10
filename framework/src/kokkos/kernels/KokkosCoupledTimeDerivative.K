@@ -9,7 +9,7 @@
 
 #include "KokkosCoupledTimeDerivative.h"
 
-registerMooseObject("MooseApp", KokkosCoupledTimeDerivative);
+registerKokkosResidualObject("MooseApp", KokkosCoupledTimeDerivative);
 
 InputParameters
 KokkosCoupledTimeDerivative::validParams()

@@ -15,8 +15,7 @@
  * Implements a constant Neumann BC where grad(u) is a equal to a postprocessor on the boundary.
  * Uses the term produced from integrating the diffusion operator by parts.
  */
-class KokkosPostprocessorNeumannBC final
-  : public Moose::Kokkos::IntegratedBC<KokkosPostprocessorNeumannBC>
+class KokkosPostprocessorNeumannBC : public Moose::Kokkos::IntegratedBC
 {
 public:
   /**

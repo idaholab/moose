@@ -19,11 +19,8 @@ namespace Kokkos
 /**
  * The base class for Kokkos time-derivative nodal kernels
  */
-template <typename Derived>
-class TimeNodalKernel : public NodalKernel<Derived>
+class TimeNodalKernel : public NodalKernel
 {
-  usingKokkosNodalKernelMembers(Derived);
-
 public:
   static InputParameters validParams();
 
@@ -43,32 +40,5 @@ protected:
   const Scalar<const Real> _du_dot_du;
 };
 
-template <typename Derived>
-InputParameters
-TimeNodalKernel<Derived>::validParams()
-{
-  InputParameters params = NodalKernel<Derived>::validParams();
-
-  params.set<MultiMooseEnum>("vector_tags") = "time";
-  params.set<MultiMooseEnum>("matrix_tags") = "system time";
-
-  return params;
-}
-
-template <typename Derived>
-TimeNodalKernel<Derived>::TimeNodalKernel(const InputParameters & parameters)
-  : NodalKernel<Derived>(parameters),
-    _u_dot(kokkosSystems(), _var, Moose::SOLUTION_DOT_TAG),
-    _du_dot_du(_var.sys().duDotDu(_var.number()))
-{
-}
-
 } // namespace Kokkos
 } // namespace Moose
-
-#define usingKokkosTimeNodalKernelMembers(T)                                                       \
-  usingKokkosNodalKernelMembers(T);                                                                \
-                                                                                                   \
-protected:                                                                                         \
-  using Moose::Kokkos::TimeNodalKernel<T>::_u_dot;                                                 \
-  using Moose::Kokkos::TimeNodalKernel<T>::_du_dot_du

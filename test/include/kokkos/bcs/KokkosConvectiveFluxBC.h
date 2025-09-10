@@ -11,7 +11,7 @@
 
 #include "KokkosIntegratedBC.h"
 
-class KokkosConvectiveFluxBC final : public Moose::Kokkos::IntegratedBC<KokkosConvectiveFluxBC>
+class KokkosConvectiveFluxBC : public Moose::Kokkos::IntegratedBC
 {
 public:
   static InputParameters validParams();

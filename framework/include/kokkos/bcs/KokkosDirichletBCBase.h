@@ -20,10 +20,8 @@ namespace Kokkos
  * The base Kokkos boundary condition of a Dirichlet type
  */
 template <typename Derived>
-class DirichletBCBase : public NodalBC<Derived>
+class DirichletBCBase : public NodalBC
 {
-  usingKokkosNodalBCMembers(Derived);
-
 public:
   static InputParameters validParams();
 
@@ -71,7 +69,7 @@ template <typename Derived>
 InputParameters
 DirichletBCBase<Derived>::validParams()
 {
-  InputParameters params = NodalBC<Derived>::validParams();
+  InputParameters params = NodalBC::validParams();
   params.addParam<bool>(
       "preset", true, "Whether or not to preset the BC (apply the value before the solve begins).");
   return params;
@@ -79,7 +77,7 @@ DirichletBCBase<Derived>::validParams()
 
 template <typename Derived>
 DirichletBCBase<Derived>::DirichletBCBase(const InputParameters & parameters)
-  : NodalBC<Derived>(parameters), _preset(this->template getParam<bool>("preset"))
+  : NodalBC(parameters), _preset(this->template getParam<bool>("preset"))
 {
 }
 
@@ -122,7 +120,9 @@ DirichletBCBase<Derived>::computeQpResidual(const ContiguousNodeID node) const
 } // namespace Moose
 
 #define usingKokkosDirichletBCBaseMembers(T)                                                       \
-  usingKokkosNodalBCMembers(T);                                                                    \
-                                                                                                   \
 public:                                                                                            \
-  using Moose::Kokkos::DirichletBCBase<T>::operator()
+  using Moose::Kokkos::DirichletBCBase<T>::operator();                                             \
+  using Moose::Kokkos::NodalBC::operator();                                                        \
+                                                                                                   \
+protected:                                                                                         \
+  using Moose::Kokkos::NodalBC::_u

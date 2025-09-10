@@ -19,22 +19,9 @@ namespace Kokkos
 /**
  * The base class for a user to derive their own Kokkos kernels.
  *
- * The polymorphic design of the original MOOSE is reproduced statically by leveraging the Curiously
- * Recurring Template Pattern (CRTP), a programming idiom that involves a class template inheriting
- * from a template instantiation of itself. When the user derives their Kokkos object from this
- * class, the inheritance structure will look like:
- *
- * class UserKernel final : public Moose::Kokkos::Kernel<UserKernel>
- *
- * It is important to note that the template argument should point to the last derived class.
- * Therefore, if the user wants to define a derived class that can be further inherited, the derived
- * class should be a class template as well. Otherwise, it is recommended to mark the derived class
- * as final to prevent its inheritence by mistake.
- *
- * The user is expected to define computeQpResidual(), computeQpJacobian(), and
- * computeQpOffDiagJacobian() as inlined public methods in their derived class (not virtual
- * override). The signature of computeQpResidual() expected to be defined in the derived class is as
- * follows:
+ * The user should define computeQpResidual(), computeQpJacobian(), and computeQpOffDiagJacobian()
+ * as inlined public methods in their derived class (not virtual override). The signature of
+ * computeQpResidual() expected to be defined in the derived class is as follows:
  *
  * @param i The element-local DOF index
  * @param qp The local quadrature point index
@@ -49,7 +36,7 @@ namespace Kokkos
  * below, and their definition in the derived class is optional. If they are defined in the derived
  * class, they will hide the default definitions in the base class.
  */
-template <typename Derived>
+
 class Kernel : public KernelBase
 {
 public:
@@ -106,15 +93,29 @@ public:
   {
     return 0;
   }
+  /**
+   * Get the function pointer of the default computeQpJacobian()
+   * @returns The function pointer
+   */
+  static auto defaultJacobian() { return &Kernel::computeQpJacobian; }
+  /**
+   * Get the function pointer of the default computeQpOffDiagJacobian()
+   * @returns The function pointer
+   */
+  static auto defaultOffDiagJacobian() { return &Kernel::computeQpOffDiagJacobian; }
   ///@}
 
   /**
    * The parallel computation entry functions called by Kokkos
    */
   ///@{
-  KOKKOS_FUNCTION void operator()(ResidualLoop, const ThreadID tid) const;
-  KOKKOS_FUNCTION void operator()(JacobianLoop, const ThreadID tid) const;
-  KOKKOS_FUNCTION void operator()(OffDiagJacobianLoop, const ThreadID tid) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void operator()(ResidualLoop, const ThreadID tid, const Derived & kernel) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void operator()(JacobianLoop, const ThreadID tid, const Derived & kernel) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void
+  operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & kernel) const;
   ///@}
 
   /**
@@ -128,19 +129,22 @@ public:
    * @param kernel The kernel object of the final derived type
    * @param datum The ResidualDatum object of the current thread
    */
-  KOKKOS_FUNCTION void computeResidualInternal(const Derived * kernel, ResidualDatum & datum) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void computeResidualInternal(const Derived & kernel, ResidualDatum & datum) const;
   /**
    * Compute diagonal Jacobian
    * @param kernel The kernel object of the final derived type
    * @param datum The ResidualDatum object of the current thread
    */
-  KOKKOS_FUNCTION void computeJacobianInternal(const Derived * kernel, ResidualDatum & datum) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void computeJacobianInternal(const Derived & kernel, ResidualDatum & datum) const;
   /**
    * Compute off-diagonal Jacobian
    * @param kernel The kernel object of the final derived type
    * @param datum The ResidualDatum object of the current thread
    */
-  KOKKOS_FUNCTION void computeOffDiagJacobianInternal(const Derived * kernel,
+  template <typename Derived>
+  KOKKOS_FUNCTION void computeOffDiagJacobianInternal(const Derived & kernel,
                                                       ResidualDatum & datum) const;
   ///@}
 
@@ -169,110 +173,34 @@ protected:
    * Gradient of the current solution at quadrature points
    */
   const VariableGradient _grad_u;
-
-  /**
-   * Get whether computeQpJacobian() was not defined in the derived class
-   * @returns Whether computeQpJacobian() was not defined in the derived class
-   */
-  virtual bool defaultJacobian() const
-  {
-    return &Derived::computeQpJacobian == &Kernel::computeQpJacobian;
-  }
-  /**
-   * Get whether computeQpOffDiagJacobian() was not defined in the derived class
-   * @returns Whether computeQpOffDiagJacobian() was not defined in the derived class
-   */
-  virtual bool defaultOffDiagJacobian() const
-  {
-    return &Derived::computeQpOffDiagJacobian == &Kernel::computeQpOffDiagJacobian;
-  }
 };
 
 template <typename Derived>
-InputParameters
-Kernel<Derived>::validParams()
-{
-  InputParameters params = KernelBase::validParams();
-  return params;
-}
-
-template <typename Derived>
-Kernel<Derived>::Kernel(const InputParameters & parameters)
-  : KernelBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD),
-    _test(),
-    _grad_test(),
-    _phi(),
-    _grad_phi(),
-    _u(_var),
-    _grad_u(_var)
-{
-  addMooseVariableDependency(&_var);
-}
-
-template <typename Derived>
-void
-Kernel<Derived>::computeResidual()
-{
-  ::Kokkos::RangePolicy<ResidualLoop, ExecSpace, ::Kokkos::IndexType<ThreadID>> policy(
-      0, numKokkosBlockElements());
-  ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
-  ::Kokkos::fence();
-}
-
-template <typename Derived>
-void
-Kernel<Derived>::computeJacobian()
-{
-  if (!defaultJacobian())
-  {
-    ::Kokkos::RangePolicy<JacobianLoop, ExecSpace, ::Kokkos::IndexType<ThreadID>> policy(
-        0, numKokkosBlockElements());
-    ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
-    ::Kokkos::fence();
-  }
-
-  if (!defaultOffDiagJacobian())
-  {
-    auto & sys = kokkosSystem(_kokkos_var.sys());
-
-    _thread.resize({sys.getCoupling(_kokkos_var.var()).size(), numKokkosBlockElements()});
-
-    ::Kokkos::RangePolicy<OffDiagJacobianLoop, ExecSpace, ::Kokkos::IndexType<ThreadID>> policy(
-        0, _thread.size());
-    ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
-    ::Kokkos::fence();
-  }
-}
-
-template <typename Derived>
 KOKKOS_FUNCTION void
-Kernel<Derived>::operator()(ResidualLoop, const ThreadID tid) const
+Kernel::operator()(ResidualLoop, const ThreadID tid, const Derived & kernel) const
 {
-  auto kernel = static_cast<const Derived *>(this);
   auto elem = kokkosBlockElementID(tid);
 
   ResidualDatum datum(elem, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
 
-  kernel->computeResidualInternal(kernel, datum);
+  kernel.computeResidualInternal(kernel, datum);
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-Kernel<Derived>::operator()(JacobianLoop, const ThreadID tid) const
+Kernel::operator()(JacobianLoop, const ThreadID tid, const Derived & kernel) const
 {
-  auto kernel = static_cast<const Derived *>(this);
   auto elem = kokkosBlockElementID(tid);
 
   ResidualDatum datum(elem, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
 
-  kernel->computeJacobianInternal(kernel, datum);
+  kernel.computeJacobianInternal(kernel, datum);
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-Kernel<Derived>::operator()(OffDiagJacobianLoop, const ThreadID tid) const
+Kernel::operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & kernel) const
 {
-  auto kernel = static_cast<const Derived *>(this);
   auto elem = kokkosBlockElementID(_thread(tid, 1));
 
   auto & sys = kokkosSystem(_kokkos_var.sys());
@@ -283,12 +211,12 @@ Kernel<Derived>::operator()(OffDiagJacobianLoop, const ThreadID tid) const
 
   ResidualDatum datum(elem, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar);
 
-  kernel->computeOffDiagJacobianInternal(kernel, datum);
+  kernel.computeOffDiagJacobianInternal(kernel, datum);
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-Kernel<Derived>::computeResidualInternal(const Derived * kernel, ResidualDatum & datum) const
+Kernel::computeResidualInternal(const Derived & kernel, ResidualDatum & datum) const
 {
   ResidualObject::computeResidualInternal(
       datum,
@@ -299,14 +227,14 @@ Kernel<Derived>::computeResidualInternal(const Derived * kernel, ResidualDatum &
           datum.reinit();
 
           for (unsigned int i = ib; i < ie; ++i)
-            local_re[i] += datum.JxW(qp) * kernel->computeQpResidual(i, qp, datum);
+            local_re[i] += datum.JxW(qp) * kernel.computeQpResidual(i, qp, datum);
         }
       });
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-Kernel<Derived>::computeJacobianInternal(const Derived * kernel, ResidualDatum & datum) const
+Kernel::computeJacobianInternal(const Derived & kernel, ResidualDatum & datum) const
 {
   ResidualObject::computeJacobianInternal(
       datum,
@@ -321,7 +249,7 @@ Kernel<Derived>::computeJacobianInternal(const Derived * kernel, ResidualDatum &
             unsigned int i = ij % datum.n_jdofs();
             unsigned int j = ij / datum.n_jdofs();
 
-            local_ke[ij] += datum.JxW(qp) * kernel->computeQpJacobian(i, j, qp, datum);
+            local_ke[ij] += datum.JxW(qp) * kernel.computeQpJacobian(i, j, qp, datum);
           }
         }
       });
@@ -329,7 +257,7 @@ Kernel<Derived>::computeJacobianInternal(const Derived * kernel, ResidualDatum &
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-Kernel<Derived>::computeOffDiagJacobianInternal(const Derived * kernel, ResidualDatum & datum) const
+Kernel::computeOffDiagJacobianInternal(const Derived & kernel, ResidualDatum & datum) const
 {
   ResidualObject::computeJacobianInternal(
       datum,
@@ -345,7 +273,7 @@ Kernel<Derived>::computeOffDiagJacobianInternal(const Derived * kernel, Residual
             unsigned int j = ij / datum.n_jdofs();
 
             local_ke[ij] +=
-                datum.JxW(qp) * kernel->computeQpOffDiagJacobian(i, j, datum.jvar(), qp, datum);
+                datum.JxW(qp) * kernel.computeQpOffDiagJacobian(i, j, datum.jvar(), qp, datum);
           }
         }
       });
@@ -353,17 +281,3 @@ Kernel<Derived>::computeOffDiagJacobianInternal(const Derived * kernel, Residual
 
 } // namespace Kokkos
 } // namespace Moose
-
-#define usingKokkosKernelMembers(T)                                                                \
-  usingKokkosKernelBaseMembers;                                                                    \
-                                                                                                   \
-protected:                                                                                         \
-  using Moose::Kokkos::Kernel<T>::_test;                                                           \
-  using Moose::Kokkos::Kernel<T>::_grad_test;                                                      \
-  using Moose::Kokkos::Kernel<T>::_phi;                                                            \
-  using Moose::Kokkos::Kernel<T>::_grad_phi;                                                       \
-  using Moose::Kokkos::Kernel<T>::_u;                                                              \
-  using Moose::Kokkos::Kernel<T>::_grad_u;                                                         \
-                                                                                                   \
-public:                                                                                            \
-  using Moose::Kokkos::Kernel<T>::operator()

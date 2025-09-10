@@ -11,11 +11,8 @@
 
 #include "KokkosTimeNodalKernel.h"
 
-class KokkosTimeDerivativeNodalKernel final
-  : public Moose::Kokkos::TimeNodalKernel<KokkosTimeDerivativeNodalKernel>
+class KokkosTimeDerivativeNodalKernel : public Moose::Kokkos::TimeNodalKernel
 {
-  usingKokkosTimeNodalKernelMembers(KokkosTimeDerivativeNodalKernel);
-
 public:
   static InputParameters validParams();
 

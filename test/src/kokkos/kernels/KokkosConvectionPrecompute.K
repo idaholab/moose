@@ -9,7 +9,7 @@
 
 #include "KokkosConvectionPrecompute.h"
 
-registerMooseObject("MooseTestApp", KokkosConvectionPrecompute);
+registerKokkosResidualObject("MooseTestApp", KokkosConvectionPrecompute);
 
 /**
  * This function defines the valid parameters for
