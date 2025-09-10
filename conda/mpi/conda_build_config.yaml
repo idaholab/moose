@@ -4,10 +4,10 @@ mpi:
 
 mpi_version:
   # MPICH versions
-  - 4.2.1    # [linux]
+  - 4.3.1    # [linux]
   - 4.3.1    # [osx]
   # OpenMPI versions
-  - 4.1.6    # [linux]
+  - 5.0.8    # [linux]
   - 5.0.8    # [osx]
 
 mpi_friendly_name:
@@ -30,7 +30,7 @@ zip_keys:
   - mpi_dev_website
 
 moose_hdf5:
-  - hdf5 1.14.3         # [linux]
+  - hdf5 1.14.6         # [linux]
   - hdf5 1.14.6         # [osx]
 
 moose_libexpat:
@@ -42,19 +42,19 @@ moose_cmake:
 
 ### If you change these versions, change also conda/wasp/*, conda/seacas/*
 moose_cc:
-  - gcc 12.3.0 h915e2ae_13                                  # [linux]
+  - gcc 14.3.0 h76bdaa0_5                                   # [linux]
   - clang 18.1.8 default_h576c50e_9                         # [not arm64 and osx]
   - clang 19.1.7 default_hf9bcbb7_4                         # [arm64]
 
 ### If you change these versions, change also conda/wasps/*, conda/seacas/*
 moose_cxx:
-  - gxx 12.3.0 h915e2ae_13                                  # [linux]
+  - gxx 14.3.0 he448592_5                                   # [linux]
   - clangxx 18.1.8 default_heb2e8d1_9                       # [not arm64 and osx]
   - clangxx 19.1.7 default_h36137df_4                       # [arm64]
 
 ### If you change these versions, change also conda/seacas/*
 moose_gfortran:
-  - gfortran 12.3.0 h915e2ae_13                             # [linux]
+  - gfortran 14.3.0 he448592_5                              # [linux]
   - gfortran 13.3.0 hcc3c99d_1                              # [not arm64 and osx]
   - gfortran 14.3.0 h3ef1dbf_0                              # [arm64]
 
@@ -70,27 +70,27 @@ moose_cxxcompiler:
   - clangxx_osx-arm64                                       # [arm64]
 
 moose_libgfortran5:
-  - libgfortran5 14.2.0 hf1ad2bd_2                          # [linux]
+  - libgfortran5 15.1.0 hcea5267_5                          # [linux]
   - libgfortran5 14.2.0 h58528f3_105                        # [not arm64 and osx]
   - libgfortran5 15.1.0 hb74de2c_1                          # [arm64]
 
 moose_gcc_impl:                                             # [linux]
-  - gcc_impl_linux-64 12.3.0 h58ffeeb_13                    # [linux]
+  - gcc_impl_linux-64 14.3.0 hd9e9e21_5                     # [linux]
 
 moose_gfortran_impl:                                        # [linux]
-  - gfortran_impl_linux-64 12.3.0 h8f2110c_13               # [linux]
+  - gfortran_impl_linux-64 14.3.0 h7db7018_5                # [linux]
 
 ### Below are pinings created at the time of render
 ### based on above content. If any of the above
 ### content changes, modification will be needed below
 moose_libstdcxx:                                            # [linux]
-  - libstdcxx 14.2.0 h8f9b012_2                             # [linux]
+  - libstdcxx 15.1.0 h8f9b012_5                             # [linux]
 
 moose_libstdcxx_devel:                                      # [linux]
-  - libstdcxx-devel_linux-64 12.3.0 h6b66f73_113            # [linux]
+  - libstdcxx-devel_linux-64 14.3.0 h85bb3a7_105            # [linux]
 
 moose_libcxx:
-  - libcxx 20.1.2 ha0f52bf_0                                # [linux]
+  - libcxx 21.1.1 ha0f52bf_0                                # [linux]
   - libcxx 20.1.2 hf95d169_0                                # [not arm64 and osx]
   - libcxx 21.1.1 hf598326_0                                # [arm64]
 
@@ -125,7 +125,6 @@ moose_llvm_tools:                                           # [osx]
   - llvm-tools 19.1.7 h855ad52_2                            # [arm64]
 
 moose_libclang:
-  - libclang13 20.1.2 default_h9c6a7e4_0                    # [linux]
   - libclang-cpp18.1 18.1.8 default_h3571c67_9              # [not arm64 and osx]
   - libclang-cpp18.1 18.1.8 default_h73dfc95_15             # [arm64]
 
