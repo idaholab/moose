@@ -35,10 +35,17 @@ MassFluxPenaltyBC::MassFluxPenaltyBC(const InputParameters & parameters)
     _comp(getParam<unsigned short>("component")),
     _matrix_only(getParam<bool>("matrix_only")),
     _gamma(getParam<Real>("gamma")),
-    _dirichlet_func(isParamValid("dirichlet_value") ? &getFunction("dirichlet_value") : nullptr)
+    _dirichlet_func(isParamValid("dirichlet_value") ? &getFunction("dirichlet_value") : nullptr),
+    _hmax(0)
 {
   if (_mesh.dimension() > 2)
     mooseError("This class only supports 2D simulations at this time");
+}
+
+void
+MassFluxPenaltyBC::precalculateResidual()
+{
+  _hmax = _current_side_elem->hmax();
 }
 
 void
@@ -55,5 +62,5 @@ MassFluxPenaltyBC::computeQpResidual()
   if (_dirichlet_func)
     soln_jump -= _dirichlet_func->vectorValue(_t, _q_point[_qp]);
 
-  return _gamma * soln_jump * _normals[_qp] * _test[_i][_qp] * _normals[_qp](_comp);
+  return _gamma / _hmax * soln_jump * _normals[_qp] * _test[_i][_qp] * _normals[_qp](_comp);
 }
