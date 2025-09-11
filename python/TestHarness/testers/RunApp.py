@@ -303,7 +303,7 @@ class RunApp(Tester):
             command += specs['input_switch'] + ' ' + specs['input'] + ' '
         command += ' '.join(cli_args)
         if options.valgrind_mode.upper() == specs['valgrind'].upper() or options.valgrind_mode.upper() == 'HEAVY' and specs['valgrind'].upper() == 'NORMAL':
-            command = 'valgrind --suppressions=' + os.path.join(specs['moose_dir'], 'python', 'TestHarness', 'suppressions', 'errors.supp') + ' --leak-check=full --tool=memcheck --dsymutil=yes --track-origins=yes --demangle=yes -v ' + command
+            command = 'valgrind --suppressions=' + os.path.join(specs['moose_dir'], 'python', 'TestHarness', 'suppressions', 'errors.supp') + ' --leak-check=full --tool=memcheck --dsymutil=yes --track-origins=yes --demangle=yes --enable-debuginfod=no -v ' + command
         elif nthreads > 1:
             command = command + ' --n-threads=' + str(nthreads)
 
