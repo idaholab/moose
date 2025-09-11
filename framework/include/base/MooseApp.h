@@ -1005,6 +1005,17 @@ public:
   const std::shared_ptr<libMesh::Parallel::Communicator> getCommunicator() const { return _comm; }
 
   /**
+   * Returns the number of threads used by this application
+   */
+  unsigned int getNumThreads() const { return _num_threads; }
+
+  /**
+   * Sets the number of threads used by this application, for both libMesh and MOOSE
+   * @param num_threads number of threads to use
+   */
+  void setNumThreads(unsigned int num_threads);
+
+  /**
    * Return the container of relationship managers
    */
   const std::set<std::shared_ptr<RelationshipManager>> & relationshipManagers() const
@@ -1140,6 +1151,9 @@ protected:
 
   /// The MPI communicator this App is going to use
   const std::shared_ptr<libMesh::Parallel::Communicator> _comm;
+
+  /// Number of threads
+  unsigned int _num_threads;
 
   /// The output file basename
   std::string _output_file_base;

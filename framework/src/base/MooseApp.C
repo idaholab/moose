@@ -217,9 +217,9 @@ MooseApp::validParams()
 
   params.addCommandLineParam<unsigned int>(
       "n_threads", "--n-threads=<n>", "Runs the specified number of threads per process");
-  // This probably shouldn't be global, but the implications of removing this are currently
-  // unknown and we need to manage it with libmesh better
-  params.setGlobalCommandLineParam("n_threads");
+  params.addCommandLineParam<unsigned int>(
+      "max_threads", "--max-threads=<n>", "Allocates enough threads per process. Defaults to n-threads.");
+  params.setGlobalCommandLineParam("max_threads");
 
   params.addCommandLineParam<bool>("allow_unused",
                                    "-w --allow-unused",
@@ -429,8 +429,6 @@ MooseApp::validParams()
       "--parse-neml2-only",
       "Executes the [NEML2] block to parse the input file and terminate.");
 
-  MooseApp::addAppParam(params);
-
   params.registerBase("Application");
 
   return params;
@@ -448,6 +446,7 @@ MooseApp::MooseApp(const InputParameters & parameters)
     // the actual const parameters that the AppFactory made for this application
     MooseBase(*this, AppFactory::instance().getAppParams(parameters)),
     _comm(getParam<std::shared_ptr<Parallel::Communicator>>("_comm")),
+    _num_threads(getParam<unsigned int>("num_threads")),
     _file_base_set_by_user(false),
     _output_position_set(false),
     _start_time_set(false),
@@ -460,7 +459,7 @@ MooseApp::MooseApp(const InputParameters & parameters)
     _parser(getCheckedPointerParam<std::shared_ptr<Parser>>("_parser")),
     _command_line(getCheckedPointerParam<std::shared_ptr<CommandLine>>("_command_line")),
     _builder(*this, _action_warehouse, *_parser),
-    _restartable_data(libMesh::n_threads()),
+    _restartable_data(_num_threads),
     _perf_graph(createRecoverablePerfGraph()),
     _solution_invalidity(createRecoverableSolutionInvalidity()),
     _rank_map(*_comm, _perf_graph),
@@ -519,6 +518,8 @@ MooseApp::MooseApp(const InputParameters & parameters)
                                                 : std::set<std::string>{})
 #endif
 {
+  setNumThreads(_num_threads);
+
   if (&parameters != &_pars)
   {
     const auto show_trace = Moose::show_trace;
@@ -3422,6 +3423,16 @@ MooseApp::getRelationshipManagerInfo() const
   }
 
   return info_strings;
+}
+
+void
+MooseApp::setNumThreads(unsigned int num_threads)
+{
+  _num_threads = num_threads;
+  libMesh::libMeshPrivateData::_n_threads = num_threads;
+#ifdef LIBMESH_HAVE_OPENMP
+  omp_set_num_threads(libMesh::libMeshPrivateData::_n_threads);
+#endif
 }
 
 void
