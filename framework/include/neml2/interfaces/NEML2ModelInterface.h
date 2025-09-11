@@ -104,16 +104,16 @@ NEML2ModelInterface<T>::validParams()
       "that corresponds to the model you want to use.");
   params.addParam<std::string>(
       "device",
-      "cpu",
       "Device on which to evaluate the NEML2 model. The string supplied must follow the following "
       "schema: (cpu|cuda)[:<device-index>] where cpu or cuda specifies the device type, and "
       ":<device-index> optionally specifies a device index. For example, device='cpu' sets the "
       "target compute device to be CPU, and device='cuda:1' sets the target compute device to be "
-      "CUDA with device ID 1.");
-  params.addParam<std::string>("output_device",
-                               "cpu",
-                               "Similar to the 'device' parameter, this parameter specifies the "
-                               "device on which to store the outputs. Default is 'cpu'.");
+      "CUDA with device ID 1. If not specified, default to the compute device specified via the "
+      "command line argument --compute-device.");
+  params.addParam<std::string>(
+      "output_device",
+      "Similar to the 'device' parameter, this parameter specifies the device on which to store "
+      "the outputs. Default to be the same as 'device'.");
 
   params.addParam<std::string>(
       "scheduler",
@@ -140,8 +140,11 @@ template <class T>
 template <typename... P>
 NEML2ModelInterface<T>::NEML2ModelInterface(const InputParameters & params, P &&... args)
   : T(params, args...),
-    _device(params.get<std::string>("device")),
-    _output_device(params.get<std::string>("output_device")),
+    _device(params.isParamValid("device") ? neml2::Device(params.get<std::string>("device"))
+                                          : this->getMooseApp().getLibtorchDevice()),
+    _output_device(params.isParamValid("output_device")
+                       ? neml2::Device(params.get<std::string>("output_device"))
+                       : _device),
     _scheduler(nullptr),
     _async_dispatch(params.get<bool>("async_dispatch"))
 {
