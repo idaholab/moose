@@ -189,7 +189,7 @@
     required_python_packages = requests
     recover = false
     restep = false
-    requirement = 'The system shall make sure get_time API gets the correct time.'
+    requirement = 'The system shall support extracting the system time via a REST API'
     valgrind = 'none' # http library is not completely valgrind clean
   []
 
