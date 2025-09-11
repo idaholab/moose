@@ -454,7 +454,7 @@ MooseApp::MooseApp(const InputParameters & parameters)
     _start_time(0.0),
     _global_time_offset(0.0),
     _input_parameter_warehouse(std::make_unique<InputParameterWarehouse>((isParamValid("_multiapp_level") ? getParam<unsigned int>("_multiapp_level")
-                                                    : 0) ? 3 : 2)),
+                                                    : 0) ? /*sub_th*/10 : 1)),
     _action_factory(*this),
     _action_warehouse(*this, _syntax, _action_factory),
     _output_warehouse(*this),
@@ -462,7 +462,7 @@ MooseApp::MooseApp(const InputParameters & parameters)
     _command_line(getCheckedPointerParam<std::shared_ptr<CommandLine>>("_command_line")),
     _builder(*this, _action_warehouse, *_parser),
     _num_threads((isParamValid("_multiapp_level") ? getParam<unsigned int>("_multiapp_level")
-                                                    : 0) ? 3 : 2), //getParam<unsigned int>("n_threads")),
+                                                    : 0) ? /*sub_th*/10 : 1), //getParam<unsigned int>("n_threads")),
     _restartable_data(_num_threads),
     _perf_graph(createRecoverablePerfGraph()),
     _solution_invalidity(createRecoverableSolutionInvalidity()),
