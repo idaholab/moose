@@ -70,6 +70,7 @@
     type = MFEMScalarDirichletBC
     variable = concentration
     boundary = 'top'
+    coefficient = 2.0
   []
 []
 
@@ -83,6 +84,7 @@
 []
 
 [Kernels]
+  active = 'residual_diff'
   [jacobian_diff]
     type = MFEMDiffusionKernel
     variable = concentration
@@ -91,7 +93,7 @@
   [residual_diff]
     type = MFEMDomainLFGardKernel
     variable = concentration
-    coefficient = diffusivity
+    coefficient = one
   []
 []
 
