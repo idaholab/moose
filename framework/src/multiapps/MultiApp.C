@@ -425,6 +425,9 @@ MultiApp::createApps()
       continue;
     createLocalApp(i);
   }
+
+  // Restore number of threads of the parent
+  _app.setNumThreads(_app.getNumThreads());
 }
 
 void
@@ -673,7 +676,10 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
       _reset_happened[i] = true;
       if (_reset_apps.size() > 0)
         for (auto & app : _reset_apps)
+        {
+          _apps[i]->setNumThreads(_apps[i]->getNumThreads());
           resetApp(app);
+        }
 
       // If we reset an application, then we delete the old objects, including the coordinate
       // transformation classes. Consequently we need to reset the coordinate transformation classes
@@ -686,6 +692,7 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
         for (const auto i : make_range(_my_num_apps))
         {
           auto app_ptr = _apps[i];
+          _apps[i]->setNumThreads(_apps[i]->getNumThreads());
           if (usingPositions())
             app_ptr->getExecutioner()->feProblem().coordTransform().transformMesh(
                 app_ptr->getExecutioner()->feProblem().mesh(), _positions[_first_local_app + i]);
@@ -711,7 +718,10 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
   {
     _move_happened = true;
     for (unsigned int i = 0; i < _move_apps.size(); i++)
+    {
+      _apps[i]->setNumThreads(_apps[i]->getNumThreads());
       moveApp(_move_apps[i], _move_positions[i]);
+    }
 
     // Backup in case the next solve fails
     backup_apps = true;
@@ -719,6 +729,8 @@ MultiApp::preTransfer(Real /*dt*/, Real target_time)
 
   if (backup_apps)
     backup();
+  // Restore number of threads of the parent
+  _app.setNumThreads(_app.getNumThreads());
 }
 
 Executioner *
@@ -735,12 +747,15 @@ MultiApp::finalize()
 {
   for (const auto & app_ptr : _apps)
   {
+    app_ptr->setNumThreads(app_ptr->getNumThreads());
     auto * executioner = app_ptr->getExecutioner();
     mooseAssert(executioner, "Executioner is nullptr");
 
     executioner->feProblem().execute(EXEC_FINAL);
     executioner->feProblem().outputStep(EXEC_FINAL);
   }
+  // Restore number of threads of the parent
+  _app.setNumThreads(_app.getNumThreads());
 }
 
 void
@@ -748,11 +763,14 @@ MultiApp::postExecute()
 {
   for (const auto & app_ptr : _apps)
   {
+    app_ptr->setNumThreads(app_ptr->getNumThreads());
     auto * executioner = app_ptr->getExecutioner();
     mooseAssert(executioner, "Executioner is nullptr");
 
     executioner->postExecute();
   }
+  // Restore number of threads of the parent
+  _app.setNumThreads(_app.getNumThreads());
 }
 
 void
@@ -764,7 +782,10 @@ MultiApp::backup()
     _console << "Backed up MultiApp ... ";
 
   for (unsigned int i = 0; i < _my_num_apps; i++)
+  {
+    _apps[i]->setNumThreads(_apps[i]->getNumThreads());
     _sub_app_backups[i] = _apps[i]->backup();
+  }
 
   if (_fe_problem.verboseMultiApps())
     _console << name() << std::endl;
@@ -790,6 +811,7 @@ MultiApp::restore(bool force)
 
       for (unsigned int i = 0; i < _my_num_apps; i++)
       {
+        _apps[i]->setNumThreads(_apps[i]->getNumThreads());
         _end_solutions[i].resize(_apps[i]->getExecutioner()->feProblem().numSolverSystems());
         for (unsigned int j = 0; j < _apps[i]->getExecutioner()->feProblem().numSolverSystems();
              j++)
@@ -817,8 +839,11 @@ MultiApp::restore(bool force)
       _end_aux_solutions.resize(_my_num_apps);
 
       for (unsigned int i = 0; i < _my_num_apps; i++)
+      {
+        _apps[i]->setNumThreads(_apps[i]->getNumThreads());
         _end_aux_solutions[i] =
             _apps[i]->getExecutioner()->feProblem().getAuxiliarySystem().solution().clone();
+      }
     }
 
     if (_fe_problem.verboseMultiApps())
@@ -826,6 +851,7 @@ MultiApp::restore(bool force)
 
     for (unsigned int i = 0; i < _my_num_apps; i++)
     {
+      _apps[i]->setNumThreads(_apps[i]->getNumThreads());
       _apps[i]->restore(std::move(_sub_app_backups[i]), false);
       _sub_app_backups[i] = _apps[i]->finalizeRestore();
       mooseAssert(_sub_app_backups[i], "Should have a backup");
@@ -839,6 +865,7 @@ MultiApp::restore(bool force)
     {
       for (unsigned int i = 0; i < _my_num_apps; i++)
       {
+        _apps[i]->setNumThreads(_apps[i]->getNumThreads());
         for (unsigned int j = 0; j < _apps[i]->getExecutioner()->feProblem().numSolverSystems();
              j++)
         {
@@ -857,6 +884,7 @@ MultiApp::restore(bool force)
     {
       for (unsigned int i = 0; i < _my_num_apps; i++)
       {
+        _apps[i]->setNumThreads(_apps[i]->getNumThreads());
         _apps[i]->getExecutioner()->feProblem().getAuxiliarySystem().solution() =
             *_end_aux_solutions[i];
 
@@ -881,11 +909,14 @@ MultiApp::restore(bool force)
   {
     for (unsigned int i = 0; i < _my_num_apps; i++)
     {
+      _apps[i]->setNumThreads(_apps[i]->getNumThreads());
       for (auto & sub_app :
            _apps[i]->getExecutioner()->feProblem().getMultiAppWarehouse().getObjects())
         sub_app->restore(false);
     }
   }
+  // Restore number of threads of the parent
+  _app.setNumThreads(_app.getNumThreads());
 }
 
 void
