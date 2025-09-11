@@ -185,6 +185,7 @@ NEML2FEInterpolation::initialize()
 
   _ndofe.clear();
   _moose_dof_map.clear();
+  _moose_dof_map_global.clear();
   _moose_phi.clear();
   _moose_grad_phi.clear();
   _local_ndof = 0;

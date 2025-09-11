@@ -124,8 +124,6 @@ ExplicitMixedOrder::meshChanged()
   // a volume integrated quantity!
   _mesh_changed = true;
 
-  mooseInfoRepeated("ExplicitMixedOrder::meshChanged()");
-
   ExplicitTimeIntegrator::meshChanged();
 }
 
@@ -155,8 +153,6 @@ ExplicitMixedOrder::solve()
   // Compute the mass matrix
   if (_mesh_changed || !_constant_mass)
   {
-    mooseInfoRepeated("Computing Mass Matrix.");
-
     // We only want to compute "inverted" lumped mass matrix once.
     _fe_problem.computeJacobianTag(
         *_nonlinear_implicit_system->current_local_solution, mass_matrix, mass_tag);
@@ -261,8 +257,6 @@ ExplicitMixedOrder::performExplicitSolve(SparseMatrix<Number> &)
   // Scaling the acceleration
   auto accel_scaled = accel_second->clone();
   accel_scaled->scale((_dt + _dt_old) / 2);
-
-  mooseInfoRepeated("vel ", vel_second->size(), " accel ", accel_scaled->size());
 
   // Velocity update for central difference
   *vel_second += *accel_scaled;
