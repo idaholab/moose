@@ -25,32 +25,6 @@
     requirement = 'The system shall support GMV output.'
   []
 
-  [yaml_dump_test]
-    type = 'RunApp'
-    input = ''
-    expect_out = 'START YAML DATA.*END YAML DATA'
-    cli_args = '--yaml'
-    # suppress error checking, the word 'ERROR' shows up in the yaml dump
-    errors = 'zzzzzzzzzz'
-    valgrind = HEAVY
-    issues = '#920'
-    design = 'YAMLFormatter.md'
-    requirement = 'The system shall be able to dump YAML data.'
-  []
-
-  [no_double_executioner_output]
-    type = 'RunApp'
-    input = ''
-    absent_out = '/Executioner/\<type\>/Transient.*/Executioner/\<type\>/Transient'
-    valgrind = HEAVY
-    # suppress error checking, the word 'ERROR' shows up in the yaml dump
-    errors = 'zzzzz zzzzz'
-    cli_args = '--yaml-search /Executioner'
-    issues = '#2855'
-    design = 'YAMLFormatter.md'
-    requirement = 'The system shall only give Executioner output once.'
-  []
-
   [tecplot_out_test]
     type = 'CheckFiles'
     input = 'output_test_tecplot.i'

@@ -24,7 +24,6 @@
 
 // Forward declarations
 class ActionWarehouse;
-class SyntaxTree;
 class MooseApp;
 class Factory;
 class ActionFactory;
@@ -60,12 +59,6 @@ private:
 class Builder : public ConsoleStreamInterface, public hit::Walker
 {
 public:
-  enum SyntaxFormatterType
-  {
-    INPUT_FILE,
-    YAML
-  };
-
   Builder(MooseApp & app, ActionWarehouse & action_wh, Parser & parser);
   virtual ~Builder();
 
@@ -99,16 +92,6 @@ public:
   void extractParams(const std::string & prefix, InputParameters & p);
 
   /**
-   * Creates a syntax formatter for printing
-   */
-  void initSyntaxFormatter(SyntaxFormatterType type, bool dump_mode);
-
-  /**
-   * Use MOOSE Factories to construct a full parse tree for documentation or echoing input.
-   */
-  void buildFullTree(const std::string & search_string);
-
-  /**
    * Use MOOSE Factories to construct a parameter tree for documentation or echoing input.
    */
   void buildJsonSyntaxTree(JsonSyntaxTree & tree) const;
@@ -140,9 +123,6 @@ private:
   Parser & _parser;
   /// The root node from the Parser
   hit::Node & _root;
-
-  /// Object for holding the syntax parse tree
-  std::unique_ptr<SyntaxTree> _syntax_formatter;
 
   /// The set of all variables extracted from the input file
   std::set<std::string> _extracted_vars;
