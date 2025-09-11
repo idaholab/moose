@@ -42,7 +42,7 @@ public:
                      bool is_type,
                      const std::string & action,
                      bool is_action,
-                     InputParameters * params,
+                     const InputParameters & params,
                      const FileLineInfo & lineinfo,
                      const std::string & classname);
 
@@ -85,7 +85,7 @@ protected:
                            bool & out_of_range_allowed,
                            std::map<MooseEnumItem, std::string> & docs);
 
-  size_t setParams(InputParameters * params, bool search_match, nlohmann::json & all_params);
+  size_t setParams(const InputParameters & params, bool search_match, nlohmann::json & all_params);
 
   static std::string
   buildOutputString(const std::iterator_traits<InputParameters::iterator>::value_type & p);

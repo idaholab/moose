@@ -29,7 +29,7 @@ public:
   void insertNode(std::string syntax,
                   const std::string & action,
                   bool is_action_params = true,
-                  InputParameters * params = NULL);
+                  const InputParameters * params = NULL);
 
   std::string print(const std::string & search_string);
 
@@ -46,14 +46,14 @@ protected:
     TreeNode(const std::string & name,
              SyntaxTree & syntax_tree,
              const std::string * action = NULL,
-             InputParameters * params = NULL,
+             const InputParameters * params = NULL,
              TreeNode * parent = NULL);
     ~TreeNode();
 
     void insertNode(std::string & syntax,
                     const std::string & action,
                     bool is_action_params = true,
-                    InputParameters * params = NULL);
+                    const InputParameters * params = NULL);
     std::string print(short depth, const std::string & search_string, bool & found);
 
     std::string getLongName(const std::string & delim = "/") const;
@@ -61,7 +61,7 @@ protected:
   protected:
     void insertParams(const std::string & action,
                       bool is_action_params,
-                      InputParameters * params = NULL);
+                      const InputParameters * params = NULL);
 
     std::map<std::string, std::unique_ptr<TreeNode>> _children;
     std::multimap<std::string, std::unique_ptr<InputParameters>> _action_params;

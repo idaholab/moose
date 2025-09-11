@@ -129,6 +129,14 @@ private:
    */
   const hit::Node * queryGlobalParamsNode() const;
 
+  /**
+   * Build a cache of object type -> parameters from the Factory.
+   *
+   * Used in the syntax builders to avoid building an object's parameters
+   * multiple times.
+   */
+  std::vector<std::pair<std::string, const InputParameters>> buildRegisteredObjectParams() const;
+
   /// The MooseApp this Parser is part of
   MooseApp & _app;
   /// The Factory associated with that MooseApp

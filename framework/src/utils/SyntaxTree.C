@@ -27,7 +27,7 @@ void
 SyntaxTree::insertNode(std::string syntax,
                        const std::string & action,
                        bool is_action_params,
-                       InputParameters * params)
+                       const InputParameters * params)
 {
   if (!_root)
     _root = std::make_unique<TreeNode>("", *this);
@@ -68,7 +68,7 @@ SyntaxTree::haveSeenIt(const std::string & prefix, const std::string & item) con
 SyntaxTree::TreeNode::TreeNode(const std::string & name,
                                SyntaxTree & syntax_tree,
                                const std::string * action,
-                               InputParameters * params,
+                               const InputParameters * params,
                                TreeNode * parent)
   : _name(name), _parent(parent), _syntax_tree(syntax_tree)
 {
@@ -82,7 +82,7 @@ void
 SyntaxTree::TreeNode::insertNode(std::string & syntax,
                                  const std::string & action,
                                  bool is_action_params,
-                                 InputParameters * params)
+                                 const InputParameters * params)
 {
   std::string::size_type pos = syntax.find_first_of("/");
   std::string item;
@@ -114,7 +114,7 @@ SyntaxTree::TreeNode::insertNode(std::string & syntax,
 void
 SyntaxTree::TreeNode::insertParams(const std::string & action,
                                    bool is_action_params,
-                                   InputParameters * params)
+                                   const InputParameters * params)
 {
   if (is_action_params)
     _action_params.emplace(action, std::make_unique<InputParameters>(*params));
