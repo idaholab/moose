@@ -321,6 +321,9 @@ MooseApp::validParams()
   params.addCommandLineParam<bool>("distributed_mesh",
                                    "--distributed-mesh",
                                    "Force the use of a distributed finite element mesh");
+  // Would prefer that this parameter isn't global, but we rely on it too much
+  // in tests to be able to go back on that decision now
+  params.setGlobalCommandLineParam("distributed_mesh");
 
   params.addOptionalValuedCommandLineParam<std::string>(
       "mesh_only",
