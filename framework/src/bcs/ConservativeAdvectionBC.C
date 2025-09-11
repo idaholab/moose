@@ -7,15 +7,17 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ADConservativeAdvectionBC.h"
+#include "ConservativeAdvectionBC.h"
 #include "Function.h"
 
+registerMooseObject("MooseApp", ConservativeAdvectionBC);
 registerMooseObject("MooseApp", ADConservativeAdvectionBC);
 
+template <bool is_ad>
 InputParameters
-ADConservativeAdvectionBC::validParams()
+ConservativeAdvectionBCTempl<is_ad>::validParams()
 {
-  InputParameters params = ADIntegratedBC::validParams();
+  InputParameters params = GenericIntegratedBC<is_ad>::validParams();
   params.addParam<MaterialPropertyName>(
       "velocity_mat_prop",
       "Velocity vector as a material property. Should be provided when we want the velocity value "
@@ -32,25 +34,29 @@ ADConservativeAdvectionBC::validParams()
                                 "The value of the primal variable on the boundary.");
   params.addParam<MaterialPropertyName>(
       "primal_coefficient",
-      1,
+      1.0,
       "If a primal Dirichlet value is supplied, then a coefficient may be optionally multiplied "
       "that multiples the Dirichlet value");
   return params;
 }
 
-ADConservativeAdvectionBC::ADConservativeAdvectionBC(const InputParameters & parameters)
-  : ADIntegratedBC(parameters),
+template <bool is_ad>
+ConservativeAdvectionBCTempl<is_ad>::ConservativeAdvectionBCTempl(
+    const InputParameters & parameters)
+  : GenericIntegratedBC<is_ad>(parameters),
     _velocity_mat_prop(isParamValid("velocity_mat_prop")
-                           ? &getADMaterialProperty<RealVectorValue>("velocity_mat_prop")
+                           ? &this->template getGenericMaterialProperty<RealVectorValue, is_ad>(
+                                 "velocity_mat_prop")
                            : nullptr),
     _velocity_function(isParamValid("velocity_function") ? &getFunction("velocity_function")
                                                          : nullptr),
-    _adv_quant(isParamValid("advected_quantity")
-                   ? getADMaterialProperty<Real>("advected_quantity").get()
-                   : _u),
+    _adv_quant(
+        isParamValid("advected_quantity")
+            ? this->template getGenericMaterialProperty<Real, is_ad>("advected_quantity").get()
+            : _u),
     _primal_dirichlet(
         isParamValid("primal_dirichlet_value") ? &getFunction("primal_dirichlet_value") : nullptr),
-    _primal_coeff(getADMaterialProperty<Real>("primal_coefficient"))
+    _primal_coeff(this->template getGenericMaterialProperty<Real, is_ad>("primal_coefficient"))
 {
   if (isParamSetByUser("primal_coefficient") && !_primal_dirichlet)
     paramError("primal_coefficient",
@@ -61,13 +67,15 @@ ADConservativeAdvectionBC::ADConservativeAdvectionBC(const InputParameters & par
     mooseError("Exactly one of 'velocity_mat_prop' or 'velocity_function' should be provided");
 }
 
-ADReal
-ADConservativeAdvectionBC::computeQpResidual()
+template <bool is_ad>
+GenericReal<is_ad>
+ConservativeAdvectionBCTempl<is_ad>::computeQpResidual()
 {
   const auto vdotn =
-      (_velocity_mat_prop ? (*_velocity_mat_prop)[_qp]
-                          : ADRealVectorValue(_velocity_function->vectorValue(_t, _q_point[_qp]))) *
-      _normals[_qp];
+      (_velocity_mat_prop
+           ? (*_velocity_mat_prop)[_qp]
+           : GenericRealVectorValue<is_ad>(_velocity_function->vectorValue(_t, _q_point[_qp]))) *
+      this->_normals[_qp];
 
   if (_primal_dirichlet)
     return _test[_i][_qp] * vdotn * _primal_dirichlet->value(_t, _q_point[_qp]) *
