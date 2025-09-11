@@ -9,27 +9,22 @@
 
 #pragma once
 
-#include "NodalKernel.h"
-
-class Function;
+#include "ArrayNodalKernel.h"
 
 /**
- * Represents a simple ODE of du/dt - rate = 0
+ * Represents a nodal reaction term equivalent to $a * u$
  */
-class TimeNodalKernel : public NodalKernel
+class ArrayReactionNodalKernel : public ArrayNodalKernel
 {
 public:
-  /**
-   * Constructor initializes the rate
-   */
   static InputParameters validParams();
 
-  TimeNodalKernel(const InputParameters & parameters);
+  ArrayReactionNodalKernel(const InputParameters & parameters);
 
 protected:
-  /// Time derivative of u
-  const VariableValue & _u_dot;
+  virtual void computeQpResidual(RealEigenVector & residual) override;
+  virtual RealEigenVector computeQpJacobian() override;
 
-  /// Derivative of u_dot with respect to u
-  const VariableValue & _du_dot_du;
+  /// rate coefficient
+  const RealEigenVector & _coeff;
 };
