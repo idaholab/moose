@@ -1152,9 +1152,6 @@ protected:
   /// The MPI communicator this App is going to use
   const std::shared_ptr<libMesh::Parallel::Communicator> _comm;
 
-  /// Number of threads
-  unsigned int _num_threads;
-
   /// The output file basename
   std::string _output_file_base;
 
@@ -1203,6 +1200,9 @@ protected:
 
   /// Builder for building app related parser tree
   Moose::Builder _builder;
+
+  /// Number of threads
+  unsigned int _num_threads;
 
   /// Where the restartable data is held (indexed on tid)
   std::vector<RestartableDataMap> _restartable_data;

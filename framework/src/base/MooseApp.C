@@ -217,6 +217,7 @@ MooseApp::validParams()
 
   params.addCommandLineParam<unsigned int>(
       "n_threads", "--n-threads=<n>", "Runs the specified number of threads per process");
+  params.setGlobalCommandLineParam("n_threads");
   params.addCommandLineParam<unsigned int>(
       "max_threads", "--max-threads=<n>", "Allocates enough threads per process. Defaults to n-threads.");
   params.setGlobalCommandLineParam("max_threads");
@@ -429,6 +430,7 @@ MooseApp::validParams()
       "--parse-neml2-only",
       "Executes the [NEML2] block to parse the input file and terminate.");
 
+  MooseApp::addAppParam(params);
   params.registerBase("Application");
 
   return params;
@@ -446,19 +448,21 @@ MooseApp::MooseApp(const InputParameters & parameters)
     // the actual const parameters that the AppFactory made for this application
     MooseBase(*this, AppFactory::instance().getAppParams(parameters)),
     _comm(getParam<std::shared_ptr<Parallel::Communicator>>("_comm")),
-    _num_threads(getParam<unsigned int>("num_threads")),
     _file_base_set_by_user(false),
     _output_position_set(false),
     _start_time_set(false),
     _start_time(0.0),
     _global_time_offset(0.0),
-    _input_parameter_warehouse(std::make_unique<InputParameterWarehouse>()),
+    _input_parameter_warehouse(std::make_unique<InputParameterWarehouse>((isParamValid("_multiapp_level") ? getParam<unsigned int>("_multiapp_level")
+                                                    : 0) ? 3 : 2)),
     _action_factory(*this),
     _action_warehouse(*this, _syntax, _action_factory),
     _output_warehouse(*this),
     _parser(getCheckedPointerParam<std::shared_ptr<Parser>>("_parser")),
     _command_line(getCheckedPointerParam<std::shared_ptr<CommandLine>>("_command_line")),
     _builder(*this, _action_warehouse, *_parser),
+    _num_threads((isParamValid("_multiapp_level") ? getParam<unsigned int>("_multiapp_level")
+                                                    : 0) ? 3 : 2), //getParam<unsigned int>("n_threads")),
     _restartable_data(_num_threads),
     _perf_graph(createRecoverablePerfGraph()),
     _solution_invalidity(createRecoverableSolutionInvalidity()),
@@ -519,6 +523,7 @@ MooseApp::MooseApp(const InputParameters & parameters)
 #endif
 {
   setNumThreads(_num_threads);
+  std::cout << "Created app " << name() << " with " << _num_threads << " " << libMesh::n_threads() << " master ? " << isUltimateMaster() << std::endl;
 
   if (&parameters != &_pars)
   {
@@ -1180,6 +1185,8 @@ MooseApp::registerCapabilities()
 
 MooseApp::~MooseApp()
 {
+  // Set to make sure we are using the right number of threads to do this
+  setNumThreads(_num_threads);
 #ifdef HAVE_GPERFTOOLS
   // CPU profiling stop
   if (_cpu_profiling)
