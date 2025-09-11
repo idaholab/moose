@@ -1,14 +1,14 @@
 # MOOSE FMU Interface
 
-The `MOOSEFMU` defines the `MooseSlave` base class which contains the boilerplate needed to wrap a MOOSE simulation as a Functional Mock-up Unit (FMU). Users only need to implement their own `__init__` and `do_step` methods when deriving from `MooseSlave`.
+The `MOOSEFMU` defines the `Moose2FMU` base class which contains the boilerplate needed to wrap a MOOSE simulation as a Functional Mock-up Unit (FMU). Users only need to implement their own `__init__` and `do_step` methods when deriving from `Moose2FMU`.
 
 ### Creating a Custom FMU
 
 ```python
-from MooseFMU import MooseSlave
+from MooseFMU import Moose2FMU
 
 
-class CustomMoose(MooseSlave):
+class CustomMoose(Moose2FMU):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # register additional inputs/outputs here
