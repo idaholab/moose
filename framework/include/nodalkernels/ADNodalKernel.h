@@ -11,11 +11,14 @@
 
 #include "NodalKernelBase.h"
 #include "ADFunctorInterface.h"
+#include "MooseVariableInterface.h"
 
 /**
  * Base class for creating nodal kernels with AD-computed Jacobians
  */
-class ADNodalKernel : public NodalKernelBase, public ADFunctorInterface
+class ADNodalKernel : public NodalKernelBase,
+                      public ADFunctorInterface,
+                      public MooseVariableInterface<Real>
 {
 public:
   /**
@@ -48,11 +51,20 @@ public:
    */
   void computeOffDiagJacobian(unsigned int jvar) override final;
 
+  /**
+   * Gets the variable this is active on
+   * @return the variable
+   */
+  const MooseVariable & variable() const override { return _var; }
+
 protected:
   /**
    * The user can override this function to compute the residual at a node.
    */
   virtual ADReal computeQpResidual() = 0;
+
+  /// variable this works on
+  MooseVariable & _var;
 
   /// Value of the unknown variable this is acting on
   const ADVariableValue & _u;

@@ -24,15 +24,17 @@ ADNodalKernel::validParams()
 }
 
 ADNodalKernel::ADNodalKernel(const InputParameters & parameters)
-  : NodalKernelBase(parameters), ADFunctorInterface(this), _u(_var.adDofValues())
+  : NodalKernelBase(parameters),
+    ADFunctorInterface(this),
+    MooseVariableInterface<Real>(this,
+                                 true,
+                                 "variable",
+                                 Moose::VarKindType::VAR_SOLVER,
+                                 Moose::VarFieldType::VAR_FIELD_STANDARD),
+    _var(*mooseVariable()),
+    _u(_var.adDofValues())
 {
-  if (getParam<std::vector<AuxVariableName>>("save_in").size())
-    paramError("save_in",
-               "ADNodalKernels do not support save_in. Please use the tagging system instead.");
-  if (getParam<std::vector<AuxVariableName>>("diag_save_in").size())
-    paramError(
-        "diag_save_in",
-        "ADNodalKernels do not support diag_save_in. Please use the tagging system instead.");
+  addMooseVariableDependency(mooseVariable());
 }
 
 void
