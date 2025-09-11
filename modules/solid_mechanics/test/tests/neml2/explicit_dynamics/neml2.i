@@ -7,10 +7,6 @@
     model = 'model'
     verbose = true
     moose_input_kernels = 'strain'
-    # To run on GPU, pass --libtorch-device=cuda on the command line
-    # and uncomment the following lines:
-    # device = 'cuda'
-    # output_device = 'cuda'
   []
 []
 

@@ -43,7 +43,7 @@
   []
   marker = uniform
   max_h_level = 2
-  # interval = 13
+  interval = 13
 []
 
 [Executioner]

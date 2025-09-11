@@ -7,10 +7,6 @@
     model = 'model'
     verbose = true
     moose_input_kernels = 'strain'
-    # To run on GPU, pass --libtorch-device=cuda on the command line
-    # and uncomment the following lines:
-    # device = 'cuda'
-    # output_device = 'cuda'
   []
 []
 
@@ -56,6 +52,7 @@
     type = NEML2CentralDifference
     mass_matrix_tag = 'mass'
     use_constant_mass = true
+    recompute_mass_matrix_after_mesh_change = true
     second_order_vars = 'disp_x disp_y disp_z'
     assembly = 'assembly'
     fe = 'fe'
