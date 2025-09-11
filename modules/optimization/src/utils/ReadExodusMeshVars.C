@@ -11,7 +11,7 @@
 #include "ReadExodusMeshVars.h"
 
 #include "libmesh/dof_map.h"
-
+#include "libmesh/explicit_system.h"
 #include "libmesh/fe_compute_data.h"
 #include "libmesh/libmesh_common.h"
 #include "libmesh/numeric_vector.h"

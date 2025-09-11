@@ -20,6 +20,7 @@
       exodiff = 'optimizationReporterInputIC_out_forward_and_adjoint0.e'
       # Optimize executioner does not support multiple threads
       max_threads = 1
+      recover = False
       detail = " with initial conditions read from the input file;"
     []
     [mesh_ICs]
@@ -31,6 +32,7 @@
       exodiff = 'optimizationReporterMeshIC_out_forward_and_adjoint0.e'
       # Optimize executioner does not support multiple threads
       max_threads = 1
+      recover = False
       detail = " with initial conditions read from the mesh."
     []
   []

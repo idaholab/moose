@@ -51,7 +51,7 @@
   [source_function]
     type = ParameterMeshFunction
     parameter_name = parameters/source
-    exodus_mesh = 'create_parameter_mesh_out.e'
+    exodus_mesh = 'initial_param_mesh_in.e'
   []
 []
 [AuxVariables]
