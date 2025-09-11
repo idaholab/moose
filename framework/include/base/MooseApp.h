@@ -1005,6 +1005,17 @@ public:
   const std::shared_ptr<libMesh::Parallel::Communicator> getCommunicator() const { return _comm; }
 
   /**
+   * Returns the number of threads used by this application
+   */
+  unsigned int getNumThreads() const { return _num_threads; }
+
+  /**
+   * Sets the number of threads used by this application, for both libMesh and MOOSE
+   * @param num_threads number of threads to use
+   */
+  void setNumThreads(unsigned int num_threads);
+
+  /**
    * Return the container of relationship managers
    */
   const std::set<std::shared_ptr<RelationshipManager>> & relationshipManagers() const
@@ -1189,6 +1200,9 @@ protected:
 
   /// Builder for building app related parser tree
   Moose::Builder _builder;
+
+  /// Number of threads
+  unsigned int _num_threads;
 
   /// Where the restartable data is held (indexed on tid)
   std::vector<RestartableDataMap> _restartable_data;

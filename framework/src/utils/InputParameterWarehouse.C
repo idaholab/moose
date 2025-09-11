@@ -11,8 +11,8 @@
 #include "InputParameterWarehouse.h"
 #include "InputParameters.h"
 
-InputParameterWarehouse::InputParameterWarehouse()
-  : _input_parameters(libMesh::n_threads()), _controllable_items(libMesh::n_threads())
+InputParameterWarehouse::InputParameterWarehouse(unsigned int num_threads)
+  : _input_parameters(num_threads), _controllable_items(num_threads), _num_threads(num_threads)
 {
 }
 
@@ -176,7 +176,7 @@ InputParameterWarehouse::addControllableParameterConnection(
     const MooseObjectParameterName & secondary,
     bool error_on_empty /*=true*/)
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+  for (THREAD_ID tid = 0; tid < _num_threads; ++tid)
   {
     std::vector<ControllableItem *> primaries = getControllableItems(primary, tid);
     if (primaries.empty() && error_on_empty && tid == 0) // some objects only exist on tid 0
@@ -207,7 +207,7 @@ void
 InputParameterWarehouse::addControllableObjectAlias(const MooseObjectName & alias,
                                                     const MooseObjectName & secondary)
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+  for (THREAD_ID tid = 0; tid < _num_threads; ++tid)
   {
     std::vector<ControllableItem *> secondaries =
         getControllableItems(MooseObjectParameterName(secondary, "*"), tid);
@@ -224,7 +224,7 @@ void
 InputParameterWarehouse::addControllableParameterAlias(const MooseObjectParameterName & alias,
                                                        const MooseObjectParameterName & secondary)
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+  for (THREAD_ID tid = 0; tid < _num_threads; ++tid)
   {
     std::vector<ControllableItem *> secondaries = getControllableItems(secondary, tid);
     if (secondaries.empty() && tid == 0) // some objects only exist on tid 0
@@ -251,7 +251,7 @@ ControllableParameter
 InputParameterWarehouse::getControllableParameter(const MooseObjectParameterName & input) const
 {
   ControllableParameter cparam;
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+  for (THREAD_ID tid = 0; tid < _num_threads; ++tid)
     for (auto it = _controllable_items[tid].begin(); it != _controllable_items[tid].end(); ++it)
       if ((*it)->name() == input)
         cparam.add(it->get());
@@ -278,7 +278,7 @@ std::vector<MooseObjectParameterName>
 InputParameterWarehouse::getControllableParameterNames(const MooseObjectParameterName & input) const
 {
   std::vector<MooseObjectParameterName> names;
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+  for (THREAD_ID tid = 0; tid < _num_threads; ++tid)
     for (auto it = _controllable_items[tid].begin(); it != _controllable_items[tid].end(); ++it)
       if ((*it)->name() == input)
         names.push_back((*it)->name());

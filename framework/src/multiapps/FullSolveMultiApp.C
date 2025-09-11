@@ -65,6 +65,7 @@ FullSolveMultiApp::initialSetup()
     for (unsigned int i = 0; i < _my_num_apps; i++)
     {
       auto & app = _apps[i];
+      _apps[i]->setNumThreads(_apps[i]->getNumThreads());
       Executioner * ex = app->getExecutioner();
 
       if (!ex)
@@ -84,6 +85,8 @@ FullSolveMultiApp::initialSetup()
       _executioners[i] = ex;
     }
   }
+  // Restore number of threads of the parent
+  _app.setNumThreads(_app.getNumThreads());
 }
 
 bool
@@ -107,6 +110,7 @@ FullSolveMultiApp::solveStep(Real /*dt*/, Real /*target_time*/, bool auto_advanc
   bool last_solve_converged = true;
   for (unsigned int i = 0; i < _my_num_apps; i++)
   {
+    _apps[i]->setNumThreads(_apps[i]->getNumThreads());
     // reset output system if desired
     if (!getParam<bool>("keep_full_output_history"))
       _apps[i]->getOutputWarehouse().reset();
@@ -118,6 +122,8 @@ FullSolveMultiApp::solveStep(Real /*dt*/, Real /*target_time*/, bool auto_advanc
 
     showStatusMessage(i);
   }
+  // Restore number of threads of the parent
+  _app.setNumThreads(_app.getNumThreads());
 
   return last_solve_converged || _ignore_diverge;
 }

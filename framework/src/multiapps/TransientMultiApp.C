@@ -166,8 +166,13 @@ TransientMultiApp::initialSetup()
     _transient_executioners.resize(_my_num_apps);
     // Grab Transient Executioners from each app
     for (unsigned int i = 0; i < _my_num_apps; i++)
+    {
+      _apps[i]->setNumThreads(_apps[i]->getNumThreads());
       setupApp(i);
+    }
   }
+  // Restore number of threads of the parent
+  _app.setNumThreads(_app.getNumThreads());
 }
 
 bool
@@ -202,6 +207,7 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
     for (unsigned int i = 0; i < _my_num_apps; i++)
     {
       FEProblemBase & problem = appProblemBase(_first_local_app + i);
+      _apps[i]->setNumThreads(_apps[i]->getNumThreads());
 
       TransientBase * ex = _transient_executioners[i];
 
@@ -540,7 +546,8 @@ TransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
   }
 
   _transferred_vars.clear();
-
+  // Restore number of threads of the parent
+  _app.setNumThreads(_app.getNumThreads());
   return return_value;
 }
 
@@ -552,6 +559,7 @@ TransientMultiApp::incrementTStep(Real target_time)
     for (unsigned int i = 0; i < _my_num_apps; i++)
     {
       TransientBase * ex = _transient_executioners[i];
+      _apps[i]->setNumThreads(_apps[i]->getNumThreads());
 
       // The App might have a different local time from the rest of the problem
       Real app_time_offset = _apps[i]->getGlobalTimeOffset();
@@ -562,6 +570,8 @@ TransientMultiApp::incrementTStep(Real target_time)
         ex->incrementStepOrReject();
     }
   }
+  // Restore number of threads of the parent
+  _app.setNumThreads(_app.getNumThreads());
 }
 
 void
@@ -572,6 +582,7 @@ TransientMultiApp::finishStep(bool recurse_through_multiapp_levels)
     for (unsigned int i = 0; i < _my_num_apps; i++)
     {
       TransientBase * ex = _transient_executioners[i];
+      _apps[i]->setNumThreads(_apps[i]->getNumThreads());
       ex->endStep();
       ex->postStep();
       if (recurse_through_multiapp_levels)
@@ -583,6 +594,8 @@ TransientMultiApp::finishStep(bool recurse_through_multiapp_levels)
       }
     }
   }
+  // Restore number of threads of the parent
+  _app.setNumThreads(_app.getNumThreads());
 }
 
 Real
@@ -600,6 +613,7 @@ TransientMultiApp::computeDT()
     for (unsigned int i = 0; i < _my_num_apps; i++)
     {
       TransientBase * ex = _transient_executioners[i];
+      _apps[i]->setNumThreads(_apps[i]->getNumThreads());
       ex->computeDT();
       Real dt = ex->getDT();
 
@@ -613,6 +627,8 @@ TransientMultiApp::computeDT()
     return std::numeric_limits<Real>::max();
 
   _communicator.min(smallest_dt);
+  // Restore number of threads of the parent
+  _app.setNumThreads(_app.getNumThreads());
   return smallest_dt;
 }
 

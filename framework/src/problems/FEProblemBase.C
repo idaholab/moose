@@ -5611,7 +5611,10 @@ FEProblemBase::backupMultiApps(ExecFlagType type)
                << std::endl;
 
     for (const auto & multi_app : multi_apps)
+    {
+      multi_app->getMooseApp().setNumThreads(multi_app->getMooseApp().getNumThreads());
       multi_app->backup();
+    }
 
     MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);
 
@@ -5619,6 +5622,7 @@ FEProblemBase::backupMultiApps(ExecFlagType type)
       _console << COLOR_CYAN << "Finished Backing Up MultiApps on " << type.name() << "\n"
                << COLOR_DEFAULT << std::endl;
   }
+  _app.setNumThreads(_app.getNumThreads());
 }
 
 void
@@ -5639,7 +5643,10 @@ FEProblemBase::restoreMultiApps(ExecFlagType type, bool force)
     }
 
     for (const auto & multi_app : multi_apps)
+    {
+      multi_app->getMooseApp().setNumThreads(multi_app->getMooseApp().getNumThreads());
       multi_app->restore(force);
+    }
 
     MooseUtils::parallelBarrierNotify(_communicator, _parallel_barrier_messaging);
 
@@ -5647,6 +5654,7 @@ FEProblemBase::restoreMultiApps(ExecFlagType type, bool force)
       _console << COLOR_CYAN << "Finished Restoring MultiApps on " << type.name() << "\n"
                << COLOR_DEFAULT << std::endl;
   }
+  _app.setNumThreads(_app.getNumThreads());
 }
 
 Real
