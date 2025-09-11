@@ -71,7 +71,7 @@ public:
 
 #if defined(LIBMESH_HAVE_TBB_API) ||                                                               \
     (!defined(LIBMESH_HAVE_OPENMP) && defined(LIBMESH_HAVE_PTHREAD))
-      for (unsigned int i = 0; i < libMesh::n_threads(); ++i)
+      for (unsigned int i = 0; i < _app.getNumThreads(); ++i)
         _ids.push(i);
 #endif
     }

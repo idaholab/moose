@@ -22,7 +22,7 @@ PrimeProductUserObject::validParams()
 PrimeProductUserObject::PrimeProductUserObject(const InputParameters & params)
   : ThreadedGeneralUserObject(params)
 {
-  if (libMesh::n_threads() > 20)
+  if (_app.getNumThreads() > 20)
     mooseError("This object works only with up to 20 threads. If you need more, add more prime "
                "numbers into `prime` variable in the execute method.");
 }

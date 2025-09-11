@@ -20,7 +20,7 @@ class ScalarInitialCondition;
 class ScalarInitialConditionWarehouse : public MooseObjectWarehouseBase<ScalarInitialCondition>
 {
 public:
-  ScalarInitialConditionWarehouse();
+  ScalarInitialConditionWarehouse(unsigned int num_threads);
 
   /**
    * Initial setup

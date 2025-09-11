@@ -417,22 +417,36 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _solver_systems(_num_nl_sys + _num_linear_sys, nullptr),
     _aux(nullptr),
     _coupling(Moose::COUPLING_DIAG),
-    _mesh_divisions(/*threaded=*/true),
+    _mesh_divisions(_app.getNumThreads()),
+    _functions(_app.getNumThreads()),
+    _convergences(_app.getNumThreads()),
+    _nonlocal_kernels(_app.getNumThreads()),
+    _nonlocal_integrated_bcs(_app.getNumThreads()),
+    _ics(_app.getNumThreads()),
+    _fv_ics(_app.getNumThreads()),
+    _scalar_ics(_app.getNumThreads()),
     _material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
-        "material_props", &_mesh, _material_prop_registry)),
+        "material_props", &_mesh, _material_prop_registry, _app.getNumThreads())),
     _bnd_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
-        "bnd_material_props", &_mesh, _material_prop_registry)),
+        "bnd_material_props", &_mesh, _material_prop_registry, _app.getNumThreads())),
     _neighbor_material_props(declareRestartableDataWithContext<MaterialPropertyStorage>(
-        "neighbor_material_props", &_mesh, _material_prop_registry)),
+        "neighbor_material_props", &_mesh, _material_prop_registry, _app.getNumThreads())),
+    _materials(_app.getNumThreads()),
+    _interface_materials(_app.getNumThreads()),
+    _discrete_materials(_app.getNumThreads()),
+    _all_materials(_app.getNumThreads()),
+    _indicators(_app.getNumThreads()),
+    _internal_side_indicators(_app.getNumThreads()),
+    _markers(_app.getNumThreads()),
     _reporter_data(_app),
     // TODO: delete the following line after apps have been updated to not call getUserObjects
-    _all_user_objects(_app.getExecuteOnEnum()),
-    _multi_apps(_app.getExecuteOnEnum()),
-    _transient_multi_apps(_app.getExecuteOnEnum()),
-    _transfers(_app.getExecuteOnEnum(), /*threaded=*/false),
-    _to_multi_app_transfers(_app.getExecuteOnEnum(), /*threaded=*/false),
-    _from_multi_app_transfers(_app.getExecuteOnEnum(), /*threaded=*/false),
-    _between_multi_app_transfers(_app.getExecuteOnEnum(), /*threaded=*/false),
+    _all_user_objects(_app.getExecuteOnEnum(), _app.getNumThreads()),
+    _multi_apps(_app.getExecuteOnEnum(), _app.getNumThreads()),
+    _transient_multi_apps(_app.getExecuteOnEnum(), _app.getNumThreads()),
+    _transfers(_app.getExecuteOnEnum(), /*n_threads=*/1),
+    _to_multi_app_transfers(_app.getExecuteOnEnum(), /*n_threads=*/1),
+    _from_multi_app_transfers(_app.getExecuteOnEnum(), /*n_threads=*/1),
+    _between_multi_app_transfers(_app.getExecuteOnEnum(), /*n_threads=*/1),
 #ifdef LIBMESH_ENABLE_AMR
     _adaptivity(*this),
     _cycles_completed(0),
@@ -478,7 +492,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
     _verbose_multiapps(getParam<bool>("verbose_multiapps")),
     _verbose_restore(getParam<bool>("verbose_restore")),
     _current_execute_on_flag(EXEC_NONE),
-    _control_warehouse(_app.getExecuteOnEnum(), /*threaded=*/false),
+    _control_warehouse(_app.getExecuteOnEnum(), /*n_threads=*/1),
     _is_petsc_options_inserted(false),
     _line_search(nullptr),
     _using_ad_mat_props(false),
@@ -529,6 +543,8 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
                      " cannot contain 'ANY_BLOCK_ID' along with other blocks. ");
   };
 
+  std::cout << "Numb threads in problem " << _app.getNumThreads() << std::endl;
+
   checkCoverageCheckConflict(
       "kernel_coverage_check", _kernel_coverage_check, _kernel_coverage_blocks);
   checkCoverageCheckConflict(
@@ -573,7 +589,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
   _dt = 0;
   _dt_old = _dt;
 
-  unsigned int n_threads = libMesh::n_threads();
+  unsigned int n_threads = _app.getNumThreads();
 
   _real_zero.resize(n_threads, 0.);
   _scalar_zero.resize(n_threads);
@@ -725,7 +741,7 @@ FEProblemBase::needSolutionState(unsigned int state, Moose::SolutionIterationTyp
 void
 FEProblemBase::newAssemblyArray(std::vector<std::shared_ptr<SolverSystem>> & solver_systems)
 {
-  unsigned int n_threads = libMesh::n_threads();
+  unsigned int n_threads = _app.getNumThreads();
 
   _assembly.resize(n_threads);
   for (const auto i : make_range(n_threads))
@@ -786,7 +802,7 @@ FEProblemBase::~FEProblemBase()
   // an unflushed stream and start destructing things.
   _console << std::flush;
 
-  unsigned int n_threads = libMesh::n_threads();
+  unsigned int n_threads = _app.getNumThreads();
   for (unsigned int i = 0; i < n_threads; i++)
   {
     _zero[i].release();
@@ -934,7 +950,7 @@ FEProblemBase::initialSetup()
   {
     TIME_SECTION("resizingVarValues", 5, "Resizing Variable Values");
 
-    for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
+    for (unsigned int tid = 0; tid < _app.getNumThreads(); ++tid)
     {
       _phi_zero[tid].resize(global_max_var_n_dofs_per_elem, std::vector<Real>(getMaxQps(), 0.));
       _grad_phi_zero[tid].resize(global_max_var_n_dofs_per_elem,
@@ -1034,7 +1050,7 @@ FEProblemBase::initialSetup()
     }
   }
 
-  unsigned int n_threads = libMesh::n_threads();
+  unsigned int n_threads = _app.getNumThreads();
 
   // Convergence initial setup
   {
@@ -1369,7 +1385,7 @@ FEProblemBase::initialSetup()
         for (const auto & bnd_object : bnd_objects)
           // Skip if this object uses geometric search because coupled variables may be defined on
           // paired boundaries instead of the boundary this node is on
-          if (!bnd_object->requiresGeometricSearch() &&
+          if (bnd_object && !bnd_object->requiresGeometricSearch() &&
               bnd_object->checkVariableBoundaryIntegrity())
           {
             std::set<MooseVariableFieldBase *> vars_to_omit = {
@@ -1550,7 +1566,7 @@ FEProblemBase::timestepSetup()
   for (const auto & it : _random_data_objects)
     it.second->updateSeeds(EXEC_TIMESTEP_BEGIN);
 
-  unsigned int n_threads = libMesh::n_threads();
+  unsigned int n_threads = _app.getNumThreads();
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {
     _all_materials.timestepSetup(tid);
@@ -1604,7 +1620,7 @@ FEProblemBase::checkNonlocalCoupling()
 {
   TIME_SECTION("checkNonlocalCoupling", 5, "Checking Nonlocal Coupling");
 
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < _app.getNumThreads(); tid++)
     for (auto & nl : _nl)
     {
       const auto & all_kernels = nl->getKernelWarehouse();
@@ -2129,7 +2145,7 @@ FEProblemBase::reinitDirac(const Elem * elem, const THREAD_ID tid)
        * In that case we need to resize the zeros to compensate.
        */
       unsigned int max_qpts = getMaxQps();
-      for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
+      for (unsigned int tid = 0; tid < _app.getNumThreads(); ++tid)
       {
         // the highest available order in libMesh is 43
         _scalar_zero[tid].resize(FORTYTHIRD, 0);
@@ -2497,7 +2513,7 @@ FEProblemBase::addFunction(const std::string & type,
 
   parameters.set<SubProblem *>("_subproblem") = this;
 
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < _app.getNumThreads(); tid++)
   {
     std::shared_ptr<Function> func = _factory.create<Function>(type, name, parameters, tid);
     logAdd("Function", name, type, parameters);
@@ -2521,7 +2537,7 @@ FEProblemBase::addConvergence(const std::string & type,
 {
   parallel_object_only();
 
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < _app.getNumThreads(); tid++)
   {
     std::shared_ptr<Convergence> conv = _factory.create<Convergence>(type, name, parameters, tid);
     _convergences.addObject(conv, tid);
@@ -2643,7 +2659,7 @@ FEProblemBase::addMeshDivision(const std::string & type,
   parallel_object_only();
   parameters.set<FEProblemBase *>("_fe_problem_base") = this;
   parameters.set<SubProblem *>("_subproblem") = this;
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < _app.getNumThreads(); tid++)
   {
     std::shared_ptr<MeshDivision> func = _factory.create<MeshDivision>(type, name, parameters, tid);
     _mesh_divisions.addObject(func, tid);
@@ -3539,7 +3555,7 @@ FEProblemBase::addInitialCondition(const std::string & ic_name,
   // field IC
   if (hasVariable(var_name))
   {
-    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+    for (THREAD_ID tid = 0; tid < _app.getNumThreads(); ++tid)
     {
       MooseVariableFEBase & var = getVariable(
           tid, var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
@@ -3599,7 +3615,7 @@ FEProblemBase::addFVInitialCondition(const std::string & ic_name,
   // field IC
   if (hasVariable(var_name))
   {
-    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+    for (THREAD_ID tid = 0; tid < _app.getNumThreads(); ++tid)
     {
       auto & var = getVariable(
           tid, var_name, Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
@@ -3888,7 +3904,7 @@ FEProblemBase::addFunctorMaterial(const std::string & functor_material_name,
 
   auto add_functor_materials = [&](const auto & parameters, const auto & name)
   {
-    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+    for (THREAD_ID tid = 0; tid < _app.getNumThreads(); tid++)
     {
       // Create the general Block/Boundary MaterialBase object
       std::shared_ptr<MaterialBase> material =
@@ -3953,7 +3969,7 @@ FEProblemBase::addMaterialHelper(std::vector<MaterialWarehouse *> warehouses,
     parameters.set<SubProblem *>("_subproblem") = this;
   }
 
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < _app.getNumThreads(); tid++)
   {
     // Create the general Block/Boundary MaterialBase object
     std::shared_ptr<MaterialBase> material =
@@ -4373,7 +4389,7 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
   // Add the _subproblem and _sys parameters depending on use_displaced_mesh
   addObjectParamsHelper(parameters, name);
 
-  for (const auto tid : make_range(libMesh::n_threads()))
+  for (const auto tid : make_range(_app.getNumThreads()))
   {
     // Create the UserObject
     std::shared_ptr<UserObject> user_object =
@@ -4427,7 +4443,7 @@ FEProblemBase::addUserObject(const std::string & user_object_name,
   // Add as a Functor if it is one. We usually need to add the user object from thread 0 as the
   // registered functor for all threads because when user objects are thread joined, generally only
   // the primary thread copy ends up with all the data
-  for (const auto tid : make_range(libMesh::n_threads()))
+  for (const auto tid : make_range(_app.getNumThreads()))
   {
     const decltype(uos)::size_type uo_index = uos.front()->needThreadedCopy() ? tid : 0;
     if (const auto functor = dynamic_cast<Moose::FunctorBase<Real> *>(uos[uo_index].get()))
@@ -4620,7 +4636,7 @@ FEProblemBase::computeMarkers()
 
     _adaptivity.updateErrorVectors();
 
-    for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+    for (THREAD_ID tid = 0; tid < _app.getNumThreads(); ++tid)
     {
       const auto & markers = _markers.getActiveObjects(tid);
       for (const auto & marker : markers)
@@ -4660,7 +4676,7 @@ FEProblemBase::customSetup(const ExecFlagType & exec_type)
   if (_line_search)
     _line_search->customSetup(exec_type);
 
-  unsigned int n_threads = libMesh::n_threads();
+  unsigned int n_threads = _app.getNumThreads();
   for (THREAD_ID tid = 0; tid < n_threads; tid++)
   {
     _all_materials.customSetup(exec_type, tid);
@@ -5140,7 +5156,7 @@ FEProblemBase::executeSamplers(const ExecFlagType & exec_type)
 {
   // TODO: This should be done in a threaded loop, but this should be super quick so for now
   // do a serial loop.
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+  for (THREAD_ID tid = 0; tid < _app.getNumThreads(); ++tid)
   {
     std::vector<Sampler *> objects;
     theWarehouse()
@@ -5164,7 +5180,7 @@ FEProblemBase::updateActiveObjects()
 {
   TIME_SECTION("updateActiveObjects", 5, "Updating Active Objects");
 
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+  for (THREAD_ID tid = 0; tid < _app.getNumThreads(); ++tid)
   {
     for (auto & nl : _nl)
       nl->updateActive(tid);
@@ -5279,7 +5295,7 @@ FEProblemBase::addIndicator(const std::string & indicator_name,
     parameters.set<SystemBase *>("_sys") = _aux.get();
   }
 
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < _app.getNumThreads(); tid++)
   {
     std::shared_ptr<Indicator> indicator =
         _factory.create<Indicator>(indicator_name, name, parameters, tid);
@@ -5322,7 +5338,7 @@ FEProblemBase::addMarker(const std::string & marker_name,
     parameters.set<SystemBase *>("_sys") = _aux.get();
   }
 
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < _app.getNumThreads(); tid++)
   {
     std::shared_ptr<Marker> marker = _factory.create<Marker>(marker_name, name, parameters, tid);
     logAdd("Marker", name, marker_name, parameters);
@@ -6055,7 +6071,7 @@ FEProblemBase::updateMaxQps()
                Moose::constMaxQpsPerElem,
                " to ",
                max_qpts);
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
+  for (unsigned int tid = 0; tid < _app.getNumThreads(); ++tid)
   {
     // the highest available order in libMesh is 43
     _scalar_zero[tid].resize(FORTYTHIRD, 0);
@@ -6073,7 +6089,7 @@ FEProblemBase::updateMaxQps()
 void
 FEProblemBase::bumpVolumeQRuleOrder(Order order, SubdomainID block)
 {
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
+  for (unsigned int tid = 0; tid < _app.getNumThreads(); ++tid)
     for (const auto i : index_range(_nl))
       _assembly[tid][i]->bumpVolumeQRuleOrder(order, block);
 
@@ -6086,7 +6102,7 @@ FEProblemBase::bumpVolumeQRuleOrder(Order order, SubdomainID block)
 void
 FEProblemBase::bumpAllQRuleOrder(Order order, SubdomainID block)
 {
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
+  for (unsigned int tid = 0; tid < _app.getNumThreads(); ++tid)
     for (const auto i : index_range(_nl))
       _assembly[tid][i]->bumpAllQRuleOrder(order, block);
 
@@ -6121,7 +6137,7 @@ FEProblemBase::createQRules(QuadratureType type,
   if (face_order == INVALID_ORDER)
     face_order = order;
 
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
+  for (unsigned int tid = 0; tid < _app.getNumThreads(); ++tid)
     for (const auto i : index_range(_solver_systems))
       _assembly[tid][i]->createQRules(
           type, order, volume_order, face_order, block, allow_negative_qweights);
@@ -6366,7 +6382,7 @@ FEProblemBase::init()
     sys->update();
   _aux->update();
 
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+  for (THREAD_ID tid = 0; tid < _app.getNumThreads(); ++tid)
     for (const auto i : index_range(_nl))
     {
       mooseAssert(
@@ -7025,7 +7041,7 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
 
       _aux->zeroVariablesForResidual();
 
-      unsigned int n_threads = libMesh::n_threads();
+      unsigned int n_threads = _app.getNumThreads();
 
       _current_execute_on_flag = EXEC_LINEAR;
 
@@ -7267,7 +7283,7 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
 
       _aux->zeroVariablesForResidual();
 
-      unsigned int n_threads = libMesh::n_threads();
+      unsigned int n_threads = _app.getNumThreads();
 
       _current_execute_on_flag = EXEC_LINEAR;
 
@@ -7413,7 +7429,7 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
 
         _aux->zeroVariablesForJacobian();
 
-        unsigned int n_threads = libMesh::n_threads();
+        unsigned int n_threads = _app.getNumThreads();
 
         // Random interface objects
         for (const auto & it : _random_data_objects)
@@ -7538,7 +7554,7 @@ FEProblemBase::computeBounds(NonlinearImplicitSystem & libmesh_dbg_var(sys),
       NumericVector<Number> & _upper = _current_nl_sys->getVector("upper_bound");
       _lower.swap(lower);
       _upper.swap(upper);
-      for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+      for (THREAD_ID tid = 0; tid < _app.getNumThreads(); tid++)
         _all_materials.residualSetup(tid);
 
       _aux->residualSetup();
@@ -7614,7 +7630,7 @@ FEProblemBase::computeLinearSystemTags(const NumericVector<Number> & soln,
     matrix.zero();
   }
 
-  unsigned int n_threads = libMesh::n_threads();
+  unsigned int n_threads = _app.getNumThreads();
 
   _current_execute_on_flag = EXEC_NONLINEAR;
 
@@ -8099,17 +8115,17 @@ FEProblemBase::initXFEM(std::shared_ptr<XFEMInterface> xfem)
   if (_displaced_mesh)
     _xfem->setDisplacedMesh(_displaced_mesh);
 
-  auto fill_data = [](auto & storage)
+  auto fill_data = [this](auto & storage)
   {
-    std::vector<MaterialData *> data(libMesh::n_threads());
-    for (const auto tid : make_range(libMesh::n_threads()))
+    std::vector<MaterialData *> data(_app.getNumThreads());
+    for (const auto tid : make_range(_app.getNumThreads()))
       data[tid] = &storage.getMaterialData(tid);
     return data;
   };
   _xfem->setMaterialData(fill_data(_material_props));
   _xfem->setBoundaryMaterialData(fill_data(_bnd_material_props));
 
-  unsigned int n_threads = libMesh::n_threads();
+  unsigned int n_threads = _app.getNumThreads();
   for (unsigned int i = 0; i < n_threads; ++i)
     for (const auto nl_sys_num : index_range(_nl))
     {

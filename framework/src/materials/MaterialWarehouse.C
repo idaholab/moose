@@ -11,6 +11,13 @@
 #include "MaterialWarehouse.h"
 #include "MaterialBase.h"
 
+MaterialWarehouse::MaterialWarehouse(unsigned int num_threads) :
+MooseObjectWarehouse<MaterialBase>(num_threads),
+_neighbor_materials(num_threads),
+_face_materials(num_threads)
+{
+}
+
 void
 MaterialWarehouse::addObjects(std::shared_ptr<MaterialBase> block,
                               std::shared_ptr<MaterialBase> neighbor,

@@ -26,7 +26,7 @@ class MortarConstraintBase;
 class ConstraintWarehouse : public MooseObjectWarehouse<Constraint>
 {
 public:
-  ConstraintWarehouse();
+  ConstraintWarehouse(unsigned int num_threads);
 
   /**
    * Add Constraint object to the warehouse.

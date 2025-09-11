@@ -57,7 +57,7 @@ Coupleable::Coupleable(const MooseObject * moose_object, bool nodal, bool is_fv)
     _coupleable_max_qps(Moose::constMaxQpsPerElem),
     _is_fv(is_fv),
     _obj(moose_object),
-    _writable_coupled_variables(libMesh::n_threads())
+    _writable_coupled_variables(_obj->getMooseApp().getNumThreads())
 {
   SubProblem & problem = *_c_parameters.getCheckedPointerParam<SubProblem *>("_subproblem");
   _obj->getMooseApp().registerInterfaceObject(*this);

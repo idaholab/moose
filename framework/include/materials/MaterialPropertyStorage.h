@@ -42,7 +42,7 @@ void dataLoad(std::istream & stream, MaterialPropertyStorage & storage, void * c
 class MaterialPropertyStorage
 {
 public:
-  MaterialPropertyStorage(MaterialPropertyRegistry & registry);
+  MaterialPropertyStorage(MaterialPropertyRegistry & registry, unsigned num_threads);
 
   /**
    * Basic structure for storing information about a property

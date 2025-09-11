@@ -26,6 +26,8 @@ class MaterialBase;
 class MaterialWarehouse : public MooseObjectWarehouse<MaterialBase>
 {
 public:
+  MaterialWarehouse(unsigned int num_threads);
+
   const MooseObjectWarehouse<MaterialBase> & operator[](Moose::MaterialDataType data_type) const;
 
   ///@{

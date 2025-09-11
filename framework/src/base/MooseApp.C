@@ -66,6 +66,7 @@
 #include "libmesh/checkpoint_io.h"
 #include "libmesh/mesh_base.h"
 #include "libmesh/petsc_solver_exception.h"
+#include "libmesh/libmesh_base.h"
 
 // System include for dynamic library methods
 #ifdef LIBMESH_HAVE_DLOPEN
@@ -215,6 +216,7 @@ MooseApp::validParams()
       "--list-constructed-objects",
       "List all moose object type names constructed by the master app factory");
 
+  params.addParam<unsigned int>("max_threads", 2, "Number of threads for this application");
   params.addCommandLineParam<unsigned int>(
       "n_threads", "--n-threads=<n>", "Runs the specified number of threads per process");
   // This probably shouldn't be global, but the implications of removing this are currently
@@ -429,8 +431,6 @@ MooseApp::validParams()
       "--parse-neml2-only",
       "Executes the [NEML2] block to parse the input file and terminate.");
 
-  MooseApp::addAppParam(params);
-
   params.registerBase("Application");
 
   return params;
@@ -453,14 +453,14 @@ MooseApp::MooseApp(const InputParameters & parameters)
     _start_time_set(false),
     _start_time(0.0),
     _global_time_offset(0.0),
-    _input_parameter_warehouse(std::make_unique<InputParameterWarehouse>()),
+    _input_parameter_warehouse(std::make_unique<InputParameterWarehouse>(getParam<unsigned int>("max_threads"))),
     _action_factory(*this),
     _action_warehouse(*this, _syntax, _action_factory),
     _output_warehouse(*this),
     _parser(getCheckedPointerParam<std::shared_ptr<Parser>>("_parser")),
     _command_line(getCheckedPointerParam<std::shared_ptr<CommandLine>>("_command_line")),
     _builder(*this, _action_warehouse, *_parser),
-    _restartable_data(libMesh::n_threads()),
+    _restartable_data(getParam<unsigned int>("max_threads")),
     _perf_graph(createRecoverablePerfGraph()),
     _solution_invalidity(createRecoverableSolutionInvalidity()),
     _rank_map(*_comm, _perf_graph),
@@ -489,7 +489,7 @@ MooseApp::MooseApp(const InputParameters & parameters)
     _test_checkpoint_half_transient(parameters.get<bool>("test_checkpoint_half_transient")),
     _test_restep(parameters.get<bool>("test_restep")),
     _check_input(getParam<bool>("check_input")),
-    _num_threads(libMesh::command_line_value("--n-threads", 1)),
+    _num_threads(getParam<unsigned int>("max_threads")),
     _multiapp_level(isParamValid("_multiapp_level") ? getParam<unsigned int>("_multiapp_level")
                                                     : 0),
     _multiapp_number(isParamValid("_multiapp_number") ? getParam<unsigned int>("_multiapp_number")
@@ -521,6 +521,10 @@ MooseApp::MooseApp(const InputParameters & parameters)
 #endif
 {
   std::cout << "Creating app " << name() << " type " << type() << " n_threads " << _num_threads << std::endl;
+
+  // We need to change the number of threads in libMesh
+  libMeshPrivateData::_n_threads = _num_threads;
+
   if (&parameters != &_pars)
   {
     const auto show_trace = Moose::show_trace;

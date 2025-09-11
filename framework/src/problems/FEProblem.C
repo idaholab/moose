@@ -86,7 +86,7 @@ void
 FEProblem::init()
 {
   for (const auto & sys : _solver_systems)
-    if (sys->system().has_static_condensation() && libMesh::n_threads() != 1)
+    if (sys->system().has_static_condensation() && _app.getNumThreads() != 1)
       mooseError("Static condensation may not be used with multiple threads");
 
   FEProblemBase::init();

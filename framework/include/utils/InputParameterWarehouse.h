@@ -36,7 +36,7 @@ public:
   /**
    * Class constructor
    */
-  InputParameterWarehouse();
+  InputParameterWarehouse(unsigned int num_threads);
 
   /**
    * Destruction
@@ -157,6 +157,8 @@ private:
   /// pointers. The ControllableItem objects are not designed and will not be used directly in
   /// user code. All user level access goes through the ControllableParameter object.
   std::vector<std::vector<std::shared_ptr<ControllableItem>>> _controllable_items;
+
+  unsigned int _num_threads;
 
   /**
    * Returns a ControllableParameter object that contains all matches to ControllableItem objects

@@ -79,6 +79,10 @@ FullSolveMultiApp::initialSetup()
                      "avoid an error if Transient solve fails.");
       }
 
+      // set number of threads
+      libMesh::libMeshPrivateData::_n_threads = app->getNumThreads();
+      omp_set_num_threads(app->getNumThreads());
+
       ex->init();
 
       _executioners[i] = ex;

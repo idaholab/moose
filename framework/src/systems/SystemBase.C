@@ -66,7 +66,7 @@ SystemBase::SystemBase(SubProblem & subproblem,
     _factory(_app.getFactory()),
     _mesh(subproblem.mesh()),
     _name(name),
-    _vars(libMesh::n_threads()),
+    _vars(_app.getNumThreads()),
     _var_map(),
     _max_var_number(0),
     _u_dot(nullptr),
@@ -719,7 +719,7 @@ SystemBase::addVariable(const std::string & var_type,
                         const std::string & name,
                         InputParameters & parameters)
 {
-  _numbered_vars.resize(libMesh::n_threads());
+  _numbered_vars.resize(_app.getNumThreads());
 
   const auto components = parameters.get<unsigned int>("components");
 
@@ -798,7 +798,7 @@ SystemBase::addVariable(const std::string & var_type,
   parameters.set<unsigned int>("_var_num") = var_num;
   parameters.set<SystemBase *>("_system_base") = this;
 
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < _app.getNumThreads(); tid++)
   {
     parameters.set<THREAD_ID>("tid") = tid;
     std::shared_ptr<MooseVariableBase> var =
@@ -1557,7 +1557,7 @@ SystemBase::computingScalingJacobian() const
 void
 SystemBase::initialSetup()
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < _app.getNumThreads(); tid++)
     _vars[tid].initialSetup();
 
   // If we need raw gradients, we initialize them here.
@@ -1577,35 +1577,35 @@ SystemBase::initialSetup()
 void
 SystemBase::timestepSetup()
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < _app.getNumThreads(); tid++)
     _vars[tid].timestepSetup();
 }
 
 void
 SystemBase::customSetup(const ExecFlagType & exec_type)
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < _app.getNumThreads(); tid++)
     _vars[tid].customSetup(exec_type);
 }
 
 void
 SystemBase::subdomainSetup()
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < _app.getNumThreads(); tid++)
     _vars[tid].subdomainSetup();
 }
 
 void
 SystemBase::residualSetup()
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < _app.getNumThreads(); tid++)
     _vars[tid].residualSetup();
 }
 
 void
 SystemBase::jacobianSetup()
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < _app.getNumThreads(); tid++)
     _vars[tid].jacobianSetup();
 }
 

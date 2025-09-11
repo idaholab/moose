@@ -10,8 +10,8 @@
 #include "ScalarInitialConditionWarehouse.h"
 #include "ScalarInitialCondition.h"
 
-ScalarInitialConditionWarehouse::ScalarInitialConditionWarehouse()
-  : MooseObjectWarehouseBase<ScalarInitialCondition>(false)
+ScalarInitialConditionWarehouse::ScalarInitialConditionWarehouse(unsigned int num_threads)
+  : MooseObjectWarehouseBase<ScalarInitialCondition>(num_threads)
 {
 }
 

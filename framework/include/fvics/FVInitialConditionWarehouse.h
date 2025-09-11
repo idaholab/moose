@@ -20,7 +20,7 @@ class FVInitialConditionBase;
 class FVInitialConditionWarehouse : public MooseObjectWarehouseBase<FVInitialConditionBase>
 {
 public:
-  FVInitialConditionWarehouse();
+  FVInitialConditionWarehouse(unsigned int num_threads);
 
   /**
    * Initial setup

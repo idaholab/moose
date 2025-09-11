@@ -131,7 +131,7 @@ RadialAverage::finalize()
 
     // update after mesh changes and/or if a displaced problem exists
     if (_update_communication_lists || _fe_problem.getDisplacedProblem() ||
-        libMesh::n_threads() > 1)
+        _app.getNumThreads() > 1)
       updateCommunicationLists();
 
     // data structures for sparse point to point communication
