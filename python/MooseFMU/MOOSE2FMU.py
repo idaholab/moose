@@ -17,7 +17,7 @@ logging.basicConfig(
     ]
 )
 
-class MooseSlave(Fmi2Slave):
+class Moose2FMU(Fmi2Slave):
     """
     Base FMU slave for MOOSE simulations. Handles registration of FMU variables,
     control setup, and stepping logic stub to be implemented by subclasses.
@@ -38,7 +38,7 @@ class MooseSlave(Fmi2Slave):
         super().__init__(*args, **kwargs, logging_add_standard_categories=True)
 
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.logger.info("MooseSlave initialized successfully.")
+        self.logger.info("Moose2FMU initialized successfully.")
 
         # Configuration parameters
         self.flag: str = flag

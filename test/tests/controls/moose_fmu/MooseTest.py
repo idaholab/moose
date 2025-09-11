@@ -4,13 +4,13 @@ from pythonfmu.variables import Boolean, Integer, Real, ScalarVariable, String
 from MooseControl import MooseControl
 from pythonfmu.default_experiment import DefaultExperiment
 from typing import Optional
-from MooseFMU import MooseSlave
+from MooseFMU import Moose2FMU
 import time
 import logging
 
 #logging.disable(logging.CRITICAL)
 
-class MooseTest(MooseSlave):
+class MooseTest(Moose2FMU):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.logger.info("MooseTest instance created.")
