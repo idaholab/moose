@@ -12,8 +12,8 @@
 #include "AuxKernel.h"
 
 /**
- * An aux kernel object which stores the element hierarchy
- * in an aux variable.
+ * An aux kernel object which stores the element level in terms of adaptivity
+ * in an auxiliary variable.
  */
 class ElementAdaptivityLevelAux : public AuxKernel
 {

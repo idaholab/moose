@@ -1,28 +1,25 @@
 [Mesh]
-    [generate_mesh]
-        type = GeneratedMeshGenerator
-        dim = 2
-        xmin = 0
-        xmax = 10
-        ymin = 0
-        ymax = 10
-        zmin = 0
-        zmax = 10
-        nx = 5
-        ny = 5
-        nz = 5
-    []
+  [generate_mesh]
+    type = GeneratedMeshGenerator
+    dim = 2
+    xmin = 0
+    xmax = 10
+    ymin = 0
+    ymax = 10
+    nx = 5
+    ny = 5
+  []
 []
 
 [AuxVariables]
-    [in_mesh]
-        order = CONSTANT
-        family = MONOMIAL
-    []
-    [hierarchy]
-        order = CONSTANT
-        family = MONOMIAL
-    []
+  [in_mesh]
+    order = CONSTANT
+    family = MONOMIAL
+  []
+  [hierarchy]
+    order = CONSTANT
+    family = MONOMIAL
+  []
 []
 
 [AuxKernels]
@@ -32,17 +29,17 @@
     variable=hierarchy
   []
 
-    [fill_up_data]
-        type = FunctionAux
-        variable = in_mesh
-        function = "3*x*y+sin(x*y)-12*x*x"
-        execute_on = 'TIMESTEP_BEGIN'
-    []
+  [fill_up_data]
+    type = FunctionAux
+    variable = in_mesh
+    function = "3*x*y+sin(x*y)-12*x*x"
+    execute_on = 'TIMESTEP_BEGIN'
+  []
 []
 
 [Adaptivity]
-    marker = error_fraction
-    steps = 1
+  marker = error_fraction
+  steps = 1
   [Indicators]
     [error]
       type = ValueJumpIndicator
@@ -67,7 +64,6 @@
 
 [Executioner]
   type = Transient
-  solve = false
   dt = 1
   num_steps = 1
 []

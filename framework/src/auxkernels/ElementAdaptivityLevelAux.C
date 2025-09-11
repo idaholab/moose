@@ -25,6 +25,8 @@ ElementAdaptivityLevelAux::validParams()
 ElementAdaptivityLevelAux::ElementAdaptivityLevelAux(const InputParameters & parameters)
   : AuxKernel(parameters), _level_type(getParam<MooseEnum>("level").getEnum<LevelType>())
 {
+  if (mooseVariableBase()->feType() != libMesh::FEType(CONSTANT, MONOMIAL))
+    paramError("variable", "Must be of type CONSTANT MONOMIAL");
 }
 
 Real

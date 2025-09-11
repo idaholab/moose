@@ -1,5 +1,5 @@
 [Tests]
-  issue = "#31469"
+  issues = "#31469"
   design = "ElementAdaptivityLevelAux.md"
   [element_hierarchy]
     type = Exodiff
