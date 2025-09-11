@@ -1,0 +1,19 @@
+[Tests]
+  issues = '#30912'
+  design = 'syntax/Controls/index.md source/controls/MOOSE_FMU.md'
+
+  # Not really sure if all of these prereqs are required as I can't guarantee
+  # if we'll get unique ports if we call them all at once
+
+  [control]
+    requirement = 'The system shall support'
+    [interface_unit_test]
+      type = RunApp
+      command_proxy = test_moose_fmu_interface.py
+      required_python_packages = requests
+      recover = false
+      restep = false
+      detail = 'the creation of moose fmu from base class.'
+      valgrind = 'none' # http library is not completely valgrind clean
+    []
+  []
