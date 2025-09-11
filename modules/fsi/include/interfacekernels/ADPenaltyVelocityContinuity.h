@@ -31,6 +31,12 @@ public:
   virtual const MooseVariableFieldBase & neighborVariable() const override;
 
 protected:
+  /**
+   * @param qp The current quadrature point index
+   * @returns The solid velocity
+   */
+  virtual ADRealVectorValue solidVelocity(const unsigned int qp) const;
+
   /// The penalty factor
   const Real _penalty;
 

@@ -74,6 +74,13 @@
     requirement = 'The system shall throw an error when the variable orders and families for the '
                   'tagged and the auxiliary output variables do not match.'
   []
+  [wrong_tag_type]
+    type = 'RunException'
+    input = 'wrong_tag_type.i'
+    expect_err = 'The provided vector tag does not correspond to a tagged residual vector'
+    requirement = 'The system shall throw an error when the user attempts to remove variable scaling '
+                  'from a tagged vector that is not affected by variable scaling.'
+  []
 
   [call_residual]
     type = RunApp
