@@ -326,6 +326,12 @@ MFEMProblem::addFunction(const std::string & type,
                          const std::string & name,
                          InputParameters & parameters)
 {
+  if (type == "MFEMGradientGridFunction")
+  {
+    FEProblemBase::addUserObject(type, name, parameters);
+    return;
+  }
+
   ExternalProblem::addFunction(type, name, parameters);
   auto & func = getFunction(name);
   // FIXME: Do we want to have optimised versions for when functions
