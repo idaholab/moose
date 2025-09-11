@@ -29,10 +29,10 @@ protected:
   void evaluateRHSResidual() override;
 
   /// The assembly object with cached assembly information
-  const NEML2Assembly * _neml2_assembly;
+  const NEML2Assembly * _neml2_assembly = nullptr;
 
   /// The FE interface for getting variable values/gradients interpolated onto the finite element space
-  const NEML2FEInterpolation * _fe;
+  const NEML2FEInterpolation * _fe = nullptr;
 
 private:
   /// Empty element vector to help zero out the algebraic range
