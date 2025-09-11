@@ -91,7 +91,7 @@ heated_length = 1.0
   []
 []
 
-[Problem]
+[SubChannel]
   type = TriSubChannel1PhaseProblem
   fp = Sodium
   n_blocks = 1
