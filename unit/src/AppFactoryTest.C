@@ -121,7 +121,7 @@ TEST(AppFactoryTest, appCopyConstructParams)
   const std::string app_type = "CopyConstructParamsApp";
 
   auto & af = AppFactory::instance();
-  af.reg<CopyConstructParamsApp>(app_type);
+  af.reg<CopyConstructParamsApp>(app_type, "", 0);
   auto params = af.getValidParams(app_type);
 
   auto command_line = std::make_shared<CommandLine>();
