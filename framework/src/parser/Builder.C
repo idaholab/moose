@@ -28,6 +28,7 @@
 #include "Syntax.h"
 #include "ParameterExtraction.h"
 #include "ParseUtils.h"
+#include "AppFactory.h"
 
 #include "libmesh/parallel.h"
 #include "libmesh/fparser.hh"
@@ -579,6 +580,32 @@ Builder::buildJsonSyntaxTree(JsonSyntaxTree & root) const
       }
     }
   }
+
+  // Helper for adding an application's params
+  const auto add_app_params = [&root](const std::string & type,
+                                      InputParameters params,
+                                      const std::string & file,
+                                      const int line)
+  {
+    params.set<std::string>("type") = type;
+    root.addParameters("Application",
+                       "Application/<type>/" + type,
+                       true,
+                       type,
+                       false,
+                       &params,
+                       FileLineInfo(file, line),
+                       "");
+  };
+
+  // Add registered applications to blocks/Application/types
+  for (const auto & [type, build_info] : AppFactory::instance().registeredObjectBuildInfos())
+    add_app_params(type, build_info->buildParameters(), build_info->file, build_info->line);
+  // Even though MooseApp isn't a registered object, it is useful to
+  // reference its parameters
+  add_app_params("MooseApp", MooseApp::validParams(), "", 0);
+
+  // Add "global" entries (parameters and registered_apps)
   root.addGlobal();
 }
 

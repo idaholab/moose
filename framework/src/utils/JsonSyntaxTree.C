@@ -152,6 +152,15 @@ JsonSyntaxTree::setParams(InputParameters * params, bool search_match, nlohmann:
 
     param_json["controllable"] = params->isControllable(iter.first);
     param_json["deprecated"] = params->isParamDeprecated(iter.first);
+
+    if (const auto cl_metadata = params->queryCommandLineMetadata(iter.first))
+    {
+      auto & cl_entry = param_json["command_line"];
+      cl_entry["syntax"] = cl_metadata->syntax;
+      cl_entry["global"] = cl_metadata->global;
+      cl_entry["input_enabled"] = cl_metadata->input_enabled;
+    }
+
     all_params[iter.first] = param_json;
   }
   return count;
@@ -224,11 +233,16 @@ JsonSyntaxTree::addParameters(const std::string & parent,
     json["description"] = params->getClassDescription();
     // We do this for ActionComponents which are registered as Actions but
     // dumped to the syntax tree as Objects
-    if (params->hasBase() && json["moose_base"] == "Action")
+    if (params->hasBase() && params->getBase() == "Action")
     {
       auto label_pair = getActionLabel(classname);
       json["label"] = label_pair.first;
       json["register_file"] = label_pair.second;
+    }
+    // Applications don't have an object label
+    else if (params->hasBase() && params->getBase() == "Application")
+    {
+      json["register_file"] = lineinfo.file();
     }
     else
     {
