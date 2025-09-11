@@ -1,4 +1,4 @@
 """MOOSE FMU interface base classes."""
-from .MOOSE2FMU import MooseSlave
+from .MOOSE2FMU import Moose2FMU
 
-__all__ = ["MooseSlave"]
+__all__ = ["Moose2FMU"]
