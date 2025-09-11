@@ -72,7 +72,7 @@ SubProblem::SubProblem(const InputParameters & parameters)
     _typed_vector_tags(2),
     _have_p_refinement(false)
 {
-  unsigned int n_threads = libMesh::n_threads();
+  unsigned int n_threads = _app.getNumThreads();
   _active_elemental_moose_variables.resize(n_threads);
   _has_active_elemental_moose_variables.resize(n_threads);
 
@@ -1169,7 +1169,7 @@ SubProblem::automaticScaling() const
 void
 SubProblem::hasScalingVector(const unsigned int nl_sys_num)
 {
-  for (const THREAD_ID tid : make_range(libMesh::n_threads()))
+  for (const THREAD_ID tid : make_range(_app.getNumThreads()))
     assembly(tid, nl_sys_num).hasScalingVector();
 }
 
@@ -1336,7 +1336,7 @@ SubProblem::preparePRefinement()
     if (flag)
       disable_families.insert(family);
 
-  for (const auto tid : make_range(libMesh::n_threads()))
+  for (const auto tid : make_range(_app.getNumThreads()))
     for (const auto s : make_range(numNonlinearSystems()))
       assembly(tid, s).havePRefinement(disable_families);
 

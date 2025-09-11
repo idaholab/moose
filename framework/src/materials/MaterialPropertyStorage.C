@@ -20,15 +20,15 @@
 
 #include <optional>
 
-MaterialPropertyStorage::MaterialPropertyStorage(MaterialPropertyRegistry & registry)
+MaterialPropertyStorage::MaterialPropertyStorage(MaterialPropertyRegistry & registry, unsigned int num_threads)
   : _max_state(0),
     _spin_mtx(libMesh::Threads::spin_mtx),
     _registry(registry),
     _restart_in_place(false),
     _recovering(false)
 {
-  _material_data.reserve(libMesh::n_threads());
-  for (const auto tid : make_range(libMesh::n_threads()))
+  _material_data.reserve(num_threads);
+  for (const auto tid : make_range(num_threads))
     _material_data.emplace_back(*this, tid);
 }
 

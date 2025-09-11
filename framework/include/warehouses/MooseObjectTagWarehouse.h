@@ -25,9 +25,9 @@ class MooseObjectTagWarehouse : public MooseObjectWarehouse<T>
 public:
   /**
    * Constructor.
-   * @param threaded When true (default) threaded storage is enabled.
+   * @param threaded When true threaded storage is enabled.
    */
-  MooseObjectTagWarehouse(bool threaded = true);
+  MooseObjectTagWarehouse(unsigned int num_threads);
 
   /**
    * Update the active status of Kernels
@@ -74,8 +74,6 @@ public:
                                                          THREAD_ID tid);
 
 protected:
-  const THREAD_ID _num_threads;
-
   /// Tag based storage. Map from a tag to a moose object warehouse for vector tags
   std::vector<std::map<TagID, MooseObjectWarehouse<T>>> _vector_tag_to_object_warehouse;
 
@@ -90,13 +88,12 @@ protected:
 };
 
 template <typename T>
-MooseObjectTagWarehouse<T>::MooseObjectTagWarehouse(bool threaded /*=true*/)
-  : MooseObjectWarehouse<T>(threaded),
-    _num_threads(threaded ? libMesh::n_threads() : 1),
-    _vector_tag_to_object_warehouse(_num_threads),
-    _vector_tags_to_object_warehouse(_num_threads),
-    _matrix_tag_to_object_warehouse(_num_threads),
-    _matrix_tags_to_object_warehouse(_num_threads)
+MooseObjectTagWarehouse<T>::MooseObjectTagWarehouse(unsigned int num_threads)
+  : MooseObjectWarehouse<T>(num_threads),
+    _vector_tag_to_object_warehouse(this->_num_threads),
+    _vector_tags_to_object_warehouse(this->_num_threads),
+    _matrix_tag_to_object_warehouse(this->_num_threads),
+    _matrix_tags_to_object_warehouse(this->_num_threads)
 {
 }
 
@@ -125,13 +122,10 @@ MooseObjectTagWarehouse<T>::getVectorTagObjectWarehouse(TagID tag_id, THREAD_ID 
 {
   auto & vector_tag_to_object_warehouse = _vector_tag_to_object_warehouse[tid];
 
-  const auto & house_end = vector_tag_to_object_warehouse.end();
-  const auto & tag_warehouse = vector_tag_to_object_warehouse.find(tag_id);
+  auto [tag_warehouse_it, inserted] = vector_tag_to_object_warehouse.try_emplace(tag_id, this->_num_threads);
 
-  if (tag_warehouse != house_end)
-    return tag_warehouse->second;
-  else
-    vector_tag_to_object_warehouse[tag_id];
+  if (!inserted)
+    return tag_warehouse_it->second;
 
   // Now add actual moose objects into warehouse
   const auto & objects = MooseObjectWarehouse<T>::getObjects(tid);
@@ -143,13 +137,13 @@ MooseObjectTagWarehouse<T>::getVectorTagObjectWarehouse(TagID tag_id, THREAD_ID 
       if (tag == tag_id)
       {
         // Tag based storage
-        vector_tag_to_object_warehouse[tag_id].addObject(object, tid);
+        tag_warehouse_it->second.addObject(object, tid);
         break;
       }
     }
   }
 
-  return vector_tag_to_object_warehouse[tag_id];
+  return tag_warehouse_it->second;
 }
 
 template <typename T>
@@ -158,13 +152,10 @@ MooseObjectTagWarehouse<T>::getMatrixTagObjectWarehouse(TagID tag_id, THREAD_ID 
 {
   auto & matrix_tag_to_object_warehouse = _matrix_tag_to_object_warehouse[tid];
 
-  const auto & house_end = matrix_tag_to_object_warehouse.end();
-  const auto & tag_warehouse = matrix_tag_to_object_warehouse.find(tag_id);
+  auto [tag_warehouse_it, inserted] = matrix_tag_to_object_warehouse.try_emplace(tag_id, this->_num_threads);
 
-  if (tag_warehouse != house_end)
-    return tag_warehouse->second;
-  else
-    matrix_tag_to_object_warehouse[tag_id];
+  if (!inserted)
+    return tag_warehouse_it->second;
 
   // Add moose objects to matrix-tag warehouse
   const auto & objects = MooseObjectWarehouse<T>::getObjects(tid);
@@ -176,14 +167,14 @@ MooseObjectTagWarehouse<T>::getMatrixTagObjectWarehouse(TagID tag_id, THREAD_ID 
       if (tag == tag_id)
       {
         // Tag based storage
-        matrix_tag_to_object_warehouse[tag_id].addObject(object, tid);
+        tag_warehouse_it->second.addObject(object, tid);
 
         break;
       }
     }
   }
 
-  return matrix_tag_to_object_warehouse[tag_id];
+  return tag_warehouse_it->second;
 }
 
 template <typename T>
@@ -201,13 +192,10 @@ MooseObjectTagWarehouse<T>::getVectorTagsObjectWarehouse(const std::set<TagID> &
   // std::map is not thread-safe for writes
   auto & vector_tags_to_object_warehouse = _vector_tags_to_object_warehouse[tid];
 
-  const auto & house_end = vector_tags_to_object_warehouse.end();
-  const auto & tags_warehouse = vector_tags_to_object_warehouse.find(v_tags);
+  auto [tag_warehouse_it, inserted] = vector_tags_to_object_warehouse.try_emplace(v_tags, this->_num_threads);
 
-  if (tags_warehouse != house_end)
-    return tags_warehouse->second;
-  else
-    vector_tags_to_object_warehouse[v_tags];
+  if (!inserted)
+    return tag_warehouse_it->second;
 
   // Add moose objects to vector-tags warehouse
   const auto & objects = MooseObjectWarehouse<T>::getObjects(tid);
@@ -222,14 +210,14 @@ MooseObjectTagWarehouse<T>::getVectorTagsObjectWarehouse(const std::set<TagID> &
       if (tag_found != tags_end)
       {
         // std::vector<Tag> based storage
-        vector_tags_to_object_warehouse[v_tags].addObject(object, tid);
+        tag_warehouse_it->second.addObject(object, tid);
         // Then we should work for next object
         break;
       }
     }
   }
 
-  return vector_tags_to_object_warehouse[v_tags];
+  return tag_warehouse_it->second;
 }
 
 template <typename T>
@@ -239,13 +227,10 @@ MooseObjectTagWarehouse<T>::getMatrixTagsObjectWarehouse(const std::set<TagID> &
 {
   auto & matrix_tags_to_object_warehouse = _matrix_tags_to_object_warehouse[tid];
 
-  const auto & house_end = matrix_tags_to_object_warehouse.end();
-  const auto & tags_warehouse = matrix_tags_to_object_warehouse.find(m_tags);
+  auto [tag_warehouse_it, inserted] = matrix_tags_to_object_warehouse.try_emplace(m_tags, this->_num_threads);
 
-  if (tags_warehouse != house_end)
-    return tags_warehouse->second;
-  else
-    matrix_tags_to_object_warehouse[m_tags];
+  if (!inserted)
+    return tag_warehouse_it->second;
 
   const auto & objects = MooseObjectWarehouse<T>::getObjects(tid);
   for (auto & object : objects)
@@ -259,12 +244,12 @@ MooseObjectTagWarehouse<T>::getMatrixTagsObjectWarehouse(const std::set<TagID> &
       if (tag_found != tags_end)
       {
         // std::vector<Tag> based storage
-        matrix_tags_to_object_warehouse[m_tags].addObject(object, tid);
+        tag_warehouse_it->second.addObject(object, tid);
         // Then we should work for next object
         break;
       }
     }
   }
 
-  return matrix_tags_to_object_warehouse[m_tags];
+  return tag_warehouse_it->second;
 }

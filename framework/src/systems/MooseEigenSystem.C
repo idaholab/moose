@@ -29,7 +29,7 @@ MooseEigenSystem::addKernel(const std::string & kernel_name,
                             const std::string & name,
                             InputParameters & parameters)
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < _app.getNumThreads(); tid++)
   {
     // In the case of EigenKernels, we might need to add two to the system
     if (parameters.have_parameter<bool>("eigen"))

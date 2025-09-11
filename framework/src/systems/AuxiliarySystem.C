@@ -40,17 +40,17 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
     PerfGraphInterface(subproblem.getMooseApp().perfGraph(), "AuxiliarySystem"),
     _sys(subproblem.es().add_system<System>(name)),
     _current_solution(_sys.current_local_solution.get()),
-    _aux_scalar_storage(_app.getExecuteOnEnum()),
-    _nodal_aux_storage(_app.getExecuteOnEnum()),
-    _mortar_nodal_aux_storage(_app.getExecuteOnEnum()),
-    _elemental_aux_storage(_app.getExecuteOnEnum()),
-    _nodal_vec_aux_storage(_app.getExecuteOnEnum()),
-    _elemental_vec_aux_storage(_app.getExecuteOnEnum()),
-    _nodal_array_aux_storage(_app.getExecuteOnEnum()),
-    _elemental_array_aux_storage(_app.getExecuteOnEnum())
+    _aux_scalar_storage(_app.getExecuteOnEnum(), _app.getNumThreads()),
+    _nodal_aux_storage(_app.getExecuteOnEnum(), _app.getNumThreads()),
+    _mortar_nodal_aux_storage(_app.getExecuteOnEnum(), _app.getNumThreads()),
+    _elemental_aux_storage(_app.getExecuteOnEnum(), _app.getNumThreads()),
+    _nodal_vec_aux_storage(_app.getExecuteOnEnum(), _app.getNumThreads()),
+    _elemental_vec_aux_storage(_app.getExecuteOnEnum(), _app.getNumThreads()),
+    _nodal_array_aux_storage(_app.getExecuteOnEnum(), _app.getNumThreads()),
+    _elemental_array_aux_storage(_app.getExecuteOnEnum(), _app.getNumThreads())
 {
-  _nodal_vars.resize(libMesh::n_threads());
-  _elem_vars.resize(libMesh::n_threads());
+  _nodal_vars.resize(_app.getNumThreads());
+  _elem_vars.resize(_app.getNumThreads());
 
   if (!_fe_problem.defaultGhosting())
   {
@@ -69,7 +69,7 @@ AuxiliarySystem::initialSetup()
 
   SystemBase::initialSetup();
 
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+  for (unsigned int tid = 0; tid < _app.getNumThreads(); tid++)
   {
     _aux_scalar_storage.sort(tid);
     _aux_scalar_storage.initialSetup(tid);
@@ -102,7 +102,7 @@ AuxiliarySystem::timestepSetup()
 {
   SystemBase::timestepSetup();
 
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+  for (unsigned int tid = 0; tid < _app.getNumThreads(); tid++)
   {
     _aux_scalar_storage.timestepSetup(tid);
     _nodal_aux_storage.timestepSetup(tid);
@@ -120,7 +120,7 @@ AuxiliarySystem::customSetup(const ExecFlagType & exec_type)
 {
   SystemBase::customSetup(exec_type);
 
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+  for (unsigned int tid = 0; tid < _app.getNumThreads(); tid++)
   {
     _aux_scalar_storage.customSetup(exec_type, tid);
     _nodal_aux_storage.customSetup(exec_type, tid);
@@ -138,7 +138,7 @@ AuxiliarySystem::subdomainSetup()
 {
   SystemBase::subdomainSetup();
 
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+  for (unsigned int tid = 0; tid < _app.getNumThreads(); tid++)
   {
     _aux_scalar_storage.subdomainSetup(tid);
     _nodal_aux_storage.subdomainSetup(tid);
@@ -156,7 +156,7 @@ AuxiliarySystem::jacobianSetup()
 {
   SystemBase::jacobianSetup();
 
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+  for (unsigned int tid = 0; tid < _app.getNumThreads(); tid++)
   {
     _aux_scalar_storage.jacobianSetup(tid);
     _nodal_aux_storage.jacobianSetup(tid);
@@ -174,7 +174,7 @@ AuxiliarySystem::residualSetup()
 {
   SystemBase::residualSetup();
 
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); tid++)
+  for (unsigned int tid = 0; tid < _app.getNumThreads(); tid++)
   {
     _aux_scalar_storage.residualSetup(tid);
     _nodal_aux_storage.residualSetup(tid);
@@ -213,7 +213,7 @@ AuxiliarySystem::addVariable(const std::string & var_type,
   if (var_type == "MooseVariableScalar")
     return;
 
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < _app.getNumThreads(); tid++)
   {
     if (FEInterface::field_type(fe_type) == TYPE_VECTOR)
     {
@@ -259,7 +259,7 @@ AuxiliarySystem::addKernel(const std::string & kernel_name,
                            const std::string & name,
                            InputParameters & parameters)
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < _app.getNumThreads(); tid++)
   {
     const auto & base = parameters.getBase();
     if (base == "AuxKernel" || base == "Bounds")
@@ -316,7 +316,7 @@ AuxiliarySystem::addScalarKernel(const std::string & kernel_name,
                                  const std::string & name,
                                  InputParameters & parameters)
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < _app.getNumThreads(); tid++)
   {
     std::shared_ptr<AuxScalarKernel> kernel =
         _factory.create<AuxScalarKernel>(kernel_name, name, parameters, tid);

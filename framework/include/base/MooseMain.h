@@ -31,6 +31,7 @@ int
 main(int argc, char * argv[])
 {
   MooseInit init(argc, argv);
+  std::cout << "just inited from main " << libMesh::command_line_value("--n-threads", 1) << std::endl;
 
   DefaultAppType::registerApps();
 

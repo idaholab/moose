@@ -34,7 +34,7 @@ public:
    * Constructor.
    * @param threaded True enables threaded object storage (default).
    */
-  ExecuteMooseObjectWarehouse(const ExecFlagEnum & flags, bool threaded = true);
+  ExecuteMooseObjectWarehouse(const ExecFlagEnum & flags, unsigned int num_threads);
 
   virtual ~ExecuteMooseObjectWarehouse();
 
@@ -103,12 +103,12 @@ protected:
 
 template <typename T>
 ExecuteMooseObjectWarehouse<T>::ExecuteMooseObjectWarehouse(const ExecFlagEnum & flags,
-                                                            bool threaded)
-  : MooseObjectWarehouse<T>(threaded)
+                                                            unsigned int num_threads)
+  : MooseObjectWarehouse<T>(num_threads)
 {
   // Initialize the active/all data structures with the correct map entries and empty vectors
   for (const auto & flag : flags.items())
-    _execute_objects.insert(std::make_pair(flag, MooseObjectWarehouse<T>(threaded)));
+    _execute_objects.insert(std::make_pair(flag, MooseObjectWarehouse<T>(num_threads)));
 }
 
 template <typename T>
@@ -209,7 +209,10 @@ ExecuteMooseObjectWarehouse<T>::addObject(std::shared_ptr<T> object,
   // Update the execute flag lists of objects
   if (const auto ptr = std::dynamic_pointer_cast<SetupInterface>(object))
     for (const auto & flag : ptr->getExecuteOnEnum())
-      _execute_objects[flag].addObject(object, tid);
+    {
+      _execute_objects.emplace(std::make_pair(flag, this->_num_threads));
+      _execute_objects.at(flag).addObject(object, tid);
+    }
   else
     mooseError("The object being added (",
                object->name(),

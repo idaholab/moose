@@ -796,6 +796,11 @@ public:
   virtual std::string header() const;
 
   /**
+   * Returns the number of threads used by this application
+   */
+  unsigned int getNumThreads() const { return _num_threads; }
+
+  /**
    * The MultiApp Level
    * @return The current number of levels from the master app
    */
@@ -1503,6 +1508,7 @@ private:
   /// The combined warehouse for storing any MooseObject based object
   std::unique_ptr<TheWarehouse> _the_warehouse;
 
+  unsigned int _num_threads;
   /// Level of multiapp, the master is level 0. This used by the Console to indent output
   unsigned int _multiapp_level;
 

@@ -18,7 +18,7 @@
 #include "NodeElemConstraintBase.h"
 #include "FEProblemBase.h"
 
-ConstraintWarehouse::ConstraintWarehouse() : MooseObjectWarehouse<Constraint>(/*threaded=*/false) {}
+ConstraintWarehouse::ConstraintWarehouse(unsigned int num_threads) : MooseObjectWarehouse<Constraint>(num_threads), _nodal_constraints(num_threads) {}
 
 void
 ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object,
@@ -46,9 +46,15 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object,
                      nfc->getParam<bool>("use_displaced_mesh");
 
     if (displaced)
-      _displaced_node_face_constraints[secondary].addObject(nfc);
+    {
+      auto [pair, inserted] = _displaced_node_face_constraints.try_emplace(secondary, this->_num_threads);
+      pair->second.addObject(nfc);
+    }
     else
-      _node_face_constraints[secondary].addObject(nfc);
+    {
+      auto [pair, inserted] = _node_face_constraints.try_emplace(secondary, this->_num_threads);
+      pair->second.addObject(nfc);
+    }
   }
 
   // MortarConstraint
@@ -63,9 +69,15 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object,
     auto key = std::make_pair(primary_boundary_id, secondary_boundary_id);
 
     if (displaced)
-      _displaced_mortar_constraints[key].addObject(mc);
+    {
+      auto [pair, inserted] = _displaced_mortar_constraints.try_emplace(key, this->_num_threads);
+      pair->second.addObject(mc);
+    }
     else
-      _mortar_constraints[key].addObject(mc);
+    {
+      auto [pair, inserted] = _mortar_constraints.try_emplace(key, this->_num_threads);
+      pair->second.addObject(mc);
+    }
   }
 
   // ElemElemConstraint
@@ -76,9 +88,15 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object,
     const InterfaceID interface_id = ec->getInterfaceID();
 
     if (displaced)
-      _displaced_element_constraints[interface_id].addObject(ec);
+    {
+      auto [pair, inserted] = _displaced_element_constraints.try_emplace(interface_id, this->_num_threads);
+      pair->second.addObject(ec);
+    }
     else
-      _element_constraints[interface_id].addObject(ec);
+    {
+      auto [pair, inserted] = _element_constraints.try_emplace(interface_id, this->_num_threads);
+      pair->second.addObject(ec);
+    }
   }
 
   // NodeElemConstraintBase
@@ -91,9 +109,15 @@ ConstraintWarehouse::addObject(std::shared_ptr<Constraint> object,
                      nec->getParam<bool>("use_displaced_mesh");
 
     if (displaced)
-      _displaced_node_elem_constraints[std::make_pair(secondary, primary)].addObject(nec);
+    {
+      auto [pair, inserted] = _displaced_node_elem_constraints.try_emplace(std::make_pair(secondary, primary), this->_num_threads);
+      pair->second.addObject(nec);
+    }
     else
-      _node_elem_constraints[std::make_pair(secondary, primary)].addObject(nec);
+    {
+      auto [pair, inserted] = _node_elem_constraints.try_emplace(std::make_pair(secondary, primary), this->_num_threads);
+      pair->second.addObject(nec);
+    }
   }
 
   // NodalConstraint

@@ -74,7 +74,7 @@ MooseLinearVariableFV<OutputType>::MooseLinearVariableFV(const InputParameters &
   _neighbor_data = std::make_unique<MooseVariableDataLinearFV<OutputType>>(
       *this, _sys, _tid, Moose::ElementType::Neighbor, this->_assembly.neighbor());
 
-  if (libMesh::n_threads() > 1)
+  if (this->_app.getNumThreads() > 1)
     mooseError("MooseLinearVariableFV does not support threading at the moment!");
 }
 

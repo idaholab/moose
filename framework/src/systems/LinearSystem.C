@@ -113,7 +113,7 @@ LinearSystem::initialSetup()
                  name);
 
   // Calling initial setup for the linear kernels
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); tid++)
+  for (THREAD_ID tid = 0; tid < _app.getNumThreads(); tid++)
   {
     std::vector<LinearFVElementalKernel *> fv_elemental_kernels;
     _fe_problem.theWarehouse()

@@ -3201,7 +3201,7 @@ FEProblemBase::addObject(const std::string & type,
   // Add the _subproblem and _sys parameters depending on use_displaced_mesh
   addObjectParamsHelper(parameters, name, var_param_name);
 
-  const auto n_threads = threaded ? libMesh::n_threads() : 1;
+  const auto n_threads = threaded ? _app.getNumThreads() : 1;
   std::vector<std::shared_ptr<T>> objects(n_threads);
   for (THREAD_ID tid = 0; tid < n_threads; ++tid)
   {

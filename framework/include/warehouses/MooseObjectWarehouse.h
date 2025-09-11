@@ -37,7 +37,7 @@ public:
    * Constructor.
    * @param threaded When true (default) threaded storage is enabled.
    */
-  MooseObjectWarehouse(bool threaded = true);
+  MooseObjectWarehouse(unsigned int num_threads);
 
   /**
    * Adds an object to the storage structure.
@@ -89,8 +89,8 @@ protected:
 };
 
 template <typename T>
-MooseObjectWarehouse<T>::MooseObjectWarehouse(bool threaded /*=true*/)
-  : MooseObjectWarehouseBase<T>(threaded)
+MooseObjectWarehouse<T>::MooseObjectWarehouse(unsigned int num_threads)
+  : MooseObjectWarehouseBase<T>(num_threads)
 {
 }
 
@@ -105,18 +105,30 @@ MooseObjectWarehouse<T>::addObject(std::shared_ptr<T> object,
   if (recurse)
   {
     if (auto mvir = std::dynamic_pointer_cast<MooseVariableInterface<Real>>(object); mvir)
-      _variable_objects[mvir->mooseVariableBase()->number()].addObject(object, tid, false);
+    {
+      _variable_objects.emplace(std::make_pair(mvir->mooseVariableBase()->number(), this->_num_threads));
+      _variable_objects.at(mvir->mooseVariableBase()->number()).addObject(object, tid, false);
+    }
     else if (auto mviv = std::dynamic_pointer_cast<MooseVariableInterface<RealVectorValue>>(object);
              mviv)
-      _variable_objects[mviv->mooseVariableBase()->number()].addObject(object, tid, false);
+    {
+      _variable_objects.emplace(std::make_pair(mviv->mooseVariableBase()->number(), this->_num_threads));
+      _variable_objects.at(mviv->mooseVariableBase()->number()).addObject(object, tid, false);
+    }
     else if (auto mvie = std::dynamic_pointer_cast<MooseVariableInterface<RealEigenVector>>(object);
              mvie)
-      _variable_objects[mvie->mooseVariableBase()->number()].addObject(object, tid, false);
+    {
+      _variable_objects.emplace(std::make_pair(mvie->mooseVariableBase()->number(), this->_num_threads));
+      _variable_objects.at(mvie->mooseVariableBase()->number()).addObject(object, tid, false);
+    }
     // Some objects, such as ScalarKernels, do not inherit from the MooseVariableInterface (which is
     // for field variables). These objects *do* inherit from ResidualObject which has this more
     // generic variable() API
     else if (auto ro = std::dynamic_pointer_cast<ResidualObject>(object); ro)
-      _variable_objects[ro->variable().number()].addObject(object, tid, false);
+    {
+      // One liner - less readable?
+      (*_variable_objects.emplace(std::make_pair(ro->variable().number(), this->_num_threads)).first).second.addObject(object, tid, false);
+    }
   }
 }
 

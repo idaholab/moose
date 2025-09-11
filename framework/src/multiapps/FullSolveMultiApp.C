@@ -79,6 +79,10 @@ FullSolveMultiApp::initialSetup()
                      "avoid an error if Transient solve fails.");
       }
 
+      // set number of threads
+      libMesh::libMeshPrivateData::_n_threads = app->getNumThreads();
+      omp_set_num_threads(app->getNumThreads());
+
       ex->init();
 
       _executioners[i] = ex;
@@ -110,6 +114,10 @@ FullSolveMultiApp::solveStep(Real /*dt*/, Real /*target_time*/, bool auto_advanc
     // reset output system if desired
     if (!getParam<bool>("keep_full_output_history"))
       _apps[i]->getOutputWarehouse().reset();
+
+    // set number of threads
+    libMesh::libMeshPrivateData::_n_threads = localApp(i)->getNumThreads();
+    omp_set_num_threads(localApp(i)->getNumThreads());
 
     Executioner * ex = _executioners[i];
     ex->execute();

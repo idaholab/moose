@@ -58,7 +58,7 @@ DisplacedProblem::DisplacedProblem(const InputParameters & parameters)
   _eq.disable_refine_in_reinit();
 
   // TODO: Move newAssemblyArray further up to SubProblem so that we can use it here
-  unsigned int n_threads = libMesh::n_threads();
+  unsigned int n_threads = _app.getNumThreads();
 
   _assembly.resize(n_threads);
   for (const auto nl_sys_num : make_range(_mproblem.numNonlinearSystems()))
@@ -123,7 +123,7 @@ DisplacedProblem::createQRules(QuadratureType type,
                                SubdomainID block,
                                const bool allow_negative_qweights)
 {
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
+  for (unsigned int tid = 0; tid < _app.getNumThreads(); ++tid)
     for (const auto sys_num : index_range(_assembly[tid]))
       _assembly[tid][sys_num]->createQRules(
           type, order, volume_order, face_order, block, allow_negative_qweights);
@@ -132,7 +132,7 @@ DisplacedProblem::createQRules(QuadratureType type,
 void
 DisplacedProblem::bumpVolumeQRuleOrder(Order order, SubdomainID block)
 {
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
+  for (unsigned int tid = 0; tid < _app.getNumThreads(); ++tid)
     for (const auto nl_sys_num : index_range(_assembly[tid]))
       _assembly[tid][nl_sys_num]->bumpVolumeQRuleOrder(order, block);
 }
@@ -140,7 +140,7 @@ DisplacedProblem::bumpVolumeQRuleOrder(Order order, SubdomainID block)
 void
 DisplacedProblem::bumpAllQRuleOrder(Order order, SubdomainID block)
 {
-  for (unsigned int tid = 0; tid < libMesh::n_threads(); ++tid)
+  for (unsigned int tid = 0; tid < _app.getNumThreads(); ++tid)
     for (const auto nl_sys_num : index_range(_assembly[tid]))
       _assembly[tid][nl_sys_num]->bumpAllQRuleOrder(order, block);
 }
@@ -148,7 +148,7 @@ DisplacedProblem::bumpAllQRuleOrder(Order order, SubdomainID block)
 void
 DisplacedProblem::init()
 {
-  for (THREAD_ID tid = 0; tid < libMesh::n_threads(); ++tid)
+  for (THREAD_ID tid = 0; tid < _app.getNumThreads(); ++tid)
   {
     for (const auto nl_sys_num : index_range(_displaced_solver_systems))
       _assembly[tid][nl_sys_num]->init(_mproblem.couplingMatrix(nl_sys_num));

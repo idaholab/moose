@@ -20,7 +20,7 @@ class InitialConditionBase;
 class InitialConditionWarehouse : public MooseObjectWarehouseBase<InitialConditionBase>
 {
 public:
-  InitialConditionWarehouse();
+  InitialConditionWarehouse(unsigned int num_threads);
 
   /**
    * Initial setup
