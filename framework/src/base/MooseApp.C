@@ -443,10 +443,6 @@ MooseApp::validParams()
   /* Command line: Syntax dumping                                                */
   /*******************************************************************************/
 
-  params.addCommandLineParam<bool>("yaml", "--yaml", "Dump input file syntax in YAML format");
-  params.addCommandLineParam<std::string>(
-      "yaml_search", "--yaml-search <search>", "Dump matching input file syntax in YAML format");
-
   params.addCommandLineParam<bool>("json", "--json", "Dump input file syntax in JSON format");
   params.addCommandLineParam<std::string>(
       "json_search", "--json-search <search>", "Dump matching input file syntax in JSON format");
@@ -462,15 +458,9 @@ MooseApp::validParams()
   params.addCommandLineParam<std::string>(
       "dump_search", "--dump-search <search>", "Dump matching input file syntax in HIT format");
 
-  params.addParamNamesToGroup({"yaml",
-                               "yaml_search",
-                               "json",
-                               "json_search",
-                               "syntax",
-                               "list_constructed_objects",
-                               "dump",
-                               "dump_search"},
-                              "Syntax dumping");
+  params.addParamNamesToGroup(
+      {"json", "json_search", "syntax", "list_constructed_objects", "dump", "dump_search"},
+      "Syntax dumping");
 
   /*******************************************************************************/
   /* Command line: Testing                                                       */
@@ -1548,18 +1538,6 @@ MooseApp::setupOptions()
     }
     else
       mooseError("Search parameter '", search, "' was not found in the registered syntax.");
-  }
-  else if (getParam<bool>("yaml") || isParamSetByUser("yaml_search"))
-  {
-    const std::string search =
-        isParamSetByUser("yaml_search") ? getParam<std::string>("yaml_search") : "";
-    _perf_graph.disableLivePrint();
-
-    _builder.initSyntaxFormatter(Moose::Builder::YAML, true);
-    _builder.buildFullTree(search);
-
-    _early_exit_param = "--yaml";
-    _ready_to_exit = true;
   }
   else if (getParam<bool>("json") || isParamSetByUser("json_search"))
   {

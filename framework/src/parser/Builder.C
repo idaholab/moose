@@ -21,7 +21,6 @@
 #include "GlobalParamsAction.h"
 #include "SyntaxTree.h"
 #include "InputFileFormatter.h"
-#include "YAMLFormatter.h"
 #include "MooseTypes.h"
 #include "CommandLine.h"
 #include "JsonSyntaxTree.h"
@@ -112,8 +111,7 @@ Builder::Builder(MooseApp & app, ActionWarehouse & action_wh, Parser & parser)
     _action_factory(app.getActionFactory()),
     _syntax(_action_wh.syntax()),
     _parser(parser),
-    _root(_parser.getRoot()),
-    _syntax_formatter(nullptr)
+    _root(_parser.getRoot())
 {
 }
 
@@ -407,23 +405,6 @@ Builder::errorCheck(const Parallel::Communicator & comm, bool warn_unused, bool 
 }
 
 void
-Builder::initSyntaxFormatter(SyntaxFormatterType type, bool dump_mode)
-{
-  switch (type)
-  {
-    case INPUT_FILE:
-      _syntax_formatter = std::make_unique<InputFileFormatter>(dump_mode);
-      break;
-    case YAML:
-      _syntax_formatter = std::make_unique<YAMLFormatter>(dump_mode);
-      break;
-    default:
-      mooseError("Unrecognized Syntax Formatter requested");
-      break;
-  }
-}
-
-void
 Builder::buildJsonSyntaxTree(JsonSyntaxTree & root) const
 {
   std::vector<std::pair<std::string, Syntax::ActionInfo>> all_names;
@@ -607,93 +588,6 @@ Builder::buildJsonSyntaxTree(JsonSyntaxTree & root) const
 
   // Add "global" entries (parameters and registered_apps)
   root.addGlobal();
-}
-
-void
-Builder::buildFullTree(const std::string & search_string)
-{
-  std::vector<std::pair<std::string, Syntax::ActionInfo>> all_names;
-
-  for (const auto & iter : _syntax.getAssociatedActions())
-  {
-    Syntax::ActionInfo act_info = iter.second;
-    /**
-     * If the task is nullptr that means we need to figure out which task goes with this syntax for
-     * the purpose of building the Moose Object part of the tree. We will figure this out by asking
-     * the ActionFactory for the registration info.
-     */
-    if (act_info._task == "")
-      act_info._task = _action_factory.getTaskName(act_info._action);
-
-    all_names.push_back(std::pair<std::string, Syntax::ActionInfo>(iter.first, act_info));
-  }
-
-  for (const auto & act_names : all_names)
-  {
-    InputParameters action_obj_params = _action_factory.getValidParams(act_names.second._action);
-    _syntax_formatter->insertNode(
-        act_names.first, act_names.second._action, true, &action_obj_params);
-
-    const std::string & task = act_names.second._task;
-    std::string act_name = act_names.first;
-
-    /**
-     * We need to see if this action is inherited from MooseObjectAction. If it is, then we will
-     * loop over all the Objects in MOOSE's Factory object to print them out if they have associated
-     * bases matching the current task.
-     */
-    if (action_obj_params.have_parameter<bool>("isObjectAction") &&
-        action_obj_params.get<bool>("isObjectAction"))
-    {
-      for (const auto & [moose_obj_name, obj] : _factory.registeredObjects())
-      {
-        auto moose_obj_params = obj->buildParameters();
-        /**
-         * Now that we know that this is a MooseObjectAction we need to see if it has been
-         * restricted in any way by the user.
-         */
-        const std::vector<std::string> & buildable_types = action_obj_params.getBuildableTypes();
-
-        // See if the current Moose Object syntax belongs under this Action's block
-        if ((buildable_types.empty() || // Not restricted
-             std::find(buildable_types.begin(), buildable_types.end(), moose_obj_name) !=
-                 buildable_types.end()) && // Restricted but found
-            moose_obj_params.hasBase() &&  // Has a registered base
-            _syntax.verifyMooseObjectTask(moose_obj_params.getBase(),
-                                          task) &&          // and that base is associated
-            action_obj_params.mooseObjectSyntaxVisibility() // and the Action says it's visible
-        )
-        {
-          std::string name;
-          size_t pos = 0;
-          bool is_action_params = false;
-          if (act_name[act_name.size() - 1] == '*')
-          {
-            pos = act_name.size();
-
-            if (!action_obj_params.collapseSyntaxNesting())
-              name = act_name.substr(0, pos - 1) + moose_obj_name;
-            else
-            {
-              name = act_name.substr(0, pos - 1) + "/<type>/" + moose_obj_name;
-              is_action_params = true;
-            }
-          }
-          else
-          {
-            name = act_name + "/<type>/" + moose_obj_name;
-          }
-
-          moose_obj_params.set<std::string>("type") = moose_obj_name;
-
-          _syntax_formatter->insertNode(name, moose_obj_name, is_action_params, &moose_obj_params);
-        }
-      }
-    }
-  }
-
-  // Do not change to _console, we need this printed to the stdout in all cases
-  Moose::out << _syntax_formatter->print(search_string) << std::flush;
 }
 
 void
