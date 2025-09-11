@@ -24,27 +24,34 @@ class GTEST_TEST_CLASS_NAME_(AppFactoryTest, createNotRegistered);
 /**
  * Macros
  */
-#define registerApp(name) AppFactory::instance().reg<name>(#name)
+#define registerApp(name) AppFactory::instance().reg<name>(#name, __FILE__, __LINE__)
 
 /**
  * Polymorphic data structure with parameter and object build access.
  */
 struct AppFactoryBuildInfoBase
 {
-  virtual std::unique_ptr<MooseApp> build(const InputParameters & params) = 0;
-  virtual InputParameters buildParameters() = 0;
+  virtual std::unique_ptr<MooseApp> build(const InputParameters & params) const = 0;
+  virtual InputParameters buildParameters() const = 0;
   virtual ~AppFactoryBuildInfoBase() = default;
 
-  std::size_t _app_creation_count = 0;
+  /// Number of times this app has been created
+  std::size_t app_creation_count = 0;
+  /// C++ type of the app
+  std::string type;
+  /// File that registered this app
+  std::string file;
+  /// Line number in \p file that this app was registered
+  int line;
 };
 template <typename T>
 struct AppFactoryBuildInfo : public AppFactoryBuildInfoBase
 {
-  virtual std::unique_ptr<MooseApp> build(const InputParameters & params) override
+  std::unique_ptr<MooseApp> build(const InputParameters & params) const override final
   {
     return std::make_unique<T>(params);
   }
-  virtual InputParameters buildParameters() override { return T::validParams(); }
+  InputParameters buildParameters() const override final { return T::validParams(); }
 };
 
 using AppFactoryBuildInfoMap = std::map<std::string, std::unique_ptr<AppFactoryBuildInfoBase>>;
@@ -121,7 +128,7 @@ public:
    * @param name Name of the object to register
    */
   template <typename T>
-  void reg(const std::string & name);
+  void reg(const std::string & name, const std::string & file, const int line);
 
   /**
    * Get valid parameters for the object
@@ -232,12 +239,18 @@ private:
 
 template <typename T>
 void
-AppFactory::reg(const std::string & name)
+AppFactory::reg(const std::string & name, const std::string & file, const int line)
 {
   if (isRegistered(name))
     return;
 
-  _name_to_build_info[name] = std::make_unique<AppFactoryBuildInfo<T>>();
+  auto it_inserted_pair =
+      _name_to_build_info.emplace(name, std::make_unique<AppFactoryBuildInfo<T>>());
+  auto & info = *it_inserted_pair.first->second;
+  info.type = name;
+  info.file = file;
+  info.line = line;
+
   Moose::Capabilities::getCapabilityRegistry().add(
       name, true, "MOOSE application " + name + " is available.");
 }

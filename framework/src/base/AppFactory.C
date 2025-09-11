@@ -179,7 +179,7 @@ AppFactory::create(const std::string & app_type,
   // copy of the derived app's parmeters)
   const auto & params = storeAppParams(parameters);
 
-  build_info->_app_creation_count++;
+  build_info->app_creation_count++;
 
   return build_info->build(params);
 }
@@ -201,7 +201,7 @@ AppFactory::createdAppCount(const std::string & app_type) const
   if (it == _name_to_build_info.end())
     mooseError("AppFactory::createdAppCount(): '", app_type, "' is not a registered app");
 
-  return it->second->_app_creation_count;
+  return it->second->app_creation_count;
 }
 
 const InputParameters &
