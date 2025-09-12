@@ -40,7 +40,7 @@ SubChannelAddVariablesAction::act()
                                         SubChannelApp::PRESSURE_DROP,
                                         SubChannelApp::WETTED_PERIMETER,
                                         SubChannelApp::LINEAR_HEAT_RATE,
-                                        SubChannelApp::DUCT_LINEAR_HEAT_RATE,
+                                        SubChannelApp::DUCT_HEAT_FLUX,
                                         SubChannelApp::ENTHALPY,
                                         SubChannelApp::TEMPERATURE,
                                         SubChannelApp::PIN_TEMPERATURE,
