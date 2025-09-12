@@ -128,6 +128,11 @@ moose_libclang:
   - libclang-cpp19.1 19.1.7 default_hc369343_4              # [not arm64 and osx]
   - libclang-cpp19.1 19.1.7 default_h73dfc95_4              # [arm64]
 
+moose_libxml:
+  - libxml2 2.14.6 h26afc86_1                                # [linux]
+  - libxml2 2.14.6 h7b7ecba_1                                # [not arm64 and osx]
+  - libxml2 2.14.6 h9329255_1                                # [arm64]
+
 #### Darwin SDK SYSROOT
 CONDA_BUILD_SYSROOT:                                        # [osx]
   - /opt/MacOSX13.3.sdk                                     # [osx]
