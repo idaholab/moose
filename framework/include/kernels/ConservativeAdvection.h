@@ -57,7 +57,7 @@ protected:
   std::vector<GenericReal<is_ad>> _dtotal_mass_out;
 
   /// Returns - _grad_test * velocity
-  GenericReal<is_ad> negSpeedQp() const;
+  virtual GenericReal<is_ad> negSpeedQp() const;
 
   /// Calculates the fully-upwind Residual and Jacobian (depending on res_or_jac)
   void fullUpwind(JacRes res_or_jac);
