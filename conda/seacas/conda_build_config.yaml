@@ -9,7 +9,7 @@ moose_cc:
 
 ### If you change these versions, change also conda/wasps/*, conda/seacas/*
 moose_cxx:
-  - gxx 12.3.0 h915e2ae_13                                  # [linux]
+  - gxx 14.3.0 he448592_5                                   # [linux]
   - clangxx 19.1.7 default_h1c12a56_4                       # [not arm64 and osx]
   - clangxx 19.1.7 default_h36137df_4                       # [arm64]
 
