@@ -1,5 +1,5 @@
-#include "automatic_weak_form/VariableSplitting.h"
-#include "automatic_weak_form/WeakFormGenerator.h"
+#include "VariableSplitting.h"
+#include "WeakFormGenerator.h"
 #include "MooseError.h"
 #include <algorithm>
 #include <queue>
@@ -14,9 +14,9 @@ VariableSplittingAnalyzer::analyzeExpression(const NodePtr & expr)
 {
   std::map<std::string, unsigned int> max_orders;
   analyzeNode(expr, max_orders, 0);
-  
+
   std::vector<SplitRequirement> requirements;
-  
+
   for (const auto & [var_name, max_order] : max_orders)
   {
     SplitRequirement req;
@@ -24,16 +24,16 @@ VariableSplittingAnalyzer::analyzeExpression(const NodePtr & expr)
     req.max_derivative_order = max_order;
     req.available_order = _use_hessians ? 2 : 1;
     req.requires_splitting = (max_order > req.available_order);
-    
+
     if (req.requires_splitting)
     {
       for (unsigned int order = req.available_order + 1; order <= max_order; ++order)
         req.split_orders.push_back(order);
     }
-    
+
     requirements.push_back(req);
   }
-  
+
   return requirements;
 }
 
@@ -41,11 +41,11 @@ bool
 VariableSplittingAnalyzer::requiresSplitting(const NodePtr & expr) const
 {
   auto requirements = const_cast<VariableSplittingAnalyzer*>(this)->analyzeExpression(expr);
-  
+
   for (const auto & req : requirements)
     if (req.requires_splitting)
       return true;
-  
+
   return false;
 }
 
@@ -54,10 +54,10 @@ VariableSplittingAnalyzer::getMaxDerivativeOrder(const NodePtr & expr, const std
 {
   std::map<std::string, unsigned int> max_orders;
   const_cast<VariableSplittingAnalyzer*>(this)->analyzeNode(expr, max_orders, 0);
-  
+
   if (max_orders.count(var_name))
     return max_orders[var_name];
-  
+
   return 0;
 }
 
@@ -66,7 +66,7 @@ VariableSplittingAnalyzer::generateSplitVariables(const NodePtr & expr)
 {
   auto requirements = analyzeExpression(expr);
   std::map<std::string, SplitVariable> split_vars;
-  
+
   for (const auto & req : requirements)
   {
     if (req.requires_splitting)
@@ -79,20 +79,20 @@ VariableSplittingAnalyzer::generateSplitVariables(const NodePtr & expr)
         sv.derivative_order = order;
         sv.definition = createSplitVariableDefinition(req.variable_name, order);
         sv.is_primary = false;
-        
+
         Shape orig_shape = ScalarShape{};
         sv.shape = computeSplitVariableShape(orig_shape, order);
-        
+
         sv.constraint_residual = subtract(
           variable(sv.name, sv.shape),
           sv.definition
         );
-        
+
         split_vars[sv.name] = sv;
       }
     }
   }
-  
+
   return split_vars;
 }
 
@@ -108,12 +108,12 @@ VariableSplittingAnalyzer::generateConstraintEquations(
     const std::map<std::string, SplitVariable> & split_vars)
 {
   std::vector<NodePtr> constraints;
-  
+
   for (const auto & [name, sv] : split_vars)
   {
     constraints.push_back(sv.constraint_residual);
   }
-  
+
   return constraints;
 }
 
@@ -122,10 +122,10 @@ VariableSplittingAnalyzer::createSplitVariableDefinition(const std::string & ori
                                                           unsigned int derivative_order)
 {
   NodePtr var = fieldVariable(original_var);
-  
+
   for (unsigned int i = 0; i < derivative_order; ++i)
     var = grad(var, _dim);
-  
+
   return var;
 }
 
@@ -142,7 +142,7 @@ VariableSplittingAnalyzer::analyzeNode(const NodePtr & node,
 {
   if (!node)
     return;
-  
+
   switch (node->type())
   {
     case NodeType::FieldVariable:
@@ -152,7 +152,7 @@ VariableSplittingAnalyzer::analyzeNode(const NodePtr & node,
       max_orders[name] = std::max(max_orders[name], current_derivative_level);
       break;
     }
-    
+
     case NodeType::Gradient:
     case NodeType::Divergence:
     case NodeType::Curl:
@@ -162,14 +162,14 @@ VariableSplittingAnalyzer::analyzeNode(const NodePtr & node,
       analyzeNode(unary->operand(), max_orders, current_derivative_level + increment);
       break;
     }
-    
+
     case NodeType::Laplacian:
     {
       auto unary = std::static_pointer_cast<UnaryOpNode>(node);
       analyzeNode(unary->operand(), max_orders, current_derivative_level + 2);
       break;
     }
-    
+
     default:
     {
       for (const auto & child : node->children())
@@ -186,19 +186,19 @@ VariableSplittingAnalyzer::transformNode(const NodePtr & node,
 {
   if (!node)
     return node;
-  
+
   if (current_derivative_level > _fe_order)
   {
     if (node->type() == NodeType::Gradient)
     {
       auto unary = std::static_pointer_cast<UnaryOpNode>(node);
       auto operand = unary->operand();
-      
+
       if (operand->type() == NodeType::FieldVariable)
       {
         auto field = std::static_pointer_cast<FieldVariableNode>(operand);
         std::string split_name = generateSplitVariableName(field->name(), current_derivative_level);
-        
+
         if (split_vars.count(split_name))
         {
           const auto & sv = split_vars.at(split_name);
@@ -207,17 +207,17 @@ VariableSplittingAnalyzer::transformNode(const NodePtr & node,
       }
     }
   }
-  
+
   switch (node->type())
   {
     case NodeType::Gradient:
     {
       auto unary = std::static_pointer_cast<UnaryOpNode>(node);
-      auto transformed_operand = transformNode(unary->operand(), split_vars, 
+      auto transformed_operand = transformNode(unary->operand(), split_vars,
                                                 current_derivative_level + 1);
       return grad(transformed_operand, _dim);
     }
-    
+
     case NodeType::Laplacian:
     {
       auto unary = std::static_pointer_cast<UnaryOpNode>(node);
@@ -225,7 +225,7 @@ VariableSplittingAnalyzer::transformNode(const NodePtr & node,
                                                 current_derivative_level + 2);
       return laplacian(transformed_operand);
     }
-    
+
     case NodeType::Add:
     case NodeType::Subtract:
     case NodeType::Multiply:
@@ -234,7 +234,7 @@ VariableSplittingAnalyzer::transformNode(const NodePtr & node,
       auto binary = std::static_pointer_cast<BinaryOpNode>(node);
       auto left = transformNode(binary->left(), split_vars, current_derivative_level);
       auto right = transformNode(binary->right(), split_vars, current_derivative_level);
-      
+
       switch (node->type())
       {
         case NodeType::Add: return add(left, right);
@@ -244,7 +244,7 @@ VariableSplittingAnalyzer::transformNode(const NodePtr & node,
         default: break;
       }
     }
-    
+
     default:
       return node->clone();
   }
@@ -253,8 +253,8 @@ VariableSplittingAnalyzer::transformNode(const NodePtr & node,
 bool
 VariableSplittingAnalyzer::isDerivativeOperator(NodeType type) const
 {
-  return type == NodeType::Gradient || 
-         type == NodeType::Divergence || 
+  return type == NodeType::Gradient ||
+         type == NodeType::Divergence ||
          type == NodeType::Laplacian ||
          type == NodeType::Curl;
 }
@@ -307,7 +307,7 @@ VariableSplittingAnalyzer::computeSplitVariableShape(const Shape & original_shap
     else if (derivative_order == 2)
       return RankThreeShape{_dim};
   }
-  
+
   mooseError("Cannot compute shape for derivative order ", derivative_order);
 }
 
@@ -315,12 +315,12 @@ std::vector<SplitVariableKernelGenerator::KernelInfo>
 SplitVariableKernelGenerator::generateKernels(const std::map<std::string, SplitVariable> & split_vars)
 {
   std::vector<KernelInfo> kernels;
-  
+
   for (const auto & [name, sv] : split_vars)
   {
     kernels.push_back(generateConstraintKernel(sv));
   }
-  
+
   return kernels;
 }
 
@@ -334,7 +334,7 @@ SplitVariableKernelGenerator::generateConstraintKernel(const SplitVariable & spl
   info.weak_form = split_var.constraint_residual;
   info.coupled_variables = {split_var.original_variable};
   info.is_auxiliary = true;
-  
+
   return info;
 }
 
@@ -365,24 +365,24 @@ MixedFormulationGenerator::generateMixedFormulation(const NodePtr & energy_densi
 {
   MixedSystem system;
   system.primary_variables = variables;
-  
+
   VariableSplittingAnalyzer analyzer(fe_order);
   auto split_vars = analyzer.generateSplitVariables(energy_density);
-  
+
   for (const auto & [name, sv] : split_vars)
   {
     system.auxiliary_variables.push_back(sv.name);
     system.weak_forms[sv.name] = sv.constraint_residual;
   }
-  
+
   WeakFormGenerator gen;
   for (const auto & var : variables)
   {
     system.weak_forms[var] = gen.generateWeakForm(energy_density, var);
   }
-  
+
   system.is_saddle_point = !system.auxiliary_variables.empty();
-  
+
   return system;
 }
 
@@ -401,16 +401,16 @@ HigherOrderSplittingStrategy::computeOptimalSplitting(const NodePtr & energy_den
                                                        unsigned int fe_order)
 {
   std::vector<SplitPlan> candidates;
-  
+
   candidates.push_back(createRecursiveSplitting(primary_var, max_derivative_order));
   candidates.push_back(createDirectSplitting(primary_var, max_derivative_order));
-  
+
   if (max_derivative_order > 2)
     candidates.push_back(createMixedSplitting(primary_var, max_derivative_order));
-  
+
   SplitPlan best_plan = candidates[0];
   Real best_cost = estimateComputationalCost(best_plan);
-  
+
   for (size_t i = 1; i < candidates.size(); ++i)
   {
     Real cost = estimateComputationalCost(candidates[i]);
@@ -420,10 +420,10 @@ HigherOrderSplittingStrategy::computeOptimalSplitting(const NodePtr & energy_den
       best_plan = candidates[i];
     }
   }
-  
+
   best_plan.strategy = Strategy::OPTIMAL;
   optimizeBandwidth(best_plan);
-  
+
   return best_plan;
 }
 
@@ -433,9 +433,9 @@ HigherOrderSplittingStrategy::createRecursiveSplitting(const std::string & var_n
 {
   SplitPlan plan;
   plan.strategy = Strategy::RECURSIVE;
-  
+
   std::string current_var = var_name;
-  
+
   for (unsigned int order = 1; order <= max_order; ++order)
   {
     SplitVariable sv;
@@ -443,17 +443,17 @@ HigherOrderSplittingStrategy::createRecursiveSplitting(const std::string & var_n
     sv.original_variable = current_var;
     sv.derivative_order = 1;
     sv.is_primary = (order == 1);
-    
+
     plan.variables.push_back(sv);
-    
+
     if (order > 1)
       plan.dependencies.push_back({sv.name, current_var});
-    
+
     current_var = sv.name;
   }
-  
+
   plan.total_dofs = plan.variables.size() + 1;
-  
+
   return plan;
 }
 
@@ -463,7 +463,7 @@ HigherOrderSplittingStrategy::createDirectSplitting(const std::string & var_name
 {
   SplitPlan plan;
   plan.strategy = Strategy::DIRECT;
-  
+
   for (unsigned int order = 1; order <= max_order; ++order)
   {
     SplitVariable sv;
@@ -471,13 +471,13 @@ HigherOrderSplittingStrategy::createDirectSplitting(const std::string & var_name
     sv.original_variable = var_name;
     sv.derivative_order = order;
     sv.is_primary = false;
-    
+
     plan.variables.push_back(sv);
     plan.dependencies.push_back({sv.name, var_name});
   }
-  
+
   plan.total_dofs = plan.variables.size() + 1;
-  
+
   return plan;
 }
 
@@ -485,13 +485,13 @@ Real
 HigherOrderSplittingStrategy::estimateComputationalCost(const SplitPlan & plan)
 {
   Real cost = 0.0;
-  
+
   cost += plan.total_dofs * plan.total_dofs;
-  
+
   cost += plan.bandwidth * plan.total_dofs;
-  
+
   cost += estimateConditionNumber(plan) * 0.1;
-  
+
   return cost;
 }
 
@@ -510,27 +510,27 @@ HigherOrderSplittingStrategy::performRCMOrdering(const std::vector<std::vector<b
   std::vector<unsigned int> ordering(n);
   std::vector<bool> visited(n, false);
   std::vector<unsigned int> degree(n);
-  
+
   for (unsigned int i = 0; i < n; ++i)
   {
     degree[i] = std::count(connectivity[i].begin(), connectivity[i].end(), true);
   }
-  
+
   auto min_it = std::min_element(degree.begin(), degree.end());
   unsigned int start = std::distance(degree.begin(), min_it);
-  
+
   std::queue<unsigned int> q;
   q.push(start);
   visited[start] = true;
-  
+
   std::vector<unsigned int> level_order;
-  
+
   while (!q.empty())
   {
     unsigned int current = q.front();
     q.pop();
     level_order.push_back(current);
-    
+
     std::vector<std::pair<unsigned int, unsigned int>> neighbors;
     for (unsigned int i = 0; i < n; ++i)
     {
@@ -540,16 +540,16 @@ HigherOrderSplittingStrategy::performRCMOrdering(const std::vector<std::vector<b
         visited[i] = true;
       }
     }
-    
+
     std::sort(neighbors.begin(), neighbors.end());
-    
+
     for (const auto & [d, neighbor] : neighbors)
       q.push(neighbor);
   }
-  
+
   for (unsigned int i = 0; i < n; ++i)
     ordering[i] = level_order[n - 1 - i];
-  
+
   return ordering;
 }
 
