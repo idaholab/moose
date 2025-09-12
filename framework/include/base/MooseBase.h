@@ -352,6 +352,31 @@ public:
                                           const bool with_prefix,
                                           const hit::Node * node);
 
+  /**
+   * Require that none or one of the given parameters must be set and no more,
+   * otherwise report a paramError
+   * @param params The parameter names
+   * @param context Optional context to be added to an error
+   */
+  void requireExclusiveParams(const std::vector<std::string> & params,
+                              const std::optional<std::string> & context = {}) const
+  {
+    _pars.requireExclusive(params, context);
+  }
+  /**
+   * Require that the two parameters can not be set together, otherwise report
+   * a paramError
+   * @param param1 The name of the first parameter
+   * @param param2 The name of the second parameter
+   * @param context Optional context to be added to an error
+   */
+  void requireExclusiveParams(const std::string & param1,
+                              const std::string & param2,
+                              const std::optional<std::string> & context = {}) const
+  {
+    _pars.requireExclusive(param1, param2, context);
+  }
+
 protected:
   /// The MOOSE application this is associated with
   MooseApp & _app;

@@ -1863,6 +1863,35 @@ InputParameters::setupVariableNames(std::vector<VariableName> & names,
   return {};
 }
 
+void
+InputParameters::requireExclusive(const std::vector<std::string> & params,
+                                  const std::optional<std::string> & context /* = {} */) const
+{
+  std::optional<std::string> found_param;
+  for (const auto & param : params)
+  {
+    if (isParamSetByUser(param))
+    {
+      if (found_param)
+      {
+        std::string message = "Cannot be used with parameter '" + paramFullpath(param) + "'";
+        if (context)
+          message += "; " + *context;
+        paramError(*found_param, message);
+      }
+      found_param = param;
+    }
+  }
+}
+
+void
+InputParameters::requireExclusive(const std::string & param1,
+                                  const std::string & param2,
+                                  const std::optional<std::string> & context /* = {} */) const
+{
+  requireExclusive({param1, param2}, context);
+}
+
 std::pair<std::string, const hit::Node *>
 InputParameters::paramMessageContext(const std::string & param) const
 {

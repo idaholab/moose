@@ -1403,6 +1403,25 @@ public:
     _allow_command_line_params = true;
   }
 
+  /**
+   * Require that none or one of the given parameters must be set and no more,
+   * otherwise report a paramError
+   * @param params The parameter names
+   * @param context Optional context to be added to an error
+   */
+  void requireExclusive(const std::vector<std::string> & params,
+                        const std::optional<std::string> & context = {}) const;
+  /**
+   * Require that the two parameters can not be set together, otherwise report
+   * a paramError
+   * @param param1 The name of the first parameter
+   * @param param2 The name of the second parameter
+   * @param context Optional context to be added to an error
+   */
+  void requireExclusive(const std::string & param1,
+                        const std::string & param2,
+                        const std::optional<std::string> & context = {}) const;
+
 private:
   // Private constructor so that InputParameters can only be created in certain places.
   InputParameters();
