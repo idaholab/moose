@@ -26,10 +26,7 @@ registerMooseObject("XFEMApp", CrackMeshCut3DUserObject);
 InputParameters
 CrackMeshCut3DUserObject::validParams()
 {
-  InputParameters params = GeometricCutUserObject::validParams();
-  params.addRequiredParam<MeshFileName>(
-      "mesh_file",
-      "Mesh file for the XFEM geometric cut; currently only the xda type is supported");
+  InputParameters params = MeshCutUserObjectBase::validParams();
   MooseEnum growthDirection("MAX_HOOP_STRESS FUNCTION", "FUNCTION");
   params.addParam<MooseEnum>(
       "growth_dir_method", growthDirection, "choose from FUNCTION, MAX_HOOP_STRESS");
@@ -55,7 +52,7 @@ CrackMeshCut3DUserObject::validParams()
 // This code does not allow predefined crack growth as a function of time
 // all inital cracks are defined at t_start = t_end = 0
 CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & parameters)
-  : GeometricCutUserObject(parameters, true),
+  : MeshCutUserObjectBase(parameters),
     _mesh(_subproblem.mesh()),
     _growth_dir_method(getParam<MooseEnum>("growth_dir_method").getEnum<GrowthDirectionEnum>()),
     _growth_rate_method(getParam<MooseEnum>("growth_rate_method").getEnum<GrowthRateEnum>()),
@@ -104,13 +101,8 @@ CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & param
       !_cfd)
     mooseError("'crack_front_nodes' is not specified to use crack growth criteria!");
 
-  // only the xda type is currently supported
-  MeshFileName xfem_cut_mesh_file = getParam<MeshFileName>("mesh_file");
-  _cut_mesh = std::make_unique<ReplicatedMesh>(_communicator);
-  _cut_mesh->read(xfem_cut_mesh_file);
-
   // test element type; only tri3 elements are allowed
-  for (const auto & cut_elem : _cut_mesh->element_ptr_range())
+  for (const auto & cut_elem : _cutter_mesh->element_ptr_range())
   {
     if (cut_elem->n_nodes() != _cut_elem_nnode)
       mooseError("The input cut mesh should include tri elements only!");
@@ -226,7 +218,7 @@ CrackMeshCut3DUserObject::cutElementByGeometry(const Elem * elem,
       const Node * node1 = curr_edge->node_ptr(0);
       const Node * node2 = curr_edge->node_ptr(1);
 
-      for (const auto & cut_elem : _cut_mesh->element_ptr_range())
+      for (const auto & cut_elem : _cutter_mesh->element_ptr_range())
       {
         std::vector<Point> vertices;
 
@@ -390,7 +382,7 @@ CrackMeshCut3DUserObject::isInsideCutPlane(const std::vector<Point> & vertices,
 void
 CrackMeshCut3DUserObject::findBoundaryNodes()
 {
-  auto boundary_node_ids = MeshTools::find_boundary_nodes(*_cut_mesh);
+  auto boundary_node_ids = MeshTools::find_boundary_nodes(*_cutter_mesh);
   for (auto it = boundary_node_ids.cbegin(); it != boundary_node_ids.cend(); it++)
   {
     dof_id_type id = *it;
@@ -410,7 +402,7 @@ CrackMeshCut3DUserObject::findBoundaryEdges()
   std::vector<dof_id_type> node_id(_cut_elem_nnode);
   std::vector<bool> is_node_on_boundary(_cut_elem_nnode);
 
-  for (const auto & cut_elem : _cut_mesh->element_ptr_range())
+  for (const auto & cut_elem : _cutter_mesh->element_ptr_range())
   {
     for (unsigned int i = 0; i < _cut_elem_nnode; ++i)
     {
@@ -455,7 +447,7 @@ CrackMeshCut3DUserObject::findBoundaryEdges()
   // if an edge is shared by two elements, it is not an boundary edge (is_edge_inside = 1)
   for (unsigned int i = 0; i < corner_elem_id.size(); ++i)
   {
-    auto elem_it = _cut_mesh->elements_begin();
+    auto elem_it = _cutter_mesh->elements_begin();
 
     for (dof_id_type j = 0; j < corner_elem_id[i]; ++j)
       ++elem_it;
@@ -471,7 +463,7 @@ CrackMeshCut3DUserObject::findBoundaryEdges()
         std::swap(node1, node2);
 
       unsigned int counter = 0;
-      for (const auto & cut_elem2 : _cut_mesh->element_ptr_range())
+      for (const auto & cut_elem2 : _cutter_mesh->element_ptr_range())
       {
         if (counter != corner_elem_id[i])
         {
@@ -582,9 +574,9 @@ CrackMeshCut3DUserObject::sortBoundaryNodes()
 Real
 CrackMeshCut3DUserObject::findDistance(dof_id_type node1, dof_id_type node2)
 {
-  Node * n1 = _cut_mesh->node_ptr(node1);
+  Node * n1 = _cutter_mesh->node_ptr(node1);
   mooseAssert(n1 != nullptr, "Node is NULL");
-  Node * n2 = _cut_mesh->node_ptr(node2);
+  Node * n2 = _cutter_mesh->node_ptr(node2);
   mooseAssert(n2 != nullptr, "Node is NULL");
   Real distance = (*n1 - *n2).norm();
   return distance;
@@ -610,10 +602,10 @@ CrackMeshCut3DUserObject::refineBoundary()
       std::array<Real, 3> x1;
       std::array<Real, 3> x2;
 
-      Node * n1 = _cut_mesh->node_ptr(node1);
+      Node * n1 = _cutter_mesh->node_ptr(node1);
       mooseAssert(n1 != nullptr, "Node is NULL");
       Point & p1 = *n1;
-      Node * n2 = _cut_mesh->node_ptr(node2);
+      Node * n2 = _cutter_mesh->node_ptr(node2);
       mooseAssert(n2 != nullptr, "Node is NULL");
       Point & p2 = *n2;
 
@@ -629,10 +621,10 @@ CrackMeshCut3DUserObject::refineBoundary()
         for (unsigned int k = 0; k < 3; ++k)
           x(k) = x2[k] - (x2[k] - x1[k]) * (j + 1) / (n + 1);
 
-        Node * this_node = Node::build(x, _cut_mesh->n_nodes()).release();
-        _cut_mesh->add_node(this_node);
+        Node * this_node = Node::build(x, _cutter_mesh->n_nodes()).release();
+        _cutter_mesh->add_node(this_node);
 
-        dof_id_type id = _cut_mesh->n_nodes() - 1;
+        dof_id_type id = _cutter_mesh->n_nodes() - 1;
         auto it = new_boundary_order.begin();
         new_boundary_order.insert(it + i, id);
       }
@@ -659,7 +651,7 @@ CrackMeshCut3DUserObject::findActiveBoundaryNodes()
   // _inactive_boundary_pos
   for (unsigned int j = 0; j < n_boundary; ++j)
   {
-    Node * this_node = _cut_mesh->node_ptr(_boundary[j]);
+    Node * this_node = _cutter_mesh->node_ptr(_boundary[j]);
     mooseAssert(this_node, "Node is NULL");
     Point & this_point = *this_node;
 
@@ -737,7 +729,7 @@ CrackMeshCut3DUserObject::findActiveBoundaryDirection()
       // loop over active front points
       for (unsigned int j = i1; j < i2; ++j)
       {
-        Node * this_node = _cut_mesh->node_ptr(_active_boundary[i][j]);
+        Node * this_node = _cutter_mesh->node_ptr(_active_boundary[i][j]);
         mooseAssert(this_node, "Node is NULL");
         Point & this_point = *this_node;
         dir(0) = _func_x->value(0, this_point);
@@ -830,7 +822,7 @@ CrackMeshCut3DUserObject::growFront()
 
     for (unsigned int j = i1; j < i2; ++j)
     {
-      Node * this_node = _cut_mesh->node_ptr(_active_boundary[i][j]);
+      Node * this_node = _cutter_mesh->node_ptr(_active_boundary[i][j]);
       mooseAssert(this_node, "Node is NULL");
       Point & this_point = *this_node;
       Point dir = _active_direction[i][j];
@@ -860,10 +852,10 @@ CrackMeshCut3DUserObject::growFront()
       else
         mooseError("This growth_rate_method is not pre-defined!");
 
-      this_node = Node::build(x, _cut_mesh->n_nodes()).release();
-      _cut_mesh->add_node(this_node);
+      this_node = Node::build(x, _cutter_mesh->n_nodes()).release();
+      _cutter_mesh->add_node(this_node);
 
-      dof_id_type id = _cut_mesh->n_nodes() - 1;
+      dof_id_type id = _cutter_mesh->n_nodes() - 1;
       temp.push_back(id);
 
       if (_cfd)
@@ -904,7 +896,7 @@ CrackMeshCut3DUserObject::findFrontIntersection()
       std::vector<Real> length2;
 
       Real node_id = _front[i][0];
-      Node * this_node = _cut_mesh->node_ptr(node_id);
+      Node * this_node = _cutter_mesh->node_ptr(node_id);
       mooseAssert(this_node, "Node is NULL");
       Point & p2 = *this_node;
 
@@ -913,12 +905,12 @@ CrackMeshCut3DUserObject::findFrontIntersection()
       else
         node_id = _front[i][1];
 
-      this_node = _cut_mesh->node_ptr(node_id);
+      this_node = _cutter_mesh->node_ptr(node_id);
       mooseAssert(this_node, "Node is NULL");
       Point & p1 = *this_node;
 
       node_id = _front[i].back();
-      this_node = _cut_mesh->node_ptr(node_id);
+      this_node = _cutter_mesh->node_ptr(node_id);
       mooseAssert(this_node, "Node is NULL");
       Point & p4 = *this_node;
 
@@ -927,7 +919,7 @@ CrackMeshCut3DUserObject::findFrontIntersection()
       else
         node_id = _front[i][_front[i].size() - 2];
 
-      this_node = _cut_mesh->node_ptr(node_id);
+      this_node = _cutter_mesh->node_ptr(node_id);
       mooseAssert(this_node, "Node is NULL");
       Point & p3 = *this_node;
 
@@ -975,11 +967,12 @@ CrackMeshCut3DUserObject::findFrontIntersection()
         Point inter1 = pint1[std::distance(length1.begin(), it1)];
         inter1 += (inter1 - p1) * _const_intersection;
 
-        Node * this_node = Node::build(inter1, _cut_mesh->n_nodes()).release();
-        _cut_mesh->add_node(this_node);
+        Node * this_node = Node::build(inter1, _cutter_mesh->n_nodes()).release();
+        _cutter_mesh->add_node(this_node);
 
-        mooseAssert(_cut_mesh->n_nodes() - 1 > 0, "The cut mesh should have at least one element.");
-        unsigned int n = _cut_mesh->n_nodes() - 1;
+        mooseAssert(_cutter_mesh->n_nodes() - 1 > 0,
+                    "The cut mesh should have at least one element.");
+        unsigned int n = _cutter_mesh->n_nodes() - 1;
 
         auto it = _front[i].begin();
         _front[i].insert(it, n);
@@ -994,10 +987,10 @@ CrackMeshCut3DUserObject::findFrontIntersection()
         Point inter2 = pint2[std::distance(length2.begin(), it2)];
         inter2 += (inter2 - p2) * _const_intersection;
 
-        Node * this_node = Node::build(inter2, _cut_mesh->n_nodes()).release();
-        _cut_mesh->add_node(this_node);
+        Node * this_node = Node::build(inter2, _cutter_mesh->n_nodes()).release();
+        _cutter_mesh->add_node(this_node);
 
-        dof_id_type n = _cut_mesh->n_nodes() - 1;
+        dof_id_type n = _cutter_mesh->n_nodes() - 1;
 
         auto it = _front[i].begin();
         unsigned int m = _front[i].size();
@@ -1037,10 +1030,10 @@ CrackMeshCut3DUserObject::refineFront()
         std::array<Real, 3> x1;
         std::array<Real, 3> x2;
 
-        Node * this_node = _cut_mesh->node_ptr(node1);
+        Node * this_node = _cutter_mesh->node_ptr(node1);
         mooseAssert(this_node, "Node is NULL");
         Point & p1 = *this_node;
-        this_node = _cut_mesh->node_ptr(node2);
+        this_node = _cutter_mesh->node_ptr(node2);
         mooseAssert(this_node, "Node is NULL");
         Point & p2 = *this_node;
 
@@ -1056,10 +1049,10 @@ CrackMeshCut3DUserObject::refineFront()
           for (unsigned int k = 0; k < 3; ++k)
             x(k) = x2[k] - (x2[k] - x1[k]) * (j + 1) / (n + 1);
 
-          Node * this_node = Node::build(x, _cut_mesh->n_nodes()).release();
-          _cut_mesh->add_node(this_node);
+          Node * this_node = Node::build(x, _cutter_mesh->n_nodes()).release();
+          _cutter_mesh->add_node(this_node);
 
-          dof_id_type id = _cut_mesh->n_nodes() - 1;
+          dof_id_type id = _cutter_mesh->n_nodes() - 1;
 
           auto it = new_front[ifront].begin();
           new_front[ifront].insert(it + i, id);
@@ -1168,11 +1161,11 @@ CrackMeshCut3DUserObject::triangulation()
 
       for (unsigned int i = 0; i < _cut_elem_nnode; ++i)
       {
-        mooseAssert(_cut_mesh->node_ptr(elem[i]) != nullptr, "Node is NULL");
-        new_elem->set_node(i, _cut_mesh->node_ptr(elem[i]));
+        mooseAssert(_cutter_mesh->node_ptr(elem[i]) != nullptr, "Node is NULL");
+        new_elem->set_node(i, _cutter_mesh->node_ptr(elem[i]));
       }
 
-      _cut_mesh->add_elem(new_elem);
+      _cutter_mesh->add_elem(new_elem);
     }
   }
 }
@@ -1229,7 +1222,7 @@ CrackMeshCut3DUserObject::getCrackFrontPoints(unsigned int number_crack_front_po
   for (unsigned int i = 0; i < number_crack_front_points; ++i)
   {
     dof_id_type id = _crack_front_points[i];
-    Node * this_node = _cut_mesh->node_ptr(id);
+    Node * this_node = _cutter_mesh->node_ptr(id);
     mooseAssert(this_node, "Node is NULL");
     Point & this_point = *this_node;
     crack_front_points[i] = this_point;
@@ -1245,14 +1238,14 @@ CrackMeshCut3DUserObject::getCrackPlaneNormals(unsigned int number_crack_front_p
   // build the node-to-elems map
   std::unordered_map<dof_id_type, std::vector<dof_id_type>> node_to_elems_map;
   node_to_elems_map.clear();
-  for (const auto & elem : _cut_mesh->element_ptr_range())
+  for (const auto & elem : _cutter_mesh->element_ptr_range())
     for (auto & node : elem->node_ref_range())
       node_to_elems_map[node.id()].push_back(elem->id());
 
   // build the elem-to-normal map
   std::unordered_map<dof_id_type, RealVectorValue> elem_to_normal_map;
   elem_to_normal_map.clear();
-  for (const auto & elem : _cut_mesh->element_ptr_range())
+  for (const auto & elem : _cutter_mesh->element_ptr_range())
   {
     Point & p1 = *elem->node_ptr(0);
     Point & p2 = *elem->node_ptr(1);

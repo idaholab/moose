@@ -21,14 +21,14 @@ MeshCutUserObjectBase::validParams()
   params.addRequiredParam<MeshFileName>(
       "mesh_file",
       "Mesh file for the XFEM geometric cut; currently only the Exodus type is supported");
-  params.addClassDescription("Creates a UserObject base class for a mesh cutter in 2D problems");
+  params.addClassDescription("Creates a UserObject base class for a mesh cutter in XFEM.");
   return params;
 }
 
 MeshCutUserObjectBase::MeshCutUserObjectBase(const InputParameters & parameters)
   : GeometricCutUserObject(parameters, true)
 {
-  // only the Exodus type is currently supported
+  // only the Exodus and XDA type is currently supported
   MeshFileName cutterMeshFileName = getParam<MeshFileName>("mesh_file");
   _cutter_mesh = std::make_unique<ReplicatedMesh>(_communicator);
   _cutter_mesh->read(cutterMeshFileName);

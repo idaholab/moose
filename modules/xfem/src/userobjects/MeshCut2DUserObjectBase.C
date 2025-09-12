@@ -40,10 +40,6 @@ MeshCut2DUserObjectBase::MeshCut2DUserObjectBase(const InputParameters & paramet
 {
   _depend_uo.insert(getParam<UserObjectName>("crack_front_definition"));
 
-  // only the Exodus type is currently supported
-  MeshFileName cutterMeshFileName = getParam<MeshFileName>("mesh_file");
-  _cutter_mesh = std::make_unique<ReplicatedMesh>(_communicator);
-  _cutter_mesh->read(cutterMeshFileName);
   // test element type; only line elements are allowed
   for (const auto & cut_elem : _cutter_mesh->element_ptr_range())
   {
