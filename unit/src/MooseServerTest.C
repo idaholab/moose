@@ -1179,7 +1179,6 @@ TEST_F(MooseServerTest, CompletionDocumentRootLevel)
 label: active                           text: active = '${1:__all__}'                      desc: If specified only... pos: [42.0]-[42.0] kind:  7 format: snippet
 label: inactive                         text: inactive =                                   desc: If specified bloc... pos: [42.0]-[42.0] kind:  7 format: regular
 label: Adaptivity                       text: [Adaptivity]\n  $0\n[]                       desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
-label: Application                      text: [Application]\n  $0\n[]                      desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
 label: AuxKernels                       text: [AuxKernels]\n  $0\n[]                       desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
 label: AuxScalarKernels                 text: [AuxScalarKernels]\n  $0\n[]                 desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
 label: AuxVariables                     text: [AuxVariables]\n  $0\n[]                     desc: application named... pos: [42.0]-[42.0] kind: 22 format: snippet
