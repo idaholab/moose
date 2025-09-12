@@ -141,7 +141,7 @@ TimeSequenceStepperBase::updateSequence(const std::vector<Real> & times)
   _time_sequence.push_back(start_time);
   for (unsigned int j = 0; j < times.size(); ++j)
   {
-    if (times[j] > start_time && times[j] < end_time)
+    if (times[j] > start_time && times[j] <= end_time)
       _time_sequence.push_back(times[j]);
   }
 
