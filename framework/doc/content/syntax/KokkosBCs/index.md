@@ -51,7 +51,7 @@ DirichletBCBase<Derived>::computeQpResidual(const ContiguousNodeID node) const
 }
 ```
 
-Also note here the static implementation of `computeValue` using the Curiosuly Recurring Template Pattern (CRTP) which is originally a virtual function. It shows the principle of base class implementations in Kokkos-MOOSE.
+Also note here the static implementation of `computeValue` using the [Curiously Recurring Template Pattern (CRTP)](syntax/Kokkos/index.md#kokkos_crtp) which is originally a virtual function.
 
 See the following source codes of `KokkosMatchedValueBC` for another example of a nodal boundary condition:
 
