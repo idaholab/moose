@@ -328,4 +328,10 @@
     requirement = 'The system shall provide the ability to filter tests based on whether or not they are dependent on certain capabilities.'
     issues = '#31310'
   []
+  [append_pythonpath]
+    type = PythonUnitTest
+    input = test_append_pythonpath.py
+    requirement = 'The system shall be able to import python utilities when running tests.'
+    issues = '#31457'
+  []
 []
