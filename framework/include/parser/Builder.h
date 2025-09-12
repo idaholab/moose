@@ -25,7 +25,6 @@
 // Forward declarations
 class ActionWarehouse;
 class MooseApp;
-class Factory;
 class ActionFactory;
 class JsonSyntaxTree;
 class Parser;
@@ -91,11 +90,6 @@ public:
    */
   void extractParams(const std::string & prefix, InputParameters & p);
 
-  /**
-   * Use MOOSE Factories to construct a parameter tree for documentation or echoing input.
-   */
-  void buildJsonSyntaxTree(JsonSyntaxTree & tree) const;
-
   void walk(const std::string & fullpath, const std::string & nodepath, hit::Node * n);
 
   void errorCheck(const libMesh::Parallel::Communicator & comm, bool warn_unused, bool err_unused);
@@ -111,8 +105,6 @@ private:
 
   /// The MooseApp this Parser is part of
   MooseApp & _app;
-  /// The Factory associated with that MooseApp
-  Factory & _factory;
   /// Action warehouse that will be filled by actions
   ActionWarehouse & _action_wh;
   /// The Factory that builds actions
