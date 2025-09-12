@@ -161,10 +161,12 @@ MooseApp::validParams()
   /* Command line: Debugging                                                     */
   /*******************************************************************************/
 
-  params.addCommandLineParam<std::string>(
+  const MooseEnum debuggers("lldb gdb");
+  params.addCommandLineParam<MooseEnum>(
       "start_in_debugger",
-      "--start-in-debugger <debugger>",
-      "Start the application and attach a debugger; launch xterm windows using <debugger>");
+      "--start-in-debugger <lldb|gdb>",
+      debuggers,
+      "Start the application and attach a debugger; launch xterm windows using <lldb|gdb>");
 
   params.addCommandLineParam<unsigned int>(
       "stop_for_debugger",
@@ -802,28 +804,15 @@ MooseApp::MooseApp(const InputParameters & parameters)
 
   if (isParamSetByUser("start_in_debugger") && isUltimateMaster())
   {
-    auto command = getParam<std::string>("start_in_debugger");
-
-    Moose::out << "Starting in debugger using: " << command << std::endl;
-
-    auto hostname = MooseUtils::hostname();
-
-    std::stringstream command_stream;
+    const auto debugger = MooseUtils::toLower(getParam<MooseEnum>("start_in_debugger"));
+    Moose::out << "Starting in debugger using: " << debugger << std::endl;
 
     // This will start XTerm and print out some info first... then run the debugger
-    command_stream << "xterm -e \"echo 'Rank: " << processor_id() << "  Hostname: " << hostname
-                   << "  PID: " << getpid() << "'; echo ''; ";
-
-    // Figure out how to run the debugger
-    if (command.find("lldb") != std::string::npos || command.find("gdb") != std::string::npos)
-      command_stream << command << " -p " << getpid();
-    else
-      paramError("start_in_debugger", "Unknown debugger '" + command + "'");
-
-    // Finish up the command
-    command_stream << "\""
-                   << " & ";
-    std::string command_string = command_stream.str();
+    std::ostringstream command_stream;
+    command_stream << "xterm -e \"echo 'Rank: " << processor_id()
+                   << "  Hostname: " << MooseUtils::hostname() << "  PID: " << getpid()
+                   << "'; echo ''; " << debugger << " -p " << getpid() << "\" & ";
+    const auto command_string = command_stream.str();
     Moose::out << "Running: " << command_string << std::endl;
 
     int ret = std::system(command_string.c_str());
