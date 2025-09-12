@@ -207,11 +207,10 @@ AppFactory::createdAppCount(const std::string & app_type) const
 const InputParameters &
 AppFactory::storeAppParams(InputParameters & params)
 {
-  const std::size_t next_id =
-      _input_parameters.size() ? (std::prev(_input_parameters.end())->first + 1) : 0;
-  params.addPrivateParam<std::size_t>("_app_params_id", next_id);
+  const auto id = _next_input_parameters_id++;
+  params.addPrivateParam<std::size_t>("_app_params_id", id);
   const auto it_inserted_pair =
-      _input_parameters.emplace(next_id, std::make_unique<InputParameters>(params));
+      _input_parameters.emplace(id, std::make_unique<InputParameters>(params));
   mooseAssert(it_inserted_pair.second, "Already exists");
   auto & stored_params = *it_inserted_pair.first->second;
   stored_params.finalize("");
