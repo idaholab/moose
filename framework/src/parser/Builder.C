@@ -425,6 +425,23 @@ Builder::buildJsonSyntaxTree(JsonSyntaxTree & root) const
       act_info._task = _action_factory.getTaskName(act_info._action);
   }
 
+  // Build a cache of registered objects (with a base) to their parameters.
+  // The action loop that follows below will search for objects that match
+  // an action's syntax, which requires knowing all object params for each
+  // action and we don't want to rebuild the params every time
+  std::vector<std::pair<std::string, const InputParameters>> object_params;
+  const auto & objects = _factory.registeredObjects();
+  object_params.reserve(objects.size());
+  for (const auto & [type, entry_ptr] : _factory.registeredObjects())
+  {
+    auto params = entry_ptr->buildParameters();
+    if (params.hasBase())
+    {
+      params.set<std::string>("type") = type;
+      object_params.emplace_back(type, std::move(params));
+    }
+  }
+
   // Add all the actions to the JSON tree, except for ActionComponents (below)
   for (const auto & act_names : all_names)
   {
@@ -460,9 +477,8 @@ Builder::buildJsonSyntaxTree(JsonSyntaxTree & root) const
     if (action_obj_params.have_parameter<bool>("isObjectAction") &&
         action_obj_params.get<bool>("isObjectAction"))
     {
-      for (auto & [moose_obj_name, obj] : _factory.registeredObjects())
+      for (const auto & [moose_obj_name, moose_obj_params] : object_params)
       {
-        auto moose_obj_params = obj->buildParameters();
         // Now that we know that this is a MooseObjectAction we need to see if it has been
         // restricted
         // in any way by the user.
@@ -472,7 +488,6 @@ Builder::buildJsonSyntaxTree(JsonSyntaxTree & root) const
         if ((buildable_types.empty() || // Not restricted
              std::find(buildable_types.begin(), buildable_types.end(), moose_obj_name) !=
                  buildable_types.end()) && // Restricted but found
-            moose_obj_params.hasBase() &&  // Has a registered base
             _syntax.verifyMooseObjectTask(moose_obj_params.getBase(),
                                           task) &&          // and that base is associated
             action_obj_params.mooseObjectSyntaxVisibility() // and the Action says it's visible
@@ -499,7 +514,6 @@ Builder::buildJsonSyntaxTree(JsonSyntaxTree & root) const
             name = syntax + "/<type>/" + moose_obj_name;
             is_type = true;
           }
-          moose_obj_params.set<std::string>("type") = moose_obj_name;
 
           auto lineinfo = _factory.getLineInfo(moose_obj_name);
           std::string classname = _factory.associatedClassName(moose_obj_name);
