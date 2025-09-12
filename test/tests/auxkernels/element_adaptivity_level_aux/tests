@@ -1,0 +1,10 @@
+[Tests]
+  issues = "#31469"
+  design = "ElementAdaptivityLevelAux.md"
+  [element_hierarchy]
+    type = Exodiff
+    input = element_hierarchy_test.i
+    exodiff = 'element_hierarchy_test_out.e'
+    requirement = "The system shall be able to output the element adaptivity refinement level"
+  []
+[]
