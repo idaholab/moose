@@ -1,0 +1,34 @@
+[Tests]
+  design = 'QuadSubChannel1PhaseProblem.md'
+  issues = '#31483'
+  [Pressure_drop_counter_flow]
+    type = CSVDiff
+    input = 'one_pin_problem.i'
+    csvdiff = 'counter_flow.csv'
+    cli_args = 'Outputs/file_base=counter_flow'
+    recover = False
+    abs_zero = 1e-7
+    max_parallel = 1
+    requirement = 'The system will calculate the pressure drop across the pin with a counter_flow direction of gravity'
+  []
+  [Pressure_drop_co_flow]
+    type = CSVDiff
+    input = 'one_pin_problem.i'
+    csvdiff = 'co_flow.csv'
+    cli_args = 'SubChannel/gravity=co_flow Outputs/file_base=co_flow'
+    recover = False
+    abs_zero = 1e-7
+    max_parallel = 1
+    requirement = 'The system will calculate the pressure drop across the pin with a co_flow direction of gravity'
+  []
+  [Pressure_drop_no_gravity]
+    type = CSVDiff
+    input = 'one_pin_problem.i'
+    csvdiff = 'no_gravity.csv'
+    cli_args = 'SubChannel/gravity=none Outputs/file_base=no_gravity'
+    recover = False
+    abs_zero = 1e-7
+    max_parallel = 1
+    requirement = 'The system will calculate the pressure drop across the pin with no gravity'
+  []
+[]

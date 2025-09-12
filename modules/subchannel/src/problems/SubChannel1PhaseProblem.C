@@ -56,6 +56,7 @@ InputParameters
 SubChannel1PhaseProblem::validParams()
 {
   MooseEnum schemes("upwind downwind central_difference exponential", "central_difference");
+  MooseEnum gravity_direction("counter_flow co_flow none", "counter_flow");
   InputParameters params = ExternalProblem::validParams();
   params += PostprocessorInterface::validParams();
   params.addClassDescription("Base class of the subchannel solvers");
@@ -71,6 +72,8 @@ SubChannel1PhaseProblem::validParams()
   params.addParam<MooseEnum>("interpolation_scheme",
                              schemes,
                              "Interpolation scheme used for the method. Default is exponential");
+  params.addParam<MooseEnum>(
+      "gravity", gravity_direction, "Direction of gravity. Default is counter_flow");
   params.addParam<bool>(
       "implicit", false, "Boolean to define the use of explicit or implicit solution.");
   params.addParam<bool>(
@@ -121,6 +124,8 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _dtol(getParam<PetscReal>("dtol")),
     _maxit(getParam<PetscInt>("maxit")),
     _interpolation_scheme(getParam<MooseEnum>("interpolation_scheme")),
+    _gravity_direction(getParam<MooseEnum>("gravity")),
+    _dir_grav(computeGravityDir(_gravity_direction)),
     _implicit_bool(getParam<bool>("implicit")),
     _staggered_pressure_bool(getParam<bool>("staggered_pressure")),
     _segregated_bool(getParam<bool>("segregated")),
@@ -641,7 +646,7 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         auto friction_term = (fi * dz / Dh_i + ki) * 0.5 *
                              (*_mdot_soln)(node_out)*std::abs((*_mdot_soln)(node_out)) /
                              (S * (*_rho_soln)(node_out));
-        auto gravity_term = _g_grav * (*_rho_soln)(node_out)*dz * S;
+        auto gravity_term = _dir_grav * _g_grav * (*_rho_soln)(node_out)*dz * S;
         auto DP = std::pow(S, -1.0) * (time_term + mass_term1 + mass_term2 + crossflow_term +
                                        turbulent_term + friction_term + gravity_term); // Pa
         _DP_soln->set(node_out, DP);
@@ -966,7 +971,7 @@ SubChannel1PhaseProblem::computeDP(int iblock)
             MatSetValues(_amc_friction_force_mat, 1, &row, 1, &col, &value, INSERT_VALUES));
 
         /// Gravity force
-        PetscScalar value_vec = -1.0 * _g_grav * rho_interp * dz * S_interp;
+        PetscScalar value_vec = _dir_grav * -1.0 * _g_grav * rho_interp * dz * S_interp;
         PetscInt row_vec = i_ch + _n_channels * iz_ind;
         LibmeshPetscCall(VecSetValues(_amc_gravity_rhs, 1, &row_vec, &value_vec, ADD_VALUES));
       }
