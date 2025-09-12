@@ -14,8 +14,8 @@
 #include "MooseUtils.h"
 #include "Moose.h"
 
-/// Helper that asserts that the given "action" throws an exception of type "exception_type"
-#define MOOSE_ASSERT_THROWS(exception_type, action)                                                \
+// Implementation for MOOSE_ASSERT_THROWS and MOOSE_ASSERT_THROWS_CONTAINS
+#define MOOSE_ASSERT_THROWS_IMPL(exception_type, action, ...)                                      \
   do                                                                                               \
   {                                                                                                \
     static_assert(std::is_base_of_v<std::exception, exception_type>, "Not an exception");          \
@@ -28,35 +28,25 @@
     {                                                                                              \
       if constexpr (!std::is_same_v<std::exception, exception_type>)                               \
         if (!dynamic_cast<const exception_type *>(&e))                                             \
-          FAIL() << "Threw " << demangle(typeid(e).name()) << " instead of "                       \
-                 << MooseUtils::prettyCppType<exception_type>() << "\nMessage: \"" << e.what()     \
+          FAIL() << "Threw " << MooseUtils::prettyCppType(&e) << " instead of "                    \
+                 << MooseUtils::prettyCppType(&e) << "\n  Message: \"" << e.what() << "\"";        \
+      if constexpr (sizeof(#__VA_ARGS__) > 1)                                                      \
+      {                                                                                            \
+        const char * contains = __VA_ARGS__;                                                       \
+        if (std::string(e.what()).find(contains) == std::string::npos)                             \
+          FAIL() << "Exception " << MooseUtils::prettyCppType<exception_type>() << ":\n"           \
+                 << "  Message: \"" << e.what() << "\"\n  Does not contain: \"" << contains        \
                  << "\"";                                                                          \
+      }                                                                                            \
     }                                                                                              \
   } while (0)
 
-/// Helper that asserts that the given "action" throws an exception of type "exception_type"
-/// whose message contains "contains"
+// Checks if an action would throw a certain exception type
+#define MOOSE_ASSERT_THROWS(exception_type, action) MOOSE_ASSERT_THROWS_IMPL(exception_type, action)
+// Checks if an action would throw a certain exception type
+// and a string is contained within the message
 #define MOOSE_ASSERT_THROWS_CONTAINS(exception_type, action, contains)                             \
-  do                                                                                               \
-  {                                                                                                \
-    static_assert(std::is_base_of_v<std::exception, exception_type>, "Not an exception");          \
-    try                                                                                            \
-    {                                                                                              \
-      action;                                                                                      \
-      FAIL() << "Expected " << MooseUtils::prettyCppType<exception_type>() << " not thrown";       \
-    }                                                                                              \
-    catch (std::exception const & e)                                                               \
-    {                                                                                              \
-      if constexpr (!std::is_same_v<std::exception, exception_type>)                               \
-        if (!dynamic_cast<const exception_type *>(&e))                                             \
-          FAIL() << "Threw " << demangle(typeid(e).name()) << " instead of "                       \
-                 << MooseUtils::prettyCppType<exception_type>() << "\nMessage: \"" << e.what()     \
-                 << "\"";                                                                          \
-      if (std::string(e.what()).find(contains) == std::string::npos)                               \
-        FAIL() << "Exception " << MooseUtils::prettyCppType<exception_type>() << ":\n"             \
-               << "Message: \"" << e.what() << "\"\nDoes not contain: \"" << contains << "\"";     \
-    }                                                                                              \
-  } while (0)
+  MOOSE_ASSERT_THROWS_IMPL(exception_type, action, contains)
 
 namespace Moose::UnitUtils
 {
