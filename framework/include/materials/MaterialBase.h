@@ -92,7 +92,7 @@ public:
    * This is _only_ called if this material has properties that are
    * requested as stateful
    */
-  virtual void initStatefulProperties(unsigned int n_points);
+  virtual void initStatefulProperties(const unsigned int n_points);
 
   virtual bool isInterfaceMaterial() { return false; };
 
