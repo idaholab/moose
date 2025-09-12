@@ -162,14 +162,15 @@ InputParameters::operator=(const InputParameters & rhs)
   Parameters::operator=(rhs);
 
   _params = rhs._params;
-
+  _coupled_vars = rhs._coupled_vars;
+  _class_description = rhs._class_description;
   _buildable_types = rhs._buildable_types;
   _buildable_rm_types = rhs._buildable_rm_types;
   _collapse_nesting = rhs._collapse_nesting;
   _moose_object_syntax_visibility = rhs._moose_object_syntax_visibility;
-  _coupled_vars = rhs._coupled_vars;
-  _new_to_deprecated_coupled_vars = rhs._new_to_deprecated_coupled_vars;
+  _show_deprecated_message = rhs._show_deprecated_message;
   _allow_copy = rhs._allow_copy;
+  _new_to_deprecated_coupled_vars = rhs._new_to_deprecated_coupled_vars;
   _old_to_new_name_and_dep = rhs._old_to_new_name_and_dep;
   _new_to_old_names = rhs._new_to_old_names;
   _hit_node = rhs._hit_node;
