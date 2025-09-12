@@ -407,24 +407,22 @@ Builder::errorCheck(const Parallel::Communicator & comm, bool warn_unused, bool 
 void
 Builder::buildJsonSyntaxTree(JsonSyntaxTree & root) const
 {
-  std::vector<std::pair<std::string, Syntax::ActionInfo>> all_names;
-
+  // Add syntax types
   for (const auto & iter : _syntax.getAssociatedTypes())
     root.addSyntaxType(iter.first, iter.second);
 
   // Build a list of all the actions appearing in the syntax
-  for (const auto & iter : _syntax.getAssociatedActions())
+  const auto & associated_actions = _syntax.getAssociatedActions();
+  std::vector<std::pair<std::string, Syntax::ActionInfo>> all_names(associated_actions.begin(),
+                                                                    associated_actions.end());
+  // If the task is empty, that means we need to figure out which task
+  // goes with this syntax for the purpose of building the MooseObject
+  // part of the tree; query the ActionFactory for the registration info
+  for (auto & name_act_info_pair : all_names)
   {
-    Syntax::ActionInfo act_info = iter.second;
-    /**
-     * If the task is nullptr that means we need to figure out which task goes with this syntax for
-     * the purpose of building the Moose Object part of the tree. We will figure this out by asking
-     * the ActionFactory for the registration info.
-     */
+    auto & act_info = name_act_info_pair.second;
     if (act_info._task == "")
       act_info._task = _action_factory.getTaskName(act_info._action);
-
-    all_names.push_back(std::make_pair(iter.first, act_info));
   }
 
   // Add all the actions to the JSON tree, except for ActionComponents (below)
