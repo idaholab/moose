@@ -1,0 +1,547 @@
+#include "kernels/VariationalKernelBase.h"
+#include "MooseError.h"
+#include "Assembly.h"
+#include "MooseVariableFE.h"
+#include "SystemBase.h"
+
+namespace moose
+{
+namespace automatic_weak_form
+{
+
+registerMooseObject("MooseApp", VariationalKernelBase);
+
+InputParameters
+VariationalKernelBase::validParams()
+{
+  InputParameters params = Kernel::validParams();
+  
+  params.addClassDescription("Base class for variational derivative kernels that automatically "
+                              "generate weak forms from energy functionals");
+  
+  MooseEnum energy_types("double_well elastic neo_hookean surface cahn_hilliard fourth_order custom");
+  params.addParam<MooseEnum>("energy_type", energy_types, "Type of energy functional");
+  
+  params.addParam<std::string>("energy_expression", "", 
+                                "Mathematical expression for the energy density");
+  
+  params.addParam<Real>("gradient_coefficient", 1.0, 
+                         "Gradient energy coefficient (kappa)");
+  params.addParam<Real>("fourth_order_coefficient", 0.0, 
+                         "Fourth-order regularization coefficient (lambda)");
+  
+  params.addParam<Real>("elastic_lambda", 1.0, "First Lamé parameter");
+  params.addParam<Real>("elastic_mu", 1.0, "Second Lamé parameter (shear modulus)");
+  
+  params.addParam<Real>("surface_energy_coefficient", 1.0, 
+                         "Surface energy coefficient (gamma)");
+  
+  params.addParam<std::vector<VariableName>>("coupled_variables", 
+                                               "List of coupled variables");
+  
+  params.addParam<bool>("use_automatic_differentiation", true,
+                         "Use automatic differentiation for Jacobian");
+  
+  params.addParam<bool>("compute_jacobian_numerically", false,
+                         "Compute Jacobian using finite differences");
+  
+  params.addParam<Real>("fd_eps", 1e-8, 
+                         "Finite difference epsilon for numerical Jacobian");
+  
+  params.addParam<bool>("enable_variable_splitting", true,
+                         "Enable automatic variable splitting for higher-order derivatives");
+  
+  params.addParam<unsigned int>("fe_order", 1, 
+                                  "Finite element order");
+  
+  params.addParam<bool>("has_time_derivatives", false,
+                         "Whether the problem includes time derivatives");
+  
+  return params;
+}
+
+VariationalKernelBase::VariationalKernelBase(const InputParameters & parameters)
+  : Kernel(parameters),
+    _gradient_coefficient(getParam<Real>("gradient_coefficient")),
+    _fourth_order_coefficient(getParam<Real>("fourth_order_coefficient")),
+    _elastic_lambda(getParam<Real>("elastic_lambda")),
+    _elastic_mu(getParam<Real>("elastic_mu")),
+    _surface_energy_coefficient(getParam<Real>("surface_energy_coefficient")),
+    _use_automatic_differentiation(getParam<bool>("use_automatic_differentiation")),
+    _compute_jacobian_numerically(getParam<bool>("compute_jacobian_numerically")),
+    _fd_eps(getParam<Real>("fd_eps")),
+    _enable_variable_splitting(getParam<bool>("enable_variable_splitting")),
+    _fe_order(getParam<unsigned int>("fe_order")),
+    _has_time_derivatives(getParam<bool>("has_time_derivatives"))
+{
+  _builder = std::make_unique<MooseExpressionBuilder>(_mesh.dimension());
+  _weak_form_gen = std::make_unique<WeakFormGenerator>(_mesh.dimension());
+  
+  if (isParamValid("energy_type"))
+  {
+    std::string type_str = getParam<MooseEnum>("energy_type");
+    if (type_str == "double_well")
+      _energy_type = EnergyType::DOUBLE_WELL;
+    else if (type_str == "elastic")
+      _energy_type = EnergyType::ELASTIC;
+    else if (type_str == "neo_hookean")
+      _energy_type = EnergyType::NEO_HOOKEAN;
+    else if (type_str == "surface")
+      _energy_type = EnergyType::SURFACE;
+    else if (type_str == "cahn_hilliard")
+      _energy_type = EnergyType::CAHN_HILLIARD;
+    else if (type_str == "fourth_order")
+      _energy_type = EnergyType::FOURTH_ORDER;
+    else
+      _energy_type = EnergyType::CUSTOM;
+  }
+  else
+    _energy_type = EnergyType::CUSTOM;
+  
+  if (isParamValid("energy_expression"))
+    _energy_expression = getParam<std::string>("energy_expression");
+  
+  if (isParamValid("coupled_variables"))
+  {
+    _coupled_variable_names = getParam<std::vector<VariableName>>("coupled_variables");
+    setupCoupledVariables();
+  }
+  
+  initializeExpression();
+  computeVariationalDerivative();
+}
+
+void
+VariationalKernelBase::initializeExpression()
+{
+  switch (_energy_type)
+  {
+    case EnergyType::DOUBLE_WELL:
+    {
+      auto c = _builder->field(_var.name());
+      _energy_density = _builder->doubleWell(c);
+      break;
+    }
+    
+    case EnergyType::ELASTIC:
+    {
+      auto u = _builder->field(_var.name());
+      auto eps = _builder->strain(_var.name());
+      _energy_density = _builder->elasticEnergy(eps, _elastic_lambda, _elastic_mu);
+      break;
+    }
+    
+    case EnergyType::NEO_HOOKEAN:
+    {
+      auto u = _builder->field(_var.name());
+      auto F = _builder->deformationGradient(_var.name());
+      _energy_density = _builder->neoHookean(F, _elastic_mu, _elastic_lambda);
+      break;
+    }
+    
+    case EnergyType::SURFACE:
+    {
+      auto phi = _builder->field(_var.name());
+      _energy_density = _builder->surfaceEnergy(phi, _surface_energy_coefficient);
+      break;
+    }
+    
+    case EnergyType::CAHN_HILLIARD:
+    {
+      auto c = _builder->field(_var.name());
+      auto grad_c = grad(c, _mesh.dimension());
+      auto bulk = _builder->doubleWell(c);
+      auto gradient = multiply(constant(0.5 * _gradient_coefficient), dot(grad_c, grad_c));
+      _energy_density = add(bulk, gradient);
+      break;
+    }
+    
+    case EnergyType::FOURTH_ORDER:
+    {
+      auto c = _builder->field(_var.name());
+      auto grad_c = grad(c, _mesh.dimension());
+      auto bulk = _builder->doubleWell(c);
+      auto gradient = multiply(constant(0.5 * _gradient_coefficient), dot(grad_c, grad_c));
+      auto fourth = _builder->fourthOrderRegularization(c, _fourth_order_coefficient);
+      _energy_density = add(add(bulk, gradient), fourth);
+      break;
+    }
+    
+    case EnergyType::CUSTOM:
+    {
+      if (!_energy_expression.empty())
+        _energy_density = _builder->parseExpression(_energy_expression);
+      else
+        mooseError("Custom energy type requires energy_expression parameter");
+      break;
+    }
+    
+    default:
+      mooseError("Unknown energy type");
+  }
+}
+
+void
+VariationalKernelBase::computeVariationalDerivative()
+{
+  if (!_energy_density)
+    mooseError("Energy density not initialized");
+  
+  auto contributions = _weak_form_gen->computeContributions(_energy_density, _var.name());
+  
+  _max_derivative_order = contributions.max_order;
+  
+  if (_enable_variable_splitting && _weak_form_gen->requiresVariableSplitting(
+          DifferentiationVisitor(_var.name()).differentiate(_energy_density), _fe_order))
+  {
+    mooseWarning("This problem requires variable splitting for order ", _max_derivative_order,
+                 " derivatives with FE order ", _fe_order);
+  }
+}
+
+void
+VariationalKernelBase::setupCoupledVariables()
+{
+  for (const auto & var_name : _coupled_variable_names)
+  {
+    unsigned int var_num = coupled(var_name);
+    _coupled_var_nums[var_name] = var_num;
+    _coupled_values[var_name] = &coupledValue(var_name);
+    _coupled_gradients[var_name] = &coupledGradient(var_name);
+    
+    if (_fe_order >= 2)
+      _coupled_seconds[var_name] = &coupledSecond(var_name);
+  }
+}
+
+void
+VariationalKernelBase::updateVariableValues(unsigned int qp)
+{
+  _variable_cache.clear();
+  
+  _variable_cache[_var.name()] = MooseValue(_u[qp]);
+  
+  RealVectorValue grad_u(_grad_u[qp]);
+  _variable_cache[_var.name() + "_grad"] = MooseValue(grad_u, _mesh.dimension());
+  
+  for (const auto & [name, value_ptr] : _coupled_values)
+  {
+    _variable_cache[name] = MooseValue((*value_ptr)[qp]);
+    
+    if (_coupled_gradients.count(name))
+    {
+      RealVectorValue grad((*_coupled_gradients[name])[qp]);
+      _variable_cache[name + "_grad"] = MooseValue(grad, _mesh.dimension());
+    }
+  }
+}
+
+Real
+VariationalKernelBase::computeQpResidual()
+{
+  clearCache();
+  updateVariableValues(_qp);
+  
+  Real residual = 0.0;
+  
+  residual += evaluateC0Contribution();
+  
+  residual -= evaluateC1Contribution();
+  
+  if (_max_derivative_order >= 2)
+    residual += evaluateC2Contribution();
+  
+  if (_max_derivative_order >= 3)
+    residual -= evaluateC3Contribution();
+  
+  return residual;
+}
+
+Real
+VariationalKernelBase::computeQpJacobian()
+{
+  if (_compute_jacobian_numerically)
+  {
+    Real u_orig = _u[_qp];
+    
+    _u[_qp] = u_orig + _fd_eps;
+    Real res_plus = computeQpResidual();
+    
+    _u[_qp] = u_orig - _fd_eps;
+    Real res_minus = computeQpResidual();
+    
+    _u[_qp] = u_orig;
+    
+    return (res_plus - res_minus) / (2.0 * _fd_eps) * _phi[_j][_qp];
+  }
+  
+  if (!_use_automatic_differentiation)
+    return Kernel::computeQpJacobian();
+  
+  clearCache();
+  updateVariableValues(_qp);
+  
+  DifferentiationVisitor dv(_var.name());
+  auto residual_expr = _weak_form_gen->generateWeakForm(_energy_density, _var.name());
+  auto jacobian_diff = dv.differentiate(residual_expr);
+  
+  if (jacobian_diff.hasOrder(0))
+  {
+    auto jacobian_expr = jacobian_diff.getCoefficient(0);
+    MooseValue jac_val = evaluateExpression(jacobian_expr);
+    
+    if (jac_val.isScalar())
+      return jac_val.asScalar() * _phi[_j][_qp] * _test[_i][_qp];
+  }
+  
+  return 0.0;
+}
+
+Real
+VariationalKernelBase::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  if (!_use_automatic_differentiation)
+    return 0.0;
+  
+  std::string coupled_var_name;
+  for (const auto & [name, var_num] : _coupled_var_nums)
+  {
+    if (var_num == jvar)
+    {
+      coupled_var_name = name;
+      break;
+    }
+  }
+  
+  if (coupled_var_name.empty())
+    return 0.0;
+  
+  clearCache();
+  updateVariableValues(_qp);
+  
+  DifferentiationVisitor dv(coupled_var_name);
+  auto residual_expr = _weak_form_gen->generateWeakForm(_energy_density, _var.name());
+  auto jacobian_diff = dv.differentiate(residual_expr);
+  
+  if (jacobian_diff.hasOrder(0))
+  {
+    auto jacobian_expr = jacobian_diff.getCoefficient(0);
+    MooseValue jac_val = evaluateExpression(jacobian_expr);
+    
+    if (jac_val.isScalar())
+      return jac_val.asScalar() * _phi[_j][_qp] * _test[_i][_qp];
+  }
+  
+  return 0.0;
+}
+
+Real
+VariationalKernelBase::evaluateC0Contribution()
+{
+  if (!_c0_cache.computed)
+  {
+    DifferentiationVisitor dv(_var.name());
+    auto diff = dv.differentiate(_energy_density);
+    
+    if (diff.hasOrder(0))
+    {
+      auto c0 = diff.getCoefficient(0);
+      _c0_cache.values[_qp] = evaluateExpression(c0);
+    }
+    else
+    {
+      _c0_cache.values[_qp] = MooseValue(0.0);
+    }
+    _c0_cache.computed = true;
+  }
+  
+  if (_c0_cache.values[_qp].isScalar())
+    return _c0_cache.values[_qp].asScalar() * _test[_i][_qp];
+  
+  return 0.0;
+}
+
+Real
+VariationalKernelBase::evaluateC1Contribution()
+{
+  if (!_c1_cache.computed)
+  {
+    DifferentiationVisitor dv(_var.name());
+    auto diff = dv.differentiate(_energy_density);
+    
+    if (diff.hasOrder(1))
+    {
+      auto c1 = diff.getCoefficient(1);
+      _c1_cache.values[_qp] = evaluateExpression(c1);
+    }
+    else
+    {
+      _c1_cache.values[_qp] = MooseValue(RealVectorValue(), _mesh.dimension());
+    }
+    _c1_cache.computed = true;
+  }
+  
+  if (_c1_cache.values[_qp].isVector())
+    return _c1_cache.values[_qp].asVector() * _grad_test[_i][_qp];
+  
+  return 0.0;
+}
+
+Real
+VariationalKernelBase::evaluateC2Contribution()
+{
+  if (!_c2_cache.computed)
+  {
+    DifferentiationVisitor dv(_var.name());
+    auto diff = dv.differentiate(_energy_density);
+    
+    if (diff.hasOrder(2))
+    {
+      auto c2 = diff.getCoefficient(2);
+      _c2_cache.values[_qp] = evaluateExpression(c2);
+    }
+    else
+    {
+      _c2_cache.values[_qp] = MooseValue(RankTwoTensor(), _mesh.dimension());
+    }
+    _c2_cache.computed = true;
+  }
+  
+  if (_c2_cache.values[_qp].isTensor() && _fe_order >= 2)
+  {
+    return 0.0;
+  }
+  
+  return 0.0;
+}
+
+Real
+VariationalKernelBase::evaluateC3Contribution()
+{
+  return 0.0;
+}
+
+MooseValue
+VariationalKernelBase::evaluateExpression(const NodePtr & expr)
+{
+  return evaluateAtQP(expr, _qp);
+}
+
+MooseValue
+VariationalKernelBase::evaluateAtQP(const NodePtr & expr, unsigned int qp)
+{
+  if (!expr)
+    return MooseValue(0.0);
+  
+  switch (expr->type())
+  {
+    case NodeType::Constant:
+    {
+      auto const_node = std::static_pointer_cast<ConstantNode>(expr);
+      return const_node->value();
+    }
+    
+    case NodeType::FieldVariable:
+    {
+      auto field_node = std::static_pointer_cast<FieldVariableNode>(expr);
+      std::string name = field_node->name();
+      
+      if (_variable_cache.count(name))
+        return _variable_cache[name];
+      
+      if (name == _var.name())
+        return MooseValue(_u[qp]);
+      
+      if (_coupled_values.count(name))
+        return MooseValue((*_coupled_values[name])[qp]);
+      
+      mooseError("Unknown field variable: ", name);
+    }
+    
+    case NodeType::Add:
+    {
+      auto binary = std::static_pointer_cast<BinaryOpNode>(expr);
+      auto left_val = evaluateAtQP(binary->left(), qp);
+      auto right_val = evaluateAtQP(binary->right(), qp);
+      return left_val + right_val;
+    }
+    
+    case NodeType::Subtract:
+    {
+      auto binary = std::static_pointer_cast<BinaryOpNode>(expr);
+      auto left_val = evaluateAtQP(binary->left(), qp);
+      auto right_val = evaluateAtQP(binary->right(), qp);
+      return left_val - right_val;
+    }
+    
+    case NodeType::Multiply:
+    {
+      auto binary = std::static_pointer_cast<BinaryOpNode>(expr);
+      auto left_val = evaluateAtQP(binary->left(), qp);
+      auto right_val = evaluateAtQP(binary->right(), qp);
+      return left_val * right_val;
+    }
+    
+    case NodeType::Gradient:
+    {
+      auto unary = std::static_pointer_cast<UnaryOpNode>(expr);
+      auto operand = unary->operand();
+      
+      if (operand->type() == NodeType::FieldVariable)
+      {
+        auto field_node = std::static_pointer_cast<FieldVariableNode>(operand);
+        std::string name = field_node->name();
+        
+        if (_variable_cache.count(name + "_grad"))
+          return _variable_cache[name + "_grad"];
+        
+        if (name == _var.name())
+          return MooseValue(RealVectorValue(_grad_u[qp]), _mesh.dimension());
+        
+        if (_coupled_gradients.count(name))
+          return MooseValue(RealVectorValue((*_coupled_gradients[name])[qp]), _mesh.dimension());
+      }
+      
+      mooseError("Cannot evaluate gradient of non-field variable");
+    }
+    
+    case NodeType::Dot:
+    {
+      auto binary = std::static_pointer_cast<BinaryOpNode>(expr);
+      auto left_val = evaluateAtQP(binary->left(), qp);
+      auto right_val = evaluateAtQP(binary->right(), qp);
+      return dot(left_val, right_val);
+    }
+    
+    case NodeType::Norm:
+    {
+      auto unary = std::static_pointer_cast<UnaryOpNode>(expr);
+      auto operand_val = evaluateAtQP(unary->operand(), qp);
+      return norm(operand_val);
+    }
+    
+    case NodeType::Function:
+    {
+      auto func_node = std::static_pointer_cast<FunctionNode>(expr);
+      
+      if (func_node->name() == "dW_dc" && func_node->args().size() == 1)
+      {
+        auto c_val = evaluateAtQP(func_node->args()[0], qp);
+        if (c_val.isScalar())
+        {
+          Real c = c_val.asScalar();
+          Real dW = 4.0 * c * (c * c - 1.0);
+          return MooseValue(dW);
+        }
+      }
+      
+      mooseError("Unknown function: ", func_node->name());
+    }
+    
+    default:
+      mooseError("Cannot evaluate expression type: ", expr->toString());
+  }
+}
+
+}
+}
