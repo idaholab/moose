@@ -1,3 +1,5 @@
+AD = ''
+
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
@@ -19,12 +21,12 @@
 
 [Kernels]
   [convection]
-    type = ADConservativeAdvection
+    type = ${AD}ConservativeAdvection
     variable = u
-    velocity = 'velocity'
+    velocity_material = '${AD}velocity'
   []
   [diffusion]
-    type = MatDiffusion
+    type = ${AD}MatDiffusion
     variable = u
     diffusivity = 1
   []
@@ -34,10 +36,10 @@
   [convection]
     type = ADDGAdvection
     variable = u
-    velocity = 'velocity'
+    velocity = 'ADvelocity'
   []
   [diffusion]
-    type = DGDiffusion
+    type = ${AD}DGDiffusion
     variable = u
     sigma = 6
     epsilon = -1
@@ -63,24 +65,30 @@
     diff = 1
   []
   [u_in]
-    type = ADConservativeAdvectionBC
+    type = ${AD}ConservativeAdvectionBC
     boundary = 'left'
     variable = u
     velocity_function = v_inlet
     primal_dirichlet_value = 1
   []
   [u_out]
-    type = ADConservativeAdvectionBC
+    type = ${AD}ConservativeAdvectionBC
     boundary = 'right'
     variable = u
-    velocity_mat_prop = 'velocity'
+    velocity_mat_prop = '${AD}velocity'
   []
 []
 
 [Materials]
   [vel]
-    type = ADVectorFromComponentVariablesMaterial
+    type = VectorFromComponentVariablesMaterial
     vector_prop_name = 'velocity'
+    u = 1
+    v = 0
+  []
+  [advel]
+    type = ADVectorFromComponentVariablesMaterial
+    vector_prop_name = 'ADvelocity'
     u = 1
     v = 0
   []
