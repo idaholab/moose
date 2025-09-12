@@ -297,14 +297,13 @@ Factory::associateNameToClass(const std::string & name, const std::string & clas
   _name_to_class[name] = class_name;
 }
 
-std::string
+const std::string &
 Factory::associatedClassName(const std::string & name) const
 {
-  auto it = _name_to_class.find(name);
-  if (it == _name_to_class.end())
-    return "";
-  else
+  if (const auto it = _name_to_class.find(name); it != _name_to_class.end())
     return it->second;
+  static const std::string empty;
+  return empty;
 }
 
 InputParameters &

@@ -1514,42 +1514,39 @@ MooseApp::setupOptions()
   }
   else if (getParam<bool>("dump") || isParamSetByUser("dump_search"))
   {
-    const std::string search =
-        isParamSetByUser("dump_search") ? getParam<std::string>("dump_search") : "";
+    std::optional<std::string> search;
+    if (isParamSetByUser("dump_search"))
+      search = getParam<std::string>("dump_search");
 
-    JsonSyntaxTree tree(search);
+    _perf_graph.disableLivePrint();
 
-    {
-      TIME_SECTION("dump", 1, "Building Syntax Tree");
-      _builder.buildJsonSyntaxTree(tree);
-    }
+    JsonSyntaxTree tree(_syntax, _action_factory, _factory, search);
+    const auto root = tree.build();
 
-    // Check if second arg is valid or not
-    if ((tree.getRoot()).is_object())
-    {
-      // Turn off live printing so that it doesn't mess with the dump
-      _perf_graph.disableLivePrint();
+    if (search && !root.is_object())
+      paramError("dump_search",
+                 "Search parameter '",
+                 *search,
+                 "' was not found in the registered syntax.");
 
-      JsonInputFileFormatter formatter;
-      Moose::out << "\n### START DUMP DATA ###\n"
-                 << formatter.toString(tree.getRoot()) << "\n### END DUMP DATA ###" << std::endl;
-      _early_exit_param = "--dump";
-      _ready_to_exit = true;
-    }
-    else
-      mooseError("Search parameter '", search, "' was not found in the registered syntax.");
+    JsonInputFileFormatter formatter;
+    Moose::out << "\n### START DUMP DATA ###\n"
+               << formatter.toString(root) << "\n### END DUMP DATA ###" << std::endl;
+    _early_exit_param = "--dump";
+    _ready_to_exit = true;
   }
   else if (getParam<bool>("json") || isParamSetByUser("json_search"))
   {
-    const std::string search =
-        isParamSetByUser("json_search") ? getParam<std::string>("json_search") : "";
+    std::optional<std::string> search;
+    if (isParamSetByUser("json_search"))
+      search = getParam<std::string>("json_search");
+
     _perf_graph.disableLivePrint();
 
-    JsonSyntaxTree tree(search);
-    _builder.buildJsonSyntaxTree(tree);
+    JsonSyntaxTree tree(_syntax, _action_factory, _factory, search);
+    const auto root = tree.build();
 
-    outputMachineReadableData(
-        "json", "**START JSON DATA**\n", "\n**END JSON DATA**", tree.getRoot().dump(2));
+    outputMachineReadableData("json", "**START JSON DATA**\n", "\n**END JSON DATA**", root.dump(2));
     _early_exit_param = "--json";
     _ready_to_exit = true;
   }

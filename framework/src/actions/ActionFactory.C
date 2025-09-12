@@ -91,35 +91,32 @@ ActionFactory::create(const std::string & action,
 }
 
 InputParameters
-ActionFactory::getValidParams(const std::string & name)
+ActionFactory::getValidParams(const std::string & name) const
 {
   /**
    * If an Action is registered more than once, it'll appear in the _name_to_build_info data
    * structure multiple times.  The actual parameters function remains the same however
    * so we can safely use the first instance
    */
-  ActionFactory::iterator iter = _name_to_build_info.find(name);
-
-  if (iter == _name_to_build_info.end())
+  const auto it = _name_to_build_info.find(name);
+  if (it == _name_to_build_info.end())
     mooseError(std::string("A '") + name + "' is not a registered Action\n\n");
 
-  InputParameters params = iter->second._obj_pointer->buildParameters();
+  InputParameters params = it->second._obj_pointer->buildParameters();
   params.addPrivateParam(MooseBase::app_param, &_app);
   params.addPrivateParam<ActionWarehouse *>("awh", &_app.actionWarehouse());
 
   return params;
 }
 
-std::string
-ActionFactory::getTaskName(const std::string & action)
+const std::string &
+ActionFactory::getTaskName(const std::string & action) const
 {
   // We are returning only the first found instance here
-  std::multimap<std::string, BuildInfo>::iterator iter = _name_to_build_info.find(action);
-
-  if (iter != _name_to_build_info.end())
-    return iter->second._task;
-  else
-    return "";
+  if (const auto it = _name_to_build_info.find(action); it != _name_to_build_info.end())
+    return it->second._task;
+  static const std::string empty;
+  return empty;
 }
 
 ActionFactory::iterator

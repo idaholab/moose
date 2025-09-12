@@ -11,7 +11,6 @@
 #include "InputParameters.h"
 #include "ActionFactory.h"
 #include "Action.h"
-#include "Factory.h"
 #include "Parser.h"
 #include "MooseObjectAction.h"
 #include "AddActionComponentAction.h"
@@ -23,11 +22,9 @@
 #include "InputFileFormatter.h"
 #include "MooseTypes.h"
 #include "CommandLine.h"
-#include "JsonSyntaxTree.h"
 #include "Syntax.h"
 #include "ParameterExtraction.h"
 #include "ParseUtils.h"
-#include "AppFactory.h"
 
 #include "libmesh/parallel.h"
 #include "libmesh/fparser.hh"
@@ -106,7 +103,6 @@ findSimilar(const std::string & param, const std::vector<std::string> & options)
 Builder::Builder(MooseApp & app, ActionWarehouse & action_wh, Parser & parser)
   : ConsoleStreamInterface(app),
     _app(app),
-    _factory(app.getFactory()),
     _action_wh(action_wh),
     _action_factory(app.getActionFactory()),
     _syntax(_action_wh.syntax()),
@@ -402,195 +398,6 @@ Builder::errorCheck(const Parallel::Communicator & comm, bool warn_unused, bool 
             "\n\nAppend --allow-unused (or -w) on the command line to ignore unused parameters.");
     }
   }
-}
-
-void
-Builder::buildJsonSyntaxTree(JsonSyntaxTree & root) const
-{
-  // Add syntax types
-  for (const auto & iter : _syntax.getAssociatedTypes())
-    root.addSyntaxType(iter.first, iter.second);
-
-  // Build a list of all the actions appearing in the syntax
-  const auto & associated_actions = _syntax.getAssociatedActions();
-  std::vector<std::pair<std::string, Syntax::ActionInfo>> all_names(associated_actions.begin(),
-                                                                    associated_actions.end());
-  // If the task is empty, that means we need to figure out which task
-  // goes with this syntax for the purpose of building the MooseObject
-  // part of the tree; query the ActionFactory for the registration info
-  for (auto & name_act_info_pair : all_names)
-  {
-    auto & act_info = name_act_info_pair.second;
-    if (act_info._task == "")
-      act_info._task = _action_factory.getTaskName(act_info._action);
-  }
-
-  // Build a cache of registered objects (with a base) to their parameters.
-  // The action loop that follows below will search for objects that match
-  // an action's syntax, which requires knowing all object params for each
-  // action and we don't want to rebuild the params every time
-  std::vector<std::pair<std::string, const InputParameters>> object_params;
-  const auto & objects = _factory.registeredObjects();
-  object_params.reserve(objects.size());
-  for (const auto & [type, entry_ptr] : _factory.registeredObjects())
-  {
-    auto params = entry_ptr->buildParameters();
-    if (params.hasBase())
-    {
-      params.set<std::string>("type") = type;
-      object_params.emplace_back(type, std::move(params));
-    }
-  }
-
-  // Add all the actions to the JSON tree, except for ActionComponents (below)
-  for (const auto & [syntax, act_info] : all_names)
-  {
-    const std::string & action = act_info._action;
-    const std::string & task = act_info._task;
-    const auto action_obj_params = _action_factory.getValidParams(action);
-    const bool params_added = root.addParameters("",
-                                                 syntax,
-                                                 false,
-                                                 action,
-                                                 true,
-                                                 action_obj_params,
-                                                 _syntax.getLineInfo(syntax, action, ""),
-                                                 "");
-
-    if (params_added)
-    {
-      const auto tasks = _action_factory.getTasksByAction(action);
-      for (const auto & t : tasks)
-      {
-        const auto info = _action_factory.getLineInfo(action, t);
-        root.addActionTask(syntax, action, t, info);
-      }
-    }
-
-    // If this action is a MooseObject action, we will loop over all of the
-    // registered MooseObjects and will add those that have associated
-    // bases matching the current task
-    if (action_obj_params.have_parameter<bool>("isObjectAction") &&
-        action_obj_params.get<bool>("isObjectAction"))
-    {
-      for (const auto & [moose_obj_name, moose_obj_params] : object_params)
-      {
-        // Now that we know that this is a MooseObjectAction we need to see if it has been
-        // restricted in any way by the user.
-        const auto & buildable_types = action_obj_params.getBuildableTypes();
-
-        // See if the current Moose Object syntax belongs under this Action's block
-        if ((buildable_types.empty() || // Not restricted
-             std::find(buildable_types.begin(), buildable_types.end(), moose_obj_name) !=
-                 buildable_types.end()) && // Restricted but found
-            _syntax.verifyMooseObjectTask(moose_obj_params.getBase(),
-                                          task) &&          // and that base is associated
-            action_obj_params.mooseObjectSyntaxVisibility() // and the Action says it's visible
-        )
-        {
-          std::string name;
-          size_t pos = 0;
-          bool is_action_params = false;
-          bool is_type = false;
-          if (syntax[syntax.size() - 1] == '*')
-          {
-            pos = syntax.size();
-
-            if (!action_obj_params.collapseSyntaxNesting())
-              name = syntax.substr(0, pos - 1) + moose_obj_name;
-            else
-            {
-              name = syntax.substr(0, pos - 1) + "/<type>/" + moose_obj_name;
-              is_action_params = true;
-            }
-          }
-          else
-          {
-            name = syntax + "/<type>/" + moose_obj_name;
-            is_type = true;
-          }
-
-          root.addParameters(syntax,
-                             name,
-                             is_type,
-                             moose_obj_name,
-                             is_action_params,
-                             moose_obj_params,
-                             _factory.getLineInfo(moose_obj_name),
-                             _factory.associatedClassName(moose_obj_name));
-        }
-      }
-
-      // Same thing for ActionComponents, which, while they are not MooseObjects, should behave
-      // similarly syntax-wise
-      if (syntax != "ActionComponents/*")
-        continue;
-
-      const auto its = _action_factory.getActionsByTask("list_component");
-      for (const auto & task_action_pair : as_range(its.first, its.second))
-      {
-        // Get the name and parameters
-        const auto & component_name = task_action_pair.second;
-        auto component_params = _action_factory.getValidParams(component_name);
-
-        // We currently do not have build-type restrictions on this action that adds
-        // action-components
-
-        // See if the current Moose Object syntax belongs under this Action's block
-        // and it is visible
-        if (action_obj_params.mooseObjectSyntaxVisibility())
-        {
-          // The logic for Components is a little simpler here for now because syntax like
-          // Executioner/TimeIntegrator/type= do not exist for components
-          std::string name;
-          if (syntax[syntax.size() - 1] == '*')
-          {
-            size_t pos = syntax.size();
-            name = syntax.substr(0, pos - 1) + component_name;
-          }
-          component_params.set<std::string>("type") = component_name;
-
-          // We add the parameters as for an object, because we want to fit them to be
-          // added to json["AddActionComponentAction"]["subblock_types"]
-          root.addParameters(syntax,
-                             /*syntax_path*/ name,
-                             /*is_type*/ false,
-                             "AddActionComponentAction",
-                             /*is_action=*/false,
-                             component_params,
-                             _action_factory.getLineInfo(component_name, "list_component"),
-                             component_name);
-        }
-      }
-    }
-  }
-
-  // Helper for adding an application's params
-  const auto add_app_params = [&root](const std::string & type,
-                                      InputParameters params,
-                                      const std::string & file,
-                                      const int line)
-  {
-    params.set<std::string>("type") = type;
-    root.addParameters("Application",
-                       "Application/<type>/" + type,
-                       true,
-                       type,
-                       false,
-                       params,
-                       FileLineInfo(file, line),
-                       "");
-  };
-
-  // Add registered applications to blocks/Application/types
-  for (const auto & [type, build_info] : AppFactory::instance().registeredObjectBuildInfos())
-    add_app_params(type, build_info->buildParameters(), build_info->file, build_info->line);
-  // Even though MooseApp isn't a registered object, it is useful to
-  // reference its parameters
-  add_app_params("MooseApp", MooseApp::validParams(), "", 0);
-
-  // Add "global" entries (parameters and registered_apps)
-  root.addGlobal();
 }
 
 void
