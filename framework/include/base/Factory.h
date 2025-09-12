@@ -52,7 +52,7 @@ public:
    * This will return an empty string if the name was not previously
    * associated with a class name via associateNameToClass()
    */
-  std::string associatedClassName(const std::string & name) const;
+  const std::string & associatedClassName(const std::string & name) const;
 
   /**
    * Get valid parameters for the object
