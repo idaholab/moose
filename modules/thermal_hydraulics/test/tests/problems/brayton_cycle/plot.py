@@ -4,7 +4,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from math import pi
-from thm_utilities import readCSVFile
+from moose_thm.thm_utilities import readCSVFile
 
 open_cycle = True
 

@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from thm_utilities import readCSVFile
+from moose_thm.thm_utilities import readCSVFile
 
 data_with = readCSVFile('with_junction_vpp_FINAL.csv')
 data_without = readCSVFile('without_junction_vpp_FINAL.csv')

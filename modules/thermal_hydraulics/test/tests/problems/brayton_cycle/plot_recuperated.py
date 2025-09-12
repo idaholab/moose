@@ -3,7 +3,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from math import pi
-from thm_utilities import readCSVFile
+from moose_thm.thm_utilities import readCSVFile
 
 data_file = 'recuperated_brayton_cycle.csv'
 suffix = '_recuperated.png'
