@@ -80,6 +80,9 @@ public:
    */
   static std::string basicCppType(const std::string & cpp_type);
 
+  static std::string
+  buildOutputString(const std::iterator_traits<InputParameters::iterator>::value_type & p);
+
 protected:
   std::string buildOptions(const std::iterator_traits<InputParameters::iterator>::value_type & p,
                            bool & out_of_range_allowed,
@@ -88,8 +91,6 @@ protected:
   size_t
   setParams(const InputParameters & params, const bool search_match, nlohmann::json & all_params);
 
-  static std::string
-  buildOutputString(const std::iterator_traits<InputParameters::iterator>::value_type & p);
   static std::vector<std::string> splitPath(const std::string & path);
   nlohmann::json & getJson(const std::string & parent, const std::string & path, bool is_type);
   nlohmann::json & getJson(const std::string & path);
@@ -104,7 +105,4 @@ protected:
   std::map<std::string, std::pair<std::string, std::string>> _action_label_map;
   std::map<std::string, std::pair<std::string, std::string>> _object_label_map;
   ///@}
-
-  // Allow the MooseServer class to use protected static convenience methods
-  friend class MooseServer;
 };
