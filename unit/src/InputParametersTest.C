@@ -676,6 +676,7 @@ TEST(InputParametersTest, fileNames)
 TEST(InputParametersTest, alphaCommandLineParamSwitch)
 {
   InputParameters params = emptyInputParameters();
+  params.allowCommandLineParams({});
   Moose::UnitUtils::assertThrows<MooseRuntimeError>(
       [&params]() { params.addCommandLineParam<bool>("1value", "--1value", "Doc"); },
       "The switch '--1value' for the command line parameter '1value' is invalid. It must begin "
@@ -707,14 +708,24 @@ TEST(InputParametersTest, commandLineParamSetNotCLParam)
   InputParameters params = emptyInputParameters();
   params.addParam<std::string>("param", "Doc");
   Moose::UnitUtils::assertThrows<MooseRuntimeError>(
-      [&params]() { params.commandLineParamSet("param", {}); },
+      [&params]() { params.commandLineParamSet("param", "unused", nullptr, {}); },
       "InputParameters::commandLineParamSet: The parameter 'param' is not a command line "
       "parameter");
+}
+
+TEST(InputParametersTest, commandLineParamFullpath)
+{
+  InputParameters params = emptyInputParameters();
+  params.allowCommandLineParams({});
+  params.addCommandLineParam<bool>("foo", "--foo", "doc");
+  params.commandLineParamSet("foo", "--foo", nullptr, {});
+  ASSERT_EQ(params.paramFullpath("foo"), "--foo");
 }
 
 TEST(InputParametersTest, isCommandLineParameter)
 {
   InputParameters params = emptyInputParameters();
+  params.allowCommandLineParams({});
   params.addCommandLineParam<std::string>("cliparam", "--cliparam", "Doc");
   params.addParam<std::string>("noncliparam", "Doc");
 
@@ -740,6 +751,7 @@ TEST(InputParametersTest, commandLineParamKnownArg)
 
   // Adding these arguments should call back to libMesh::add_command_line_name
   InputParameters params = emptyInputParameters();
+  params.allowCommandLineParams({});
   const auto combined_switches = MooseUtils::stringJoin(switches, " ");
   params.addCommandLineParam<std::string>("foo", combined_switches, "Doc");
 
@@ -774,4 +786,13 @@ TEST(InputParametersTest, queryAndGetObjectType)
   ASSERT_NE(type_ptr, nullptr);
   ASSERT_EQ(*type_ptr, object_type);
   ASSERT_EQ(params.getObjectType(), *type_ptr);
+}
+
+TEST(InputParametersTest, addCommandLineParamNotEnabled)
+{
+  InputParameters params = emptyInputParameters();
+  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
+      [&params]() { params.addCommandLineParam<bool>("foo", "--foo", "doc"); },
+      "While adding command line parameter 'foo': Command line parameters are not enabled for this "
+      "object.");
 }

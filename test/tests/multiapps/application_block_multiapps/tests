@@ -1,6 +1,6 @@
 [Tests]
   issues = '#26474'
-  design = 'syntax/Application/index.md CreateApplicationBlockAction.md'
+  design = 'syntax/Application/index.md'
 
   [no_application_block]
     type = 'RunApp'

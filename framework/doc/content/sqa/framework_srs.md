@@ -157,8 +157,6 @@ there are a few other modes that can be triggered with various command line flag
 | `--yaml` | Output all object descriptions and available parameters in YAML format |
 | `--json` | Output all object descriptions and available parameters in JSON format |
 | `--syntax` | Output all registered syntax |
-| `--registry` | Output all known objects and actions |
-| `--registry-hit` | Output all known objects and actions in HIT format |
 | `--mesh-only` (implies -i flag) | Run only the mesh related tasks and output the final mesh that would be used for the simulation |
 | `--start-in-debugger <debugger>` | Start the simulation attached to the supplied debugger |
 

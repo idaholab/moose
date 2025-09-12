@@ -28,7 +28,7 @@
   [get_meta_data_error_check]
     type = RunException
     input = 'mesh_meta_data_store.i'
-    cli_args = '--test_getRestartableDataMap_error'
+    cli_args = 'Application/test_getrestartabledatamap_error=true'
 
     expect_err = "Unable to find RestartableDataMap object for the supplied name"
     requirement = "The system shall report an error if a invalid identifier is supplied when attempting to retrieve a restart meta data object."

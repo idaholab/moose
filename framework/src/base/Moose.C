@@ -564,7 +564,7 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("AddConvergenceAction", "Convergence/*");
   syntax.registerSyntaxType("Convergence/*", "ConvergenceName");
 
-  registerSyntax("GlobalParamsAction", "GlobalParams");
+  registerSyntax("GlobalParamsAction", global_params_syntax);
 
   registerSyntax("AddDistributionAction", "Distributions/*");
   syntax.registerSyntaxType("Distributions/*", "DistributionName");
@@ -710,9 +710,6 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 
   registerSyntax("ProjectedStatefulMaterialStorageAction", "ProjectedStatefulMaterialStorage/*");
 
-  // Application Block System
-  registerSyntax("CreateApplicationBlockAction", "Application");
-
 #ifdef MOOSE_MFEM_ENABLED
   registerSyntaxTask("AddMFEMSubMeshAction", "SubMeshes/*", "add_mfem_submeshes");
   registerSyntaxTask("AddMFEMFESpaceAction", "FESpaces/*", "add_mfem_fespaces");
@@ -763,6 +760,8 @@ setColorConsole(bool use_color, bool force)
   return _color_console;
 }
 
+ScopedThrowOnError::ScopedThrowOnError() : ScopedThrowOnError(true) {}
+
 ScopedThrowOnError::ScopedThrowOnError(const bool throw_on_error)
   : _throw_on_error_before(Moose::_throw_on_error)
 {
@@ -770,20 +769,34 @@ ScopedThrowOnError::ScopedThrowOnError(const bool throw_on_error)
   Moose::_throw_on_error = throw_on_error;
 }
 
-ScopedThrowOnError::ScopedThrowOnError() : ScopedThrowOnError(true) {}
-
 ScopedThrowOnError::~ScopedThrowOnError() { Moose::_throw_on_error = _throw_on_error_before; }
 
-std::string
-hitMessagePrefix(const hit::Node & node)
+ScopedHideTrace::ScopedHideTrace() : _show_trace_before(Moose::show_trace)
 {
-  // Strip meaningless line and column number for CLI args
-  if (node.filename() == "CLI_ARGS")
-    return "CLI_ARGS:\n";
+  mooseAssert(!libMesh::Threads::in_threads, "Cannot be used in threads");
+  Moose::show_trace = true;
+}
+
+ScopedHideTrace::~ScopedHideTrace() { Moose::show_trace = _show_trace_before; }
+
+std::optional<std::string>
+hitMessagePrefix(const hit::Node & node, const bool fullpath /* = false */)
+{
+  if (!node.getNodeView().node_pool())
+    return {};
   // If using the root node, don't add line info
   if (node.isRoot())
-    return node.filename() + ":\n";
-  return node.fileLocation() + ":\n";
+    return node.filename() + ":";
+  // Strip meaningless line and column number for CLI args
+  // and add fullpath for context (if requested)
+  if (node.filename() == Moose::hit_command_line_filename)
+  {
+    auto prefix = node.filename() + ":";
+    if (fullpath)
+      prefix += node.fullpath() + ":";
+    return prefix;
+  }
+  return node.fileLocation() + ":";
 }
 
 bool _warnings_are_errors = false;

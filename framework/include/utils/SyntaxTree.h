@@ -16,20 +16,19 @@
 #include <set>
 #include <string>
 
-// Forward declarations
 class InputParameters;
 class SyntaxTree;
 
 class SyntaxTree : public SyntaxFormatterInterface
 {
 public:
-  SyntaxTree(bool use_long_names = false);
-  virtual ~SyntaxTree();
+  SyntaxTree(const bool use_long_names = false);
+  virtual ~SyntaxTree() = default;
 
-  void insertNode(std::string syntax,
+  void insertNode(const std::string & syntax,
                   const std::string & action,
-                  bool is_action_params = true,
-                  InputParameters * params = NULL);
+                  const bool is_action_params,
+                  const InputParameters & params);
 
   std::string print(const std::string & search_string);
 
@@ -43,38 +42,39 @@ protected:
   class TreeNode
   {
   public:
+    TreeNode(SyntaxTree & syntax_tree);
     TreeNode(const std::string & name,
              SyntaxTree & syntax_tree,
-             const std::string * action = NULL,
-             InputParameters * params = NULL,
-             TreeNode * parent = NULL);
-    ~TreeNode();
+             const std::string * const action,
+             const InputParameters & params,
+             const TreeNode & parent);
+    ~TreeNode() = default;
 
-    void insertNode(std::string & syntax,
+    void insertNode(std::string syntax,
                     const std::string & action,
-                    bool is_action_params = true,
-                    InputParameters * params = NULL);
-    std::string print(short depth, const std::string & search_string, bool & found);
+                    const bool is_action_params,
+                    const InputParameters & params);
+    std::string print(const short depth, const std::string & search_string, bool & found);
 
-    std::string getLongName(const std::string & delim = "/") const;
+    std::string getLongName() const;
 
   protected:
     void insertParams(const std::string & action,
-                      bool is_action_params,
-                      InputParameters * params = NULL);
+                      const bool is_action_params,
+                      const InputParameters & params);
 
     std::map<std::string, std::unique_ptr<TreeNode>> _children;
     std::multimap<std::string, std::unique_ptr<InputParameters>> _action_params;
     std::multimap<std::string, std::unique_ptr<InputParameters>> _moose_object_params;
-    std::string _name;
-    TreeNode * _parent;
+    const std::string _name;
+    const TreeNode * const _parent;
     SyntaxTree & _syntax_tree;
   };
 
   bool isLongNames() const;
 
   std::unique_ptr<TreeNode> _root;
-  bool _use_long_names;
+  const bool _use_long_names;
 
 private:
   std::set<std::string> _params_printed;
