@@ -31,6 +31,8 @@ GeometricSearchInterface::validParams()
       "may be necessary to accurately detect gaps, contact, or penetration on any "
       "boundaries whose elements are not connected via shared nodes. ");
 
+  params.addParamNamesToGroup("search_using_point_locator", "Geometric search");
+
   return params;
 }
 
