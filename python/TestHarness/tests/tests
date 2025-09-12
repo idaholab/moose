@@ -322,4 +322,10 @@
     requirement = 'The system shall provide the ability to set whether or not a test can run using the capabilities system using properties of the currently running test suite.'
     issues = '#31135'
   []
+  [append_pythonpath]
+    type = PythonUnitTest
+    input = test_append_pythonpath.py
+    requirement = 'The system shall be able to import python utilities when running tests.'
+    issues = '#31457'
+  []
 []
