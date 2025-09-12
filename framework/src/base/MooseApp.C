@@ -177,10 +177,12 @@ MooseApp::validParams()
   /* Command line: Debugging                                                     */
   /*******************************************************************************/
 
-  params.addCommandLineParam<std::string>(
+  const MooseEnum debuggers("lldb gdb");
+  params.addCommandLineParam<MooseEnum>(
       "start_in_debugger",
-      "--start-in-debugger <debugger>",
-      "Start the application and attach a debugger; launch xterm windows using <debugger>");
+      "--start-in-debugger <lldb|gdb>",
+      debuggers,
+      "Start the application and attach a debugger; launch xterm windows using <lldb|gdb>");
 
   params.addCommandLineParam<unsigned int>(
       "stop_for_debugger",
@@ -830,13 +832,8 @@ MooseApp::MooseApp(const InputParameters & parameters)
 
   if (isParamSetByUser("start_in_debugger") && isUltimateMaster())
   {
-    auto command = getParam<std::string>("start_in_debugger");
-
-    Moose::out << "Starting in debugger using: " << command << std::endl;
-
-    auto hostname = MooseUtils::hostname();
-
-    std::stringstream command_stream;
+    const auto debugger = MooseUtils::toLower(getParam<MooseEnum>("start_in_debugger"));
+    Moose::out << "Starting in debugger using: " << debugger << std::endl;
 
     // This will start XTerm and print out some info first... then run the debugger
     command_stream << "xterm -e \"echo 'Rank: " << processor_id() << "  Hostname: " << hostname
