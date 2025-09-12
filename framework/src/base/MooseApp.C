@@ -823,10 +823,9 @@ MooseApp::MooseApp(const InputParameters & parameters)
 
   _perf_graph.enableLivePrint();
 
-  if (_check_input && isParamSetByUser("recover"))
-    paramError("check_input",
-               "Cannot be used with '" + _pars.paramFullpath("recover") +
-                   "'; recover files might not exist");
+  requireExclusiveParams("check_input", "recover", "recover files might not exist");
+  requireExclusiveParams("test_restep", "test_checkpoint_half_transient");
+  requireExclusiveParams("trap_fpe", "no_trap_fpe");
 
   if (isParamSetByUser("start_in_debugger") && isUltimateMaster())
   {
@@ -906,11 +905,6 @@ MooseApp::MooseApp(const InputParameters & parameters)
                     "Remove said parameter in ",
                     name(),
                     " to remove this deprecation warning.");
-
-  if (_test_restep && _test_checkpoint_half_transient)
-    paramError("test_restep",
-               "Cannot be used with '" + _pars.paramFullpath("test_checkpoint_half_transient") +
-                   "'");
 
   registerCapabilities();
 
@@ -1437,8 +1431,6 @@ MooseApp::setupOptions()
   {
     _trap_fpe = true;
     _perf_graph.setActive(false);
-    if (getParam<bool>("no_trap_fpe"))
-      paramError("no_trap_fpe", "Cannot be used with '" + _pars.paramFullpath("trap_fpe") + "'");
   }
   else if (getParam<bool>("no_trap_fpe"))
     _trap_fpe = false;
