@@ -11,13 +11,13 @@ Before reading this documentation, consider reading the following materials firs
 !alert note
 Kokkos-MOOSE materials do not support automatic differention yet.
 
-A Kokkos-MOOSE material can be created by subclassing `Moose::Kokkos::Material` in the same Curiosuly Recurring Template Pattern (CRTP) described in the [Kokkos Kernels System](syntax/KokkosKernels/index.md). The hook method for material property computation, which used to be:
+A Kokkos-MOOSE material can be created by subclassing `Moose::Kokkos::Material`. Note that it should now be registered with `registerKokkosMaterial()` instead of `registerMooseObject()`. The hook method for material property computation, which used to be:
 
 ```cpp
 virtual void computeQpProperties() override;
 ```
 
-in the original MOOSE materials, is now defined as a +public+ method with the following signature:
+in the original MOOSE materials, is now defined as a +*inlined public*+ method with the following signature:
 
 ```cpp
 KOKKOS_FUNCTION void computeQpProperties(const unsigned int qp, Datum & datum) const;
@@ -28,7 +28,7 @@ Other than the hook method definition, the Kokkos-MOOSE materials have several n
 - `declareKokkosProperty<type, dimension>(name, dims)`, and
 - `getKokkosMaterialProperty<type, dimension, state>(name)`,
 
-respectively. Unlike in the original MOOSE materials where the `type` can be any valid C++ type, Kokkos-MOOSE materials require it to be a +trivial type+. Namely, it should not contain any virtual functions, dynamically allocated member variables, user-defined constructors, and other member variables of non-trivial types. While the code will not prevent using non-trivial types, it is your responsibility to understand the implications of using them and to make them behave properly. For instance, using a class with a user-defined constructor will have to be manually initialized as it is not called automatically upon allocation. Same applies to a class with in-class member initialization, which is equivalent to having a user-defined constructor. Using a class with dynamic allocations will [incur a significant performance hit](syntax/Kokkos/index.md#kokkos_dynamic_allocation) and will break when it is used for stateful material properties.
+respectively. Unlike in the original MOOSE materials where the `type` can be any valid C++ type, Kokkos-MOOSE materials require it to be a +*trivial type*+. Namely, it should not contain any virtual functions, dynamically allocated member variables, user-defined constructors, and other member variables of non-trivial types. While the code will not prevent using non-trivial types, it is your responsibility to understand the implications of using them and to make them behave properly. For instance, using a class with a user-defined constructor will have to be manually initialized as it is not called automatically upon allocation. Same applies to a class with in-class member initialization, which is equivalent to having a user-defined constructor. Using a class with dynamic allocations will [incur a significant performance hit](syntax/Kokkos/index.md#kokkos_dynamic_allocation) and will break when it is used for stateful material properties.
 
 Instead, the material properties in Kokkos-MOOSE can be multi-dimensional to partially support the needs for dynamically-sized material properties. The dimension is provided as the second template argument `dimension`, which has the default value of 0 (scalar) and can be up to 4. The size of each dimension is provied as a vector as the function argument `dims`. It requires a material property to have the same dimension and size at every quadrature point.
 
@@ -75,7 +75,7 @@ See the following source codes of `KokkosGenericConstantMaterial` for an example
 
 ## Stateful Material Properties
 
-Stateful material properties can be obtained by `getKokkosMaterialPropertyOld<type, dimension>(name)` or `getKokkosMaterialPropertyOlder<type, dimension>(name)`, or by specifying the state number (0 for current, 1 for old, and 2 for older) explicitly as the third template argument `state` of `getKokkosMaterialProperty<type, dimension, state>(name)` which defaults to 0. Stateful material properties can be optionally initialized by defining the following +public+ hook method:
+Stateful material properties can be obtained by `getKokkosMaterialPropertyOld<type, dimension>(name)` or `getKokkosMaterialPropertyOlder<type, dimension>(name)`, or by specifying the state number (0 for current, 1 for old, and 2 for older) explicitly as the third template argument `state` of `getKokkosMaterialProperty<type, dimension, state>(name)` which defaults to 0. Stateful material properties can be optionally initialized by defining the following +*inlined public*+ hook method:
 
 ```cpp
 KOKKOS_FUNCTION void initQpStatefulProperties(const unsigned int qp, Datum & datum) const

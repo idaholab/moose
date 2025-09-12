@@ -9,7 +9,7 @@ Before reading this documentation, consider reading the following materials firs
 - [Kokkos Kernels System](syntax/KokkosKernels/index.md) to understand the common design pattern of objects in Kokkos-MOOSE,
 - [Kokkos BCs System](syntax/KokkosBCs/index.md) to understand the design pattern of nodal boundary conditions in Kokkos-MOOSE.
 
-You can create your own nodal kernels by inheriting `Moose::Kokkos::NodalKernel` and following the same pattern with kernels and boundary conditions. The interfaces of nodal kernels are identical to the nodal boundary conditions described in [Kokkos BCs System](syntax/KokkosBCs/index.md), so they will not be explained here in detail. See the following source codes of `KokkosCoupledForceNodalKernel` for an example of a nodal kernel:
+You can create your own nodal kernels by inheriting `Moose::Kokkos::NodalKernel` and following the same pattern with kernels and boundary conditions including registering with `registerKokkosResidualObject()`. The interfaces of nodal kernels are identical to the nodal boundary conditions described in [Kokkos BCs System](syntax/KokkosBCs/index.md), so they will not be explained here in detail. See the following source codes of `KokkosCoupledForceNodalKernel` for an example of a nodal kernel:
 
 !listing framework/include/kokkos/nodalkernels/KokkosCoupledForceNodalKernel.h id=kokkos-force-nodal-header
          caption=The `KokkosCoupledForceNodalKernel` header file.
