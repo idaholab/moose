@@ -29,6 +29,7 @@ public:
   virtual void computeResidualAndJacobian() override;
   virtual void jacobianSetup() override;
   virtual const std::unordered_set<unsigned int> & getMatPropDependencies() const override;
+  virtual bool getMaterialPropertyCalled() const override;
 
 protected:
   /**

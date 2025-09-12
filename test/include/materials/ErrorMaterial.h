@@ -13,7 +13,6 @@
 
 /**
  * ErrorMaterial calls a mooseError at the locations desired
- * met.
  */
 class ErrorMaterial : public Material
 {

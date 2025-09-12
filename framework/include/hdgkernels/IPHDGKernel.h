@@ -39,6 +39,7 @@ public:
 
   virtual std::set<std::string> additionalROVariables() override;
   virtual const std::unordered_set<unsigned int> & getMatPropDependencies() const override;
+  virtual bool getMaterialPropertyCalled() const override;
 
 protected:
   virtual IPHDGAssemblyHelper & iphdgHelper() = 0;

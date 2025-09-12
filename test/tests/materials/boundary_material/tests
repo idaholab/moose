@@ -43,7 +43,7 @@
       type = RunApp
       input = 'dont_execute_when_not_needed.i'
       absent_out = 'Erroring on boundary'
-      detail = 'such as on faces where no boundary condition use material properties'
+      detail = 'such as on faces where no boundary conditions use material properties'
       mesh_mode = 'replicated'
     []
     [interface]
