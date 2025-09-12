@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "ADIntegratedBC.h"
+#include "GenericIntegratedBC.h"
 
 class Function;
 
@@ -18,28 +18,34 @@ class Function;
  * inlet and outlet boundaries for imposing both "explicit" (e.g. Dirichlet) and "implicit" (use
  * interior information) boundary conditions
  */
-class ADConservativeAdvectionBC : public ADIntegratedBC
+template <bool is_ad>
+class ConservativeAdvectionBCTempl : public GenericIntegratedBC<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  ADConservativeAdvectionBC(const InputParameters & parameters);
+  ConservativeAdvectionBCTempl(const InputParameters & parameters);
 
 protected:
-  virtual ADReal computeQpResidual() override;
+  virtual GenericReal<is_ad> computeQpResidual() override;
 
   /// The velocity as a material property
-  const ADMaterialProperty<RealVectorValue> * const _velocity_mat_prop;
+  const GenericMaterialProperty<RealVectorValue, is_ad> * const _velocity_mat_prop;
 
   /// The velocity as a function
   const Function * const _velocity_function;
 
   /// The advected quantity
-  const MooseArray<ADReal> & _adv_quant;
+  const MooseArray<GenericReal<is_ad>> & _adv_quant;
 
   /// Dirichlet value for the primal variable
   const Function * const _primal_dirichlet;
 
   /// Coefficient for multiplying the primal Dirichlet value
-  const ADMaterialProperty<Real> & _primal_coeff;
+  const GenericMaterialProperty<Real, is_ad> & _primal_coeff;
+
+  usingGenericIntegratedBCMembers;
 };
+
+typedef ConservativeAdvectionBCTempl<false> ConservativeAdvectionBC;
+typedef ConservativeAdvectionBCTempl<true> ADConservativeAdvectionBC;
