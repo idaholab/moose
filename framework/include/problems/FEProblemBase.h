@@ -1026,7 +1026,7 @@ public:
                            const std::deque<MaterialBase *> * reinit_mats = nullptr);
 
   /**
-   * reinit materials on element faces near a boundary (internal or external)
+   * reinit materials on element faces on a boundary (internal or external)
    * This specific routine helps us not reinit when don't need to
    * @param boundary_id The boundary on which the face belongs
    * @param tid The thread id
@@ -1945,7 +1945,7 @@ public:
    */
   bool needBoundaryMaterialOnSide(BoundaryID bnd_id, const THREAD_ID tid);
   bool needInterfaceMaterialOnSide(BoundaryID bnd_id, const THREAD_ID tid);
-  bool needSubdomainMaterialOnSide(SubdomainID subdomain_id, const THREAD_ID tid);
+  bool needInternalNeighborSideMaterial(SubdomainID subdomain_id, const THREAD_ID tid);
   ///@}
 
   /**
