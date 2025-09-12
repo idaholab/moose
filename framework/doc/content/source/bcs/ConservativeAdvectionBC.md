@@ -1,8 +1,8 @@
-# ADConservativeAdvectionBC
+# ConservativeAdvectionBC
 
 ## Description
 
-The `ADConservativeAdvectionBC` boundary condition pairs with the
+The `ConservativeAdvectionBC` boundary condition pairs with the
 [ConservativeAdvection.md] kernel. It can be used for both Dirichlet and
 "implicit" boundary conditions which use only information from the equation
 systems solution vectors. Velocity must be provided, either through the
@@ -24,8 +24,8 @@ implicitly through `velocity_mat_prop`.
 
 !listing test/tests/dgkernels/passive-scalar-channel-flow/test.i block=BCs
 
-!syntax parameters /BCs/ADConservativeAdvectionBC
+!syntax parameters /BCs/ConservativeAdvectionBC
 
-!syntax inputs /BCs/ADConservativeAdvectionBC
+!syntax inputs /BCs/ConservativeAdvectionBC
 
-!syntax children /BCs/ADConservativeAdvectionBC
+!syntax children /BCs/ConservativeAdvectionBC
