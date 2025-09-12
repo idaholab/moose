@@ -613,6 +613,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     // determine the orientation of the primary elems relative to the
     // new mortar segments.
     const Point normal = getNormals(*secondary_elem, std::vector<Real>({xi1}))[0];
+    mooseError("why are we generating a mortar mesh");
 
     // Get the set of primary_node neighbors.
     if (this->_nodes_to_primary_elem_map.find(primary_node->id()) ==

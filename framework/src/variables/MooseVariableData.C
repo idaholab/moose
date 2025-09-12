@@ -627,8 +627,6 @@ MooseVariableData<OutputType>::computeValuesInternal()
     if (_need_du_dot_du)
     {
       _du_dot_du.resize(nqp);
-      for (const auto qp : make_range(nqp))
-        _du_dot_du[qp] = 0.;
       for (const auto i : make_range(num_dofs))
         for (const auto qp : make_range(nqp))
           _du_dot_du[qp] = _dof_du_dot_du[i];
@@ -636,8 +634,6 @@ MooseVariableData<OutputType>::computeValuesInternal()
     if (_need_du_dotdot_du)
     {
       _du_dotdot_du.resize(nqp);
-      for (const auto qp : make_range(nqp))
-        _du_dotdot_du[qp] = 0.;
       for (const auto i : make_range(num_dofs))
         for (const auto qp : make_range(nqp))
           _du_dotdot_du[qp] = _dof_du_dotdot_du[i];

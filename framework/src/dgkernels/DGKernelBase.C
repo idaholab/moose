@@ -190,6 +190,7 @@ DGKernelBase::excludeBoundary() const
   if (_excluded_boundaries.empty())
     return false;
 
+  // Note: if this shows in profiling, use mesh.elementMayHaveASideOnABoundary
   auto boundary_ids = _mesh.getBoundaryIDs(_current_elem, _current_side);
   for (auto bid : boundary_ids)
     if (_excluded_boundaries.find(bid) != _excluded_boundaries.end())

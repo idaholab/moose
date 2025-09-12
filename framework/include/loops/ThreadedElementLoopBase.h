@@ -260,10 +260,14 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
           postElement(elem);
           continue;
         }
+        // To skip some look-ups, we look up the element first
+        const bool any_bdy_to_consider = _mesh.elementMayHaveASideOnABoundary(elem);
 
         for (unsigned int side = 0; side < elem->n_sides(); side++)
         {
-          std::vector<BoundaryID> boundary_ids = _mesh.getBoundaryIDs(elem, side);
+          std::vector<BoundaryID> boundary_ids;
+          if (any_bdy_to_consider)
+            boundary_ids = _mesh.getBoundaryIDs(elem, side);
           const Elem * lower_d_elem = _mesh.getLowerDElem(elem, side);
 
           if (boundary_ids.size() > 0)
