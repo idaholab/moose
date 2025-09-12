@@ -428,14 +428,14 @@ ActionWarehouse::printInputFile(std::ostream & out)
       params.allowCopy(true);
 
       // TODO: Do we need to insert more nodes for each task?
-      tree.insertNode(name, *tasks.begin(), true, &params);
+      tree.insertNode(name, *tasks.begin(), true, params);
       params.allowCopy(false);
 
       MooseObjectAction * moose_object_action = dynamic_cast<MooseObjectAction *>(act);
       if (moose_object_action)
       {
-        InputParameters obj_params = moose_object_action->getObjectParams();
-        tree.insertNode(name, *tasks.begin(), false, &obj_params);
+        const auto obj_params = moose_object_action->getObjectParams();
+        tree.insertNode(name, *tasks.begin(), false, obj_params);
       }
     }
   }
