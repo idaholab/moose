@@ -57,7 +57,7 @@ ProjectMaterialProperties::~ProjectMaterialProperties() {}
 void
 ProjectMaterialProperties::subdomainChanged()
 {
-  _need_internal_side_material = _fe_problem.needSubdomainMaterialOnSide(_subdomain, _tid);
+  _need_internal_side_material = _fe_problem.needInternalNeighborSideMaterial(_subdomain, _tid);
 }
 
 void

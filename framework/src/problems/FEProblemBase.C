@@ -4161,7 +4161,7 @@ FEProblemBase::reinitMaterialsFace(const SubdomainID blk_id,
                                    const std::deque<MaterialBase *> * const reinit_mats)
 {
   // we reinit more often than needed here because we dont have a way to check whether
-  // we need to compute the face materials on that particular (possibly external) face
+  // we need to compute the face materials on a particular (possibly external) face
   if (hasActiveMaterialProperties(tid))
   {
     auto && elem = _assembly[tid][0]->elem();
@@ -4193,11 +4193,11 @@ FEProblemBase::reinitMaterialsFaceOnBoundary(const BoundaryID boundary_id,
                                              const bool swap_stateful,
                                              const std::deque<MaterialBase *> * const reinit_mats)
 {
-  if (hasActiveMaterialProperties(tid) &&
-      (needBoundaryMaterialOnSide(boundary_id, tid) ||
-       needInterfaceMaterialOnSide(boundary_id, tid) || needSubdomainMaterialOnSide(blk_id, tid)))
+  if (hasActiveMaterialProperties(tid) && (needBoundaryMaterialOnSide(boundary_id, tid) ||
+                                           needInterfaceMaterialOnSide(boundary_id, tid) ||
+                                           needInternalNeighborSideMaterial(blk_id, tid)))
   {
-    auto && elem = _assembly[tid][0]->elem();
+    const auto * const elem = _assembly[tid][0]->elem();
     unsigned int side = _assembly[tid][0]->side();
     unsigned int n_points = _assembly[tid][0]->qRuleFace()->n_points();
 
@@ -8963,14 +8963,14 @@ FEProblemBase::needInterfaceMaterialOnSide(BoundaryID bnd_id, const THREAD_ID ti
 }
 
 bool
-FEProblemBase::needSubdomainMaterialOnSide(SubdomainID subdomain_id, const THREAD_ID tid)
+FEProblemBase::needInternalNeighborSideMaterial(SubdomainID subdomain_id, const THREAD_ID tid)
 {
   if (_block_mat_side_cache[tid].find(subdomain_id) == _block_mat_side_cache[tid].end())
   {
     _block_mat_side_cache[tid][subdomain_id] = false;
 
     for (auto & nl : _nl)
-      if (nl->needSubdomainMaterialOnSide(subdomain_id, tid))
+      if (nl->needInternalNeighborSideMaterial(subdomain_id, tid))
       {
         _block_mat_side_cache[tid][subdomain_id] = true;
         return true;

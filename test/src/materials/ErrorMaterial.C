@@ -45,7 +45,7 @@ ErrorMaterial::computeQpProperties()
   _prop_value[_qp] = 2.;
 
   // Check where we are, and error if needed
-  // Note: neighbor materials have _bnd = true for some reason
+  // Note: neighbor materials have _bnd = true because they are using neighbor side materials
   if (_bnd && !_neighbor)
   {
     std::vector<BoundaryID> boundary_ids = _mesh.getBoundaryIDs(_current_elem, _current_side);
