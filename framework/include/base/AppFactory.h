@@ -235,6 +235,8 @@ private:
 
   /// Storage of input parameters used in applications (ID (from getAppParamsID()) -> params)
   std::map<std::size_t, std::unique_ptr<InputParameters>> _input_parameters;
+
+  std::size_t _next_input_parameters_id = 0;
 };
 
 template <typename T>
