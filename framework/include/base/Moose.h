@@ -331,6 +331,32 @@ private:
 };
 
 /**
+ * Scoped helper for hiding traces via Moose::show_trace = false.
+ *
+ * Resets Moose::show_trace to what it was upon entry on exit.
+ *
+ * Cannot be used within threads.
+ */
+class ScopedHideTrace
+{
+public:
+  /**
+   * Default constructor, which sets Moose::show_trace = false
+   */
+  ScopedHideTrace();
+
+  /**
+   * Destructor, which sets Moose::show_trace to what it
+   * was upon construction
+   */
+  ~ScopedHideTrace();
+
+private:
+  /// The value of Moose::show_trace at construction
+  const bool _show_trace_before;
+};
+
+/**
  * Get the prefix to be associated with a hit node for a message, if any.
  *
  * In the case of a CLI argument, if \p fullpath, then also output the

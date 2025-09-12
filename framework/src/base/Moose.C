@@ -778,6 +778,8 @@ setColorConsole(bool use_color, bool force)
   return _color_console;
 }
 
+ScopedThrowOnError::ScopedThrowOnError() : ScopedThrowOnError(true) {}
+
 ScopedThrowOnError::ScopedThrowOnError(const bool throw_on_error)
   : _throw_on_error_before(Moose::_throw_on_error)
 {
@@ -785,9 +787,15 @@ ScopedThrowOnError::ScopedThrowOnError(const bool throw_on_error)
   Moose::_throw_on_error = throw_on_error;
 }
 
-ScopedThrowOnError::ScopedThrowOnError() : ScopedThrowOnError(true) {}
-
 ScopedThrowOnError::~ScopedThrowOnError() { Moose::_throw_on_error = _throw_on_error_before; }
+
+ScopedHideTrace::ScopedHideTrace() : _show_trace_before(Moose::show_trace)
+{
+  mooseAssert(!libMesh::Threads::in_threads, "Cannot be used in threads");
+  Moose::show_trace = true;
+}
+
+ScopedHideTrace::~ScopedHideTrace() { Moose::show_trace = _show_trace_before; }
 
 std::optional<std::string>
 hitMessagePrefix(const hit::Node & node, const bool fullpath /* = false */)

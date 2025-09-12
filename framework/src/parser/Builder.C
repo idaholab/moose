@@ -344,10 +344,8 @@ Builder::build()
       messages.push_back(key_message_pair.second);
     const auto message = MooseUtils::stringJoin(messages, "\n\n");
 
-    const auto current_show_trace = Moose::show_trace;
-    Moose::show_trace = false;
+    Moose::ScopedHideTrace scoped_hide_trace;
     moose::internal::mooseDeprecatedStream(Moose::out, false, true, message + "\n\n");
-    Moose::show_trace = current_show_trace;
   }
 
   if (_errors.size())

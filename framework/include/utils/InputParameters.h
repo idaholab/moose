@@ -2567,9 +2567,8 @@ InputParameters::paramError(const std::string & param, Args... args) const
   moose::internal::mooseStreamAll(oss, std::forward<Args>(args)...);
   const auto [prefix, node] = paramMessageContext(param);
 
-  Moose::show_trace = false;
+  Moose::ScopedHideTrace scoped_hide_trace;
   callMooseError(prefix + oss.str(), false, node);
-  Moose::show_trace = true;
 }
 
 namespace Moose

@@ -678,8 +678,7 @@ MooseApp::MooseApp(const InputParameters & parameters)
 {
   if (&parameters != &_pars)
   {
-    const auto show_trace = Moose::show_trace;
-    Moose::show_trace = false;
+    Moose::ScopedHideTrace scoped_hide_trace;
     const std::string bad_params = "(InputParameters parameters)";
     const std::string good_params = "(const InputParameters & parameters)";
     const std::string source_constructor = type() + "::" + type();
@@ -704,7 +703,6 @@ MooseApp::MooseApp(const InputParameters & parameters)
                                 type(),
                                 good_params,
                                 ";"));
-    Moose::show_trace = show_trace;
   }
 
   mooseAssert(_command_line->hasParsed(), "Command line has not parsed");

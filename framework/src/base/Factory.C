@@ -201,8 +201,7 @@ Factory::deprecatedMessage(const std::string obj_name) const
   _deprecated_types.emplace(obj_name);
 
   // We dont need a backtrace on this, this is user-facing
-  const auto current_show_trace = Moose::show_trace;
-  Moose::show_trace = false;
+  Moose::ScopedHideTrace scoped_hide_trace;
 
   // Get the current time
   std::time_t now;
@@ -244,7 +243,6 @@ Factory::deprecatedMessage(const std::string obj_name) const
     // Produce the error message
     mooseDeprecated(msg.str());
   }
-  Moose::show_trace = current_show_trace;
 }
 
 void
