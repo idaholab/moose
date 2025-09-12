@@ -438,6 +438,9 @@ Builder::buildJsonSyntaxTree(JsonSyntaxTree & root) const
     all_names.push_back(std::make_pair(iter.first, act_info));
   }
 
+  // Cache to avoid building an object's parameters multiple times
+  const auto object_params = buildRegisteredObjectParams();
+
   // Add all the actions to the JSON tree, except for ActionComponents (below)
   for (const auto & act_names : all_names)
   {
@@ -445,13 +448,13 @@ Builder::buildJsonSyntaxTree(JsonSyntaxTree & root) const
     const std::string & action = act_info._action;
     const std::string & task = act_info._task;
     const std::string syntax = act_names.first;
-    InputParameters action_obj_params = _action_factory.getValidParams(action);
+    const InputParameters action_obj_params = _action_factory.getValidParams(action);
     bool params_added = root.addParameters("",
                                            syntax,
                                            false,
                                            action,
                                            true,
-                                           &action_obj_params,
+                                           action_obj_params,
                                            _syntax.getLineInfo(syntax, action, ""),
                                            "");
 
@@ -473,9 +476,9 @@ Builder::buildJsonSyntaxTree(JsonSyntaxTree & root) const
     if (action_obj_params.have_parameter<bool>("isObjectAction") &&
         action_obj_params.get<bool>("isObjectAction"))
     {
-      for (auto & [moose_obj_name, obj] : _factory.registeredObjects())
+      for (const auto & [moose_obj_name, moose_obj_params] : object_params)
       {
-        auto moose_obj_params = obj->buildParameters();
+
         // Now that we know that this is a MooseObjectAction we need to see if it has been
         // restricted
         // in any way by the user.
@@ -512,7 +515,6 @@ Builder::buildJsonSyntaxTree(JsonSyntaxTree & root) const
             name = syntax + "/<type>/" + moose_obj_name;
             is_type = true;
           }
-          moose_obj_params.set<std::string>("type") = moose_obj_name;
 
           auto lineinfo = _factory.getLineInfo(moose_obj_name);
           std::string classname = _factory.associatedClassName(moose_obj_name);
@@ -521,7 +523,7 @@ Builder::buildJsonSyntaxTree(JsonSyntaxTree & root) const
                              is_type,
                              moose_obj_name,
                              is_action_params,
-                             &moose_obj_params,
+                             moose_obj_params,
                              lineinfo,
                              classname);
         }
@@ -565,7 +567,7 @@ Builder::buildJsonSyntaxTree(JsonSyntaxTree & root) const
                              /*is_type*/ false,
                              "AddActionComponentAction",
                              /*is_action=*/false,
-                             &component_params,
+                             component_params,
                              lineinfo,
                              component_name);
         }
@@ -594,6 +596,9 @@ Builder::buildFullTree(const std::string & search_string)
     all_names.push_back(std::pair<std::string, Syntax::ActionInfo>(iter.first, act_info));
   }
 
+  // Cache to avoid building an object's parameters multiple times
+  const auto object_params = buildRegisteredObjectParams();
+
   for (const auto & act_names : all_names)
   {
     InputParameters action_obj_params = _action_factory.getValidParams(act_names.second._action);
@@ -611,9 +616,8 @@ Builder::buildFullTree(const std::string & search_string)
     if (action_obj_params.have_parameter<bool>("isObjectAction") &&
         action_obj_params.get<bool>("isObjectAction"))
     {
-      for (const auto & [moose_obj_name, obj] : _factory.registeredObjects())
+      for (const auto & [moose_obj_name, moose_obj_params] : object_params)
       {
-        auto moose_obj_params = obj->buildParameters();
         /**
          * Now that we know that this is a MooseObjectAction we need to see if it has been
          * restricted in any way by the user.
@@ -649,8 +653,6 @@ Builder::buildFullTree(const std::string & search_string)
           {
             name = act_name + "/<type>/" + moose_obj_name;
           }
-
-          moose_obj_params.set<std::string>("type") = moose_obj_name;
 
           _syntax_formatter->insertNode(name, moose_obj_name, is_action_params, &moose_obj_params);
         }
@@ -839,6 +841,24 @@ Builder::queryGlobalParamsNode() const
     _global_params_node = _root.find(syntax.front());
   }
   return *_global_params_node;
+}
+
+std::vector<std::pair<std::string, const InputParameters>>
+Builder::buildRegisteredObjectParams() const
+{
+  std::vector<std::pair<std::string, const InputParameters>> object_params;
+
+  const auto & objects = _factory.registeredObjects();
+  object_params.reserve(objects.size());
+
+  for (const auto & [type, entry_ptr] : _factory.registeredObjects())
+  {
+    auto params = entry_ptr->buildParameters();
+    params.set<std::string>("type") = type;
+    object_params.emplace_back(type, std::move(params));
+  }
+
+  return object_params;
 }
 
 } // end of namespace Moose
