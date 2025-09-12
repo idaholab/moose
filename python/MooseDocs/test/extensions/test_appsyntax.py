@@ -76,7 +76,7 @@ class TestParameters(AppSyntaxTestCase):
     def testHTML(self):
         _, res = self.execute(self.TEXT, renderer=base.HTMLRenderer())
 
-        self.assertSize(res, 11)
+        self.assertSize(res, 13)
         self.assertHTMLTag(res(0), 'h2', id_='input-parameters', size=3)
         self.assertEqual(res(0).text(), 'Input Parameters')
 
@@ -111,7 +111,7 @@ class TestParameters(AppSyntaxTestCase):
 
     def testMaterialize(self):
         _, res = self.execute(self.TEXT, renderer=base.MaterializeRenderer())
-        self.assertSize(res, 11)
+        self.assertSize(res, 13)
         self.assertHTMLTag(res(0), 'h2', id_='input-parameters', size=3)
         self.assertEqual(res(0).text(), 'Input Parameters')
 
@@ -156,7 +156,7 @@ class TestParameters(AppSyntaxTestCase):
         # This size should correspond to the total number of parameters for
         # Diffusion (Required + Optional + Advanced + Tagging) + 1
         # (corresponding to 'type')
-        self.assertSize(res, 19)
+        self.assertSize(res, 20)
         self.assertLatexCommand(res(0), 'chapter', size=4)
         self.assertLatexCommand(res(0,0), 'label', string=u'input-parameters')
         self.assertLatexString(res(0,1), content=u'Input')
