@@ -21,10 +21,7 @@
 InputParameters
 MeshCut2DUserObjectBase::validParams()
 {
-  InputParameters params = GeometricCutUserObject::validParams();
-  params.addRequiredParam<MeshFileName>(
-      "mesh_file",
-      "Mesh file for the XFEM geometric cut; currently only the Exodus type is supported");
+  InputParameters params = MeshCutUserObjectBase::validParams();
   params.addParam<UserObjectName>("nucleate_uo", "The MeshCutNucleation UO for nucleating cracks.");
   params.addParam<UserObjectName>("crack_front_definition",
                                   "crackFrontDefinition",
@@ -34,7 +31,7 @@ MeshCut2DUserObjectBase::validParams()
 }
 
 MeshCut2DUserObjectBase::MeshCut2DUserObjectBase(const InputParameters & parameters)
-  : GeometricCutUserObject(parameters, true),
+  : MeshCutUserObjectBase(parameters),
     _mesh(_subproblem.mesh()),
     _nucleate_uo(isParamValid("nucleate_uo")
                      ? &getUserObject<MeshCut2DNucleationBase>("nucleate_uo")
@@ -163,13 +160,6 @@ MeshCut2DUserObjectBase::cutFragmentByGeometry(std::vector<std::vector<Point>> &
 {
   mooseError("Invalid method for 2D mesh fragment cutting.");
   return false;
-}
-
-MeshBase &
-MeshCut2DUserObjectBase::getCutterMesh() const
-{
-  mooseAssert(_cutter_mesh, "MeshCut2DUserObjectBase::getCutterMesh _cutter_mesh is nullptr");
-  return *_cutter_mesh;
 }
 
 const std::vector<Point>
