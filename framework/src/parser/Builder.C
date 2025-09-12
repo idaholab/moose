@@ -443,46 +443,41 @@ Builder::buildJsonSyntaxTree(JsonSyntaxTree & root) const
   }
 
   // Add all the actions to the JSON tree, except for ActionComponents (below)
-  for (const auto & act_names : all_names)
+  for (const auto & [syntax, act_info] : all_names)
   {
-    const auto & act_info = act_names.second;
     const std::string & action = act_info._action;
     const std::string & task = act_info._task;
-    const std::string syntax = act_names.first;
-    InputParameters action_obj_params = _action_factory.getValidParams(action);
-    bool params_added = root.addParameters("",
-                                           syntax,
-                                           false,
-                                           action,
-                                           true,
-                                           action_obj_params,
-                                           _syntax.getLineInfo(syntax, action, ""),
-                                           "");
+    const auto action_obj_params = _action_factory.getValidParams(action);
+    const bool params_added = root.addParameters("",
+                                                 syntax,
+                                                 false,
+                                                 action,
+                                                 true,
+                                                 action_obj_params,
+                                                 _syntax.getLineInfo(syntax, action, ""),
+                                                 "");
 
     if (params_added)
     {
-      auto tasks = _action_factory.getTasksByAction(action);
-      for (auto & t : tasks)
+      const auto tasks = _action_factory.getTasksByAction(action);
+      for (const auto & t : tasks)
       {
-        auto info = _action_factory.getLineInfo(action, t);
+        const auto info = _action_factory.getLineInfo(action, t);
         root.addActionTask(syntax, action, t, info);
       }
     }
 
-    /**
-     * We need to see if this action is inherited from MooseObjectAction. If it is, then we will
-     * loop over all the Objects in MOOSE's Factory object to print them out if they have associated
-     * bases matching the current task.
-     */
+    // If this action is a MooseObject action, we will loop over all of the
+    // registered MooseObjects and will add those that have associated
+    // bases matching the current task
     if (action_obj_params.have_parameter<bool>("isObjectAction") &&
         action_obj_params.get<bool>("isObjectAction"))
     {
       for (const auto & [moose_obj_name, moose_obj_params] : object_params)
       {
         // Now that we know that this is a MooseObjectAction we need to see if it has been
-        // restricted
-        // in any way by the user.
-        const std::vector<std::string> & buildable_types = action_obj_params.getBuildableTypes();
+        // restricted in any way by the user.
+        const auto & buildable_types = action_obj_params.getBuildableTypes();
 
         // See if the current Moose Object syntax belongs under this Action's block
         if ((buildable_types.empty() || // Not restricted
@@ -515,16 +510,14 @@ Builder::buildJsonSyntaxTree(JsonSyntaxTree & root) const
             is_type = true;
           }
 
-          auto lineinfo = _factory.getLineInfo(moose_obj_name);
-          std::string classname = _factory.associatedClassName(moose_obj_name);
           root.addParameters(syntax,
                              name,
                              is_type,
                              moose_obj_name,
                              is_action_params,
                              moose_obj_params,
-                             lineinfo,
-                             classname);
+                             _factory.getLineInfo(moose_obj_name),
+                             _factory.associatedClassName(moose_obj_name));
         }
       }
 
@@ -533,20 +526,19 @@ Builder::buildJsonSyntaxTree(JsonSyntaxTree & root) const
       if (syntax != "ActionComponents/*")
         continue;
 
-      auto iters = _action_factory.getActionsByTask("list_component");
-
-      for (auto it = iters.first; it != iters.second; ++it)
+      const auto its = _action_factory.getActionsByTask("list_component");
+      for (const auto & task_action_pair : as_range(its.first, its.second))
       {
         // Get the name and parameters
-        const auto component_name = it->second;
+        const auto & component_name = task_action_pair.second;
         auto component_params = _action_factory.getValidParams(component_name);
 
         // We currently do not have build-type restrictions on this action that adds
         // action-components
 
         // See if the current Moose Object syntax belongs under this Action's block
-        if (action_obj_params.mooseObjectSyntaxVisibility() // and the Action says it's visible
-        )
+        // and it is visible
+        if (action_obj_params.mooseObjectSyntaxVisibility())
         {
           // The logic for Components is a little simpler here for now because syntax like
           // Executioner/TimeIntegrator/type= do not exist for components
@@ -558,7 +550,6 @@ Builder::buildJsonSyntaxTree(JsonSyntaxTree & root) const
           }
           component_params.set<std::string>("type") = component_name;
 
-          auto lineinfo = _action_factory.getLineInfo(component_name, "list_component");
           // We add the parameters as for an object, because we want to fit them to be
           // added to json["AddActionComponentAction"]["subblock_types"]
           root.addParameters(syntax,
@@ -567,7 +558,7 @@ Builder::buildJsonSyntaxTree(JsonSyntaxTree & root) const
                              "AddActionComponentAction",
                              /*is_action=*/false,
                              component_params,
-                             lineinfo,
+                             _action_factory.getLineInfo(component_name, "list_component"),
                              component_name);
         }
       }
