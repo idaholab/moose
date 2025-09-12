@@ -83,3 +83,6 @@ ConservativeAdvectionBCTempl<is_ad>::computeQpResidual()
   else
     return _test[_i][_qp] * vdotn * _adv_quant[_qp];
 }
+
+template class ConservativeAdvectionBCTempl<false>;
+template class ConservativeAdvectionBCTempl<true>;
