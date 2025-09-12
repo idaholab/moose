@@ -440,7 +440,7 @@ Builder::buildJsonSyntaxTree(JsonSyntaxTree & root) const
                                            false,
                                            action,
                                            true,
-                                           &action_obj_params,
+                                           action_obj_params,
                                            _syntax.getLineInfo(syntax, action, ""),
                                            "");
 
@@ -510,7 +510,7 @@ Builder::buildJsonSyntaxTree(JsonSyntaxTree & root) const
                              is_type,
                              moose_obj_name,
                              is_action_params,
-                             &moose_obj_params,
+                             moose_obj_params,
                              lineinfo,
                              classname);
         }
@@ -554,7 +554,7 @@ Builder::buildJsonSyntaxTree(JsonSyntaxTree & root) const
                              /*is_type*/ false,
                              "AddActionComponentAction",
                              /*is_action=*/false,
-                             &component_params,
+                             component_params,
                              lineinfo,
                              component_name);
         }
@@ -574,7 +574,7 @@ Builder::buildJsonSyntaxTree(JsonSyntaxTree & root) const
                        true,
                        type,
                        false,
-                       &params,
+                       params,
                        FileLineInfo(file, line),
                        "");
   };

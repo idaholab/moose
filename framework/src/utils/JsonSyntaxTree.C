@@ -96,30 +96,34 @@ JsonSyntaxTree::getJson(const std::string & parent, const std::string & path, bo
 }
 
 size_t
-JsonSyntaxTree::setParams(InputParameters * params, bool search_match, nlohmann::json & all_params)
+JsonSyntaxTree::setParams(const InputParameters & params,
+                          const bool search_match,
+                          nlohmann::json & all_params)
 {
   size_t count = 0;
-  for (auto & iter : *params)
+  for (const auto & name_param_pair : params)
   {
+    const auto & param_name = name_param_pair.first;
+
     // Make sure we want to see this parameter
-    bool param_match = !_search.empty() && MooseUtils::wildCardMatch(iter.first, _search);
-    if (params->isPrivate(iter.first) || (!_search.empty() && !search_match && !param_match))
+    bool param_match = !_search.empty() && MooseUtils::wildCardMatch(param_name, _search);
+    if (params.isPrivate(param_name) || (!_search.empty() && !search_match && !param_match))
       continue;
 
     ++count;
-    nlohmann::json param_json;
+    auto & param_json = all_params[param_name];
 
-    param_json["required"] = params->isParamRequired(iter.first);
+    param_json["required"] = params.isParamRequired(param_name);
 
     // Only output default if it has one
-    if (params->isParamValid(iter.first))
-      param_json["default"] = buildOutputString(iter);
-    else if (params->hasDefaultCoupledValue(iter.first))
-      param_json["default"] = params->defaultCoupledValue(iter.first);
+    if (params.isParamValid(param_name))
+      param_json["default"] = buildOutputString(name_param_pair);
+    else if (params.hasDefaultCoupledValue(param_name))
+      param_json["default"] = params.defaultCoupledValue(param_name);
 
     bool out_of_range_allowed = false;
     std::map<MooseEnumItem, std::string> docs;
-    param_json["options"] = buildOptions(iter, out_of_range_allowed, docs);
+    param_json["options"] = buildOptions(name_param_pair, out_of_range_allowed, docs);
     if (!nlohmann::to_string(param_json["options"]).empty())
     {
       param_json["out_of_range_allowed"] = out_of_range_allowed;
@@ -131,37 +135,35 @@ JsonSyntaxTree::setParams(InputParameters * params, bool search_match, nlohmann:
         param_json["option_docs"] = jdocs;
       }
     }
-    auto reserved_values = params->reservedValues(iter.first);
+    auto reserved_values = params.reservedValues(param_name);
     for (const auto & reserved : reserved_values)
       param_json["reserved_values"].push_back(reserved);
 
-    std::string t = MooseUtils::prettyCppType(params->type(iter.first));
+    std::string t = MooseUtils::prettyCppType(params.type(param_name));
     param_json["cpp_type"] = t;
     param_json["basic_type"] = basicCppType(t);
-    if (const auto group_ptr = params->queryParameterGroup(iter.first))
+    if (const auto group_ptr = params.queryParameterGroup(param_name))
       param_json["group_name"] = *group_ptr;
     else
       param_json["group_name"] = "";
-    param_json["name"] = iter.first;
+    param_json["name"] = param_name;
 
-    std::string doc = params->getDocString(iter.first);
+    std::string doc = params.getDocString(param_name);
     MooseUtils::escape(doc);
     param_json["description"] = doc;
 
-    param_json["doc_unit"] = params->getDocUnit(iter.first);
+    param_json["doc_unit"] = params.getDocUnit(param_name);
 
-    param_json["controllable"] = params->isControllable(iter.first);
-    param_json["deprecated"] = params->isParamDeprecated(iter.first);
+    param_json["controllable"] = params.isControllable(param_name);
+    param_json["deprecated"] = params.isParamDeprecated(param_name);
 
-    if (const auto cl_metadata = params->queryCommandLineMetadata(iter.first))
+    if (const auto cl_metadata = params.queryCommandLineMetadata(param_name))
     {
       auto & cl_entry = param_json["command_line"];
       cl_entry["syntax"] = cl_metadata->syntax;
       cl_entry["global"] = cl_metadata->global;
       cl_entry["input_enabled"] = cl_metadata->input_enabled;
     }
-
-    all_params[iter.first] = param_json;
   }
   return count;
 }
@@ -172,9 +174,9 @@ JsonSyntaxTree::addGlobal()
   // If they are doing a search they probably don't want to see this
   if (_search.empty())
   {
-    auto params = Moose::Builder::validParams();
+    const auto params = Moose::Builder::validParams();
     nlohmann::json jparams;
-    setParams(&params, true, jparams);
+    setParams(params, true, jparams);
     _root["global"]["parameters"] = jparams;
 
     // Just create a list of registered app names
@@ -193,7 +195,7 @@ JsonSyntaxTree::addParameters(const std::string & parent,
                               bool is_type,
                               const std::string & action,
                               bool is_action,
-                              InputParameters * params,
+                              const InputParameters & params,
                               const FileLineInfo & lineinfo,
                               const std::string & classname)
 {
@@ -214,7 +216,7 @@ JsonSyntaxTree::addParameters(const std::string & parent,
   if (is_action)
   {
     json[action]["parameters"] = all_params;
-    json[action]["description"] = params->getClassDescription();
+    json[action]["description"] = params.getClassDescription();
     json[action]["action_path"] = path;
     auto label_pair = getActionLabel(action);
     json[action]["label"] = label_pair.first;
@@ -222,25 +224,25 @@ JsonSyntaxTree::addParameters(const std::string & parent,
     if (lineinfo.isValid())
       json[action]["file_info"][lineinfo.file()] = lineinfo.line();
   }
-  else if (params)
+  else
   {
-    if (params->hasBase())
-      json["moose_base"] = params->getBase();
+    if (params.hasBase())
+      json["moose_base"] = params.getBase();
 
     json["parameters"] = all_params;
     json["syntax_path"] = path;
     json["parent_syntax"] = parent;
-    json["description"] = params->getClassDescription();
+    json["description"] = params.getClassDescription();
     // We do this for ActionComponents which are registered as Actions but
     // dumped to the syntax tree as Objects
-    if (params->hasBase() && params->getBase() == "Action")
+    if (params.hasBase() && params.getBase() == "Action")
     {
       auto label_pair = getActionLabel(classname);
       json["label"] = label_pair.first;
       json["register_file"] = label_pair.second;
     }
     // Applications don't have an object label
-    else if (params->hasBase() && params->getBase() == "Application")
+    else if (params.hasBase() && params.getBase() == "Application")
     {
       json["register_file"] = lineinfo.file();
     }
@@ -354,7 +356,7 @@ JsonSyntaxTree::buildOutputString(
 }
 
 void
-JsonSyntaxTree::addSyntaxType(const std::string & path, const std::string type)
+JsonSyntaxTree::addSyntaxType(const std::string & path, const std::string & type)
 {
   if (MooseUtils::wildCardMatch(path, _search))
   {
