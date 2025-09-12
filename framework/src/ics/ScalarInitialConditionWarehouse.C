@@ -11,7 +11,7 @@
 #include "ScalarInitialCondition.h"
 
 ScalarInitialConditionWarehouse::ScalarInitialConditionWarehouse()
-  : MooseObjectWarehouseBase<ScalarInitialCondition>(false)
+  : MooseObjectWarehouseBase<ScalarInitialCondition>(/*threaded=*/false)
 {
 }
 
