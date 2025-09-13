@@ -34,26 +34,25 @@
 
 [AutomaticWeakForm]
   [cahn_hilliard_system]
-    type = AutomaticWeakFormAction
     energy_type = expression
-    
+
     # Intermediate expressions (semicolon-separated)
     expressions = 'M = 1.0;
                    dW_dc = 4*c*(c^2 - 1);
                    kappa_term = kappa*laplacian(c)'
-    
+
     # Strong form equations (semicolon-separated)
     # Format: variable_t = expression for time derivatives
     #         variable = expression for steady equations
     strong_forms = 'c_t = div(M*grad(mu));
                     mu = dW_dc - kappa_term'
-    
+
     # Parameters
     parameters = 'kappa=0.01'
-    
+
     # Primary variables
     variables = 'c mu'
-    
+
     # Enable automatic differentiation for Jacobian
     use_automatic_differentiation = true
   []
@@ -82,26 +81,26 @@
 [Executioner]
   type = Transient
   solve_type = NEWTON
-  
+
   # Preconditioner for saddle-point problem
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
   petsc_options_value = 'lu superlu_dist'
-  
+
   # Alternative: Use fieldsplit for better performance
   # petsc_options_iname = '-pc_type -pc_fieldsplit_type -pc_fieldsplit_detect_saddle_point'
   # petsc_options_value = 'fieldsplit multiplicative true'
-  
+
   # Tolerances
   l_tol = 1e-4
   l_max_its = 30
   nl_max_its = 20
   nl_rel_tol = 1e-9
   nl_abs_tol = 1e-11
-  
+
   # Time stepping
   dt = 1e-4
   end_time = 0.05
-  
+
   [TimeStepper]
     type = IterationAdaptiveDT
     dt = 1e-4
@@ -114,7 +113,7 @@
 [Outputs]
   exodus = true
   print_linear_residuals = false
-  
+
   [console]
     type = Console
     print_mesh_changed_info = false
