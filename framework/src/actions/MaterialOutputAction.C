@@ -269,6 +269,20 @@ MaterialOutputAction::materialOutput(const std::string & property_name,
                          material,
                          get_names_only);
 
+  else if (hasProperty<std::vector<Real>>(property_name))
+    names = outputHelper({"MaterialStdVectorAux", "variable_size", {"index"}},
+                         property_name,
+                         property_name + "_",
+                         material,
+                         get_names_only);
+
+  else if (hasProperty<std::vector<ADReal>>(property_name))
+    names = outputHelper({"ADMaterialStdVectorAux", "variable_size", {"index"}},
+                         property_name,
+                         property_name + "_",
+                         material,
+                         get_names_only);
+
   else if (hasProperty<RealTensorValue>(property_name))
     names = outputHelper({"MaterialRealTensorValueAux", "012", {"row", "column"}},
                          property_name,
@@ -381,6 +395,14 @@ MaterialOutputAction::outputHelper(const MaterialOutputAction::OutputMetaData & 
   const auto & [kernel_name, index_symbols, param_names] = metadata;
   const auto dim = param_names.size();
   const auto size = index_symbols.size();
+  unsigned int size_inner = size;
+  if (index_symbols == "variable_size")
+  {
+    // Will be updated
+    size_inner = 1;
+    mooseInfoRepeated("Only the first component of vector material property '" + property_name +
+                      "' will be output.");
+  }
 
   std::vector<std::string> names;
   // general 0 to 4 dimensional loop
@@ -388,7 +410,7 @@ MaterialOutputAction::outputHelper(const MaterialOutputAction::OutputMetaData & 
   for (i[3] = 0; i[3] < (dim < 4 ? 1 : size); ++i[3])
     for (i[2] = 0; i[2] < (dim < 3 ? 1 : size); ++i[2])
       for (i[1] = 0; i[1] < (dim < 2 ? 1 : size); ++i[1])
-        for (i[0] = 0; i[0] < (dim < 1 ? 1 : size); ++i[0])
+        for (i[0] = 0; i[0] < (dim < 1 ? 1 : size_inner); ++i[0])
         {
           std::string var_name = var_name_base;
           for (const auto j : make_range(dim))
