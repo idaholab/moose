@@ -138,7 +138,7 @@
       type = Exodiff
       input = output.i
       exodiff = 'vector_output.e'
-      cli_args = "Outputs/file_base='vector_output' Materials/active='vector' Materials/vector/type=ADGenericConstantVectorMaterial Materials/vector/prop_names='p1 p2' Materials/vector/prop_values='0 1 2 1.2 3.4 -1' Materials/vector/outputs='exodus'"
+      cli_args = "Outputs/file_base='vector_output' Materials/active='vector' Materials/vector/type=ADGenericRealVectorValue Materials/vector/prop_names='p1 p2' Materials/vector/prop_values='0 1 2 1.2 3.4 -1' Materials/vector/outputs='exodus'"
       detail = 'automatic differentiation vector material properties'
     []
   []
