@@ -127,6 +127,7 @@ NonlinearSystemBase::NonlinearSystemBase(FEProblemBase & fe_problem,
     _nodal_bcs(/*threaded=*/false),
     _preset_nodal_bcs(/*threaded=*/false),
     _ad_preset_nodal_bcs(/*threaded=*/false),
+    _general_dampers(/*threaded=*/false),
     _splits(/*threaded=*/false),
     _increment_vec(NULL),
     _use_finite_differenced_preconditioner(false),
@@ -259,6 +260,8 @@ NonlinearSystemBase::initialSetup()
     _constraints.initialSetup();
     _general_dampers.initialSetup();
     _nodal_bcs.initialSetup();
+    _preset_nodal_bcs.residualSetup();
+    _ad_preset_nodal_bcs.residualSetup();
   }
 
   {
@@ -364,6 +367,8 @@ NonlinearSystemBase::timestepSetup()
   _constraints.timestepSetup();
   _general_dampers.timestepSetup();
   _nodal_bcs.timestepSetup();
+  _preset_nodal_bcs.timestepSetup();
+  _ad_preset_nodal_bcs.timestepSetup();
 }
 
 void
@@ -418,6 +423,8 @@ NonlinearSystemBase::customSetup(const ExecFlagType & exec_type)
   _constraints.customSetup(exec_type);
   _general_dampers.customSetup(exec_type);
   _nodal_bcs.customSetup(exec_type);
+  _preset_nodal_bcs.customSetup(exec_type);
+  _ad_preset_nodal_bcs.customSetup(exec_type);
 }
 
 void
@@ -1697,6 +1704,8 @@ NonlinearSystemBase::residualSetup()
   _constraints.residualSetup();
   _general_dampers.residualSetup();
   _nodal_bcs.residualSetup();
+  _preset_nodal_bcs.residualSetup();
+  _ad_preset_nodal_bcs.residualSetup();
 
   // Avoid recursion
   if (this == &_fe_problem.currentNonlinearSystem())
@@ -2763,6 +2772,8 @@ NonlinearSystemBase::jacobianSetup()
   _constraints.jacobianSetup();
   _general_dampers.jacobianSetup();
   _nodal_bcs.jacobianSetup();
+  _preset_nodal_bcs.jacobianSetup();
+  _ad_preset_nodal_bcs.jacobianSetup();
 
   // Avoid recursion
   if (this == &_fe_problem.currentNonlinearSystem())
@@ -3294,6 +3305,7 @@ NonlinearSystemBase::updateActive(THREAD_ID tid)
     _nodal_bcs.updateActive();
     _preset_nodal_bcs.updateActive();
     _ad_preset_nodal_bcs.updateActive();
+    _splits.updateActive();
     _constraints.updateActive();
     _scalar_kernels.updateActive();
   }
