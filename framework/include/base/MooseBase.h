@@ -59,6 +59,10 @@ public:
   static const std::string app_param;
   /// The name of the parameter that contains the moose system base
   static const std::string moose_base_param;
+#ifdef MOOSE_KOKKOS_ENABLED
+  /// The name of the parameter that indicates an object is a Kokkos functor
+  static const std::string kokkos_object_param;
+#endif
 
   static InputParameters validParams();
 

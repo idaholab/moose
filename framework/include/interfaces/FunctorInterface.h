@@ -32,6 +32,13 @@ public:
 
   FunctorInterface(const MooseObject * moose_object);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  FunctorInterface(const FunctorInterface & object, const Moose::Kokkos::FunctorCopy & key);
+#endif
+
   /**
    * Helper to look up a functor name through the input parameter keys
    * @param name The input parameter name that we are trying to deduce the functor name for

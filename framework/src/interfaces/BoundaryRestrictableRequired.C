@@ -8,13 +8,11 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "BoundaryRestrictableRequired.h"
-
 #include "InputParameters.h"
 
 InputParameters
 BoundaryRestrictableRequired::validParams()
 {
-
   // Create instance of InputParameters
   InputParameters params = emptyInputParameters();
 
@@ -35,3 +33,11 @@ BoundaryRestrictableRequired::BoundaryRestrictableRequired(const MooseObject * m
   : BoundaryRestrictable(moose_object, nodal)
 {
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+BoundaryRestrictableRequired::BoundaryRestrictableRequired(
+    const BoundaryRestrictableRequired & object, const Moose::Kokkos::FunctorCopy & key)
+  : BoundaryRestrictable(object, key)
+{
+}
+#endif

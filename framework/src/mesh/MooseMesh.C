@@ -285,6 +285,11 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     allowRemoteElementRemoval(false);
 
   determineUseDistributedMesh();
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  if (_app.isKokkosAvailable())
+    _kokkos_mesh = std::make_unique<Moose::Kokkos::Mesh>(*this);
+#endif
 }
 
 MooseMesh::MooseMesh(const MooseMesh & other_mesh)
@@ -363,6 +368,11 @@ MooseMesh::MooseMesh(const MooseMesh & other_mesh)
   }
 
   updateCoordTransform();
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  if (_app.isKokkosAvailable())
+    _kokkos_mesh = std::make_unique<Moose::Kokkos::Mesh>(*this);
+#endif
 }
 
 MooseMesh::~MooseMesh()
@@ -650,6 +660,11 @@ MooseMesh::update()
 
   // the flag might have been set by calling doingPRefinement(true)
   _doing_p_refinement = _doing_p_refinement || (_max_p_level > 0);
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  if (_app.hasKokkosObjects() || (_app.getExecutioner() && _app.feProblem().hasKokkosObjects()))
+    _kokkos_mesh->update();
+#endif
 
   _finite_volume_info_dirty = true;
 }
@@ -1053,6 +1068,29 @@ MooseMesh::buildNodeList()
 
   // This sort is here so that boundary conditions are always applied in the same order
   std::sort(_bnd_nodes.begin(), _bnd_nodes.end(), BndNodeCompare());
+}
+
+void
+MooseMesh::computeMaxPerElemAndSide()
+{
+  auto & mesh = getMesh();
+
+  _max_sides_per_elem = 0;
+  _max_nodes_per_elem = 0;
+  _max_nodes_per_side = 0;
+
+  for (auto & elem : as_range(mesh.local_elements_begin(), mesh.local_elements_end()))
+  {
+    _max_sides_per_elem = std::max(_max_sides_per_elem, elem->n_sides());
+    _max_nodes_per_elem = std::max(_max_nodes_per_elem, elem->n_nodes());
+
+    for (unsigned int side = 0; side < elem->n_sides(); ++side)
+      _max_nodes_per_side = std::max(_max_nodes_per_side, elem->side_ptr(side)->n_nodes());
+  }
+
+  mesh.comm().max(_max_sides_per_elem);
+  mesh.comm().max(_max_nodes_per_elem);
+  mesh.comm().max(_max_nodes_per_side);
 }
 
 void
@@ -2922,6 +2960,8 @@ MooseMesh::init()
     if (getParam<bool>("build_all_side_lowerd_mesh"))
       buildLowerDMesh();
   }
+
+  computeMaxPerElemAndSide();
 }
 
 unsigned int

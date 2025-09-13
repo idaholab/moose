@@ -1204,6 +1204,8 @@ extern const TagName OLD_SOLUTION_TAG;
 extern const TagName OLDER_SOLUTION_TAG;
 extern const TagName PREVIOUS_NL_SOLUTION_TAG;
 extern const TagName PREVIOUS_FP_SOLUTION_TAG;
+extern const TagName SOLUTION_DOT_TAG;
+extern const TagName SOLUTION_DOTDOT_TAG;
 
 enum class FEBackend
 {
@@ -1213,6 +1215,29 @@ enum class FEBackend
   MFEM
 #endif
 };
+
+#ifdef MOOSE_KOKKOS_ENABLED
+namespace Kokkos
+{
+// Passkey for calling special constructors for functor copy
+class FunctorCopy
+{
+  friend class ResidualObject;
+  friend class KernelBase;
+  friend class NodalKernelBase;
+  friend class BoundaryCondition;
+  friend class IntegratedBCBase;
+  friend class NodalBCBase;
+  friend class MaterialBase;
+  template <typename Derived>
+  friend class Material;
+
+  FunctorCopy() = default;
+  FunctorCopy(const FunctorCopy &) = delete;
+  FunctorCopy(FunctorCopy &&) = delete;
+};
+}
+#endif
 }
 
 /// macros for adding Tensor index enums locally

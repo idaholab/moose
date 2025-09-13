@@ -1,0 +1,25 @@
+[Tests]
+  issues = '#30655'
+  design = 'DataIO.md Restartable.md'
+
+  [kernel]
+    requirement = 'The Kokkos system shall support the ability to'
+    [test]
+      type = 'Exodiff'
+      input = 'kokkos_kernel_restartable.i'
+      exodiff = 'kokkos_kernel_restartable_out.e'
+      detail = 'perform residual calculations that accumulate state and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+    [test2]
+      type = 'Exodiff'
+      input = 'kokkos_kernel_restartable_second.i'
+      exodiff = 'kokkos_kernel_restartable_second_out.e'
+      prereq = kernel/test
+      detail = 'restart the calculation using the accumulated state.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+  []
+[]

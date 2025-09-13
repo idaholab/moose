@@ -31,6 +31,13 @@ public:
 
   MooseObject(const InputParameters & parameters);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  MooseObject(const MooseObject & object, const Moose::Kokkos::FunctorCopy & key);
+#endif
+
   virtual ~MooseObject() = default;
 
   /**
@@ -44,6 +51,29 @@ public:
    */
   std::shared_ptr<MooseObject> getSharedPtr();
   std::shared_ptr<const MooseObject> getSharedPtr() const;
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  class IsKokkosObjectKey
+  {
+    friend class BlockRestrictable;
+    friend class BoundaryRestrictable;
+    friend class MaterialPropertyInterface;
+    IsKokkosObjectKey() = default;
+    IsKokkosObjectKey(const IsKokkosObjectKey &) = delete;
+    IsKokkosObjectKey(IsKokkosObjectKey &&) = delete;
+  };
+
+  /**
+   * Get whether this object is a Kokkos functor
+   * The parameter is set by the Kokkos base classes:
+   * - Moose::Kokkos::ResidualObject in KokkosResidualObject.K
+   * - Moose::Kokkos::MaterialBase in KokkosMaterialBase.K
+   */
+  bool isKokkosObject(IsKokkosObjectKey &&) const
+  {
+    return parameters().isParamValid(MooseBase::kokkos_object_param);
+  }
+#endif
 
 protected:
   /// Reference to the "enable" InputParameters, used by Controls for toggling on/off MooseObjects

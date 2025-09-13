@@ -9,6 +9,7 @@
 
 #include "MooseVariableDependencyInterface.h"
 #include "MooseVariableFieldBase.h"
+#include "MooseApp.h"
 #include "MooseObject.h"
 #include "SystemBase.h"
 #include "MooseError.h"
@@ -18,7 +19,14 @@
 
 using namespace libMesh;
 
-MooseVariableDependencyInterface::MooseVariableDependencyInterface(const MooseObject * const) {}
+MooseVariableDependencyInterface::MooseVariableDependencyInterface(const MooseObject *) {}
+
+#ifdef MOOSE_KOKKOS_ENABLED
+MooseVariableDependencyInterface::MooseVariableDependencyInterface(
+    const MooseVariableDependencyInterface &, const Moose::Kokkos::FunctorCopy &)
+{
+}
+#endif
 
 template <typename DofObjectType>
 std::set<MooseVariableFieldBase *>

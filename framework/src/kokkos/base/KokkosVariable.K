@@ -1,0 +1,78 @@
+//* This file is part of the MOOSE framework
+//* https://www.mooseframework.org
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "KokkosVariable.h"
+
+#include "SystemBase.h"
+#include "FEProblemBase.h"
+
+namespace Moose
+{
+namespace Kokkos
+{
+
+void
+Variable::init(const MooseVariableBase & variable, const TagName & tag_name)
+{
+  init(variable, variable.sys().feProblem().getVectorTagID(tag_name));
+}
+
+void
+Variable::init(const MooseVariableBase & variable, const TagID tag)
+{
+  _coupled = true;
+  _components = variable.count();
+  _tag = tag;
+
+  _var.create(_components);
+  _sys.create(_components);
+
+  for (unsigned int comp = 0; comp < _components; ++comp)
+  {
+    _var[comp] = variable.number() + comp;
+    _sys[comp] = variable.sys().number();
+  }
+
+  _var.copyToDevice();
+  _sys.copyToDevice();
+}
+
+void
+Variable::init(const std::vector<const MooseVariableBase *> & variables,
+               const TagID tag,
+               CoupleableKey)
+{
+  _coupled = true;
+  _components = variables.size();
+  _tag = tag;
+
+  _var.create(_components);
+  _sys.create(_components);
+
+  for (unsigned int comp = 0; comp < _components; ++comp)
+  {
+    _var[comp] = variables[comp]->number();
+    _sys[comp] = variables[comp]->sys().number();
+  }
+
+  _var.copyToDevice();
+  _sys.copyToDevice();
+}
+
+void
+Variable::init(const std::vector<Real> & values, CoupleableKey)
+{
+  _coupled = false;
+  _components = values.size();
+
+  _default_value = values;
+}
+
+} // namespace Kokkos
+} // namespace Moose

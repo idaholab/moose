@@ -23,6 +23,13 @@ public:
 
   ADFunctorInterface(const MooseObject * moose_object);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  ADFunctorInterface(const ADFunctorInterface & object, const Moose::Kokkos::FunctorCopy & key);
+#endif
+
 private:
   virtual bool isADObject() const override { return true; }
 };

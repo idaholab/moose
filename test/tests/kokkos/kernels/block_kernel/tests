@@ -1,0 +1,26 @@
+[Tests]
+  issues = '#30655'
+  design = '/BlockRestrictable.md'
+
+  [block_restriction]
+    requirement = 'The Kokkos system shall support the ability to apply a kernel to a subset of the domain'
+
+    [kernel]
+      type = 'Exodiff'
+      input = 'kokkos_block_kernel_test.i'
+      exodiff = 'kokkos_block_kernel_test_out.e'
+      detail = 'through a subdomain restriction on the kernel, and'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+
+    [variable]
+      type = 'Exodiff'
+      input = 'kokkos_block_vars.i'
+      exodiff = 'kokkos_block_vars_out.e'
+      detail = 'through a subdomain restriction on the variable.'
+      capabilities = 'kokkos'
+      compute_devices = 'cpu cuda'
+    []
+  []
+[]
