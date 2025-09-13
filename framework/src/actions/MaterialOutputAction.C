@@ -21,6 +21,7 @@
 #include "MooseEnum.h"
 #include "MooseVariableConstMonomial.h"
 #include "FunctorMaterial.h"
+#include "VariableSizeMaterialPropertiesInterface.h"
 
 #include "libmesh/utility.h"
 
@@ -396,12 +397,27 @@ MaterialOutputAction::outputHelper(const MaterialOutputAction::OutputMetaData & 
   const auto dim = param_names.size();
   const auto size = index_symbols.size();
   unsigned int size_inner = size;
+
+  // Handle the case the material property is of a variable input-defined size
+  bool variable_size = false;
+  std::string variable_size_symbols;
   if (index_symbols == "variable_size")
   {
-    // Will be updated
-    size_inner = 1;
-    mooseInfoRepeated("Only the first component of vector material property '" + property_name +
-                      "' will be output.");
+    variable_size = true;
+    if (const auto vsmi = dynamic_cast<const VariableSizeMaterialPropertiesInterface *>(&material))
+      size_inner = vsmi->getVectorPropertySize(property_name);
+    else
+    {
+      size_inner = 1;
+      mooseInfoRepeated("Only the first component of vector material property '" + property_name +
+                        "' will be output. If you require all components, add the "
+                        "'VariableSizeMaterialPropertiesInterface' to the base classes of your "
+                        "Material and implement the get...Size(property_name) routines. Note that "
+                        "the size must be known during initialization.");
+    }
+    // Use indices as symbols
+    for (const auto i : make_range(size_inner))
+      variable_size_symbols += std::to_string(i);
   }
 
   std::vector<std::string> names;
@@ -413,8 +429,10 @@ MaterialOutputAction::outputHelper(const MaterialOutputAction::OutputMetaData & 
         for (i[0] = 0; i[0] < (dim < 1 ? 1 : size_inner); ++i[0])
         {
           std::string var_name = var_name_base;
+          const auto & symbols = variable_size ? variable_size_symbols : index_symbols;
           for (const auto j : make_range(dim))
-            var_name += Moose::stringify(index_symbols[i[j]]);
+            var_name += Moose::stringify(symbols[i[j]]);
+
           names.push_back(var_name);
 
           if (!get_names_only)

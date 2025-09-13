@@ -33,6 +33,7 @@ template <bool is_ad>
 GenericConstantVectorMaterialTempl<is_ad>::GenericConstantVectorMaterialTempl(
     const InputParameters & parameters)
   : Material(parameters),
+    VariableSizeMaterialPropertiesInterface(parameters),
     _prop_names(getParam<std::vector<std::string>>("prop_names")),
     _prop_values(getParam<std::vector<std::vector<Real>>>("prop_values"))
 {
@@ -68,6 +69,17 @@ GenericConstantVectorMaterialTempl<is_ad>::computeQpProperties()
     for (const auto j : index_range(_prop_values[i]))
       (*_properties[i])[_qp][j] = _prop_values[i][j];
   }
+}
+
+template <bool is_ad>
+unsigned int
+GenericConstantVectorMaterialTempl<is_ad>::getVectorPropertySize(
+    const MaterialPropertyName & prop_name) const
+{
+  for (const auto i : index_range(_prop_names))
+    if (_prop_names[i] == prop_name)
+      return _prop_values[i].size();
+  paramError("prop_names", "Property '" + prop_name + "' was not defined");
 }
 
 template class GenericConstantVectorMaterialTempl<false>;

@@ -10,17 +10,21 @@
 #pragma once
 
 #include "Material.h"
+#include "VariableSizeMaterialPropertiesInterface.h"
 
 /**
  * Material to create constant properties with the variable-size std::vector<Real> type
  */
 template <bool is_ad>
-class GenericConstantVectorMaterialTempl : public Material
+class GenericConstantVectorMaterialTempl : public Material,
+                                           public VariableSizeMaterialPropertiesInterface
 {
 public:
   static InputParameters validParams();
 
   GenericConstantVectorMaterialTempl(const InputParameters & parameters);
+
+  virtual unsigned int getVectorPropertySize(const MaterialPropertyName & prop_name) const override;
 
 protected:
   virtual void initQpStatefulProperties() override;
