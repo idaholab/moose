@@ -15,6 +15,7 @@ InputParameters
 Constraint::validParams()
 {
   InputParameters params = NeighborResidualObject::validParams();
+  params += GeometricSearchInterface::validParams();
 
   params.addParam<bool>("use_displaced_mesh",
                         false,

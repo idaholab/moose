@@ -61,6 +61,8 @@ public:
                     Point & closest_point,
                     RealVectorValue & normal);
 
+  void setUsePointLocator(bool state);
+
   int intersect2D_Segments(Point S1P0, Point S1P1, Point S2P0, Point S2P1, Point * I0, Point * I1);
   int inSegment(Point P, Point SP0, Point SP1);
 
@@ -98,6 +100,8 @@ protected:
   Real _normal_smoothing_distance; // Distance from edge (in parametric coords) within which to
                                    // perform normal smoothing
   NORMAL_SMOOTHING_METHOD _normal_smoothing_method;
+  bool _use_point_locator; // Use a PointLocator rather than relying on mesh connectivity to
+                           // find element patches
 
   const Moose::PatchUpdateType _patch_update_strategy; // Contact patch update strategy
 };
