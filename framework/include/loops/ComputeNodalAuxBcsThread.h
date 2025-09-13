@@ -18,8 +18,10 @@ template <typename T>
 class MooseObjectWarehouse;
 
 template <typename AuxKernelType>
-class ComputeNodalAuxBcsThread
-  : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
+class ComputeNodalAuxBcsThread final
+  : public ThreadedNodeLoop<ConstBndNodeRange,
+                            ConstBndNodeRange::const_iterator,
+                            ComputeNodalAuxBcsThread<AuxKernelType>>
 {
 public:
   ComputeNodalAuxBcsThread(FEProblemBase & fe_problem,
@@ -28,14 +30,14 @@ public:
   // Splitting Constructor
   ComputeNodalAuxBcsThread(ComputeNodalAuxBcsThread & x, Threads::split split);
 
-  virtual void onNode(ConstBndNodeRange::const_iterator & node_it) override;
+  void onNode(ConstBndNodeRange::const_iterator & node_it);
 
   void join(const ComputeNodalAuxBcsThread & /*y*/);
 
-protected:
   /// Print information about the loop, mostly order of execution of objects
-  void printGeneralExecutionInformation() const override;
+  void printGeneralExecutionInformation() const;
 
+protected:
   AuxiliarySystem & _aux_sys;
 
   /// Storage object containing active AuxKernel objects

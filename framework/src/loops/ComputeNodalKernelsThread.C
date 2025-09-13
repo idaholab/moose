@@ -22,7 +22,8 @@ ComputeNodalKernelsThread::ComputeNodalKernelsThread(
     FEProblemBase & fe_problem,
     MooseObjectTagWarehouse<NodalKernelBase> & nodal_kernels,
     const std::set<TagID> & tags)
-  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator, ComputeNodalKernelsThread>(
+        fe_problem),
     _fe_problem(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
     _tags(tags),
@@ -34,7 +35,8 @@ ComputeNodalKernelsThread::ComputeNodalKernelsThread(
 // Splitting Constructor
 ComputeNodalKernelsThread::ComputeNodalKernelsThread(ComputeNodalKernelsThread & x,
                                                      Threads::split split)
-  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator, ComputeNodalKernelsThread>(
+        x, split),
     _fe_problem(x._fe_problem),
     _aux_sys(x._aux_sys),
     _tags(x._tags),
@@ -51,9 +53,10 @@ ComputeNodalKernelsThread::pre()
   if (!_tags.size() || _tags.size() == _fe_problem.numVectorTags(Moose::VECTOR_TAG_RESIDUAL))
     _nkernel_warehouse = &_nodal_kernels;
   else if (_tags.size() == 1)
-    _nkernel_warehouse = &(_nodal_kernels.getVectorTagObjectWarehouse(*(_tags.begin()), _tid));
+    _nkernel_warehouse =
+        &(_nodal_kernels.getVectorTagObjectWarehouse(*(_tags.begin()), this->_tid));
   else
-    _nkernel_warehouse = &(_nodal_kernels.getVectorTagsObjectWarehouse(_tags, _tid));
+    _nkernel_warehouse = &(_nodal_kernels.getVectorTagsObjectWarehouse(_tags, this->_tid));
 }
 
 void
@@ -64,21 +67,21 @@ ComputeNodalKernelsThread::onNode(ConstNodeRange::const_iterator & node_it)
   std::set<const NodalKernelBase *> nks_executed;
 
   // prepare variables
-  for (auto * var : _aux_sys._nodal_vars[_tid])
+  for (auto * var : _aux_sys._nodal_vars[this->_tid])
     var->prepareAux();
 
-  _fe_problem.reinitNode(node, _tid);
+  _fe_problem.reinitNode(node, this->_tid);
 
   const auto & block_ids = _aux_sys.mesh().getNodeBlockIds(*node);
   for (const auto block : block_ids)
-    if (_nkernel_warehouse->hasActiveBlockObjects(block, _tid))
+    if (_nkernel_warehouse->hasActiveBlockObjects(block, this->_tid))
     {
       std::set<TagID> needed_fe_var_vector_tags;
       _nkernel_warehouse->updateBlockFEVariableCoupledVectorTagDependency(
-          block, needed_fe_var_vector_tags, _tid);
-      _fe_problem.setActiveFEVariableCoupleableVectorTags(needed_fe_var_vector_tags, _tid);
+          block, needed_fe_var_vector_tags, this->_tid);
+      _fe_problem.setActiveFEVariableCoupleableVectorTags(needed_fe_var_vector_tags, this->_tid);
 
-      const auto & objects = _nkernel_warehouse->getActiveBlockObjects(block, _tid);
+      const auto & objects = _nkernel_warehouse->getActiveBlockObjects(block, this->_tid);
       for (const auto & nodal_kernel : objects)
         if (nks_executed.emplace(nodal_kernel.get()).second)
         {
@@ -93,7 +96,7 @@ ComputeNodalKernelsThread::onNode(ConstNodeRange::const_iterator & node_it)
   {
     _num_cached = 0;
     Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-    _fe_problem.addCachedResidual(_tid);
+    _fe_problem.addCachedResidual(this->_tid);
   }
 }
 
@@ -105,7 +108,7 @@ ComputeNodalKernelsThread::join(const ComputeNodalKernelsThread & /*y*/)
 void
 ComputeNodalKernelsThread::printGeneralExecutionInformation() const
 {
-  if (!_fe_problem.shouldPrintExecution(_tid) || !_nkernel_warehouse->hasActiveObjects())
+  if (!_fe_problem.shouldPrintExecution(this->_tid) || !_nkernel_warehouse->hasActiveObjects())
     return;
 
   const auto & console = _fe_problem.console();

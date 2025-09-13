@@ -25,7 +25,9 @@
 
 BoundaryNodeIntegrityCheckThread::BoundaryNodeIntegrityCheckThread(
     FEProblemBase & fe_problem, const TheWarehouse::Query & query)
-  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
+  : ThreadedNodeLoop<ConstBndNodeRange,
+                     ConstBndNodeRange::const_iterator,
+                     BoundaryNodeIntegrityCheckThread>(fe_problem),
     _aux_sys(fe_problem.getAuxiliarySystem()),
     _nodal_aux(_aux_sys.nodalAuxWarehouse()),
     _nodal_vec_aux(_aux_sys.nodalVectorAuxWarehouse()),
@@ -38,7 +40,9 @@ BoundaryNodeIntegrityCheckThread::BoundaryNodeIntegrityCheckThread(
 // Splitting Constructor
 BoundaryNodeIntegrityCheckThread::BoundaryNodeIntegrityCheckThread(
     BoundaryNodeIntegrityCheckThread & x, Threads::split split)
-  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
+  : ThreadedNodeLoop<ConstBndNodeRange,
+                     ConstBndNodeRange::const_iterator,
+                     BoundaryNodeIntegrityCheckThread>(x, split),
     _aux_sys(x._aux_sys),
     _nodal_aux(x._nodal_aux),
     _nodal_vec_aux(x._nodal_vec_aux),
@@ -56,10 +60,10 @@ BoundaryNodeIntegrityCheckThread::onNode(ConstBndNodeRange::const_iterator & nod
   const Node * const node = bnode->_node;
 
   // We can distribute work just as the actual execution code will
-  if (node->processor_id() != _fe_problem.processor_id())
+  if (node->processor_id() != this->_fe_problem.processor_id())
     return;
 
-  auto & mesh = _fe_problem.mesh();
+  auto & mesh = this->_fe_problem.mesh();
 
   // Only check vertices. Variables may not be defined on non-vertex nodes (think first order
   // Lagrange on a second order mesh) and user-code can often handle that
@@ -73,7 +77,7 @@ BoundaryNodeIntegrityCheckThread::onNode(ConstBndNodeRange::const_iterator & nod
   // uo check
   std::vector<NodalUserObject *> objs;
   _query.clone()
-      .condition<AttribThread>(_tid)
+      .condition<AttribThread>(this->_tid)
       .condition<AttribInterfaces>(Interfaces::NodalUserObject)
       .condition<AttribBoundaries>(boundary_id, true)
       .queryInto(objs);
@@ -83,10 +87,10 @@ BoundaryNodeIntegrityCheckThread::onNode(ConstBndNodeRange::const_iterator & nod
 
   auto check = [node, boundary_id, &bnd_name, this](const auto & warehouse)
   {
-    if (!warehouse.hasBoundaryObjects(boundary_id, _tid))
+    if (!warehouse.hasBoundaryObjects(boundary_id, this->_tid))
       return;
 
-    const auto & bnd_objects = warehouse.getBoundaryObjects(boundary_id, _tid);
+    const auto & bnd_objects = warehouse.getBoundaryObjects(boundary_id, this->_tid);
     for (const auto & bnd_object : bnd_objects)
       // Skip if this object uses geometric search because coupled variables may be defined on
       // paired boundaries instead of the boundary this node is on

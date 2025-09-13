@@ -16,7 +16,7 @@
 #include "libmesh/threads.h"
 
 MaxVarNDofsPerNode::MaxVarNDofsPerNode(FEProblemBase & feproblem, SolverSystem & sys)
-  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(feproblem),
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator, MaxVarNDofsPerNode>(feproblem),
     _system(sys),
     _max(0),
     _dof_map(_system.dofMap())
@@ -25,7 +25,7 @@ MaxVarNDofsPerNode::MaxVarNDofsPerNode(FEProblemBase & feproblem, SolverSystem &
 
 // Splitting Constructor
 MaxVarNDofsPerNode::MaxVarNDofsPerNode(MaxVarNDofsPerNode & x, Threads::split split)
-  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
+  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator, MaxVarNDofsPerNode>(x, split),
     _system(x._system),
     _max(0),
     _dof_map(x._dof_map)

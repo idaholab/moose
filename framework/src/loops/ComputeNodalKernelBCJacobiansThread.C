@@ -24,7 +24,9 @@ ComputeNodalKernelBCJacobiansThread::ComputeNodalKernelBCJacobiansThread(
     NonlinearSystemBase & nl,
     MooseObjectTagWarehouse<NodalKernelBase> & nodal_kernels,
     const std::set<TagID> & tags)
-  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(fe_problem),
+  : ThreadedNodeLoop<ConstBndNodeRange,
+                     ConstBndNodeRange::const_iterator,
+                     ComputeNodalKernelBCJacobiansThread>(fe_problem),
     _fe_problem(fe_problem),
     _nl(nl),
     _aux_sys(fe_problem.getAuxiliarySystem()),
@@ -37,7 +39,9 @@ ComputeNodalKernelBCJacobiansThread::ComputeNodalKernelBCJacobiansThread(
 // Splitting Constructor
 ComputeNodalKernelBCJacobiansThread::ComputeNodalKernelBCJacobiansThread(
     ComputeNodalKernelBCJacobiansThread & x, Threads::split split)
-  : ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>(x, split),
+  : ThreadedNodeLoop<ConstBndNodeRange,
+                     ConstBndNodeRange::const_iterator,
+                     ComputeNodalKernelBCJacobiansThread>(x, split),
     _fe_problem(x._fe_problem),
     _nl(x._nl),
     _aux_sys(x._aux_sys),
@@ -55,9 +59,10 @@ ComputeNodalKernelBCJacobiansThread::pre()
   if (!_tags.size() || _tags.size() == _fe_problem.numMatrixTags())
     _nkernel_warehouse = &_nodal_kernels;
   else if (_tags.size() == 1)
-    _nkernel_warehouse = &(_nodal_kernels.getMatrixTagObjectWarehouse(*(_tags.begin()), _tid));
+    _nkernel_warehouse =
+        &(_nodal_kernels.getMatrixTagObjectWarehouse(*(_tags.begin()), this->_tid));
   else
-    _nkernel_warehouse = &(_nodal_kernels.getMatrixTagsObjectWarehouse(_tags, _tid));
+    _nkernel_warehouse = &(_nodal_kernels.getMatrixTagsObjectWarehouse(_tags, this->_tid));
 }
 
 void
@@ -67,7 +72,7 @@ ComputeNodalKernelBCJacobiansThread::onNode(ConstBndNodeRange::const_iterator & 
 
   BoundaryID boundary_id = bnode->_bnd_id;
 
-  auto & ce = _fe_problem.couplingEntries(_tid, _nl.number());
+  auto & ce = _fe_problem.couplingEntries(this->_tid, _nl.number());
   for (const auto & it : ce)
   {
     MooseVariableFEBase & ivariable = *(it.first);
@@ -79,10 +84,10 @@ ComputeNodalKernelBCJacobiansThread::onNode(ConstBndNodeRange::const_iterator & 
     // The NodalKernels that are active and are coupled to the jvar in question
     std::vector<std::shared_ptr<NodalKernelBase>> active_involved_kernels;
 
-    if (_nkernel_warehouse->hasActiveBoundaryObjects(boundary_id, _tid))
+    if (_nkernel_warehouse->hasActiveBoundaryObjects(boundary_id, this->_tid))
     {
       // Loop over each NodalKernel to see if it's involved with the jvar
-      const auto & objects = _nkernel_warehouse->getActiveBoundaryObjects(boundary_id, _tid);
+      const auto & objects = _nkernel_warehouse->getActiveBoundaryObjects(boundary_id, this->_tid);
       for (const auto & nodal_kernel : objects)
       {
         if (nodal_kernel->variable().number() == ivar)
@@ -114,15 +119,15 @@ ComputeNodalKernelBCJacobiansThread::onNode(ConstBndNodeRange::const_iterator & 
     if (!active_involved_kernels.empty())
     {
       // prepare variables
-      for (auto * var : _aux_sys._nodal_vars[_tid])
+      for (auto * var : _aux_sys._nodal_vars[this->_tid])
         var->prepareAux();
 
-      if (_nkernel_warehouse->hasActiveBoundaryObjects(boundary_id, _tid))
+      if (_nkernel_warehouse->hasActiveBoundaryObjects(boundary_id, this->_tid))
       {
         Node * node = bnode->_node;
         if (node->processor_id() == _fe_problem.processor_id())
         {
-          _fe_problem.reinitNodeFace(node, boundary_id, _tid);
+          _fe_problem.reinitNodeFace(node, boundary_id, this->_tid);
           for (const auto & nodal_kernel : active_involved_kernels)
           {
             nodal_kernel->setSubdomains(Moose::NodeArg::undefined_subdomain_connection);
@@ -138,7 +143,7 @@ ComputeNodalKernelBCJacobiansThread::onNode(ConstBndNodeRange::const_iterator & 
         _num_cached = 0;
         // vectors are thread-safe, but matrices are not yet
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        _fe_problem.addCachedJacobian(_tid);
+        _fe_problem.addCachedJacobian(this->_tid);
       }
     }
   }
@@ -152,7 +157,8 @@ ComputeNodalKernelBCJacobiansThread::join(const ComputeNodalKernelBCJacobiansThr
 void
 ComputeNodalKernelBCJacobiansThread::printGeneralExecutionInformation() const
 {
-  if (!_fe_problem.shouldPrintExecution(_tid) || !_nkernel_warehouse->hasActiveBoundaryObjects())
+  if (!_fe_problem.shouldPrintExecution(this->_tid) ||
+      !_nkernel_warehouse->hasActiveBoundaryObjects())
     return;
 
   const auto & console = _fe_problem.console();

@@ -14,7 +14,14 @@
 
 static Threads::spin_mutex threaded_node_mutex;
 
-template <typename RangeType, typename IteratorType>
+/**
+ * Template for a threaded (e.g. replicated on each thread here) loop on a range of nodes
+ * @tparam RangeType the class type of the range
+ * @tparam IteratorType the type of the iteration
+ * @tparam Derived the type of the Derived class. This is for CRTP
+ * See https://en.cppreference.com/w/cpp/language/crtp.html
+ */
+template <typename RangeType, typename IteratorType, typename Derived>
 class ThreadedNodeLoop
 {
 public:
@@ -23,37 +30,37 @@ public:
   // Splitting Constructor
   ThreadedNodeLoop(ThreadedNodeLoop & x, Threads::split split);
 
-  virtual ~ThreadedNodeLoop(){};
+  ~ThreadedNodeLoop() {};
 
   void operator()(const RangeType & range);
 
   /**
    * Called before the node range loop
    */
-  virtual void pre();
+  void pre();
 
   /**
    * Called after the node range loop
    */
-  virtual void post();
+  void post();
 
   /**
    * Called for each node
    */
-  virtual void onNode(IteratorType & node_it);
+  void onNode(IteratorType & node_it);
 
   /**
    * Called after the node assembly is done (including surface assembling)
    *
    * @param node - active node
    */
-  virtual void postNode(IteratorType & node_it);
+  void postNode(IteratorType & node_it);
 
   /**
    * Called if a MooseException is caught anywhere during the computation.
    * The single input parameter taken is a MooseException object.
    */
-  virtual void caughtMooseException(MooseException & e)
+  void caughtMooseException(MooseException & e)
   {
     Threads::spin_mutex::scoped_lock lock(threaded_node_mutex);
 
@@ -66,79 +73,81 @@ public:
    *
    * @return true to keep going, false to stop.
    */
-  virtual bool keepGoing() { return !_fe_problem.hasException(); }
+  bool keepGoing() { return !_fe_problem.hasException(); }
 
 protected:
+  /// The Problem class, stores objects, knows the current execution point, etc
   FEProblemBase & _fe_problem;
+  /// Thread ID. This loop is replicated on each thread
   THREAD_ID _tid;
 
   /// Print information about the loop, mostly order of execution of objects
-  virtual void printGeneralExecutionInformation() const {}
+  void printGeneralExecutionInformation() const {}
 };
 
-template <typename RangeType, typename IteratorType>
-ThreadedNodeLoop<RangeType, IteratorType>::ThreadedNodeLoop(FEProblemBase & fe_problem)
+template <typename RangeType, typename IteratorType, typename Derived>
+ThreadedNodeLoop<RangeType, IteratorType, Derived>::ThreadedNodeLoop(FEProblemBase & fe_problem)
   : _fe_problem(fe_problem)
 {
 }
 
-template <typename RangeType, typename IteratorType>
-ThreadedNodeLoop<RangeType, IteratorType>::ThreadedNodeLoop(ThreadedNodeLoop & x,
-                                                            Threads::split /*split*/)
+template <typename RangeType, typename IteratorType, typename Derived>
+ThreadedNodeLoop<RangeType, IteratorType, Derived>::ThreadedNodeLoop(ThreadedNodeLoop & x,
+                                                                     Threads::split /*split*/)
   : _fe_problem(x._fe_problem)
 {
 }
 
-template <typename RangeType, typename IteratorType>
+template <typename RangeType, typename IteratorType, typename Derived>
 void
-ThreadedNodeLoop<RangeType, IteratorType>::operator()(const RangeType & range)
+ThreadedNodeLoop<RangeType, IteratorType, Derived>::operator()(const RangeType & range)
 {
   try
   {
     ParallelUniqueId puid;
     _tid = puid.id;
 
-    pre();
-    printGeneralExecutionInformation();
+    static_cast<Derived *>(this)->pre();
+    static_cast<Derived *>(this)->printGeneralExecutionInformation();
 
     for (IteratorType nd = range.begin(); nd != range.end(); ++nd)
     {
-      if (!keepGoing())
+      if (!static_cast<Derived *>(this)->keepGoing())
         break;
 
-      onNode(nd);
+      static_cast<Derived *>(this)->onNode(nd);
 
-      postNode(nd);
+      static_cast<Derived *>(this)->postNode(nd);
     }
 
-    post();
+    static_cast<Derived *>(this)->post();
   }
   catch (MooseException & e)
   {
-    caughtMooseException(e);
+    static_cast<Derived *>(this)->caughtMooseException(e);
   }
 }
 
-template <typename RangeType, typename IteratorType>
+template <typename RangeType, typename IteratorType, typename Derived>
 void
-ThreadedNodeLoop<RangeType, IteratorType>::pre()
+ThreadedNodeLoop<RangeType, IteratorType, Derived>::pre()
 {
 }
 
-template <typename RangeType, typename IteratorType>
+template <typename RangeType, typename IteratorType, typename Derived>
 void
-ThreadedNodeLoop<RangeType, IteratorType>::post()
+ThreadedNodeLoop<RangeType, IteratorType, Derived>::post()
 {
 }
 
-template <typename RangeType, typename IteratorType>
+template <typename RangeType, typename IteratorType, typename Derived>
 void
-ThreadedNodeLoop<RangeType, IteratorType>::onNode(IteratorType & /*node_it*/)
+ThreadedNodeLoop<RangeType, IteratorType, Derived>::onNode(IteratorType & /*node_it*/)
 {
 }
 
-template <typename RangeType, typename IteratorType>
+template <typename RangeType, typename IteratorType, typename Derived>
 void
-ThreadedNodeLoop<RangeType, IteratorType>::postNode(IteratorType & /*node_it*/)
+ThreadedNodeLoop<RangeType, IteratorType, Derived>::postNode(IteratorType & /*node_it*/)
 {
 }

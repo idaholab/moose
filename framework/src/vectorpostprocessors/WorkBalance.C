@@ -239,11 +239,12 @@ private:
   }
 };
 
-class WBNodeLoop : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>
+class WBNodeLoop final
+  : public ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator, WBNodeLoop>
 {
 public:
   WBNodeLoop(FEProblemBase & fe_problem, int system)
-    : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
+    : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator, WBNodeLoop>(fe_problem),
       _system(system),
       _local_num_nodes(0),
       _local_num_dofs(0)
@@ -251,14 +252,14 @@ public:
   }
 
   WBNodeLoop(WBNodeLoop & x, Threads::split split)
-    : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
+    : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator, WBNodeLoop>(x, split),
       _system(x._system),
       _local_num_nodes(0),
       _local_num_dofs(0)
   {
   }
 
-  virtual void onNode(ConstNodeRange::const_iterator & node_it)
+  void onNode(ConstNodeRange::const_iterator & node_it)
   {
     auto & node = *(*node_it);
 

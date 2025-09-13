@@ -15,7 +15,7 @@
 
 ResetDisplacedMeshThread::ResetDisplacedMeshThread(FEProblemBase & fe_problem,
                                                    DisplacedProblem & displaced_problem)
-  : ThreadedNodeLoop<NodeRange, NodeRange::const_iterator>(fe_problem),
+  : ThreadedNodeLoop<NodeRange, NodeRange::const_iterator, ResetDisplacedMeshThread>(fe_problem),
     _displaced_problem(displaced_problem),
     _ref_mesh(_displaced_problem.refMesh())
 {
@@ -23,7 +23,7 @@ ResetDisplacedMeshThread::ResetDisplacedMeshThread(FEProblemBase & fe_problem,
 
 ResetDisplacedMeshThread::ResetDisplacedMeshThread(ResetDisplacedMeshThread & x,
                                                    Threads::split split)
-  : ThreadedNodeLoop<NodeRange, NodeRange::const_iterator>(x, split),
+  : ThreadedNodeLoop<NodeRange, NodeRange::const_iterator, ResetDisplacedMeshThread>(x, split),
     _displaced_problem(x._displaced_problem),
     _ref_mesh(x._ref_mesh)
 {

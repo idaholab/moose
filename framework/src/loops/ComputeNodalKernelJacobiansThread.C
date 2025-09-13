@@ -25,7 +25,9 @@ ComputeNodalKernelJacobiansThread::ComputeNodalKernelJacobiansThread(
     NonlinearSystemBase & nl,
     MooseObjectTagWarehouse<NodalKernelBase> & nodal_kernels,
     const std::set<TagID> & tags)
-  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(fe_problem),
+  : ThreadedNodeLoop<ConstNodeRange,
+                     ConstNodeRange::const_iterator,
+                     ComputeNodalKernelJacobiansThread>(fe_problem),
     _fe_problem(fe_problem),
     _nl(nl),
     _aux_sys(fe_problem.getAuxiliarySystem()),
@@ -38,7 +40,9 @@ ComputeNodalKernelJacobiansThread::ComputeNodalKernelJacobiansThread(
 // Splitting Constructor
 ComputeNodalKernelJacobiansThread::ComputeNodalKernelJacobiansThread(
     ComputeNodalKernelJacobiansThread & x, Threads::split split)
-  : ThreadedNodeLoop<ConstNodeRange, ConstNodeRange::const_iterator>(x, split),
+  : ThreadedNodeLoop<ConstNodeRange,
+                     ConstNodeRange::const_iterator,
+                     ComputeNodalKernelJacobiansThread>(x, split),
     _fe_problem(x._fe_problem),
     _nl(x._nl),
     _aux_sys(x._aux_sys),
@@ -56,9 +60,10 @@ ComputeNodalKernelJacobiansThread::pre()
   if (!_tags.size() || _tags.size() == _fe_problem.numMatrixTags())
     _nkernel_warehouse = &_nodal_kernels;
   else if (_tags.size() == 1)
-    _nkernel_warehouse = &(_nodal_kernels.getMatrixTagObjectWarehouse(*(_tags.begin()), _tid));
+    _nkernel_warehouse =
+        &(_nodal_kernels.getMatrixTagObjectWarehouse(*(_tags.begin()), this->_tid));
   else
-    _nkernel_warehouse = &(_nodal_kernels.getMatrixTagsObjectWarehouse(_tags, _tid));
+    _nkernel_warehouse = &(_nodal_kernels.getMatrixTagsObjectWarehouse(_tags, this->_tid));
 }
 
 void
@@ -66,7 +71,7 @@ ComputeNodalKernelJacobiansThread::onNode(ConstNodeRange::const_iterator & node_
 {
   const Node * node = *node_it;
 
-  auto & ce = _fe_problem.couplingEntries(_tid, _nl.number());
+  auto & ce = _fe_problem.couplingEntries(this->_tid, _nl.number());
   for (const auto & it : ce)
   {
     MooseVariableFEBase & ivariable = *(it.first);
@@ -81,10 +86,10 @@ ComputeNodalKernelJacobiansThread::onNode(ConstNodeRange::const_iterator & node_
     const auto & block_ids = _aux_sys.mesh().getNodeBlockIds(*node);
     for (const auto & block : block_ids)
     {
-      if (_nkernel_warehouse->hasActiveBlockObjects(block, _tid))
+      if (_nkernel_warehouse->hasActiveBlockObjects(block, this->_tid))
       {
         // Loop over each NodalKernel to see if it's involved with the jvar
-        const auto & objects = _nkernel_warehouse->getActiveBlockObjects(block, _tid);
+        const auto & objects = _nkernel_warehouse->getActiveBlockObjects(block, this->_tid);
         for (const auto & nodal_kernel : objects)
         {
           if (nodal_kernel->variable().number() == ivar)
@@ -115,10 +120,10 @@ ComputeNodalKernelJacobiansThread::onNode(ConstNodeRange::const_iterator & node_
     if (!active_involved_kernels.empty())
     {
       // prepare variables
-      for (auto * var : _aux_sys._nodal_vars[_tid])
+      for (auto * var : _aux_sys._nodal_vars[this->_tid])
         var->prepareAux();
 
-      _fe_problem.reinitNode(node, _tid);
+      _fe_problem.reinitNode(node, this->_tid);
 
       for (const auto & nodal_kernel : active_involved_kernels)
       {
@@ -133,7 +138,7 @@ ComputeNodalKernelJacobiansThread::onNode(ConstNodeRange::const_iterator & node_
         _num_cached = 0;
         // vectors are thread-safe, but matrices are not yet
         Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
-        _fe_problem.addCachedJacobian(_tid);
+        _fe_problem.addCachedJacobian(this->_tid);
       }
     }
   }
@@ -147,7 +152,7 @@ ComputeNodalKernelJacobiansThread::join(const ComputeNodalKernelJacobiansThread 
 void
 ComputeNodalKernelJacobiansThread::printGeneralExecutionInformation() const
 {
-  if (!_fe_problem.shouldPrintExecution(_tid) || !_nkernel_warehouse->hasActiveObjects())
+  if (!_fe_problem.shouldPrintExecution(this->_tid) || !_nkernel_warehouse->hasActiveObjects())
     return;
 
   const auto & console = _fe_problem.console();

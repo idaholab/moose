@@ -20,8 +20,10 @@ class AuxiliarySystem;
  * This class evaluates a single mortar nodal aux kernel
  */
 template <typename AuxKernelType>
-class ComputeMortarNodalAuxBndThread
-  : public ThreadedNodeLoop<ConstBndNodeRange, ConstBndNodeRange::const_iterator>
+class ComputeMortarNodalAuxBndThread final
+  : public ThreadedNodeLoop<ConstBndNodeRange,
+                            ConstBndNodeRange::const_iterator,
+                            ComputeMortarNodalAuxBndThread<AuxKernelType>>
 {
 public:
   ComputeMortarNodalAuxBndThread(FEProblemBase & fe_problem,
@@ -31,7 +33,7 @@ public:
   // Splitting Constructor
   ComputeMortarNodalAuxBndThread(ComputeMortarNodalAuxBndThread & x, Threads::split split);
 
-  void onNode(ConstBndNodeRange::const_iterator & node_it) override;
+  void onNode(ConstBndNodeRange::const_iterator & node_it);
   void join(const ComputeMortarNodalAuxBndThread & /*y*/);
 
 protected:
