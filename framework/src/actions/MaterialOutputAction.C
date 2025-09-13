@@ -404,16 +404,21 @@ MaterialOutputAction::outputHelper(const MaterialOutputAction::OutputMetaData & 
   if (index_symbols == "variable_size")
   {
     variable_size = true;
-    if (const auto vsmi = dynamic_cast<const VariableSizeMaterialPropertiesInterface *>(&material))
+    size_inner = 0;
+    const auto vsmi = dynamic_cast<const VariableSizeMaterialPropertiesInterface *>(&material);
+    if (vsmi)
       size_inner = vsmi->getVectorPropertySize(property_name);
-    else
+
+    if (!size_inner)
     {
-      size_inner = 1;
-      mooseInfoRepeated("Only the first component of vector material property '" + property_name +
-                        "' will be output. If you require all components, add the "
-                        "'VariableSizeMaterialPropertiesInterface' to the base classes of your "
-                        "Material and implement the get...Size(property_name) routines. Note that "
-                        "the size must be known during initialization.");
+      mooseWarning("Vector material property '" + property_name + "' will not be output as we " +
+                   (vsmi ? "have a 0-size vector during the simulation setup."
+                         : "do not know the size of the vector at initialization. Add the "
+                           "'VariableSizeMaterialPropertiesInterface' as a base class of the "
+                           "Material defining the vector property and implement the "
+                           "get...Size(property_name) routine. Note that "
+                           "the size must be known during the simulation setup phase."));
+      return {};
     }
     // Use indices as symbols
     for (const auto i : make_range(size_inner))
