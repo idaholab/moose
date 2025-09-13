@@ -1,22 +1,22 @@
-#include "VariationalDerivativeAction.h"
+#include "AutomaticWeakFormAction.h"
 #include "FEProblem.h"
 #include "Factory.h"
 #include "MooseError.h"
 #include "libmesh/string_to_enum.h"
 #include "StringExpressionParser.h"
 
-registerMooseAction("MooseApp", VariationalDerivativeAction, "add_variable");
-registerMooseAction("MooseApp", VariationalDerivativeAction, "add_aux_variable");
-registerMooseAction("MooseApp", VariationalDerivativeAction, "add_kernel");
-registerMooseAction("MooseApp", VariationalDerivativeAction, "add_aux_kernel");
-registerMooseAction("MooseApp", VariationalDerivativeAction, "add_bc");
+registerMooseAction("MooseApp", AutomaticWeakFormAction, "add_variable");
+registerMooseAction("MooseApp", AutomaticWeakFormAction, "add_aux_variable");
+registerMooseAction("MooseApp", AutomaticWeakFormAction, "add_kernel");
+registerMooseAction("MooseApp", AutomaticWeakFormAction, "add_aux_kernel");
+registerMooseAction("MooseApp", AutomaticWeakFormAction, "add_bc");
 
 InputParameters
-VariationalDerivativeAction::validParams()
+AutomaticWeakFormAction::validParams()
 {
   InputParameters params = Action::validParams();
   
-  params.addClassDescription("Automatically sets up weak form from energy functional");
+  params.addClassDescription("Automatically generates weak form from energy functionals or strong form equations");
   
   MooseEnum energy_types("expression double_well elastic_linear elastic_neohookean "
                           "surface_isotropic surface_anisotropic cahn_hilliard "
@@ -115,7 +115,7 @@ VariationalDerivativeAction::validParams()
   return params;
 }
 
-VariationalDerivativeAction::VariationalDerivativeAction(const InputParameters & params)
+AutomaticWeakFormAction::AutomaticWeakFormAction(const InputParameters & params)
   : Action(params)
 {
   // Initialize member variables
@@ -179,7 +179,7 @@ VariationalDerivativeAction::VariationalDerivativeAction(const InputParameters &
 }
 
 void
-VariationalDerivativeAction::act()
+AutomaticWeakFormAction::act()
 {
   // Check if we're using strong forms instead of energy functionals
   bool using_strong_forms = isParamValid("strong_forms") && !getParam<std::vector<std::string>>("strong_forms").empty();
@@ -236,7 +236,7 @@ VariationalDerivativeAction::act()
 }
 
 void
-VariationalDerivativeAction::parseEnergyFunctional()
+AutomaticWeakFormAction::parseEnergyFunctional()
 {
   buildEnergyFromType();
   
@@ -245,7 +245,7 @@ VariationalDerivativeAction::parseEnergyFunctional()
 }
 
 void
-VariationalDerivativeAction::buildEnergyFromType()
+AutomaticWeakFormAction::buildEnergyFromType()
 {
   switch (_energy_type)
   {
@@ -348,7 +348,7 @@ VariationalDerivativeAction::buildEnergyFromType()
 }
 
 void
-VariationalDerivativeAction::buildDoubleWellEnergy()
+AutomaticWeakFormAction::buildDoubleWellEnergy()
 {
   if (_variable_names.empty())
     mooseError("At least one variable required");
@@ -359,7 +359,7 @@ VariationalDerivativeAction::buildDoubleWellEnergy()
 }
 
 void
-VariationalDerivativeAction::buildElasticEnergy()
+AutomaticWeakFormAction::buildElasticEnergy()
 {
   if (_variable_names.size() < _problem->mesh().dimension())
     mooseError("Elastic energy requires displacement components");
@@ -376,7 +376,7 @@ VariationalDerivativeAction::buildElasticEnergy()
 }
 
 void
-VariationalDerivativeAction::buildNeoHookeanEnergy()
+AutomaticWeakFormAction::buildNeoHookeanEnergy()
 {
   if (_variable_names.size() < _problem->mesh().dimension())
     mooseError("Neo-Hookean energy requires displacement components");
@@ -393,7 +393,7 @@ VariationalDerivativeAction::buildNeoHookeanEnergy()
 }
 
 void
-VariationalDerivativeAction::buildSurfaceEnergy()
+AutomaticWeakFormAction::buildSurfaceEnergy()
 {
   if (_variable_names.empty())
     mooseError("At least one variable required");
@@ -405,7 +405,7 @@ VariationalDerivativeAction::buildSurfaceEnergy()
 }
 
 void
-VariationalDerivativeAction::buildCahnHilliardEnergy()
+AutomaticWeakFormAction::buildCahnHilliardEnergy()
 {
   if (_variable_names.empty())
     mooseError("At least one variable required");
@@ -425,7 +425,7 @@ VariationalDerivativeAction::buildCahnHilliardEnergy()
 }
 
 void
-VariationalDerivativeAction::buildFourthOrderCahnHilliardEnergy()
+AutomaticWeakFormAction::buildFourthOrderCahnHilliardEnergy()
 {
   if (_variable_names.empty())
     mooseError("At least one variable required");
@@ -449,19 +449,19 @@ VariationalDerivativeAction::buildFourthOrderCahnHilliardEnergy()
 }
 
 void
-VariationalDerivativeAction::buildPhaseFieldCrystalEnergy()
+AutomaticWeakFormAction::buildPhaseFieldCrystalEnergy()
 {
   mooseError("Phase field crystal energy not yet implemented");
 }
 
 void
-VariationalDerivativeAction::buildNavierStokesEnergy()
+AutomaticWeakFormAction::buildNavierStokesEnergy()
 {
   mooseError("Navier-Stokes energy not yet implemented");
 }
 
 void
-VariationalDerivativeAction::analyzeVariables()
+AutomaticWeakFormAction::analyzeVariables()
 {
   for (const auto & var_name : _variable_names)
   {
@@ -483,7 +483,7 @@ VariationalDerivativeAction::analyzeVariables()
 }
 
 void
-VariationalDerivativeAction::setupVariableSplitting()
+AutomaticWeakFormAction::setupVariableSplitting()
 {
   _split_variables = _split_analyzer->generateSplitVariables(_energy_functional);
   
@@ -505,7 +505,7 @@ VariationalDerivativeAction::setupVariableSplitting()
 }
 
 void
-VariationalDerivativeAction::addPrimaryVariables()
+AutomaticWeakFormAction::addPrimaryVariables()
 {
   for (const auto & var_name : _variable_names)
   {
@@ -523,7 +523,7 @@ VariationalDerivativeAction::addPrimaryVariables()
 }
 
 void
-VariationalDerivativeAction::addSplitVariables()
+AutomaticWeakFormAction::addSplitVariables()
 {
   for (const auto & [name, sv] : _split_variables)
   {
@@ -541,7 +541,7 @@ VariationalDerivativeAction::addSplitVariables()
 }
 
 void
-VariationalDerivativeAction::addKernels()
+AutomaticWeakFormAction::addKernels()
 {
   // Handle multiple energy expressions for coupled systems
   if (!_multiple_energies.empty())
@@ -566,7 +566,7 @@ VariationalDerivativeAction::addKernels()
 }
 
 void
-VariationalDerivativeAction::generateKernelForVariable(
+AutomaticWeakFormAction::generateKernelForVariable(
     const std::string & var_name,
     const moose::automatic_weak_form::NodePtr & weak_form)
 {
@@ -593,7 +593,7 @@ VariationalDerivativeAction::generateKernelForVariable(
 }
 
 void
-VariationalDerivativeAction::addAuxKernels()
+AutomaticWeakFormAction::addAuxKernels()
 {
   moose::automatic_weak_form::SplitVariableKernelGenerator gen;
   auto kernel_infos = gen.generateKernels(_split_variables);
@@ -611,12 +611,12 @@ VariationalDerivativeAction::addAuxKernels()
 }
 
 void
-VariationalDerivativeAction::addBoundaryConditions()
+AutomaticWeakFormAction::addBoundaryConditions()
 {
 }
 
 std::string
-VariationalDerivativeAction::generateKernelName(const std::string & var_name, const std::string & suffix)
+AutomaticWeakFormAction::generateKernelName(const std::string & var_name, const std::string & suffix)
 {
   std::string name = var_name + "_variational";
   if (!suffix.empty())
@@ -625,7 +625,7 @@ VariationalDerivativeAction::generateKernelName(const std::string & var_name, co
 }
 
 void
-VariationalDerivativeAction::writeWeakFormToFile()
+AutomaticWeakFormAction::writeWeakFormToFile()
 {
   std::ofstream file(_weak_form_file);
   
@@ -661,7 +661,7 @@ VariationalDerivativeAction::writeWeakFormToFile()
 }
 
 void
-VariationalDerivativeAction::performConservationCheck()
+AutomaticWeakFormAction::performConservationCheck()
 {
   for (const auto & [var_name, weak_form] : _weak_forms)
   {
@@ -676,7 +676,7 @@ VariationalDerivativeAction::performConservationCheck()
 }
 
 void
-VariationalDerivativeAction::performStabilityAnalysis()
+AutomaticWeakFormAction::performStabilityAnalysis()
 {
   auto analysis = _problem_analyzer->analyze(_energy_functional, _variable_names);
   
@@ -703,7 +703,7 @@ VariationalDerivativeAction::performStabilityAnalysis()
 }
 
 void
-VariationalDerivativeAction::parseStrongForms()
+AutomaticWeakFormAction::parseStrongForms()
 {
   // Create parser
   moose::automatic_weak_form::StringExpressionParser parser(_problem->mesh().dimension());
@@ -766,7 +766,7 @@ VariationalDerivativeAction::parseStrongForms()
 }
 
 void
-VariationalDerivativeAction::deriveWeakForms()
+AutomaticWeakFormAction::deriveWeakForms()
 {
   // For each strong form equation, derive the weak form
   // This involves:
@@ -791,7 +791,7 @@ VariationalDerivativeAction::deriveWeakForms()
 }
 
 void
-VariationalDerivativeAction::addTimeDerivativeKernels()
+AutomaticWeakFormAction::addTimeDerivativeKernels()
 {
   // Add TimeDerivative kernels for transient terms
   for (const auto & [var_name, eq] : _strong_form_equations)
@@ -809,7 +809,7 @@ VariationalDerivativeAction::addTimeDerivativeKernels()
 }
 
 void
-VariationalDerivativeAction::addExpressionKernels()
+AutomaticWeakFormAction::addExpressionKernels()
 {
   // Add ExpressionEvaluationKernel for each equation's residual
   for (const auto & [var_name, eq] : _strong_form_equations)

@@ -42,9 +42,9 @@
   []
 []
 
-[VariationalProblem]
+[AutomaticWeakForm]
   [coupled_pf_mechanics]
-    type = VariationalDerivativeAction
+    type = AutomaticWeakFormAction
     energy_type = expression
     
     # Intermediate expressions for clarity and reuse

@@ -38,9 +38,9 @@
   []
 []
 
-[VariationalProblem]
+[AutomaticWeakForm]
   [coupled_system]
-    type = VariationalDerivativeAction
+    type = AutomaticWeakFormAction
     energy_type = expression
     
     # Define intermediate expressions first

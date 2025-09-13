@@ -32,9 +32,9 @@
   []
 []
 
-[VariationalProblem]
+[AutomaticWeakForm]
   [cahn_hilliard_system]
-    type = VariationalDerivativeAction
+    type = AutomaticWeakFormAction
     energy_type = expression
     
     # Intermediate expressions (semicolon-separated)

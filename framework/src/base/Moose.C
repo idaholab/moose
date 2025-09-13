@@ -723,6 +723,8 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("NEML2ActionCommon", "NEML2");
   registerSyntax("NEML2Action", "NEML2/*");
 
+  registerSyntax("AutomaticWeakFormAction", "AutomaticWeakForm/*");
+
   addActionTypes(syntax);
 }
 

@@ -21,9 +21,9 @@
   []
 []
 
-[VariationalProblem]
+[AutomaticWeakForm]
   [cahn_hilliard]
-    type = VariationalDerivativeAction
+    type = AutomaticWeakFormAction
     
     # Use expression type with string parsing
     energy_type = expression

@@ -33,10 +33,10 @@
   []
 []
 
-[VariationalProblem]
+[AutomaticWeakForm]
   # Chemical free energy
   [chemical_energy]
-    type = VariationalDerivativeAction
+    type = AutomaticWeakFormAction
     energy_type = expression
     energy_expression = 'W(c) + 0.5*kappa*dot(grad(c), grad(c))'
     parameters = 'kappa=0.01'
@@ -46,7 +46,7 @@
   
   # Elastic energy with concentration coupling
   [elastic_energy]
-    type = VariationalDerivativeAction
+    type = AutomaticWeakFormAction
     energy_type = expression
     
     # Define strain: ε = sym(∇u)

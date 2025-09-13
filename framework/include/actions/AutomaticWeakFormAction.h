@@ -7,12 +7,12 @@
 #include "VariableSplitting.h"
 #include "StringExpressionParser.h"
 
-class VariationalDerivativeAction : public Action
+class AutomaticWeakFormAction : public Action
 {
 public:
   static InputParameters validParams();
   
-  VariationalDerivativeAction(const InputParameters & params);
+  AutomaticWeakFormAction(const InputParameters & params);
   
   virtual void act() override;
   
