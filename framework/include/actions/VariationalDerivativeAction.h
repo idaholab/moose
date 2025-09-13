@@ -131,6 +131,8 @@ private:
   
   std::map<std::string, moose::automatic_weak_form::NodePtr> _weak_forms;
   
+  std::map<std::string, moose::automatic_weak_form::NodePtr> _multiple_energies;
+  
   std::map<std::string, moose::automatic_weak_form::SplitVariable> _split_variables;
   
   std::map<std::string, std::map<std::string, moose::automatic_weak_form::NodePtr>> _jacobian_blocks;

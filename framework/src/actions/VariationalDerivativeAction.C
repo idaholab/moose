@@ -27,6 +27,12 @@ VariationalDerivativeAction::validParams()
   params.addParam<std::string>("energy_expression", "", 
                                 "Mathematical expression for custom energy (e.g., 'W(c) + 0.5*kappa*dot(grad(c), grad(c))')");
   
+  params.addParam<std::map<std::string, std::string>>("energy_expressions", 
+                                                        "Multiple energy expressions for coupled systems (var_name => expression)");
+  
+  params.addParam<std::map<std::string, std::string>>("expressions", 
+                                                        "Intermediate expressions (e.g., strain = 'sym(grad(u))')");
+  
   params.addParam<std::map<std::string, Real>>("parameters", 
                                                  "Parameters used in the energy expression (e.g., kappa=1.0)");
   
@@ -220,8 +226,6 @@ VariationalDerivativeAction::buildEnergyFromType()
   switch (_energy_type)
   {
     case EnergyType::EXPRESSION:
-      if (_energy_expression.empty())
-        mooseError("Energy expression required for expression type");
       {
         // Use the new string parser for arbitrary expressions
         moose::automatic_weak_form::StringExpressionParser parser(_problem->mesh().dimension());
@@ -237,9 +241,32 @@ VariationalDerivativeAction::buildEnergyFromType()
         // Define variables
         for (const auto & var_name : _variable_names)
           parser.defineVariable(var_name);
+        for (const auto & var_name : _coupled_variable_names)
+          parser.defineVariable(var_name);
         
-        // Parse the expression
-        _energy_functional = parser.parse(_energy_expression);
+        // Define intermediate expressions if provided
+        if (isParamValid("expressions"))
+        {
+          const auto & expressions = getParam<std::map<std::string, std::string>>("expressions");
+          for (const auto & [name, expr] : expressions)
+            parser.defineExpression(name, expr);
+        }
+        
+        // Handle multiple energy expressions for coupled systems
+        if (isParamValid("energy_expressions"))
+        {
+          const auto & energy_exprs = getParam<std::map<std::string, std::string>>("energy_expressions");
+          _multiple_energies = parser.parseMultipleEnergies(energy_exprs);
+        }
+        else if (!_energy_expression.empty())
+        {
+          // Single energy expression
+          _energy_functional = parser.parse(_energy_expression);
+        }
+        else
+        {
+          mooseError("Either energy_expression or energy_expressions must be provided for expression type");
+        }
       }
       break;
       
@@ -476,12 +503,25 @@ VariationalDerivativeAction::addSplitVariables()
 void
 VariationalDerivativeAction::addKernels()
 {
-  for (const auto & var_name : _variable_names)
+  // Handle multiple energy expressions for coupled systems
+  if (!_multiple_energies.empty())
   {
-    auto weak_form = _weak_form_gen->generateWeakForm(_energy_functional, var_name);
-    _weak_forms[var_name] = weak_form;
-    
-    generateKernelForVariable(var_name, weak_form);
+    for (const auto & [var_name, energy] : _multiple_energies)
+    {
+      auto weak_form = _weak_form_gen->generateWeakForm(energy, var_name);
+      _weak_forms[var_name] = weak_form;
+      generateKernelForVariable(var_name, weak_form);
+    }
+  }
+  // Handle single energy expression
+  else if (_energy_functional)
+  {
+    for (const auto & var_name : _variable_names)
+    {
+      auto weak_form = _weak_form_gen->generateWeakForm(_energy_functional, var_name);
+      _weak_forms[var_name] = weak_form;
+      generateKernelForVariable(var_name, weak_form);
+    }
   }
 }
 

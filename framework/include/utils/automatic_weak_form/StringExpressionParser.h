@@ -40,6 +40,14 @@ public:
   // Define variables
   void defineVariable(const std::string & name, const Shape & shape = ScalarShape{});
   
+  // Define intermediate expressions (e.g., strain = sym(grad(u)))
+  void defineExpression(const std::string & name, const std::string & expression);
+  void defineExpression(const std::string & name, const NodePtr & expr);
+  
+  // Parse multiple energy functionals for coupled systems
+  std::map<std::string, NodePtr> parseMultipleEnergies(
+      const std::map<std::string, std::string> & energy_expressions);
+  
 private:
   unsigned int _dim;
   std::map<std::string, Real> _parameters;
@@ -48,6 +56,8 @@ private:
   std::map<std::string, Shape> _variables;
   std::map<std::string, std::string> _custom_functions;
   std::map<std::string, std::map<std::string, std::string>> _custom_derivatives;
+  std::map<std::string, NodePtr> _expressions;  // Stored intermediate expressions
+  std::map<std::string, std::string> _expression_strings;  // String versions for parsing
   
   // Tokenizer
   struct Token
@@ -128,6 +138,7 @@ private:
   NodePtr parseDev(const std::vector<NodePtr> & args);
   NodePtr parseContract(const std::vector<NodePtr> & args);
   NodePtr parseOuter(const std::vector<NodePtr> & args);
+  NodePtr parseVec(const std::vector<NodePtr> & args);  // Assemble vector from components
   
   // Standard mathematical functions
   NodePtr parseExp(const std::vector<NodePtr> & args);
@@ -200,6 +211,28 @@ inline void StringExpressionParser::setParameter(const std::string & name, Real 
 inline void StringExpressionParser::defineVariable(const std::string & name, const Shape & shape)
 {
   _variables[name] = shape;
+}
+
+inline void StringExpressionParser::defineExpression(const std::string & name, const std::string & expression)
+{
+  _expression_strings[name] = expression;
+  _expressions[name] = parse(expression);
+}
+
+inline void StringExpressionParser::defineExpression(const std::string & name, const NodePtr & expr)
+{
+  _expressions[name] = expr;
+}
+
+inline std::map<std::string, NodePtr> 
+StringExpressionParser::parseMultipleEnergies(const std::map<std::string, std::string> & energy_expressions)
+{
+  std::map<std::string, NodePtr> energies;
+  for (const auto & [var_name, expr] : energy_expressions)
+  {
+    energies[var_name] = parse(expr);
+  }
+  return energies;
 }
 
 inline NodePtr StringExpressionParser::parseExpression(Tokenizer & tokenizer)
@@ -302,8 +335,10 @@ inline NodePtr StringExpressionParser::parsePrimary(Tokenizer & tokenizer)
       }
       else
       {
-        // Check if it's a parameter or variable
-        if (_parameters.count(token.value))
+        // Check if it's a defined expression, parameter, or variable
+        if (_expressions.count(token.value))
+          return _expressions[token.value];
+        else if (_parameters.count(token.value))
           return constant(_parameters[token.value]);
         else if (_variables.count(token.value))
           return fieldVariable(token.value, _variables[token.value]);
@@ -388,6 +423,8 @@ inline NodePtr StringExpressionParser::parseFunction(const std::string & name, T
     return parseContract(args);
   else if (name == "outer")
     return parseOuter(args);
+  else if (name == "vec" || name == "vector")
+    return parseVec(args);
   else if (name == "exp")
     return parseExp(args);
   else if (name == "log" || name == "ln")
@@ -541,6 +578,24 @@ inline NodePtr StringExpressionParser::parseSqrt(const std::vector<NodePtr> & ar
   if (args.size() != 1)
     mooseError("sqrt() requires exactly 1 argument");
   return power(args[0], constant(0.5));
+}
+
+inline NodePtr StringExpressionParser::parseVec(const std::vector<NodePtr> & args)
+{
+  if (args.size() < 2 || args.size() > 3)
+    mooseError("vec() requires 2 or 3 arguments (for 2D or 3D vectors)");
+  
+  // Create a vector from scalar components
+  if (args.size() == 2)
+  {
+    // 2D vector
+    return vec2(args[0], args[1]);
+  }
+  else
+  {
+    // 3D vector
+    return vec3(args[0], args[1], args[2]);
+  }
 }
 
 // Tokenizer implementation

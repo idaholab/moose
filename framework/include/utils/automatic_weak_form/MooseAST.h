@@ -47,7 +47,8 @@ enum class NodeType
   Deviatoric,
   Function,
   TensorComponent,
-  VectorComponent
+  VectorComponent,
+  VectorAssembly
 };
 
 class Node : public std::enable_shared_from_this<Node>
@@ -394,6 +395,54 @@ private:
   std::vector<NodePtr> _args;
 };
 
+class VectorAssemblyNode : public Node
+{
+public:
+  VectorAssemblyNode(const std::vector<NodePtr> & components, const Shape & shape)
+    : Node(NodeType::VectorAssembly, shape), _components(components) {}
+  
+  const std::vector<NodePtr> & components() const { return _components; }
+  
+  std::vector<NodePtr> children() const override { return _components; }
+  
+  std::string toString() const override
+  {
+    std::string result = "vec(";
+    for (size_t i = 0; i < _components.size(); ++i)
+    {
+      if (i > 0)
+        result += ", ";
+      result += _components[i]->toString();
+    }
+    result += ")";
+    return result;
+  }
+  
+  NodePtr clone() const override
+  {
+    std::vector<NodePtr> cloned_components;
+    for (const auto & comp : _components)
+      cloned_components.push_back(comp->clone());
+    return std::make_shared<VectorAssemblyNode>(cloned_components, _shape);
+  }
+  
+  bool equals(const Node & other) const override
+  {
+    if (other.type() != _type)
+      return false;
+    auto & va = static_cast<const VectorAssemblyNode &>(other);
+    if (_components.size() != va._components.size())
+      return false;
+    for (size_t i = 0; i < _components.size(); ++i)
+      if (!_components[i]->equals(*va._components[i]))
+        return false;
+    return true;
+  }
+  
+private:
+  std::vector<NodePtr> _components;
+};
+
 class ComponentNode : public Node
 {
 public:
@@ -643,6 +692,18 @@ inline NodePtr skew(const NodePtr & a)
 inline NodePtr dev(const NodePtr & a)
 {
   return std::make_shared<UnaryOpNode>(NodeType::Deviatoric, a, a->shape());
+}
+
+inline NodePtr vec2(const NodePtr & x, const NodePtr & y)
+{
+  std::vector<NodePtr> components = {x, y};
+  return std::make_shared<VectorAssemblyNode>(components, VectorShape{2});
+}
+
+inline NodePtr vec3(const NodePtr & x, const NodePtr & y, const NodePtr & z)
+{
+  std::vector<NodePtr> components = {x, y, z};
+  return std::make_shared<VectorAssemblyNode>(components, VectorShape{3});
 }
 
 inline NodePtr function(const std::string & name, const std::vector<NodePtr> & args, 
