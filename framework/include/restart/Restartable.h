@@ -105,6 +105,13 @@ public:
               const bool read_only = false,
               const RestartableDataMapName & metaname = "");
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  Restartable(const Restartable & object, const Moose::Kokkos::FunctorCopy & key);
+#endif
+
 protected:
   /**
    * Declare a piece of data as "restartable" and initialize it.

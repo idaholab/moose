@@ -23,5 +23,13 @@ class BoundaryRestrictableRequired : public BoundaryRestrictable
 public:
   BoundaryRestrictableRequired(const MooseObject * moose_object, bool nodal);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  BoundaryRestrictableRequired(const BoundaryRestrictableRequired & object,
+                               const Moose::Kokkos::FunctorCopy & key);
+#endif
+
   static InputParameters validParams();
 };

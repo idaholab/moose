@@ -31,6 +31,16 @@ UserObjectInterface::UserObjectInterface(const MooseObject * moose_object)
 {
 }
 
+#ifdef MOOSE_KOKKOS_ENABLED
+UserObjectInterface::UserObjectInterface(const UserObjectInterface & object,
+                                         const Moose::Kokkos::FunctorCopy &)
+  : _uoi_moose_object(object._uoi_moose_object),
+    _uoi_feproblem(object._uoi_feproblem),
+    _uoi_tid(object._uoi_tid)
+{
+}
+#endif
+
 UserObjectName
 UserObjectInterface::getUserObjectName(const std::string & param_name) const
 {

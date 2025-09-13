@@ -13,9 +13,11 @@ endif
 
 # We ignore this in the contrib folder because we will set up the include
 # directories manually later
-IGNORE_CONTRIB_INC ?= libtorch mfem neml2
+IGNORE_CONTRIB_INC ?= libtorch mfem neml2 kokkos
 ENABLE_LIBTORCH ?= false
 ENABLE_MFEM ?= false
+ENABLE_KOKKOS ?= false
+ENABLE_KOKKOS_GPU ?= true
 
 # this allows us to modify the linked names/rpaths safely later for install targets
 ifneq (,$(findstring darwin,$(libmesh_HOST)))
@@ -485,6 +487,34 @@ endif
 wasp_submodule_status:
 	@if [ x$(wasp_submodule_message) != "x" ]; then printf $(wasp_submodule_message); exit 1; fi
 
+# Kokkos for MOOSE
+
+app_KOKKOS_LIBS :=
+
+ifeq ($(ENABLE_KOKKOS),true)
+
+MOOSE_KOKKOS_SRC_FILES := $(shell find $(FRAMEWORK_DIR) -name "*.K")
+MOOSE_KOKKOS_OBJECTS   := $(patsubst %.K, %.$(KOKKOS_OBJ_SUFFIX), $(MOOSE_KOKKOS_SRC_FILES))
+MOOSE_KOKKOS_DEPS      := $(patsubst %.$(KOKKOS_OBJ_SUFFIX), %.$(KOKKOS_OBJ_SUFFIX).d, $(MOOSE_KOKKOS_OBJECTS))
+MOOSE_KOKKOS_LIB       := $(FRAMEWORK_DIR)/libmoose_kokkos-$(METHOD).so
+
+KOKKOS_OBJECTS := $(MOOSE_KOKKOS_OBJECTS)
+KOKKOS_DEPS    := $(MOOSE_KOKKOS_DEPS)
+
+-include $(MOOSE_KOKKOS_DEPS)
+
+ifeq ($(MOOSE_HEADER_SYMLINKS),true)
+  $(KOKKOS_OBJECTS): $(moose_config_symlink) | moose_header_symlinks
+else
+  $(KOKKOS_OBJECTS): $(moose_config)
+endif
+
+$(MOOSE_KOKKOS_LIB): $(MOOSE_KOKKOS_OBJECTS)
+	@echo "Linking Kokkos Library "$@"..."
+	@$(KOKKOS_CXX) --shared -o $@ $(MOOSE_KOKKOS_OBJECTS) $(KOKKOS_LDFLAGS) $(KOKKOS_LIBS)
+
+endif
+
 # Pre-make for checking current dependency versions and showing useful warnings
 # if things like conda packages are out of date. The variable is such that
 # rules can use $(prebuild), instead of prebuild, as a prerequisite. In those
@@ -532,14 +562,14 @@ $(hit_LIB): $(hit_objects)
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(hit_LIB) $(HIT_DIR)
 
 ifeq ($(MOOSE_UNITY),true)
-$(moose_LIB): $(moose_objects) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB) $(moose_revision_header)
+$(moose_LIB): $(moose_objects) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB) $(moose_revision_header) $(MOOSE_KOKKOS_LIB)
 	@echo "Linking Library "$@"..."
 	@bash -c '$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
 	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(moose_objects) $(pcre_LIB) $(png_LIB) $(LDFLAGS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) -rpath $(FRAMEWORK_DIR) ${SILENCE_SOME_WARNINGS}'
 	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(moose_LIB) $(FRAMEWORK_DIR)
 else
 # We avoid bash -c outside unity build mode because there would be too many arguments and it triggers an error
-$(moose_LIB): $(moose_objects) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB) $(moose_revision_header)
+$(moose_LIB): $(moose_objects) $(pcre_LIB) $(gtest_LIB) $(hit_LIB) $(pyhit_LIB) $(moose_revision_header) $(MOOSE_KOKKOS_LIB)
 	@echo "Linking Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
 	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(moose_objects) $(pcre_LIB) $(png_LIB) $(LDFLAGS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) -rpath $(FRAMEWORK_DIR)
@@ -682,6 +712,9 @@ app_EXEC := $(exodiff_APP)
 app_LIB  := $(moose_LIBS) $(gtest_LIB) $(pyhit_LIB)
 app_objects := $(moose_objects) $(exodiff_objects) $(pcre_objects) $(gtest_objects) $(hit_objects)
 app_deps := $(moose_deps) $(exodiff_deps) $(pcre_deps) $(gtest_deps) $(hit_deps)
+app_KOKKOS_OBJECTS := $(MOOSE_KOKKOS_OBJECTS)
+app_KOKKOS_DEPS := $(MOOSE_KOKKOS_DEPS)
+app_KOKKOS_LIB := $(MOOSE_KOKKOS_LIB)
 
 # The clean target removes everything we can remove "easily",
 # i.e. stuff which we have Makefile variables for.  Notes:
@@ -694,6 +727,7 @@ app_deps := $(moose_deps) $(exodiff_deps) $(pcre_deps) $(gtest_deps) $(hit_deps)
 clean:
 	@$(libmesh_LIBTOOL) --mode=uninstall --quiet rm -f $(app_LIB) $(app_test_LIB)
 	@rm -rf $(app_EXEC) $(app_objects) $(main_object) $(app_deps) $(app_HEADER) $(app_test_objects) $(app_unity_srcfiles)
+	@rm -rf $(app_KOKKOS_LIB) $(app_KOKKOS_OBJECTS) $(app_KOKKOS_DEPS)
 	@rm -rf $(APPLICATION_DIR)/build
 
 # The clobber target does 'make clean' and then uses 'find' to clean a
@@ -742,17 +776,34 @@ ADRealMonolithic.h: $(MOOSE_DIR)/framework/include/utils/ADReal.h
 	@$(libmesh_CXX) -E $(libmesh_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) -imacros cmath -x c++-header $< > $@
 
 compile_commands_all_srcfiles := $(moose_srcfiles) $(srcfiles)
+compile_commands_all_kokkos_srcfiles := $(MOOSE_KOKKOS_SRC_FILES)
 compile_commands.json:
 ifeq (4.0,$(firstword $(sort $(MAKE_VERSION) 4.0)))
+# Standard C++ sources
 	$(file > .compile_commands.json,$(CURDIR))
 	$(file >> .compile_commands.json,$(libmesh_CXX))
 	$(file >> .compile_commands.json,$(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) $(ADDITIONAL_INCLUDES))
 	$(file >> .compile_commands.json,$(compile_commands_all_srcfiles))
+ifeq ($(ENABLE_KOKKOS),true)
+# Kokkos sources
+	$(file >> .compile_commands.json,$(CURDIR))
+	$(file >> .compile_commands.json,$(KOKKOS_CXX))
+	$(file >> .compile_commands.json,$(KOKKOS_CXXFLAGS) $(KOKKOS_CPPFLAGS) $(KOKKOS_INCLUDE) $(app_INCLUDES))
+	$(file >> .compile_commands.json,$(compile_commands_all_kokkos_srcfiles))
+endif
 else
+# Standard C++ sources
 	@echo $(CURDIR) > .compile_commands.json
 	@echo $(libmesh_CXX) >> .compile_commands.json
 	@echo $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) $(CXXFLAGS) $(libmesh_CXXFLAGS) $(app_INCLUDES) $(libmesh_INCLUDE) $(ADDITIONAL_INCLUDES) >> .compile_commands.json
 	@echo $(compile_commands_all_srcfiles) >> .compile_commands.json
+ifeq ($(ENABLE_KOKKOS),true)
+# Kokkos sources
+	@echo $(CURDIR) >> .compile_commands.json
+	@echo $(KOKKOS_CXX) >> .compile_commands.json
+	@echo $(KOKKOS_CXXFLAGS) $(KOKKOS_CPPFLAGS) $(KOKKOS_INCLUDE) $(app_INCLUDES) >> .compile_commands.json
+	@echo $(compile_commands_all_kokkos_srcfiles) >> .compile_commands.json
+endif
 endif
 	@$(FRAMEWORK_DIR)/scripts/compile_commands.py < .compile_commands.json > compile_commands.json
 	@rm .compile_commands.json
@@ -775,3 +826,9 @@ echo_app_objects:
 
 echo_app_deps:
 	@echo $(app_deps)
+
+echo_kokkos_objects:
+	@echo $(KOKKOS_OBJECTS)
+
+echo_kokkos_deps:
+	@echo $(KOKKOS_DEPS)

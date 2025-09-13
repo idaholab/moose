@@ -57,6 +57,13 @@ const std::string not_shared_error =
     "shared pointer. Make sure this object is build using Factory::create(...).";
 }
 
+#ifdef MOOSE_KOKKOS_ENABLED
+MooseObject::MooseObject(const MooseObject & object, const Moose::Kokkos::FunctorCopy &)
+  : ParallelParamObject(object), _enabled(object._enabled)
+{
+}
+#endif
+
 std::shared_ptr<MooseObject>
 MooseObject::getSharedPtr()
 {

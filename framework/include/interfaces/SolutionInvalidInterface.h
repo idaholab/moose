@@ -37,7 +37,15 @@ class FEProblemBase;
 class SolutionInvalidInterface
 {
 public:
-  SolutionInvalidInterface(MooseObject * const moose_object);
+  SolutionInvalidInterface(const MooseObject * const moose_object);
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  SolutionInvalidInterface(const SolutionInvalidInterface & object,
+                           const Moose::Kokkos::FunctorCopy & key);
+#endif
 
 protected:
   template <bool warning>
@@ -49,8 +57,8 @@ protected:
 
 private:
   /// The MooseObject that owns this interface
-  MooseObject & _si_moose_object;
+  const MooseObject & _si_moose_object;
 
   /// A reference to FEProblem base
-  FEProblemBase & _si_problem;
+  const FEProblemBase & _si_problem;
 };

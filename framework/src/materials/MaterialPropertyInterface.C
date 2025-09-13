@@ -60,8 +60,19 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
     _mi_feproblem(*_mi_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _mi_subproblem(*_mi_params.getCheckedPointerParam<SubProblem *>("_subproblem")),
     _mi_tid(_mi_params.get<THREAD_ID>("_tid")),
+#ifdef MOOSE_KOKKOS_ENABLED
+    _is_kokkos_object(_mi_moose_object.isKokkosObject({})),
+#else
+    _is_kokkos_object(false),
+#endif
     _material_data_type(getMaterialDataType(boundary_ids)),
-    _material_data(_mi_feproblem.getMaterialData(_material_data_type, _mi_tid)),
+    _material_data(
+#ifdef MOOSE_KOKKOS_ENABLED
+        _is_kokkos_object
+            ? _mi_feproblem.getKokkosMaterialData(_material_data_type, moose_object)
+            :
+#endif
+            _mi_feproblem.getMaterialData(_material_data_type, _mi_tid, moose_object)),
     _stateful_allowed(true),
     _get_material_property_called(false),
     _get_suffix(_mi_params.get<MaterialPropertyName>("prop_getter_suffix")),
@@ -72,6 +83,30 @@ MaterialPropertyInterface::MaterialPropertyInterface(const MooseObject * moose_o
 {
   moose_object->getMooseApp().registerInterfaceObject(*this);
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+MaterialPropertyInterface::MaterialPropertyInterface(const MaterialPropertyInterface & object,
+                                                     const Moose::Kokkos::FunctorCopy &)
+  : _mi_moose_object(object._mi_moose_object),
+    _mi_params(object._mi_params),
+    _mi_name(object._mi_name),
+    _mi_moose_object_name(object._mi_moose_object_name),
+    _mi_feproblem(object._mi_feproblem),
+    _mi_subproblem(object._mi_subproblem),
+    _mi_tid(object._mi_tid),
+    _is_kokkos_object(object._is_kokkos_object),
+    _material_data_type(object._material_data_type),
+    _material_data(object._material_data),
+    _stateful_allowed(object._stateful_allowed),
+    _get_material_property_called(object._get_material_property_called),
+    _get_suffix(object._get_suffix),
+    _use_interpolated_state(object._use_interpolated_state),
+    _mi_boundary_restricted(object._mi_boundary_restricted),
+    _mi_block_ids(object._mi_block_ids),
+    _mi_boundary_ids(object._mi_boundary_ids)
+{
+}
+#endif
 
 MaterialPropertyName
 MaterialPropertyInterface::getMaterialPropertyName(const std::string & name) const
