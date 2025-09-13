@@ -132,9 +132,8 @@ ExpressionEvaluationKernel::ExpressionEvaluationKernel(const InputParameters & p
   // Register coupled variables
   for (size_t i = 0; i < _coupled_var_names.size(); ++i)
   {
-    // Get the actual variable object to get its number
-    const MooseVariableFieldBase & coupled_var = getCoupledVariable(_coupled_var_names[i]);
-    _evaluator->registerVariable(_coupled_var_names[i], coupled_var.number());
+    // Use the coupled variable ID directly - it's already the variable number
+    _evaluator->registerVariable(_coupled_var_names[i], _coupled_var_ids[i]);
   }
 }
 
