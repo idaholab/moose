@@ -125,28 +125,39 @@ ExpressionEvaluationKernel::ExpressionEvaluationKernel(const InputParameters & p
   
   // Create the expression evaluator
   _evaluator = std::make_unique<moose::automatic_weak_form::ExpressionEvaluator>(_mesh.dimension());
+  
+  // Register variable name to number mappings for efficient lookup
+  _evaluator->registerVariable(_var.name(), _var.number());
+  
+  // Register coupled variables
+  for (size_t i = 0; i < _coupled_var_names.size(); ++i)
+  {
+    // Get the actual variable object to get its number
+    const MooseVariableFieldBase & coupled_var = getCoupledVariable(_coupled_var_names[i]);
+    _evaluator->registerVariable(_coupled_var_names[i], coupled_var.number());
+  }
 }
 
 void
 ExpressionEvaluationKernel::setupEvaluationContext()
 {
-  // Set current quadrature point values
-  _evaluator->setFieldValue(_var.name(), _u[_qp]);
-  _evaluator->setFieldGradient(_var.name(), _grad_u[_qp]);
+  // Set current quadrature point values using variable number for efficiency
+  _evaluator->setFieldValue(_var.number(), _u[_qp]);
+  _evaluator->setFieldGradient(_var.number(), _grad_u[_qp]);
   
   // Set test function values
-  _evaluator->setTestFunction(_var.name(), _test[_i][_qp]);
-  _evaluator->setTestGradient(_var.name(), _grad_test[_i][_qp]);
+  _evaluator->setTestFunction(_var.number(), _test[_i][_qp]);
+  _evaluator->setTestGradient(_var.number(), _grad_test[_i][_qp]);
   
   // Set shape function values for Jacobian
-  _evaluator->setShapeFunction(_var.name(), _phi[_j][_qp]);
-  _evaluator->setShapeGradient(_var.name(), _grad_phi[_j][_qp]);
+  _evaluator->setShapeFunction(_var.number(), _phi[_j][_qp]);
+  _evaluator->setShapeGradient(_var.number(), _grad_phi[_j][_qp]);
   
   // Set coupled variable values
-  for (size_t i = 0; i < _coupled_var_names.size(); ++i)
+  for (size_t i = 0; i < _coupled_var_ids.size(); ++i)
   {
-    _evaluator->setFieldValue(_coupled_var_names[i], (*_coupled_vals[i])[_qp]);
-    _evaluator->setFieldGradient(_coupled_var_names[i], (*_coupled_grads[i])[_qp]);
+    _evaluator->setFieldValue(_coupled_var_ids[i], (*_coupled_vals[i])[_qp]);
+    _evaluator->setFieldGradient(_coupled_var_ids[i], (*_coupled_grads[i])[_qp]);
   }
   
   // Set current position
@@ -203,14 +214,8 @@ ExpressionEvaluationKernel::computeQpOffDiagJacobian(unsigned int jvar)
   }
   else if (_use_ad)
   {
-    // Find the variable name for jvar
-    for (size_t i = 0; i < _coupled_var_ids.size(); ++i)
-    {
-      if (_coupled_var_ids[i] == jvar)
-      {
-        return _evaluator->evaluateDerivative(_residual_expr, _coupled_var_names[i]);
-      }
-    }
+    // Use variable number directly for AD - more efficient
+    return _evaluator->evaluateDerivativeByVarNum(_residual_expr, jvar);
   }
   
   return 0.0;
