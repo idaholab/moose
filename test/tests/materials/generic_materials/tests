@@ -63,7 +63,7 @@
       detail = 'with constant values using automatic differentiation.'
     [../]
   [../]
-  [./symmetric_realvectorvalue]
+  [realvectorvalue]
     requirement = 'The system shall be able to compute a RealVectorValue material property'
     [./constant]
       type = 'Exodiff'
@@ -75,6 +75,22 @@
       type = 'Exodiff'
       input = 'ad_generic_constant_real_vector_value.i'
       exodiff = 'ad_generic_constant_real_vector_value_out.e'
+      detail = 'with constant values using automatic differentiation.'
+    [../]
+  [../]
+  [vector_of_real]
+    requirement = 'The system shall be able to compute a standard vector of real material property'
+    [./constant]
+      type = 'Exodiff'
+      input = 'generic_constant_real_vector.i'
+      exodiff = 'generic_constant_real_vector_out.e'
+      detail = 'with constant values.'
+    [../]
+    [./ad_constant]
+      type = 'Exodiff'
+      input = 'generic_constant_real_vector.i'
+      cli_args = 'Materials/vector/type=ADGenericConstantVectorMaterial'
+      exodiff = 'ad_generic_constant_real_vector_out.e'
       detail = 'with constant values using automatic differentiation.'
     [../]
   [../]
