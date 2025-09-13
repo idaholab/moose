@@ -1750,7 +1750,7 @@ public:
    */
   const ADVectorVariableCurl & getADDefaultCurl() const;
 
-private:
+protected:
   /**
    * Helper method to return (and insert if necessary) the default value
    * for an uncoupled variable.
@@ -1784,6 +1784,7 @@ private:
   template <typename T>
   const Moose::Functor<T> & getDefaultFunctor(const std::string & var_name) const;
 
+private:
   /// Maximum qps for any element in this system
   unsigned int _coupleable_max_qps;
 
