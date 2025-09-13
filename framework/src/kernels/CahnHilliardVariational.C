@@ -65,7 +65,7 @@ CahnHilliardVariational::buildEnergyFunctional()
   _bulk_energy = _builder->doubleWell(c, _well_height);
 
   auto grad_c = grad(c, _mesh.dimension());
-  _gradient_energy = multiply(constant(0.5 * _kappa), dot(grad_c, grad_c));
+  _gradient_energy = multiply(constant(0.5 * _kappa), moose::automatic_weak_form::dot(grad_c, grad_c));
 
   _total_energy = add(_bulk_energy, _gradient_energy);
 
@@ -130,11 +130,11 @@ CahnHilliardVariational::computeJacobian()
 }
 
 void
-CahnHilliardVariational::computeOffDiagJacobian(const MooseVariableFEBase & jvar)
+CahnHilliardVariational::computeOffDiagJacobian(unsigned int jvar)
 {
-  if (_split_formulation && jvar.number() == _mu_var && _use_analytical_jacobian)
+  if (_split_formulation && jvar == _mu_var && _use_analytical_jacobian)
   {
-    prepareMatrixTag(_assembly, _var.number(), jvar.number());
+    prepareMatrixTag(_assembly, _var.number(), jvar);
 
     for (_qp = 0; _qp < _qrule->n_points(); _qp++)
     {
@@ -306,7 +306,7 @@ AllenCahnVariational::AllenCahnVariational(const InputParameters & parameters)
     auto eta = _builder->field(_var.name());
     auto bulk = _builder->doubleWell(eta);
     auto grad_eta = grad(eta, _mesh.dimension());
-    auto gradient = multiply(constant(0.5 * _kappa), dot(grad_eta, grad_eta));
+    auto gradient = multiply(constant(0.5 * _kappa), moose::automatic_weak_form::dot(grad_eta, grad_eta));
 
     _energy_density = add(bulk, gradient);
     computeVariationalDerivative();

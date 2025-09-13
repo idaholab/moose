@@ -62,17 +62,17 @@ VariationalKernelBase::validParams()
 
 VariationalKernelBase::VariationalKernelBase(const InputParameters & parameters)
   : Kernel(parameters),
+    _has_time_derivatives(getParam<bool>("has_time_derivatives")),
+    _compute_jacobian_numerically(getParam<bool>("compute_jacobian_numerically")),
+    _fd_eps(getParam<Real>("fd_eps")),
     _gradient_coefficient(getParam<Real>("gradient_coefficient")),
     _fourth_order_coefficient(getParam<Real>("fourth_order_coefficient")),
     _elastic_lambda(getParam<Real>("elastic_lambda")),
     _elastic_mu(getParam<Real>("elastic_mu")),
     _surface_energy_coefficient(getParam<Real>("surface_energy_coefficient")),
     _use_automatic_differentiation(getParam<bool>("use_automatic_differentiation")),
-    _compute_jacobian_numerically(getParam<bool>("compute_jacobian_numerically")),
-    _fd_eps(getParam<Real>("fd_eps")),
     _enable_variable_splitting(getParam<bool>("enable_variable_splitting")),
-    _fe_order(getParam<unsigned int>("fe_order")),
-    _has_time_derivatives(getParam<bool>("has_time_derivatives"))
+    _fe_order(getParam<unsigned int>("fe_order"))
 {
   _builder = std::make_unique<MooseExpressionBuilder>(_mesh.dimension());
   _weak_form_gen = std::make_unique<WeakFormGenerator>(_mesh.dimension());
@@ -103,7 +103,10 @@ VariationalKernelBase::VariationalKernelBase(const InputParameters & parameters)
 
   if (isParamValid("coupled_variables"))
   {
-    _coupled_variable_names = getParam<std::vector<VariableName>>("coupled_variables");
+    auto variable_names = getParam<std::vector<VariableName>>("coupled_variables");
+    _coupled_variable_names.clear();
+    for (const auto & var_name : variable_names)
+      _coupled_variable_names.push_back(var_name);
     setupCoupledVariables();
   }
 
@@ -151,7 +154,7 @@ VariationalKernelBase::initializeExpression()
       auto c = _builder->field(_var.name());
       auto grad_c = grad(c, _mesh.dimension());
       auto bulk = _builder->doubleWell(c);
-      auto gradient = multiply(constant(0.5 * _gradient_coefficient), dot(grad_c, grad_c));
+      auto gradient = multiply(constant(0.5 * _gradient_coefficient), moose::automatic_weak_form::dot(grad_c, grad_c));
       _energy_density = add(bulk, gradient);
       break;
     }
@@ -161,7 +164,7 @@ VariationalKernelBase::initializeExpression()
       auto c = _builder->field(_var.name());
       auto grad_c = grad(c, _mesh.dimension());
       auto bulk = _builder->doubleWell(c);
-      auto gradient = multiply(constant(0.5 * _gradient_coefficient), dot(grad_c, grad_c));
+      auto gradient = multiply(constant(0.5 * _gradient_coefficient), moose::automatic_weak_form::dot(grad_c, grad_c));
       auto fourth = _builder->fourthOrderRegularization(c, _fourth_order_coefficient);
       _energy_density = add(add(bulk, gradient), fourth);
       break;
@@ -262,17 +265,10 @@ VariationalKernelBase::computeQpJacobian()
 {
   if (_compute_jacobian_numerically)
   {
-    Real u_orig = _u[_qp];
-
-    _u[_qp] = u_orig + _fd_eps;
-    Real res_plus = computeQpResidual();
-
-    _u[_qp] = u_orig - _fd_eps;
-    Real res_minus = computeQpResidual();
-
-    _u[_qp] = u_orig;
-
-    return (res_plus - res_minus) / (2.0 * _fd_eps) * _phi[_j][_qp];
+    // Numerical Jacobian computation disabled - _u is const in MOOSE
+    // Use automatic differentiation or analytical Jacobian instead
+    mooseWarning("Numerical Jacobian computation not available, using base class implementation");
+    return Kernel::computeQpJacobian();
   }
 
   if (!_use_automatic_differentiation)
@@ -510,7 +506,7 @@ VariationalKernelBase::evaluateAtQP(const NodePtr & expr, unsigned int qp)
       auto binary = std::static_pointer_cast<BinaryOpNode>(expr);
       auto left_val = evaluateAtQP(binary->left(), qp);
       auto right_val = evaluateAtQP(binary->right(), qp);
-      return dot(left_val, right_val);
+      return moose::automatic_weak_form::dot(left_val, right_val);
     }
 
     case NodeType::Norm:

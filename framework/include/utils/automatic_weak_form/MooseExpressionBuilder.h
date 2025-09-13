@@ -170,7 +170,7 @@ public:
     return add(bulk, interface);
   }
   
-  NodePtr cahnHilliard(const NodePtr & c_field, const NodePtr & mu_field, 
+  NodePtr cahnHilliard(const NodePtr & /*c_field*/, const NodePtr & mu_field, 
                         const NodePtr & mobility)
   {
     auto grad_mu = grad(mu_field, _dim);

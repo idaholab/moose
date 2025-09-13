@@ -1,4 +1,4 @@
-#include "automatic_weak_form/WeakFormGenerator.h"
+#include "WeakFormGenerator.h"
 #include "MooseError.h"
 #include <algorithm>
 #include <cmath>
@@ -139,7 +139,10 @@ Differential DifferentiationVisitor::visitUnaryOp(const UnaryOpNode * node)
       Differential result;
       if (operand_diff.hasOrder(0))
       {
-        auto invA = node;
+        // For inverse: d(A^-1) = -A^-1 * dA * A^-1
+        // The node itself represents inv(A), so we reuse it
+        auto unary = static_cast<const UnaryOpNode *>(node);
+        auto invA = inv(unary->operand());
         auto dA = operand_diff.coefficients[0];
         auto dinvA = negate(multiply(invA, multiply(dA, invA)));
         result.coefficients[0] = dinvA;
@@ -228,7 +231,11 @@ Differential DifferentiationVisitor::visitFunction(const FunctionNode * node)
     if (arg_diff.hasOrder(0))
     {
       auto dW_dc = function("dW_dc", {node->args()[0]});
-      result = applyChainRule(dW_dc, arg_diff);
+      for (auto & [order, coeff] : arg_diff.coefficients)
+      {
+        if (coeff)
+          result.coefficients[order] = multiply(dW_dc, coeff);
+      }
     }
   }
   else if (node->name() == "log" && node->args().size() == 1)
@@ -237,7 +244,11 @@ Differential DifferentiationVisitor::visitFunction(const FunctionNode * node)
     if (arg_diff.hasOrder(0))
     {
       auto one_over_arg = divide(constant(1.0), node->args()[0]);
-      result = applyChainRule(one_over_arg, arg_diff);
+      for (auto & [order, coeff] : arg_diff.coefficients)
+      {
+        if (coeff)
+          result.coefficients[order] = multiply(one_over_arg, coeff);
+      }
     }
   }
   else if (node->name() == "exp" && node->args().size() == 1)
@@ -246,7 +257,11 @@ Differential DifferentiationVisitor::visitFunction(const FunctionNode * node)
     if (arg_diff.hasOrder(0))
     {
       auto exp_arg = function("exp", {node->args()[0]});
-      result = applyChainRule(exp_arg, arg_diff);
+      for (auto & [order, coeff] : arg_diff.coefficients)
+      {
+        if (coeff)
+          result.coefficients[order] = multiply(exp_arg, coeff);
+      }
     }
   }
   else if (node->name() == "sin" && node->args().size() == 1)
@@ -255,7 +270,11 @@ Differential DifferentiationVisitor::visitFunction(const FunctionNode * node)
     if (arg_diff.hasOrder(0))
     {
       auto cos_arg = function("cos", {node->args()[0]});
-      result = applyChainRule(cos_arg, arg_diff);
+      for (auto & [order, coeff] : arg_diff.coefficients)
+      {
+        if (coeff)
+          result.coefficients[order] = multiply(cos_arg, coeff);
+      }
     }
   }
   else if (node->name() == "cos" && node->args().size() == 1)
@@ -264,7 +283,11 @@ Differential DifferentiationVisitor::visitFunction(const FunctionNode * node)
     if (arg_diff.hasOrder(0))
     {
       auto neg_sin = negate(function("sin", {node->args()[0]}));
-      result = applyChainRule(neg_sin, arg_diff);
+      for (auto & [order, coeff] : arg_diff.coefficients)
+      {
+        if (coeff)
+          result.coefficients[order] = multiply(neg_sin, coeff);
+      }
     }
   }
   

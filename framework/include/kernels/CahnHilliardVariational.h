@@ -18,7 +18,7 @@ protected:
 
   virtual void computeJacobian() override;
 
-  virtual void computeOffDiagJacobian(const MooseVariableFEBase & jvar) override;
+  virtual void computeOffDiagJacobian(unsigned int jvar) override;
 
 private:
   void buildEnergyFunctional();

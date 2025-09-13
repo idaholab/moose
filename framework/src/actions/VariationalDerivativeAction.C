@@ -1,8 +1,9 @@
-#include "actions/VariationalDerivativeAction.h"
+#include "VariationalDerivativeAction.h"
 #include "FEProblem.h"
 #include "Factory.h"
 #include "MooseError.h"
 #include "libmesh/string_to_enum.h"
+#include "StringExpressionParser.h"
 
 registerMooseAction("MooseApp", VariationalDerivativeAction, "add_variable");
 registerMooseAction("MooseApp", VariationalDerivativeAction, "add_aux_variable");
@@ -24,7 +25,10 @@ VariationalDerivativeAction::validParams()
                                       "Type of energy functional");
   
   params.addParam<std::string>("energy_expression", "", 
-                                "Mathematical expression for custom energy");
+                                "Mathematical expression for custom energy (e.g., 'W(c) + 0.5*kappa*dot(grad(c), grad(c))')");
+  
+  params.addParam<std::map<std::string, Real>>("parameters", 
+                                                 "Parameters used in the energy expression (e.g., kappa=1.0)");
   
   params.addRequiredParam<std::vector<std::string>>("variables", 
                                                       "Primary variables for the problem");
@@ -218,7 +222,25 @@ VariationalDerivativeAction::buildEnergyFromType()
     case EnergyType::EXPRESSION:
       if (_energy_expression.empty())
         mooseError("Energy expression required for expression type");
-      _energy_functional = _expr_builder->parseExpression(_energy_expression);
+      {
+        // Use the new string parser for arbitrary expressions
+        moose::automatic_weak_form::StringExpressionParser parser(_problem->mesh().dimension());
+        
+        // Register parameters if provided
+        if (isParamValid("parameters"))
+        {
+          const auto & params = getParam<std::map<std::string, Real>>("parameters");
+          for (const auto & [name, value] : params)
+            parser.setParameter(name, value);
+        }
+        
+        // Define variables
+        for (const auto & var_name : _variable_names)
+          parser.defineVariable(var_name);
+        
+        // Parse the expression
+        _energy_functional = parser.parse(_energy_expression);
+      }
       break;
       
     case EnergyType::DOUBLE_WELL:
@@ -440,7 +462,7 @@ VariationalDerivativeAction::addSplitVariables()
   {
     const auto & info = _variable_info[sv.name];
     
-    if (_problem->hasAuxVariable(sv.name))
+    if (_problem->hasVariable(sv.name))
       continue;
     
     InputParameters params = _factory.getValidParams("MooseVariable");
@@ -480,7 +502,12 @@ VariationalDerivativeAction::generateKernelForVariable(
   params.set<unsigned int>("fe_order") = _max_fe_order;
   
   if (!_coupled_variable_names.empty())
-    params.set<std::vector<VariableName>>("coupled_variables") = _coupled_variable_names;
+  {
+    std::vector<VariableName> coupled_vars;
+    for (const auto & name : _coupled_variable_names)
+      coupled_vars.push_back(name);
+    params.set<std::vector<VariableName>>("coupled_variables") = coupled_vars;
+  }
   
   _problem->addKernel("VariationalKernelBase", kernel_name, params);
 }

@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Action.h"
-#include "automatic_weak_form/MooseAST.h"
-#include "automatic_weak_form/MooseExpressionBuilder.h"
-#include "automatic_weak_form/WeakFormGenerator.h"
-#include "automatic_weak_form/VariableSplitting.h"
+#include "MooseAST.h"
+#include "MooseExpressionBuilder.h"
+#include "WeakFormGenerator.h"
+#include "VariableSplitting.h"
 
 class VariationalDerivativeAction : public Action
 {
