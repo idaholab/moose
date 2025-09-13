@@ -1,8 +1,8 @@
 clang_format:
-  - clang-format 18
+  - clang-format 19
 
 clang_tools:
-  - clang-tools 18
+  - clang-tools 19
 
 moose_python:
   - python 3.13
