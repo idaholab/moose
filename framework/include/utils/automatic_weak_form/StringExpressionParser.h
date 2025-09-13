@@ -44,9 +44,31 @@ public:
   void defineExpression(const std::string & name, const std::string & expression);
   void defineExpression(const std::string & name, const NodePtr & expr);
   
+  // Parse semicolon-separated expressions  
+  void parseExpressions(const std::string & expr_list);
+  
   // Parse multiple energy functionals for coupled systems
   std::map<std::string, NodePtr> parseMultipleEnergies(
       const std::map<std::string, std::string> & energy_expressions);
+  
+  // Strong form equation types
+  enum class EquationType
+  {
+    STEADY,      // 0 = F (no time derivative)
+    TRANSIENT    // du/dt = F (has time derivative)
+  };
+  
+  struct StrongFormEquation
+  {
+    std::string variable;
+    EquationType type;
+    NodePtr rhs;  // Right-hand side expression
+    NodePtr weak_residual;  // Derived weak form residual
+    NodePtr jacobian;  // Derived Jacobian
+  };
+  
+  // Parse strong form equations (e.g., "c_t = -div(M*grad(mu)); mu = dW/dc - kappa*laplacian(c)")
+  std::map<std::string, StrongFormEquation> parseStrongForms(const std::string & equations);
   
 private:
   unsigned int _dim;
@@ -222,6 +244,109 @@ inline void StringExpressionParser::defineExpression(const std::string & name, c
 inline void StringExpressionParser::defineExpression(const std::string & name, const NodePtr & expr)
 {
   _expressions[name] = expr;
+}
+
+inline void StringExpressionParser::parseExpressions(const std::string & expr_list)
+{
+  // Split by semicolons
+  std::vector<std::string> expressions;
+  std::stringstream ss(expr_list);
+  std::string expr;
+  
+  while (std::getline(ss, expr, ';'))
+  {
+    // Trim whitespace
+    expr.erase(0, expr.find_first_not_of(" \t\n"));
+    expr.erase(expr.find_last_not_of(" \t\n") + 1);
+    
+    if (expr.empty())
+      continue;
+    
+    // Look for assignment
+    size_t eq_pos = expr.find('=');
+    if (eq_pos != std::string::npos)
+    {
+      std::string name = expr.substr(0, eq_pos);
+      std::string rhs = expr.substr(eq_pos + 1);
+      
+      // Trim whitespace from name and rhs
+      name.erase(0, name.find_first_not_of(" \t"));
+      name.erase(name.find_last_not_of(" \t") + 1);
+      rhs.erase(0, rhs.find_first_not_of(" \t"));
+      rhs.erase(rhs.find_last_not_of(" \t") + 1);
+      
+      defineExpression(name, rhs);
+    }
+  }
+}
+
+inline std::map<std::string, StringExpressionParser::StrongFormEquation>
+StringExpressionParser::parseStrongForms(const std::string & equations)
+{
+  std::map<std::string, StrongFormEquation> result;
+  
+  // Split by semicolons
+  std::vector<std::string> eqns;
+  std::stringstream ss(equations);
+  std::string eq;
+  
+  while (std::getline(ss, eq, ';'))
+  {
+    // Trim whitespace
+    eq.erase(0, eq.find_first_not_of(" \t\n"));
+    eq.erase(eq.find_last_not_of(" \t\n") + 1);
+    
+    if (eq.empty())
+      continue;
+    
+    // Look for equals sign
+    size_t eq_pos = eq.find('=');
+    if (eq_pos == std::string::npos)
+      mooseError("Invalid equation format (missing '='): " + eq);
+    
+    std::string lhs = eq.substr(0, eq_pos);
+    std::string rhs = eq.substr(eq_pos + 1);
+    
+    // Trim whitespace
+    lhs.erase(0, lhs.find_first_not_of(" \t"));
+    lhs.erase(lhs.find_last_not_of(" \t") + 1);
+    rhs.erase(0, rhs.find_first_not_of(" \t"));
+    rhs.erase(rhs.find_last_not_of(" \t") + 1);
+    
+    StrongFormEquation sfe;
+    
+    // Check if LHS has time derivative notation
+    if (lhs.size() > 2 && lhs.substr(lhs.size() - 2) == "_t")
+    {
+      // Time derivative: c_t = F
+      sfe.variable = lhs.substr(0, lhs.size() - 2);
+      sfe.type = EquationType::TRANSIENT;
+    }
+    else if (lhs.size() > 4 && lhs.substr(0, 3) == "dt(" && lhs.back() == ')')
+    {
+      // Alternative notation: dt(c) = F
+      sfe.variable = lhs.substr(3, lhs.size() - 4);
+      sfe.type = EquationType::TRANSIENT;
+    }
+    else
+    {
+      // Steady state: c = F means 0 = F - c, but usually we want mu = expression
+      sfe.variable = lhs;
+      sfe.type = EquationType::STEADY;
+    }
+    
+    // Parse the RHS expression
+    sfe.rhs = parse(rhs);
+    
+    // TODO: Derive weak form and Jacobian here
+    // For now, just store the RHS
+    sfe.weak_residual = sfe.rhs;
+    sfe.jacobian = nullptr;
+    
+    result[sfe.variable] = sfe;
+  }
+  
+  return result;
 }
 
 inline std::map<std::string, NodePtr> 

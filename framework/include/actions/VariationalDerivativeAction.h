@@ -5,6 +5,7 @@
 #include "MooseExpressionBuilder.h"
 #include "WeakFormGenerator.h"
 #include "VariableSplitting.h"
+#include "StringExpressionParser.h"
 
 class VariationalDerivativeAction : public Action
 {
@@ -133,6 +134,8 @@ private:
   
   std::map<std::string, moose::automatic_weak_form::NodePtr> _multiple_energies;
   
+  std::map<std::string, moose::automatic_weak_form::StringExpressionParser::StrongFormEquation> _strong_form_equations;
+  
   std::map<std::string, moose::automatic_weak_form::SplitVariable> _split_variables;
   
   std::map<std::string, std::map<std::string, moose::automatic_weak_form::NodePtr>> _jacobian_blocks;
@@ -191,6 +194,12 @@ private:
   void performStabilityAnalysis();
   
   void estimateSystemConditionNumber();
+  
+  // Strong form handling
+  void parseStrongForms();
+  void addTimeDerivativeKernels();
+  void addExpressionKernels();
+  void deriveWeakForms();
   
   void reportAnalysisResults();
   

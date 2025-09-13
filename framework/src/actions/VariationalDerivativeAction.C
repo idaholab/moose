@@ -30,8 +30,11 @@ VariationalDerivativeAction::validParams()
   params.addParam<std::map<std::string, std::string>>("energy_expressions", 
                                                         "Multiple energy expressions for coupled systems (var_name => expression)");
   
-  params.addParam<std::map<std::string, std::string>>("expressions", 
-                                                        "Intermediate expressions (e.g., strain = 'sym(grad(u))')");
+  params.addParam<std::string>("expressions", "", 
+                                "Semicolon-separated intermediate expressions (e.g., 'u = vec(disp_x, disp_y); strain = sym(grad(u))')");
+  
+  params.addParam<std::string>("strong_forms", "",
+                                "Semicolon-separated strong form equations (e.g., 'c_t = -div(M*grad(mu)); mu = dW/dc - kappa*laplacian(c)')");
   
   params.addParam<std::map<std::string, Real>>("parameters", 
                                                  "Parameters used in the energy expression (e.g., kappa=1.0)");
@@ -113,30 +116,32 @@ VariationalDerivativeAction::validParams()
 }
 
 VariationalDerivativeAction::VariationalDerivativeAction(const InputParameters & params)
-  : Action(params),
-    _energy_expression(getParam<std::string>("energy_expression")),
-    _variable_names(getParam<std::vector<std::string>>("variables")),
-    _enable_splitting(getParam<bool>("enable_splitting")),
-    _max_fe_order(getParam<unsigned int>("max_fe_order")),
-    _use_automatic_differentiation(getParam<bool>("use_automatic_differentiation")),
-    _compute_jacobian_numerically(getParam<bool>("compute_jacobian_numerically")),
-    _fd_epsilon(getParam<Real>("fd_epsilon")),
-    _add_time_derivative(getParam<bool>("add_time_derivative")),
-    _time_derivative_type(getParam<std::string>("time_derivative_type")),
-    _enable_stabilization(getParam<bool>("enable_stabilization")),
-    _stabilization_type(getParam<std::string>("stabilization_type")),
-    _stabilization_parameter(getParam<Real>("stabilization_parameter")),
-    _symmetrize_jacobian(getParam<bool>("symmetrize_jacobian")),
-    _use_preconditioner(getParam<bool>("use_preconditioner")),
-    _preconditioner_type(getParam<std::string>("preconditioner_type")),
-    _adaptive_splitting(getParam<bool>("adaptive_splitting")),
-    _splitting_tolerance(getParam<Real>("splitting_tolerance")),
-    _output_weak_form(getParam<bool>("output_weak_form")),
-    _weak_form_file(getParam<std::string>("weak_form_file")),
-    _validate_conservation(getParam<bool>("validate_conservation")),
-    _check_stability(getParam<bool>("check_stability")),
-    _estimate_condition_number(getParam<bool>("estimate_condition_number"))
+  : Action(params)
 {
+  // Initialize member variables
+  _energy_expression = getParam<std::string>("energy_expression");
+  _variable_names = getParam<std::vector<std::string>>("variables");
+  _enable_splitting = getParam<bool>("enable_splitting");
+  _max_fe_order = getParam<unsigned int>("max_fe_order");
+  _use_automatic_differentiation = getParam<bool>("use_automatic_differentiation");
+  _compute_jacobian_numerically = getParam<bool>("compute_jacobian_numerically");
+  _fd_epsilon = getParam<Real>("fd_epsilon");
+  _add_time_derivative = getParam<bool>("add_time_derivative");
+  _time_derivative_type = getParam<std::string>("time_derivative_type");
+  _enable_stabilization = getParam<bool>("enable_stabilization");
+  _stabilization_type = getParam<std::string>("stabilization_type");
+  _stabilization_parameter = getParam<Real>("stabilization_parameter");
+  _symmetrize_jacobian = getParam<bool>("symmetrize_jacobian");
+  _use_preconditioner = getParam<bool>("use_preconditioner");
+  _preconditioner_type = getParam<std::string>("preconditioner_type");
+  _adaptive_splitting = getParam<bool>("adaptive_splitting");
+  _splitting_tolerance = getParam<Real>("splitting_tolerance");
+  _output_weak_form = getParam<bool>("output_weak_form");
+  _weak_form_file = getParam<std::string>("weak_form_file");
+  _validate_conservation = getParam<bool>("validate_conservation");
+  _check_stability = getParam<bool>("check_stability");
+  _estimate_condition_number = getParam<bool>("estimate_condition_number");
+  
   std::string type_str = getParam<MooseEnum>("energy_type");
   
   if (type_str == "expression")
@@ -176,9 +181,20 @@ VariationalDerivativeAction::VariationalDerivativeAction(const InputParameters &
 void
 VariationalDerivativeAction::act()
 {
+  // Check if we're using strong forms instead of energy functionals
+  bool using_strong_forms = !getParam<std::string>("strong_forms").empty();
+  
   if (_current_task == "add_variable")
   {
-    parseEnergyFunctional();
+    if (using_strong_forms)
+    {
+      parseStrongForms();
+      deriveWeakForms();
+    }
+    else
+    {
+      parseEnergyFunctional();
+    }
     analyzeVariables();
     addPrimaryVariables();
   }
@@ -189,7 +205,15 @@ VariationalDerivativeAction::act()
   }
   else if (_current_task == "add_kernel")
   {
-    addKernels();
+    if (using_strong_forms)
+    {
+      addTimeDerivativeKernels();
+      addExpressionKernels();
+    }
+    else
+    {
+      addKernels();
+    }
   }
   else if (_current_task == "add_aux_kernel")
   {
@@ -659,5 +683,123 @@ VariationalDerivativeAction::performStabilityAnalysis()
     _console << "  Suggestions:\n";
     for (const auto & suggestion : analysis.suggestions)
       _console << "    - " << suggestion << "\n";
+  }
+}
+
+void
+VariationalDerivativeAction::parseStrongForms()
+{
+  const std::string & strong_forms_str = getParam<std::string>("strong_forms");
+  const std::string & expressions_str = getParam<std::string>("expressions");
+  
+  // Create parser
+  moose::automatic_weak_form::StringExpressionParser parser(_problem->mesh().dimension());
+  
+  // Set up parameters
+  if (isParamValid("parameters"))
+  {
+    const auto & params = getParam<std::map<std::string, Real>>("parameters");
+    for (const auto & [name, value] : params)
+      parser.setParameter(name, value);
+  }
+  
+  // Define all variables
+  for (const auto & var_name : _variable_names)
+    parser.defineVariable(var_name);
+  for (const auto & var_name : _coupled_variable_names)
+    parser.defineVariable(var_name);
+  
+  // Parse intermediate expressions
+  if (!expressions_str.empty())
+    parser.parseExpressions(expressions_str);
+  
+  // Parse strong form equations
+  _strong_form_equations = parser.parseStrongForms(strong_forms_str);
+}
+
+void
+VariationalDerivativeAction::deriveWeakForms()
+{
+  // For each strong form equation, derive the weak form
+  // This involves:
+  // 1. Multiplying by test function
+  // 2. Integrating by parts if needed
+  // 3. Computing Jacobian terms
+  
+  for (auto & [var_name, eq] : _strong_form_equations)
+  {
+    // The weak form residual for equation du/dt = F or 0 = F is:
+    // R = ∫ test * (F) dx  (after appropriate integration by parts)
+    
+    // For now, we store the RHS as the weak residual
+    // A more complete implementation would perform integration by parts
+    // on divergence terms and properly handle boundary conditions
+    
+    eq.weak_residual = eq.rhs;
+    
+    // TODO: Compute Jacobian symbolically or mark for AD
+    eq.jacobian = nullptr;
+  }
+}
+
+void
+VariationalDerivativeAction::addTimeDerivativeKernels()
+{
+  // Add TimeDerivative kernels for transient terms
+  for (const auto & [var_name, eq] : _strong_form_equations)
+  {
+    if (eq.type == moose::automatic_weak_form::StringExpressionParser::EquationType::TRANSIENT)
+    {
+      std::string kernel_name = var_name + "_time_derivative";
+      
+      InputParameters params = _factory.getValidParams("TimeDerivative");
+      params.set<NonlinearVariableName>("variable") = var_name;
+      
+      _problem->addKernel("TimeDerivative", kernel_name, params);
+    }
+  }
+}
+
+void
+VariationalDerivativeAction::addExpressionKernels()
+{
+  // Add ExpressionEvaluationKernel for each equation's residual
+  for (const auto & [var_name, eq] : _strong_form_equations)
+  {
+    std::string kernel_name = var_name + "_expression_kernel";
+    
+    InputParameters params = _factory.getValidParams("ExpressionEvaluationKernel");
+    params.set<NonlinearVariableName>("variable") = var_name;
+    
+    // Convert the NodePtr to a string representation for the kernel
+    // In a real implementation, we'd serialize the expression or pass it directly
+    params.set<std::string>("residual_expression") = eq.weak_residual->toString();
+    
+    if (eq.jacobian)
+      params.set<std::string>("jacobian_expression") = eq.jacobian->toString();
+    
+    params.set<bool>("is_transient_term") = 
+        (eq.type == moose::automatic_weak_form::StringExpressionParser::EquationType::TRANSIENT);
+    
+    // Pass parameters
+    if (isParamValid("parameters"))
+      params.set<std::map<std::string, Real>>("parameters") = getParam<std::map<std::string, Real>>("parameters");
+    
+    // Pass intermediate expressions
+    if (isParamValid("expressions"))
+      params.set<std::string>("intermediate_expressions") = getParam<std::string>("expressions");
+    
+    // Pass coupled variables
+    if (!_coupled_variable_names.empty())
+    {
+      std::vector<VariableName> coupled_vars;
+      for (const auto & name : _coupled_variable_names)
+        coupled_vars.push_back(name);
+      params.set<std::vector<VariableName>>("coupled") = coupled_vars;
+    }
+    
+    params.set<bool>("use_automatic_differentiation") = _use_automatic_differentiation;
+    
+    _problem->addKernel("ExpressionEvaluationKernel", kernel_name, params);
   }
 }
