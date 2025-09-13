@@ -30,11 +30,11 @@ VariationalDerivativeAction::validParams()
   params.addParam<std::map<std::string, std::string>>("energy_expressions", 
                                                         "Multiple energy expressions for coupled systems (var_name => expression)");
   
-  params.addParam<std::string>("expressions", "", 
-                                "Semicolon-separated intermediate expressions (e.g., 'u = vec(disp_x, disp_y); strain = sym(grad(u))')");
+  params.addParam<std::vector<std::string>>("expressions", 
+                                             "Intermediate expressions (MOOSE will split on semicolons, e.g., 'u = vec(disp_x, disp_y); strain = sym(grad(u))')");
   
-  params.addParam<std::string>("strong_forms", "",
-                                "Semicolon-separated strong form equations (e.g., 'c_t = -div(M*grad(mu)); mu = dW/dc - kappa*laplacian(c)')");
+  params.addParam<std::vector<std::string>>("strong_forms",
+                                             "Strong form equations (MOOSE will split on semicolons, e.g., 'c_t = -div(M*grad(mu)); mu = dW/dc - kappa*laplacian(c)')");
   
   params.addParam<std::map<std::string, Real>>("parameters", 
                                                  "Parameters used in the energy expression (e.g., kappa=1.0)");
@@ -182,7 +182,7 @@ void
 VariationalDerivativeAction::act()
 {
   // Check if we're using strong forms instead of energy functionals
-  bool using_strong_forms = !getParam<std::string>("strong_forms").empty();
+  bool using_strong_forms = isParamValid("strong_forms") && !getParam<std::vector<std::string>>("strong_forms").empty();
   
   if (_current_task == "add_variable")
   {
@@ -271,9 +271,25 @@ VariationalDerivativeAction::buildEnergyFromType()
         // Define intermediate expressions if provided
         if (isParamValid("expressions"))
         {
-          const auto & expressions = getParam<std::map<std::string, std::string>>("expressions");
-          for (const auto & [name, expr] : expressions)
-            parser.defineExpression(name, expr);
+          const auto & expressions = getParam<std::vector<std::string>>("expressions");
+          for (const auto & expr : expressions)
+          {
+            // Each expression should be of the form "name = expression"
+            size_t eq_pos = expr.find('=');
+            if (eq_pos != std::string::npos)
+            {
+              std::string name = expr.substr(0, eq_pos);
+              std::string rhs = expr.substr(eq_pos + 1);
+              
+              // Trim whitespace
+              name.erase(0, name.find_first_not_of(" \t"));
+              name.erase(name.find_last_not_of(" \t") + 1);
+              rhs.erase(0, rhs.find_first_not_of(" \t"));
+              rhs.erase(rhs.find_last_not_of(" \t") + 1);
+              
+              parser.defineExpression(name, rhs);
+            }
+          }
         }
         
         // Handle multiple energy expressions for coupled systems
@@ -689,9 +705,6 @@ VariationalDerivativeAction::performStabilityAnalysis()
 void
 VariationalDerivativeAction::parseStrongForms()
 {
-  const std::string & strong_forms_str = getParam<std::string>("strong_forms");
-  const std::string & expressions_str = getParam<std::string>("expressions");
-  
   // Create parser
   moose::automatic_weak_form::StringExpressionParser parser(_problem->mesh().dimension());
   
@@ -709,12 +722,47 @@ VariationalDerivativeAction::parseStrongForms()
   for (const auto & var_name : _coupled_variable_names)
     parser.defineVariable(var_name);
   
-  // Parse intermediate expressions
-  if (!expressions_str.empty())
-    parser.parseExpressions(expressions_str);
+  // Parse intermediate expressions if provided
+  if (isParamValid("expressions"))
+  {
+    const auto & expressions = getParam<std::vector<std::string>>("expressions");
+    for (const auto & expr : expressions)
+    {
+      // Each expression should be of the form "name = expression"
+      size_t eq_pos = expr.find('=');
+      if (eq_pos != std::string::npos)
+      {
+        std::string name = expr.substr(0, eq_pos);
+        std::string rhs = expr.substr(eq_pos + 1);
+        
+        // Trim whitespace
+        name.erase(0, name.find_first_not_of(" \t"));
+        name.erase(name.find_last_not_of(" \t") + 1);
+        rhs.erase(0, rhs.find_first_not_of(" \t"));
+        rhs.erase(rhs.find_last_not_of(" \t") + 1);
+        
+        parser.defineExpression(name, rhs);
+      }
+    }
+  }
   
   // Parse strong form equations
-  _strong_form_equations = parser.parseStrongForms(strong_forms_str);
+  if (isParamValid("strong_forms"))
+  {
+    const auto & strong_forms = getParam<std::vector<std::string>>("strong_forms");
+    
+    // Build a single string from the vector for the parser
+    // Or better, update parseStrongForms to accept a vector
+    std::string combined;
+    for (size_t i = 0; i < strong_forms.size(); ++i)
+    {
+      if (i > 0)
+        combined += "; ";
+      combined += strong_forms[i];
+    }
+    
+    _strong_form_equations = parser.parseStrongForms(combined);
+  }
 }
 
 void
@@ -787,7 +835,18 @@ VariationalDerivativeAction::addExpressionKernels()
     
     // Pass intermediate expressions
     if (isParamValid("expressions"))
-      params.set<std::string>("intermediate_expressions") = getParam<std::string>("expressions");
+    {
+      const auto & expressions = getParam<std::vector<std::string>>("expressions");
+      // Combine into semicolon-separated string for the kernel
+      std::string combined;
+      for (size_t i = 0; i < expressions.size(); ++i)
+      {
+        if (i > 0)
+          combined += "; ";
+        combined += expressions[i];
+      }
+      params.set<std::string>("intermediate_expressions") = combined;
+    }
     
     // Pass coupled variables
     if (!_coupled_variable_names.empty())
