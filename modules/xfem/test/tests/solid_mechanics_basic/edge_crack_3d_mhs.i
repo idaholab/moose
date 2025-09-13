@@ -158,6 +158,10 @@
   file_base = edge_crack_3d_mhs_out
   execute_on = 'timestep_end'
   exodus = true
+  [./xfemcutter]
+    type = XFEMCutMeshOutput
+    xfem_cutter_uo = cut_mesh
+  [../]
   [./console]
     type = Console
     output_linear = true

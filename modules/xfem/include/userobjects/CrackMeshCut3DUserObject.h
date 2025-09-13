@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "GeometricCutUserObject.h"
+#include "MeshCutUserObjectBase.h"
 #include "CrackFrontDefinition.h"
 
 #include <array>
@@ -22,7 +22,7 @@ class Function;
  * (3) grows the mesh based on prescribed growth functions.
  */
 
-class CrackMeshCut3DUserObject : public GeometricCutUserObject
+class CrackMeshCut3DUserObject : public MeshCutUserObjectBase
 {
 public:
   static InputParameters validParams();
@@ -75,9 +75,6 @@ public:
   unsigned int getNumberOfCrackFrontPoints() const;
 
 protected:
-  /// The cutter mesh
-  std::unique_ptr<MeshBase> _cut_mesh;
-
   /// The cutter mesh has triangluar elements only
   const unsigned int _cut_elem_nnode = 3;
   const unsigned int _cut_elem_dim = 2;
