@@ -53,13 +53,13 @@
     type = ADParsedMaterial
     f_name = 'linearized_conductivity'
     function = '10+500*forwardT'
-    args = 'forwardT'
+    coupled_variables = 'forwardT'
   []
   [dDdT]
     type = ADParsedMaterial
     f_name = 'dDdT'
     function = '500'
-    args = 'forwardT'
+    coupled_variables = 'forwardT'
   []
 []
 

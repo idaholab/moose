@@ -320,7 +320,7 @@ GrandPotentialKernelAction::act()
       InputParameters params = _factory.getValidParams("MatReaction");
       params.set<NonlinearVariableName>("variable") = w_names[i];
       params.set<std::vector<VariableName>>("v") = v4;
-      params.set<MaterialPropertyName>("mob_name") = "-1";
+      params.set<MaterialPropertyName>("reaction_rate") = "-1";
       kernel_name = "MR_c" + w_names[i];
       _problem->addKernel("MatReaction", kernel_name, params);
 
@@ -333,7 +333,7 @@ GrandPotentialKernelAction::act()
         params = _factory.getValidParams("MatReaction");
         params.set<NonlinearVariableName>("variable") = w_names[i];
         params.set<std::vector<VariableName>>("args") = v1;
-        params.set<MaterialPropertyName>("mob_name") = hj_over_kVa[j];
+        params.set<MaterialPropertyName>("reaction_rate") = hj_over_kVa[j];
         params.set<bool>("implicit") = implicity;
         params.set<bool>("use_displaced_mesh") = displaced_mesh;
         kernel_name = "MR_" + w_names[i] + "_" + all_etas[j];

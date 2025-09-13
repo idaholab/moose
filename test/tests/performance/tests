@@ -52,7 +52,7 @@
     [linux]
        type = RunApp
        input = input.i
-       capabilities = 'platform=darwin'
+       capabilities = 'platform=linux'
 
        detail = "Linux operating systems."
     []

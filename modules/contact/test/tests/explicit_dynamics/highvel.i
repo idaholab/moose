@@ -350,7 +350,7 @@
 []
 
 [Outputs]
-  interval = 2
+  time_step_interval = 2
   exodus = true
   csv = true
   execute_on = 'TIMESTEP_END'

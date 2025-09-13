@@ -175,13 +175,13 @@ cp = 1
     type = INSFVInletVelocityBC
     variable = u
     boundary = 'bottom_to_0'
-    function = 0
+    functor = 0
   []
   [inlet_v]
     type = INSFVInletVelocityBC
     variable = v
     boundary = 'bottom_to_0'
-    function = 1
+    functor = 1
   []
 
   [inlet_T]

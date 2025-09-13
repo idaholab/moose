@@ -33,23 +33,23 @@ advected_interp_method = 'upwind'
     density = ${rho}
     dynamic_viscosity = ${mu}
     passive_scalar_source = 0.1
-    passive_scalar_schmidt_number = 1.0
+    Sc_t = 1.0
 
     initial_velocity = '1 1 0'
     initial_pressure = 0.0
 
     inlet_boundaries = 'left'
     momentum_inlet_types = 'fixed-velocity'
-    momentum_inlet_function = '1 0'
+    momentum_inlet_functors = '1 0'
     passive_scalar_inlet_types = 'fixed-value'
-    passive_scalar_inlet_function = '1'
+    passive_scalar_inlet_functors = '1'
 
     wall_boundaries = 'top bottom'
     momentum_wall_types = 'noslip symmetry'
 
     outlet_boundaries = 'right'
     momentum_outlet_types = 'fixed-pressure'
-    pressure_function = '0'
+    pressure_functors = '0'
 
     von_karman_const = ${von_karman_const}
     mixing_length_delta = 1e9

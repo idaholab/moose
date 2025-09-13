@@ -49,7 +49,7 @@ inlet_scalar = 1.2
     thermal_conductivity = 'k'
     specific_heat = 'cp'
     passive_scalar_diffusivity = '10.0'
-    passive_scalar_schmidt_number = '1.0'
+    Sc_t = '1.0'
 
     initial_velocity = '${inlet_velocity} 1e-15 0'
     initial_temperature = '${inlet_temp}'
@@ -60,18 +60,18 @@ inlet_scalar = 1.2
     momentum_inlet_types = 'flux-mass'
     flux_inlet_pps = 'inlet_mdot'
     energy_inlet_types = 'flux-mass'
-    energy_inlet_function = 'inlet_T'
+    energy_inlet_functors = 'inlet_T'
     passive_scalar_inlet_types = 'flux-mass'
-    passive_scalar_inlet_function = 'inlet_scalar'
+    passive_scalar_inlet_functors = 'inlet_scalar'
 
     wall_boundaries = 'top bottom'
     momentum_wall_types = 'slip slip'
     energy_wall_types = 'heatflux heatflux'
-    energy_wall_function = '0 0'
+    energy_wall_functors = '0 0'
 
     outlet_boundaries = 'right'
     momentum_outlet_types = 'fixed-pressure'
-    pressure_function = '${outlet_pressure}'
+    pressure_functors = '${outlet_pressure}'
 
     external_heat_source = 'power_density'
 
