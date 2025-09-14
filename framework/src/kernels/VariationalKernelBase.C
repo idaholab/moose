@@ -103,7 +103,10 @@ VariationalKernelBase::VariationalKernelBase(const InputParameters & parameters)
     _energy_type = EnergyType::CUSTOM;
 
   if (isParamValid("energy_expression"))
+  {
     _energy_expression = getParam<std::string>("energy_expression");
+    Moose::out << "[DEBUG] VariationalKernelBase received energy expression: " << _energy_expression << "\n";
+  }
 
   if (isParamValid("coupled_variables"))
   {
@@ -200,16 +203,28 @@ VariationalKernelBase::computeVariationalDerivative()
   if (!_energy_density)
     mooseError("Energy density not initialized");
 
-  auto contributions = _weak_form_gen->computeContributions(_energy_density, _var.name());
+  // First check if splitting is needed
+  DifferentiationVisitor dv(_var.name());
+  auto diff = dv.differentiate(_energy_density);
 
-  _max_derivative_order = contributions.max_order;
-
-  if (_enable_variable_splitting && _weak_form_gen->requiresVariableSplitting(
-          DifferentiationVisitor(_var.name()).differentiate(_energy_density), _fe_order))
+  if (_enable_variable_splitting && _weak_form_gen->requiresVariableSplitting(diff, _fe_order))
   {
-    mooseWarning("This problem requires variable splitting for order ", _max_derivative_order,
-                 " derivatives with FE order ", _fe_order);
+    // When splitting is enabled and required, we expect the energy expression
+    // to have been transformed to use split variables by the action.
+    // For now, we'll issue an error with helpful information.
+    unsigned int max_order = 0;
+    for (const auto & [order, coeff] : diff.coefficients)
+      if (order > max_order)
+        max_order = order;
+
+    mooseError("Variable splitting is enabled but the energy expression still contains ",
+               "derivatives of order ", max_order, " which exceeds the FE order ", _fe_order, ".\n",
+               "The energy expression should have been transformed to use split variables.\n",
+               "Energy expression: ", _energy_density->toString());
   }
+
+  auto contributions = _weak_form_gen->computeContributions(_energy_density, _var.name());
+  _max_derivative_order = contributions.max_order;
 }
 
 void

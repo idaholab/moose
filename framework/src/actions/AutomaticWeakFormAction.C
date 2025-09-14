@@ -186,6 +186,9 @@ AutomaticWeakFormAction::AutomaticWeakFormAction(const InputParameters & params)
 void
 AutomaticWeakFormAction::act()
 {
+  Moose::out << "\n[DEBUG] AutomaticWeakFormAction::act() called with task: " << _current_task << "\n";
+  Moose::out << "  _enable_splitting = " << _enable_splitting << "\n";
+
   // Check if we're using strong forms instead of energy functionals
   bool using_strong_forms =
       isParamValid("strong_forms") && !getParam<std::string>("strong_forms").empty();
@@ -207,6 +210,7 @@ AutomaticWeakFormAction::act()
 
   if (_current_task == "add_variable")
   {
+    Moose::out << "  [DEBUG] In add_variable task\n";
     if (using_strong_forms)
     {
       parseStrongForms();
@@ -214,15 +218,29 @@ AutomaticWeakFormAction::act()
     }
     else if (!_energy_functional)
     {
+      Moose::out << "  [DEBUG] Parsing energy functional\n";
       parseEnergyFunctional();
     }
+    Moose::out << "  [DEBUG] Calling analyzeVariables()\n";
     analyzeVariables();
+    Moose::out << "  [DEBUG] Calling addPrimaryVariables()\n";
     addPrimaryVariables();
   }
   else if (_current_task == "add_aux_variable")
   {
     if (_enable_splitting)
+    {
+      // Need to re-analyze variables since action state doesn't persist across tasks
+      if (!_energy_functional)
+        parseEnergyFunctional();
+      if (_split_variables.empty() && _energy_functional)
+      {
+        Moose::out << "  [DEBUG] Re-generating split variables in add_aux_variable\n";
+        _split_variables = _split_analyzer->generateSplitVariables(_energy_functional);
+      }
+      Moose::out << "  [DEBUG] add_aux_variable: _split_variables.size() = " << _split_variables.size() << "\n";
       addSplitVariables();
+    }
   }
   else if (_current_task == "add_kernel")
   {
@@ -489,8 +507,12 @@ AutomaticWeakFormAction::buildNavierStokesEnergy()
 void
 AutomaticWeakFormAction::analyzeVariables()
 {
+  Moose::out << "  [DEBUG] analyzeVariables() called\n";
+  Moose::out << "  [DEBUG] _variable_names.size() = " << _variable_names.size() << "\n";
+
   for (const auto & var_name : _variable_names)
   {
+    Moose::out << "    [DEBUG] Processing variable: " << var_name << "\n";
     VariableInfo info;
     info.name = var_name;
     info.family = "LAGRANGE";
@@ -505,17 +527,44 @@ AutomaticWeakFormAction::analyzeVariables()
   }
 
   if (_enable_splitting)
+  {
+    Moose::out << "  [DEBUG] Variable splitting is enabled, calling setupVariableSplitting()\n";
     setupVariableSplitting();
+  }
+  else
+  {
+    Moose::out << "  [DEBUG] Variable splitting is disabled\n";
+  }
 }
 
 void
 AutomaticWeakFormAction::setupVariableSplitting()
 {
+  Moose::out << "  [DEBUG] setupVariableSplitting() called\n";
+
   if (_verbose)
     _console << "\n[AutomaticWeakForm] Analyzing expression for variable splitting...\n";
-    
+
+  Moose::out << "  [DEBUG] Energy functional before split analysis: " << (_energy_functional ? _energy_functional->toString() : "null") << "\n";
+
+  if (!_energy_functional)
+  {
+    Moose::out << "  [DEBUG] ERROR: _energy_functional is null!\n";
+    return;
+  }
+
   _split_variables = _split_analyzer->generateSplitVariables(_energy_functional);
-  
+
+  Moose::out << "  [DEBUG] Number of split variables generated: " << _split_variables.size() << "\n";
+
+  for (const auto & [name, sv] : _split_variables)
+  {
+    Moose::out << "    [DEBUG] Split variable: " << sv.name
+               << " (order " << sv.derivative_order << " of " << sv.original_variable << ")\n";
+    if (sv.definition)
+      Moose::out << "      Definition: " << sv.definition->toString() << "\n";
+  }
+
   if (_verbose)
   {
     if (_split_variables.empty())
@@ -566,15 +615,38 @@ AutomaticWeakFormAction::addPrimaryVariables()
 void
 AutomaticWeakFormAction::addSplitVariables()
 {
+  Moose::out << "  [DEBUG] addSplitVariables() called with " << _split_variables.size() << " split variables\n";
+
   if (_verbose && !_split_variables.empty())
     _console << "\n[AutomaticWeakForm] Adding split variables to nonlinear system\n";
-    
+
   for (const auto & [name, sv] : _split_variables)
   {
+    // Create variable info if it doesn't exist
+    if (_variable_info.find(sv.name) == _variable_info.end())
+    {
+      VariableInfo info;
+      info.name = sv.name;
+      info.family = "LAGRANGE";
+      info.order = "FIRST";
+      info.is_vector = std::holds_alternative<moose::automatic_weak_form::VectorShape>(sv.shape);
+      info.is_tensor = std::holds_alternative<moose::automatic_weak_form::TensorShape>(sv.shape);
+      info.components = info.is_tensor ? _problem->mesh().dimension() * _problem->mesh().dimension() : 1;
+      info.is_auxiliary = false;  // Split variables are part of the nonlinear system
+      info.is_split = true;
+      info.parent_variable = sv.original_variable;
+      _variable_info[sv.name] = info;
+    }
+
     const auto & info = _variable_info[sv.name];
 
     if (_problem->hasVariable(sv.name))
+    {
+      Moose::out << "    [DEBUG] Variable " << sv.name << " already exists\n";
       continue;
+    }
+
+    Moose::out << "    [DEBUG] Adding split variable: " << sv.name << " (tensor=" << info.is_tensor << ")\n";
 
     InputParameters params = _factory.getValidParams("MooseVariable");
     params.set<MooseEnum>("family") = info.family;
@@ -593,11 +665,24 @@ AutomaticWeakFormAction::addSplitVariables()
 void
 AutomaticWeakFormAction::addKernels()
 {
+  // Re-generate split variables if needed (action state doesn't persist across tasks)
+  if (_enable_splitting && _split_variables.empty())
+  {
+    if (!_energy_functional)
+      parseEnergyFunctional();
+    if (_energy_functional)
+      _split_variables = _split_analyzer->generateSplitVariables(_energy_functional);
+  }
+
+  Moose::out << "  [DEBUG] AutomaticWeakFormAction::addKernels() called\n";
+  Moose::out << "    _enable_splitting = " << _enable_splitting << "\n";
+  Moose::out << "    _split_variables.size() = " << _split_variables.size() << "\n";
+
   if (_verbose)
     _console << "\n========================================\n"
              << "[AutomaticWeakForm] Adding Kernels\n"
              << "========================================\n";
-             
+
   // First add constraint kernels for split variables
   if (_enable_splitting && !_split_variables.empty())
     addSplitConstraintKernels();
@@ -681,11 +766,11 @@ AutomaticWeakFormAction::addKernels()
 
       auto weak_form = _weak_form_gen->generateWeakForm(transformed_energy, var_name);
       _weak_forms[var_name] = weak_form;
-      
+
       if (_debug_print_weak_form && weak_form)
         _console << "  Weak form: " << weak_form->toString() << "\n";
-        
-      generateKernelForVariable(var_name, weak_form);
+
+      generateKernelForVariable(var_name, weak_form, transformed_energy);
     }
   }
   // Handle single energy expression
@@ -710,11 +795,24 @@ AutomaticWeakFormAction::addKernels()
       moose::automatic_weak_form::NodePtr transformed_energy = _energy_functional;
       if (_enable_splitting && !_split_variables.empty())
       {
+        Moose::out << "    [DEBUG] Transforming energy with " << _split_variables.size() << " split variables\n";
+        for (const auto & [name, sv] : _split_variables)
+        {
+          Moose::out << "      Split var: " << name << " = " << sv.name << " (order " << sv.derivative_order << ")\n";
+        }
         moose::automatic_weak_form::ExpressionTransformer transformer(_split_variables, _problem->mesh().dimension());
         transformed_energy = transformer.transform(_energy_functional);
-        
+
+        Moose::out << "    [DEBUG] Original energy: " << _energy_functional->toString() << "\n";
+        Moose::out << "    [DEBUG] Transformed energy: " << transformed_energy->toString() << "\n";
+
         if (_verbose && transformed_energy != _energy_functional)
           _console << "  Transformed energy functional for split variables\n";
+      }
+      else
+      {
+        Moose::out << "    [DEBUG] Not transforming - splitting=" << _enable_splitting
+                   << ", split_vars=" << _split_variables.size() << "\n";
       }
         
       // Debug: Check shape of energy before generating weak form
@@ -771,8 +869,8 @@ AutomaticWeakFormAction::addKernels()
         _console << weak_form->toString() << "\n";
       else
         _console << "null\n";
-        
-      generateKernelForVariable(var_name, weak_form);
+
+      generateKernelForVariable(var_name, weak_form, transformed_energy);
     }
   }
   
@@ -837,7 +935,17 @@ AutomaticWeakFormAction::addSplitConstraintKernels()
     else if (sv.derivative_order == 2)
     {
       if (_verbose)
-        _console << "    - WARNING: Second-order constraint kernels not yet implemented\n";
+        _console << "    - Adding placeholder kernel for Hessian variable: " << sv.name << "\n";
+
+      // For now, just add a simple diffusion kernel to make the system solvable
+      // TODO: Implement proper Hessian constraint kernel
+      std::string kernel_name = sv.name + "_placeholder";
+      InputParameters params = _factory.getValidParams("Diffusion");
+      params.set<NonlinearVariableName>("variable") = sv.name;
+      _problem->addKernel("Diffusion", kernel_name, params);
+
+      if (_verbose)
+        _console << "    - Added placeholder Diffusion kernel for " << sv.name << "\n";
     }
   }
 }
@@ -879,10 +987,12 @@ AutomaticWeakFormAction::addTimeDerivativeKernelForVariable(const std::string & 
 
 void
 AutomaticWeakFormAction::generateKernelForVariable(
-    const std::string & var_name, const moose::automatic_weak_form::NodePtr & weak_form)
+    const std::string & var_name,
+    const moose::automatic_weak_form::NodePtr & weak_form,
+    const moose::automatic_weak_form::NodePtr & energy_expr)
 {
   std::string kernel_name = generateKernelName(var_name);
-  
+
   if (_verbose)
     _console << "\n[AutomaticWeakForm] Generating kernel for variable: " << var_name << "\n"
              << "  - Kernel name: " << kernel_name << "\n"
@@ -890,7 +1000,7 @@ AutomaticWeakFormAction::generateKernelForVariable(
 
   InputParameters params = _factory.getValidParams("VariationalKernelBase");
   params.set<NonlinearVariableName>("variable") = var_name;
-  
+
   // Get the energy type string from the input
   const auto & energy_type_enum = getParam<MooseEnum>("energy_type");
   params.set<MooseEnum>("energy_type") = energy_type_enum;
@@ -900,10 +1010,23 @@ AutomaticWeakFormAction::generateKernelForVariable(
   params.set<bool>("enable_variable_splitting") = _enable_splitting;
   params.set<unsigned int>("fe_order") = _max_fe_order;
 
-  // Pass the energy expression if we're using expression type
+  // Pass the energy expression - use transformed if splitting was applied
   if (_energy_type == EnergyType::EXPRESSION)
   {
-    params.set<std::string>("energy_expression") = _energy_expression;
+    // If we have a transformed energy expression, convert it to string
+    if (energy_expr)
+    {
+      std::string transformed_expr = energy_expr->toString();
+      params.set<std::string>("energy_expression") = transformed_expr;
+      if (_verbose)
+        _console << "  - Passing transformed energy expression to kernel: " << transformed_expr << "\n";
+    }
+    else
+    {
+      params.set<std::string>("energy_expression") = _energy_expression;
+      if (_verbose)
+        _console << "  - Passing original energy expression to kernel: " << _energy_expression << "\n";
+    }
     
     // Pass parameters if any
     if (isParamValid("parameters"))

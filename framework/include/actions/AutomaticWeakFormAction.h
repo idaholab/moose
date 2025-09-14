@@ -44,7 +44,8 @@ protected:
   void validateProblemSetup();
   
   void generateKernelForVariable(const std::string & var_name,
-                                  const moose::automatic_weak_form::NodePtr & weak_form);
+                                  const moose::automatic_weak_form::NodePtr & weak_form,
+                                  const moose::automatic_weak_form::NodePtr & energy_expr = nullptr);
   
   void generateSplitVariableKernel(const moose::automatic_weak_form::SplitVariable & split_var);
   

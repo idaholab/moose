@@ -109,19 +109,27 @@ ExpressionTransformer::transformGradient(const UnaryOpNode * grad_node)
   {
     auto inner_grad = static_cast<const UnaryOpNode*>(operand.get());
     auto base_expr = inner_grad->operand();
-    
+
     // Check if the base is a field variable
     if (base_expr->type() == NodeType::FieldVariable)
     {
       auto field_var = static_cast<const FieldVariableNode*>(base_expr.get());
       std::string var_name = field_var->name();
-      
-      // Look for split variable q = grad(u)
-      auto split_var = findSplitVariable(var_name, 1);
+
+      // Look for split variable for the Hessian (2nd order derivative)
+      auto split_var = findSplitVariable(var_name, 2);
       if (split_var)
       {
+        // Replace grad(grad(u)) with the Hessian split variable
+        return split_var;
+      }
+
+      // Alternatively, look for q = grad(u) and return grad(q)
+      auto grad_split = findSplitVariable(var_name, 1);
+      if (grad_split)
+      {
         // Replace grad(grad(u)) with grad(q)
-        return std::make_shared<UnaryOpNode>(NodeType::Gradient, split_var, VectorShape{static_cast<unsigned int>(_split_variables.begin()->second.shape.index())});
+        return std::make_shared<UnaryOpNode>(NodeType::Gradient, grad_split, TensorShape{_dim});
       }
     }
   }

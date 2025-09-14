@@ -7,7 +7,6 @@
 []
 
 [AutomaticWeakForm]
-  type = AutomaticWeakFormAction
   energy_type = EXPRESSION
   energy_expression = '0.25*(c^2 - 1)^2 + 0.5*kappa*dot(grad(c), grad(c)) + 0.01*dot(grad(grad(c)), grad(grad(c)))'
   variables = 'c'
@@ -45,6 +44,7 @@
 [Executioner]
   type = Steady
   solve_type = NEWTON
+  line_search = none
   petsc_options_iname = '-pc_type -ksp_gmres_restart -sub_pc_type -pc_asm_overlap'
   petsc_options_value = 'asm      31                  lu           1'
   l_tol = 1e-4

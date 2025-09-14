@@ -13,7 +13,6 @@
 []
 
 [AutomaticWeakForm]
-  type = AutomaticWeakFormAction
   energy_type = expression
   energy_expression = '0.25*(c^2 - 1)^2 + 0.5*kappa*dot(grad(c), grad(c)) + 0.01*dot(grad(grad(c)), grad(grad(c)))'
   variables = 'c'
