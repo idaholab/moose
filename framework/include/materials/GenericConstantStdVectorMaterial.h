@@ -10,14 +10,21 @@
 #pragma once
 
 #include "Material.h"
+#include "VariableSizeMaterialPropertiesInterface.h"
 
+/**
+ * Material to create constant properties with the variable-size std::vector<Real> type
+ */
 template <bool is_ad>
-class GenericConstantVectorMaterialTempl : public Material
+class GenericConstantStdVectorMaterialTempl : public Material,
+                                              public VariableSizeMaterialPropertiesInterface
 {
 public:
   static InputParameters validParams();
 
-  GenericConstantVectorMaterialTempl(const InputParameters & parameters);
+  GenericConstantStdVectorMaterialTempl(const InputParameters & parameters);
+
+  virtual unsigned int getVectorPropertySize(const MaterialPropertyName & prop_name) const override;
 
 protected:
   virtual void initQpStatefulProperties() override;
@@ -27,14 +34,14 @@ protected:
   std::vector<std::string> _prop_names;
 
   /// The vector values of each vector material property
-  const std::vector<Real> & _prop_values;
+  const std::vector<std::vector<Real>> & _prop_values;
 
   /// The number of constant vector material properties defined
   unsigned int _num_props;
 
   /// A vector of pointer to the material properties
-  std::vector<GenericMaterialProperty<RealVectorValue, is_ad> *> _properties;
+  std::vector<MaterialProperty<std::vector<GenericReal<is_ad>>> *> _properties;
 };
 
-typedef GenericConstantVectorMaterialTempl<false> GenericConstantVectorMaterial;
-typedef GenericConstantVectorMaterialTempl<true> ADGenericConstantVectorMaterial;
+typedef GenericConstantStdVectorMaterialTempl<false> GenericConstantStdVectorMaterial;
+typedef GenericConstantStdVectorMaterialTempl<true> ADGenericConstantStdVectorMaterial;
