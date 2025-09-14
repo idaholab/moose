@@ -33,7 +33,7 @@
     energy_expression = 'W(c) + 0.5*kappa*dot(grad(c), grad(c))'
     
     # Parameters used in the expression
-    parameters = 'kappa=0.01'
+    parameters = 'kappa 0.01'
     
     # Primary variable
     variables = 'c'

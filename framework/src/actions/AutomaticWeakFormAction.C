@@ -566,12 +566,26 @@ AutomaticWeakFormAction::generateKernelForVariable(
 
   InputParameters params = _factory.getValidParams("VariationalKernelBase");
   params.set<NonlinearVariableName>("variable") = var_name;
-  params.set<MooseEnum>("energy_type") = "custom";
+  
+  // Get the energy type string from the input
+  const auto & energy_type_enum = getParam<MooseEnum>("energy_type");
+  params.set<MooseEnum>("energy_type") = energy_type_enum;
   params.set<bool>("use_automatic_differentiation") = _use_automatic_differentiation;
   params.set<bool>("compute_jacobian_numerically") = _compute_jacobian_numerically;
   params.set<Real>("fd_eps") = _fd_epsilon;
   params.set<bool>("enable_variable_splitting") = _enable_splitting;
   params.set<unsigned int>("fe_order") = _max_fe_order;
+
+  // Pass the energy expression if we're using expression type
+  if (_energy_type == EnergyType::EXPRESSION)
+  {
+    params.set<std::string>("energy_expression") = _energy_expression;
+    
+    // Pass parameters if any
+    if (isParamValid("parameters"))
+      params.set<std::map<std::string, Real>>("parameters") = 
+          getParam<std::map<std::string, Real>>("parameters");
+  }
 
   if (!_coupled_variable_names.empty())
   {

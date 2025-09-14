@@ -548,15 +548,44 @@ Differential DifferentiationVisitor::handleDot(const NodePtr & left, const NodeP
   
   Differential result;
   
+  // Handle d/du dot(left, right) = dot(d(left)/du, right)
   for (auto & [order, coeff] : left_diff.coefficients)
+  {
     if (coeff)
-      result.coefficients[order] = dot(coeff, right);
+    {
+      // If coeff is a scalar (from differentiating a field variable),
+      // we need to multiply by it, not take dot product
+      if (coeff->type() == NodeType::Constant)
+      {
+        auto const_node = static_cast<const ConstantNode*>(coeff.get());
+        if (const_node->value().isScalar())
+          result.coefficients[order] = multiply(coeff, right);
+        else
+          result.coefficients[order] = dot(coeff, right);
+      }
+      else
+        result.coefficients[order] = dot(coeff, right);
+    }
+  }
   
+  // Handle d/du dot(left, right) = dot(left, d(right)/du)
   for (auto & [order, coeff] : right_diff.coefficients)
   {
     if (coeff)
     {
-      auto term = dot(left, coeff);
+      NodePtr term;
+      // If coeff is a scalar, multiply instead of dot
+      if (coeff->type() == NodeType::Constant)
+      {
+        auto const_node = static_cast<const ConstantNode*>(coeff.get());
+        if (const_node->value().isScalar())
+          term = multiply(coeff, left);
+        else
+          term = dot(left, coeff);
+      }
+      else
+        term = dot(left, coeff);
+        
       if (result.coefficients.count(order))
         result.coefficients[order] = add(result.coefficients[order], term);
       else
