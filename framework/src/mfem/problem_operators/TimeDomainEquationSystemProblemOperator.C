@@ -67,10 +67,13 @@ TimeDomainEquationSystemProblemOperator::ImplicitSolve(const mfem::real_t dt,
   _problem_data.jacobian_solver->updateSolver(
       *_equation_system->_blfs.Get(_equation_system->_test_var_names.at(0)),
       _equation_system->_ess_tdof_lists.at(0));
+  
+  mfem::Vector zero_vec(_true_rhs.Size());
+  zero_vec = 0.0;
 
   _problem_data.nonlinear_solver->SetSolver(_problem_data.jacobian_solver->getSolver());
   _problem_data.nonlinear_solver->SetOperator(*GetEquationSystem());
-  _problem_data.nonlinear_solver->Mult(_true_rhs, dX_dt);
+  _problem_data.nonlinear_solver->Mult(zero_vec, dX_dt);
   SetTrialVariablesFromTrueVectors();
 }
 
