@@ -721,6 +721,14 @@ NodePtr WeakFormGenerator::generateWeakForm(const NodePtr & energy_density, cons
   DifferentiationVisitor dv(var_name);
   Differential diff = dv.differentiate(energy_density);
   
+  // Debug: Print differential coefficients
+  mooseInfo("Differential coefficients for variable ", var_name, ":");
+  for (auto & [order, coeff] : diff.coefficients)
+  {
+    if (coeff)
+      mooseInfo("  C^", order, " = ", coeff->toString());
+  }
+  
   return computeEulerLagrange(diff);
 }
 
@@ -733,12 +741,19 @@ NodePtr WeakFormGenerator::computeEulerLagrange(const Differential & diff)
     if (coeff)
     {
       NodePtr term = coeff;
+      mooseInfo("  Processing C^", order, " = ", term->toString());
       
       for (unsigned int i = 0; i < order; ++i)
+      {
         term = applyDivergence(term);
+        mooseInfo("    After divergence ", i+1, ": ", term->toString());
+      }
       
       if (order % 2 == 1)
+      {
         term = negate(term);
+        mooseInfo("    After negation: ", term->toString());
+      }
       
       if (result)
         result = add(result, term);
@@ -747,6 +762,7 @@ NodePtr WeakFormGenerator::computeEulerLagrange(const Differential & diff)
     }
   }
   
+  mooseInfo("Final Euler-Lagrange equation: ", result ? result->toString() : "null");
   return result;
 }
 

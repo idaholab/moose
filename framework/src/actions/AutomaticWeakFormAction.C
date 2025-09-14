@@ -553,6 +553,14 @@ AutomaticWeakFormAction::addKernels()
     {
       auto weak_form = _weak_form_gen->generateWeakForm(_energy_functional, var_name);
       _weak_forms[var_name] = weak_form;
+      
+      // Debug: Print the weak form
+      _console << "Generated weak form for " << var_name << ": ";
+      if (weak_form)
+        _console << weak_form->toString() << "\n";
+      else
+        _console << "null\n";
+        
       generateKernelForVariable(var_name, weak_form);
     }
   }

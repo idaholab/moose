@@ -149,7 +149,15 @@ public:
   
   std::string toString() const override 
   { 
-    return "_" + _name + "[_qp]"; 
+    // For symbolic manipulation, return just the variable name
+    // Runtime evaluation will add the MOOSE-specific prefixes
+    return _name; 
+  }
+  
+  std::string toRuntimeString() const
+  {
+    // For runtime evaluation in MOOSE context
+    return "_" + _name + "[_qp]";
   }
   
   NodePtr clone() const override
@@ -184,6 +192,16 @@ public:
   
   std::string toString() const override 
   { 
+    // For symbolic manipulation
+    if (_is_gradient)
+      return "grad_test_" + _var_name;
+    else
+      return "test_" + _var_name;
+  }
+  
+  std::string toRuntimeString() const
+  {
+    // For runtime evaluation in MOOSE context
     if (_is_gradient)
       return "_grad_test[_i][_qp]";
     else
@@ -224,6 +242,16 @@ public:
   
   std::string toString() const override 
   { 
+    // For symbolic manipulation
+    if (_is_gradient)
+      return "grad_phi_" + _var_name;
+    else
+      return "phi_" + _var_name;
+  }
+  
+  std::string toRuntimeString() const
+  {
+    // For runtime evaluation in MOOSE context
     if (_is_gradient)
       return "_grad_phi[_j][_qp]";
     else

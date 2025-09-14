@@ -453,6 +453,23 @@ VariationalKernelBase::evaluateAtQP(const NodePtr & expr, unsigned int qp)
 
       mooseError("Unknown field variable: ", name);
     }
+    
+    case NodeType::Variable:
+    {
+      auto var_node = std::static_pointer_cast<VariableNode>(expr);
+      std::string name = var_node->name();
+
+      if (_variable_cache.count(name))
+        return _variable_cache[name];
+
+      if (name == _var.name())
+        return MooseValue(_u[qp]);
+
+      if (_coupled_values.count(name))
+        return MooseValue((*_coupled_values[name])[qp]);
+
+      mooseError("Unknown variable: ", name);
+    }
 
     case NodeType::Add:
     {
@@ -483,6 +500,7 @@ VariationalKernelBase::evaluateAtQP(const NodePtr & expr, unsigned int qp)
       auto unary = std::static_pointer_cast<UnaryOpNode>(expr);
       auto operand = unary->operand();
 
+      // Handle direct field variables
       if (operand->type() == NodeType::FieldVariable)
       {
         auto field_node = std::static_pointer_cast<FieldVariableNode>(operand);
@@ -496,6 +514,72 @@ VariationalKernelBase::evaluateAtQP(const NodePtr & expr, unsigned int qp)
 
         if (_coupled_gradients.count(name))
           return MooseValue(RealVectorValue((*_coupled_gradients[name])[qp]), _mesh.dimension());
+      }
+      // Handle symbolic variables (from differentiation)
+      else if (operand->type() == NodeType::Variable)
+      {
+        auto var_node = std::static_pointer_cast<VariableNode>(operand);
+        std::string name = var_node->name();
+        
+        if (_variable_cache.count(name + "_grad"))
+          return _variable_cache[name + "_grad"];
+
+        if (name == _var.name())
+          return MooseValue(RealVectorValue(_grad_u[qp]), _mesh.dimension());
+
+        if (_coupled_gradients.count(name))
+          return MooseValue(RealVectorValue((*_coupled_gradients[name])[qp]), _mesh.dimension());
+          
+        mooseError("Unknown variable in gradient: ", name);
+      }
+      // Handle multiplication by constant (e.g., grad(c * u))
+      else if (operand->type() == NodeType::Multiply)
+      {
+        auto mult_node = std::static_pointer_cast<BinaryOpNode>(operand);
+        auto left = mult_node->left();
+        auto right = mult_node->right();
+        
+        // Check if one side is a constant and the other is a field variable
+        if (left->type() == NodeType::Constant && right->type() == NodeType::FieldVariable)
+        {
+          auto const_val = evaluateAtQP(left, qp);
+          auto field_node = std::static_pointer_cast<FieldVariableNode>(right);
+          std::string name = field_node->name();
+          
+          MooseValue grad_val;
+          if (name == _var.name())
+            grad_val = MooseValue(RealVectorValue(_grad_u[qp]), _mesh.dimension());
+          else if (_coupled_gradients.count(name))
+            grad_val = MooseValue(RealVectorValue((*_coupled_gradients[name])[qp]), _mesh.dimension());
+          else
+            mooseError("Unknown field variable in gradient: ", name);
+            
+          return const_val * grad_val;
+        }
+        else if (right->type() == NodeType::Constant && left->type() == NodeType::FieldVariable)
+        {
+          auto const_val = evaluateAtQP(right, qp);
+          auto field_node = std::static_pointer_cast<FieldVariableNode>(left);
+          std::string name = field_node->name();
+          
+          MooseValue grad_val;
+          if (name == _var.name())
+            grad_val = MooseValue(RealVectorValue(_grad_u[qp]), _mesh.dimension());
+          else if (_coupled_gradients.count(name))
+            grad_val = MooseValue(RealVectorValue((*_coupled_gradients[name])[qp]), _mesh.dimension());
+          else
+            mooseError("Unknown field variable in gradient: ", name);
+            
+          return const_val * grad_val;
+        }
+      }
+      // For more complex expressions, use numerical differentiation or chain rule
+      else
+      {
+        // This is a limitation - we can't evaluate gradient of arbitrary expressions
+        // In practice, after differentiation we should only get simple cases
+        mooseError("Cannot evaluate gradient of complex expression. Expression type: ", 
+                   static_cast<int>(operand->type()));
       }
 
       mooseError("Cannot evaluate gradient of non-field variable");
