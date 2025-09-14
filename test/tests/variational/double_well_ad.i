@@ -19,12 +19,10 @@
 []
 
 [AutomaticWeakForm]
-  [double_well]
     energy_type = expression
     energy_expression = '(c*c - 1.0)*(c*c - 1.0)'
     variables = 'c'
     use_automatic_differentiation = true
-  []
 []
 
 [BCs]

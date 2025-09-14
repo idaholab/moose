@@ -593,7 +593,6 @@ AutomaticWeakFormAction::addSplitVariables()
 void
 AutomaticWeakFormAction::addKernels()
 {
-  _console << "\n[DEBUG] addKernels() called\n";
   if (_verbose)
     _console << "\n========================================\n"
              << "[AutomaticWeakForm] Adding Kernels\n"
@@ -692,8 +691,6 @@ AutomaticWeakFormAction::addKernels()
   // Handle single energy expression
   else if (_energy_functional)
   {
-    _console << "[DEBUG] Single energy functional path\n";
-    _console << "  Energy: " << _energy_functional->toString() << "\n";
     if (_verbose)
       _console << "\nProcessing single energy functional\n";
       

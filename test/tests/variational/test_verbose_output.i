@@ -18,7 +18,6 @@
 []
 
 [AutomaticWeakForm]
-  [diffusion]
     # Basic setup
     energy_type = expression
     energy_expression = '0.5*dot(grad(u), grad(u)) - f*u'
@@ -39,7 +38,6 @@
     # Output weak form to file
     output_weak_form = true
     weak_form_file = 'diffusion_weak_form.txt'
-  []
 []
 
 [BCs]

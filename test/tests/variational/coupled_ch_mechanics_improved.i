@@ -39,7 +39,6 @@
 []
 
 [AutomaticWeakForm]
-  [coupled_system]
     type = AutomaticWeakFormAction
     energy_type = expression
     
@@ -66,7 +65,6 @@
     # Enable variable splitting if needed for higher-order terms
     enable_splitting = true
     max_fe_order = 1
-  []
 []
 
 [ICs]

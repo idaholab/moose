@@ -43,7 +43,6 @@
 []
 
 [AutomaticWeakForm]
-  [coupled_pf_mechanics]
     type = AutomaticWeakFormAction
     energy_type = expression
     
@@ -77,7 +76,6 @@
     
     # Variable splitting for higher-order terms if needed
     enable_splitting = false
-  []
 []
 
 [ICs]

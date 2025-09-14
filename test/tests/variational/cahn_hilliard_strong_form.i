@@ -33,7 +33,6 @@
 []
 
 [AutomaticWeakForm]
-  [cahn_hilliard_system]
     energy_type = expression
 
     # Intermediate expressions (semicolon-separated)
@@ -55,7 +54,6 @@
 
     # Enable automatic differentiation for Jacobian
     use_automatic_differentiation = true
-  []
 []
 
 [ICs]

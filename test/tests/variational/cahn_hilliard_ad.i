@@ -27,13 +27,11 @@
 []
 
 [AutomaticWeakForm]
-  [cahn_hilliard]
     energy_type = expression
     # Explicit double-well energy with gradient penalty
     energy_expression = '((c*c - 1.0)*(c*c - 1.0)) + 0.5*0.01*dot(grad(c), grad(c))'
     variables = 'c'
     use_automatic_differentiation = true  # Enable AD for Jacobian
-  []
 []
 
 [BCs]

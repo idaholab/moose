@@ -22,7 +22,6 @@
 []
 
 [AutomaticWeakForm]
-  [cahn_hilliard]
     # Use expression type with string parsing
     energy_type = expression
     
@@ -38,7 +37,6 @@
     
     # Enable automatic differentiation for Jacobian
     use_automatic_differentiation = true
-  []
 []
 
 [ICs]

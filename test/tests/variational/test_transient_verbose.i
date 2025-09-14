@@ -17,7 +17,6 @@
 []
 
 [AutomaticWeakForm]
-  [heat]
     energy_type = expression
     energy_expression = '0.5*dot(grad(u), grad(u))'
     variables = 'u'
@@ -26,7 +25,6 @@
     # Enable verbose output to see time derivative kernel addition
     verbose = true
     debug_print_weak_form = true
-  []
 []
 
 [BCs]
