@@ -29,6 +29,8 @@ protected:
   
   void addKernels();
   
+  void addTimeDerivativeKernelForVariable(const std::string & var_name);
+  
   void addAuxKernels();
   
   void addBoundaryConditions();

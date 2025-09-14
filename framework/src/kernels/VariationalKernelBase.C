@@ -608,6 +608,16 @@ VariationalKernelBase::evaluateAtQP(const NodePtr & expr, unsigned int qp)
       return left_val * right_val;
     }
 
+    case NodeType::Power:
+    {
+      auto binary = std::static_pointer_cast<BinaryOpNode>(expr);
+      auto base_val = evaluateAtQP(binary->left(), qp);
+      auto exp_val = evaluateAtQP(binary->right(), qp);
+      if (base_val.isScalar() && exp_val.isScalar())
+        return MooseValue(std::pow(base_val.asScalar(), exp_val.asScalar()));
+      mooseError("Cannot evaluate power of non-scalar values");
+    }
+
     case NodeType::Gradient:
     {
       auto unary = std::static_pointer_cast<UnaryOpNode>(expr);

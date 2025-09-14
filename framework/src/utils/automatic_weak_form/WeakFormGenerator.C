@@ -1,4 +1,5 @@
 #include "WeakFormGenerator.h"
+#include "ExpressionSimplifier.h"
 #include "MooseError.h"
 #include <algorithm>
 #include <cmath>
@@ -10,7 +11,16 @@ namespace automatic_weak_form
 
 Differential DifferentiationVisitor::differentiate(const NodePtr & expr)
 {
-  return visit(expr);
+  auto diff = visit(expr);
+  
+  // Simplify all coefficients
+  for (auto & [order, coeff] : diff.coefficients)
+  {
+    if (coeff)
+      coeff = ExpressionSimplifier::simplify(coeff);
+  }
+  
+  return diff;
 }
 
 Differential DifferentiationVisitor::visit(const NodePtr & node)

@@ -536,11 +536,18 @@ AutomaticWeakFormAction::addSplitVariables()
 void
 AutomaticWeakFormAction::addKernels()
 {
+  // Check if this is a transient problem and add time derivative kernels
+  bool is_transient = _problem->isTransient();
+  
   // Handle multiple energy expressions for coupled systems
   if (!_multiple_energies.empty())
   {
     for (const auto & [var_name, energy] : _multiple_energies)
     {
+      // Add time derivative kernel for transient problems
+      if (is_transient)
+        addTimeDerivativeKernelForVariable(var_name);
+        
       auto weak_form = _weak_form_gen->generateWeakForm(energy, var_name);
       _weak_forms[var_name] = weak_form;
       generateKernelForVariable(var_name, weak_form);
@@ -551,6 +558,10 @@ AutomaticWeakFormAction::addKernels()
   {
     for (const auto & var_name : _variable_names)
     {
+      // Add time derivative kernel for transient problems
+      if (is_transient)
+        addTimeDerivativeKernelForVariable(var_name);
+        
       auto weak_form = _weak_form_gen->generateWeakForm(_energy_functional, var_name);
       _weak_forms[var_name] = weak_form;
       
@@ -564,6 +575,31 @@ AutomaticWeakFormAction::addKernels()
       generateKernelForVariable(var_name, weak_form);
     }
   }
+}
+
+void
+AutomaticWeakFormAction::addTimeDerivativeKernelForVariable(const std::string & var_name)
+{
+  std::string kernel_name = var_name + "_time_derivative";
+  
+  // Use the specialized VariationalTimeDerivative kernel if automatic differentiation is enabled
+  if (_use_automatic_differentiation)
+  {
+    InputParameters params = _factory.getValidParams("VariationalTimeDerivative");
+    params.set<NonlinearVariableName>("variable") = var_name;
+    params.set<Real>("coefficient") = 1.0;  // Default coefficient, could be made configurable
+    params.set<bool>("use_automatic_differentiation") = true;
+    _problem->addKernel("VariationalTimeDerivative", kernel_name, params);
+  }
+  else
+  {
+    // Use standard TimeDerivative kernel
+    InputParameters params = _factory.getValidParams("TimeDerivative");
+    params.set<NonlinearVariableName>("variable") = var_name;
+    _problem->addKernel("TimeDerivative", kernel_name, params);
+  }
+  
+  _console << "Added time derivative kernel for variable: " << var_name << "\n";
 }
 
 void
