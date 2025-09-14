@@ -177,7 +177,13 @@ VariationalKernelBase::initializeExpression()
     case EnergyType::CUSTOM:
     {
       if (!_energy_expression.empty())
-        _energy_density = _builder->parseExpression(_energy_expression);
+      {
+        // Pass parameters to the expression parser
+        if (!_parameters.empty())
+          _energy_density = _builder->parseExpression(_energy_expression, _parameters);
+        else
+          _energy_density = _builder->parseExpression(_energy_expression);
+      }
       else
         mooseError("Custom energy type requires energy_expression parameter");
       break;

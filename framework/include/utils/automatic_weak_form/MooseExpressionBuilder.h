@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MooseAST.h"
+#include "StringExpressionParser.h"
 #include "MooseObject.h"
 #include "InputParameters.h"
 #include <sstream>
@@ -17,6 +18,9 @@ public:
   MooseExpressionBuilder(unsigned int dim = 3) : _dim(dim) {}
   
   NodePtr parseExpression(const std::string & expr_str);
+  NodePtr parseExpression(const std::string & expr_str, const std::map<std::string, Real> & params);
+  
+  void setParameter(const std::string & name, Real value) { _parameters[name] = value; }
   
   NodePtr buildFromParameters(const InputParameters & params);
   
@@ -186,6 +190,7 @@ public:
   
 private:
   unsigned int _dim;
+  std::map<std::string, Real> _parameters;
   
   NodePtr identityTensor()
   {
@@ -244,9 +249,25 @@ private:
 
 inline NodePtr MooseExpressionBuilder::parseExpression(const std::string & expr_str)
 {
-  Tokenizer tokenizer(expr_str);
-  Parser parser(tokenizer, *this);
-  return parser.parse();
+  StringExpressionParser expr_parser(_dim);
+  
+  // Set any stored parameters
+  for (const auto & [name, value] : _parameters)
+    expr_parser.setParameter(name, value);
+  
+  return expr_parser.parse(expr_str);
+}
+
+inline NodePtr MooseExpressionBuilder::parseExpression(const std::string & expr_str,
+                                                      const std::map<std::string, Real> & params)
+{
+  StringExpressionParser expr_parser(_dim);
+  
+  // Set parameters
+  for (const auto & [name, value] : params)
+    expr_parser.setParameter(name, value);
+  
+  return expr_parser.parse(expr_str);
 }
 
 inline NodePtr MooseExpressionBuilder::buildFromParameters(const InputParameters & params)
@@ -254,7 +275,17 @@ inline NodePtr MooseExpressionBuilder::buildFromParameters(const InputParameters
   if (params.isParamValid("energy_expression"))
   {
     std::string expr = params.get<std::string>("energy_expression");
-    return parseExpression(expr);
+    
+    // Check if we have parameters to substitute
+    if (params.isParamValid("parameters"))
+    {
+      auto param_map = params.get<std::map<std::string, Real>>("parameters");
+      return parseExpression(expr, param_map);
+    }
+    else
+    {
+      return parseExpression(expr);
+    }
   }
   
   if (params.isParamValid("energy_type"))

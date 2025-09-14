@@ -27,8 +27,8 @@
     energy_type = expression
     
     # Energy functional as a string expression
-    # W(c) is shorthand for double-well (c^2-1)^2
-    energy_expression = 'W(c) + 0.5*kappa*dot(grad(c), grad(c))'
+    # Using explicit double-well form for now
+    energy_expression = '((c*c - 1.0)*(c*c - 1.0)) + 0.5*0.01*dot(grad(c), grad(c))'
     
     # Parameters used in the expression
     parameters = 'kappa 0.01'
