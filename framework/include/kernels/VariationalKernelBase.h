@@ -85,6 +85,8 @@ protected:
   Real _elastic_lambda;
   Real _elastic_mu;
   Real _surface_energy_coefficient;
+  
+  std::map<std::string, Real> _parameters;
 
   std::vector<std::string> _coupled_variable_names;
 

@@ -38,6 +38,9 @@ VariationalKernelBase::validParams()
 
   params.addParam<std::vector<VariableName>>("coupled_variables",
                                                "List of coupled variables");
+  
+  params.addParam<std::map<std::string, Real>>("parameters",
+                                                 "Named parameters for the energy functional");
 
   params.addParam<bool>("use_automatic_differentiation", true,
                          "Use automatic differentiation for Jacobian");
@@ -70,6 +73,7 @@ VariationalKernelBase::VariationalKernelBase(const InputParameters & parameters)
     _elastic_lambda(getParam<Real>("elastic_lambda")),
     _elastic_mu(getParam<Real>("elastic_mu")),
     _surface_energy_coefficient(getParam<Real>("surface_energy_coefficient")),
+    _parameters(isParamValid("parameters") ? getParam<std::map<std::string, Real>>("parameters") : std::map<std::string, Real>()),
     _use_automatic_differentiation(getParam<bool>("use_automatic_differentiation")),
     _enable_variable_splitting(getParam<bool>("enable_variable_splitting")),
     _fe_order(getParam<unsigned int>("fe_order"))
@@ -249,13 +253,14 @@ VariationalKernelBase::computeQpResidual()
 
   residual += evaluateC0Contribution();
 
-  residual -= evaluateC1Contribution();
+  // After integration by parts, -div(C^1) becomes +C^1·∇ψ
+  residual += evaluateC1Contribution();
 
   if (_max_derivative_order >= 2)
     residual += evaluateC2Contribution();
 
   if (_max_derivative_order >= 3)
-    residual -= evaluateC3Contribution();
+    residual += evaluateC3Contribution();
 
   return residual;
 }
@@ -276,14 +281,9 @@ VariationalKernelBase::computeQpJacobian()
     // For now, provide a simple analytical Jacobian for the diffusion case
     // This handles the weak form: -∇·(κ∇u) which gives Jacobian: κ∇φ_j·∇ψ_i
     
-    // Check if we have C^1 coefficient (gradient term)
-    if (_differential && _differential->hasOrder(1))
-    {
-      // For simple diffusion, the Jacobian from -∇·(κ∇u) is κ∇φ_j·∇ψ_i
-      // The coefficient should be something like κ*grad(u), so we need to extract κ
-      // For now, assume κ=1 for testing
-      return _grad_phi[_j][_qp] * _grad_test[_i][_qp];
-    }
+    // For simple diffusion, the Jacobian from -∇·(κ∇u) is κ∇φ_j·∇ψ_i
+    // For now, assume κ=1 for testing
+    return _grad_phi[_j][_qp] * _grad_test[_i][_qp];
     
     return Kernel::computeQpJacobian();
   }
@@ -392,7 +392,10 @@ VariationalKernelBase::evaluateC1Contribution()
   }
 
   if (_c1_cache.values[_qp].isVector())
-    return _c1_cache.values[_qp].asVector() * _grad_test[_i][_qp];
+  {
+    RealVectorValue c1_vec = _c1_cache.values[_qp].asVector();
+    return c1_vec * _grad_test[_i][_qp];
+  }
 
   return 0.0;
 }
@@ -490,6 +493,7 @@ VariationalKernelBase::evaluateAtQP(const NodePtr & expr, unsigned int qp)
       auto binary = std::static_pointer_cast<BinaryOpNode>(expr);
       auto left_val = evaluateAtQP(binary->left(), qp);
       auto right_val = evaluateAtQP(binary->right(), qp);
+      
       return left_val + right_val;
     }
 
@@ -506,6 +510,7 @@ VariationalKernelBase::evaluateAtQP(const NodePtr & expr, unsigned int qp)
       auto binary = std::static_pointer_cast<BinaryOpNode>(expr);
       auto left_val = evaluateAtQP(binary->left(), qp);
       auto right_val = evaluateAtQP(binary->right(), qp);
+      
       return left_val * right_val;
     }
 

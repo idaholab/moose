@@ -13,6 +13,7 @@
   [u]
     order = FIRST
     family = LAGRANGE
+    initial_condition = 0.5
   []
 []
 
@@ -43,6 +44,11 @@
 [Executioner]
   type = Steady
   solve_type = NEWTON
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
+  l_tol = 1e-10
+  nl_rel_tol = 1e-10
+  nl_abs_tol = 1e-10
 []
 
 [Outputs]
