@@ -299,7 +299,7 @@ VariationalKernelBase::computeQpJacobian()
   Real jacobian = 0.0;
   
   // Optional debug output
-  bool debug = false; // Set to true for debugging
+  bool debug = false; // (_qp == 0 && _i == 0 && _j == 0); // Debug first element
   
   // Get the differential coefficients C^k from the energy functional
   DifferentiationVisitor dv(_var.name());
@@ -382,7 +382,9 @@ VariationalKernelBase::computeQpJacobian()
       else if (dc1_grad_val.isScalar())
       {
         // For simple cases like C^1 = κ∇u, ∂C^1/∂(∇u) = κI
-        Real contrib = dc1_grad_val.asScalar() * _grad_phi[_j][_qp] * _grad_test[_i][_qp];
+        // The scalar represents the coefficient κ
+        Real coeff = dc1_grad_val.asScalar();
+        Real contrib = coeff * _grad_phi[_j][_qp] * _grad_test[_i][_qp];
         jacobian += contrib;
         
         if (debug && _qp == 0 && _i == 0 && _j == 0)
