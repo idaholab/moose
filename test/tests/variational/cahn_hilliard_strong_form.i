@@ -48,7 +48,7 @@
                     mu = dW_dc - kappa_term'
 
     # Parameters
-    parameters = 'kappa=0.01'
+    parameters = 'kappa 0.01'
 
     # Primary variables
     variables = 'c mu'

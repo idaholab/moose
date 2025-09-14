@@ -76,7 +76,8 @@ ExpressionEvaluationKernel::ExpressionEvaluationKernel(const InputParameters & p
   if (isParamValid("intermediate_expressions"))
   {
     const std::string & expr_list = getParam<std::string>("intermediate_expressions");
-    parser.parseExpressions(expr_list);
+    if (!expr_list.empty())
+      parser.parseExpressions(expr_list);
   }
   
   // Parse residual expression

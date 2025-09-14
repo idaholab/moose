@@ -482,7 +482,10 @@ inline NodePtr StringExpressionParser::parsePrimary(Tokenizer & tokenizer)
     }
     
     default:
-      mooseError("Unexpected token: " + token.value);
+      if (token.type == Token::END)
+        mooseError("Unexpected end of expression");
+      else
+        mooseError("Unexpected token: '" + token.value + "'");
   }
 }
 

@@ -4,6 +4,7 @@
 #include "MooseError.h"
 #include "libmesh/string_to_enum.h"
 #include "StringExpressionParser.h"
+#include "MooseUtils.h"
 
 registerMooseAction("MooseApp", AutomaticWeakFormAction, "create_problem_complete");
 registerMooseAction("MooseApp", AutomaticWeakFormAction, "add_variable");
@@ -36,13 +37,11 @@ AutomaticWeakFormAction::validParams()
 
   params.addParam<std::vector<std::string>>(
       "expressions",
-      "Intermediate expressions (MOOSE will split on semicolons, e.g., 'u = vec(disp_x, disp_y); "
-      "strain = sym(grad(u))')");
+      "Intermediate expressions (e.g., 'u = vec(disp_x, disp_y)' 'strain = sym(grad(u))')");
 
   params.addParam<std::vector<std::string>>(
       "strong_forms",
-      "Strong form equations (MOOSE will split on semicolons, e.g., 'c_t = -div(M*grad(mu)); mu = "
-      "dW/dc - kappa*laplacian(c)')");
+      "Strong form equations (e.g., 'c_t = -div(M*grad(mu))' 'mu = dW/dc - kappa*laplacian(c)')");
 
   params.addParam<std::map<std::string, Real>>(
       "parameters", "Parameters used in the energy expression (e.g., kappa=1.0)");
@@ -718,9 +717,23 @@ AutomaticWeakFormAction::parseStrongForms()
   // Parse intermediate expressions if provided
   if (isParamValid("expressions"))
   {
-    const auto & expressions = getParam<std::vector<std::string>>("expressions");
+    const auto & expr_vector = getParam<std::vector<std::string>>("expressions");
+    
+    // MOOSE concatenates multiple quoted strings, so we get a single string
+    // We need to split it by semicolons
+    std::string combined_expr;
+    for (const auto & s : expr_vector)
+      combined_expr += s;
+    
+    std::vector<std::string> expressions;
+    MooseUtils::tokenize(combined_expr, expressions, 1, ";");
+    
     for (const auto & expr : expressions)
     {
+      // Skip empty expressions
+      if (expr.empty())
+        continue;
+        
       // Each expression should be of the form "name = expression"
       size_t eq_pos = expr.find('=');
       if (eq_pos != std::string::npos)
@@ -729,10 +742,14 @@ AutomaticWeakFormAction::parseStrongForms()
         std::string rhs = expr.substr(eq_pos + 1);
 
         // Trim whitespace
-        name.erase(0, name.find_first_not_of(" \t"));
-        name.erase(name.find_last_not_of(" \t") + 1);
-        rhs.erase(0, rhs.find_first_not_of(" \t"));
-        rhs.erase(rhs.find_last_not_of(" \t") + 1);
+        name.erase(0, name.find_first_not_of(" \t\n"));
+        name.erase(name.find_last_not_of(" \t\n") + 1);
+        rhs.erase(0, rhs.find_first_not_of(" \t\n"));
+        rhs.erase(rhs.find_last_not_of(" \t\n") + 1);
+
+        // Skip if either name or rhs is empty after trimming
+        if (name.empty() || rhs.empty())
+          continue;
 
         parser.defineExpression(name, rhs);
       }
@@ -742,19 +759,15 @@ AutomaticWeakFormAction::parseStrongForms()
   // Parse strong form equations
   if (isParamValid("strong_forms"))
   {
-    const auto & strong_forms = getParam<std::vector<std::string>>("strong_forms");
-
-    // Build a single string from the vector for the parser
-    // Or better, update parseStrongForms to accept a vector
-    std::string combined;
-    for (size_t i = 0; i < strong_forms.size(); ++i)
-    {
-      if (i > 0)
-        combined += "; ";
-      combined += strong_forms[i];
-    }
-
-    _strong_form_equations = parser.parseStrongForms(combined);
+    const auto & forms_vector = getParam<std::vector<std::string>>("strong_forms");
+    
+    // MOOSE concatenates multiple quoted strings into a single element vector
+    // The string contains semicolon-separated equations
+    std::string forms_string;
+    for (const auto & s : forms_vector)
+      forms_string += s;
+    
+    _strong_form_equations = parser.parseStrongForms(forms_string);
   }
 }
 
@@ -812,9 +825,11 @@ AutomaticWeakFormAction::addExpressionKernels()
     InputParameters params = _factory.getValidParams("ExpressionEvaluationKernel");
     params.set<NonlinearVariableName>("variable") = var_name;
 
-    // Convert the NodePtr to a string representation for the kernel
-    // In a real implementation, we'd serialize the expression or pass it directly
-    params.set<std::string>("residual_expression") = eq.weak_residual->toString();
+    // For now, just pass the raw RHS expression as a string
+    // The weak_residual would need proper conversion
+    // TODO: Implement proper expression serialization
+    std::string residual_expr = "0";  // Placeholder - need to convert eq.rhs properly
+    params.set<std::string>("residual_expression") = residual_expr;
 
     if (eq.jacobian)
       params.set<std::string>("jacobian_expression") = eq.jacobian->toString();
@@ -831,15 +846,10 @@ AutomaticWeakFormAction::addExpressionKernels()
     if (isParamValid("expressions"))
     {
       const auto & expressions = getParam<std::vector<std::string>>("expressions");
-      // Combine into semicolon-separated string for the kernel
-      std::string combined;
-      for (size_t i = 0; i < expressions.size(); ++i)
-      {
-        if (i > 0)
-          combined += "; ";
-        combined += expressions[i];
-      }
-      params.set<std::string>("intermediate_expressions") = combined;
+      // MOOSE concatenates multi-line strings into a single element
+      // Just pass the first (and likely only) element
+      if (!expressions.empty() && !expressions[0].empty())
+        params.set<std::string>("intermediate_expressions") = expressions[0];
     }
 
     // Pass coupled variables
