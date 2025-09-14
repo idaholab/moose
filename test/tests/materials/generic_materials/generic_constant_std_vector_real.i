@@ -10,7 +10,7 @@
 
 [Materials]
   [vector]
-    type = GenericConstantVectorMaterial
+    type = GenericConstantStdVectorMaterial
     prop_names = 'constant_3 constant_2'
     prop_values = '1 2 3; 0 1'
     outputs = all
