@@ -109,7 +109,7 @@ BSplineCurveGenerator::BSplineCurveGenerator(const InputParameters & parameters)
     if (isParamValid("end_boundary") || isParamValid("end_mesh"))
       paramError("end_point and end_boundary or end_mesh cannot be simultaneously specified!");
   }
-  if (_node_set_boundaries.size() != 0 || _node_set_boundaries.size() != 2)
+  if (_node_set_boundaries.size() != 0 && _node_set_boundaries.size() != 2)
     paramError("edge_nodesets", "If specified, edge_nodesets must have exactly 2 entries.");
 }
 
