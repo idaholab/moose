@@ -36,8 +36,8 @@ VariationalKernelBase::validParams()
   params.addParam<Real>("surface_energy_coefficient", 1.0,
                          "Surface energy coefficient (gamma)");
 
-  params.addParam<std::vector<VariableName>>("coupled_variables",
-                                               "List of coupled variables");
+  // Add a generic coupled variable parameter that can handle multiple variables
+  params.addCoupledVar("coupled_vars", "List of coupled variables from the energy expression");
   
   params.addParam<std::map<std::string, Real>>("parameters",
                                                  "Named parameters for the energy functional");
@@ -108,13 +108,24 @@ VariationalKernelBase::VariationalKernelBase(const InputParameters & parameters)
     Moose::out << "[DEBUG] VariationalKernelBase received energy expression: " << _energy_expression << "\n";
   }
 
-  if (isParamValid("coupled_variables"))
+  // Get the list of coupled variables from the generic parameter
+  if (isCoupled("coupled_vars"))
   {
-    auto variable_names = getParam<std::vector<VariableName>>("coupled_variables");
+    unsigned int n_coupled = coupledComponents("coupled_vars");
     _coupled_variable_names.clear();
-    for (const auto & var_name : variable_names)
+
+    for (unsigned int i = 0; i < n_coupled; ++i)
+    {
+      auto var_name = getFieldVar("coupled_vars", i)->name();
       _coupled_variable_names.push_back(var_name);
-    setupCoupledVariables();
+
+      // Store the coupled values and gradients
+      _coupled_values[var_name] = &coupledValue("coupled_vars", i);
+      _coupled_gradients[var_name] = &coupledGradient("coupled_vars", i);
+
+      if (_fe_order >= 2)
+        _coupled_seconds[var_name] = &coupledSecond("coupled_vars", i);
+    }
   }
 
   initializeExpression();
@@ -225,21 +236,6 @@ VariationalKernelBase::computeVariationalDerivative()
 
   auto contributions = _weak_form_gen->computeContributions(_energy_density, _var.name());
   _max_derivative_order = contributions.max_order;
-}
-
-void
-VariationalKernelBase::setupCoupledVariables()
-{
-  for (const auto & var_name : _coupled_variable_names)
-  {
-    unsigned int var_num = coupled(var_name);
-    _coupled_var_nums[var_name] = var_num;
-    _coupled_values[var_name] = &coupledValue(var_name);
-    _coupled_gradients[var_name] = &coupledGradient(var_name);
-
-    if (_fe_order >= 2)
-      _coupled_seconds[var_name] = &coupledSecond(var_name);
-  }
 }
 
 void

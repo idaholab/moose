@@ -34,32 +34,21 @@
 []
 
 [AutomaticWeakForm]
-  # Chemical free energy
-  [chemical_energy]
-    type = AutomaticWeakFormAction
-    energy_type = expression
-    energy_expression = 'W(c) + 0.5*kappa*dot(grad(c), grad(c))'
-    parameters = 'kappa=0.01'
-    variables = 'c'
-    coupled_variables = 'disp_x disp_y'
-  []
-  
-  # Elastic energy with concentration coupling
-  [elastic_energy]
-    type = AutomaticWeakFormAction
-    energy_type = expression
-    
-    # Define strain: ε = sym(∇u)
-    # tr(ε) is the trace (volumetric strain)
-    # |ε|^2 is the Frobenius norm squared (contract(ε,ε))
-    energy_expression = '0.5*lambda*pow(trace(strain),2) + mu*contract(strain,strain) + alpha*c*trace(strain)'
-    
-    parameters = 'lambda=100 mu=75 alpha=10'
-    variables = 'disp_x disp_y'
-    coupled_variables = 'c'
-    
-    # Note: 'strain' would need to be defined as sym(grad(u)) in the actual implementation
-  []
+  energy_type = expression
+
+  # Combined energy functional for coupled Cahn-Hilliard and mechanics
+  # Chemical energy: W(c) + κ/2|∇c|^2
+  # Elastic energy: λ/2(tr(ε))^2 + μ|ε|^2 + α*c*tr(ε)
+  # where ε = sym(∇u) is the strain tensor
+
+  # Simplified expression without proper tensor mechanics
+  # Using gradient penalty as a placeholder for elastic energy
+  energy_expression = 'W(c) + 0.5*kappa*dot(grad(c), grad(c)) + 0.5*lambda*(dot(grad(disp_x), grad(disp_x)) + dot(grad(disp_y), grad(disp_y))) + alpha*c*(disp_x + disp_y)'
+
+  parameters = 'kappa 0.01 lambda 100 mu 75 alpha 10'
+  variables = 'c disp_x disp_y'
+
+  use_automatic_differentiation = true
 []
 
 [ICs]

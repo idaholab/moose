@@ -1034,6 +1034,15 @@ AutomaticWeakFormAction::generateKernelForVariable(
              << "  - Kernel type: VariationalKernelBase\n";
 
   InputParameters params = _factory.getValidParams("VariationalKernelBase");
+
+  // First, we need to couple all the other variables BEFORE setting parameters
+  // This is required for MOOSE's coupling system to work
+  // We do this by modifying the validParams to add coupled variables
+  // But we can't modify validParams after getting them, so we need a different approach
+
+  // The VariationalKernelBase should handle coupling internally based on the
+  // coupled_variables parameter we'll pass
+
   params.set<NonlinearVariableName>("variable") = var_name;
 
   // Get the energy type string from the input
@@ -1069,12 +1078,28 @@ AutomaticWeakFormAction::generateKernelForVariable(
           getParam<std::map<std::string, Real>>("parameters");
   }
 
-  if (!_coupled_variable_names.empty())
+  // For coupled problems, each variable's kernel needs the OTHER variables as coupled
+  std::vector<VariableName> coupled_vars;
+
+  // Add all variables from the energy expression except the current one
+  for (const auto & name : _variable_names)
   {
-    std::vector<VariableName> coupled_vars;
-    for (const auto & name : _coupled_variable_names)
+    if (name != var_name)
       coupled_vars.push_back(name);
-    params.set<std::vector<VariableName>>("coupled_variables") = coupled_vars;
+  }
+
+  // Also add any explicitly specified coupled variables
+  for (const auto & name : _coupled_variable_names)
+  {
+    // Don't add if it's the current variable or already in the list
+    if (name != var_name && std::find(coupled_vars.begin(), coupled_vars.end(), name) == coupled_vars.end())
+      coupled_vars.push_back(name);
+  }
+
+  if (!coupled_vars.empty())
+  {
+    // Set the coupled variables
+    params.set<std::vector<VariableName>>("coupled_vars") = coupled_vars;
 
     if (_verbose)
     {

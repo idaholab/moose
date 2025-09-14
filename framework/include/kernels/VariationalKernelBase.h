@@ -40,8 +40,6 @@ protected:
 
   void setupFieldVariables();
 
-  void setupCoupledVariables();
-
   void updateVariableValues(unsigned int qp);
   
   NodePtr differentiateWithRespectToField(const NodePtr & expr, const std::string & var_name);
