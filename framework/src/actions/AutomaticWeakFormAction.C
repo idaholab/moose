@@ -35,13 +35,13 @@ AutomaticWeakFormAction::validParams()
       "energy_expressions",
       "Multiple energy expressions for coupled systems (var_name => expression)");
 
-  params.addParam<std::vector<std::string>>(
+  params.addParam<std::string>(
       "expressions",
-      "Intermediate expressions (e.g., 'u = vec(disp_x, disp_y)' 'strain = sym(grad(u))')");
+      "Intermediate expressions separated by semicolons (e.g., 'u = vec(disp_x, disp_y); strain = sym(grad(u))')");
 
-  params.addParam<std::vector<std::string>>(
+  params.addParam<std::string>(
       "strong_forms",
-      "Strong form equations (e.g., 'c_t = -div(M*grad(mu))' 'mu = dW/dc - kappa*laplacian(c)')");
+      "Strong form equations separated by semicolons (e.g., 'c_t = -div(M*grad(mu)); mu = dW/dc - kappa*laplacian(c)')");
 
   params.addParam<std::map<std::string, Real>>(
       "parameters", "Parameters used in the energy expression (e.g., kappa=1.0)");
@@ -717,16 +717,11 @@ AutomaticWeakFormAction::parseStrongForms()
   // Parse intermediate expressions if provided
   if (isParamValid("expressions"))
   {
-    const auto & expr_vector = getParam<std::vector<std::string>>("expressions");
+    const std::string & expr_string = getParam<std::string>("expressions");
     
-    // MOOSE concatenates multiple quoted strings, so we get a single string
-    // We need to split it by semicolons
-    std::string combined_expr;
-    for (const auto & s : expr_vector)
-      combined_expr += s;
-    
+    // Split by semicolons
     std::vector<std::string> expressions;
-    MooseUtils::tokenize(combined_expr, expressions, 1, ";");
+    MooseUtils::tokenize(expr_string, expressions, 1, ";");
     
     for (const auto & expr : expressions)
     {
@@ -759,14 +754,9 @@ AutomaticWeakFormAction::parseStrongForms()
   // Parse strong form equations
   if (isParamValid("strong_forms"))
   {
-    const auto & forms_vector = getParam<std::vector<std::string>>("strong_forms");
+    const std::string & forms_string = getParam<std::string>("strong_forms");
     
-    // MOOSE concatenates multiple quoted strings into a single element vector
     // The string contains semicolon-separated equations
-    std::string forms_string;
-    for (const auto & s : forms_vector)
-      forms_string += s;
-    
     _strong_form_equations = parser.parseStrongForms(forms_string);
   }
 }
@@ -845,11 +835,10 @@ AutomaticWeakFormAction::addExpressionKernels()
     // Pass intermediate expressions
     if (isParamValid("expressions"))
     {
-      const auto & expressions = getParam<std::vector<std::string>>("expressions");
-      // MOOSE concatenates multi-line strings into a single element
-      // Just pass the first (and likely only) element
-      if (!expressions.empty() && !expressions[0].empty())
-        params.set<std::string>("intermediate_expressions") = expressions[0];
+      const std::string & expressions = getParam<std::string>("expressions");
+      // Just pass the string directly - it already has semicolons
+      if (!expressions.empty())
+        params.set<std::string>("intermediate_expressions") = expressions;
     }
 
     // Pass coupled variables
