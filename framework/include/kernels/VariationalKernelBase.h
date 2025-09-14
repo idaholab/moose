@@ -43,6 +43,12 @@ protected:
   void setupCoupledVariables();
 
   void updateVariableValues(unsigned int qp);
+  
+  NodePtr differentiateWithRespectToField(const NodePtr & expr, const std::string & var_name);
+  
+  NodePtr differentiateWithRespectToGradient(const NodePtr & expr, const std::string & var_name);
+  
+  bool containsGradient(const NodePtr & expr, const std::string & var_name);
 
 protected:
   std::unique_ptr<MooseExpressionBuilder> _builder;

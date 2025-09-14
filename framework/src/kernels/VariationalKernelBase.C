@@ -290,27 +290,113 @@ VariationalKernelBase::computeQpJacobian()
     // For simple diffusion, the Jacobian from -∇·(κ∇u) is κ∇φ_j·∇ψ_i
     // For now, assume κ=1 for testing
     return _grad_phi[_j][_qp] * _grad_test[_i][_qp];
-    
-    return Kernel::computeQpJacobian();
   }
 
+  // Automatic differentiation for Jacobian
   clearCache();
   updateVariableValues(_qp);
-
+  
+  Real jacobian = 0.0;
+  
+  // Optional debug output
+  bool debug = false; // Set to true for debugging
+  
+  // Get the differential coefficients C^k from the energy functional
   DifferentiationVisitor dv(_var.name());
-  auto residual_expr = _weak_form_gen->generateWeakForm(_energy_density, _var.name());
-  auto jacobian_diff = dv.differentiate(residual_expr);
-
-  if (jacobian_diff.hasOrder(0))
+  auto diff = dv.differentiate(_energy_density);
+  
+  // Jacobian from C^0 term: ∂C^0/∂u · φ_j · ψ_i
+  if (diff.hasOrder(0))
   {
-    auto jacobian_expr = jacobian_diff.getCoefficient(0);
-    MooseValue jac_val = evaluateExpression(jacobian_expr);
-
-    if (jac_val.isScalar())
-      return jac_val.asScalar() * _phi[_j][_qp] * _test[_i][_qp];
+    auto c0 = diff.getCoefficient(0);
+    
+    if (debug && _qp == 0 && _i == 0 && _j == 0)
+      mooseInfo("  C^0 expression: ", c0->toString());
+    
+    // Differentiate C^0 with respect to the field variable
+    auto dc0_du = differentiateWithRespectToField(c0, _var.name());
+    
+    if (debug && _qp == 0 && _i == 0 && _j == 0)
+    {
+      if (dc0_du)
+        mooseInfo("  dc0/du: ", dc0_du->toString());
+      else
+        mooseInfo("  dc0/du: null");
+    }
+    
+    if (dc0_du)
+    {
+      MooseValue dc0_val = evaluateExpression(dc0_du);
+      if (dc0_val.isScalar())
+      {
+        Real contrib = dc0_val.asScalar() * _phi[_j][_qp] * _test[_i][_qp];
+        jacobian += contrib;
+        
+        if (debug && _qp == 0 && _i == 0 && _j == 0)
+          mooseInfo("  C^0 Jacobian contribution: ", contrib);
+      }
+    }
   }
-
-  return 0.0;
+  
+  // Jacobian from C^1 term: ∂C^1/∂u · φ_j · ∇ψ_i + ∂C^1/∂(∇u) · ∇φ_j · ∇ψ_i
+  if (diff.hasOrder(1))
+  {
+    auto c1 = diff.getCoefficient(1);
+    
+    if (debug && _qp == 0 && _i == 0 && _j == 0)
+      mooseInfo("  C^1 expression: ", c1->toString());
+    
+    // Contribution from ∂C^1/∂u
+    auto dc1_du = differentiateWithRespectToField(c1, _var.name());
+    if (dc1_du)
+    {
+      MooseValue dc1_val = evaluateExpression(dc1_du);
+      if (dc1_val.isVector())
+        jacobian += dc1_val.asVector() * _grad_test[_i][_qp] * _phi[_j][_qp];
+    }
+    
+    // Contribution from ∂C^1/∂(∇u)
+    auto dc1_dgradu = differentiateWithRespectToGradient(c1, _var.name());
+    
+    if (debug && _qp == 0 && _i == 0 && _j == 0)
+    {
+      if (dc1_dgradu)
+        mooseInfo("  dc1/d(grad u): ", dc1_dgradu->toString());
+      else
+        mooseInfo("  dc1/d(grad u): null");
+    }
+    
+    if (dc1_dgradu)
+    {
+      MooseValue dc1_grad_val = evaluateExpression(dc1_dgradu);
+      if (dc1_grad_val.isTensor())
+      {
+        // Contract the tensor with ∇φ_j and then dot with ∇ψ_i
+        RankTwoTensor tensor = dc1_grad_val.asTensor();
+        RealVectorValue result = tensor * _grad_phi[_j][_qp];
+        jacobian += result * _grad_test[_i][_qp];
+        
+        if (debug && _qp == 0 && _i == 0 && _j == 0)
+          mooseInfo("  Tensor contribution: ", result * _grad_test[_i][_qp]);
+      }
+      else if (dc1_grad_val.isScalar())
+      {
+        // For simple cases like C^1 = κ∇u, ∂C^1/∂(∇u) = κI
+        Real contrib = dc1_grad_val.asScalar() * _grad_phi[_j][_qp] * _grad_test[_i][_qp];
+        jacobian += contrib;
+        
+        if (debug && _qp == 0 && _i == 0 && _j == 0)
+        {
+          mooseInfo("  Scalar grad contribution: ", contrib);
+          mooseInfo("    dc1_grad_val: ", dc1_grad_val.asScalar());
+        }
+      }
+    }
+  }
+  
+  // TODO: Add C^2 and higher order terms if needed
+  
+  return jacobian;
 }
 
 Real
@@ -646,6 +732,167 @@ VariationalKernelBase::evaluateAtQP(const NodePtr & expr, unsigned int qp)
     default:
       mooseError("Cannot evaluate expression type: ", expr->toString());
   }
+}
+
+NodePtr
+VariationalKernelBase::differentiateWithRespectToField(const NodePtr & expr, const std::string & var_name)
+{
+  if (!expr)
+    return nullptr;
+    
+  // Use the differentiation visitor to compute ∂expr/∂var
+  DifferentiationVisitor dv(var_name);
+  auto diff = dv.differentiate(expr);
+  
+  // The 0-th order coefficient is ∂expr/∂var
+  if (diff.hasOrder(0))
+    return diff.getCoefficient(0);
+    
+  return nullptr;
+}
+
+NodePtr
+VariationalKernelBase::differentiateWithRespectToGradient(const NodePtr & expr, const std::string & var_name)
+{
+  if (!expr)
+    return nullptr;
+    
+  // For expressions like C^1 = κ∇u, we need ∂C^1/∂(∇u)
+  // This is more complex and depends on the structure of the expression
+  
+  // Handle different node types
+  if (expr->type() == NodeType::Add)
+  {
+    // d(a + b)/d(grad u) = da/d(grad u) + db/d(grad u)
+    auto binary = std::static_pointer_cast<BinaryOpNode>(expr);
+    auto left_deriv = differentiateWithRespectToGradient(binary->left(), var_name);
+    auto right_deriv = differentiateWithRespectToGradient(binary->right(), var_name);
+    
+    if (left_deriv && right_deriv)
+      return add(left_deriv, right_deriv);
+    else if (left_deriv)
+      return left_deriv;
+    else if (right_deriv)
+      return right_deriv;
+    else
+      return nullptr;
+  }
+  else if (expr->type() == NodeType::Multiply)
+  {
+    // d(a * b)/d(grad u) = a * db/d(grad u) + da/d(grad u) * b
+    // But if a is scalar and b is grad(u), then d(a * grad(u))/d(grad u) = a * I
+    auto binary = std::static_pointer_cast<BinaryOpNode>(expr);
+    auto left = binary->left();
+    auto right = binary->right();
+    
+    // Check if one side is a scalar constant/expression and the other contains grad(u)
+    bool left_has_grad = containsGradient(left, var_name);
+    bool right_has_grad = containsGradient(right, var_name);
+    
+    if (!left_has_grad && right_has_grad)
+    {
+      // left is coefficient, right contains grad(u)
+      auto right_deriv = differentiateWithRespectToGradient(right, var_name);
+      if (right_deriv)
+        return multiply(left, right_deriv);
+    }
+    else if (left_has_grad && !right_has_grad)
+    {
+      // right is coefficient, left contains grad(u)
+      auto left_deriv = differentiateWithRespectToGradient(left, var_name);
+      if (left_deriv)
+        return multiply(right, left_deriv);
+    }
+    // If both have gradients, we'd need product rule - not handled yet
+    return nullptr;
+  }
+  else if (expr->type() == NodeType::Gradient)
+  {
+    auto unary = std::static_pointer_cast<UnaryOpNode>(expr);
+    auto operand = unary->operand();
+    if (operand->type() == NodeType::Variable || operand->type() == NodeType::FieldVariable)
+    {
+      auto var_node = operand;
+      if ((var_node->type() == NodeType::Variable && 
+           std::static_pointer_cast<VariableNode>(var_node)->name() == var_name) ||
+          (var_node->type() == NodeType::FieldVariable && 
+           std::static_pointer_cast<FieldVariableNode>(var_node)->name() == var_name))
+      {
+        // ∂(grad(u))/∂(grad(u)) = I (identity tensor)
+        return constant(1.0); // Simplified - should return identity tensor
+      }
+    }
+  }
+  else if (expr->type() == NodeType::Multiply)
+  {
+    auto binary = std::static_pointer_cast<BinaryOpNode>(expr);
+    auto left = binary->left();
+    auto right = binary->right();
+    
+    // Check if one side is grad(var) and the other is a constant/scalar
+    NodePtr grad_part = nullptr;
+    NodePtr coeff_part = nullptr;
+    
+    if (right->type() == NodeType::Gradient)
+    {
+      grad_part = right;
+      coeff_part = left;
+    }
+    else if (left->type() == NodeType::Gradient)
+    {
+      grad_part = left;
+      coeff_part = right;
+    }
+    
+    if (grad_part)
+    {
+      auto unary = std::static_pointer_cast<UnaryOpNode>(grad_part);
+      auto operand = unary->operand();
+      if ((operand->type() == NodeType::Variable && 
+           std::static_pointer_cast<VariableNode>(operand)->name() == var_name) ||
+          (operand->type() == NodeType::FieldVariable && 
+           std::static_pointer_cast<FieldVariableNode>(operand)->name() == var_name))
+      {
+        // ∂(κ * grad(u))/∂(grad(u)) = κ * I
+        return coeff_part; // Returns the coefficient
+      }
+    }
+  }
+  
+  // For more complex expressions, we would need a more sophisticated approach
+  return nullptr;
+}
+
+bool
+VariationalKernelBase::containsGradient(const NodePtr & expr, const std::string & var_name)
+{
+  if (!expr)
+    return false;
+    
+  if (expr->type() == NodeType::Gradient)
+  {
+    auto unary = std::static_pointer_cast<UnaryOpNode>(expr);
+    auto operand = unary->operand();
+    if (operand->type() == NodeType::Variable || operand->type() == NodeType::FieldVariable)
+    {
+      if ((operand->type() == NodeType::Variable && 
+           std::static_pointer_cast<VariableNode>(operand)->name() == var_name) ||
+          (operand->type() == NodeType::FieldVariable && 
+           std::static_pointer_cast<FieldVariableNode>(operand)->name() == var_name))
+      {
+        return true;
+      }
+    }
+  }
+  
+  // Recursively check children
+  for (const auto & child : expr->children())
+  {
+    if (containsGradient(child, var_name))
+      return true;
+  }
+  
+  return false;
 }
 
 }
