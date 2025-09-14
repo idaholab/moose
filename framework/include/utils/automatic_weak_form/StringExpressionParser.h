@@ -581,7 +581,26 @@ inline NodePtr StringExpressionParser::parseGradient(const std::vector<NodePtr> 
 {
   if (args.size() != 1)
     mooseError("gradient() requires exactly 1 argument");
-  return grad(args[0], _dim);
+  
+  auto result = grad(args[0], _dim);
+  
+  // Debug output for shape tracking
+  if (_dim == 1)
+  {
+    std::string input_shape = "unknown";
+    if (args[0]->isScalar()) input_shape = "scalar";
+    else if (args[0]->isVector()) input_shape = "vector";
+    else if (args[0]->isTensor()) input_shape = "tensor";
+    
+    std::string output_shape = "unknown";
+    if (result->isScalar()) output_shape = "scalar";
+    else if (result->isVector()) output_shape = "vector";
+    else if (result->isTensor()) output_shape = "tensor";
+    
+    mooseInfo("[DEBUG] grad() in 1D: input shape = ", input_shape, ", output shape = ", output_shape);
+  }
+  
+  return result;
 }
 
 inline NodePtr StringExpressionParser::parseDivergence(const std::vector<NodePtr> & args)
@@ -609,6 +628,24 @@ inline NodePtr StringExpressionParser::parseDot(const std::vector<NodePtr> & arg
 {
   if (args.size() != 2)
     mooseError("dot() requires exactly 2 arguments");
+  
+  // Debug shapes
+  mooseInfo("[DEBUG parseDot] arg0=", args[0]->toString());
+  if (args[0]->isVector())
+    mooseInfo("  arg0 shape: VECTOR");
+  else if (args[0]->isTensor())  
+    mooseInfo("  arg0 shape: TENSOR");
+  else if (args[0]->isScalar())
+    mooseInfo("  arg0 shape: SCALAR");
+    
+  mooseInfo("[DEBUG parseDot] arg1=", args[1]->toString());
+  if (args[1]->isVector())
+    mooseInfo("  arg1 shape: VECTOR");
+  else if (args[1]->isTensor())
+    mooseInfo("  arg1 shape: TENSOR");
+  else if (args[1]->isScalar())
+    mooseInfo("  arg1 shape: SCALAR");
+  
   return moose::automatic_weak_form::dot(args[0], args[1]);
 }
 

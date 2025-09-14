@@ -282,9 +282,34 @@ class UnaryOpNode : public Node
 {
 public:
   UnaryOpNode(NodeType type, const NodePtr & operand, const Shape & shape)
-    : Node(type, shape), _operand(operand) {}
+    : Node(type, shape), _operand(operand)
+  {
+    // Debug shape issues in 1D
+    if (type == NodeType::Gradient && operand->type() == NodeType::Gradient)
+    {
+      std::string shape_str = "unknown";
+      if (std::holds_alternative<VectorShape>(shape))
+        shape_str = "VECTOR(dim=" + std::to_string(std::get<VectorShape>(shape).dim) + ")";
+      else if (std::holds_alternative<TensorShape>(shape))
+        shape_str = "TENSOR(dim=" + std::to_string(std::get<TensorShape>(shape).dim) + ")";
+      mooseInfo("[DEBUG UnaryOpNode] Creating grad(grad(...)) with shape=", shape_str);
+    }
+  }
   
   const NodePtr & operand() const { return _operand; }
+
+  // Debug helper
+  std::string shapeString() const
+  {
+    if (std::holds_alternative<VectorShape>(_shape))
+      return "VECTOR(dim=" + std::to_string(std::get<VectorShape>(_shape).dim) + ")";
+    else if (std::holds_alternative<TensorShape>(_shape))
+      return "TENSOR(dim=" + std::to_string(std::get<TensorShape>(_shape).dim) + ")";
+    else if (std::holds_alternative<ScalarShape>(_shape))
+      return "SCALAR";
+    else
+      return "UNKNOWN";
+  }
   
   std::vector<NodePtr> children() const override { return {_operand}; }
   
@@ -312,7 +337,35 @@ public:
   
   NodePtr clone() const override
   {
-    return std::make_shared<UnaryOpNode>(_type, _operand->clone(), _shape);
+    auto cloned = std::make_shared<UnaryOpNode>(_type, _operand->clone(), _shape);
+
+    // Debug cloning issues
+    if (_type == NodeType::Gradient && _operand->type() == NodeType::Gradient)
+    {
+      std::string orig_shape = "unknown";
+      if (std::holds_alternative<VectorShape>(_shape))
+        orig_shape = "VECTOR(dim=" + std::to_string(std::get<VectorShape>(_shape).dim) + ")";
+      else if (std::holds_alternative<TensorShape>(_shape))
+        orig_shape = "TENSOR(dim=" + std::to_string(std::get<TensorShape>(_shape).dim) + ")";
+
+      std::string cloned_shape = "unknown";
+      if (cloned->isVector())
+      {
+        auto shape = cloned->shape();
+        if (std::holds_alternative<VectorShape>(shape))
+          cloned_shape = "VECTOR(dim=" + std::to_string(std::get<VectorShape>(shape).dim) + ")";
+      }
+      else if (cloned->isTensor())
+      {
+        auto shape = cloned->shape();
+        if (std::holds_alternative<TensorShape>(shape))
+          cloned_shape = "TENSOR(dim=" + std::to_string(std::get<TensorShape>(shape).dim) + ")";
+      }
+
+      mooseInfo("[DEBUG clone] grad(grad(...)) original shape=", orig_shape, " cloned shape=", cloned_shape);
+    }
+
+    return cloned;
   }
   
   bool equals(const Node & other) const override
@@ -597,14 +650,36 @@ inline NodePtr subtract(const NodePtr & a, const NodePtr & b)
 
 inline NodePtr multiply(const NodePtr & a, const NodePtr & b)
 {
+  NodePtr result;
   if (a->isScalar())
-    return std::make_shared<BinaryOpNode>(NodeType::Multiply, a, b, b->shape());
+    result = std::make_shared<BinaryOpNode>(NodeType::Multiply, a, b, b->shape());
   else if (b->isScalar())
-    return std::make_shared<BinaryOpNode>(NodeType::Multiply, a, b, a->shape());
+    result = std::make_shared<BinaryOpNode>(NodeType::Multiply, a, b, a->shape());
   else if (a->isVector() && b->isVector())
-    return std::make_shared<BinaryOpNode>(NodeType::Multiply, a, b, ScalarShape{});
+    result = std::make_shared<BinaryOpNode>(NodeType::Multiply, a, b, ScalarShape{});
   else
-    return std::make_shared<BinaryOpNode>(NodeType::Multiply, a, b, a->shape());
+    result = std::make_shared<BinaryOpNode>(NodeType::Multiply, a, b, a->shape());
+  
+  // Debug output for shape tracking
+  std::string a_shape = "unknown";
+  if (a->isScalar()) a_shape = "scalar";
+  else if (a->isVector()) a_shape = "vector";
+  else if (a->isTensor()) a_shape = "tensor";
+  
+  std::string b_shape = "unknown";
+  if (b->isScalar()) b_shape = "scalar";
+  else if (b->isVector()) b_shape = "vector";
+  else if (b->isTensor()) b_shape = "tensor";
+  
+  std::string result_shape = "unknown";
+  if (result->isScalar()) result_shape = "scalar";
+  else if (result->isVector()) result_shape = "vector";
+  else if (result->isTensor()) result_shape = "tensor";
+  
+  if (a_shape == "scalar" && b_shape == "tensor")
+    mooseInfo("[DEBUG] multiply: ", a->toString(), " (", a_shape, ") * ", b->toString(), " (", b_shape, ") -> shape = ", result_shape);
+  
+  return result;
 }
 
 inline NodePtr divide(const NodePtr & a, const NodePtr & b)
@@ -625,7 +700,26 @@ inline NodePtr negate(const NodePtr & a)
 inline NodePtr grad(const NodePtr & a, unsigned int dim = 3)
 {
   auto result_shape = gradientShape(a->shape(), dim);
-  return std::make_shared<UnaryOpNode>(NodeType::Gradient, a, result_shape.shape);
+  auto result = std::make_shared<UnaryOpNode>(NodeType::Gradient, a, result_shape.shape);
+  
+  // Debug output for nested gradients
+  if (a->type() == NodeType::Gradient && dim == 1)
+  {
+    std::string input_shape_str = "unknown";
+    if (a->isScalar()) input_shape_str = "scalar";
+    else if (a->isVector()) input_shape_str = "vector";
+    else if (a->isTensor()) input_shape_str = "tensor";
+    
+    std::string output_shape_str = "unknown";
+    if (result->isScalar()) output_shape_str = "scalar";
+    else if (result->isVector()) output_shape_str = "vector";
+    else if (result->isTensor()) output_shape_str = "tensor";
+    
+    mooseInfo("[DEBUG] grad(grad(...)) in 1D: input=", a->toString(), " shape=", input_shape_str, 
+              " -> output shape=", output_shape_str);
+  }
+  
+  return result;
 }
 
 inline NodePtr div(const NodePtr & a)

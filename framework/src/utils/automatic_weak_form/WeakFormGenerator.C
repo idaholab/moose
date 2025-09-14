@@ -208,6 +208,47 @@ Differential DifferentiationVisitor::visitUnaryOp(const UnaryOpNode * node)
 
 Differential DifferentiationVisitor::visitBinaryOp(const BinaryOpNode * node)
 {
+  // Debug dot product operands
+  if (node->type() == NodeType::Dot)
+  {
+    mooseInfo("[DEBUG visitBinaryOp] Dot product found");
+    auto left = node->left();
+    auto right = node->right();
+    mooseInfo("  left=", left->toString(), " type=", static_cast<int>(left->type()));
+    std::string left_shape = "UNKNOWN";
+    if (left->isVector())
+      left_shape = "VECTOR";
+    else if (left->isTensor())
+      left_shape = "TENSOR";
+    else if (left->isScalar())
+      left_shape = "SCALAR";
+
+    // Try to get more detailed shape info for gradient nodes
+    if (left->type() == NodeType::Gradient)
+    {
+      auto unary_left = static_cast<const UnaryOpNode*>(left.get());
+      left_shape = unary_left->shapeString();
+    }
+    mooseInfo("  left shape: ", left_shape);
+
+    mooseInfo("  right=", right->toString(), " type=", static_cast<int>(right->type()));
+    std::string right_shape = "UNKNOWN";
+    if (right->isVector())
+      right_shape = "VECTOR";
+    else if (right->isTensor())
+      right_shape = "TENSOR";
+    else if (right->isScalar())
+      right_shape = "SCALAR";
+
+    // Try to get more detailed shape info for gradient nodes
+    if (right->type() == NodeType::Gradient)
+    {
+      auto unary_right = static_cast<const UnaryOpNode*>(right.get());
+      right_shape = unary_right->shapeString();
+    }
+    mooseInfo("  right shape: ", right_shape);
+  }
+
   switch (node->type())
   {
     case NodeType::Add:
@@ -553,6 +594,22 @@ Differential DifferentiationVisitor::handlePower(const NodePtr & left, const Nod
 
 Differential DifferentiationVisitor::handleDot(const NodePtr & left, const NodePtr & right)
 {
+  // Debug input shapes
+  mooseInfo("[DEBUG handleDot] Inputs: left=", left->toString(), ", right=", right->toString());
+  if (left->isVector())
+    mooseInfo("  left shape: VECTOR");
+  else if (left->isTensor())
+    mooseInfo("  left shape: TENSOR");
+  else if (left->isScalar())
+    mooseInfo("  left shape: SCALAR");
+    
+  if (right->isVector())
+    mooseInfo("  right shape: VECTOR");
+  else if (right->isTensor())
+    mooseInfo("  right shape: TENSOR");
+  else if (right->isScalar())
+    mooseInfo("  right shape: SCALAR");
+  
   Differential left_diff = visit(left);
   Differential right_diff = visit(right);
   
@@ -569,7 +626,15 @@ Differential DifferentiationVisitor::handleDot(const NodePtr & left, const NodeP
       {
         auto const_node = static_cast<const ConstantNode*>(coeff.get());
         if (const_node->value().isScalar())
+        {
           result.coefficients[order] = multiply(coeff, right);
+          // Debug output
+          mooseInfo("[DEBUG handleDot] left coeff order=", order, " multiplying scalar by right=", right->toString());
+          if (right->isVector())
+            mooseInfo("  right shape is VECTOR");
+          else if (right->isTensor())
+            mooseInfo("  right shape is TENSOR");
+        }
         else
           result.coefficients[order] = dot(coeff, right);
       }
@@ -752,6 +817,16 @@ NodePtr WeakFormGenerator::computeEulerLagrange(const Differential & diff)
     {
       NodePtr term = coeff;
       mooseInfo("  Processing C^", order, " = ", term->toString());
+      
+      // Debug: print shape information
+      if (term->isScalar())
+        mooseInfo("    Shape: SCALAR");
+      else if (term->isVector())
+        mooseInfo("    Shape: VECTOR");
+      else if (term->isTensor())
+        mooseInfo("    Shape: TENSOR");
+      else
+        mooseInfo("    Shape: UNKNOWN/RANK>2");
       
       for (unsigned int i = 0; i < order; ++i)
       {

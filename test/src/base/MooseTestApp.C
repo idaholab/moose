@@ -125,6 +125,9 @@ MooseTestApp::registerAll(Factory & f, ActionFactory & af, Syntax & s, bool use_
     registerSyntaxTask("AddAuxVariableAction", "MoreAuxVariables/*", "add_aux_variable");
     registerSyntaxTask("AddLotsOfAuxVariablesAction", "LotsOfAuxVariables/*", "add_variable");
     registerSyntax("ApplyCoupledVariablesTestAction", "ApplyInputParametersTest");
+    
+    // Register AutomaticWeakFormAction syntax
+    registerSyntax("AutomaticWeakFormAction", "AutomaticWeakForm");
     registerSyntax("AddLotsOfDiffusion", "Testing/LotsOfDiffusion/*");
     registerSyntax("TestGetActionsAction", "TestGetActions");
     registerSyntax("BadAddKernelAction", "BadKernels/*");

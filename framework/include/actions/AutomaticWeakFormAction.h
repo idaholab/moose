@@ -31,6 +31,8 @@ protected:
   
   void addTimeDerivativeKernelForVariable(const std::string & var_name);
   
+  void addSplitConstraintKernels();
+  
   void addAuxKernels();
   
   void addBoundaryConditions();
@@ -119,6 +121,14 @@ private:
   bool _check_stability;
   
   bool _estimate_condition_number;
+  
+  // Debugging and verbose output flags
+  bool _verbose;
+  bool _debug_print_expressions;
+  bool _debug_print_derivatives;
+  bool _debug_print_simplification;
+  bool _debug_print_weak_form;
+  bool _debug_print_jacobian;
   
   std::unique_ptr<moose::automatic_weak_form::MooseExpressionBuilder> _expr_builder;
   
