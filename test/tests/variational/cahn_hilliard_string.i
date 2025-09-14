@@ -23,8 +23,6 @@
 
 [AutomaticWeakForm]
   [cahn_hilliard]
-    type = AutomaticWeakFormAction
-    
     # Use expression type with string parsing
     energy_type = expression
     
