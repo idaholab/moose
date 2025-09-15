@@ -8,8 +8,7 @@ ADFluxFromGradientMaterial::validParams()
   InputParameters params = Material::validParams();
 
   // Required name for the output flux property
-  params.addRequiredParam<MaterialPropertyName>(
-      "flux", "Name of the flux material property");
+  params.addRequiredParam<MaterialPropertyName>("flux", "Name of the flux material property");
 
   // Coupled variable whose gradient is used
   params.addRequiredCoupledVar("u", "Variable used to compute the flux");

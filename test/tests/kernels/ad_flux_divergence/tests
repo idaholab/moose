@@ -1,0 +1,37 @@
+[Tests]
+  [steadystate]
+    type = 'Exodiff'
+    input = '1d_fluxdivergence_steadystate_test.i'
+    exodiff = 'steadystate_out.e'
+    requirement = 'The system shall provide an ability to solve a 1D flux divergence problem in steady state.'
+    issues = '#31531'
+    design = '/Kernels/ADFluxDivergence.md, /Materials/ADFluxFromGradientMaterial.md'
+  []
+
+  [transient]
+    type = 'Exodiff'
+    input = '1d_fluxdivergence_transient_test.i'
+    exodiff = 'transient_out.e'
+    requirement = 'The system shall provide an ability to solve a 1D flux divergence problem in transient state.'
+    issues = '#31531'
+    design = '/Kernels/ADFluxDivergence.md, /Materials/ADFluxFromGradientMaterial.md'
+  []
+
+  [neumannbc]
+    type = 'Exodiff'
+    input = '2d_fluxdivergence_neumannbc_test.i'
+    exodiff = 'neumannbc_out.e'
+    requirement = 'The system shall provide an ability to solve a 2D flux divergence problem with Neumann boundary conditions.'
+    issues = '#31531'
+    design = '/Kernels/ADFluxDivergence.md, /Materials/ADFluxFromGradientMaterial.md'
+  []
+
+  [nonlinear_diffusivity]
+    type = 'Exodiff'
+    input = '2d_fluxdivergence_nonlineardiffusivity_test.i'
+    exodiff = 'nonlinear_diffusivity_out.e'
+    requirement = 'The system shall provide an ability to solve a 2D flux divergence problem with nonlinear diffusivity.'
+    issues = '#31531'
+    design = '/Kernels/ADFluxDivergence.md, /Materials/ADFluxFromGradientMaterial.md'
+  []
+[]

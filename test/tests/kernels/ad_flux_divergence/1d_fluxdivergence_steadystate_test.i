@@ -1,7 +1,7 @@
 [Mesh]
   type = GeneratedMesh
   dim = 1
-  nx = 1
+  nx = 20
 []
 
 [Variables]
@@ -17,11 +17,17 @@
 []
 
 [Materials]
+  [diffusivity]
+    type = ADGenericConstantMaterial
+    prop_names = 'diffusivity'
+    prop_values = '1.0'
+  []
+
   [flux]
     type = ADFluxFromGradientMaterial
     flux = flux
     u = u
-    diffusivity = 1.0
+    diffusivity = diffusivity
   []
 []
 
@@ -30,20 +36,14 @@
     type = DirichletBC
     variable = u
     boundary = left
-    value = 0
+    value = 1
   []
+
   [right]
     type = DirichletBC
     variable = u
     boundary = right
-    value = 1
-  []
-[]
-
-[Postprocessors]
-  [u_avg]
-    type = ElementAverageValue
-    variable = u
+    value = 0
   []
 []
 
@@ -52,9 +52,6 @@
 []
 
 [Outputs]
-  [csv]
-    type = CSV
-    file_base = ad_flux_divergence_out
-  []
+  file_base = steadystate_out
+  exodus = true
 []
-
