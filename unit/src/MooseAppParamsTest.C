@@ -20,15 +20,15 @@ createApp(const std::vector<std::string> & cli_args)
 
 TEST(MooseAppParamsTest, checkExclusiveParams)
 {
-  MOOSE_ASSERT_THROWS_CONTAINS(
+  MOOSE_ASSERT_THROWS(
       MooseRuntimeError,
       createApp({"--check-input", "--recover"}),
       "--check-input: Cannot be used with parameter '--recover'; recover files might not exist");
-  MOOSE_ASSERT_THROWS_CONTAINS(
+  MOOSE_ASSERT_THROWS(
       MooseRuntimeError,
       createApp({"--test-restep", "--test-checkpoint-half-transient"}),
       "--test-restep: Cannot be used with parameter '--test-checkpoint-half-transient'");
-  MOOSE_ASSERT_THROWS_CONTAINS(MooseRuntimeError,
-                               createApp({"--trap-fpe", "--no-trap-fpe"}),
-                               "--trap-fpe: Cannot be used with parameter '--no-trap-fpe'");
+  MOOSE_ASSERT_THROWS(MooseRuntimeError,
+                      createApp({"--trap-fpe", "--no-trap-fpe"}),
+                      "--trap-fpe: Cannot be used with parameter '--no-trap-fpe'");
 }

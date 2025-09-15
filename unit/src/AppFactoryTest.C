@@ -42,7 +42,7 @@ TEST(AppFactoryTest, manageAppParams)
   {
     AppFactory af;
     InputParameters params = emptyInputParameters();
-    MOOSE_ASSERT_THROWS_CONTAINS(
+    MOOSE_ASSERT_THROWS(
         MooseRuntimeError,
         af.getAppParamsID(params),
         "AppFactory::getAppParamsID(): Invalid application parameters (missing '_app_params_id')");
@@ -54,11 +54,11 @@ TEST(AppFactoryTest, manageAppParams)
     InputParameters params = emptyInputParameters();
     af.storeAppParams(params);
     af.clearAppParams(params, {});
-    MOOSE_ASSERT_THROWS_CONTAINS(
+    MOOSE_ASSERT_THROWS(
         MooseRuntimeError,
         af.getAppParams(params),
         "AppFactory::getAppParams(): Parameters for application with ID 0 not found");
-    MOOSE_ASSERT_THROWS_CONTAINS(
+    MOOSE_ASSERT_THROWS(
         MooseRuntimeError,
         af.clearAppParams(params, {}),
         "AppFactory::clearAppParams(): Parameters for application with ID 0 not found");
@@ -94,9 +94,9 @@ TEST(AppFactoryTest, appCopyConstructParams)
 
   const auto deprecated_is_error = Moose::_deprecated_is_error;
   Moose::_deprecated_is_error = true;
-  MOOSE_ASSERT_THROWS_CONTAINS(MooseRuntimeError,
-                               af.create(app_type, "test", params, MPI_COMM_WORLD),
-                               "CopyConstructParamsApp copy-constructs its input parameters");
+  MOOSE_ASSERT_THROWS(MooseRuntimeError,
+                      af.create(app_type, "test", params, MPI_COMM_WORLD),
+                      "CopyConstructParamsApp copy-constructs its input parameters");
   Moose::_deprecated_is_error = deprecated_is_error;
 
   ASSERT_EQ(af._input_parameters.size(), 1);
@@ -112,10 +112,9 @@ TEST(AppFactoryTest, appCopyConstructParams)
 TEST(AppFactoryTest, createNotRegistered)
 {
   AppFactory af;
-  MOOSE_ASSERT_THROWS_CONTAINS(
-      MooseRuntimeError,
-      af.create("fooapp", "unused", emptyInputParameters(), MPI_COMM_WORLD),
-      "AppFactory::Create(): Application 'fooapp' was not registered");
+  MOOSE_ASSERT_THROWS(MooseRuntimeError,
+                      af.create("fooapp", "unused", emptyInputParameters(), MPI_COMM_WORLD),
+                      "AppFactory::Create(): Application 'fooapp' was not registered");
 }
 
 TEST(AppFactoryTest, createForUnit)
