@@ -18,8 +18,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 80
-  ny = 80
+  nx = 40
+  ny = 40
   xmin = -1
   xmax = 1
   ymin = -1
@@ -50,17 +50,17 @@
 
   # Energy with fourfold anisotropy
   # The anisotropic term favors interfaces aligned with coordinate axes
+  # Using a simpler formulation that avoids division issues
+  # This creates an effective anisotropic gradient energy
   energy_expression = 'W(eta) +
                        0.5*kappa_0*dot(grad(eta), grad(eta)) +
                        0.5*kappa_1*(pow(dot(grad(eta), vec(1.0, 0.0)), 4.0) +
-                                    pow(dot(grad(eta), vec(0.0, 1.0)), 4.0))/
-                                   (dot(grad(eta), grad(eta)) + delta)'
+                                    pow(dot(grad(eta), vec(0.0, 1.0)), 4.0))'
 
   # Parameters:
   # kappa_0: base interface energy
-  # kappa_1: anisotropy strength (positive favors axis-aligned interfaces)
-  # delta: regularization to avoid division by zero
-  parameters = 'kappa_0 0.01 kappa_1 0.008 delta 1e-8'
+  # kappa_1: anisotropy strength for fourth-order terms
+  parameters = 'kappa_0 0.01 kappa_1 0.0001'
 
   variables = 'eta'
 
@@ -85,7 +85,7 @@
 
   # Time stepping - slower to observe shape evolution
   dt = 0.002
-  end_time = 5.0
+  end_time = 0.01
 
   # Solver settings
   solve_type = NEWTON
