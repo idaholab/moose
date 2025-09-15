@@ -58,7 +58,8 @@ MFEMSolverBase::resetSolver()
   constructSolver(solver_params);
 
   // ditto for the preconditioner
-  if (_preconditioner) _preconditioner->resetSolver();
+  if (_preconditioner)
+    _preconditioner->resetSolver();
 }
 
 template void MFEMSolverBase::setPreconditioner(mfem::CGSolver &);
