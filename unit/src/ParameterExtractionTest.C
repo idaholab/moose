@@ -195,7 +195,7 @@ TEST(ParameterExtractionTest, extractSetCatch)
   const auto [root, nodes] = buildTestRootWithNodes({"Section/foo=a"});
   const auto info = extract(*root, "Section", params);
   ASSERT_EQ(info.errors.size(), 1);
-  ASSERT_EQ(info.errors[0].message, "invalid boolean syntax for parameter: foo='a'");
+  ASSERT_EQ(info.errors[0].message, "invalid boolean syntax for parameter: Section/foo='a'");
   ASSERT_EQ(info.errors[0].node, nodes[0]);
   ASSERT_TRUE(info.extracted_nodes.empty());
   ASSERT_FALSE(params.isParamSetByUser("foo"));
