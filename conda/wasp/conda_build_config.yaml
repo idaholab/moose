@@ -10,13 +10,13 @@ moose_cmake:
 
 moose_cc:
   - gcc 14.3.0 h76bdaa0_5                                   # [linux]
-  - clang 18.1.8                                            # [not arm64 and osx]
+  - clang 18.1.8 default_h1323312_15                        # [not arm64 and osx]
   - clang 18.1.8 default_hf9bcbb7_15                        # [arm64]
 
 ### If you change these versions, change also conda/mpi/*, conda/seacas/*
 moose_cxx:
   - gxx 14.3.0 he448592_5                                   # [linux]
-  - clangxx 18.1.8                                          # [not arm64 and osx]
+  - clangxx 18.1.8 default_h1c12a56_15                      # [not arm64 and osx]
   - clangxx 18.1.8 default_h36137df_15                      # [arm64]
 
 ### Cmake requires these be installed in order to "find" compilers
