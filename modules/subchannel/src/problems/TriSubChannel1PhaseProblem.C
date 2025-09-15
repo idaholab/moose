@@ -445,13 +445,20 @@ TriSubChannel1PhaseProblem::computeFrictionFactorParameters(FrictionStruct frict
       _ff_a_soln->set(node, a_eff);
     }
   }
-  else if (_friction_model == 2)
+  else if (_friction_model == 1)
   {
-    // Do nothing the user should populate the aux variable ff.
+    mooseError(
+        name(),
+        ": There is no non-default friction model available for the triangular lattice problems ");
+  }
+  else if (_friction_model == 2 || _friction_model == 3)
+  {
+    // Do nothing the user should populate the aux variable ff_a, ff_b or directly the aux variable
+    // ff.
   }
   else
   {
-    mooseError(name(), ": Friction model should be a string: default, user_defined");
+    mooseError(name(), ": Friction model should be a string: default, user_ab, user_ff ");
   }
 }
 
