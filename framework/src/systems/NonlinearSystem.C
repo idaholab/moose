@@ -315,10 +315,19 @@ NonlinearSystem::setupColoringFiniteDifferencedPreconditioner()
                     MatFDColoringCreate(petsc_mat->mat(), iscoloring, &_fdcoloring));
   LibmeshPetscCallA(_communicator.get(), MatFDColoringSetFromOptions(_fdcoloring));
   // clang-format off
-  LibmeshPetscCallA(_communicator.get(), MatFDColoringSetFunction(_fdcoloring,
-                                                                  (PetscErrorCode(*)(void))(void (*)(void)) &
-                                                                      libMesh::libmesh_petsc_snes_fd_residual,
-                                                                  &petsc_nonlinear_solver));
+#if PETSC_VERSION_LESS_THAN(3, 24, 0)
+  LibmeshPetscCallA(_communicator.get(),
+                    MatFDColoringSetFunction(_fdcoloring,
+                                             (PetscErrorCode(*)(void))(void (*)(void))
+                                             &libMesh::libmesh_petsc_snes_fd_residual,
+                                             &petsc_nonlinear_solver));
+#else
+  LibmeshPetscCallA(_communicator.get(),
+                    MatFDColoringSetFunction(_fdcoloring,
+                                             (MatFDColoringFn*)
+                                             &libMesh::libmesh_petsc_snes_fd_residual,
+                                             &petsc_nonlinear_solver));
+#endif
   // clang-format on
   LibmeshPetscCallA(_communicator.get(),
                     MatFDColoringSetUp(petsc_mat->mat(), iscoloring, _fdcoloring));

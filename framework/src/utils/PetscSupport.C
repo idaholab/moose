@@ -347,7 +347,11 @@ petscLinearConverged(
 
       // TODO: find a KSP code that works better for this case
     case Convergence::MooseConvergenceStatus::CONVERGED:
+#if PETSC_VERSION_LESS_THAN(3, 24, 0)
       *reason = KSP_CONVERGED_RTOL_NORMAL;
+#else
+      *reason = KSP_CONVERGED_RTOL_NORMAL_EQUATIONS;
+#endif
       break;
 
     case Convergence::MooseConvergenceStatus::DIVERGED:
