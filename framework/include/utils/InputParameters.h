@@ -1118,11 +1118,6 @@ public:
   std::set<std::string> getControllableParameters() const;
 
   /**
-   * Return names of parameters within a group.
-   */
-  std::set<std::string> getGroupParameters(const std::string & group) const;
-
-  /**
    * Gets the group a parameter is in, if any
    */
   const std::string * queryParameterGroup(const std::string & name) const;
