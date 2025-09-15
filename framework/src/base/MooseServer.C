@@ -1665,8 +1665,13 @@ MooseServer::gatherPlottingResponses(wasp::DataArray & plottingResponses, int li
   const std::string & object_type =
       type_node.is_null() ? "" : wasp::strip_quotes(hit::extractValue(type_node.data()));
 
+  // get check app of document and return with no plots if its build failed
+  auto app_ptr = queryCheckApp();
+  if (!app_ptr)
+    return true;
+
   // get problem from action warehouse and return without any plots if null
-  std::shared_ptr<FEProblemBase> & problem = getCheckApp().actionWarehouse().problemBase();
+  std::shared_ptr<FEProblemBase> & problem = app_ptr->actionWarehouse().problemBase();
   if (!problem)
     return true;
 
