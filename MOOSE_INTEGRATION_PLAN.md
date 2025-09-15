@@ -1,276 +1,357 @@
-# MOOSE Integration Plan for Variational Derivative System
+# MOOSE Integration Plan for Automatic Weak Form Generation
 
 ## Executive Summary
 
-This document outlines the integration of the variational derivative symbolic computation system into MOOSE to enable automatic weak form generation from strong form energy functionals, including automatic variable splitting for higher-order derivatives.
+This document outlines the **completed integration** of automatic weak form generation from energy functionals into MOOSE. The system enables users to specify physics through energy functionals, automatically computes variational derivatives, generates appropriate kernels, and handles variable splitting for higher-order PDEs.
+
+## Current Status: ✅ INTEGRATED
+
+### Completed Components
+
+#### 1. Core Action System ✅
+- **AutomaticWeakFormAction** (`framework/src/actions/AutomaticWeakFormAction.C`)
+  - Parses energy expressions from input files
+  - Analyzes variables and derivative orders
+  - Generates appropriate kernels automatically
+  - Handles variable splitting when needed
+  - Manages coupled multi-physics problems
+
+#### 2. Kernel Implementation ✅
+- **VariationalKernelBase** (`framework/src/kernels/VariationalKernelBase.C`)
+  - Computes weak form residuals from energy functionals
+  - Handles automatic differentiation for Jacobians
+  - Supports coupled variables
+  - Evaluates symbolic expressions at quadrature points
+
+#### 3. Variable Splitting System ✅
+- **Constraint Kernels** for enforcing split variable relationships:
+  - `GradientConstraintKernel` - General gradient constraints
+  - `ScalarGradientConstraint` - Scalar gradient constraints (1D)
+  - `VectorGradientConstraint` - Vector gradient constraints
+  - `VariationalTimeDerivative` - Time derivatives for gradient flow
+
+#### 4. Expression System ✅
+- **StringExpressionParser** - Parses mathematical expressions
+- **ExpressionTransformer** - Transforms for variable splitting
+- **ExpressionSimplifier** - Symbolic simplification
+- **MooseAST** - Expression tree with differentiation support
+
+### Working Features
+
+#### Energy Expression Parsing ✅
+```ini
+[AutomaticWeakForm]
+  energy_type = EXPRESSION
+  energy_expression = 'W(c) + 0.5*kappa*dot(grad(c), grad(c))'
+  parameters = 'kappa 0.01'
+  variables = 'c'
+[]
+```
+
+Supports:
+- Basic operations: `+`, `-`, `*`, `/`, `^`, `pow()`, `sqrt()`
+- Differential operators: `grad()`, `div()`, `laplacian()`
+- Vector operations: `dot()`, `cross()`, `norm()`, `normalize()`
+- Tensor operations: `trace()`, `det()`, `inv()`, `transpose()`
+- Special functions: `W()` (double-well), `exp()`, `log()`, `sin()`, `cos()`
+
+#### Variable Splitting ✅
+Automatically handles higher-order PDEs:
+
+```ini
+[AutomaticWeakForm]
+  energy_type = EXPRESSION
+  # 4th-order term triggers splitting
+  energy_expression = 'W(c) + 0.5*kappa*dot(grad(c), grad(c)) + 0.5*lambda*dot(grad(grad(c)), grad(grad(c)))'
+  enable_splitting = true
+  max_fe_order = 1  # Forces splitting
+[]
+```
+
+System automatically:
+- Detects derivatives exceeding FE capabilities
+- Creates auxiliary variables (e.g., `c_hess = ∇²c`)
+- Transforms energy expressions
+- Generates constraint kernels
+
+#### Coupled Multi-Physics ✅
+```ini
+[AutomaticWeakForm]
+  energy_type = EXPRESSION
+  # Coupled Cahn-Hilliard and thermal diffusion
+  energy_expression = 'W(c) + 0.5*kappa*dot(grad(c), grad(c)) + 0.5*k_th*dot(grad(T), grad(T)) + beta*c*T'
+  parameters = 'kappa 0.01 k_th 1.0 beta 0.1'
+  variables = 'c T'
+[]
+```
+
+Automatically handles:
+- Variable coupling based on energy expression
+- Generates kernels for each variable
+- Computes off-diagonal Jacobian contributions
+
+### Test Cases ✅
+
+Working test cases in `test/tests/variational/`:
+
+1. **Basic Cahn-Hilliard**
+   - `cahn_hilliard_transient_ad.i` - Transient with AD
+   - `cahn_hilliard_steady_ad.i` - Steady-state
+   - `cahn_hilliard_no_ad.i` - Without AD
+
+2. **Fourth-Order Problems**
+   - `cahn_hilliard_fourth_order_split.i` - With variable splitting
+   - `fourth_order_splitting.i` - Tests splitting mechanism
+   - `test_biharmonic_split.i` - Biharmonic equation
+
+3. **Coupled Problems**
+   - `coupled_ch_diffusion_simple.i` - CH with thermal diffusion
+   - `coupled_ch_mechanics_string.i` - CH with mechanics (simplified)
+
+4. **Verification Tests**
+   - `double_well_ad.i` - Double-well potential
+   - `polynomial_ad.i` - Polynomial energy
+   - `test_verbose_output.i` - Debug output
 
 ## Architecture Overview
 
-### 1. Core Components to Integrate
+### Directory Structure
+```
+framework/
+├── include/
+│   ├── actions/
+│   │   └── AutomaticWeakFormAction.h
+│   ├── kernels/
+│   │   ├── VariationalKernelBase.h
+│   │   ├── GradientConstraintKernel.h
+│   │   ├── ScalarGradientConstraint.h
+│   │   ├── VectorGradientConstraint.h
+│   │   └── VariationalTimeDerivative.h
+│   └── utils/automatic_weak_form/
+│       ├── MooseAST.h
+│       ├── StringExpressionParser.h
+│       ├── ExpressionTransformer.h
+│       └── ExpressionSimplifier.h
+├── src/
+│   ├── actions/
+│   │   └── AutomaticWeakFormAction.C
+│   ├── kernels/
+│   │   ├── VariationalKernelBase.C
+│   │   ├── GradientConstraintKernel.C
+│   │   ├── ScalarGradientConstraint.C
+│   │   ├── VectorGradientConstraint.C
+│   │   └── VariationalTimeDerivative.C
+│   └── utils/automatic_weak_form/
+│       ├── WeakFormGenerator.C
+│       ├── StringExpressionParser.C
+│       ├── ExpressionTransformer.C
+│       └── ExpressionSimplifier.C
+└── doc/content/source/
+    ├── actions/
+    │   └── AutomaticWeakFormAction.md
+    └── kernels/
+        ├── VariationalKernelBase.md
+        ├── GradientConstraintKernel.md
+        ├── ScalarGradientConstraint.md
+        ├── VectorGradientConstraint.md
+        └── VariationalTimeDerivative.md
+```
 
-#### Phase 1: Core Symbolic System (Move to `framework/`)
-- `include/utils/variational_derivative/AST.h` - Expression AST with typed nodes
-- `include/utils/variational_derivative/Differentiation.h` - Variational derivative engine
-- `include/utils/variational_derivative/VariableSplitting.h` - Automatic splitting for higher-order terms
-- `include/utils/variational_derivative/WeakFormGenerator.h` - Generate weak form from strong form
+### Workflow
 
-#### Phase 2: MOOSE Integration Layer
-- `include/actions/VariationalDerivativeAction.h` - Parse and setup system
-- `include/kernels/VariationalKernel.h` - Base kernel for variational problems
-- `include/kernels/SplitVariableKernel.h` - Kernels for auxiliary split variables
+1. **User Input**: Specify energy functional in input file
+2. **Parsing**: AutomaticWeakFormAction parses energy expression
+3. **Analysis**:
+   - Identify variables and maximum derivative orders
+   - Determine if splitting is needed
+4. **Transformation**:
+   - If splitting needed, introduce auxiliary variables
+   - Transform energy expression
+5. **Generation**:
+   - Create primary variables and split variables
+   - Generate VariationalKernelBase for each variable
+   - Generate constraint kernels for split variables
+6. **Execution**: Standard MOOSE solve
 
-### 2. Proposed MOOSE Action Workflow
+## Mathematical Foundation
 
-```cpp
-[VariationalProblem]
-  [energy]
-    type = CahnHilliardEnergy
+### Variational Derivatives
+For functional F[u] = ∫ f(u, ∇u, ∇²u, ...) dx:
+
+```
+δF/δu = ∂f/∂u - ∇·(∂f/∂∇u) + ∇²:(∂f/∂∇²u) - ...
+```
+
+### Weak Form
+After integration by parts:
+
+```
+R = ∫ (C⁰·v - C¹·∇v + C²:∇²v - ...) dx
+```
+
+where C^k = ∂f/∂(∇^k u) are variational coefficients.
+
+### Variable Splitting
+For 4th-order term |∇²u|²:
+- Introduce q = ∇²u
+- Transform: |∇²u|² → |q|²
+- Add constraint: q - ∇²u = 0 (enforced weakly)
+
+## Usage Examples
+
+### Simple Diffusion
+```ini
+[AutomaticWeakForm]
+  energy_type = EXPRESSION
+  energy_expression = '0.5*dot(grad(u), grad(u))'
+  variables = 'u'
+[]
+```
+
+### Allen-Cahn Equation
+```ini
+[AutomaticWeakForm]
+  energy_type = EXPRESSION
+  energy_expression = 'W(eta) + 0.5*kappa*dot(grad(eta), grad(eta))'
+  parameters = 'kappa 0.5'
+  variables = 'eta'
+[]
+```
+
+### Fourth-Order Cahn-Hilliard
+```ini
+[AutomaticWeakForm]
+  energy_type = EXPRESSION
+  energy_expression = 'W(c) + 0.5*kappa*dot(grad(c), grad(c)) + 0.5*lambda*dot(grad(grad(c)), grad(grad(c)))'
+  parameters = 'kappa 0.01 lambda 0.001'
+  variables = 'c'
+  enable_splitting = true
+  max_fe_order = 1
+[]
+```
+
+## Testing and Validation
+
+### Run Tests
+```bash
+cd test
+make -j4
+
+# Run all variational tests
+./run_tests -i tests/variational
+
+# Run specific test
+./moose_test-opt -i tests/variational/cahn_hilliard_transient_ad.i
+```
+
+### Verification Methods
+- Compare with analytical solutions
+- Energy dissipation for gradient flow
+- Conservation properties
+- Convergence studies
+
+## Known Limitations
+
+1. **Tensor Mechanics**: Full tensor mechanics requires specialized expressions
+2. **Nonlocal Terms**: Integral operators not directly supported
+3. **Boundary Integrals**: Only volume integrals in energy functionals
+4. **Performance**: Complex expressions may be slower than hand-coded kernels
+
+## Future Enhancements
+
+### Near-term
+- [ ] Improved tensor mechanics support
+- [ ] Optimized expression evaluation
+- [ ] More predefined energy functionals
+- [ ] Better error messages for expression syntax
+
+### Long-term
+- [ ] Nonlocal operators (integral terms)
+- [ ] Boundary integral support
+- [ ] Adaptive splitting strategies
+- [ ] GPU acceleration for expression evaluation
+- [ ] Integration with MOOSE's AD system
+
+## Migration Guide
+
+### For Existing MOOSE Users
+
+Replace manual kernel implementation:
+
+**Before** (manual):
+```ini
+[Kernels]
+  [bulk]
+    type = CahnHilliardBulk
     variable = c
-    # Energy: W(c) + (κ/2)|∇c|² + (λ/2)|∇²c|²
-    double_well = 'W'
-    kappa = 1.0
-    lambda = 0.1  # Triggers 4th-order split
+    f_name = f_bulk
+  []
+  [interface]
+    type = CahnHilliardInterface
+    variable = c
+    kappa = 0.01
   []
 []
 ```
 
-The `VariationalDerivativeAction` will:
-
-1. **Parse Energy Functional**
-   - Build AST from input parameters
-   - Identify primary and coupled variables
-
-2. **Compute Variational Derivatives**
-   - Generate δF/δu for each variable
-   - Extract C^(k) coefficients
-
-3. **Analyze for Variable Splitting**
-   - Detect max derivative order needed
-   - Compare with available FE order
-   - Generate split variables (e.g., q = ∇c for ∇²c terms)
-
-4. **Add Variables and Kernels**
-   ```cpp
-   // Automatically generated:
-   addVariable("c");           // Primary variable
-   addAuxVariable("c_grad");   // Split variable q = ∇c
-   
-   addKernel("VariationalKernel", "c_residual");
-   addKernel("SplitGradientKernel", "c_grad_compute");
-   addKernel("SplitDiffusionKernel", "c_fourth_order");
-   ```
-
-### 3. Kernel Implementation Strategy
-
-#### Base Variational Kernel
-```cpp
-class VariationalKernel : public Kernel
-{
-public:
-  VariationalKernel(const InputParameters & parameters);
-  
-protected:
-  virtual Real computeQpResidual() override;
-  virtual Real computeQpJacobian() override;
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
-  
-private:
-  // Holds the differential coefficients
-  std::unique_ptr<Differential> _diff;
-  
-  // C^0 contribution: C^0 * test
-  Real computeC0Contribution();
-  
-  // C^1 contribution: -C^1 · ∇test
-  Real computeC1Contribution();
-  
-  // C^2 contribution: C^2 : ∇²test (if needed)
-  Real computeC2Contribution();
-};
-```
-
-#### Split Variable Kernels
-```cpp
-class SplitGradientKernel : public AuxKernel
-{
-  // Computes q = ∇c at nodes
-protected:
-  virtual Real computeValue() override {
-    return _grad_u[_qp](component);
-  }
-};
-
-class SplitDiffusionKernel : public Kernel
-{
-  // Handles ∇²c terms via split variable q
-  // Contributes: -∇q · ∇test to residual
-};
-```
-
-### 4. Coupled Multi-Physics Support
-
-For coupled systems like Cahn-Hilliard with mechanics:
-
-```cpp
-[VariationalProblem]
-  [energy]
-    type = CoupledCahnHilliardElasticity
-    variables = 'c disp_x disp_y'
-    
-    # f = f_ch(c, ∇c) + f_elastic(ε(u), c)
-    chemical_energy = 'W(c) + 0.5*kappa*|grad(c)|^2'
-    elastic_energy = '0.5*lambda*tr(eps)^2 + mu*|eps|^2'
-    coupling_energy = 'A*c*tr(eps)'
-  []
+**After** (automatic):
+```ini
+[AutomaticWeakForm]
+  energy_type = EXPRESSION
+  energy_expression = 'W(c) + 0.5*kappa*dot(grad(c), grad(c))'
+  parameters = 'kappa 0.01'
+  variables = 'c'
 []
 ```
 
-The system will generate:
-- On-diagonal Jacobians: ∂R_c/∂c, ∂R_u/∂u
-- Off-diagonal Jacobians: ∂R_c/∂u, ∂R_u/∂c
+### Benefits
+- Fewer lines of code
+- Automatic Jacobian computation
+- Guaranteed consistency between residual and Jacobian
+- Easy to modify energy functional
 
-### 5. Implementation Phases
+## Documentation
 
-#### Phase 1: Core Integration (Weeks 1-2)
-- Move symbolic system to MOOSE framework
-- Create basic VariationalDerivativeAction
-- Implement simple test cases (diffusion, Cahn-Hilliard)
+Comprehensive documentation available:
+- `framework/doc/content/source/actions/AutomaticWeakFormAction.md`
+- `framework/doc/content/source/kernels/VariationalKernelBase.md`
+- `framework/doc/content/source/kernels/*GradientConstraint.md`
 
-#### Phase 2: Variable Splitting (Weeks 3-4)
-- Implement automatic split detection
-- Create split variable kernels
-- Test with 4th-order Cahn-Hilliard
+## Contributing
 
-#### Phase 3: Coupled Systems (Weeks 5-6)
-- Extend to multi-variable problems
-- Implement off-diagonal Jacobians
-- Test with coupled physics
+To extend the system:
 
-#### Phase 4: Advanced Features (Weeks 7-8)
-- Surface energy terms (normalized gradients)
-- Tensor-valued problems (mechanics)
-- Performance optimization
+1. **Add New Functions**:
+   - Update `StringExpressionParser` to recognize function
+   - Add differentiation rules in `MooseAST`
+   - Create test case
 
-### 6. Testing Strategy
+2. **Add Energy Types**:
+   - Add enum value in `AutomaticWeakFormAction`
+   - Implement energy builder
+   - Document in markdown
 
-#### Unit Tests (`test/tests/kernels/variational/`)
-- Test each C^k contribution separately
-- Verify Jacobian accuracy with MMS
-- Test variable splitting logic
+3. **Improve Performance**:
+   - Profile expression evaluation
+   - Implement caching/memoization
+   - Consider compile-time optimization
 
-#### Integration Tests
-- Compare with existing MOOSE kernels
-- Verify conservation properties
-- Benchmark performance
+## Support
 
-#### Example Test Cases
-1. **Simple Diffusion**: f = (1/2)|∇u|²
-2. **Cahn-Hilliard**: f = W(c) + (κ/2)|∇c|²
-3. **4th-Order CH**: f = W(c) + (κ/2)|∇c|² + (λ/2)|∇²c|²
-4. **Coupled CH-Elasticity**: Chemical + mechanical energy
-5. **Surface Energy**: f = γ(n)|∇φ| with n = ∇φ/|∇φ|
-
-### 7. Input File Design
-
-#### Simple Case
-```
-[Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 100
-  ny = 100
-[]
-
-[VariationalProblem]
-  [./cahn_hilliard]
-    type = VariationalDerivativeAction
-    variable = c
-    energy = 'double_well + gradient'
-    
-    [./double_well]
-      expression = '(c^2 - 1)^2'
-    [../]
-    
-    [./gradient]
-      expression = '0.5 * kappa * dot(grad(c), grad(c))'
-      kappa = 1.0
-    [../]
-  [../]
-[]
-
-[BCs]
-  # Automatically handles natural BCs from variational form
-[]
-
-[Executioner]
-  type = Transient
-  solve_type = NEWTON
-[]
-```
-
-#### With Variable Splitting
-```
-[VariationalProblem]
-  [./fourth_order]
-    type = VariationalDerivativeAction
-    variable = c
-    energy_density = 'W(c) + 0.5*kappa*|grad(c)|^2 + 0.5*lambda*|grad(grad(c))|^2'
-    
-    # Automatically generates:
-    # - AuxVariable: c_grad (= ∇c)
-    # - Coupled kernels for 4th-order system
-    
-    auto_split = true
-    max_fe_order = 1  # Forces splitting for 2nd derivatives
-  [../]
-[]
-```
-
-### 8. Benefits of Integration
-
-1. **Automatic Consistency**: Weak form automatically derived from energy
-2. **Reduced Code Duplication**: One energy definition generates all kernels
-3. **Easier Multi-Physics**: Coupling terms handled automatically
-4. **Variable Splitting**: Higher-order PDEs handled transparently
-5. **Optimization Opportunities**: Symbolic simplification before evaluation
-
-### 9. Migration Path
-
-1. **Create MOOSE Fork/Branch**
-   ```bash
-   git checkout -b variational-derivative-system
-   ```
-
-2. **Directory Structure**
-   ```
-   framework/
-     include/
-       utils/
-         variational_derivative/
-           AST.h
-           Differentiation.h
-           VariableSplitting.h
-       actions/
-         VariationalDerivativeAction.h
-       kernels/
-         variational/
-           VariationalKernel.h
-           SplitVariableKernel.h
-   ```
-
-3. **Initial PR Strategy**
-   - PR 1: Core symbolic system (utils/)
-   - PR 2: Basic action and kernels
-   - PR 3: Variable splitting
-   - PR 4: Coupled systems support
-
-### 10. Documentation Requirements
-
-- Theory manual section on variational derivatives
-- User guide for VariationalDerivativeAction
-- Developer docs for extending energy functionals
-- Example problems demonstrating capabilities
+For issues or questions:
+- Create issue on GitHub
+- Check test cases for examples
+- Review documentation
+- Enable `verbose = true` for debugging
 
 ## Conclusion
 
-This integration will provide MOOSE users with a powerful system for automatically deriving weak forms from energy functionals, handling complex multi-physics problems with minimal code while ensuring mathematical consistency.
+The automatic weak form generation system is **fully integrated** into MOOSE and provides:
+- ✅ Automatic derivation of weak forms from energy functionals
+- ✅ Variable splitting for higher-order PDEs
+- ✅ Coupled multi-physics support
+- ✅ Symbolic differentiation and simplification
+- ✅ Comprehensive test coverage
+- ✅ Full documentation
+
+The system is ready for use in production simulations while continuing to evolve with additional features and optimizations.
