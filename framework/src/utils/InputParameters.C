@@ -1620,16 +1620,6 @@ InputParameters::shouldIgnore(const std::string & name_in)
   mooseError("Parameter ", name, " does not exist");
 }
 
-std::set<std::string>
-InputParameters::getGroupParameters(const std::string & group) const
-{
-  std::set<std::string> names;
-  for (const auto & [name, metadata] : _params)
-    if (metadata._group && *metadata._group == group)
-      names.emplace(name);
-  return names;
-}
-
 const std::string *
 InputParameters::queryParameterGroup(const std::string & name) const
 {
