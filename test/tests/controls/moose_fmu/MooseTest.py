@@ -3,12 +3,8 @@ from pythonfmu.enums import Fmi2Causality, Fmi2Variability
 from pythonfmu.variables import Boolean, Integer, Real, ScalarVariable, String
 from MooseControl import MooseControl
 from pythonfmu.default_experiment import DefaultExperiment
-from typing import Optional
 from MooseFMU import Moose2FMU
-import time
 import logging
-
-#logging.disable(logging.CRITICAL)
 
 class MooseTest(Moose2FMU):
     def __init__(self, *args, **kwargs):
