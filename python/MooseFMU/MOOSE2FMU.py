@@ -6,6 +6,7 @@ from MooseControl import MooseControl
 from typing import Optional
 import logging
 import time
+from . import fmu_utils
 
 
 logging.basicConfig(
