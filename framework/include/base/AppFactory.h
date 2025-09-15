@@ -78,8 +78,10 @@ public:
    *
    * Useful for unit testing.
    */
+#ifdef MOOSE_UNIT_TEST
   static std::unique_ptr<MooseApp> create(const std::string & app_type,
                                           const std::vector<std::string> & cli_args = {});
+#endif
 
   /**
    * Create a MooseApp from a Parser and CommandLine, both of which should have parsed.
@@ -151,6 +153,7 @@ public:
    */
   class ClearAppParamsKey
   {
+    friend class AppFactory;
     friend class MooseApp;
 #ifdef MOOSE_UNIT_TEST
     FRIEND_TEST(::AppFactoryTest, manageAppParams);
