@@ -252,7 +252,7 @@ TriSubChannel1PhaseProblem::initializeSolution()
 }
 
 void
-TriSubChannel1PhaseProblem::computeFrictionFactor(FrictionStruct friction_args)
+TriSubChannel1PhaseProblem::computeFrictionFactorParameters(FrictionStruct friction_args)
 {
   // The upgraded Cheng and Todreas correlation for pressure drop in hexagonal wire-wrapped rod
   // bundles
@@ -280,7 +280,6 @@ TriSubChannel1PhaseProblem::computeFrictionFactor(FrictionStruct friction_args)
     auto ReL = std::pow(10, (p_over_d - 1)) * 320.0;
     auto ReT = std::pow(10, 0.7 * (p_over_d - 1)) * 1.0E+4;
     auto psi = std::log(Re / ReL) / std::log(ReT / ReL);
-    const Real lambda = 7.0;
     auto theta = std::acos(wire_lead_length /
                            std::sqrt(std::pow(wire_lead_length, 2) +
                                      std::pow(libMesh::pi * (pin_diameter + wire_diameter), 2)));
@@ -417,28 +416,33 @@ TriSubChannel1PhaseProblem::computeFrictionFactor(FrictionStruct friction_args)
         cL *= (1 + ws_l * (ar / a_p) * std::pow(std::tan(theta), 2.0));
       }
     }
-
-    // laminar friction factor
-    auto fL = cL / Re;
-    // turbulent friction factor
-    auto fT = cT / std::pow(Re, 0.18);
+    // laminar friction factor and turbulent friction factor coefficients (power-law form)
+    const Real bL = -1.0;
+    const Real bT = -0.18;
 
     if (Re < ReL)
     {
       // laminar flow
-      _ff_soln->set(node, fL);
+      _ff_b_soln->set(node, bL);
+      _ff_a_soln->set(node, cL);
     }
     else if (Re > ReT)
     {
       // turbulent flow
-      _ff_soln->set(node, fT);
+      _ff_b_soln->set(node, bT);
+      _ff_a_soln->set(node, cT);
     }
     else
     {
       // transient flow: psi definition uses a Bulk ReT/ReL number, same for all channels
-      _ff_soln->set(node,
-                    fL * std::pow((1 - psi), 1.0 / 3.0) * (1 - std::pow(psi, lambda)) +
-                        fT * std::pow(psi, 1.0 / 3.0));
+      // _ff_soln->set(node,
+      //               fL * std::pow((1 - psi), 1.0 / 3.0) * (1 - std::pow(psi, lambda)) +
+      //                   fT * std::pow(psi, 1.0 / 3.0));
+      // transitional regime: enforce f = a * Re^{b} with log-space blending
+      const Real b_eff = (1.0 - psi) * bL + psi * bT;
+      const Real a_eff = std::exp((1.0 - psi) * std::log(cL) + psi * std::log(cT));
+      _ff_b_soln->set(node, b_eff);
+      _ff_a_soln->set(node, a_eff);
     }
   }
   else if (_friction_model == 2)
@@ -449,6 +453,17 @@ TriSubChannel1PhaseProblem::computeFrictionFactor(FrictionStruct friction_args)
   {
     mooseError(name(), ": Friction model should be a string: default, user_defined");
   }
+}
+
+void
+TriSubChannel1PhaseProblem::computeFrictionFactor(FrictionStruct friction_args)
+{
+  computeFrictionFactorParameters(friction_args);
+  auto Re = friction_args.Re;
+  auto i_ch = friction_args.i_ch;
+  auto iz = friction_args.iz;
+  auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
+  _ff_soln->set(node, (*_ff_a_soln)(node)*std::pow(Re, (*_ff_b_soln)(node)));
 }
 
 Real
