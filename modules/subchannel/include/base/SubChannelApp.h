@@ -57,6 +57,10 @@ public:
   static const std::string DUCT_TEMPERATURE;
   /// subchannel displacement
   static const std::string DISPLACEMENT;
-  /// friction factor
+  /// friction factor : f = a * Re ^b
   static const std::string FRICTION_FACTOR;
+  /// friction factor parameter a
+  static const std::string FF_PARAMETER_A;
+  /// friction factor parameter b
+  static const std::string FF_PARAMETER_B;
 };

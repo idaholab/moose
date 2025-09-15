@@ -275,6 +275,8 @@ SubChannel1PhaseProblem::initialSetup()
   _displacement_soln =
       std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::DISPLACEMENT));
   _ff_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::FRICTION_FACTOR));
+  _ff_a_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::FF_PARAMETER_A));
+  _ff_b_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::FF_PARAMETER_B));
   if (_duct_mesh_exist)
   {
     _duct_heat_flux_soln =
