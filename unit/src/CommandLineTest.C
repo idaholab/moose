@@ -169,23 +169,26 @@ TEST(CommandLineTest, parseHIT)
 
 TEST(CommandLineTest, parseMultiAppDashedOption)
 {
-  const auto test = [](const std::string & arg)
-  {
-    CommandLine cl;
-    cl.addArgument(arg);
-    Moose::UnitUtils::assertThrows<MooseRuntimeError>(
-        [&cl]() { cl.parse(); },
-        "The MultiApp command line argument '" + arg +
-            "' sets a command line option.\nMultiApp command line arguments can only be used for "
-            "setting HIT parameters.");
-  };
+#define test_dash(arg)                                                                             \
+  {                                                                                                \
+    CommandLine cl;                                                                                \
+    cl.addArgument(arg);                                                                           \
+    MOOSE_ASSERT_THROWS(MooseRuntimeError,                                                         \
+                        cl.parse(),                                                                \
+                        "The MultiApp command line argument '" + std::string(arg) +                \
+                            "' sets a command line option.\nMultiApp command line arguments "      \
+                            "can only be used for setting HIT parameters.");                       \
+  }                                                                                                \
+  while (0)
 
-  test("sub:-foo=val");
-  test("baz0:--foo=val");
-  test("bang1:--distributed-mesh");
-  test("sub:--foo");
-  test("sub:-foo");
-  test("sub1:--cool-vector=1 2 3 4");
+  test_dash("sub:-foo=val");
+  test_dash("baz0:--foo=val");
+  test_dash("bang1:--distributed-mesh");
+  test_dash("sub:--foo");
+  test_dash("sub:-foo");
+  test_dash("sub1:--cool-vector=1 2 3 4");
+
+#undef test_dash
 }
 
 TEST(CommandLineTest, populate)
@@ -384,10 +387,10 @@ TEST(CommandLineTest, populateSameSwitch)
 
   CommandLine cl;
   cl.parse();
-  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
-      [&cl, &params]() { cl.populateCommandLineParams(params); },
-      "The command line options 'value' and 'value2' both declare the command line switch "
-      "'--value'");
+  MOOSE_ASSERT_THROWS(MooseRuntimeError,
+                      cl.populateCommandLineParams(params),
+                      "The command line options 'value' and 'value2' both declare the "
+                      "command line switch '--value'");
 }
 
 TEST(CommandLineTest, populateMooseEnum)
@@ -417,10 +420,11 @@ TEST(CommandLineTest, populateMooseEnum)
   check("");
   check("foo");
   check("bar");
-  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
-      [&check]() { check("baz"); },
-      "While parsing command line option '--value' with value 'baz':\n\nInvalid "
-      "option \"baz\" in MooseEnum.  Valid options (not case-sensitive) are \"foo bar\".");
+  MOOSE_ASSERT_THROWS(
+      MooseRuntimeError,
+      check("baz"),
+      "While parsing command line option '--value' with value 'baz':\n\nInvalid option \"baz\" in "
+      "MooseEnum.  Valid options (not case-sensitive) are \"foo bar\".");
 }
 
 TEST(CommandLineTest, populateSetByUser)
@@ -542,9 +546,9 @@ TEST(CommandLineTest, requiredParameter)
     CommandLine cl;
     cl.addArgument("/path/to/exe");
     cl.parse();
-    Moose::UnitUtils::assertThrows<MooseRuntimeError>(
-        [&cl, &params_copy]() { cl.populateCommandLineParams(params_copy); },
-        "Missing required command-line parameter: value\nDoc string: Doc");
+    MOOSE_ASSERT_THROWS(MooseRuntimeError,
+                        cl.populateCommandLineParams(params_copy),
+                        "Missing required command-line parameter: value\nDoc string: Doc");
   }
 
   {
@@ -642,7 +646,7 @@ TEST(CommandLineTest, unappliedArgument)
       expected_err +=
           "\n\nDid you mean to combine this argument with the previous argument, such as:\n\n  " +
           suggestion + "\n";
-    Moose::UnitUtils::assertThrows<MooseRuntimeError>([&cl]() { cl.parse(); }, expected_err);
+    MOOSE_ASSERT_THROWS(MooseRuntimeError, cl.parse(), expected_err);
   };
 
   test_not_applied({"foo"}, "foo");
@@ -660,8 +664,9 @@ TEST(CommandLineTest, boolParamWithValue)
   cl.addArgument("--value");
   cl.addArgument("foo");
   cl.parse();
-  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
-      [&cl, &params]() { cl.populateCommandLineParams(params); },
+  MOOSE_ASSERT_THROWS(
+      MooseRuntimeError,
+      cl.populateCommandLineParams(params),
       "The command line option '--value' is a boolean and does not support a value but the value "
       "'foo' was provided.\nDoc string: Doc");
 }
@@ -775,8 +780,9 @@ TEST(CommandLineTest, findCommandLineParam)
   auto find_other_value = std::as_const(cl).findCommandLineParam("other_value");
   ASSERT_EQ(find_other_value, std::as_const(cl).getEntries().end());
 
-  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
-      [&cl]() { std::as_const(cl).findCommandLineParam("foo"); },
+  MOOSE_ASSERT_THROWS(
+      MooseRuntimeError,
+      std::as_const(cl).findCommandLineParam("foo"),
       "CommandLine::findCommandLineParam(): The parameter 'foo' is not a command line parameter");
 }
 
@@ -853,9 +859,9 @@ TEST(CommandLineTest, removeArgumentMissing)
   CommandLine cl;
   cl.addArgument("/path/to/exe");
   EXPECT_FALSE(cl.hasArgument("--arg"));
-  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
-      [&cl]() { cl.removeArgument("--arg"); },
-      "CommandLine::removeArgument(): The argument '--arg' does not exist");
+  MOOSE_ASSERT_THROWS(MooseRuntimeError,
+                      cl.removeArgument("--arg"),
+                      "CommandLine::removeArgument(): The argument '--arg' does not exist");
 }
 
 TEST(CommandLineTest, formatEntry)
