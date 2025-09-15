@@ -116,7 +116,7 @@ P_out = 4.923e6 # Pa
 [Outputs]
   exodus = true
   checkpoint = true
-  hide = ff
+  hide = 'ff ff_a ff_b'
 []
 
 [Executioner]
