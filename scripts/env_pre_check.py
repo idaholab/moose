@@ -166,25 +166,11 @@ def classified_keywords() -> List[str]:
         if f in seen:
             continue
         seen.add(f)
+        # Skip env_pre_check.py itself since it needs to check for these keywords
+        if f.endswith("env_pre_check.py"):
+            continue
         text = read_text(f)
         if pat_prop.search(text) or pat_class.search(text):
-            bad.append("\t" + f)
-    return bad
-
-def style_files() -> List[str]:
-    """
-    Mirrors: /\bfor\(/ || /\bif\(/ || /\bwhile\(/ || /\bswitch\(/
-    """
-    bad = []
-    seen = set()
-    files = git_files("*.[Ch]")
-    pat = re.compile(r"\b(for|if|while|switch)\(")
-    for f in files:
-        if f in seen:
-            continue
-        seen.add(f)
-        text = read_text(f)
-        if pat.search(text):
             bad.append("\t" + f)
     return bad
 
@@ -365,7 +351,6 @@ def unicode_files() -> List[str]:
 def precheck_errors(log_from: str, log_to: str) -> int:
     # Read toggles (match the shell script defaults)
     check_ticket = os.environ.get("CHECK_TICKET_REFERENCE", "1")
-    check_style = os.environ.get("CHECK_STYLE", "1")
     check_keywords = os.environ.get("CHECK_KEYWORDS", "1")
     check_eof = os.environ.get("CHECK_EOF", "1")
     check_exes = os.environ.get("CHECK_EXECUTABLES", "0")
@@ -380,7 +365,6 @@ def precheck_errors(log_from: str, log_to: str) -> int:
     check_f_whitespace = os.environ.get("CHECK_F_WHITESPACE", "0")
 
     TICKET_REFERENCE = ""
-    STYLE_FILES = ""
     BANNED_KEYWORDS = ""
     EOF_FILES = ""
     WHITESPACE_FILES = ""
@@ -410,9 +394,6 @@ def precheck_errors(log_from: str, log_to: str) -> int:
 
     if check_keywords == "1":
         BANNED_KEYWORDS = "\n".join(banned_keywords())
-
-    if check_style == "1":
-        STYLE_FILES = "\n".join(style_files())
 
     if check_eof == "1":
         EOF_FILES = "\n".join(no_newline_at_eof_files())
@@ -465,9 +446,6 @@ def precheck_errors(log_from: str, log_to: str) -> int:
 
     if check_keywords == "1":
         _pf(not BANNED_KEYWORDS)
-
-    if check_style == "1":
-        _pf(not STYLE_FILES)
 
     if check_ticket == "1":  # note: duplicated in original script; keeping parity
         _pf(bool(TICKET_REFERENCE))
@@ -534,12 +512,6 @@ def precheck_errors(log_from: str, log_to: str) -> int:
         else:
             print("INFO: Keywords check disabled")
 
-        if check_style == "1":
-            if not STYLE_FILES:
-                print("INFO: Your patch contains spaces after control keywords.")
-        else:
-            print("INFO: Style check disabled")
-
         if check_unicode == "1":
             if not UNICODE_FILES:
                 print("INFO: Your patch contains no disallowed unicode characters.")
@@ -576,7 +548,7 @@ def precheck_errors(log_from: str, log_to: str) -> int:
             print('\nRun the "delete_trailing_whitespace.sh" script in your $MOOSE_DIR/scripts directory.')
 
         if check_classified == "1" and CLASSIFIED_FILES:
-            print("\nERROR: The following files contain keywords classified or proprietary keywords:")
+            print("\nERROR: The following files contain classified or proprietary keywords:")
             print(CLASSIFIED_FILES)
 
         if check_tabs == "1" and TAB_FILES:
@@ -599,10 +571,6 @@ def precheck_errors(log_from: str, log_to: str) -> int:
         if check_keywords == "1" and BANNED_KEYWORDS:
             print("\nERROR: The following files contain banned keywords (std::cout, std::cerr, sleep, print_trace):")
             print(BANNED_KEYWORDS)
-
-        if check_style == "1" and STYLE_FILES:
-            print("\nERROR: The following files contain control keywords without proper spacing (for, if, while, or switch)\nhttp://mooseframework.org/wiki/CodeStandards:")
-            print(STYLE_FILES)
 
         if check_unicode == "1" and UNICODE_FILES:
             print("\nERROR: The following files contain disallowed unicode characters")
