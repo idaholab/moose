@@ -47,7 +47,7 @@ class MooseTest(Moose2FMU):
                 self.control.finalize()
                 return False
             self.control.wait(flag)
-            t_val = self.control.getPostprocessor("t")
+            t_val = self.control.getTime()
             diffused = self.control.getPostprocessor("diffused")
             self.control.setContinue()
 
