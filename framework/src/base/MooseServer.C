@@ -192,13 +192,16 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
   // If the Parser has a valid root, store it because we can use it
   // in the future (hover text etc with a partially complete document)
   CheckState * state = nullptr;
-  if (auto parser_root_ptr = parser->queryRoot())
-    if (!parser_root_ptr->getNodeView().is_null())
-    {
-      auto it_inserted_pair = _check_state.emplace(document_path, parser);
-      mooseAssert(it_inserted_pair.second, "Should not already exist");
-      state = &it_inserted_pair.first->second;
-    }
+  if (auto parser_root_ptr = parser->queryRoot();
+      parser_root_ptr && !parser_root_ptr->getNodeView().is_null())
+  {
+    auto it_inserted_pair = _check_state.emplace(document_path, parser);
+    mooseAssert(it_inserted_pair.second, "Should not already exist");
+    state = &it_inserted_pair.first->second;
+  }
+  // We have no root or an empty document, nothing else to do
+  else
+    return true;
 
   // Failed to parse, don't bother building the app. But... we might
   // have a root node at least!
