@@ -6,7 +6,7 @@ mpi_version:
   # MPICH versions
   - 4.3.1    # [linux]
   - 4.3.1    # [not arm64 and osx]
-  - 4.3.0    # [osx]
+  - 4.3.0    # [arm64]
   # OpenMPI versions
   - 5.0.8    # [linux]
   - 5.0.7    # [osx]
