@@ -274,6 +274,15 @@ WIDER_EXTRAS = [
     "SQUARE ROOT",                   # √
     "CIRCLED DOT OPERATOR",          # ⊙
     "CIRCLED PLUS",                  # ⊕
+    "ELEMENT OF",                    # ∈
+    "DOUBLE-STRUCK CAPITAL R",       # ℝ
+    "DOUBLE-STRUCK CAPITAL N",       # ℕ
+    "DOUBLE-STRUCK CAPITAL Z",       # ℤ
+    "DOUBLE-STRUCK CAPITAL Q",       # ℚ
+    "DOUBLE-STRUCK CAPITAL C",       # ℂ
+    "NOT AN ELEMENT OF",             # ∉
+    "CONTAINS AS MEMBER",            # ∋
+    "DOES NOT CONTAIN AS MEMBER",    # ∌
 ]
 
 CORE_NAMES = [
