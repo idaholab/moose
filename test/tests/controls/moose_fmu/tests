@@ -2,18 +2,36 @@
   issues = '#30912'
   design = 'syntax/Controls/index.md source/controls/MOOSE_FMU.md'
 
-  # Not really sure if all of these prereqs are required as I can't guarantee
-  # if we'll get unique ports if we call them all at once
-
   [control]
     requirement = 'The system shall support'
-    [interface_unit_test]
+    [create_fmu]
       type = RunApp
-      command_proxy = test_moose_fmu_interface.py
-      required_python_packages = requests
+      command_proxy = 'pythonfmu build -f MooseTest.py'
+      required_python_packages = 'pythonfmu'
       recover = false
       restep = false
       detail = 'the creation of moose fmu from base class.'
+      valgrind = 'none' # http library is not completely valgrind clean
+    []
+    [run_fmu]
+      type = 'CSVDiff'
+      csvdiff = 'run_fmu.csv'
+      command_proxy = run_fmu.py
+      required_python_packages = 'fmpy pandas numpy logging'
+      recover = false
+      restep = false
+      detail = 'running the created test fmu.'
+      valgrind = 'none' # http library is not completely valgrind clean
+    []
+    [couple_fmus]
+      type = 'CSVDiff'
+      csvdiff = 'run_fmu_connection.csv'
+      csvdiff = 'run_fmu_connection.csv'
+      command_proxy = run_fmu_connection.py
+      required_python_packages = 'fmpy pandas matplotlib.pyplot math time logging'
+      recover = false
+      restep = false
+      detail = 'coupling MOOSE fmu with other open source fmus.'
       valgrind = 'none' # http library is not completely valgrind clean
     []
   []

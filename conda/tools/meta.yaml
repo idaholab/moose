@@ -67,6 +67,8 @@ requirements:
     - uncertainties
     - xmltodict {{ xmltodict }}
     - yaml
+    - pythonfmu
+    - fmpy
 test:
   commands:
     - black --version
@@ -102,6 +104,8 @@ test:
     - tabulate
     - xmltodict
     - yaml
+    - pythonfmu
+    - fmpy
 
 about:
   home: https://mooseframework.inl.gov/
