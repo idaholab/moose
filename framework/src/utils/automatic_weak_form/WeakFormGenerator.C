@@ -61,6 +61,8 @@ Differential DifferentiationVisitor::visit(const NodePtr & node)
       return visitUnaryOp(static_cast<const UnaryOpNode *>(node.get()));
     case NodeType::Function:
       return visitFunction(static_cast<const FunctionNode *>(node.get()));
+    case NodeType::VectorAssembly:
+      return visitVectorAssembly(static_cast<const VectorAssemblyNode *>(node.get()));
     default:
       mooseError("Unsupported node type in differentiation");
   }
@@ -315,6 +317,54 @@ Differential DifferentiationVisitor::handleGradient(const NodePtr & operand)
       result.coefficients[order + 1] = coeff;
   }
   
+  return result;
+}
+
+Differential DifferentiationVisitor::visitVectorAssembly(const VectorAssemblyNode * node)
+{
+  // VectorAssembly creates a vector from scalar components
+  // The derivative of vec(u1, u2, ..., un) w.r.t. a variable is vec(du1/dx, du2/dx, ..., dun/dx)
+
+  Differential result;
+  std::vector<NodePtr> diff_components;
+
+  // Differentiate each component
+  for (const auto & component : node->components())
+  {
+    Differential comp_diff = visit(component);
+
+    // For each differentiation order, build the vector of derivatives
+    for (auto & [order, coeff] : comp_diff.coefficients)
+    {
+      if (coeff)
+      {
+        if (result.coefficients.count(order) == 0)
+        {
+          // Initialize vector for this order
+          std::vector<NodePtr> order_components;
+          for (size_t i = 0; i < node->components().size(); ++i)
+            order_components.push_back(constant(0.0));
+
+          // Create VectorAssemblyNode with appropriate shape
+          VectorShape vec_shape{static_cast<unsigned int>(node->components().size())};
+          result.coefficients[order] = std::make_shared<VectorAssemblyNode>(order_components, Shape(vec_shape));
+        }
+
+        // Update the component for this order
+        auto vec_node = std::static_pointer_cast<VectorAssemblyNode>(result.coefficients[order]);
+        std::vector<NodePtr> updated_components = vec_node->components();
+
+        // Find the index of the current component
+        size_t comp_index = &component - &node->components()[0];
+        updated_components[comp_index] = coeff;
+
+        // Create updated VectorAssemblyNode
+        VectorShape vec_shape{static_cast<unsigned int>(node->components().size())};
+        result.coefficients[order] = std::make_shared<VectorAssemblyNode>(updated_components, Shape(vec_shape));
+      }
+    }
+  }
+
   return result;
 }
 

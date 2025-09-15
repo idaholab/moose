@@ -752,6 +752,29 @@ VariationalKernelBase::evaluateAtQP(const NodePtr & expr, unsigned int qp)
       mooseError("Unknown function: ", func_node->name());
     }
 
+    case NodeType::VectorAssembly:
+    {
+      // Evaluate each component of the vector
+      auto vec_node = std::static_pointer_cast<VectorAssemblyNode>(expr);
+      std::vector<Real> components;
+
+      for (const auto & comp : vec_node->components())
+      {
+        MooseValue comp_val = evaluateAtQP(comp, qp);
+        if (!comp_val.isScalar())
+          mooseError("VectorAssembly components must be scalars");
+        components.push_back(comp_val.asScalar());
+      }
+
+      // Create a RealVectorValue from the components
+      if (components.size() == 2)
+        return MooseValue(RealVectorValue(components[0], components[1], 0.0), 3);
+      else if (components.size() == 3)
+        return MooseValue(RealVectorValue(components[0], components[1], components[2]), 3);
+      else
+        mooseError("VectorAssembly must have 2 or 3 components, got ", components.size());
+    }
+
     default:
       mooseError("Cannot evaluate expression type: ", expr->toString());
   }

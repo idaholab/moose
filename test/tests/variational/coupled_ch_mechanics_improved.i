@@ -41,20 +41,13 @@
 [AutomaticWeakForm]
     type = AutomaticWeakFormAction
     energy_type = expression
-    
-    # Define intermediate expressions first
-    expressions = 'u = vec(disp_x, disp_y)
-                   strain = sym(grad(u))
-                   tr_strain = trace(strain)
-                   strain_norm2 = contract(strain, strain)'
-    
-    # Multiple energy expressions for each primary variable
-    energy_expressions = 'c = W(c) + 0.5*kappa*dot(grad(c), grad(c)) + alpha*c*tr_strain
-                          disp_x = 0.5*lambda*pow(tr_strain, 2) + mu*strain_norm2
-                          disp_y = 0.5*lambda*pow(tr_strain, 2) + mu*strain_norm2'
+
+    # Combined energy expression directly using vec()
+    # Note: intermediate expressions are not yet supported, so we write it out directly
+    energy_expression = 'W(c) + 0.5*kappa*dot(grad(c), grad(c)) + alpha*c*trace(sym(grad(vec(disp_x, disp_y)))) + 0.5*lambda*pow(trace(sym(grad(vec(disp_x, disp_y)))), 2) + mu*contract(sym(grad(vec(disp_x, disp_y))), sym(grad(vec(disp_x, disp_y))))'
     
     # Parameters for the energy expressions
-    parameters = 'kappa=0.01 lambda=100 mu=75 alpha=10'
+    parameters = 'kappa 0.01 lambda 100 mu 75 alpha 10'
     
     # Primary variables
     variables = 'c disp_x disp_y'
@@ -151,7 +144,7 @@
   
   [checkpoint]
     type = Checkpoint
-    interval = 10
+    time_step_interval = 10
   []
 []
 

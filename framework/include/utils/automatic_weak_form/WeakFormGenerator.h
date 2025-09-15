@@ -56,7 +56,8 @@ private:
   Differential visitUnaryOp(const UnaryOpNode * node);
   Differential visitBinaryOp(const BinaryOpNode * node);
   Differential visitFunction(const FunctionNode * node);
-  
+  Differential visitVectorAssembly(const VectorAssemblyNode * node);
+
   Differential handleGradient(const NodePtr & operand);
   Differential handleDivergence(const NodePtr & operand);
   Differential handleLaplacian(const NodePtr & operand);
