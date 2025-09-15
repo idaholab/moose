@@ -54,6 +54,15 @@
   # 2. Gradient energies (with anisotropy for c)
   # 3. Coupling terms that link composition to phase
 
+  # NOTE: Full anisotropic interface energy would require:
+  # κ(θ) = κ_0*(1 + ε*cos(4θ)) where θ = atan2(grad_c_y, grad_c_x)
+  # This needs vector component access: grad(c)[0], grad(c)[1]
+  # or dot products with basis vectors: dot(grad(c), e_x)
+  # These features are planned for future implementation.
+  #
+  # For now, we use a simpler coupled model with isotropic interfaces
+  # but with spatially varying gradient coefficient
+
   energy_expression = '
     0.25*(c*c - 1.0)*(c*c - 1.0) +
     0.25*(eta*eta - 1.0)*(eta*eta - 1.0) +
@@ -61,10 +70,7 @@
     0.5*kappa_eta*dot(grad(eta), grad(eta)) +
     lambda*c*c*(1.0 - eta*eta) +
     alpha*c*eta +
-    0.5*epsilon*kappa_c*(
-      dot(grad(c), grad(c))*dot(grad(c), grad(c)) -
-      (grad(c)[0]*grad(c)[0] - grad(c)[1]*grad(c)[1])*(grad(c)[0]*grad(c)[0] - grad(c)[1]*grad(c)[1])
-    )/(dot(grad(c), grad(c)) + delta)'
+    epsilon*kappa_c*eta*eta*dot(grad(c), grad(c))'
 
   # Parameters:
   # kappa_c, kappa_eta: Interface energies
@@ -258,7 +264,7 @@
 
   [checkpoint]
     type = Checkpoint
-    interval = 50
+    time_step_interval = 50
     num_files = 2
   []
 

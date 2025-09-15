@@ -1,4 +1,4 @@
-coupled_ch_ac_simple.i# Simple Coupled Cahn-Hilliard and Allen-Cahn Test
+# Simple Coupled Cahn-Hilliard and Allen-Cahn Test
 #
 # Minimal example for testing coupled conserved and non-conserved dynamics
 #
