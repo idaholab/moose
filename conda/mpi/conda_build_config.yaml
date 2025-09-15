@@ -5,6 +5,7 @@ mpi:
 mpi_version:
   # MPICH versions
   - 4.3.1    # [linux]
+  - 4.3.1    # [not arm64 and osx]
   - 4.3.0    # [osx]
   # OpenMPI versions
   - 5.0.8    # [linux]
@@ -43,19 +44,19 @@ moose_cmake:
 ### If you change these versions, change also conda/wasp/*, conda/seacas/*
 moose_cc:
   - gcc 14.3.0 h76bdaa0_5                                   # [linux]
-  - clang 18.1.8                                            # [not arm64 and osx]
+  - clang 18.1.8 default_h1323312_15                        # [not arm64 and osx]
   - clang 18.1.8 default_hf9bcbb7_15                        # [arm64]
 
 ### If you change these versions, change also conda/wasps/*, conda/seacas/*
 moose_cxx:
   - gxx 14.3.0 he448592_5                                   # [linux]
-  - clangxx 18.1.8                                          # [not arm64 and osx]
+  - clangxx 18.1.8 default_h1c12a56_15                      # [not arm64 and osx]
   - clangxx 18.1.8 default_h36137df_15                      # [arm64]
 
 ### If you change these versions, change also conda/seacas/*
 moose_gfortran:
   - gfortran 14.3.0 he448592_5                              # [linux]
-  - gfortran 13.4.0                                         # [not arm64 and osx]
+  - gfortran 13.4.0 hcc3c99d_0                              # [not arm64 and osx]
   - gfortran 13.4.0 h3ef1dbf_0                              # [arm64]
 
 ### Cmake requires these be installed in order to "find" compilers
@@ -71,7 +72,7 @@ moose_cxxcompiler:
 
 moose_libgfortran5:
   - libgfortran5 15.1.0 hcea5267_5                          # [linux]
-  - libgfortran5 15.1.0                                     # [not arm64 and osx]
+  - libgfortran5 14.2.0 h51e75f0_103                        # [not arm64 and osx]
   - libgfortran5 15.1.0 hb74de2c_1                          # [arm64]
 
 moose_gcc_impl:                                             # [linux]
@@ -105,15 +106,15 @@ moose_icu:
   - icu 75.1 hfee45f7_0                                     # [arm64]
 
 moose_cctools:                                              # [osx]
-  - cctools_osx-64 1021.4                                   # [not arm64 and osx]
+  - cctools_osx-64 1021.4 ha66f10e_0                        # [not arm64 and osx]
   - cctools_osx-arm64 1021.4 h12580ec_0                     # [arm64]
 
 moose_compiler_rt:                                          # [osx]
-  - compiler-rt 18.1.8                                      # [not arm64 and osx]
+  - compiler-rt 18.1.8 he914875_2                           # [not arm64 and osx]
   - compiler-rt 18.1.8 h855ad52_2                           # [arm64]
 
 moose_clang_osx:                                            # [osx]
-  - clangxx_osx-64 18.1.8                                   # [not arm64 and osx]
+  - clangxx_osx-64 18.1.8 h7e5c614_25                       # [not arm64 and osx]
   - clang_osx-arm64 18.1.8 h07b0088_25                      # [arm64]
 
 moose_llvm_openmp:                                          # [osx]
@@ -121,7 +122,7 @@ moose_llvm_openmp:                                          # [osx]
   - llvm-openmp 21.1.0 hbb9b287_0                           # [arm64]
 
 moose_llvm_tools:                                           # [osx]
-  - llvm-tools 18.1.8                                       # [not arm64 and osx]
+  - llvm-tools 18.1.8 default_hd2a208e_9                    # [not arm64 and osx]
   - llvm-tools 18.1.8 default_h3f49643_9                    # [arm64]
 
 moose_libclang:
@@ -130,7 +131,7 @@ moose_libclang:
 
 moose_libxml:
   - libxml2 2.14.6 h26afc86_1                               # [linux]
-  - libxml2 2.13.8                                          # [not arm64 and osx]
+  - libxml2 2.13.8 he1bc88e_1                               # [not arm64 and osx]
   - libxml2 2.13.8 h4a9ca0c_1                               # [arm64]
 
 #### Darwin SDK SYSROOT
