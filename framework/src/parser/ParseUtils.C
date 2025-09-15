@@ -22,12 +22,6 @@ appendErrorMessages(std::vector<hit::ErrorMessage> & to,
   to.insert(to.end(), from.begin(), from.end());
 }
 
-void
-appendErrorMessages(std::vector<hit::ErrorMessage> & to, const hit::Error & error)
-{
-  appendErrorMessages(to, error.error_messages);
-}
-
 std::string
 joinErrorMessages(const std::vector<hit::ErrorMessage> & error_messages,
                   const bool augment_node_errors /* = true */)

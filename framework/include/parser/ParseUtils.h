@@ -18,11 +18,8 @@ namespace Moose::ParseUtils
 /**
  * Helper for accumulating errors from a walker into an accumulation of errors
  */
-///@{
 void appendErrorMessages(std::vector<hit::ErrorMessage> & to,
                          const std::vector<hit::ErrorMessage> & from);
-void appendErrorMessages(std::vector<hit::ErrorMessage> & to, const hit::Error & error);
-///@}
 
 /**
  * Helper for combining error messages into a single, newline separated message

@@ -566,8 +566,7 @@ JsonSyntaxTree::getObjectLabel(const std::string & obj) const
   const auto paths = MooseUtils::split(obj, "/");
   if (const auto it = _object_label_map.find(paths.back()); it != _object_label_map.end())
     return it->second;
-  static const std::pair<std::string, std::string> empty;
-  return empty;
+  mooseError("JsonSyntaxTree::getObjectLabel: Did not find object with name '", obj, "'");
 }
 
 const std::pair<std::string, std::string> &
@@ -575,6 +574,5 @@ JsonSyntaxTree::getActionLabel(const std::string & action) const
 {
   if (const auto it = _action_label_map.find(action); it != _action_label_map.end())
     return it->second;
-  static const std::pair<std::string, std::string> empty;
-  return empty;
+  mooseError("JsonSyntaxTree::getActionLabel: Did not find action with name '", action, "'");
 }
