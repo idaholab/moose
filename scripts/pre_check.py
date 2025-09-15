@@ -20,18 +20,35 @@ import re
 import sys
 import stat
 import subprocess
+import textwrap
 from pathlib import Path
 from typing import Iterable, List, Tuple, Optional
 
 # --------------------------- Helpers ---------------------------
 
 def run(cmd: List[str], capture=True, text=True, check=False) -> subprocess.CompletedProcess:
+    """Execute a shell command and return the result.
+
+    Args:
+        cmd: Command and arguments as a list
+        capture: Whether to capture output
+        text: Whether to decode output as text
+        check: Whether to raise exception on non-zero exit
+
+    Returns:
+        CompletedProcess object with command result
+    """
     return subprocess.run(cmd, capture_output=capture, text=text, check=check)
 
 def git_files(*patterns: str) -> List[str]:
     """
-    Return repo-tracked files matching glob patterns, excluding contrib/ and /contrib/,
-    using NUL delimiters to be robust to spaces. Mirrors bash git_files() function.
+    Return repo-tracked files matching glob patterns.
+
+    Args:
+        *patterns: Glob patterns to match (e.g., "*.py", "*.[Ch]")
+
+    Returns:
+        List of file paths, excluding contrib/ directory
     """
     if not patterns:
         patterns = ('',)
@@ -44,6 +61,14 @@ def git_files(*patterns: str) -> List[str]:
     return items
 
 def read_text_bytes(path: str) -> bytes:
+    """Read file as bytes, returning empty bytes on error.
+
+    Args:
+        path: File path to read
+
+    Returns:
+        File contents as bytes, or empty bytes if error
+    """
     try:
         with open(path, "rb") as f:
             return f.read()
@@ -51,6 +76,14 @@ def read_text_bytes(path: str) -> bytes:
         return b""
 
 def read_text(path: str) -> str:
+    """Read file as UTF-8 text, with fallback for encoding errors.
+
+    Args:
+        path: File path to read
+
+    Returns:
+        File contents as string, with invalid UTF-8 replaced
+    """
     try:
         with open(path, "r", encoding="utf-8", errors="replace") as f:
             return f.read()
@@ -62,7 +95,16 @@ def read_text(path: str) -> str:
 
 def ticket_references(log_from: str, log_to: str) -> str:
     r"""
-    Mirrors: git log "$1".."$2" | perl -ne 'print if m<(?:moose/(?:issues|pull)/)|#\d{1,}>'
+    Find commit messages with ticket references between two commits.
+
+    Searches for patterns like '#1234' or 'moose/issues/' or 'moose/pull/'.
+
+    Args:
+        log_from: Starting commit reference
+        log_to: Ending commit reference
+
+    Returns:
+        Newline-separated list of matching commit messages
     """
     try:
         cp = run(["git", "log", f"{log_from}..{log_to}"], capture=True, text=True)
@@ -79,12 +121,23 @@ def ticket_references(log_from: str, log_to: str) -> str:
 # --------------------------- File set helpers ---------------------------
 
 def files_for_tabs_except_input() -> List[str]:
+    """Get C/C++ and Python files for tab checking, excluding input files."""
     return git_files("*.[Ch]", "*.py")
 
 def files_for_tabs() -> List[str]:
+    """Get all C/C++, input, and Python files for tab checking."""
     return git_files("*.[Chi]", "*.py")
 
 def files_for_whitespace(check_cpp_whitespace: str, check_f_whitespace: str) -> List[str]:
+    """Get files to check for trailing whitespace.
+
+    Args:
+        check_cpp_whitespace: "1" to include C/C++ files, "0" for only input files
+        check_f_whitespace: "1" to include Fortran files
+
+    Returns:
+        List of file paths to check
+    """
     if check_cpp_whitespace == "0":
         files = ["*.i", "*.py"]
     else:
@@ -94,11 +147,20 @@ def files_for_whitespace(check_cpp_whitespace: str, check_f_whitespace: str) -> 
     return git_files(*files)
 
 def files_for_headers() -> List[str]:
+    """Get all header files."""
     return git_files("*.h")
 
 # --------------------------- Individual checks ---------------------------
 
 def find_tabs(files: Iterable[str]) -> List[str]:
+    """Check files for tab characters.
+
+    Args:
+        files: Iterable of file paths to check
+
+    Returns:
+        List of files containing tabs, prefixed with tabs
+    """
     bad = []
     seen = set()
     for f in files:
@@ -112,11 +174,16 @@ def find_tabs(files: Iterable[str]) -> List[str]:
 
 def banned_keywords() -> List[str]:
     r"""
-    Mirrors:
-    /std::cout|std::cerr/ ||
-    /printf\s*\(/ ||
-    ($ARGV !~ /SlowProblem.C/ && /sleep\s*\(/) ||
-    ($ARGV !~ /MooseError.(h|C)/ && /print_trace/)
+    Check for banned keywords in C/C++ files.
+
+    Detects:
+    - std::cout, std::cerr (should use mooseInfo/mooseError)
+    - printf() calls
+    - sleep() calls (except in SlowProblem.C)
+    - print_trace (except in MooseError files)
+
+    Returns:
+        List of files containing banned keywords, prefixed with tabs
     """
     bad = []
     seen = set()
@@ -142,7 +209,13 @@ def banned_keywords() -> List[str]:
 
 def banned_funcs() -> List[str]:
     r"""
-    Mirrors: if ($ARGV !~ /Moose(Error|Object).(h|C)/ && /moose(Warning|Error|Deprecated|Info)2 *\(/igs )
+    Check for deprecated MOOSE function calls.
+
+    Detects usage of mooseError2, mooseWarning2, etc. which should be
+    replaced with mooseError, mooseWarning, etc.
+
+    Returns:
+        List of files containing banned functions, prefixed with tabs
     """
     bad = []
     seen = set()
@@ -162,7 +235,13 @@ def banned_funcs() -> List[str]:
 
 def classified_keywords() -> List[str]:
     r"""
-    Mirrors: /p\s*r\s*o\s*p\s*r\s*i\s*e\s*t\s*a\s*r\s*y/i || /c\s*l\s*a\s*s\s*s\s*i\s*f\s*i\s*e\s*d/i
+    Check for classified or proprietary keywords.
+
+    Searches for variations of 'proprietary' and 'classified' that might
+    indicate restricted content. Ignores pre_check.py itself.
+
+    Returns:
+        List of files containing classified keywords, prefixed with tabs
     """
     bad = []
     seen = set()
@@ -182,6 +261,14 @@ def classified_keywords() -> List[str]:
     return bad
 
 def trailing_whitespace_files(files: Iterable[str]) -> List[str]:
+    """Check files for trailing whitespace at line ends.
+
+    Args:
+        files: Iterable of file paths to check
+
+    Returns:
+        List of files with trailing whitespace, prefixed with tabs
+    """
     bad = []
     seen = set()
     for f in files:
@@ -202,6 +289,11 @@ def trailing_whitespace_files(files: Iterable[str]) -> List[str]:
     return bad
 
 def no_newline_at_eof_files() -> List[str]:
+    """Check for files missing newline at end of file.
+
+    Returns:
+        List of files without newline at EOF, prefixed with tabs
+    """
     bad = []
     files = git_files("*.[Chi]", "*.py")
     for f in files:
@@ -220,9 +312,13 @@ def no_newline_at_eof_files() -> List[str]:
     return bad
 
 def find_bad_executables() -> List[str]:
-    """
-    Ignore *.py, *.js, *.sh, *.pl and files without extension.
-    Flag files that are executable (-X).
+    """Find files with incorrect executable permissions.
+
+    Scripts (.py, .js, .sh, .pl) and extensionless files are allowed to be
+    executable. Other files should not have executable permissions.
+
+    Returns:
+        List of incorrectly executable files, prefixed with tabs
     """
     bad = []
     try:
@@ -245,8 +341,12 @@ def find_bad_executables() -> List[str]:
     return bad
 
 def include_guard_files() -> List[str]:
-    """
-    Print headers that contain old-style include guards (#ifndef FOO_H / #define FOO_H).
+    """Check for old-style C++ include guards.
+
+    MOOSE prefers '#pragma once' over traditional #ifndef/#define guards.
+
+    Returns:
+        List of headers with old-style guards, prefixed with tabs
     """
     bad = []
     files = files_for_headers()
@@ -258,6 +358,11 @@ def include_guard_files() -> List[str]:
     return bad
 
 def windows_line_endings() -> List[str]:
+    """Check for Windows-style line endings (CRLF).
+
+    Returns:
+        List of files with Windows line endings, prefixed with tabs
+    """
     bad = []
     files = git_files("*.[Chi]", "*.py")
     for f in files:
@@ -432,6 +537,18 @@ def unicode_files() -> Tuple[List[str], List[str]]:
 # --------------------------- Main precheck logic ---------------------------
 
 def precheck_errors(log_from: str, log_to: str) -> int:
+    """Run all precheck validations on git commits.
+
+    Performs various code quality checks on the changes between two git references,
+    including style, keywords, whitespace, Unicode characters, and more.
+
+    Args:
+        log_from: Starting git reference (commit/branch/tag)
+        log_to: Ending git reference (commit/branch/tag)
+
+    Returns:
+        0 if all checks pass, 1 if any check fails
+    """
     # Read toggles (match the shell script defaults)
     check_ticket = os.environ.get("CHECK_TICKET_REFERENCE", "1")
     check_keywords = os.environ.get("CHECK_KEYWORDS", "1")
@@ -462,7 +579,8 @@ def precheck_errors(log_from: str, log_to: str) -> int:
 
     if check_ticket == "1":
         TICKET_REFERENCE = ticket_references(log_from, log_to)
-        print(f"TICKET_REFERNCES:\n{TICKET_REFERENCE}")
+        if TICKET_REFERENCE and os.environ.get("VERBOSE", "0") == "1":
+            print(f"TICKET_REFERENCES:\n{TICKET_REFERENCE}")
 
     if check_whitespace == "1":
         WHITESPACE_FILES = "\n".join(trailing_whitespace_files(files_for_whitespace(check_cpp_whitespace, check_f_whitespace)))
@@ -503,6 +621,7 @@ def precheck_errors(log_from: str, log_to: str) -> int:
     one_passed = 0
 
     def _pf(cond_pass: bool):
+        """Track pass/fail status for checks."""
         nonlocal one_failed, one_passed
         if cond_pass:
             one_passed = 1
@@ -533,9 +652,6 @@ def precheck_errors(log_from: str, log_to: str) -> int:
     if check_keywords == "1":
         _pf(not BANNED_KEYWORDS)
 
-    if check_ticket == "1":  # note: duplicated in original script; keeping parity
-        _pf(bool(TICKET_REFERENCE))
-
     if check_unicode == "1":
         _pf(not UNICODE_FILES)
 
@@ -546,140 +662,182 @@ def precheck_errors(log_from: str, log_to: str) -> int:
         _pf(not WINDOWS_FILES)
 
     if one_passed == 1:
-        print("\n\n##########################################################################")
+        info_msgs = []
+
+        # Build info messages based on check results
         if check_ticket == "1":
             if TICKET_REFERENCE:
-                print("INFO: Your patch contains a valid ticket reference.")
+                info_msgs.append("Your patch contains a valid ticket reference.")
         else:
-            print("INFO: Ticket reference check disabled.")
+            info_msgs.append("Ticket reference check disabled.")
 
         if check_whitespace == "1":
             if not WHITESPACE_FILES:
-                print("INFO: Your patch contains no trailing whitespace.")
+                info_msgs.append("Your patch contains no trailing whitespace.")
         else:
-            print("INFO: Whitespace check disabled.")
+            info_msgs.append("Whitespace check disabled.")
 
         if check_classified == "1":
             if not CLASSIFIED_FILES:
-                print("INFO: Your patch contains no proprietary or classified keywords.")
+                info_msgs.append("Your patch contains no proprietary or classified keywords.")
         else:
-            print("INFO: Classified keyword check disabled.")
+            info_msgs.append("Classified keyword check disabled.")
 
         if check_tabs == "1":
             if not TAB_FILES:
                 if check_tabs_except_input_files == "1":
-                    print("INFO: Your patch contains no tabs (input files not checked).")
+                    info_msgs.append("Your patch contains no tabs (input files not checked).")
                 else:
-                    print("INFO: Your patch contains no tabs.")
+                    info_msgs.append("Your patch contains no tabs.")
         else:
-            print("INFO: Tabs check disabled.")
+            info_msgs.append("Tabs check disabled.")
 
         if check_eof == "1":
             if not EOF_FILES:
-                print("INFO: Your patch contains no files without newlines before EOF.")
+                info_msgs.append("Your patch contains no files without newlines before EOF.")
         else:
-            print("INFO: EOF check disabled")
+            info_msgs.append("EOF check disabled")
 
         if check_exes == "1":
             if not EXE_FILES:
-                print("INFO: Your patch contains no bad executable files.")
+                info_msgs.append("Your patch contains no bad executable files.")
         else:
-            print("INFO: Executable file check disabled")
+            info_msgs.append("Executable file check disabled")
 
         if os.environ.get("CHECK_BANNED_FUNCS", "0") == "1":
             if not BAN_FUNC_FILES:
-                print("INFO: Your patch contains no banned functions.")
+                info_msgs.append("Your patch contains no banned functions.")
         else:
-            print("INFO: Banned function check disabled")
+            info_msgs.append("Banned function check disabled")
 
         if check_keywords == "1":
             if not BANNED_KEYWORDS:
-                print("INFO: Your patch contains no banned keywords.")
+                info_msgs.append("Your patch contains no banned keywords.")
         else:
-            print("INFO: Keywords check disabled")
+            info_msgs.append("Keywords check disabled")
 
         if check_unicode == "1":
             if not UNICODE_FILES:
-                print("INFO: Your patch contains no disallowed unicode characters.")
+                info_msgs.append("Your patch contains no disallowed unicode characters.")
         else:
-            print("INFO: Unicode check disabled")
+            info_msgs.append("Unicode check disabled")
 
         if check_include_guards == "1":
             if not INCLUDE_GUARD_FILES:
-                print("INFO: Your patch contains no old style C++ include guards.")
+                info_msgs.append("Your patch contains no old style C++ include guards.")
         else:
-            print("INFO: Include Guard check disabled")
+            info_msgs.append("Include Guard check disabled")
 
         if check_windows_files == "1":
             if not WINDOWS_FILES:
-                print("INFO: Your patch contains no windows line endings.")
+                info_msgs.append("Your patch contains no windows line endings.")
         else:
-            print("INFO: Windows line ending check disabled")
+            info_msgs.append("Windows line ending check disabled")
 
-        print("##########################################################################\n")
+        # Print all info messages at once
+        info_output = "\n" + "#" * 74 + "\n"
+        for msg in info_msgs:
+            info_output += f"INFO: {msg}\n"
+        info_output += "#" * 74 + "\n"
+        print(info_output)
 
     if one_failed == 1:
-        print("\n##########################################################################")
+        error_output = "\n" + "#" * 74 + "\n"
+
         if check_ticket == "1" and not TICKET_REFERENCE:
-            print("ERROR: Your patch does not contain a valid ticket reference! (i.e. #1234)")
+            error_output += "ERROR: Your patch does not contain a valid ticket reference! (i.e. #1234)\n"
             try:
                 cp = run(["git", "log", f"{log_from}..{log_to}", "--pretty=%s"])
-                print(cp.stdout)
+                error_output += cp.stdout + "\n"
             except Exception:
                 pass
 
         if check_whitespace == "1" and WHITESPACE_FILES:
-            print("\nERROR: The following files contain trailing whitespace after applying your patch:")
-            print(WHITESPACE_FILES)
-            print('\nRun the "delete_trailing_whitespace.sh" script in your $MOOSE_DIR/scripts directory.')
+            error_output += textwrap.dedent(f"""
+                ERROR: The following files contain trailing whitespace after applying your patch:
+                {WHITESPACE_FILES}
+
+                Run the "delete_trailing_whitespace.sh" script in your $MOOSE_DIR/scripts directory.
+                """)
 
         if check_classified == "1" and CLASSIFIED_FILES:
-            print("\nERROR: The following files contain classified or proprietary keywords:")
-            print(CLASSIFIED_FILES)
+            error_output += textwrap.dedent(f"""
+                ERROR: The following files contain classified or proprietary keywords:
+                {CLASSIFIED_FILES}
+                """)
 
         if check_tabs == "1" and TAB_FILES:
-            print("\nERROR: MOOSE prefers two spaces instead of tabs. The following files contain tab characters:")
-            print(TAB_FILES)
+            error_output += textwrap.dedent(f"""
+                ERROR: MOOSE prefers two spaces instead of tabs. The following files contain tab characters:
+                {TAB_FILES}
+                """)
 
         if check_eof == "1" and EOF_FILES:
-            print("\nERROR: The following files do not contain a newline character before EOF:")
-            print(EOF_FILES)
-            print('\nRun the "delete_trailing_whitespace.sh" script in your $MOOSE_DIR/scripts directory.')
+            error_output += textwrap.dedent(f"""
+                ERROR: The following files do not contain a newline character before EOF:
+                {EOF_FILES}
+
+                Run the "delete_trailing_whitespace.sh" script in your $MOOSE_DIR/scripts directory.
+                """)
 
         if check_exes == "1" and EXE_FILES:
-            print("\nERROR: The following files are executable but shouldn't be:")
-            print(EXE_FILES)
+            error_output += textwrap.dedent(f"""
+                ERROR: The following files are executable but shouldn't be:
+                {EXE_FILES}
+                """)
 
         if os.environ.get("CHECK_BANNED_FUNCS", "0") == "1" and BAN_FUNC_FILES:
-            print("\nERROR: The following files contain banned functions (e.g. mooseError2, mooseWarning2, etc.) - use mooseError, mooseWarning, etc:")
-            print(BAN_FUNC_FILES)
+            error_output += textwrap.dedent(f"""
+                ERROR: The following files contain banned functions (e.g. mooseError2, mooseWarning2, etc.)
+                Use mooseError, mooseWarning, etc. instead:
+                {BAN_FUNC_FILES}
+                """)
 
         if check_keywords == "1" and BANNED_KEYWORDS:
-            print("\nERROR: The following files contain banned keywords (std::cout, std::cerr, sleep, print_trace):")
-            print(BANNED_KEYWORDS)
+            error_output += textwrap.dedent(f"""
+                ERROR: The following files contain banned keywords (std::cout, std::cerr, sleep, print_trace):
+                {BANNED_KEYWORDS}
+                """)
 
         if check_unicode == "1" and UNICODE_FILES:
-            print("\nERROR: The following files contain disallowed unicode characters:")
-            print(UNICODE_FILES)
+            error_output += textwrap.dedent(f"""
+                ERROR: The following files contain disallowed unicode characters:
+                {UNICODE_FILES}
+                """)
             if UNICODE_LOCATIONS:
-                print("\nDetailed locations:")
-                print(UNICODE_LOCATIONS)
+                error_output += textwrap.dedent(f"""
+                    Detailed locations:
+                    {UNICODE_LOCATIONS}
+                    """)
 
         if check_include_guards == "1" and INCLUDE_GUARD_FILES:
-            print('\nERROR: The following files contain include guards, MOOSE uses "#pragma once".')
-            print(INCLUDE_GUARD_FILES)
+            error_output += textwrap.dedent(f"""
+                ERROR: The following files contain include guards, MOOSE uses "#pragma once":
+                {INCLUDE_GUARD_FILES}
+                """)
 
         if check_windows_files == "1" and WINDOWS_FILES:
-            print("\nERROR: The following files contain windows line endings:")
-            print(WINDOWS_FILES)
+            error_output += textwrap.dedent(f"""
+                ERROR: The following files contain windows line endings:
+                {WINDOWS_FILES}
+                """)
 
-        print("##########################################################################\n")
+        error_output += "#" * 74 + "\n"
+        print(error_output)
 
     return one_failed
 
 # --------------------------- Entry point ---------------------------
 
 def main(argv: List[str]) -> int:
+    """Entry point for the pre-check script.
+
+    Args:
+        argv: Command line arguments (script name, optional log_from, optional log_to)
+
+    Returns:
+        Exit code (0 for success, 1 for failure)
+    """
     if len(argv) < 3:
         # Try to use merge-base with upstream/next as default
         try:
@@ -688,16 +846,19 @@ def main(argv: List[str]) -> int:
             log_to = "HEAD"
             print(f"Using merge-base with upstream/next: {log_from[:8]}..{log_to}", file=sys.stderr)
         except subprocess.CalledProcessError:
-            print("ERROR: Could not determine merge-base with upstream/next", file=sys.stderr)
-            print("", file=sys.stderr)
-            print("Please specify a comparison range explicitly:", file=sys.stderr)
-            print("  pre_check.py HEAD~1 HEAD", file=sys.stderr)
-            print("  pre_check.py upstream/next HEAD", file=sys.stderr)
-            print("  pre_check.py <commit-hash> HEAD", file=sys.stderr)
-            print("", file=sys.stderr)
-            print("Or ensure 'upstream' remote is configured:", file=sys.stderr)
-            print("  git remote add upstream https://github.com/idaholab/moose.git", file=sys.stderr)
-            print("  git fetch upstream", file=sys.stderr)
+            error_msg = textwrap.dedent("""\
+                ERROR: Could not determine merge-base with upstream/next
+
+                Please specify a comparison range explicitly:
+                  pre_check.py HEAD~1 HEAD
+                  pre_check.py upstream/next HEAD
+                  pre_check.py <commit-hash> HEAD
+
+                Or ensure 'upstream' remote is configured:
+                  git remote add upstream https://github.com/idaholab/moose.git
+                  git fetch upstream
+                """)
+            print(error_msg, file=sys.stderr)
             return 1
     else:
         log_from, log_to = argv[1], argv[2]
