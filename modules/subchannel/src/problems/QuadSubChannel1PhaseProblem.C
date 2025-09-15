@@ -359,13 +359,15 @@ QuadSubChannel1PhaseProblem::computeFrictionFactorParameters(FrictionStruct fric
       _ff_a_soln->set(node, a_eff);
     }
   }
-  else if (_friction_model == 2)
+  else if (_friction_model == 2 || _friction_model == 3)
   {
-    // Do nothing the user should populate the aux variable ff_a, ff_b .
+    // Do nothing the user should populate the aux variable ff_a, ff_b or directly the aux variable
+    // ff.
   }
   else
   {
-    mooseError(name(), ": Friction model should be a string: default, non_default, user_defined");
+    mooseError(name(),
+               ": Friction model should be a string: default, non_default, user_ab, user_ff ");
   }
 }
 
