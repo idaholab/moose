@@ -9,22 +9,54 @@
 
 #pragma once
 
-#include "InputParameters.h"
-#include "FileLineInfo.h"
 #include "nlohmann/json.h"
 #include <string>
 #include <vector>
 #include <utility>
+#include <optional>
+
+#include "libmesh/parameters.h"
+
+class Syntax;
+class ActionFactory;
+class Factory;
+class FileLineInfo;
 
 /**
- * Holds the syntax in a Json::Value tree
+ * Builder for the syntax tree in JSON
  */
 class JsonSyntaxTree
 {
 public:
-  JsonSyntaxTree(const std::string & search_string);
+  JsonSyntaxTree(const Syntax & syntax,
+                 const ActionFactory & action_factory,
+                 const Factory & factory,
+                 const std::optional<std::string> & search = {});
+
   virtual ~JsonSyntaxTree() {}
 
+  /**
+   * Builds the JSON syntax tree.
+   */
+  nlohmann::json build();
+
+  /**
+   * Converts a c++ type into a "basic" type
+   */
+  static std::string basicCppType(const std::string & cpp_type);
+
+  /**
+   *
+   */
+  static std::string
+  buildOutputString(const std::iterator_traits<InputParameters::const_iterator>::value_type & p);
+
+  static std::string
+  buildOptions(const std::iterator_traits<InputParameters::const_iterator>::value_type & p,
+               bool & out_of_range_allowed,
+               std::map<MooseEnumItem, std::string> & docs);
+
+protected:
   /**
    * Add parameters to the tree
    * @param parent_path The parent syntax path that the action belongs to
@@ -42,33 +74,9 @@ public:
                      bool is_type,
                      const std::string & action,
                      bool is_action,
-                     InputParameters * params,
+                     const InputParameters & params,
                      const FileLineInfo & lineinfo,
                      const std::string & classname);
-
-  /**
-   * Add a task to the tree
-   * @param path The path of the action
-   * @param action Name of the action
-   * @param task Name of the task
-   * @param lineinfo The FileLineInfo where the action/task was registered
-   */
-  void addActionTask(const std::string & path,
-                     const std::string & action,
-                     const std::string & task,
-                     const FileLineInfo & lineinfo);
-  /**
-   * Get the root of the tree.
-   * @return The top level Json::Value holding the tree.
-   */
-  const nlohmann::json & getRoot() const { return _root; }
-
-  /**
-   * Add an associated type to a block
-   * @param path Path of the block
-   * @param type Type name to associate the block with
-   */
-  void addSyntaxType(const std::string & path, const std::string type);
 
   /**
    * Add the global section to the output
@@ -76,34 +84,54 @@ public:
   void addGlobal();
 
   /**
-   * Utilities for making sense of c++ types
+   * Insert all of the parameters into the tree
+   * @param params The parameters to read from
+   * @param search_match Whether or not the search in the tree above was a match
+   * @param all_params The JSON param node to fill into
+   * @return The number of parameters that were set
    */
-  static std::string basicCppType(const std::string & cpp_type);
+  size_t
+  setParams(const InputParameters & params, const bool search_match, nlohmann::json & all_params);
 
-protected:
-  std::string buildOptions(const std::iterator_traits<InputParameters::iterator>::value_type & p,
-                           bool & out_of_range_allowed,
-                           std::map<MooseEnumItem, std::string> & docs);
-
-  size_t setParams(InputParameters * params, bool search_match, nlohmann::json & all_params);
-
-  static std::string
-  buildOutputString(const std::iterator_traits<InputParameters::iterator>::value_type & p);
-  static std::vector<std::string> splitPath(const std::string & path);
-  nlohmann::json & getJson(const std::string & parent, const std::string & path, bool is_type);
+  /**
+   * Gets the entry in the JSON tree for the given path
+   * @param parent The path to the parent
+   * @param path The path to the object
+   * @param is_type Whether or not the params are for a type (if false, an action)
+   * @return The JSON node
+   */
+  nlohmann::json &
+  getJson(const std::string & parent, const std::string & path, const bool is_type);
+  /**
+   * Gets the path in the JSON tree
+   * @param path The path
+   * @return The JSON node
+   */
   nlohmann::json & getJson(const std::string & path);
-  std::pair<std::string, std::string> getObjectLabel(const std::string & obj) const;
-  std::pair<std::string, std::string> getActionLabel(const std::string & action) const;
 
-  nlohmann::json _root;
-  std::string _search;
+  /**
+   * Get the cached label (label and file) for the given object path \p obj
+   */
+  const std::pair<std::string, std::string> & getObjectLabel(const std::string & obj) const;
+  /**
+   * Get the cached label (label and file) for the given action with name \p action
+   */
+  const std::pair<std::string, std::string> & getActionLabel(const std::string & action) const;
+
+  /// The root JSON node for syntax; filled during build() and used within helper functions
+  std::unique_ptr<nlohmann::json> _root;
+  /// The application's Syntax
+  const Syntax & _syntax;
+  /// The application' ActionFactory
+  const ActionFactory & _action_factory;
+  /// The application's Factory
+  const Factory & _factory;
+  /// Optional search parameter
+  const std::optional<std::string> _search;
 
   ///@{
   /// Maps storing action/object name to the label and file location
   std::map<std::string, std::pair<std::string, std::string>> _action_label_map;
   std::map<std::string, std::pair<std::string, std::string>> _object_label_map;
   ///@}
-
-  // Allow the MooseServer class to use protected static convenience methods
-  friend class MooseServer;
 };

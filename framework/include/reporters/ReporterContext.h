@@ -20,7 +20,6 @@
 #include "ReporterMode.h"
 #include "ReporterState.h"
 #include "JsonIO.h"
-#include "JsonSyntaxTree.h"
 #include "MooseObject.h"
 #include <type_traits>
 

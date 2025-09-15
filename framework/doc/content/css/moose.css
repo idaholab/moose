@@ -609,7 +609,8 @@ li{
 .moose-parameter-description-cpptype span,
 .moose-parameter-description-doc-unit span,
 .moose-parameter-description-options span,
-.moose-parameter-description-controllable span{
+.moose-parameter-description-controllable span,
+.moose-parameter-description-command-line-syntax{
     padding-right:10px;
     font-weight:100;
 }
