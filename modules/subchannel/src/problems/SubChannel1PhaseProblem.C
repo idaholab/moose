@@ -713,12 +713,19 @@ SubChannel1PhaseProblem::computeMdot(int iblock)
 void
 SubChannel1PhaseProblem::computeFrictionFactor(FrictionStruct friction_args)
 {
-  computeFrictionFactorParameters(friction_args);
-  auto Re = friction_args.Re;
-  auto i_ch = friction_args.i_ch;
-  auto iz = friction_args.iz;
-  auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
-  _ff_soln->set(node, (*_ff_a_soln)(node)*std::pow(Re, (*_ff_b_soln)(node)));
+  if (_friction_model == 3)
+  {
+    // Do nothing the user should populate the aux variable ff.
+  }
+  else
+  {
+    computeFrictionFactorParameters(friction_args);
+    auto Re = friction_args.Re;
+    auto i_ch = friction_args.i_ch;
+    auto iz = friction_args.iz;
+    auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
+    _ff_soln->set(node, (*_ff_a_soln)(node)*std::pow(Re, (*_ff_b_soln)(node)));
+  }
 }
 
 void
