@@ -8,6 +8,5 @@
     requirement = "The system shall be able to solve a subchannel problem as a child application."
     recover = false
     capabilities = 'method!=dbg'
-    max_parallel = 1
   []
 []

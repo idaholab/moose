@@ -47,8 +47,8 @@ protected:
     Real Re, S, w_perim;
   } _friction_args;
 
-  /// populates friction factor at specific subchannel node
-  virtual void computeFrictionFactor(FrictionStruct friction_args) = 0;
+  /// populates friction factor at specific subchannel node: fi = aRei^b
+  void computeFrictionFactor(FrictionStruct friction_args);
   /// populates friction factor parameters at specific subchannel node
   virtual void computeFrictionFactorParameters(FrictionStruct friction_args) = 0;
   /// Computes diversion crossflow per gap for block iblock
