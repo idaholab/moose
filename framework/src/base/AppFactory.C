@@ -73,6 +73,7 @@ AppFactory::create(const std::string & app_type,
   return AppFactory::create(std::move(parser), std::move(command_line));
 }
 
+#ifdef MOOSE_UNIT_TEST
 std::unique_ptr<MooseApp>
 AppFactory::create(std::unique_ptr<Parser> parser, std::unique_ptr<CommandLine> command_line)
 {
@@ -90,6 +91,7 @@ AppFactory::create(std::unique_ptr<Parser> parser, std::unique_ptr<CommandLine> 
 
   return AppFactory::instance().create(app_type, main_app_name, app_params, MPI_COMM_WORLD);
 }
+#endif
 
 std::shared_ptr<MooseApp>
 AppFactory::createAppShared(const std::string & default_app_type,
@@ -179,7 +181,17 @@ AppFactory::create(const std::string & app_type,
   // copy of the derived app's parmeters)
   const auto & params = storeAppParams(parameters);
 
-  return build_info->build(params);
+  // Build the app; if it fails at construction, remove the parameters
+  // so that we don't have memory leaks
+  try
+  {
+    return build_info->build(params);
+  }
+  catch (...)
+  {
+    clearAppParams(params, {});
+    throw;
+  }
 }
 
 std::shared_ptr<MooseApp>
