@@ -1,9 +1,16 @@
 from fmpy import simulate_fmu
 import numpy as np
+import pandas as pd
+import logging
 
+# Configure root logger
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+)
+logger = logging.getLogger(__name__)
 
-if __name__ == "__main__":
-
+def main():
 
     t0, t1, dt = 0, 5.0, 0.5
     times = np.arange(t0, t1 + dt/2, dt)
@@ -34,5 +41,13 @@ if __name__ == "__main__":
 
     for ti, di, diff in zip(time, dt, diff_u):
         print(f"fmu_time={ti:.1f} → moose_time={di:.5f} → diffused={diff:.5f} ")
+
+    df = pd.DataFrame(result)
+
+    df.to_csv("run_fmu.csv", index=False)
+
+if __name__ == "__main__":
+    main()
+
 
 

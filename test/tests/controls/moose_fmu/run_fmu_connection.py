@@ -1,7 +1,7 @@
 import time
 import matplotlib.pyplot as plt
 from fmpy import extract, instantiate_fmu
-from utils import (
+from MooseFMU import (
     fmu_info,
     get_real,
     get_string,
@@ -12,6 +12,7 @@ from utils import (
 )
 import logging
 import math
+import pandas as pd
 
 # Configure root logger
 logging.basicConfig(
@@ -28,7 +29,7 @@ def main():
 
     start_time = 0.0
     stop_time = 5.0
-    step_size = 0.1
+    step_size = 0.5
     change_time = 1.0
 
     # Extract FMUs
@@ -70,7 +71,7 @@ def main():
 
     # Pause before coupled run
     logger.info("Start the second moose run after 30s")
-    time.sleep(30)
+    time.sleep(10)
 
     # Re-instantiate Moose for coupled run
     moose_instance = instantiate_fmu(moose_model, moose_description)
@@ -116,6 +117,12 @@ def main():
     # Report results
     for ti, mti, d in zip(times, moose_times, diffused):
         print(f"fmu_time={ti:.1f} → moose_time={mti:.5f} → diffused={d:.5f}")
+
+    df = pd.DataFrame(
+        zip(times, moose_times, diffused),
+        columns=["fmu_time", "moose_time", "diffused"],
+    )
+    df.to_csv("run_fmu_connection.csv", index=False)
 
     # Plot comparison
     plt.figure()
