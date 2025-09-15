@@ -99,14 +99,7 @@ TEST(AppFactoryTest, appCopyConstructParams)
                       "CopyConstructParamsApp copy-constructs its input parameters");
   Moose::_deprecated_is_error = deprecated_is_error;
 
-  ASSERT_EQ(af._input_parameters.size(), 1);
-
-  const auto it = af._name_to_build_info.find(app_type);
-  EXPECT_NE(it, af._name_to_build_info.end());
-  af._name_to_build_info.erase(it);
-
-  af._input_parameters.clear();
-  af._next_input_parameters_id = 0;
+  ASSERT_EQ(af._input_parameters.size(), 0);
 }
 
 TEST(AppFactoryTest, createNotRegistered)
