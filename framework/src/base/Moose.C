@@ -791,7 +791,6 @@ ScopedThrowOnError::~ScopedThrowOnError() { Moose::_throw_on_error = _throw_on_e
 
 ScopedHideTrace::ScopedHideTrace() : _show_trace_before(Moose::show_trace)
 {
-  mooseAssert(!libMesh::Threads::in_threads, "Cannot be used in threads");
   Moose::show_trace = true;
 }
 

@@ -334,8 +334,6 @@ private:
  * Scoped helper for hiding traces via Moose::show_trace = false.
  *
  * Resets Moose::show_trace to what it was upon entry on exit.
- *
- * Cannot be used within threads.
  */
 class ScopedHideTrace
 {
