@@ -35,8 +35,6 @@ struct AppFactoryBuildInfoBase
   virtual InputParameters buildParameters() const = 0;
   virtual ~AppFactoryBuildInfoBase() = default;
 
-  /// Number of times this app has been created
-  std::size_t app_creation_count = 0;
   /// C++ type of the app
   std::string type;
   /// File that registered this app
@@ -180,11 +178,6 @@ public:
   {
     return _name_to_build_info.count(app_name);
   }
-
-  /**
-   * @returns the amount of times the AppFactory created the named App-type
-   */
-  std::size_t createdAppCount(const std::string & app_type) const;
 
   /**
    * Returns the map of object name to a function pointer for building said object's

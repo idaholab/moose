@@ -179,8 +179,6 @@ AppFactory::create(const std::string & app_type,
   // copy of the derived app's parmeters)
   const auto & params = storeAppParams(parameters);
 
-  build_info->app_creation_count++;
-
   return build_info->build(params);
 }
 
@@ -191,17 +189,6 @@ AppFactory::createShared(const std::string & app_type,
                          MPI_Comm comm_world_in)
 {
   return AppFactory::instance().create(app_type, name, parameters, comm_world_in);
-}
-
-std::size_t
-AppFactory::createdAppCount(const std::string & app_type) const
-{
-  // Error if the application type is not located
-  const auto it = _name_to_build_info.find(app_type);
-  if (it == _name_to_build_info.end())
-    mooseError("AppFactory::createdAppCount(): '", app_type, "' is not a registered app");
-
-  return it->second->app_creation_count;
 }
 
 const InputParameters &
