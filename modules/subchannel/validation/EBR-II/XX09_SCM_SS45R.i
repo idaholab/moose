@@ -106,6 +106,12 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   [ff]
     block = subchannel
   []
+  [ff_a]
+    block = subchannel
+  []
+  [ff_b]
+    block = subchannel
+  []
   [q_prime]
     block = fuel_pins
   []
