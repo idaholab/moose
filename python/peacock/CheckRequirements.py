@@ -14,8 +14,8 @@ def print_error(msg):
     print(f"\nError starting peacock: {msg}"
            "\n\nYou may need to either create or load an environment providing PyQt, VTK, etc."
            "\nThe MOOSE development team provides a conda package with the required dependencies:"
-           f"\n\n\tmamba create -n peacock moose-peacock python={python_short}"
-           "\n\tmamba activate peacock\n\nThen run peacock again\n")
+           f"\n\n\tconda create -n peacock moose-peacock python={python_short}"
+           "\n\tconda activate peacock\n\nThen run peacock again\n")
 
 class ErrorObserver(object):
     """
