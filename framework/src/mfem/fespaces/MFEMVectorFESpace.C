@@ -86,9 +86,6 @@ MFEMVectorFESpace::getFECName() const
                  : std::string({mfem::BasisType::GetChar(getParam<MooseEnum>("basis"))});
   }
 
-  // This is to get around an MFEM bug (to be removed in #31525)
-  basis = (basis == "@Gg" || basis == "@G" || basis == "_T0") ? "" : basis;
-
   return actual_type + basis + "_" + std::to_string(pdim) + "D_P" + std::to_string(_fec_order);
 }
 
