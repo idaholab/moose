@@ -209,6 +209,7 @@ tmp_jit_*
 
 # HIT
 framework/contrib/hit/hit
+framework/contrib/hit/test/test_hit
 
 # MooseDocs
 site
