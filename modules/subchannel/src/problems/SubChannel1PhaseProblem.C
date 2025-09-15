@@ -57,7 +57,7 @@ SubChannel1PhaseProblem::validParams()
 {
   MooseEnum schemes("upwind downwind central_difference exponential", "central_difference");
   MooseEnum gravity_direction("counter_flow co_flow none", "counter_flow");
-  MooseEnum friction_models("default non_default user_defined", "default");
+  MooseEnum friction_models("default non_default user_ab user_ff", "default");
   InputParameters params = ExternalProblem::validParams();
   params += PostprocessorInterface::validParams();
   params.addClassDescription("Base class of the subchannel solvers");
@@ -78,8 +78,13 @@ SubChannel1PhaseProblem::validParams()
   params.addParam<MooseEnum>(
       "friction_model",
       friction_models,
-      "The model used for the friction factor calculation. Default is Pang, B. et al. KIT, 2013 "
-      "for quad problems and the upgraded Cheng and Todreas correlation for tri problems");
+      "Options are: default, non_default, user_ab, user_ff. The default model is Pang, B. et al. "
+      "KIT, 2013 for quad problems and the upgraded Cheng and Todreas correlation for tri "
+      "problems. There is no non-default model for the tri problems. The non-default model for "
+      "quad problens is the upgraded Cheng and Todreas. Additionally, the user must manually "
+      "define the aux variables ff_a, ff_b if they choose the model user_ab. In this case the "
+      "friction factor is (ff = ff_a * Re ^ ff_b). Last if the user chooses user_ff they must "
+      "manually define the auxvariable ff");
   params.addParam<bool>(
       "implicit", false, "Boolean to define the use of explicit or implicit solution.");
   params.addParam<bool>(
@@ -584,12 +589,19 @@ SubChannel1PhaseProblem::computeMdot(int iblock)
 void
 SubChannel1PhaseProblem::computeFrictionFactor(FrictionStruct friction_args)
 {
-  computeFrictionFactorParameters(friction_args);
-  auto Re = friction_args.Re;
-  auto i_ch = friction_args.i_ch;
-  auto iz = friction_args.iz;
-  auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
-  _ff_soln->set(node, (*_ff_a_soln)(node)*std::pow(Re, (*_ff_b_soln)(node)));
+  if (_friction_model == 3)
+  {
+    // Do nothing the user should populate the aux variable ff.
+  }
+  else
+  {
+    computeFrictionFactorParameters(friction_args);
+    auto Re = friction_args.Re;
+    auto i_ch = friction_args.i_ch;
+    auto iz = friction_args.iz;
+    auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
+    _ff_soln->set(node, (*_ff_a_soln)(node)*std::pow(Re, (*_ff_b_soln)(node)));
+  }
 }
 
 void
