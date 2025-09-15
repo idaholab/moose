@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+#* This file is part of the MOOSE framework
+#* https://mooseframework.inl.gov
+#*
+#* All rights reserved, see COPYRIGHT for full restrictions
+#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#*
+#* Licensed under LGPL 2.1, please see LICENSE for details
+#* https://www.gnu.org/licenses/lgpl-2.1.html
+
 """
 Python port of env_pre_check.sh with an extended allow-list for Unicode characters.
 - Mirrors the checks from the original shell script.
@@ -454,7 +462,7 @@ def precheck_errors(log_from: str, log_to: str) -> int:
 
     if check_ticket == "1":
         TICKET_REFERENCE = ticket_references(log_from, log_to)
-        print(f"TICKET_REFERNCES: {TICKET_REFERENCE}")
+        print(f"TICKET_REFERNCES:\n{TICKET_REFERENCE}")
 
     if check_whitespace == "1":
         WHITESPACE_FILES = "\n".join(trailing_whitespace_files(files_for_whitespace(check_cpp_whitespace, check_f_whitespace)))
@@ -673,11 +681,24 @@ def precheck_errors(log_from: str, log_to: str) -> int:
 
 def main(argv: List[str]) -> int:
     if len(argv) < 3:
-        print("Usage: env_pre_check.py <log_from> <log_to>", file=sys.stderr)
-        # default to HEAD~1..HEAD if not provided, for convenience
-        log_from = "HEAD~1"
-        log_to = "HEAD"
-        print(f"Defaulting to range: {log_from}..{log_to}", file=sys.stderr)
+        # Try to use merge-base with upstream/next as default
+        try:
+            cp = run(["git", "merge-base", "upstream/next", "HEAD"], capture=True, text=True, check=True)
+            log_from = cp.stdout.strip()
+            log_to = "HEAD"
+            print(f"Using merge-base with upstream/next: {log_from[:8]}..{log_to}", file=sys.stderr)
+        except subprocess.CalledProcessError:
+            print("ERROR: Could not determine merge-base with upstream/next", file=sys.stderr)
+            print("", file=sys.stderr)
+            print("Please specify a comparison range explicitly:", file=sys.stderr)
+            print("  pre_check.py HEAD~1 HEAD", file=sys.stderr)
+            print("  pre_check.py upstream/next HEAD", file=sys.stderr)
+            print("  pre_check.py <commit-hash> HEAD", file=sys.stderr)
+            print("", file=sys.stderr)
+            print("Or ensure 'upstream' remote is configured:", file=sys.stderr)
+            print("  git remote add upstream https://github.com/idaholab/moose.git", file=sys.stderr)
+            print("  git fetch upstream", file=sys.stderr)
+            return 1
     else:
         log_from, log_to = argv[1], argv[2]
     return precheck_errors(log_from, log_to)
