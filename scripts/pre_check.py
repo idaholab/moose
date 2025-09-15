@@ -3,7 +3,7 @@
 """
 Python port of env_pre_check.sh with an extended allow-list for Unicode characters.
 - Mirrors the checks from the original shell script.
-- Adds a configurable Unicode allow-list (ASCII + Greek + Superscripts/Subscripts + ¹²³ + µ + math symbols).
+- Adds a configurable Unicode allow-list (ASCII + Latin Extended/European accents + Greek + Superscripts/Subscripts + ¹²³ + µ + math symbols).
 - Uses standard `re` module with manual Unicode classification.
 """
 
@@ -334,9 +334,32 @@ def _in_superscripts_subscripts(ch: str) -> bool:
 def _is_ascii(ch: str) -> bool:
     return ord(ch) < 128
 
+def _in_latin_extended(ch: str) -> bool:
+    """Check if character is in Latin-1 Supplement or Latin Extended blocks."""
+    cp = ord(ch)
+    # Latin-1 Supplement: U+0080 - U+00FF (includes most Western European accents)
+    # This covers French, Spanish, German, Italian, Portuguese, etc.
+    if 0x00A0 <= cp <= 0x00FF:  # Skip control chars, start from non-breaking space
+        return True
+    # Latin Extended-A: U+0100 - U+017F (Central European, Baltic)
+    # Covers Polish, Czech, Croatian, Hungarian, etc.
+    if 0x0100 <= cp <= 0x017F:
+        return True
+    # Latin Extended-B: U+0180 - U+024F (less common, but still European)
+    if 0x0180 <= cp <= 0x024F:
+        return True
+    # Latin Extended Additional: U+1E00 - U+1EFF (Vietnamese and other special Latin)
+    # Uncomment if needed: if 0x1E00 <= cp <= 0x1EFF: return True
+    # IPA Extensions: U+0250 - U+02AF (phonetic symbols)
+    # Uncomment if needed: if 0x0250 <= cp <= 0x02AF: return True
+    return False
+
 def _is_allowed_manual(ch: str) -> bool:
     # ASCII
     if _is_ascii(ch):
+        return True
+    # Latin extended (European accents)
+    if _in_latin_extended(ch):
         return True
     # Greek
     if _in_greek(ch):
@@ -374,8 +397,10 @@ def _get_line_col(text: str, index: int) -> Tuple[int, int]:
             col += 1
     return line, col
 
-def unicode_files() -> List[str]:
+def unicode_files() -> Tuple[List[str], List[str]]:
+    """Returns (bad_files, detailed_locations)."""
     bad = []
+    locations = []
     files = git_files("*.[Chi]", "*.py")
     seen = set()
     for f in files:
@@ -386,15 +411,15 @@ def unicode_files() -> List[str]:
         disallowed = _disallowed_spans(text)
         if disallowed:
             bad.append("\t" + f)
-            # Print detailed location info for each disallowed character
+            # Collect detailed location info for each disallowed character
             for idx, ch in disallowed:
                 line, col = _get_line_col(text, idx)
                 # Show the character code point for clarity
                 char_info = f"U+{ord(ch):04X}"
                 if ch.isprintable() and ch not in ['\n', '\r', '\t']:
                     char_info += f" '{ch}'"
-                print(f"  {f}:{line}:{col}: {char_info}")
-    return bad
+                locations.append(f"\t  {f}:{line}:{col}: {char_info}")
+    return bad, locations
 
 # --------------------------- Main precheck logic ---------------------------
 
@@ -421,6 +446,7 @@ def precheck_errors(log_from: str, log_to: str) -> int:
     TAB_FILES = ""
     CLASSIFIED_FILES = ""
     UNICODE_FILES = ""
+    UNICODE_LOCATIONS = ""
     INCLUDE_GUARD_FILES = ""
     WINDOWS_FILES = ""
     EXE_FILES = ""
@@ -455,7 +481,9 @@ def precheck_errors(log_from: str, log_to: str) -> int:
         BAN_FUNC_FILES = "\n".join(banned_funcs())
 
     if check_unicode == "1":
-        UNICODE_FILES = "\n".join(unicode_files())
+        files, locations = unicode_files()
+        UNICODE_FILES = "\n".join(files)
+        UNICODE_LOCATIONS = "\n".join(locations)
 
     if check_include_guards == "1":
         INCLUDE_GUARD_FILES = "\n".join(include_guard_files())
@@ -623,8 +651,11 @@ def precheck_errors(log_from: str, log_to: str) -> int:
             print(BANNED_KEYWORDS)
 
         if check_unicode == "1" and UNICODE_FILES:
-            print("\nERROR: The following files contain disallowed unicode characters (see specific locations above):")
+            print("\nERROR: The following files contain disallowed unicode characters:")
             print(UNICODE_FILES)
+            if UNICODE_LOCATIONS:
+                print("\nDetailed locations:")
+                print(UNICODE_LOCATIONS)
 
         if check_include_guards == "1" and INCLUDE_GUARD_FILES:
             print('\nERROR: The following files contain include guards, MOOSE uses "#pragma once".')
