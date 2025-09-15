@@ -207,6 +207,7 @@ MooseApp::validParams()
                                    "-w --allow-unused",
                                    "Warn on unused input file parameters instead of erroring");
   params.setGlobalCommandLineParam("allow_unused");
+  params.enableInputCommandLineParam("allow_unused");
 
   params.addCommandLineParam<bool>("error", "--error", "Error on warnings");
   params.setGlobalCommandLineParam("error");
@@ -215,14 +216,17 @@ MooseApp::validParams()
   params.addCommandLineParam<bool>(
       "error_unused", "-e --error-unused", "Error on unused input file options");
   params.setGlobalCommandLineParam("error_unused");
+  params.enableInputCommandLineParam("error_unused");
 
   params.addCommandLineParam<bool>(
       "error_override", "-o --error-override", "Error on overridden parameters");
   params.setGlobalCommandLineParam("error_override");
+  params.enableInputCommandLineParam("error_override");
 
   params.addCommandLineParam<bool>(
       "error_deprecated", "--error-deprecated", "Error on deprecation warnings");
   params.setGlobalCommandLineParam("error_deprecated");
+  params.enableInputCommandLineParam("error_deprecated");
 
   params.addCommandLineParam<bool>("trap_fpe",
                                    "--trap-fpe",
