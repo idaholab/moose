@@ -74,14 +74,12 @@ SubChannel1PhaseProblem::validParams()
                              schemes,
                              "Interpolation scheme used for the method. Default is exponential");
   params.addParam<MooseEnum>(
-<<<<<<< HEAD
       "gravity", gravity_direction, "Direction of gravity. Default is counter_flow");
-=======
+  params.addParam<MooseEnum>(
       "friction_model",
       friction_models,
       "The model used for the friction factor calculation. Default is Pang, B. et al. KIT, 2013 "
       "for quad problems and the upgraded Cheng and Todreas correlation for tri problems");
->>>>>>> 901e8d5e3c (used mooseEnum for friction model Refs #30049)
   params.addParam<bool>(
       "implicit", false, "Boolean to define the use of explicit or implicit solution.");
   params.addParam<bool>(
@@ -132,12 +130,9 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _dtol(getParam<PetscReal>("dtol")),
     _maxit(getParam<PetscInt>("maxit")),
     _interpolation_scheme(getParam<MooseEnum>("interpolation_scheme")),
-<<<<<<< HEAD
     _gravity_direction(getParam<MooseEnum>("gravity")),
     _dir_grav(computeGravityDir(_gravity_direction)),
-=======
     _friction_model(getParam<MooseEnum>("friction_model")),
->>>>>>> 901e8d5e3c (used mooseEnum for friction model Refs #30049)
     _implicit_bool(getParam<bool>("implicit")),
     _staggered_pressure_bool(getParam<bool>("staggered_pressure")),
     _segregated_bool(getParam<bool>("segregated")),
@@ -270,6 +265,8 @@ SubChannel1PhaseProblem::initialSetup()
   _displacement_soln =
       std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::DISPLACEMENT));
   _ff_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::FRICTION_FACTOR));
+  _ff_a_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::FF_PARAMETER_A));
+  _ff_b_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::FF_PARAMETER_B));
   if (_duct_mesh_exist)
   {
     _duct_heat_flux_soln =
