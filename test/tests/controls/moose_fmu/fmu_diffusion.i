@@ -90,5 +90,5 @@ l = 2
 []
 
 [Outputs]
-  exodus = true
+  exodus = false
 []
