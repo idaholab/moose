@@ -4,14 +4,13 @@
 Python port of env_pre_check.sh with an extended allow-list for Unicode characters.
 - Mirrors the checks from the original shell script.
 - Adds a configurable Unicode allow-list (ASCII + Greek + Superscripts/Subscripts + ¹²³ + µ + math symbols).
-- Requires the `regex` module for Unicode property support.
+- Uses standard `re` module with manual Unicode classification.
 """
 
 import os
 import re
 import sys
 import stat
-import regex
 import subprocess
 from pathlib import Path
 from typing import Iterable, List, Tuple, Optional
@@ -323,23 +322,42 @@ def _named_chars(names: Iterable[str]) -> List[str]:
 ALLOWED_NAMED_CHARS = _named_chars(CORE_NAMES + WIDER_EXTRAS + LEGACY_SUPERSCRIPTS + [MICRO_SIGN])
 
 
+def _in_greek(ch: str) -> bool:
+    cp = ord(ch)
+    # Greek and Coptic: U+0370–U+03FF, Greek Extended: U+1F00–U+1FFF
+    return (0x0370 <= cp <= 0x03FF) or (0x1F00 <= cp <= 0x1FFF)
+
+def _in_superscripts_subscripts(ch: str) -> bool:
+    cp = ord(ch)
+    return 0x2070 <= cp <= 0x209F
+
+def _is_ascii(ch: str) -> bool:
+    return ord(ch) < 128
+
+def _is_allowed_manual(ch: str) -> bool:
+    # ASCII
+    if _is_ascii(ch):
+        return True
+    # Greek
+    if _in_greek(ch):
+        return True
+    # Superscripts/Subscripts block
+    if _in_superscripts_subscripts(ch):
+        return True
+    # Named math symbols and special characters
+    if ch in ALLOWED_NAMED_CHARS:
+        return True
+    return False
+
 def _disallowed_spans(text: str) -> List[Tuple[int, str]]:
     r"""
     Return list of (index, char) for characters NOT in the allow-list.
-    Uses the 'regex' module for \p{..} Unicode property support.
+    Uses manual classification since standard re doesn't support Unicode properties.
     """
-    # Build a character class using Unicode properties
-    # We keep ASCII, Greek, superscripts/subscripts, and explicit named symbols.
-    # regex supports \p{Greek} and \p{InSuperscripts_And_Subscripts}
-    named_class = "".join(r"\N{" + unic + "}" for unic in (
-        CORE_NAMES + WIDER_EXTRAS + LEGACY_SUPERSCRIPTS + [MICRO_SIGN]
-    ))
-    pat = regex.compile(
-        r"(?V1)(?u)([^\p{ASCII}\p{Greek}\p{InSuperscripts_And_Subscripts}" + named_class + r"])"
-    )
     out = []
-    for m in pat.finditer(text):
-        out.append((m.start(1), m.group(1)))
+    for i, ch in enumerate(text):
+        if not _is_allowed_manual(ch):
+            out.append((i, ch))
     return out
 
 def unicode_files() -> List[str]:
