@@ -26,4 +26,3 @@ flux $\mathbf{J} = -D\nabla u$ from the gradient of the coupled variable `u`.
 !syntax inputs /Kernels/ADFluxDivergence
 
 !syntax children /Kernels/ADFluxDivergence
-
