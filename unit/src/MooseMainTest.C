@@ -104,25 +104,26 @@ TEST(MooseMainTest, createUnregistered)
   // default app type is not registered
   {
     Args args({});
-    Moose::UnitUtils::assertThrows<MooseRuntimeError>(
-        [&args, &unreg_name]() { Moose::createMooseApp(unreg_name, args.argc(), args.argv()); },
-        "createMooseApp: The default app type '" + unreg_name +
-            "' is not a registered application type");
+    MOOSE_ASSERT_THROWS(MooseRuntimeError,
+                        Moose::createMooseApp(unreg_name, args.argc(), args.argv()),
+                        "createMooseApp: The default app type '" + unreg_name +
+                            "' is not a registered application type");
   }
   // not registered via --app
   {
     Args args({"--app=" + unreg_name});
-    Moose::UnitUtils::assertThrows<MooseRuntimeError>(
-        [&args, &reg_name]() { Moose::createMooseApp(reg_name, args.argc(), args.argv()); },
-        "'" + unreg_name + "' is not a registered application type");
+
+    MOOSE_ASSERT_THROWS(MooseRuntimeError,
+                        Moose::createMooseApp(reg_name, args.argc(), args.argv()),
+                        "'" + unreg_name + "' is not a registered application type");
   }
   // not registered via Application/type
   {
     Args args({"Application/type=" + unreg_name});
-    Moose::UnitUtils::assertThrows<MooseRuntimeError>(
-        [&args, &reg_name]() { Moose::createMooseApp(reg_name, args.argc(), args.argv()); },
-        Moose::hit_command_line_filename + ":Application/type:\n'" + unreg_name +
-            "' is not a registered application type");
+    MOOSE_ASSERT_THROWS(MooseRuntimeError,
+                        Moose::createMooseApp(reg_name, args.argc(), args.argv()),
+                        Moose::hit_command_line_filename + ":Application/type:\n'" + unreg_name +
+                            "' is not a registered application type");
   }
 }
 
@@ -130,8 +131,9 @@ TEST(MooseMainTest, createMultiAppApplicationOverrideError)
 {
   const std::string arg = "subapp:Application/type=foo";
   Args args({arg});
-  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
-      [&args]() { Moose::createMooseApp("MooseUnitApp", args.argc(), args.argv()); },
+  MOOSE_ASSERT_THROWS(
+      MooseRuntimeError,
+      Moose::createMooseApp("MooseUnitApp", args.argc(), args.argv()),
       "For command line argument '" + arg +
           "': overriding the application type for MultiApps via command line is not allowed.");
 }

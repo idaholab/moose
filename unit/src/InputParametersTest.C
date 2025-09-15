@@ -22,8 +22,8 @@ TEST(InputParametersTest, checkControlParamPrivateError)
   InputParameters params = emptyInputParameters();
   params.addPrivateParam<Real>("private", 1);
   params.declareControllable("private");
-  Moose::UnitUtils::assertThrows<MooseRuntimeError>([&params]() { params.checkParams(""); },
-                                                    "private parameter '' marked controllable");
+  MOOSE_ASSERT_THROWS(
+      MooseRuntimeError, params.checkParams(""), "private parameter '' marked controllable");
 }
 
 TEST(InputParametersTest, checkRangeCheckedParam)
@@ -33,9 +33,9 @@ TEST(InputParametersTest, checkRangeCheckedParam)
   // do absolute floating point comparisons instead of using a default epsilon.
   InputParameters params = emptyInputParameters();
   params.addRangeCheckedParam<Real>("p", 1.000000000000001, "p = 1", "Some doc");
-  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
-      [&params]() { params.checkParams(""); },
-      "p: Range check failed; expression = 'p = 1', value = 1");
+  MOOSE_ASSERT_THROWS(MooseRuntimeError,
+                      params.checkParams(""),
+                      "p: Range check failed; expression = 'p = 1', value = 1");
 
   const auto test_vector_error = [](const std::vector<Real> & value,
                                     const std::string & range_function,
@@ -94,23 +94,23 @@ TEST(InputParametersTest, checkControlParamTypeError)
   InputParameters params = emptyInputParameters();
   params.addParam<PostprocessorName>("pp_name", "make_it_valid", "Some doc");
   params.declareControllable("pp_name");
-  Moose::UnitUtils::assertThrows<MooseRuntimeError>([&params]() { params.checkParams(""); },
-                                                    "non-controllable type");
+  MOOSE_ASSERT_THROWS(MooseRuntimeError, params.checkParams(""), "non-controllable type");
 }
 
 TEST(InputParametersTest, checkControlParamValidError)
 {
   InputParameters params = emptyInputParameters();
-  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
-      [&params]() { params.declareControllable("not_valid"); }, "cannot be marked as controllable");
+  MOOSE_ASSERT_THROWS(MooseRuntimeError,
+                      params.declareControllable("not_valid"),
+                      "cannot be marked as controllable");
 }
 
 TEST(InputParametersTest, checkSuppressedError)
 {
   InputParameters params = emptyInputParameters();
-  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
-      [&params]() { params.suppressParameter<int>("nonexistent"); },
-      "Unable to suppress nonexistent parameter");
+  MOOSE_ASSERT_THROWS(MooseRuntimeError,
+                      params.suppressParameter<int>("nonexistent"),
+                      "Unable to suppress nonexistent parameter");
 }
 
 TEST(InputParametersTest, checkSuppressingControllableParam)
@@ -139,11 +139,9 @@ TEST(InputParametersTest, checkSetDocString)
 TEST(InputParametersTest, checkSetDocStringError)
 {
   InputParameters params = emptyInputParameters();
-  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
-      [&params]() {
-        params.setDocString("little_guy",
-                            "That little guy, I wouldn't worry about that little_guy.");
-      },
+  MOOSE_ASSERT_THROWS(
+      MooseRuntimeError,
+      params.setDocString("little_guy", "That little guy, I wouldn't worry about that little_guy."),
       "Unable to set the documentation string (using setDocString)");
 }
 
@@ -151,8 +149,8 @@ void
 testBadParamName(const std::string & name)
 {
   InputParameters params = emptyInputParameters();
-  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
-      [&params, &name]() { params.addParam<bool>(name, "Doc"); }, "Invalid parameter name");
+  MOOSE_ASSERT_THROWS(
+      MooseRuntimeError, params.addParam<bool>(name, "Doc"), "Invalid parameter name");
 }
 
 /// Just make sure we don't allow invalid parameter names
@@ -265,14 +263,14 @@ TEST(InputParametersTest, makeParamRequired)
   EXPECT_TRUE(params.isParamRequired("good_param"));
 
   // Require existing parameter with the wrong type
-  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
-      [&params]() { params.makeParamRequired<PostprocessorName>("wrong_param_type"); },
-      "Unable to require nonexistent parameter: wrong_param_type");
+  MOOSE_ASSERT_THROWS(MooseRuntimeError,
+                      params.makeParamRequired<PostprocessorName>("wrong_param_type"),
+                      "Unable to require nonexistent parameter: wrong_param_type");
 
   // Require non-existing parameter
-  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
-      [&params]() { params.makeParamRequired<PostprocessorName>("wrong_param_name"); },
-      "Unable to require nonexistent parameter: wrong_param_name");
+  MOOSE_ASSERT_THROWS(MooseRuntimeError,
+                      params.makeParamRequired<PostprocessorName>("wrong_param_name"),
+                      "Unable to require nonexistent parameter: wrong_param_name");
 }
 
 TEST(InputParametersTest, setPPandVofPP)
@@ -496,13 +494,13 @@ TEST(InputParametersTest, noDefaultValueError)
   params.addParam<std::vector<Real>>("dummy_vector", "a dummy vector");
 
   // Throw an error message when no default value is provided
-  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
-      [&params]() { params.getParamHelper<Real>("dummy_real", params); },
-      "The parameter \"dummy_real\" is being retrieved before being set.");
+  MOOSE_ASSERT_THROWS(MooseRuntimeError,
+                      params.getParamHelper<Real>("dummy_real", params),
+                      "The parameter \"dummy_real\" is being retrieved before being set.");
 
-  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
-      [&params]() { params.getParamHelper<std::vector<Real>>("dummy_vector", params); },
-      "The parameter \"dummy_vector\" is being retrieved before being set.");
+  MOOSE_ASSERT_THROWS(MooseRuntimeError,
+                      params.getParamHelper<std::vector<Real>>("dummy_vector", params),
+                      "The parameter \"dummy_vector\" is being retrieved before being set.");
 }
 
 TEST(InputParametersTest, fileNames)
@@ -677,8 +675,9 @@ TEST(InputParametersTest, alphaCommandLineParamSwitch)
 {
   InputParameters params = emptyInputParameters();
   params.allowCommandLineParams({});
-  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
-      [&params]() { params.addCommandLineParam<bool>("1value", "--1value", "Doc"); },
+  MOOSE_ASSERT_THROWS(
+      MooseRuntimeError,
+      params.addCommandLineParam<bool>("1value", "--1value", "Doc"),
       "The switch '--1value' for the command line parameter '1value' is invalid. It must begin "
       "with an alphabetical character.");
 }
@@ -687,30 +686,30 @@ TEST(InputParametersTest, setGlobalCommandLineParamNotCLParam)
 {
   InputParameters params = emptyInputParameters();
   params.addParam<std::string>("param", "Doc");
-  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
-      [&params]() { params.setGlobalCommandLineParam("param"); },
-      "InputParameters::setGlobalCommandLineParam: The parameter 'param' is not a command line "
-      "parameter");
+  MOOSE_ASSERT_THROWS(MooseRuntimeError,
+                      params.setGlobalCommandLineParam("param"),
+                      "InputParameters::setGlobalCommandLineParam: The parameter 'param' "
+                      "is not a command line parameter");
 }
 
 TEST(InputParametersTest, getCommandLineMetadataNotCLParam)
 {
   InputParameters params = emptyInputParameters();
   params.addParam<std::string>("param", "Doc");
-  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
-      [&params]() { params.getCommandLineMetadata("param"); },
-      "InputParameters::getCommandLineMetadata: The parameter 'param' is not a command line "
-      "parameter");
+  MOOSE_ASSERT_THROWS(MooseRuntimeError,
+                      params.getCommandLineMetadata("param"),
+                      "InputParameters::getCommandLineMetadata: The parameter 'param' is "
+                      "not a command line parameter");
 }
 
 TEST(InputParametersTest, commandLineParamSetNotCLParam)
 {
   InputParameters params = emptyInputParameters();
   params.addParam<std::string>("param", "Doc");
-  Moose::UnitUtils::assertThrows<MooseRuntimeError>(
-      [&params]() { params.commandLineParamSet("param", "unused", nullptr, {}); },
-      "InputParameters::commandLineParamSet: The parameter 'param' is not a command line "
-      "parameter");
+  MOOSE_ASSERT_THROWS(MooseRuntimeError,
+                      params.commandLineParamSet("param", "unused", nullptr, {}),
+                      "InputParameters::commandLineParamSet: The parameter 'param' is not "
+                      "a command line parameter");
 }
 
 TEST(InputParametersTest, commandLineParamFullpath)
@@ -776,8 +775,7 @@ TEST(InputParametersTest, queryAndGetObjectType)
   ASSERT_EQ(params.queryObjectType(), nullptr);
   Moose::UnitUtils::assertThrows([&params]() { params.getObjectType(); },
                                  "InputParameters::getObjectType(): Missing '" +
-                                     MooseBase::type_param + "' param",
-                                 true);
+                                     MooseBase::type_param + "' param");
 
   // Is set
   const auto object_type = "foo";
