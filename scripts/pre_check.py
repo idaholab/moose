@@ -324,7 +324,7 @@ ALLOWED_NAMED_CHARS = _named_chars(CORE_NAMES + WIDER_EXTRAS + LEGACY_SUPERSCRIP
 
 def _in_greek(ch: str) -> bool:
     cp = ord(ch)
-    # Greek and Coptic: U+0370–U+03FF, Greek Extended: U+1F00–U+1FFF
+    # Greek and Coptic: U+0370 - U+03FF, Greek Extended: U+1F00 - U+1FFF
     return (0x0370 <= cp <= 0x03FF) or (0x1F00 <= cp <= 0x1FFF)
 
 def _in_superscripts_subscripts(ch: str) -> bool:
@@ -360,6 +360,20 @@ def _disallowed_spans(text: str) -> List[Tuple[int, str]]:
             out.append((i, ch))
     return out
 
+def _get_line_col(text: str, index: int) -> Tuple[int, int]:
+    """Convert a string index to line and column numbers (1-based)."""
+    line = 1
+    col = 1
+    for i, ch in enumerate(text):
+        if i == index:
+            return line, col
+        if ch == '\n':
+            line += 1
+            col = 1
+        else:
+            col += 1
+    return line, col
+
 def unicode_files() -> List[str]:
     bad = []
     files = git_files("*.[Chi]", "*.py")
@@ -369,8 +383,17 @@ def unicode_files() -> List[str]:
             continue
         seen.add(f)
         text = read_text(f)
-        if _disallowed_spans(text):
+        disallowed = _disallowed_spans(text)
+        if disallowed:
             bad.append("\t" + f)
+            # Print detailed location info for each disallowed character
+            for idx, ch in disallowed:
+                line, col = _get_line_col(text, idx)
+                # Show the character code point for clarity
+                char_info = f"U+{ord(ch):04X}"
+                if ch.isprintable() and ch not in ['\n', '\r', '\t']:
+                    char_info += f" '{ch}'"
+                print(f"  {f}:{line}:{col}: {char_info}")
     return bad
 
 # --------------------------- Main precheck logic ---------------------------
@@ -600,8 +623,7 @@ def precheck_errors(log_from: str, log_to: str) -> int:
             print(BANNED_KEYWORDS)
 
         if check_unicode == "1" and UNICODE_FILES:
-            print("\nERROR: The following files contain disallowed unicode characters")
-            print("To locate offending chars per-line: add a debug print around _disallowed_spans() in this script.")
+            print("\nERROR: The following files contain disallowed unicode characters (see specific locations above):")
             print(UNICODE_FILES)
 
         if check_include_guards == "1" and INCLUDE_GUARD_FILES:
