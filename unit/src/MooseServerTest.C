@@ -530,7 +530,7 @@ TEST_F(MooseServerTest, DocumentOpenAndDiagnostics)
 {
   // didopen test parameters - note input has error with variable u twice
 
-  std::string document_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
+  std::string document_uri = wasp::lsp::m_uri_prefix + test_input_path;
   std::string document_language_id = "test_language_id_string";
   int document_version = 1;
   std::string document_text_open = R"INPUT(
@@ -623,7 +623,7 @@ TEST_F(MooseServerTest, DocumentOpenAndSymbols)
   // symbols test parameters
 
   int request_id = 2;
-  std::string document_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
+  std::string document_uri = wasp::lsp::m_uri_prefix + test_input_path;
 
   // build symbols request with the test parameters
 
@@ -748,7 +748,7 @@ TEST_F(MooseServerTest, DocumentChangeAndDiagnostics)
 {
   // didchange test parameters - note input has error with bad bcs boundary
 
-  std::string document_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
+  std::string document_uri = wasp::lsp::m_uri_prefix + test_input_path;
   int document_version = 2;
   int start_line = -1;
   int start_character = -1;
@@ -852,7 +852,7 @@ TEST_F(MooseServerTest, DocumentChangeAndSymbols)
   // symbols test parameters
 
   int request_id = 3;
-  std::string document_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
+  std::string document_uri = wasp::lsp::m_uri_prefix + test_input_path;
 
   // build symbols request with the test parameters
 
@@ -979,7 +979,7 @@ TEST_F(MooseServerTest, CompletionMeshDefaultedType)
 {
   // didchange test parameters - update input to set up autocomplete scenarios
 
-  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
+  std::string doc_uri = wasp::lsp::m_uri_prefix + test_input_path;
   int doc_version = 3;
   std::string doc_text_change = R"INPUT(
 [Mesh]
@@ -1107,7 +1107,7 @@ label: Partitioner                            text: [Partitioner]\n  type = $1\n
 TEST_F(MooseServerTest, CompletionDocumentRootLevel)
 {
   // completion test parameters - at document root level outside of all blocks
-  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
+  std::string doc_uri = wasp::lsp::m_uri_prefix + test_input_path;
   int request_id = 5;
   int request_line = 42;
   int request_char = 0;
@@ -1170,7 +1170,7 @@ label: VectorPostprocessors             text: [VectorPostprocessors]\n  $0\n[]  
 TEST_F(MooseServerTest, CompletionValueActiveBlocks)
 {
   // completion test parameters - on active parameter value in Variables block
-  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
+  std::string doc_uri = wasp::lsp::m_uri_prefix + test_input_path;
   int request_id = 6;
   int request_line = 9;
   int request_char = 12;
@@ -1185,7 +1185,7 @@ label: v text: v desc: subblock name pos: [9.12]-[9.19] kind:  7 format: snippet
 TEST_F(MooseServerTest, CompletionValueBooleanParam)
 {
   // completion test parameters - on boolean value of solve param from Problem
-  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
+  std::string doc_uri = wasp::lsp::m_uri_prefix + test_input_path;
   int request_id = 7;
   int request_line = 33;
   int request_char = 10;
@@ -1200,7 +1200,7 @@ label: true  text: true  desc:  pos: [33.10]-[33.15] kind:  8 format: snippet
 TEST_F(MooseServerTest, CompletionValueEnumsAndDocs)
 {
   // completion test parameters - on error_level enum in Terminator UserObject
-  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
+  std::string doc_uri = wasp::lsp::m_uri_prefix + test_input_path;
   int request_id = 8;
   int request_line = 39;
   int request_char = 18;
@@ -1217,7 +1217,7 @@ label: WARNING text: WARNING desc: Output a warning ... pos: [39.18]-[39.22] kin
 TEST_F(MooseServerTest, CompletionValueAllowedTypes)
 {
   // completion test parameters - on type parameter value in Executioner block
-  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
+  std::string doc_uri = wasp::lsp::m_uri_prefix + test_input_path;
   int request_id = 9;
   int request_line = 30;
   int request_char = 9;
@@ -1235,7 +1235,7 @@ label: Transient          text: Transient                            desc: Execu
 TEST_F(MooseServerTest, CompletionValueInputLookups)
 {
   // completion test parameters - on displacements parameter value in VacuumBC
-  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
+  std::string doc_uri = wasp::lsp::m_uri_prefix + test_input_path;
   int request_id = 10;
   int request_line = 26;
   int request_char = 21;
@@ -1254,7 +1254,7 @@ TEST_F(MooseServerTest, DefinitionObjectTypeSource)
   // definition test parameters - on Transient.C defined object type Transient
 
   int request_id = 11;
-  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
+  std::string doc_uri = wasp::lsp::m_uri_prefix + test_input_path;
   int line = 30;
   int character = 9;
 
@@ -1309,7 +1309,7 @@ TEST_F(MooseServerTest, DefinitionInputFileLookups)
   // definition test parameters - on AuxVariables defined displacements disp_x
 
   int request_id = 12;
-  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
+  std::string doc_uri = wasp::lsp::m_uri_prefix + test_input_path;
   int line = 26;
   int character = 21;
 
@@ -1364,7 +1364,7 @@ document_uri: "file://...absolute.../unit/test.i"    location_start: [19.5]    l
 TEST_F(MooseServerTest, HoverDocumentationRequests)
 {
   // check hover 01 - on boundary parameter key in BCs block of VacuumBC type
-  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
+  std::string doc_uri = wasp::lsp::m_uri_prefix + test_input_path;
   int request_id = 13;
   int request_line = 24;
   int request_char = 10;
@@ -1410,7 +1410,7 @@ TEST_F(MooseServerTest, HoverDocumentationRequests)
 TEST_F(MooseServerTest, CompletionPartialInputCases)
 {
   // didchange test parameters - update for partial input completion checking
-  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
+  std::string doc_uri = wasp::lsp::m_uri_prefix + test_input_path;
   int doc_version = 4;
   std::string doc_text_change = R"INPUT(
 [Mesh]
@@ -1529,7 +1529,7 @@ label: linear_residual_start_time text: linear_residual_start_time =           d
 TEST_F(MooseServerTest, DocumentReferencesRequest)
 {
   // didchange test parameters - update input to set up document references
-  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
+  std::string doc_uri = wasp::lsp::m_uri_prefix + test_input_path;
   int doc_version = 5;
   std::string doc_text_change = R"INPUT(
 [Mesh]
@@ -1633,7 +1633,7 @@ TEST_F(MooseServerTest, DocumentFormattingRequest)
 
   // didchange test parameters - update input to set up document formatting
 
-  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
+  std::string doc_uri = wasp::lsp::m_uri_prefix + test_input_path;
   int doc_version = 6;
   std::string doc_text_change = R"INPUT(
 
@@ -1836,7 +1836,7 @@ Problem/solve = true
 TEST_F(MooseServerTest, DiagnosticsEmptyMessageSkip)
 {
   // didchange test parameters - create empty diagnostic which is not added
-  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
+  std::string doc_uri = wasp::lsp::m_uri_prefix + test_input_path;
   int doc_version = 7;
   std::string doc_text_change = R"INPUT(
 [Mesh]
@@ -1912,7 +1912,7 @@ time, 501, 502, 503, 504 # ignored comment
   csv_col_index.close();
 
   // didchange test parameters - update input and prepare plotting requests
-  std::string doc_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
+  std::string doc_uri = wasp::lsp::m_uri_prefix + test_input_path;
   int doc_version = 8;
   std::string doc_text_change = R"INPUT(
 [Mesh]
@@ -2178,7 +2178,7 @@ TEST_F(MooseServerTest, DocumentCloseShutdownAndExit)
 
   // didclose test parameter
 
-  std::string document_uri = wasp::lsp::m_uri_prefix + std::string(test_input_path);
+  std::string document_uri = wasp::lsp::m_uri_prefix + test_input_path;
 
   // build didclose notification with the test parameter
 
