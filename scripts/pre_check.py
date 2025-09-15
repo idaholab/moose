@@ -54,7 +54,7 @@ def read_text(path: str) -> str:
 # --------------------------- Ticket references ---------------------------
 
 def ticket_references(log_from: str, log_to: str) -> str:
-    """
+    r"""
     Mirrors: git log "$1".."$2" | perl -ne 'print if m<(?:moose/(?:issues|pull)/)|#\d{1,}>'
     """
     try:
@@ -104,7 +104,7 @@ def find_tabs(files: Iterable[str]) -> List[str]:
     return bad
 
 def banned_keywords() -> List[str]:
-    """
+    r"""
     Mirrors:
     /std::cout|std::cerr/ ||
     /printf\s*\(/ ||
@@ -134,7 +134,7 @@ def banned_keywords() -> List[str]:
     return bad
 
 def banned_funcs() -> List[str]:
-    """
+    r"""
     Mirrors: if ($ARGV !~ /Moose(Error|Object).(h|C)/ && /moose(Warning|Error|Deprecated|Info)2 *\(/igs )
     """
     bad = []
@@ -154,7 +154,7 @@ def banned_funcs() -> List[str]:
     return bad
 
 def classified_keywords() -> List[str]:
-    """
+    r"""
     Mirrors: /p\s*r\s*o\s*p\s*r\s*i\s*e\s*t\s*a\s*r\s*y/i || /c\s*l\s*a\s*s\s*s\s*i\s*f\s*i\s*e\s*d/i
     """
     bad = []
@@ -167,7 +167,7 @@ def classified_keywords() -> List[str]:
             continue
         seen.add(f)
         # Skip env_pre_check.py itself since it needs to check for these keywords
-        if f.endswith("env_pre_check.py"):
+        if f.endswith("pre_check.py"):
             continue
         text = read_text(f)
         if pat_prop.search(text) or pat_class.search(text):
@@ -324,7 +324,7 @@ ALLOWED_NAMED_CHARS = _named_chars(CORE_NAMES + WIDER_EXTRAS + LEGACY_SUPERSCRIP
 
 
 def _disallowed_spans(text: str) -> List[Tuple[int, str]]:
-    """
+    r"""
     Return list of (index, char) for characters NOT in the allow-list.
     Uses the 'regex' module for \p{..} Unicode property support.
     """
