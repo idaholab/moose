@@ -74,11 +74,6 @@ l = 2
 
 
 [Postprocessors]
-  [t]
-    type = FunctionValuePostprocessor
-    function = 't'
-  []
-
   [dt]
     type = TimestepSize
   []
