@@ -115,8 +115,7 @@ ActionFactory::getTaskName(const std::string & action) const
   // We are returning only the first found instance here
   if (const auto it = _name_to_build_info.find(action); it != _name_to_build_info.end())
     return it->second._task;
-  static const std::string empty;
-  return empty;
+  mooseError("ActionFactory::getTaskName: No action found named '", action, "'");
 }
 
 ActionFactory::iterator
