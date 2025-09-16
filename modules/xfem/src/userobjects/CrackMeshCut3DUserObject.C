@@ -761,10 +761,13 @@ CrackMeshCut3DUserObject::findActiveBoundaryDirection()
         int ind = index[j];
         Real theta = 2 * std::atan((k1[ind] - std::sqrt(k1[ind] * k1[ind] + k2[ind] * k2[ind])) /
                                    (4 * k2[ind]));
-        RealVectorValue dir_cfc; // growth direction in crack front coord (cfc) system based on the
-                                 // max hoop stress criterion
-        RealVectorValue
-            dir; // growth direction in global coord system based on the max hoop stress criterion
+
+        // growth direction in crack front coord (cfc) system based on the max hoop stress criterion
+        RealVectorValue dir_cfc;
+
+        // growth direction in global coord system based on the max hoop stress criterion
+        RealVectorValue dir;
+
         dir_cfc(0) = std::cos(theta);
         dir_cfc(1) = std::sin(theta);
         dir_cfc(2) = 0;
