@@ -373,6 +373,7 @@ GrandPotentialKernelAction::act()
       params.set<bool>("use_displaced_mesh") = displaced_mesh;
       params.set<MaterialPropertyName>("diffusivity") = M[i];
       kernel_name = "MatDif_" + w_names[i];
+      params.set<std::vector<VariableName>>("args") = v0;
       if (aniso.get(i))
       {
         params.set<std::vector<VariableName>>("surface_op_var") = v_etas;
