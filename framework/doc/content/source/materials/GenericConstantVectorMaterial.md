@@ -2,9 +2,13 @@
 
 !syntax description /Materials/GenericConstantVectorMaterial
 
-This can be used to quickly create simple constant anisotropic material properties, for testing,
-for initial survey of a problem or simply because the material properties do not vary much over the
+This can be used for example to create simple constant anisotropic material properties, for testing,
+for initial survey of a problem or simply because the anisotropic material properties do not vary much over the
 domain explored by the simulation.
+
+!alert note
+If you are working with a `std::vector<double>`-valued material property, e.g. a variable-size
+vector, you have to use the [GenericConstantStdVectorMaterial.md].
 
 ## Example Input File Syntax
 

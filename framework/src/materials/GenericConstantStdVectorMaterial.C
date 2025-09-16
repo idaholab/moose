@@ -24,7 +24,6 @@ GenericConstantStdVectorMaterialTempl<is_ad>::validParams()
       "prop_names", "The names of the properties this material will have");
   params.addRequiredParam<std::vector<std::vector<Real>>>(
       "prop_values", "The values associated with the named properties. ");
-  params.declareControllable("prop_values");
   params.set<MooseEnum>("constant_on") = "SUBDOMAIN";
   return params;
 }
@@ -37,8 +36,8 @@ GenericConstantStdVectorMaterialTempl<is_ad>::GenericConstantStdVectorMaterialTe
     _prop_names(getParam<std::vector<std::string>>("prop_names")),
     _prop_values(getParam<std::vector<std::vector<Real>>>("prop_values"))
 {
-  unsigned int num_names = _prop_names.size();
-  unsigned int num_values = _prop_values.size();
+  const auto num_names = _prop_names.size();
+  const auto num_values = _prop_values.size();
   if (num_names != num_values)
     paramError("prop_values",
                "Number of vector property names (" + std::to_string(num_names) +
@@ -48,8 +47,8 @@ GenericConstantStdVectorMaterialTempl<is_ad>::GenericConstantStdVectorMaterialTe
   _num_props = num_names;
   _properties.resize(num_names);
 
-  for (unsigned int i = 0; i < _num_props; i++)
-    _properties[i] = &declareProperty<std::vector<GenericReal<is_ad>>>(_prop_names[i]);
+  for (const auto i : make_range(_num_props))
+    _properties[i] = &declareGenericProperty<std::vector<Real>, is_ad>(_prop_names[i]);
 }
 
 template <bool is_ad>
@@ -65,14 +64,16 @@ GenericConstantStdVectorMaterialTempl<is_ad>::computeQpProperties()
 {
   for (unsigned int i = 0; i < _num_props; i++)
   {
-    (*_properties[i])[_qp].resize(_prop_values[i].size());
-    for (const auto j : index_range(_prop_values[i]))
-      (*_properties[i])[_qp][j] = _prop_values[i][j];
+    auto & prop_out = (*_properties[i])[_qp];
+    const auto & prop_in = _prop_values[i];
+    prop_out.resize(prop_in.size());
+    for (const auto j : index_range(prop_in))
+      prop_out[j] = prop_in[j];
   }
 }
 
 template <bool is_ad>
-unsigned int
+std::size_t
 GenericConstantStdVectorMaterialTempl<is_ad>::getVectorPropertySize(
     const MaterialPropertyName & prop_name) const
 {

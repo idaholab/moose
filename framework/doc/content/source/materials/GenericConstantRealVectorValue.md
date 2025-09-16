@@ -6,8 +6,8 @@
 This object is deprecated in factor of the [GenericConstantVectorMaterial.md]
 
 !alert note
-If you are working with a `std::vector<double>`-valued material property, you have to use the
-[GenericConstantStdVectorMaterial.md].
+If you are working with a `std::vector<double>`-valued material property, e.g. a variable-size
+vector, you have to use the [GenericConstantStdVectorMaterial.md].
 
 ## Overview
 
