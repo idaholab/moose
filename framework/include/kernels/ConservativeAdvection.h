@@ -32,7 +32,7 @@ protected:
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
 
-  /// Material property multiplied against the veloctiy to scale advection strength
+  /// Material property multiplied against the velocity to scale advection strength
   const GenericMaterialProperty<Real, is_ad> & _scalar;
 
   /// Flag to determine if coupled variable is present
@@ -47,7 +47,7 @@ protected:
   /// Flag to determine if user supplied variable is used as advective quantity
   const bool _user_supplied_adv_quant;
 
-  /// Quantity that is advected. Can be the member variable or user specified
+  /// Quantity, as a variable value, that is advected. Defaults to the equation variable if unspecified
   const MooseArray<GenericReal<is_ad>> & _adv_quant;
 
   /// enum to make the code clearer

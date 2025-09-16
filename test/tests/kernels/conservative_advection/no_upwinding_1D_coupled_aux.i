@@ -28,8 +28,8 @@
 
 [Kernels]
   [advection]
-    coupled_variable = coupled
-    scalar = scalar
+    velocity_as_variable_gradient = coupled
+    velocity_scalar_coef = scalar
   []
 []
 

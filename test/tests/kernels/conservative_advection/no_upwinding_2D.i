@@ -36,7 +36,7 @@
 
 [Executioner]
   type = Transient
-  solve_type = NEWTON
+  solve_type = LINEAR
   dt = 0.01
   end_time = 0.1
   l_tol = 1e-14
