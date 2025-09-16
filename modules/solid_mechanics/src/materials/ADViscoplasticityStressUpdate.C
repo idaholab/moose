@@ -155,7 +155,8 @@ ADViscoplasticityStressUpdate::updateState(ADRankTwoTensor & elastic_strain_incr
 }
 
 ADReal
-ADViscoplasticityStressUpdate::initialGuess(const ADReal & effective_trial_stress)
+ADViscoplasticityStressUpdate::initialGuess(const ADReal & effective_trial_stress,
+                                            const ADReal & /*effective_strain_increment*/)
 {
   return effective_trial_stress;
 }
