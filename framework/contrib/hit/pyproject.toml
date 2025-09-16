@@ -13,9 +13,8 @@ authors = [
 ]
 
 # This is kind of a fake package to put src/include files and include hit CLI
-[tool.setuptools.packages.find]
-where = ["moose_hit"]
-namespaces = false
+[tool.setuptools.package-dir]
+moose_hit = "moose_hit"
 
 # Allow for a hit executable to be available on install
 [project.scripts]
@@ -24,5 +23,21 @@ hit = "moose_hit:main"
 [tool.cibuildwheel]
 build = ["cp*-manylinux_x86_64", "cp*-manylinux_aarch64"]
 skip = "pp*, gp*, cp{38,39,314}-*"
-test-command = "python -c \"import hit; print(f'hit successfully installed in {hit.__file__}')\""
+test-command = [
+    "echo \"Setting WASP install directory...\"",
+    "export WASP_DIR=$( python -c \"import importlib.resources as rs; print(rs.files('hit').joinpath('moose_wasp'))\" )",
+    "echo \"WASP_DIR set to ${WASP_DIR}\"",
+
+    "echo \"Testing hit command-line interface...\"",
+    "hit format {package}/test/input.i > /dev/null",
+    "echo \"Success!\"",
+
+    "echo \"Running C++ unit tests...\"",
+    "make -C {package}/test test",
+    "echo \"Success!\"",
+
+    "echo \"Running python unit tests...\"",
+    "python {package}/test/test_hit.py",
+    "echo \"Success!\"",
+]
 build-verbosity = 3

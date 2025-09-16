@@ -1,0 +1,6 @@
+include README.md
+include Makefile
+recursive-include src *.cc *.cpp
+recursive-include include *.h
+recursive-include test *.i MakeFile *.cc *.py
+recursive-include moose_hit *.py
