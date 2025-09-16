@@ -7,6 +7,9 @@ ADFluxFromGradientMaterial::validParams()
 {
   InputParameters params = Material::validParams();
 
+  params.addClassDescription("Computes a flux vector material property based on the gradient of a "
+                             "coupled variable and a scalar diffusivity.");
+
   // Required name for the output flux property
   params.addRequiredParam<MaterialPropertyName>("flux", "Name of the flux material property");
 

@@ -30,5 +30,5 @@ ADFluxDivergence::ADFluxDivergence(const InputParameters & parameters)
 ADReal
 ADFluxDivergence::computeQpResidual()
 {
-  return _grad_test[_i][_qp] * _flux[_qp];
+  return -_grad_test[_i][_qp] * _flux[_qp];
 }
