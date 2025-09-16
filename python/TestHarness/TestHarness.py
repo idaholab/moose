@@ -70,10 +70,15 @@ def findDepApps(dep_names, use_current_only=False):
     apps = []
 
     # First see if we are in a git repo
-    p = subprocess.Popen('git rev-parse --show-cdup', stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
-    p.wait()
+    p = subprocess.run(
+        ['git', 'rev-parse', '--show-cdup'],
+        text=True,
+        check=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+    )
     if p.returncode == 0:
-        git_dir = p.communicate()[0].decode('utf-8')
+        git_dir = p.stdout
         root_dir = os.path.abspath(os.path.join(os.getcwd(), git_dir)).rstrip()
 
         # Assume that any application we care about is always a peer
