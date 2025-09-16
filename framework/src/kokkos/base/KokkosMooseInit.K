@@ -27,6 +27,13 @@ MooseInit::initKokkos()
 {
   Kokkos::InitializationSettings settings;
 
+  // Explicitly set the number of threads consistently with MOOSE
+  settings.set_num_threads(libMesh::n_threads());
+
+  // Only print warnings on the head process
+  if (comm().rank())
+    settings.set_disable_warnings(true);
+
 #ifdef MOOSE_ENABLE_KOKKOS_GPU
 
   unsigned int num_kokkos_gpus = Kokkos::num_devices();
