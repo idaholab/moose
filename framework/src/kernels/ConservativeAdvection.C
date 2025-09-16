@@ -21,8 +21,13 @@ ConservativeAdvectionTempl<is_ad>::generalParams()
 {
   InputParameters params = GenericKernel<is_ad>::validParams();
   params.addClassDescription("Conservative form of $\\nabla \\cdot \\vec{v} u$ which in its weak "
-                             "form is given by: $(-\\nabla \\psi_i, \\vec{v} u)$.");
-  params.addParam<MaterialPropertyName>("scalar", "1.0", "Material property scalar multiplier.");
+                             "form is given by: $(-\\nabla \\psi_i, \\vec{v} u)$. Velocity can be "
+                             "given as 1) a variable, for which the gradient is automatically "
+                             "taken, 2) a vector variable, or a 3) vector material.");
+  params.addParam<MaterialPropertyName>(
+      "scalar",
+      "1.0",
+      "Name of material property multiplied against the veloctiy to scale advection strength.");
   MooseEnum upwinding_type("none full", "none");
   params.addParam<MooseEnum>("upwinding_type",
                              upwinding_type,
@@ -33,9 +38,9 @@ ConservativeAdvectionTempl<is_ad>::generalParams()
                                         "An optional material property to be advected. If not "
                                         "supplied, then the variable will be used.");
   params.addCoupledVar(
-      "field_variable",
-      "Variable for which the gradient defines the advection velocity. Can be supplied instead of "
-      "velocity material or velocity variable.");
+      "coupled_variable",
+      "Gradient of this coupled variable is used to define the advection velocity. "
+      "Can be supplied instead of velocity material or velocity variable.");
   return params;
 }
 
@@ -65,12 +70,11 @@ template <bool is_ad>
 ConservativeAdvectionTempl<is_ad>::ConservativeAdvectionTempl(const InputParameters & parameters)
   : GenericKernel<is_ad>(parameters),
     _scalar(this->template getGenericMaterialProperty<Real, is_ad>("scalar")),
-    _field_variable(isParamValid("field_variable") ? &this->coupledGradient("field_variable")
-                                                   : nullptr),
-    _field_variable_var(_field_variable ? coupled("field_variable") : 0),
+    _coupled_variable_present(isParamValid("coupled_variable")),
+    _coupled_variable_var(_coupled_variable_present ? coupled("coupled_variable") : 0),
     _velocity(
-        _field_variable
-            ? nullptr
+        _coupled_variable_present
+            ? &this->template coupledGenericGradient<is_ad>("coupled_variable")
             : (this->isParamValid("velocity_variable")
                    ? &this->template coupledGenericVectorValue<is_ad>("velocity_variable")
                    : (this->isParamValid("velocity_material")
@@ -78,9 +82,9 @@ ConservativeAdvectionTempl<is_ad>::ConservativeAdvectionTempl(const InputParamet
                                      "velocity_material")
                                  .get()
                           : nullptr))),
-    _adv_quant_valid(isParamValid("advected_quantity")),
+    _user_supplied_adv_quant(isParamValid("advected_quantity")),
     _adv_quant(
-        _adv_quant_valid
+        _user_supplied_adv_quant
             ? this->template getGenericMaterialProperty<Real, is_ad>("advected_quantity").get()
             : _u),
     _upwinding(
@@ -94,14 +98,13 @@ ConservativeAdvectionTempl<is_ad>::ConservativeAdvectionTempl(const InputParamet
         "advected_quantity",
         "Upwinding is not compatable with an advected quantity that is not the primary variable.");
 
-  if ((!_velocity && !_field_variable) ||
-      (_field_variable && this->isParamValid("velocity_material")) ||
-      (_field_variable && this->isParamValid("velocity_variable")) ||
+  if (!_velocity || (_coupled_variable_present && this->isParamValid("velocity_material")) ||
+      (_coupled_variable_present && this->isParamValid("velocity_variable")) ||
       (this->isParamValid("velocity_variable") && this->isParamValid("velocity_material")))
     paramError(
-        "field_variable",
+        "coupled_variable",
         "One and only one of the following input variables must be specified: velocity_variable, "
-        "velocity_material, or field_variable.");
+        "velocity_material, or coupled_variable.");
 
   if (this->_has_diag_save_in)
     paramError("diag_save_in",
@@ -113,8 +116,6 @@ template <bool is_ad>
 GenericReal<is_ad>
 ConservativeAdvectionTempl<is_ad>::negSpeedQp() const
 {
-  if (_field_variable)
-    return -_grad_test[_i][_qp] * (*_field_variable)[_qp] * _scalar[_qp];
   return -_grad_test[_i][_qp] * (*_velocity)[_qp] * _scalar[_qp];
 }
 
@@ -133,7 +134,7 @@ ConservativeAdvectionTempl<false>::computeQpJacobian()
 {
   // This is the no-upwinded version
   // It gets called via GenericKernel<false>::computeJacobian()
-  if (!_adv_quant_valid)
+  if (!_user_supplied_adv_quant)
     return negSpeedQp() * _phi[_j][_qp];
   return 0.0;
 }
@@ -150,9 +151,9 @@ template <>
 Real
 ConservativeAdvectionTempl<false>::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  // This is the no-upwinded version
+  // This is the non-upwinded version
   // It gets called via GenericKernel<false>::computeOffDiagJacobian()
-  if (_field_variable && _field_variable_var == jvar)
+  if (_coupled_variable_present && _coupled_variable_var == jvar)
     return -_grad_test[_i][_qp] * _grad_phi[_j][_qp] * _adv_quant[_qp] * _scalar[_qp];
   else
     return 0.0;

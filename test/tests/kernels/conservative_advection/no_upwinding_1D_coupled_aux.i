@@ -1,19 +1,19 @@
 # ConservativeAdvection with upwinding_type = None
-# Coupled a field of (1, 0, 0) and see a pulse advect to the right
+# Coupled an aux of (1, 0, 0) and see a pulse advect to the right
 # Note there are overshoots and undershoots
 
 !include no_upwinding_1D.i
 
 [AuxVariables]
-  [field]
+  [coupled]
   []
 []
 
 [AuxKernels]
-  [field_aux]
+  [coupled_aux]
     type = ParsedAux
     expression = 'x * 2'
-    variable = field
+    variable = coupled
     use_xyzt = true
   []
 []
@@ -28,11 +28,11 @@
 
 [Kernels]
   [advection]
-    field_variable = field
+    coupled_variable = coupled
     scalar = scalar
   []
 []
 
 [Outputs]
-  hide = field
+  hide = coupled
 []
