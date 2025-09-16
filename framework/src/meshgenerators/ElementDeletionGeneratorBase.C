@@ -66,10 +66,10 @@ ElementDeletionGeneratorBase::generate()
         elem->set_interior_parent(nullptr);
     }
 
-    /**
-     * If we are in parallel we'd better have a consistent idea of what
-     * should be deleted.  This can't be checked cheaply.
-     */
+  /**
+   * If we are in parallel we'd better have a consistent idea of what
+   * should be deleted.  This can't be checked cheaply.
+   */
 #ifdef DEBUG
   dof_id_type pmax_elem_id = mesh->max_elem_id();
   mesh->comm().max(pmax_elem_id);
