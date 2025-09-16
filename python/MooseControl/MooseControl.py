@@ -621,7 +621,7 @@ class MooseControl:
         if status != 200:
             raise self.ControlException(f'Unexpected status {status} from getting time value')
         self._checkResponse(['time'], r)
-        assert isinstance(r['time'], float)
+        assert isinstance(r['time'], (int, float))
         return r['time']
 
     @staticmethod
