@@ -50,10 +50,8 @@
 
 [Executioner]
   type = Transient
-  solve_type = LINEAR
   dt = 0.1
   end_time = 1
-  l_tol = 1E-14
 []
 
 [Outputs]
