@@ -10,6 +10,7 @@
 #include "MeshCutUserObjectBase.h"
 
 #include "MooseError.h"
+#include "MooseUtils.h"
 #include "MooseMesh.h"
 #include "libmesh/serial_mesh.h"
 #include "libmesh/mesh_tools.h"
@@ -18,9 +19,13 @@ InputParameters
 MeshCutUserObjectBase::validParams()
 {
   InputParameters params = GeometricCutUserObject::validParams();
-  params.addRequiredParam<MeshFileName>(
+  params.addDeprecatedParam<MeshFileName>(
       "mesh_file",
-      "Mesh file for the XFEM geometric cut; currently only the Exodus type is supported");
+      "Mesh file for the XFEM geometric cut; currently only the Exodus type is supported.",
+      "This parameter is deprecated in favor of reading in the cuttermesh from the mesh system "
+      "using 'mesh_generator_name'.");
+  params.addParam<std::string>("mesh_generator_name",
+                               "Mesh generator for the XFEM geometric cutter.");
   params.addClassDescription("Creates a UserObject base class for a mesh cutter in XFEM.");
   return params;
 }
@@ -28,10 +33,25 @@ MeshCutUserObjectBase::validParams()
 MeshCutUserObjectBase::MeshCutUserObjectBase(const InputParameters & parameters)
   : GeometricCutUserObject(parameters, true)
 {
-  // only the Exodus and XDA type is currently supported
-  MeshFileName cutterMeshFileName = getParam<MeshFileName>("mesh_file");
-  _cutter_mesh = std::make_unique<ReplicatedMesh>(_communicator);
-  _cutter_mesh->read(cutterMeshFileName);
+  if (isParamValid("mesh_generator_name"))
+  {
+    std::string cutterMeshName = getParam<std::string>("mesh_generator_name");
+    auto & mesh_generator_system = _app.getMeshGeneratorSystem();
+    _cutter_mesh = mesh_generator_system.getSavedMesh(cutterMeshName);
+  }
+  else if (isParamValid("mesh_file"))
+  {
+    MeshFileName cutterMeshName = getParam<MeshFileName>("mesh_file");
+    _cutter_mesh = std::make_unique<ReplicatedMesh>(_communicator);
+    _cutter_mesh->read(cutterMeshName);
+  }
+  else
+  {
+    mooseError("Must specify 'mesh_generator_name' or 'mesh_file'. ");
+  }
+
+  if (!_cutter_mesh)
+    mooseError("Not able to read in a cutter mesh.");
 }
 
 MeshBase &
