@@ -67,6 +67,13 @@ if [ -n "$UNSET_APPTAINER_VARS" ]; then
   unset "${!APPTAINER@}" "${!SINGULARITY@}" UNSET_APPTAINER_VARS
 fi
 
+# If we're using openmpi, we need to allow running as root
+# if we're in a fakeroot environment
+if [ "$(whoami)" == root ] && which ompi_info &> /dev/null; then
+    export OMPI_ALLOW_RUN_AS_ROOT=1
+    export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
+fi
+
 # Run the server
 code-server --auth=password \
             --bind-addr=0.0.0.0:"${PORT}" \
