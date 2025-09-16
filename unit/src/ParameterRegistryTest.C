@@ -20,7 +20,7 @@ TEST(ParameterRegistryTest, add)
   ASSERT_TRUE(registry._registry.empty());
   registry.add<double>([](double &, const hit::Field &) {});
   ASSERT_EQ(registry._registry.size(), 1);
-  ASSERT_TRUE(registry._registry.find("double") != registry._registry.end());
+  ASSERT_TRUE(registry._registry.find(std::type_index(typeid(double))) != registry._registry.end());
 }
 
 TEST(ParameterRegistryTest, addExists)

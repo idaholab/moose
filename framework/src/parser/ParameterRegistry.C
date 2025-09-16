@@ -25,10 +25,12 @@ ParameterRegistry::get()
 void
 ParameterRegistry::set(libMesh::Parameters::Value & value, const hit::Field & field) const
 {
-  const auto key = value.type();
+  const std::type_index key(value.type_info());
   const auto it = _registry.find(key);
   if (it == _registry.end())
-    mooseError("ParameterRegistry::set(): Parameter type '", key, "' is not registered");
+    mooseError("ParameterRegistry::set(): Parameter type '",
+               MooseUtils::prettyCppType(value.type()),
+               "' is not registered");
 
   // Catch all mooseErrors so that they can be accumulated during
   // parsing and building instead of ending the run
