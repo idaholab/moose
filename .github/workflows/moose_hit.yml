@@ -4,12 +4,14 @@ on: [pull_request]
 
 jobs:
   build_wheels:
-    name: Build wheels on ${{ matrix.os }} with CPython-${{ matrix.python }}
-    runs-on: ubuntu-latest
+    name: Build wheels on ${{ matrix.cibuild.os }} with CPython-${{ matrix.python }}
+    runs-on: ${{ matrix.cibuild.os }}
     strategy:
       matrix:
         cibuild:
-          - {platform: 'manylinux', arch: 'x86_64'}
+          - {os: 'ubuntu-latest', platform: 'manylinux', arch: 'x86_64'}
+          - {os: 'macos-13', platform: 'macosx', arch: 'x86_64'}
+          - {os: 'macos-14', platform: 'macosx', arch: 'arm64'}
         python: ['310', '311', '312', '313']
 
 
