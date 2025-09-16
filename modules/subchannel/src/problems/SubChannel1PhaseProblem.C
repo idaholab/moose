@@ -55,8 +55,12 @@ formFunction(SNES, Vec x, Vec f, void * ctx)
 InputParameters
 SubChannel1PhaseProblem::validParams()
 {
+  // Enumerators
   MooseEnum schemes("upwind downwind central_difference exponential", "central_difference");
   MooseEnum gravity_direction("counter_flow co_flow none", "counter_flow");
+  MooseEnum htc_correlations("dittus-boelter gnielinski kazimi-carelli", "dittus-boelter");
+
+  // Inputs
   InputParameters params = ExternalProblem::validParams();
   params += PostprocessorInterface::validParams();
   params.addClassDescription("Base class of the subchannel solvers");
@@ -72,6 +76,12 @@ SubChannel1PhaseProblem::validParams()
   params.addParam<MooseEnum>("interpolation_scheme",
                              schemes,
                              "Interpolation scheme used for the method. Default is exponential");
+  params.addParam<MooseEnum>("pin_htc_correlation",
+                             htc_correlations,
+                             "The correlation used for computing the pin surface temperature.");
+  params.addParam<MooseEnum>("duct_htc_correlation",
+                             htc_correlations,
+                             "The correlation used for computing the duct surface temperature.");
   params.addParam<MooseEnum>(
       "gravity", gravity_direction, "Direction of gravity. Default is counter_flow");
   params.addParam<bool>(
@@ -124,6 +134,8 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _dtol(getParam<PetscReal>("dtol")),
     _maxit(getParam<PetscInt>("maxit")),
     _interpolation_scheme(getParam<MooseEnum>("interpolation_scheme")),
+    _pin_htc_correlation(getParam<MooseEnum>("pin_htc_correlation")),
+    _duct_htc_correlation(getParam<MooseEnum>("duct_htc_correlation")),
     _gravity_direction(getParam<MooseEnum>("gravity")),
     _dir_grav(computeGravityDir(_gravity_direction)),
     _implicit_bool(getParam<bool>("implicit")),
@@ -361,6 +373,53 @@ SubChannel1PhaseProblem::computeInterpolatedValue(PetscScalar topValue,
 {
   PetscScalar alpha = computeInterpolationCoefficients(Peclet);
   return alpha * botValue + (1.0 - alpha) * topValue;
+}
+
+Real SubChannel1PhaseProblem::computeNusseltNumber(NusseltStruct nusselt_args)
+{
+  const auto htc_correlation = nusselt_args.htc_correlation;
+  const auto Re = nusselt_args.Re;
+  const auto Pr = nusselt_args.Pr;
+
+  switch (htc_correlation) {
+    case 0: // dittus-boelter
+      return 0.023 * std::pow(Re, 0.8) * std::pow(Pr, 0.4);
+
+    case 1: // gnielinski
+    {
+      const auto iz = nusselt_args.iz;
+      const auto i_ch = nusselt_args.i_ch;
+
+      FrictionStruct friction_args;
+      friction_args.i_ch = i_ch;
+      friction_args.Re = Re;
+      const auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
+      friction_args.S = (*_S_flow_soln)(node);
+      friction_args.w_perim = (*_w_perim_soln)(node);
+      Real f_darcy = computeFrictionFactor(friction_args) / 8.0;
+
+      // return f_darcy * (Re - 1e3) * Pr / (1 + 12.7 * std::sqrt(f_darcy) * (std::pow(Pr, 2./3.) - 1.) + 4.0);
+      return f_darcy * (Re - 1e3) * (Pr + 0.01) / (1 + 12.7 * std::sqrt(f_darcy) * (std::pow(Pr + 0.01, 2./3.) - 1.));
+    }
+    
+    case 2: // kazimi-carelli
+    {
+      const auto i_pin = nusselt_args.i_pin;
+      const auto iz = nusselt_args.iz;
+      
+      const auto pitch = _subchannel_mesh.getPitch();
+      const auto * pin_node = _subchannel_mesh.getPinNode(i_pin, iz);
+      const auto D = (*_Dpin_soln)(pin_node);
+      const auto poD = pitch / D;
+      const auto Pe = Re * Pr;
+
+      return 4.0 + 0.33 * std::pow(poD, 3.8) * std::pow((Pe / 1e2), 0.86) + 0.16 * std::pow(poD, 5);
+    }
+
+    default:
+      mooseError(name(), ": Invalid heat transfer correlation, "
+                         "please use 'dittus-boelter', 'gnielinski', or 'kazimi-carelli'");
+    }
 }
 
 void
@@ -2641,7 +2700,7 @@ SubChannel1PhaseProblem::externalSolve()
       {
         const auto * pin_node = _subchannel_mesh.getPinNode(i_pin, iz);
         Real sumTemp = 0.0;
-        Real rod_counter = 0.0;
+
         // Calculate sum of pin surface temperatures that the channels around the pin see
         for (auto i_ch : _subchannel_mesh.getPinChannels(i_pin))
         {
@@ -2654,17 +2713,32 @@ SubChannel1PhaseProblem::externalSolve()
           auto k = _fp->k_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node));
           auto cp = _fp->cp_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node));
           auto Pr = (*_mu_soln)(node)*cp / k;
-          auto Nu = 0.023 * std::pow(Re, 0.8) * std::pow(Pr, 0.4);
-          auto hw = Nu * k / Dh_i;
+
           if ((*_Dpin_soln)(pin_node) <= 0)
             mooseError("Dpin should not be null or negative when computing pin powers: ",
                        (*_Dpin_soln)(pin_node));
+
+          // Create nusselt number structure
+          NusseltStruct nusselt_struct;
+          nusselt_struct.Re = Re;
+          nusselt_struct.Pr = Pr;
+          nusselt_struct.i_pin = i_pin;
+          nusselt_struct.iz = iz;
+          nusselt_struct.i_ch = i_ch;
+          nusselt_struct.htc_correlation = _pin_htc_correlation;
+
+          // Compute Nusselt number
+          auto Nu = this->computeNusseltNumber(nusselt_struct);
+
+          // Compute HTC
+          auto hw = Nu * k / Dh_i;
+
+          // Compute surface temperature contribution from subchannel side
           sumTemp +=
               (*_q_prime_soln)(pin_node) / ((*_Dpin_soln)(pin_node)*M_PI * hw) + (*_T_soln)(node);
-          rod_counter += 1.0;
         }
-        if (rod_counter > 0)
-          _Tpin_soln->set(pin_node, sumTemp / rod_counter);
+        if (_subchannel_mesh.getPinChannels(i_pin).size() > 0)
+          _Tpin_soln->set(pin_node, sumTemp / _subchannel_mesh.getPinChannels(i_pin).size());
         else
           mooseError("Pin was not found for pin index:  " + std::to_string(i_pin));
       }
@@ -2687,9 +2761,29 @@ SubChannel1PhaseProblem::externalSolve()
       auto k = _fp->k_from_p_T((*_P_soln)(node_chan) + _P_out, (*_T_soln)(node_chan));
       auto cp = _fp->cp_from_p_T((*_P_soln)(node_chan) + _P_out, (*_T_soln)(node_chan));
       auto Pr = (*_mu_soln)(node_chan)*cp / k;
-      /// FIXME - model assumes HTC calculation via Dittus-Boelter correlation
-      auto Nu = 0.023 * std::pow(Re, 0.8) * std::pow(Pr, 0.4);
+
+      // Check that kazimi-carelli is not used for the duct (not supporeted yet)
+      if (_duct_htc_correlation == "kazimi-carelli")
+        mooseError("'kazimi-carelli' is not yet supported for the 'duct_htc_correlation'.");
+
+      // Create nusselt number structure
+      NusseltStruct nusselt_struct;
+      nusselt_struct.Re = Re;
+      nusselt_struct.Pr = Pr;
+      nusselt_struct.i_pin = 0; // don't care about this one at the moment
+      const auto channel_node = _subchannel_mesh.getChannelNodeFromDuct(dn);
+      const libMesh::Point& node_point = *channel_node;
+      nusselt_struct.iz = _subchannel_mesh.getZIndex(node_point);
+      nusselt_struct.i_ch = _subchannel_mesh.channelIndex(node_point);
+      nusselt_struct.htc_correlation = _duct_htc_correlation;
+
+      // Compute Nusselt number
+      auto Nu = this->computeNusseltNumber(nusselt_struct);
+
+      // Compute HTC
       auto hw = Nu * k / Dh_i;
+
+      // Compute Channel Temperature
       auto T_chan = (*_duct_heat_flux_soln)(dn) / hw + (*_T_soln)(node_chan);
       _Tduct_soln->set(dn, T_chan);
     }
