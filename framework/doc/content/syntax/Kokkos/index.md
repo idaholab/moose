@@ -259,6 +259,15 @@ Last but not the least, all Kokkos codes should only be included in the source f
 
 In case Kokkos-related codes (not Kokkos codes) should be added to non-Kokkos source files, the build system conditionally defines a global preprocessor `MOOSE_KOKKOS_ENABLED` when the Kokkos capabilities are enabled. It can be used to protect the Kokkos-related codes in non-Kokkos source files. Also, the build system defines another preprocessor `MOOSE_KOKKOS_SCOPE` that is only defined for the Kokkos source files. It is useful for protecting Kokkos codes in header files that can be included in both Kokkos and non-Kokkos source files. However, it is important to note that `MOOSE_KOKKOS_SCOPE` should not be used to protect member variables or virtual member functions in a class, as it can make CPU and GPU compiler see inconsistent class definitions having different sizes and cause memory misalignment. It is primarly used to protect inlined GPU functions with the `KOKKOS_FUNCTION` specifier in header files or non-virtual CPU functions that are not allowed to be called in non-Kokkos source files.
 
+## Kokkos-MOOSE Objects
+
+The following objects are currently available in Kokkos-MOOSE:
+
+- [Kernels](syntax/KokkosKernels/index.md)
+- [NodalKernels](syntax/KokkosNodalKernels/index.md)
+- [BCs](syntax/KokkosBCs/index.md)
+- [Materials](syntax/KokkosMaterials/index.md)
+
 !if-end!
 
 !else
