@@ -3,18 +3,18 @@ from libcpp.string cimport string
 from libcpp.vector cimport vector
 from libcpp cimport bool
 
-cdef extern from "parse.h" namespace "hit":
+cdef extern from "hit/parse.h" namespace "hit":
     cdef cppclass NodeType:
         pass
 
-cdef extern from "parse.h" namespace "hit::NodeType":
+cdef extern from "hit/parse.h" namespace "hit::NodeType":
     cdef NodeType NTAll "hit::NodeType::All"
     cdef NodeType NTSection "hit::NodeType::Section"
     cdef NodeType NTComment "hit::NodeType::Comment"
     cdef NodeType NTField "hit::NodeType::Field"
     cdef NodeType NTBlank "hit::NodeType::Blank"
 
-cdef extern from "parse.h" namespace "hit":
+cdef extern from "hit/parse.h" namespace "hit":
     cdef cppclass Node:
         Node(NodeType t)
         NodeType type()
@@ -48,7 +48,7 @@ cdef extern from "parse.h" namespace "hit":
     Node * explode(Node * n) except +
     void merge(Node * src, Node * dst) except +
 
-cdef extern from "parse.h" namespace "hit":
+cdef extern from "hit/parse.h" namespace "hit":
     cdef cppclass Formatter:
         Formatter()
         Formatter(const string & fname, const string & hit_config)
@@ -62,18 +62,18 @@ cdef extern from "parse.h" namespace "hit":
         int line_length
         string indent_string
 
-cdef extern from "parse.h" namespace "hit::Field":
+cdef extern from "hit/parse.h" namespace "hit::Field":
     cdef cppclass Kind:
         pass
 
-cdef extern from "parse.h" namespace "hit::Field::Kind":
+cdef extern from "hit/parse.h" namespace "hit::Field::Kind":
     cdef Kind None
     cdef Kind Int
     cdef Kind Float
     cdef Kind Bool
     cdef Kind String
 
-cdef extern from "parse.h" namespace "hit":
+cdef extern from "hit/parse.h" namespace "hit":
     cdef cppclass Field "hit::Field":
         Field(const string & field, Kind k, const string & val)
         Kind kind()
@@ -83,25 +83,25 @@ cdef extern from "parse.h" namespace "hit":
         string strVal()
         void setVal(const string & val, Kind k)
 
-cdef extern from "parse.h" namespace "hit":
+cdef extern from "hit/parse.h" namespace "hit":
     cdef cppclass Comment "hit::Comment":
         Comment(const string & text, bool is_inline)
         void setText(const string & text)
 
-cdef extern from "parse.h" namespace "hit":
+cdef extern from "hit/parse.h" namespace "hit":
     cdef cppclass Blank "hit::Blank":
         Blank()
 
-cdef extern from "parse.h" namespace "hit":
+cdef extern from "hit/parse.h" namespace "hit":
     cdef cppclass Section "hit::Section":
         Section(const string & path)
 
 # LEXER
-cdef extern from "lex.h" namespace "hit":
+cdef extern from "hit/lex.h" namespace "hit":
     cdef cppclass TokType:
         pass
 
-cdef extern from "lex.h" namespace "hit::TokType":
+cdef extern from "hit/lex.h" namespace "hit::TokType":
     cdef TokType TokenError "hit::TokType::Error"
     cdef TokType TokenEOF "hit::TokType::EOF"
     cdef TokType TokenEquals "hit::TokType::Equals"
@@ -115,7 +115,7 @@ cdef extern from "lex.h" namespace "hit::TokType":
     cdef TokType TokenInlineComment "hit::TokType::InlineComment"
     cdef TokType TokenBlankLine "hit::TokType::BlankLine"
 
-cdef extern from "lex.h" namespace "hit":
+cdef extern from "hit/lex.h" namespace "hit":
     cdef cppclass Token:
         Token(TokType t, const string & val, const string & name, size_t offset, line)
         string str()
@@ -125,5 +125,5 @@ cdef extern from "lex.h" namespace "hit":
         size_t offset
         int line
 
-cdef extern from "lex.h" namespace "hit":
+cdef extern from "hit/lex.h" namespace "hit":
     vector[Token] tokenize(string fname, string input) except +
