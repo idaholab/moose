@@ -84,7 +84,7 @@
       type = 'Exodiff'
       input = 'generic_constant_std_vector_real.i'
       exodiff = 'generic_constant_std_vector_real_out.e'
-      detail = 'with constant values.'
+      detail = 'with constant values, and'
     []
     [ad_constant]
       type = 'Exodiff'

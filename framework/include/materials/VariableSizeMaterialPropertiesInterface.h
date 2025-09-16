@@ -17,8 +17,8 @@
 class VariableSizeMaterialPropertiesInterface
 {
 public:
-  VariableSizeMaterialPropertiesInterface(const InputParameters & /*params*/) {};
+  VariableSizeMaterialPropertiesInterface(const InputParameters & /*params*/) {}
 
   /// Return the size of the variable size vector material property that the material defines
-  virtual unsigned int getVectorPropertySize(const MaterialPropertyName & /*prop_name*/) const = 0;
+  virtual std::size_t getVectorPropertySize(const MaterialPropertyName & /*prop_name*/) const = 0;
 };

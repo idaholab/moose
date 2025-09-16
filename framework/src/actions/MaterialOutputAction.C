@@ -277,7 +277,7 @@ MaterialOutputAction::materialOutput(const std::string & property_name,
                          material,
                          get_names_only);
 
-  else if (hasProperty<std::vector<ADReal>>(property_name))
+  else if (hasADProperty<std::vector<Real>>(property_name))
     names = outputHelper({"ADMaterialStdVectorAux", "variable_size", {"index"}},
                          property_name,
                          property_name + "_",
@@ -396,7 +396,7 @@ MaterialOutputAction::outputHelper(const MaterialOutputAction::OutputMetaData & 
   const auto & [kernel_name, index_symbols, param_names] = metadata;
   const auto dim = param_names.size();
   const auto size = index_symbols.size();
-  unsigned int size_inner = size;
+  auto size_inner = size;
 
   // Handle the case the material property is of a variable input-defined size
   bool variable_size = false;
@@ -405,7 +405,8 @@ MaterialOutputAction::outputHelper(const MaterialOutputAction::OutputMetaData & 
   {
     variable_size = true;
     size_inner = 0;
-    const auto vsmi = dynamic_cast<const VariableSizeMaterialPropertiesInterface *>(&material);
+    const auto * const vsmi =
+        dynamic_cast<const VariableSizeMaterialPropertiesInterface *>(&material);
     if (vsmi)
       size_inner = vsmi->getVectorPropertySize(property_name);
 
