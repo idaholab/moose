@@ -21,8 +21,6 @@ moose_hit = "moose_hit"
 hit = "moose_hit:main"
 
 [tool.cibuildwheel]
-build = ["cp*-manylinux_x86_64", "cp*-manylinux_aarch64"]
-skip = "pp*, gp*, cp{38,39,314}-*"
 test-command = [
     "echo \"Setting WASP install directory...\"",
     "export WASP_DIR=$( python -c \"import importlib.resources as rs; print(rs.files('moose_hit').joinpath('wasp'))\" )",
