@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "ResidualObject.h"
-#include "SubProblem.h"
+#include "FEProblemBase.h"
 #include "InputParameters.h"
 
 InputParameters
@@ -54,6 +54,30 @@ ResidualObject::ResidualObject(const InputParameters & parameters, bool is_nodal
     _mesh(_subproblem.mesh())
 {
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+ResidualObject::ResidualObject(const ResidualObject & object,
+                               const Moose::Kokkos::FunctorCopy & key)
+  : MooseObject(object, key),
+    SetupInterface(object, key),
+    FunctionInterface(object, key),
+    UserObjectInterface(object, key),
+    TransientInterface(object, key),
+    PostprocessorInterface(object, key),
+    VectorPostprocessorInterface(object, key),
+    RandomInterface(object, key),
+    Restartable(object, key),
+    MeshChangedInterface(object, key),
+    TaggingInterface(object, key),
+    _subproblem(object._subproblem),
+    _fe_problem(object._fe_problem),
+    _sys(object._sys),
+    _tid(object._tid),
+    _assembly(object._assembly),
+    _mesh(object._mesh)
+{
+}
+#endif
 
 void
 ResidualObject::prepareShapes(const unsigned int var_num)

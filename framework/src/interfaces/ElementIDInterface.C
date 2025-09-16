@@ -32,6 +32,14 @@ ElementIDInterface::ElementIDInterface(const MooseObject * moose_object)
 {
 }
 
+#ifdef MOOSE_KOKKOS_ENABLED
+ElementIDInterface::ElementIDInterface(const ElementIDInterface & object,
+                                       const Moose::Kokkos::FunctorCopy &)
+  : _obj_parameters(object._obj_parameters), _id_mesh(object._id_mesh), _ei_name(object._ei_name)
+{
+}
+#endif
+
 unsigned int
 ElementIDInterface::getElementIDIndex(const std::string & id_parameter_name,
                                       unsigned int comp) const

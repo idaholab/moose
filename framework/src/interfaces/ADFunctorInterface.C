@@ -20,3 +20,11 @@ ADFunctorInterface::ADFunctorInterface(const MooseObject * const moose_object)
   : FunctorInterface(moose_object)
 {
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+ADFunctorInterface::ADFunctorInterface(const ADFunctorInterface & object,
+                                       const Moose::Kokkos::FunctorCopy & key)
+  : FunctorInterface(object, key)
+{
+}
+#endif

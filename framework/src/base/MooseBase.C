@@ -20,6 +20,9 @@ const std::string MooseBase::name_param = "_object_name";
 const std::string MooseBase::unique_name_param = "_unique_name";
 const std::string MooseBase::app_param = "_moose_app";
 const std::string MooseBase::moose_base_param = "_moose_base";
+#ifdef MOOSE_KOKKOS_ENABLED
+const std::string MooseBase::kokkos_object_param = "_kokkos_object";
+#endif
 
 InputParameters
 MooseBase::validParams()

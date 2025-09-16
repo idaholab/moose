@@ -27,6 +27,16 @@ DistributionInterface::DistributionInterface(const MooseObject * moose_object)
 {
 }
 
+#ifdef MOOSE_KOKKOS_ENABLED
+DistributionInterface::DistributionInterface(const DistributionInterface & object,
+                                             const Moose::Kokkos::FunctorCopy &)
+  : _dni_params(object._dni_params),
+    _dni_feproblem(object._dni_feproblem),
+    _dni_moose_object_ptr(object._dni_moose_object_ptr)
+{
+}
+#endif
+
 const Distribution &
 DistributionInterface::getDistribution(const std::string & name) const
 {

@@ -26,13 +26,14 @@ class UserObjectInterface
 public:
   static InputParameters validParams();
 
-  /**
-   * @param params The parameters used by the object being instantiated. This
-   *        class needs them so it can get the user object named in the input file,
-   *        but the object calling getUserObject only needs to use the name on the
-   *        left hand side of the statement "user_object = user_object_name"
-   */
   UserObjectInterface(const MooseObject * moose_object);
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  UserObjectInterface(const UserObjectInterface & object, const Moose::Kokkos::FunctorCopy & key);
+#endif
 
   /**
    * @return The name of the user object associated with the parameter \p param_name

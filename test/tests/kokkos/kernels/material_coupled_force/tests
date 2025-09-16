@@ -1,0 +1,14 @@
+[Tests]
+  issues = '#30655'
+  design = 'KokkosMatCoupledForce.md'
+
+  [material_coupled_force]
+    type = 'Exodiff'
+    input = 'kokkos_material_coupled_force.i'
+    exodiff = 'kokkos_material_coupled_force_out.e'
+    abs_zero = 1e-6
+    requirement = 'The Kokkos system shall support a kernel for coupling the sum of several products of material properties with variables and constant coefficients'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+[]

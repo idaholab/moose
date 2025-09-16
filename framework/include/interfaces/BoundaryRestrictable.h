@@ -9,6 +9,10 @@
 
 #pragma once
 
+#ifdef MOOSE_KOKKOS_ENABLED
+#include "KokkosTypes.h"
+#endif
+
 // MOOSE includes
 #include "InputParameters.h"
 #include "MaterialData.h"
@@ -54,6 +58,13 @@ public:
   BoundaryRestrictable(const MooseObject * moose_object,
                        const std::set<SubdomainID> & block_ids,
                        bool nodal);
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  BoundaryRestrictable(const BoundaryRestrictable & object, const Moose::Kokkos::FunctorCopy & key);
+#endif
 
   /**
    * Helper for determining if the object is boundary restricted. This is needed for the
@@ -220,12 +231,63 @@ private:
    */
   void initializeBoundaryRestrictable();
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  void initializeKokkosBoundaryRestrictable(MooseMesh * mesh);
+#endif
+
 protected:
   /**
    * A helper method to avoid circular #include problems.
    * @see hasBoundaryMaterialProperty
    */
   bool hasBoundaryMaterialPropertyHelper(const std::string & prop_name) const;
+
+#ifdef MOOSE_KOKKOS_SCOPE
+  /**
+   * Get the number of nodes this Kokkos object is operating on
+   * @returns The number of nodes local to this process
+   */
+  KOKKOS_FUNCTION dof_id_type numKokkosBoundaryNodes() const { return _kokkos_node_ids.size(); }
+  /**
+   * Get the number of sides this Kokkos object is operating on
+   * @returns The number of sides local to this process
+   */
+  KOKKOS_FUNCTION dof_id_type numKokkosBoundarySides() const
+  {
+    return _kokkos_element_side_ids.size();
+  }
+  /**
+   * Get the contiguous node ID this Kokkos thread is operating on
+   * @param tid The thread ID
+   * @returns The contiguous node ID
+   */
+  KOKKOS_FUNCTION ContiguousNodeID kokkosBoundaryNodeID(ThreadID tid) const
+  {
+    return _kokkos_node_ids[tid];
+  }
+  /**
+   * Get the contiguous element ID - side index pair this Kokkos thread is operating on
+   * @param tid The thread ID
+   * @returns The contiguous element ID - side index pair
+   */
+  KOKKOS_FUNCTION auto kokkosBoundaryElementSideID(ThreadID tid) const
+  {
+    return _kokkos_element_side_ids[tid];
+  }
+#endif
+
+#ifdef MOOSE_KOKKOS_ENABLED
+private:
+  /**
+   * List of contiguous node IDs this Kokkos object is operating on
+   */
+  Moose::Kokkos::Array<ContiguousNodeID> _kokkos_node_ids;
+  /**
+   * List of contiguous element ID - side index pairs this Kokkos object is operating on
+   */
+  Moose::Kokkos::Array<Moose::Kokkos::Pair<ContiguousElementID, unsigned int>>
+      _kokkos_element_side_ids;
+#endif
 };
 
 template <typename T, bool is_ad>

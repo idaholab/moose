@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "MooseTypes.h"
+
 #include "libmesh/id_types.h"
 
 #include <set>
@@ -27,6 +29,14 @@ class MooseVariableDependencyInterface
 public:
   // Must be a pointer in order to disambiguate with default copy constructor
   MooseVariableDependencyInterface(const MooseObject *);
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  MooseVariableDependencyInterface(const MooseVariableDependencyInterface &,
+                                   const Moose::Kokkos::FunctorCopy & key);
+#endif
 
   /**
    * Retrieve the set of MooseVariableFieldBase that _this_ object depends on.
