@@ -22,13 +22,12 @@ ADFluxDivergence::validParams()
 }
 
 ADFluxDivergence::ADFluxDivergence(const InputParameters & parameters)
-  : ADKernel(parameters),
-    _flux(getADMaterialProperty<RealVectorValue>(getParam<MaterialPropertyName>("flux")))
+  : ADKernel(parameters), _flux(getADMaterialProperty<RealVectorValue>("flux"))
 {
 }
 
 ADReal
 ADFluxDivergence::computeQpResidual()
 {
-  return _grad_test[_i][_qp] * _flux[_qp];
+  return -_grad_test[_i][_qp] * _flux[_qp];
 }

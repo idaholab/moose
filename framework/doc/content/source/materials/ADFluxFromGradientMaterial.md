@@ -20,24 +20,12 @@ where:
 
 This flux can be used with the `ADFluxDivergence` kernel to model diffusion-like processes.
 
-## Input Parameters
+## Example Input File
+
+!listing test/tests/kernels/ad_flux_divergence/1d_fluxdivergence_steadystate_test.i block= Materials/flux
 
 !syntax parameters /Materials/ADFluxFromGradientMaterial
 
-## Example Input File
+!syntax inputs /Materials/ADFluxFromGradientMaterial
 
-```ini
-[Materials]
-  [diffusivity]
-    type = ADGenericConstantMaterial
-    prop_names = 'diffusivity'
-    prop_values = '1.0'
-  []
-
-  [flux]
-    type = ADFluxFromGradientMaterial
-    flux = flux
-    u = u
-    diffusivity = diffusivity
-  []
-[]
+!syntax children /Materials/ADFluxFromGradientMaterial
