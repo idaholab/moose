@@ -34,11 +34,6 @@ public:
   DiracKernelBase(const InputParameters & parameters);
 
   /**
-   * This gets called by computeOffDiagJacobian() at each quadrature point.
-   */
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
-
-  /**
    * Computes the off-diagonal Jacobian for variable jvar.
    */
   virtual void computeOffDiagJacobian(unsigned int jvar) override = 0;
