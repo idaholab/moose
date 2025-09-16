@@ -19,8 +19,8 @@ MOOSE_DIR = os.environ.get(
 class BuildWithWasp(build_ext):
     def run(self):
         # Destination we will install WASP and HIT to
-        self.wasp_install_dir = os.path.abspath(os.path.join(self.build_lib, "moose_wasp"))
         self.hit_install_dir = os.path.abspath(os.path.join(self.build_lib, "moose_hit"))
+        self.wasp_install_dir = os.path.abspath(os.path.join(self.hit_install_dir, "wasp"))
         # Build or move wasp install
         wasp_include, wasp_lib, wasp_libraries = self._build_wasp()
         # Append include and lib stuff with wasp build

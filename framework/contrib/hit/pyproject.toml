@@ -25,7 +25,7 @@ build = ["cp*-manylinux_x86_64", "cp*-manylinux_aarch64"]
 skip = "pp*, gp*, cp{38,39,314}-*"
 test-command = [
     "echo \"Setting WASP install directory...\"",
-    "export WASP_DIR=$( python -c \"import importlib.resources as rs; print(rs.files('hit').joinpath('moose_wasp'))\" )",
+    "export WASP_DIR=$( python -c \"import importlib.resources as rs; print(rs.files('moose_hit').joinpath('wasp'))\" )",
     "echo \"WASP_DIR set to ${WASP_DIR}\"",
 
     "echo \"Testing hit command-line interface...\"",
