@@ -106,7 +106,7 @@ moose_icu:
   - icu 75.1 hfee45f7_0                                     # [arm64]
 
 moose_cctools:                                              # [osx]
-  - cctools_osx-64 1021.4 ha66f10e_0                        # [not arm64 and osx]
+  - cctools_osx-64 1021.4 h508880d_0                        # [not arm64 and osx]
   - cctools_osx-arm64 1021.4 h12580ec_0                     # [arm64]
 
 moose_compiler_rt:                                          # [osx]
