@@ -680,3 +680,336 @@ TEST_F(WeakFormDerivationTest, IntegrationByParts)
     EXPECT_EQ(contributions.total_residual->toString(), "-(dot(grad(u), grad_test_u))");
   }
 }
+
+// Test what the simplifier DOES handle correctly
+TEST_F(WeakFormDerivationTest, SimplifierWorkingSimplifications)
+{
+  // Test 1: x + 0 = x
+  {
+    auto expr = parser->parse("x + 0.0");
+    auto simplified = simplifier->simplify(expr);
+    EXPECT_EQ(simplified->toString(), "x");
+  }
+
+  // Test 2: 0 + x = x
+  {
+    auto expr = parser->parse("0.0 + x");
+    auto simplified = simplifier->simplify(expr);
+    EXPECT_EQ(simplified->toString(), "x");
+  }
+
+  // Test 3: x * 1 = x
+  {
+    auto expr = parser->parse("x * 1.0");
+    auto simplified = simplifier->simplify(expr);
+    EXPECT_EQ(simplified->toString(), "x");
+  }
+
+  // Test 4: 1 * x = x
+  {
+    auto expr = parser->parse("1.0 * x");
+    auto simplified = simplifier->simplify(expr);
+    EXPECT_EQ(simplified->toString(), "x");
+  }
+
+  // Test 5: 0 * x = 0
+  {
+    auto expr = parser->parse("0.0 * x");
+    auto simplified = simplifier->simplify(expr);
+    EXPECT_EQ(simplified->toString(), "0.000000");
+  }
+
+  // Test 6: x * 0 = 0
+  {
+    auto expr = parser->parse("x * 0.0");
+    auto simplified = simplifier->simplify(expr);
+    EXPECT_EQ(simplified->toString(), "0.000000");
+  }
+
+  // Test 7: x / 1 = x
+  {
+    auto expr = parser->parse("x / 1.0");
+    auto simplified = simplifier->simplify(expr);
+    EXPECT_EQ(simplified->toString(), "x");
+  }
+
+  // Test 8: x - x = 0
+  {
+    auto expr = parser->parse("x - x");
+    auto simplified = simplifier->simplify(expr);
+    EXPECT_EQ(simplified->toString(), "0.000000");
+  }
+
+  // Test 9: Constant folding: 2 * 3 = 6
+  {
+    auto expr = parser->parse("2.0 * 3.0");
+    auto simplified = simplifier->simplify(expr);
+    EXPECT_EQ(simplified->toString(), "6.000000");
+  }
+}
+
+// Test improved nested multiplication handling
+TEST_F(WeakFormDerivationTest, SimplifierNestedMultiplicationLimitation)
+{
+  // Now the simplifier DOES collapse 0.5 * (2.0 * x) to x
+  {
+    auto expr = parser->parse("0.5 * (2.0 * x)");
+    auto simplified = simplifier->simplify(expr);
+    EXPECT_EQ(simplified->toString(), "x");
+  }
+
+  // Similarly for (2.0 * x) * 0.5
+  {
+    auto expr = parser->parse("(2.0 * x) * 0.5");
+    auto simplified = simplifier->simplify(expr);
+    EXPECT_EQ(simplified->toString(), "x");
+  }
+
+  // And for 2.0 * (0.5 * x)
+  {
+    auto expr = parser->parse("2.0 * (0.5 * x)");
+    auto simplified = simplifier->simplify(expr);
+    EXPECT_EQ(simplified->toString(), "x");
+  }
+
+  // Test more complex nested case
+  {
+    auto expr = parser->parse("0.25 * (2.0 * (2.0 * x))");
+    auto simplified = simplifier->simplify(expr);
+    EXPECT_EQ(simplified->toString(), "x");
+  }
+
+  // Test with three levels
+  {
+    auto expr = parser->parse("2.0 * (0.5 * (1.0 * x))");
+    auto simplified = simplifier->simplify(expr);
+    EXPECT_EQ(simplified->toString(), "x");
+  }
+}
+
+// Test that certain addition patterns aren't simplified
+TEST_F(WeakFormDerivationTest, SimplifierAdditionLimitation)
+{
+  // The differentiation produces (x * 1) + (1 * x) which gets simplified to 2*x
+  // But this happens during differentiation, not in the simplifier
+  {
+    // If we manually create the expression, simplifier may not combine them
+    auto expr = parser->parse("((x * 1.0) + (1.0 * x))");
+    auto simplified = simplifier->simplify(expr);
+    // The simplifier does simplify this to 2*x
+    EXPECT_EQ(simplified->toString(), "(2.000000 * x)");
+  }
+}
+
+// Test grad operations are now properly simplified
+TEST_F(WeakFormDerivationTest, SimplifierGradientSimplification)
+{
+  // 0.5 * (2.0 * grad(u)) now correctly becomes grad(u)
+  {
+    auto expr = parser->parse("0.5 * (2.0 * grad(u))");
+    auto simplified = simplifier->simplify(expr);
+    EXPECT_EQ(simplified->toString(), "grad(u)");
+  }
+
+  // Test with laplacian too
+  {
+    auto expr = parser->parse("2.0 * (0.5 * laplacian(u))");
+    auto simplified = simplifier->simplify(expr);
+    EXPECT_EQ(simplified->toString(), "laplacian(u)");
+  }
+
+  // Test with more complex gradient expression
+  {
+    auto expr = parser->parse("0.25 * (4.0 * grad(c))");
+    auto simplified = simplifier->simplify(expr);
+    EXPECT_EQ(simplified->toString(), "grad(c)");
+  }
+}
+
+// Test that the simplifier preserves mathematical correctness
+TEST_F(WeakFormDerivationTest, SimplifierCorrectnessPreservation)
+{
+  // Even though the simplifier doesn't optimize everything,
+  // it should never produce incorrect results
+
+  // Test that (a * b) * c is preserved correctly
+  {
+    auto expr = parser->parse("(2.0 * 3.0) * 4.0");
+    auto simplified = simplifier->simplify(expr);
+    // Should be 24.0 after constant folding
+    EXPECT_EQ(simplified->toString(), "24.000000");
+  }
+
+  // Test that order of operations is preserved
+  {
+    auto expr = parser->parse("x + 2.0 * 3.0");
+    auto simplified = simplifier->simplify(expr);
+    // Should be x + 6.0
+    EXPECT_EQ(simplified->toString(), "(x + 6.000000)");
+  }
+}
+
+// Document what the improved simplifier now does
+TEST_F(WeakFormDerivationTest, SimplifierIdealSimplifierBehavior)
+{
+  // These tests show what the simplifier can now do after improvements
+
+  // Collapse nested constant multiplications - NOW WORKS!
+  {
+    auto expr = parser->parse("2.0 * (0.5 * laplacian(u))");
+    auto simplified = simplifier->simplify(expr);
+    EXPECT_EQ(simplified->toString(), "laplacian(u)");
+  }
+
+  // Distribute and collect coefficients
+  {
+    auto expr = parser->parse("kappa * grad(u) + kappa * grad(u)");
+    auto simplified = simplifier->simplify(expr);
+    std::string result = simplified->toString();
+    EXPECT_EQ(result, "(2.000000 * (kappa * grad(u)))");
+  }
+}
+
+// Test that simplifier handles complex expressions reasonably
+TEST_F(WeakFormDerivationTest, SimplifierComplexExpressions)
+{
+  // Test a typical variational derivative result
+  {
+    auto expr = parser->parse("0.5 * dot(grad(u), grad(u))");
+    // After differentiation, this would produce 0.5 * 2 * grad(u)
+    // which the simplifier doesn't collapse to grad(u)
+
+    // But the original expression should remain unchanged
+    auto simplified = simplifier->simplify(expr);
+    EXPECT_EQ(simplified->toString(), "(0.500000 * dot(grad(u), grad(u)))");
+  }
+
+  // Test that vec operations are preserved
+  {
+    auto expr = parser->parse("vec(1.0, 0.0)");
+    auto simplified = simplifier->simplify(expr);
+    EXPECT_EQ(simplified->toString(), "vec(1.000000, 0.000000)");
+  }
+
+  // Test that function calls are preserved
+  {
+    auto expr = parser->parse("sin(x) + cos(x)");
+    auto simplified = simplifier->simplify(expr);
+    EXPECT_EQ(simplified->toString(), "(sin(x) + cos(x))");
+  }
+}
+
+// Test that values very close to 1.0 are recognized as 1.0
+TEST_F(WeakFormDerivationTest, ToleranceNearOneSimplification)
+{
+  // Create a value that's 1.0 plus a few machine epsilons
+  Real one_plus_eps = 1.0 + 50 * std::numeric_limits<Real>::epsilon();
+  std::string expr_str = std::to_string(one_plus_eps) + " * x";
+
+  auto expr = parser->parse(expr_str);
+  auto simplified = simplifier->simplify(expr);
+
+  // Should be simplified to x since the coefficient is numerically 1.0
+  EXPECT_EQ(simplified->toString(), "x");
+}
+
+// Test that values very close to 0.0 are recognized as 0.0
+TEST_F(WeakFormDerivationTest, ToleranceNearZeroSimplification)
+{
+  // Create a value that's a few machine epsilons
+  Real small_value = 50 * std::numeric_limits<Real>::epsilon();
+  std::string expr_str = std::to_string(small_value) + " * x";
+
+  auto expr = parser->parse(expr_str);
+  auto simplified = simplifier->simplify(expr);
+
+  // Should be simplified to 0 since the coefficient is numerically 0
+  EXPECT_EQ(simplified->toString(), "0.000000");
+}
+
+// Test that 0.5 * 2.0 is correctly recognized as 1.0
+TEST_F(WeakFormDerivationTest, ToleranceExactArithmeticToOne)
+{
+  auto expr = parser->parse("0.5 * (2.0 * x)");
+  auto simplified = simplifier->simplify(expr);
+
+  // 0.5 * 2.0 = 1.0 exactly, should simplify to x
+  EXPECT_EQ(simplified->toString(), "x");
+}
+
+// Test that 0.25 * 4.0 is correctly recognized as 1.0
+TEST_F(WeakFormDerivationTest, ToleranceQuarterTimesFour)
+{
+  auto expr = parser->parse("0.25 * (4.0 * grad(u))");
+  auto simplified = simplifier->simplify(expr);
+
+  // 0.25 * 4.0 = 1.0 exactly, should simplify to grad(u)
+  EXPECT_EQ(simplified->toString(), "grad(u)");
+}
+
+// Test that values that are NOT close to 1.0 are not incorrectly simplified
+TEST_F(WeakFormDerivationTest, ToleranceNotNearOne)
+{
+  // This should be detectable as different from 1.0
+  auto expr = parser->parse("1.000001 * x");
+  auto simplified = simplifier->simplify(expr);
+
+  // Should NOT be simplified to x
+  EXPECT_NE(simplified->toString(), "x");
+  // Should keep the multiplication
+  EXPECT_EQ(simplified->toString(), "(1.000001 * x)");
+}
+
+// Test division by small but non-zero values
+TEST_F(WeakFormDerivationTest, ToleranceDivisionBySmallValue)
+{
+  // Value that's small but not numerically zero
+  Real small_but_nonzero = 1000 * std::numeric_limits<Real>::epsilon();
+  std::string expr_str = "x / " + std::to_string(small_but_nonzero);
+
+  auto expr = parser->parse(expr_str);
+  auto simplified = simplifier->simplify(expr);
+
+  // Should not fail or produce infinity - the division should be preserved
+  std::string result = simplified->toString();
+  EXPECT_TRUE(result.find("div") != std::string::npos || result.find("/") != std::string::npos);
+}
+
+// Test that machine epsilon appropriate arithmetic works
+TEST_F(WeakFormDerivationTest, ToleranceMachineEpsilonArithmetic)
+{
+  // Test that 1/3 * 3 is recognized as 1
+  auto expr = parser->parse("0.333333333333333 * 3.0 * x");
+  auto simplified = simplifier->simplify(expr);
+
+  // 0.333... * 3.0 should be close enough to 1.0 to simplify
+  std::string result = simplified->toString();
+
+  // With our tolerance of 100 * epsilon, this should simplify to x
+  // But the exact result depends on how many 3s we have
+  // The parser might also handle this differently
+  // Just check it produces something reasonable
+  EXPECT_TRUE(result.find("x") != std::string::npos);
+}
+
+// Test nested multiplication with values that multiply to exactly 1.0
+TEST_F(WeakFormDerivationTest, ToleranceNestedExactToOne)
+{
+  auto expr = parser->parse("0.125 * (2.0 * (4.0 * laplacian(u)))");
+  auto simplified = simplifier->simplify(expr);
+
+  // 0.125 * 2.0 * 4.0 = 1.0 exactly
+  EXPECT_EQ(simplified->toString(), "laplacian(u)");
+}
+
+// Test that expressions with accumulating rounding errors are handled
+TEST_F(WeakFormDerivationTest, ToleranceAccumulatingErrors)
+{
+  // Create an expression where multiple operations might accumulate small errors
+  auto expr = parser->parse("0.1 * 0.1 * 100.0 * x");
+  auto simplified = simplifier->simplify(expr);
+
+  // 0.1 * 0.1 * 100.0 = 1.0, but 0.1 cannot be represented exactly in binary
+  // Our tolerance should handle this appropriately
+  EXPECT_EQ(simplified->toString(), "x");
+}

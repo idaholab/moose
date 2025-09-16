@@ -11,6 +11,11 @@ namespace automatic_weak_form
 
 /**
  * Simplifies symbolic expressions to reduce complexity and improve numerical stability
+ *
+ * Floating-point comparisons use machine-epsilon based tolerances:
+ * - Relative tolerance: 100 * machine epsilon for values away from zero
+ * - Absolute tolerance: 100 * machine epsilon for values near zero
+ * This ensures robust comparisons that adapt to the floating-point precision (float vs double)
  */
 class ExpressionSimplifier
 {

@@ -1,10 +1,46 @@
 #include "ExpressionSimplifier.h"
 #include "MooseAST.h"
+#include <limits>
+#include <algorithm>
+#include <cmath>
 
 namespace moose
 {
 namespace automatic_weak_form
 {
+
+// Helper function for robust floating-point comparison
+// Uses relative tolerance for values away from zero, absolute tolerance near zero
+namespace
+{
+bool isNumericallyEqual(Real a, Real b, Real relTol = std::numeric_limits<Real>::epsilon() * 100,
+                        Real absTol = std::numeric_limits<Real>::epsilon() * 100)
+{
+  // Check for exact equality first (handles infinities and identical values)
+  if (a == b)
+    return true;
+
+  Real diff = std::abs(a - b);
+
+  // For values near zero, use absolute tolerance
+  if (std::abs(a) < absTol && std::abs(b) < absTol)
+    return diff < absTol;
+
+  // For other values, use relative tolerance
+  Real largest = std::max(std::abs(a), std::abs(b));
+  return diff <= largest * relTol;
+}
+
+bool isNumericallyZero(Real value)
+{
+  return isNumericallyEqual(value, 0.0);
+}
+
+bool isNumericallyOne(Real value)
+{
+  return isNumericallyEqual(value, 1.0);
+}
+}
 
 NodePtr ExpressionSimplifier::simplify(const NodePtr & expr)
 {
@@ -181,7 +217,7 @@ NodePtr ExpressionSimplifier::simplifyAdd(const NodePtr & left, const NodePtr & 
       if (left_coeff->value().isScalar() && right_coeff->value().isScalar())
       {
         Real sum = left_coeff->value().asScalar() + right_coeff->value().asScalar();
-        if (std::abs(sum) < 1e-10)
+        if (isNumericallyZero(sum))
           return constant(0.0);
         return multiply(constant(sum), left_mul->right());
       }
@@ -239,7 +275,7 @@ NodePtr ExpressionSimplifier::simplifyMultiply(const NodePtr & left, const NodeP
     {
       Real product = left_const->value().asScalar() * right_const->value().asScalar();
       // If the product is effectively 1.0, return just 1.0
-      if (std::abs(product - 1.0) < 1e-10)
+      if (isNumericallyOne(product))
         return constant(1.0);
       return constant(product);
     }
@@ -297,9 +333,9 @@ NodePtr ExpressionSimplifier::simplifyMultiply(const NodePtr & left, const NodeP
     }
 
     // Combine
-    if (std::abs(combined_const) < 1e-10)
+    if (isNumericallyZero(combined_const))
       return constant(0.0);
-    else if (std::abs(combined_const - 1.0) < 1e-10)
+    else if (isNumericallyOne(combined_const))
       return non_const_part ? non_const_part : constant(1.0);
     else if (non_const_part)
       return multiply(constant(combined_const), non_const_part);
@@ -407,7 +443,7 @@ NodePtr ExpressionSimplifier::simplifyDivide(const NodePtr & left, const NodePtr
     if (left_const->value().isScalar() && right_const->value().isScalar())
     {
       Real divisor = right_const->value().asScalar();
-      if (std::abs(divisor) > 1e-10)
+      if (!isNumericallyZero(divisor))
       {
         Real quotient = left_const->value().asScalar() / divisor;
         return constant(quotient);
@@ -497,7 +533,7 @@ bool ExpressionSimplifier::isConstant(const NodePtr & node, Real value)
   auto const_node = static_cast<const ConstantNode*>(node.get());
   if (!const_node->value().isScalar())
     return false;
-  return std::abs(const_node->value().asScalar() - value) < 1e-10;
+  return isNumericallyEqual(const_node->value().asScalar(), value);
 }
 
 Real ExpressionSimplifier::getConstantValue(const NodePtr & node)
