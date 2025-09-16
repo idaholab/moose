@@ -149,7 +149,7 @@ public:
    * Called if a MooseException is caught anywhere during the computation.
    * The single input parameter taken is a MooseException object.
    */
-  virtual void caughtMooseException(MooseException &){};
+  virtual void caughtMooseException(MooseException &) {};
 
   /**
    * Whether or not the loop should continue.
@@ -276,7 +276,9 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
               onBoundary(elem, side, *it, lower_d_elem);
             }
 
-          const Elem * neighbor = elem->neighbor_ptr(side);
+          const Elem * neighbor_ptr = elem->neighbor_ptr(side);
+          const Elem * neighbor =
+              (neighbor_ptr) ? neighbor_ptr : _mesh.neighbor_fake_ptr(elem, side);
           if (neighbor)
           {
             preInternalSide(elem, side);
