@@ -1148,7 +1148,7 @@ class TestHarness:
         filtergroup.add_argument('--no-check-input', action='store_true', help='Do not run check_input (syntax) tests')
         filtergroup.add_argument('--not-group', action='store', type=str, help='Run only tests NOT in the named group')
         filtergroup.add_argument('--re', action='store', type=str, dest='reg_exp', help='Run tests that match the given regular expression')
-        filtergroup.add_argument('--require-capability', action='append', nargs=1, type=str, help='Require that a test depend on this capability name; can be negated with "!"')
+        filtergroup.add_argument('--require-capability', action='extend', nargs=1, type=str, help='Require that a test depend on this capability name; can be negated with "!"')
         filtergroup.add_argument('--valgrind', action='store_const', dest='valgrind_mode', const='NORMAL', help='Run normal valgrind tests')
         filtergroup.add_argument('--valgrind-heavy', action='store_const', dest='valgrind_mode', const='HEAVY', help='Run heavy valgrind tests')
 
@@ -1347,8 +1347,13 @@ class TestHarness:
         """
         Helper for setting up the required capabilities.
         """
+        assert isinstance(registered, list)
+        assert isinstance(required, list)
+
         result = []
-        for v in [v.strip() for v in required]:
+        for v in required:
+            assert isinstance(v, str)
+            v = v.strip()
             is_false = v[0] == '!'
             capability = v[1:] if is_false else v
             if capability not in registered:
