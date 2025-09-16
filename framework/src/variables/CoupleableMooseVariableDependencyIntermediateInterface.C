@@ -23,6 +23,18 @@ CoupleableMooseVariableDependencyIntermediateInterface::
     addMooseVariableDependency(coupled_var);
 }
 
+#ifdef MOOSE_KOKKOS_ENABLED
+CoupleableMooseVariableDependencyIntermediateInterface::
+    CoupleableMooseVariableDependencyIntermediateInterface(
+        const CoupleableMooseVariableDependencyIntermediateInterface & object,
+        const Moose::Kokkos::FunctorCopy & key)
+  : Coupleable(object, key),
+    ScalarCoupleable(object, key),
+    MooseVariableDependencyInterface(object, key)
+{
+}
+#endif
+
 const VariableValue &
 CoupleableMooseVariableDependencyIntermediateInterface::coupledValueByName(
     const std::string & var_name)

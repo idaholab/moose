@@ -60,7 +60,7 @@ via the input file. The following input file snippet shows that a [PointValue.md
 is created and named "right_pp" and the [PostprocessorNeumannBC.md] uses this value to set the
 boundary condition.
 
-!listing pp_neumann.i block=Postprocessors BCs
+!listing /pp_neumann.i block=Postprocessors BCs
 
 This first step of coding this type of coupling begins by adding the necessary input file syntax to
 the object that requires a postprocessor value, PostprocessorNeumannBC in this example. In all MOOSE
@@ -80,7 +80,7 @@ the initialization of this reference in the source file.  The `_value` member va
 available for use anywhere inside the object, for the case of the boundary condition it is utilized
 in the computation of the residual.
 
-!listing PostprocessorNeumannBC.h line=PostprocessorValue
+!listing /PostprocessorNeumannBC.h line=PostprocessorValue
 
 !listing PostprocessorNeumannBC.C start=PostprocessorNeumannBC:: end=} include-end=true
 

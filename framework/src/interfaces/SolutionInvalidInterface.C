@@ -14,12 +14,20 @@
 #include "FEProblemBase.h"
 #include "SolutionInvalidityRegistry.h"
 
-SolutionInvalidInterface::SolutionInvalidInterface(MooseObject * const moose_object)
+SolutionInvalidInterface::SolutionInvalidInterface(const MooseObject * const moose_object)
   : _si_moose_object(*moose_object),
     _si_problem(
         *_si_moose_object.parameters().getCheckedPointerParam<FEProblemBase *>("_fe_problem_base"))
 {
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+SolutionInvalidInterface::SolutionInvalidInterface(const SolutionInvalidInterface & object,
+                                                   const Moose::Kokkos::FunctorCopy &)
+  : _si_moose_object(object._si_moose_object), _si_problem(object._si_problem)
+{
+}
+#endif
 
 /// Set solution invalid mark for the given solution ID
 template <bool warning>

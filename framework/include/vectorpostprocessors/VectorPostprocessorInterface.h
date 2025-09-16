@@ -32,6 +32,14 @@ public:
    */
   VectorPostprocessorInterface(const MooseObject * moose_object, bool broadcast_by_default = false);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  VectorPostprocessorInterface(const VectorPostprocessorInterface & object,
+                               const Moose::Kokkos::FunctorCopy & key);
+#endif
+
   /**
    * This class has virtual methods, so it needs a virtual dtor.
    */

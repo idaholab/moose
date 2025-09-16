@@ -9,6 +9,10 @@
 
 #pragma once
 
+#ifdef MOOSE_KOKKOS_ENABLED
+#include "KokkosMesh.h"
+#endif
+
 #include "MooseObject.h"
 #include "BndNode.h"
 #include "BndElement.h"
@@ -664,6 +668,13 @@ public:
   const MeshBase * getMeshPtr() const;
 
   /**
+   * Accessor for Kokkos mesh object.
+   */
+#ifdef MOOSE_KOKKOS_ENABLED
+  const Moose::Kokkos::Mesh * getKokkosMesh() const { return _kokkos_mesh.get(); }
+#endif
+
+  /**
    * Calls print_info() on the underlying Mesh.
    */
   void printInfo(std::ostream & os = libMesh::out, const unsigned int verbosity = 0) const;
@@ -1140,6 +1151,21 @@ public:
   std::set<dof_id_type> getElemIDsOnBlocks(unsigned int elem_id_index,
                                            const std::set<SubdomainID> & blks) const;
 
+  /**
+   * Get the maximum number of sides per element
+   */
+  unsigned int getMaxSidesPerElem() const { return _max_sides_per_elem; }
+
+  /**
+   * Get the maximum number of nodes per element
+   */
+  unsigned int getMaxNodesPerElem() const { return _max_nodes_per_elem; }
+
+  /**
+   * Get the maximum number of nodes per side
+   */
+  unsigned int getMaxNodesPerSide() const { return _max_nodes_per_side; }
+
   std::unordered_map<dof_id_type, std::set<dof_id_type>>
   getElemIDMapping(const std::string & from_id_name, const std::string & to_id_name) const;
 
@@ -1431,6 +1457,11 @@ protected:
 
   /// Pointer to underlying libMesh mesh object
   std::unique_ptr<libMesh::MeshBase> _mesh;
+
+  /// Pointer to Kokkos mesh object
+#ifdef MOOSE_KOKKOS_ENABLED
+  std::unique_ptr<Moose::Kokkos::Mesh> _kokkos_mesh;
+#endif
 
   /// The partitioner used on this mesh
   MooseEnum _partitioner_name;
@@ -1844,6 +1875,18 @@ private:
   std::vector<dof_id_type> _min_ids;
   /// Flags to indicate whether or not any two extra element integers are the same
   std::vector<std::vector<bool>> _id_identical_flag;
+
+  /// The maximum number of sides per element
+  unsigned int _max_sides_per_elem;
+
+  /// The maximum number of nodes per element
+  unsigned int _max_nodes_per_elem;
+
+  /// The maximum number of nodes per side
+  unsigned int _max_nodes_per_side;
+
+  /// Compute the maximum numbers per element and side
+  void computeMaxPerElemAndSide();
 
   /// Whether this mesh is displaced
   bool _is_displaced;

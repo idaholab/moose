@@ -257,3 +257,17 @@
    fun:*TaskManager*
    ...
 }
+{
+   cuda_driver
+   Memcheck:Leak
+   ...
+   obj:*libcuda*
+   ...
+}
+{
+   cuda_runtime
+   Memcheck:Leak
+   ...
+   obj:*libnvidia*
+   ...
+}

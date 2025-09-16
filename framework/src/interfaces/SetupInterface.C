@@ -35,6 +35,13 @@ SetupInterface::SetupInterface(const MooseObject * moose_object)
       .clearSetValues(); // remove any flags for the case when "execute_on" is not used
 }
 
+#ifdef MOOSE_KOKKOS_ENABLED
+SetupInterface::SetupInterface(const SetupInterface & object, const Moose::Kokkos::FunctorCopy &)
+  : _execute_enum(object._execute_enum), _current_execute_flag(object._current_execute_flag)
+{
+}
+#endif
+
 SetupInterface::~SetupInterface() {}
 
 void

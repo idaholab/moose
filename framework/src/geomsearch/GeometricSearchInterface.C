@@ -31,6 +31,15 @@ GeometricSearchInterface::GeometricSearchInterface(const MooseObject * moose_obj
 {
 }
 
+#ifdef MOOSE_KOKKOS_ENABLED
+GeometricSearchInterface::GeometricSearchInterface(const GeometricSearchInterface & object,
+                                                   const Moose::Kokkos::FunctorCopy &)
+  : _geometric_search_data(object._geometric_search_data),
+    _requires_geometric_search(object._requires_geometric_search)
+{
+}
+#endif
+
 PenetrationLocator &
 GeometricSearchInterface::getPenetrationLocator(const BoundaryName & primary,
                                                 const BoundaryName & secondary,

@@ -41,6 +41,21 @@ RandomInterface::RandomInterface(const InputParameters & parameters,
 {
 }
 
+#ifdef MOOSE_KOKKOS_ENABLED
+RandomInterface::RandomInterface(const RandomInterface & object, const Moose::Kokkos::FunctorCopy &)
+  : _random_data(object._random_data),
+    _generator(object._generator),
+    _ri_problem(object._ri_problem),
+    _ri_name(object._ri_name),
+    _master_seed(object._master_seed),
+    _is_nodal(object._is_nodal),
+    _reset_on(object._reset_on),
+    _curr_node(object._curr_node),
+    _curr_element(object._curr_element)
+{
+}
+#endif
+
 RandomInterface::~RandomInterface() {}
 
 void

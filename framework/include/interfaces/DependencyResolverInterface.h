@@ -30,6 +30,16 @@ public:
    */
   DependencyResolverInterface() {}
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  /**
+   * Special constructor used for Kokkos functor copy during parallel dispatch
+   */
+  DependencyResolverInterface(const DependencyResolverInterface &,
+                              const Moose::Kokkos::FunctorCopy &)
+  {
+  }
+#endif
+
   /**
    * Return a set containing the names of items requested by the object.
    */

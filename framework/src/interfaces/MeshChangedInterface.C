@@ -23,3 +23,11 @@ MeshChangedInterface::MeshChangedInterface(const InputParameters & params)
 {
   _mci_feproblem.notifyWhenMeshChanges(this);
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+MeshChangedInterface::MeshChangedInterface(const MeshChangedInterface & object,
+                                           const Moose::Kokkos::FunctorCopy &)
+  : _mci_feproblem(object._mci_feproblem)
+{
+}
+#endif

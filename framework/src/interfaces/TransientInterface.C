@@ -39,4 +39,21 @@ TransientInterface::TransientInterface(const MooseObject * moose_object)
 {
 }
 
+#ifdef MOOSE_KOKKOS_ENABLED
+TransientInterface::TransientInterface(const TransientInterface & object,
+                                       const Moose::Kokkos::FunctorCopy &)
+  : _ti_params(object._ti_params),
+    _ti_feproblem(object._ti_feproblem),
+    _is_implicit(object._is_implicit),
+    _t(object._t),
+    _t_old(object._t_old),
+    _t_step(object._t_step),
+    _dt(object._dt),
+    _dt_old(object._dt_old),
+    _is_transient(object._is_transient),
+    _ti_name(object._ti_name)
+{
+}
+#endif
+
 TransientInterface::~TransientInterface() {}
