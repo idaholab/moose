@@ -1397,3 +1397,31 @@ f14118d63adbfcc3d45765c2ba3cac1dfa0ffa7a: #31104; add kokkos to all builds, upda
   wasp:
     full_version: 2025.09.04_0
     hash: 41363d4
+a62abba3f218c71fadda32d9ca52b828abbbafbb: #31536; update code-server in apptainer moose-dev
+  libmesh:
+    full_version: 2025.08.06_0
+    hash: e1f499b
+  libmesh-vtk:
+    full_version: 9.4.2_5
+    hash: 2b88261
+  moose-dev:
+    full_version: 2025.09.15
+    hash: aeabd1e
+  mpi:
+    full_version: 2025.08.06
+    hash: de1bd33
+  petsc:
+    full_version: 3.23.4_0
+    hash: 437fa22
+  pprof:
+    full_version: 2025.06.13
+    hash: 3d296db
+  seacas:
+    full_version: 2025.05.22_0
+    hash: '1278418'
+  tools:
+    full_version: 2025.06.26
+    hash: d73012a
+  wasp:
+    full_version: 2025.09.04_0
+    hash: 41363d4
