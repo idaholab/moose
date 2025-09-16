@@ -10,7 +10,26 @@ NodePtr ExpressionSimplifier::simplify(const NodePtr & expr)
 {
   if (!expr)
     return nullptr;
-  return simplifyNode(expr);
+
+  // Multiple passes until no changes occur
+  NodePtr current = expr;
+  NodePtr previous = nullptr;
+  int max_iterations = 10; // Prevent infinite loops
+  int iteration = 0;
+
+  while (iteration < max_iterations)
+  {
+    previous = current;
+    current = simplifyNode(current);
+
+    // If no change, we're done
+    if (current->equals(*previous))
+      break;
+
+    iteration++;
+  }
+
+  return current;
 }
 
 NodePtr ExpressionSimplifier::simplifyNode(const NodePtr & node)
@@ -210,7 +229,7 @@ NodePtr ExpressionSimplifier::simplifyMultiply(const NodePtr & left, const NodeP
   // x * 1 = x
   if (isOne(right))
     return left;
-    
+
   // Constant folding
   if (left->type() == NodeType::Constant && right->type() == NodeType::Constant)
   {
@@ -219,11 +238,113 @@ NodePtr ExpressionSimplifier::simplifyMultiply(const NodePtr & left, const NodeP
     if (left_const->value().isScalar() && right_const->value().isScalar())
     {
       Real product = left_const->value().asScalar() * right_const->value().asScalar();
+      // If the product is effectively 1.0, return just 1.0
+      if (std::abs(product - 1.0) < 1e-10)
+        return constant(1.0);
       return constant(product);
     }
   }
-  
-  // Combine constants: (a * x) * b = (a*b) * x
+
+  // Extract all constants from nested multiplications
+  std::vector<NodePtr> constants;
+  std::vector<NodePtr> non_constants;
+
+  // Helper to extract from a multiplication tree
+  auto extractFromMultiply = [&](const NodePtr & node, auto & extract) -> void {
+    if (node->type() == NodeType::Multiply)
+    {
+      auto mul = static_cast<const BinaryOpNode*>(node.get());
+      extract(mul->left(), extract);
+      extract(mul->right(), extract);
+    }
+    else if (node->type() == NodeType::Constant)
+    {
+      constants.push_back(node);
+    }
+    else
+    {
+      non_constants.push_back(node);
+    }
+  };
+
+  // Extract from both sides
+  extractFromMultiply(left, extractFromMultiply);
+  extractFromMultiply(right, extractFromMultiply);
+
+  // If we found multiple parts, rebuild optimally
+  if (constants.size() > 0 || non_constants.size() > 1)
+  {
+    // Combine all constants
+    Real combined_const = 1.0;
+    for (const auto & c : constants)
+    {
+      if (c->type() == NodeType::Constant)
+      {
+        auto const_node = static_cast<const ConstantNode*>(c.get());
+        if (const_node->value().isScalar())
+          combined_const *= const_node->value().asScalar();
+      }
+    }
+
+    // Build the non-constant part
+    NodePtr non_const_part = nullptr;
+    for (const auto & nc : non_constants)
+    {
+      if (!non_const_part)
+        non_const_part = nc;
+      else
+        non_const_part = multiply(non_const_part, nc);
+    }
+
+    // Combine
+    if (std::abs(combined_const) < 1e-10)
+      return constant(0.0);
+    else if (std::abs(combined_const - 1.0) < 1e-10)
+      return non_const_part ? non_const_part : constant(1.0);
+    else if (non_const_part)
+      return multiply(constant(combined_const), non_const_part);
+    else
+      return constant(combined_const);
+  }
+
+  // Handle nested cases: a * (b * x) = (a*b) * x
+  if (left->type() == NodeType::Constant && right->type() == NodeType::Multiply)
+  {
+    auto right_mul = static_cast<const BinaryOpNode*>(right.get());
+    if (right_mul->left()->type() == NodeType::Constant)
+    {
+      auto combined = simplifyMultiply(left, right_mul->left());
+      if (combined->type() == NodeType::Constant)
+      {
+        auto result = simplifyMultiply(combined, right_mul->right());
+        // If result is (1.0 * x), return just x
+        if (result->type() == NodeType::Multiply)
+        {
+          auto res_mul = static_cast<const BinaryOpNode*>(result.get());
+          if (isOne(res_mul->left()))
+            return res_mul->right();
+        }
+        return result;
+      }
+    }
+    if (right_mul->right()->type() == NodeType::Constant)
+    {
+      auto combined = simplifyMultiply(left, right_mul->right());
+      if (combined->type() == NodeType::Constant)
+      {
+        auto result = simplifyMultiply(combined, right_mul->left());
+        if (result->type() == NodeType::Multiply)
+        {
+          auto res_mul = static_cast<const BinaryOpNode*>(result.get());
+          if (isOne(res_mul->left()))
+            return res_mul->right();
+        }
+        return result;
+      }
+    }
+  }
+
+  // Handle (a * x) * b = (a*b) * x
   if (left->type() == NodeType::Multiply && right->type() == NodeType::Constant)
   {
     auto left_mul = static_cast<const BinaryOpNode*>(left.get());
@@ -231,14 +352,38 @@ NodePtr ExpressionSimplifier::simplifyMultiply(const NodePtr & left, const NodeP
     {
       auto combined = simplifyMultiply(left_mul->left(), right);
       if (combined->type() == NodeType::Constant)
-        return multiply(combined, left_mul->right());
+      {
+        auto result = simplifyMultiply(combined, left_mul->right());
+        if (result->type() == NodeType::Multiply)
+        {
+          auto res_mul = static_cast<const BinaryOpNode*>(result.get());
+          if (isOne(res_mul->left()))
+            return res_mul->right();
+        }
+        return result;
+      }
+    }
+    if (left_mul->right()->type() == NodeType::Constant)
+    {
+      auto combined = simplifyMultiply(left_mul->right(), right);
+      if (combined->type() == NodeType::Constant)
+      {
+        auto result = simplifyMultiply(combined, left_mul->left());
+        if (result->type() == NodeType::Multiply)
+        {
+          auto res_mul = static_cast<const BinaryOpNode*>(result.get());
+          if (isOne(res_mul->left()))
+            return res_mul->right();
+        }
+        return result;
+      }
     }
   }
-  
+
   // x * x = x^2
   if (left->equals(*right))
     return power(left, constant(2.0));
-    
+
   return multiply(left, right);
 }
 

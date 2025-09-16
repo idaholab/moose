@@ -285,8 +285,8 @@ TEST_F(WeakFormDerivationTest, AnisotropicEnergy)
 
     auto c0 = diff.getCoefficient(0);
     ASSERT_NE(c0, nullptr);
-    // The zeroth-order term is 4*eta*(eta^2-1) expanded
-    EXPECT_EQ(c0->toString(), "(((2.000000 * eta) * (pow(eta, 2.000000) - 1.000000)) + ((pow(eta, 2.000000) - 1.000000) * (2.000000 * eta)))");
+    // The zeroth-order term is 4*eta*(eta^2-1) expanded, with improved simplifier it has 2 factored out
+    EXPECT_EQ(c0->toString(), "((2.000000 * (eta * ((eta * eta) - 1.000000))) + (2.000000 * (((eta * eta) - 1.000000) * eta)))");
 
     auto c1 = diff.getCoefficient(1);
     ASSERT_NE(c1, nullptr);
@@ -392,12 +392,12 @@ TEST_F(WeakFormDerivationTest, ChainRule)
     ASSERT_NE(result, nullptr);
 
     std::string result_str = result->toString();
-    // cos(x^2) * 2x
-    EXPECT_EQ(result_str, "(cos(pow(x, 2.000000)) * (2.000000 * x))");
+    // The simplifier produces 2 * (cos((x * x)) * x)
+    EXPECT_EQ(result_str, "(2.000000 * (cos((x * x)) * x))");
 
     // Already simplified
     auto simplified = simplifier->simplify(result);
-    EXPECT_EQ(simplified->toString(), "(cos(pow(x, 2.000000)) * (2.000000 * x))");
+    EXPECT_EQ(simplified->toString(), "(2.000000 * (cos((x * x)) * x))");
   }
 }
 
@@ -483,15 +483,15 @@ TEST_F(WeakFormDerivationTest, VariationalDerivatives)
 
     // Simplifier doesn't collapse 0.5 * 2 = 1
     auto simplified_c1 = simplifier->simplify(c1);
-    EXPECT_EQ(simplified_c1->toString(), "(0.500000 * (2.000000 * grad(c)))");
+    EXPECT_EQ(simplified_c1->toString(), "grad(c)");
 
     // Compute Euler-Lagrange equation: -div(grad(c))
     auto euler_lagrange = generator->computeEulerLagrange(diff);
     ASSERT_NE(euler_lagrange, nullptr);
 
     std::string el_str = euler_lagrange->toString();
-    // Should be -div(0.5 * 2 * grad(c))
-    EXPECT_EQ(el_str, "-(div((0.500000 * (2.000000 * grad(c)))))");
+    // Now simplified to just -div(grad(c))
+    EXPECT_EQ(el_str, "-(div(grad(c)))");
   }
 
   // Test 2: Double-well potential only
@@ -528,8 +528,8 @@ TEST_F(WeakFormDerivationTest, WeakFormConstruction)
     ASSERT_NE(weak_form, nullptr);
 
     std::string wf_str = weak_form->toString();
-    // The weak form should be -div(0.5 * 2 * grad(u))
-    EXPECT_EQ(wf_str, "-(div((0.500000 * (2.000000 * grad(u)))))");
+    // The weak form is now simplified to -div(grad(u))
+    EXPECT_EQ(wf_str, "-(div(grad(u)))");
   }
 
   // Test with both bulk and gradient terms
@@ -539,8 +539,8 @@ TEST_F(WeakFormDerivationTest, WeakFormConstruction)
     ASSERT_NE(weak_form, nullptr);
 
     std::string wf_str = weak_form->toString();
-    // Should be 2*u - div(0.5 * 2 * grad(u))
-    EXPECT_EQ(wf_str, "((2.000000 * u) + -(div((0.500000 * (2.000000 * grad(u))))))");
+    // Should be 2*u - div(grad(u))
+    EXPECT_EQ(wf_str, "((2.000000 * u) + -(div(grad(u))))");
   }
 }
 
@@ -560,13 +560,13 @@ TEST_F(WeakFormDerivationTest, FourthOrderDerivatives)
     auto c2 = diff.getCoefficient(2);
     ASSERT_NE(c2, nullptr);
 
-    // The second-order coefficient shows multiplication
+    // The second-order coefficient is now simplified
     std::string c2_str = c2->toString();
-    EXPECT_EQ(c2_str, "(2.000000 * (0.500000 * laplacian(u)))");
+    EXPECT_EQ(c2_str, "laplacian(u)");
 
-    // Simplifier doesn't collapse nested multiplications
+    // Already simplified
     auto simplified = simplifier->simplify(c2);
-    EXPECT_EQ(simplified->toString(), "(2.000000 * (0.500000 * laplacian(u)))");
+    EXPECT_EQ(simplified->toString(), "laplacian(u)");
   }
 }
 
@@ -591,7 +591,7 @@ TEST_F(WeakFormDerivationTest, CoupledSystem)
     auto c1_u = diff_u.getCoefficient(1);
     ASSERT_NE(c1_u, nullptr);
     auto simplified_c1_u = simplifier->simplify(c1_u);
-    EXPECT_EQ(simplified_c1_u->toString(), "(0.500000 * (2.000000 * grad(u)))");
+    EXPECT_EQ(simplified_c1_u->toString(), "grad(u)");
 
     // Differentiate w.r.t. v
     DifferentiationVisitor dv_v("v");
@@ -607,7 +607,7 @@ TEST_F(WeakFormDerivationTest, CoupledSystem)
     auto c1_v = diff_v.getCoefficient(1);
     ASSERT_NE(c1_v, nullptr);
     auto simplified_c1_v = simplifier->simplify(c1_v);
-    EXPECT_EQ(simplified_c1_v->toString(), "(0.500000 * (2.000000 * grad(v)))");
+    EXPECT_EQ(simplified_c1_v->toString(), "grad(v)");
   }
 }
 
@@ -670,13 +670,13 @@ TEST_F(WeakFormDerivationTest, IntegrationByParts)
     std::string c1_str = contributions.c1_term->toString();
     // Simplifier result: 0.5 * 2 * grad(u)
     auto simplified = simplifier->simplify(contributions.c1_term);
-    EXPECT_EQ(simplified->toString(), "(0.500000 * (2.000000 * grad(u)))");
+    EXPECT_EQ(simplified->toString(), "grad(u)");
 
     // Maximum order should be 1 for this energy
     EXPECT_EQ(contributions.max_order, 1);
 
     // Total residual includes test function multiplication
     ASSERT_NE(contributions.total_residual, nullptr);
-    EXPECT_EQ(contributions.total_residual->toString(), "-(dot((0.500000 * (2.000000 * grad(u))), grad_test_u))");
+    EXPECT_EQ(contributions.total_residual->toString(), "-(dot(grad(u), grad_test_u))");
   }
 }
