@@ -130,7 +130,7 @@ moose_libclang:
   - libclang-cpp19.1 19.1.7 default_h73dfc95_4              # [arm64]
 
 moose_libxml:
-  - libxml2 2.14.6 h26afc86_1                               # [linux]
+  - libxml2 2.13.8 h04c0eec_1                               # [linux]
   - libxml2 2.13.8 he1bc88e_1                               # [not arm64 and osx]
   - libxml2 2.13.8 h4a9ca0c_1                               # [arm64]
 
