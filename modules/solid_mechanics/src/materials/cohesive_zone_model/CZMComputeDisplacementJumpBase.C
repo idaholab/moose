@@ -84,7 +84,6 @@ template <bool is_ad>
 void
 CZMComputeDisplacementJumpBase<is_ad>::computeQpProperties()
 {
-
   // computing the displacement jump
   for (unsigned int i = 0; i < _ndisp; i++)
     _displacement_jump_global[_qp](i) = (*_disp_neighbor[i])[_qp] - (*_disp[i])[_qp];

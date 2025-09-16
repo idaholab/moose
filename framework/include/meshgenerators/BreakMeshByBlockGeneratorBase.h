@@ -37,12 +37,12 @@ protected:
 
   /// given the primary and secondary blocks this method return the appropriate
   /// boundary id and name
-  void findBoundaryNameAndInd(MeshBase & mesh,
-                              const subdomain_id_type & /*primaryBlockID*/,
-                              const subdomain_id_type & /*secondaryBlockID*/,
-                              std::string & /*boundaryName*/,
-                              boundary_id_type & /*boundaryID*/,
-                              BoundaryInfo & /*boundary_info*/);
+  void findBoundaryName(MeshBase & mesh,
+                        const subdomain_id_type & /*primaryBlockID*/,
+                        const subdomain_id_type & /*secondaryBlockID*/,
+                        std::string & /*boundaryName*/,
+                        const boundary_id_type & /*boundaryID*/,
+                        BoundaryInfo & /*boundary_info*/);
 
   std::set<std::pair<std::string, BoundaryID>> _bName_bID_set;
 
@@ -56,6 +56,6 @@ private:
                                    const subdomain_id_type & /*secondaryBlockID*/);
 
   /// this method save the boundary name/id pair
-  void mapBoundaryIdAndBoundaryName(boundary_id_type & /*boundaryID*/,
+  void mapBoundaryIdAndBoundaryName(const boundary_id_type & /*boundaryID*/,
                                     const std::string & /*boundaryName*/);
 };

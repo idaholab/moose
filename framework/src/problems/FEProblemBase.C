@@ -1847,7 +1847,15 @@ FEProblemBase::setCurrentSubdomainID(const Elem * elem, const THREAD_ID tid)
 void
 FEProblemBase::setNeighborSubdomainID(const Elem * elem, unsigned int side, const THREAD_ID tid)
 {
-  SubdomainID did = elem->neighbor_ptr(side)->subdomain_id();
+  const Elem * neighbor = elem->neighbor_ptr(side);
+  if (!neighbor)
+    neighbor = _mesh.neighbor_fake_ptr(elem, side);
+
+  if (!neighbor)
+    mooseError("No neighbor (real or fake) found for elem ", elem->id(), " side ", side);
+
+  SubdomainID did = neighbor->subdomain_id();
+
   for (const auto i : index_range(_nl))
   {
     _assembly[tid][i]->setCurrentNeighborSubdomainID(did);
@@ -2381,8 +2389,11 @@ FEProblemBase::reinitNeighbor(const Elem * elem, unsigned int side, const THREAD
 {
   setNeighborSubdomainID(elem, side, tid);
 
-  const Elem * neighbor = elem->neighbor_ptr(side);
-  unsigned int neighbor_side = neighbor->which_neighbor_am_i(elem);
+  const Elem * neighbor_ptr = elem->neighbor_ptr(side);
+  const Elem * neighbor = (neighbor_ptr) ? neighbor_ptr : _mesh.neighbor_fake_ptr(elem, side);
+
+  unsigned int neighbor_side = (neighbor_ptr) ? neighbor_ptr->which_neighbor_am_i(elem)
+                                              : _mesh.neighbor_fake_side(elem, side);
 
   for (const auto i : index_range(_nl))
   {
@@ -4285,7 +4296,25 @@ FEProblemBase::reinitMaterialsNeighbor(const SubdomainID blk_id,
     // lindsayad: why not?
 
     const Elem * neighbor = _assembly[tid][0]->neighbor();
-    unsigned int neighbor_side = neighbor->which_neighbor_am_i(_assembly[tid][0]->elem());
+    unsigned int neighbor_side = libMesh::invalid_uint;
+
+    if (neighbor)
+      neighbor_side = neighbor->which_neighbor_am_i(_assembly[tid][0]->elem());
+    else
+    {
+      const Elem * fake_neighbor =
+          _mesh.neighbor_fake_ptr(_assembly[tid][0]->elem(), _assembly[tid][0]->side());
+
+      if (!fake_neighbor)
+        mooseError("No neighbor (real or fake) found for elem ",
+                   _assembly[tid][0]->elem()->id(),
+                   " side ",
+                   _assembly[tid][0]->side());
+
+      neighbor = fake_neighbor;
+      neighbor_side =
+          _mesh.neighbor_fake_side(_assembly[tid][0]->elem(), _assembly[tid][0]->side());
+    }
 
     mooseAssert(neighbor, "neighbor should be non-null");
     mooseAssert(blk_id == neighbor->subdomain_id(),
@@ -4382,9 +4411,24 @@ void
 FEProblemBase::swapBackMaterialsNeighbor(const THREAD_ID tid)
 {
   // NOTE: this will not work with h-adaptivity
+  const Elem * elem = _assembly[tid][0]->elem();
+  const unsigned int side = _assembly[tid][0]->side();
+
   const Elem * neighbor = _assembly[tid][0]->neighbor();
-  unsigned int neighbor_side =
-      neighbor ? neighbor->which_neighbor_am_i(_assembly[tid][0]->elem()) : libMesh::invalid_uint;
+  unsigned int neighbor_side = libMesh::invalid_uint;
+
+  if (neighbor)
+    // true neighbor
+    neighbor_side = neighbor->which_neighbor_am_i(elem);
+  else
+  {
+    // fake neighbor
+    neighbor = _mesh.neighbor_fake_ptr(elem, side);
+    if (!neighbor)
+      mooseError("No neighbor (real or fake) found for elem ", elem->id(), " side ", side);
+
+    neighbor_side = _mesh.neighbor_fake_side(elem, side);
+  }
 
   if (!neighbor)
   {
