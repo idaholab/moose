@@ -16,7 +16,8 @@ jobs:
 
 
     steps:
-      - uses: actions/checkout@v5
+      - name: Checkout MOOSE
+        uses: actions/checkout@v5
 
       - name: Checkout WASP
         run: git submodule update --init --checkout --recursive framework/contrib/wasp/
@@ -32,8 +33,11 @@ jobs:
           MOOSE_DIR: ${{ github.workspace }}
           CIBW_BUILD: cp${{ matrix.python }}-${{ matrix.cibuild.platform }}_${{ matrix.cibuild.arch }}
 
-      - name: List wheels
-        run: ls ./wheelhouse/*.whl
+      - name: Store wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: cibw-wheels-cp${{ matrix.python }}-${{ matrix.cibuild.platform }}_${{ matrix.cibuild.arch }}
+          path: wheelhouse/*.whl
 
 
 
