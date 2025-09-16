@@ -29,6 +29,10 @@
     variable = coupled
   []
   [advection]
-    coupled_variable = coupled
+    velocity_as_variable_gradient = coupled
   []
+[]
+
+[Executioner]
+  solve_type := NEWTON
 []
