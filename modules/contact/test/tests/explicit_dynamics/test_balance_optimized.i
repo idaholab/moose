@@ -267,7 +267,7 @@
   []
 []
 [Outputs]
-  interval = 10
+  time_step_interval = 10
   exodus = true
   csv = true
   file_base = test_balance_out

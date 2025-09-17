@@ -129,7 +129,7 @@ MaterialDerivativeTestAction::act()
         case PropTypeEnum::REAL:
         {
           auto params = _factory.getValidParams("MaterialDerivativeTestKernel");
-          params.set<std::vector<VariableName>>("args") = _args;
+          params.set<std::vector<VariableName>>("coupled_variables") = _args;
           params.set<std::vector<SymbolName>>("derivative") = derivative.second;
           params.set<MaterialPropertyName>("material_property") = _prop_name;
           params.set<NonlinearVariableName>("variable") = "var_" + derivative.first;
@@ -140,7 +140,7 @@ MaterialDerivativeTestAction::act()
         case PropTypeEnum::RANKTWOTENSOR:
         {
           auto params = _factory.getValidParams("MaterialDerivativeRankTwoTestKernel");
-          params.set<std::vector<VariableName>>("args") = _args;
+          params.set<std::vector<VariableName>>("coupled_variables") = _args;
           params.set<std::vector<SymbolName>>("derivative") = derivative.second;
           params.set<MaterialPropertyName>("material_property") = _prop_name;
           for (unsigned int i = 0; i < 3; ++i)
@@ -160,7 +160,7 @@ MaterialDerivativeTestAction::act()
         case PropTypeEnum::RANKFOURTENSOR:
         {
           auto params = _factory.getValidParams("MaterialDerivativeRankFourTestKernel");
-          params.set<std::vector<VariableName>>("args") = _args;
+          params.set<std::vector<VariableName>>("coupled_variables") = _args;
           params.set<std::vector<SymbolName>>("derivative") = derivative.second;
           params.set<MaterialPropertyName>("material_property") = _prop_name;
           for (unsigned int i = 0; i < 3; ++i)

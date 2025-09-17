@@ -147,7 +147,7 @@
     v = etaa0
     Fj_names = 'rhoa rhob rhod'
     hj_names = 'ha   hb   hd'
-    args = 'etaa0 etab0 etad0'
+    coupled_variables = 'etaa0 etab0 etad0'
   []
   [coupled_etab0dot]
     type = ADCoupledSwitchingTimeDerivative
@@ -155,7 +155,7 @@
     v = etab0
     Fj_names = 'rhoa rhob rhod'
     hj_names = 'ha   hb   hd'
-    args = 'etaa0 etab0 etad0'
+    coupled_variables = 'etaa0 etab0 etad0'
   []
   [coupled_etad0dot]
     type = ADCoupledSwitchingTimeDerivative
@@ -163,7 +163,7 @@
     v = etad0
     Fj_names = 'rhoa rhob rhod'
     hj_names = 'ha   hb   hd'
-    args = 'etaa0 etab0 etad0'
+    coupled_variables = 'etaa0 etab0 etad0'
   []
 []
 
@@ -188,7 +188,7 @@
   []
   [omegaa]
     type = ADDerivativeParsedMaterial
-    args = 'w'
+    coupled_variables = 'w'
     f_name = omegaa
     material_property_names = 'Vm ka caeq'
     function = '-0.5*w^2/Vm^2/ka-w/Vm*caeq'
@@ -196,7 +196,7 @@
   []
   [omegab]
     type = ADDerivativeParsedMaterial
-    args = 'w'
+    coupled_variables = 'w'
     f_name = omegab
     material_property_names = 'Vm kb cbeq'
     function = '-0.5*w^2/Vm^2/kb-w/Vm*cbeq'
@@ -204,7 +204,7 @@
   []
   [omegad]
     type = ADDerivativeParsedMaterial
-    args = 'w'
+    coupled_variables = 'w'
     f_name = omegad
     material_property_names = 'Vm kd cdeq'
     function = '-0.5*w^2/Vm^2/kd-w/Vm*cdeq'
@@ -212,7 +212,7 @@
   []
   [rhoa]
     type = ADDerivativeParsedMaterial
-    args = 'w'
+    coupled_variables = 'w'
     f_name = rhoa
     material_property_names = 'Vm ka caeq'
     function = 'w/Vm^2/ka + caeq/Vm'
@@ -220,7 +220,7 @@
   []
   [rhob]
     type = ADDerivativeParsedMaterial
-    args = 'w'
+    coupled_variables = 'w'
     f_name = rhob
     material_property_names = 'Vm kb cbeq'
     function = 'w/Vm^2/kb + cbeq/Vm'
@@ -228,7 +228,7 @@
   []
   [rhod]
     type = ADDerivativeParsedMaterial
-    args = 'w'
+    coupled_variables = 'w'
     f_name = rhod
     material_property_names = 'Vm kd cdeq'
     function = 'w/Vm^2/kd + cdeq/Vm'
@@ -257,7 +257,7 @@
     f_name = chi
     material_property_names = 'Vm ha(etaa0,etab0,etad0) ka hb(etaa0,etab0,etad0) kb hd(etaa0,etab0,etad0) kd'
     function = '(ha/ka + hb/kb + hd/kd) / Vm^2'
-    args = 'etaa0 etab0 etad0'
+    coupled_variables = 'etaa0 etab0 etad0'
     derivative_order = 2
   []
 []
@@ -319,11 +319,11 @@
   [exodus]
     type = Exodus
     execute_on = 'initial timestep_end final'
-    interval = 1
+    time_step_interval = 1
   []
   [csv]
     type = CSV
     execute_on = 'initial timestep_end final'
-    interval = 1
+    time_step_interval = 1
   []
 []

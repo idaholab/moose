@@ -33,14 +33,14 @@ mu = '${fparse rho * bulk_u * 2 * H / Re}'
 
     inlet_boundaries = 'left'
     momentum_inlet_types = 'fixed-velocity'
-    momentum_inlet_function = '1 0'
+    momentum_inlet_functors = '1 0'
 
     wall_boundaries = 'top bottom'
     momentum_wall_types = 'wallfunction symmetry'
 
     outlet_boundaries = 'right'
     momentum_outlet_types = 'fixed-pressure'
-    pressure_function = '0'
+    pressure_functors = '0'
 
     von_karman_const = ${von_karman_const}
     mixing_length_delta = 0.5

@@ -15,8 +15,7 @@ InputParameters
 ParsedMaterialBase::validParams()
 {
   InputParameters params = emptyInputParameters();
-  params.addCoupledVar("args", "Vector of variables used in the parsed function");
-  params.deprecateCoupledVar("args", "coupled_variables", "02/07/2024");
+  params.addCoupledVar("coupled_variables", "Vector of variables used in the parsed function");
 
   // Constants and their values
   params.addParam<std::vector<std::string>>(

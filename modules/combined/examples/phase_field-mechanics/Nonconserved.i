@@ -104,7 +104,7 @@
     base_name = phasea
     f_name = Fea
     block = 0
-    args = ''
+    coupled_variables = ''
   [../]
 
   # oversized precipitate phase (simulated using thermal expansion)
@@ -141,7 +141,7 @@
     base_name = phaseb
     f_name = Feb
     block = 0
-    args = ''
+    coupled_variables = ''
   [../]
 
   # Generate the global free energy from the phase free energies
@@ -164,7 +164,7 @@
     fa_name = Fea
     fb_name = Feb
     eta = eta
-    args = ''
+    coupled_variables = ''
     W = 0.1
     derivative_order = 2
   [../]
