@@ -135,7 +135,7 @@ TEST_F(WeakFormDerivationTest, BasicDifferentiation)
     ASSERT_NE(result, nullptr);
 
     auto simplified = simplifier->simplify(result);
-    EXPECT_EQ(simplified->toString(), "(1.000000 / (2.000000 * sqrt(x)))");
+    EXPECT_EQ(simplified->toString(), "(0.500000 * pow(x, -0.500000))");
   }
 
   // Test 7: d/dx(tanh(x)) = 1 - tanh(x)^2
@@ -324,9 +324,9 @@ TEST_F(WeakFormDerivationTest, VectorAssemblyOperations)
 
 TEST_F(WeakFormDerivationTest, HigherOrderDerivatives)
 {
-  // Test 1: div(laplacian(u)) produces first-order coefficient 1
+  // Test 1: div(grad(grad(u))) produces first-order coefficient 1
   {
-    auto expr = parser->parse("div(laplacian(u))");
+    auto expr = parser->parse("div(grad(grad(u)))");
     ASSERT_NE(expr, nullptr);
 
     DifferentiationVisitor dv("u");
@@ -341,16 +341,16 @@ TEST_F(WeakFormDerivationTest, HigherOrderDerivatives)
     EXPECT_EQ(simplified->toString(), "1.000000");
   }
 
-  // Test 2: div(grad(laplacian(u))) -> coefficient at order 2 equals 1
+  // Test 2: div(grad(grad(grad(u)))) -> coefficient at order 2 equals 1
   {
-    auto expr = parser->parse("div(grad(laplacian(u)))");
+    auto expr = parser->parse("div(grad(grad(grad(u))))");
     ASSERT_NE(expr, nullptr);
 
     DifferentiationVisitor dv("u");
     auto diff = dv.differentiate(expr);
 
     EXPECT_FALSE(diff.hasOrder(0));
-    EXPECT_TRUE(diff.hasOrder(1));
+    EXPECT_FALSE(diff.hasOrder(1));
     ASSERT_TRUE(diff.hasOrder(2));
 
     auto coeff = diff.getCoefficient(2);

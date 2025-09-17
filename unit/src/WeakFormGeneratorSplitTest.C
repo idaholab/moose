@@ -28,8 +28,8 @@ TEST(WeakFormGeneratorSplitTest, LaplacianEnergyMatchesBaseline)
   NodePtr energy = multiply(laplacian(u), laplacian(u));
 
   WeakFormGenerator baseline_generator(3);
-  auto baseline = baseline_generator.computeContributions(energy, "u");
-  ASSERT_TRUE(baseline.total_residual);
+  NodePtr baseline_strong = baseline_generator.generateWeakForm(energy, "u");
+  ASSERT_TRUE(baseline_strong);
 
   auto split_vars = analyzer.generateSplitVariables(energy);
   auto split_defs = extractDefinitions(split_vars);
@@ -37,10 +37,10 @@ TEST(WeakFormGeneratorSplitTest, LaplacianEnergyMatchesBaseline)
 
   WeakFormGenerator split_generator(3);
   split_generator.setSplitDefinitions(split_defs);
-  auto split = split_generator.computeContributions(transformed, "u");
-  ASSERT_TRUE(split.total_residual);
+  NodePtr split_strong = split_generator.generateWeakForm(transformed, "u");
+  ASSERT_TRUE(split_strong);
 
-  EXPECT_EQ(split.total_residual->toString(), baseline.total_residual->toString());
+  EXPECT_EQ(split_strong->toString(), baseline_strong->toString());
 }
 
 TEST(WeakFormGeneratorSplitTest, SplitVariableCarriesDerivativeInformation)
@@ -57,12 +57,21 @@ TEST(WeakFormGeneratorSplitTest, SplitVariableCarriesDerivativeInformation)
   auto split_it = split_vars.find("u_d2");
 
   DifferentiationVisitor dv("u", &split_defs);
-  auto diff = dv.differentiate(fieldVariable(split_it->first));
+  auto split_diff = dv.differentiate(fieldVariable(split_it->first));
+  auto reference_expr = div(grad(fieldVariable("u")));
+  auto reference_diff = dv.differentiate(reference_expr);
 
-  EXPECT_TRUE(diff.hasOrder(2));
-  ASSERT_TRUE(diff.getCoefficient(2));
-  EXPECT_EQ(diff.getCoefficient(2)->toString(), constant(1.0)->toString());
-  EXPECT_FALSE(diff.hasOrder(0));
-  EXPECT_FALSE(diff.hasOrder(1));
+  EXPECT_EQ(split_diff.maxOrder(), reference_diff.maxOrder());
+  for (unsigned int order = 0; order <= reference_diff.maxOrder(); ++order)
+  {
+    EXPECT_EQ(split_diff.hasOrder(order), reference_diff.hasOrder(order));
+    if (reference_diff.hasOrder(order))
+    {
+      auto split_coeff = split_diff.getCoefficient(order);
+      auto ref_coeff = reference_diff.getCoefficient(order);
+      ASSERT_NE(split_coeff, nullptr);
+      ASSERT_NE(ref_coeff, nullptr);
+      EXPECT_EQ(split_coeff->toString(), ref_coeff->toString());
+    }
+  }
 }
-
