@@ -8,7 +8,7 @@
 
 [Controls/web_server]
   type = WebServerControl
-  execute_on = 'TIMESTEP_END'
+  execute_on = 'INITIAL TIMESTEP_END'
 []
 
 [Problem]
@@ -24,7 +24,7 @@
 [Postprocessors/t]
   type = FunctionValuePostprocessor
   function = 't'
-  execute_on = 'TIMESTEP_BEGIN'
+  execute_on = 'INITIAL TIMESTEP_BEGIN'
 []
 
 [Outputs]

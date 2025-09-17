@@ -14,6 +14,12 @@ if __name__ == '__main__':
     # Passed into the base controller to run the MooseControl
     def run_control(control):
 
+        # Control through initialization
+        control.wait('INITIAL')
+        pp_t = control.getPostprocessor('t')
+        t  = control.getTime()
+        expect_close(pp_t, t)
+        control.setContinue()
         # Control through the timesteps
         for i in range(3):
             # Wait, where we shold be at TIMESTEP_END
@@ -22,6 +28,7 @@ if __name__ == '__main__':
             # Get the current value of the postprocessor and simulation time for comparision
             pp_t = control.getPostprocessor('t')
             t  = control.getTime()
+            print(f"pp time is {pp_t}, t time is {t}")
             expect_close(pp_t, t)
 
             # Tell MOOSE to continue with the solve
