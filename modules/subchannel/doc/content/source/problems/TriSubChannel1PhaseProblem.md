@@ -15,7 +15,7 @@ Pin surface temperature is calculated at the end of the solve, if there is a Pin
 
 The pin surface temperature are computed via the heat transfer coefficient as follows:
 
-\being{equation}
+\begin{equation}
 T_{s,\text{pin}}(z) = \frac{1}{N} \sum_{sc=1}^N T_{bulk,sc}(z) + \frac{q'_{\text{pin}}(z)}{\pi D_{\text{pin}}(z) h_{sc}(z)},
 \end{equation}
 
@@ -29,7 +29,7 @@ where:
 
 For the duct, the duct surface temperature is defined as follows:
 
-\being{equation}
+\begin{equation}
 T_{s,d}(z) = T_{bulk,d}(z) + \frac{q''_d(z)}{h_d(z)},
 \end{equation}
 
@@ -41,7 +41,7 @@ where:
 
 In both cases, the heat exchange coefficients are computed using the the Nusselt number (Nu) as follows:
 
-\being{equation}
+\begin{equation}
 h = \frac{\text{Nu} \times k}{D_h}
 \end{equation}
 
@@ -88,7 +88,7 @@ The following relation is used dependeing on the subchannel type~\cite{Todreas}:
 ### Dittus-Boelter Correlation for Turbulent Nusselt Number
 The Dittus-Boelter equation~\cite{incropera1990} is implemented as follows:
 
-\being{equation}
+\begin{equation}
 \text{Nu}_{\text{turbulent}} = 0.023 \times Re^{0.8} \times Pr^{0.4},
 \end{equation}
 
@@ -100,7 +100,7 @@ where:
 ### Gnielinski Correlation for Turbulent Nusselt Number
 The modified Gnielinski correlation for low Prandtl numbers~\cite{angelucci2018} is used for calculating the Nusselt number for transitional and turbulent flows as follows:
 
-\being{equation}
+\begin{equation}
 \text{Nu}_{\text{turbulent}} = \frac{f/8.0 \times (Re - 1000) \times (Pr + 0.01)}{1 + 12.7 \times \sqrt{f/8.0} \times \left( (Pr + 0.01)^{2/3} - 1 \right)},
 \end{equation}
 
@@ -113,7 +113,7 @@ where:
 ### Kazimi-Carelli Correlation for Turbulent Nusselt Number
 The Kazimi-Carelli correlation~\cite{kazimi1976} is used for calculating the Nusselt number in rod bundles, considering the geometry of the bundle.
 
-\being{equation}
+\begin{equation}
 \text{Nu}_{\text{turbulent}} = 4.0 + 0.33 \times \left( \frac{p}{D} \right)^{3.8} \times \left( \frac{Pe}{100} \right)^{0.86} + 0.16 \times \left( \frac{p}{D} \right)^{5},
 \end{equation}
 
@@ -130,18 +130,18 @@ where:
 The Kazimi-Carelli correlation is not currently implemented for computing the duct surface temperature.
 The code will error out if 'Kazimi-Carelli' is used in [!param](/Problem/TriSubChannel1PhaseProblem/duct_htc_correlation).
 
-#### Transition Regime
+### Transition Regime
 
 A linear interplation weight is defined as follows:
 
-\being{equation}
+\begin{equation}
 w_T = \frac{Re - Re_L}{Re_T - Re_L}.
 \end{equation}
 
 Then, the Nusselt is defined by linearly interpolating the laminar Nusselt number and ther turbulent one,
 which is defined with the chosen correlation for the pin or duct, as follows:
 
-\being{equation}
+\begin{equation}
 \text{Nu}_{\text{transition}} = w_T \times \text{Nu}_{\text{turbulent}} + (1.0 - w_T) \times \text{Nu}_{\text{laminar}}.
 \end{equation}
 
