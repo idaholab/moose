@@ -66,13 +66,13 @@ protected:
   /// metal fuel specific heat
   Real MetalFuelCP(Real temp, Real _wpu, Real _wzr);
   /// metal fuel density
-  Real MetalFuelRHO(Real temp, Real _wpu, Real _wzr, Real _por);
+  Real MetalFuelRHO(Real _wpu, Real _wzr, Real _por);
   /// HT9 Cladding thermal conductivity
   Real HT9CladTHCON(Real temp);
   /// HT9 cladding Specific heat
   Real HT9CladCP(Real temp);
   /// Cladding density
-  Real HT9CladRHO(Real temp);
+  Real HT9CladRHO();
   /// initialize PinTempSolver
   unsigned int pintemp_init = 0;
   /// Steady-state integer flag, 0=SS, 1=TR

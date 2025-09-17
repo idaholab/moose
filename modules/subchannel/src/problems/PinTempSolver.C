@@ -127,8 +127,6 @@ PinTempSolver::initializeSolutionPinTempSolver()
     _r[i] = _r[0] + (_r[_nrfuel] - _r[0]) / float(_nrfuel) * i;
   }
 
-  Real sum;
-  sum = 0.0;
   for (unsigned int i = 0; i < _nrpin + 1; i++)
   {
 
@@ -416,7 +414,7 @@ PinTempSolver::MetalFuelCP(Real temp, Real _wpu, Real _wzr)
 }
 
 Real
-PinTempSolver::MetalFuelRHO(Real temp, Real _wpu, Real _wzr, Real _por)
+PinTempSolver::MetalFuelRHO(Real _wpu, Real _wzr, Real _por)
 {
 
   Real rho_u = 19000.0;
@@ -461,7 +459,7 @@ PinTempSolver::HT9CladCP(Real temp)
 }
 
 Real
-PinTempSolver::HT9CladRHO(Real temp)
+PinTempSolver::HT9CladRHO()
 {
 
   Real rho = 7800.0;
@@ -489,8 +487,8 @@ PinTempSolver::TempSolverSS(unsigned int iz, unsigned int i_pin, Real hcoef, Rea
     _cpclad[i] = HT9CladCP(_temp_pin[i_pin](iz, i));
     _kfuel[i] = MetalFuelTHCON(_temp_pin[i_pin](iz, i), _wpu, _wzr, _por, _r[i]);
     _kclad[i] = HT9CladTHCON(_temp_pin[i_pin](iz, i));
-    _rhofuel[i] = MetalFuelRHO(_temp_pin[i_pin](iz, i), _wpu, _wzr, _por);
-    _rhoclad[i] = HT9CladRHO(_temp_pin[i_pin](iz, i));
+    _rhofuel[i] = MetalFuelRHO(_wpu, _wzr, _por);
+    _rhoclad[i] = HT9CladRHO();
     _qtrip[i] = (*_q_prime_soln)(pin_node) / libMesh::pi / (pow(_rfu, 2) - pow(_r0, 2));
     _b[i] = 0.0;
   }
@@ -651,8 +649,8 @@ PinTempSolver::TempSolverTR(Real dt, unsigned int iz, unsigned int i_pin, Real h
     _cpclad[i] = HT9CladCP(_temp_pin[i_pin](iz, i));
     _kfuel[i] = MetalFuelTHCON(_temp_pin[i_pin](iz, i), _wpu, _wzr, _por, _r[i]);
     _kclad[i] = HT9CladTHCON(_temp_pin[i_pin](iz, i));
-    _rhofuel[i] = MetalFuelRHO(_temp_pin[i_pin](iz, i), _wpu, _wzr, _por);
-    _rhoclad[i] = HT9CladRHO(_temp_pin[i_pin](iz, i));
+    _rhofuel[i] = MetalFuelRHO(_wpu, _wzr, _por);
+    _rhoclad[i] = HT9CladRHO();
     _qtrip[i] = (*_q_prime_soln)(pin_node) / libMesh::pi / (pow(_rfu, 2) - pow(_r0, 2));
     _b[i] = 0.0;
   }
@@ -1091,4 +1089,3 @@ PinTempSolver::externalSolve()
         "Energy conservation equation might not be solved correctly, Power added to coolant:  " +
         std::to_string(power_out - power_in) + " Watt ");
 }
-
