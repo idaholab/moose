@@ -24,13 +24,13 @@ def main():
         start_time=t0,
         stop_time=t1,
         start_values={
-        'flag':             'TIMESTEP_END',
+        'flag':             'INITIAL TIMESTEP_END',
         'moose_executable': '../../../moose_test-opt',
         'moose_inputfile':  'fmu_diffusion.i',
         'server_name':      'web_server',
-        'max_retries':      10
-    },
+        'max_retries':      10},
         input = input_data,
+        debug_logging=False,
         output      = ['time','moose_time', 'diffused']
     )
 

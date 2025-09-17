@@ -26,7 +26,6 @@
     [couple_fmus]
       type = 'CSVDiff'
       csvdiff = 'run_fmu_connection.csv'
-      csvdiff = 'run_fmu_connection.csv'
       command_proxy = run_fmu_connection.py
       required_python_packages = 'fmpy pandas matplotlib.pyplot math time logging'
       recover = false
@@ -35,3 +34,4 @@
       valgrind = 'none' # http library is not completely valgrind clean
     []
   []
+[]
