@@ -279,6 +279,21 @@ TEST_F(WeakFormDerivationTest, VectorAssemblyOperations)
     ASSERT_NE(coeff, nullptr);
     EXPECT_EQ(coeff->toString(), "vec(0.000000, 0.000000, 1.000000)");
   }
+
+  // Test 7: Curl differentiation increases derivative order
+  {
+    auto expr = parser->parse("curl(vec(u, 0.0, 0.0))");
+    ASSERT_NE(expr, nullptr);
+
+    DifferentiationVisitor dv("u");
+    auto diff = dv.differentiate(expr);
+
+    EXPECT_FALSE(diff.hasOrder(0));
+    EXPECT_TRUE(diff.hasOrder(1));
+    auto coeff = diff.getCoefficient(1);
+    ASSERT_NE(coeff, nullptr);
+    EXPECT_EQ(coeff->toString(), "vec(1.000000, 0.000000, 0.000000)");
+  }
 }
 
 // Test anisotropic energy expressions with exact results

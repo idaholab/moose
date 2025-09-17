@@ -61,6 +61,7 @@ DifferentiationVisitor::handlerMap()
       {NodeType::Outer, &DifferentiationVisitor::differentiateBinaryOp},
       {NodeType::Negate, &DifferentiationVisitor::differentiateUnaryOp},
       {NodeType::Gradient, &DifferentiationVisitor::differentiateUnaryOp},
+      {NodeType::Curl, &DifferentiationVisitor::differentiateUnaryOp},
       {NodeType::Divergence, &DifferentiationVisitor::differentiateUnaryOp},
       {NodeType::Laplacian, &DifferentiationVisitor::differentiateUnaryOp},
       {NodeType::Norm, &DifferentiationVisitor::differentiateUnaryOp},
@@ -117,6 +118,9 @@ Differential DifferentiationVisitor::differentiateUnaryOp(const NodePtr & node)
 
     case NodeType::Gradient:
       return handleGradient(unary->operand());
+
+    case NodeType::Curl:
+      return handleCurl(unary->operand());
 
     case NodeType::Divergence:
       return handleDivergence(unary->operand());
@@ -306,6 +310,18 @@ Differential DifferentiationVisitor::differentiateFunction(const NodePtr & node)
 }
 
 Differential DifferentiationVisitor::handleGradient(const NodePtr & operand)
+{
+  Differential operand_diff = visit(operand);
+  Differential result;
+
+  for (auto & [order, coeff] : operand_diff.coefficients)
+    if (coeff)
+      result.coefficients[order + 1] = coeff;
+
+  return result;
+}
+
+Differential DifferentiationVisitor::handleCurl(const NodePtr & operand)
 {
   Differential operand_diff = visit(operand);
   Differential result;

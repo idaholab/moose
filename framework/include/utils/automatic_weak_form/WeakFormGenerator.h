@@ -63,6 +63,7 @@ private:
   Differential differentiateVectorAssembly(const NodePtr & node);
 
   Differential handleGradient(const NodePtr & operand);
+  Differential handleCurl(const NodePtr & operand);
   Differential handleDivergence(const NodePtr & operand);
   Differential handleLaplacian(const NodePtr & operand);
   Differential handleNorm(const NodePtr & operand);
