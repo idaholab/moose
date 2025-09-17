@@ -55,7 +55,7 @@ formFunction(SNES, Vec x, Vec f, void * ctx)
 InputParameters
 SubChannel1PhaseProblem::validParams()
 {
-  // Enumerators
+  // Enumerations
   MooseEnum schemes("upwind downwind central_difference exponential", "central_difference");
   MooseEnum gravity_direction("counter_flow co_flow none", "counter_flow");
   MooseEnum htc_correlations("dittus-boelter gnielinski kazimi-carelli", "dittus-boelter");
@@ -400,8 +400,6 @@ SubChannel1PhaseProblem::computeNusseltNumber(NusseltStruct nusselt_args)
       friction_args.w_perim = (*_w_perim_soln)(node);
       Real f_darcy = computeFrictionFactor(friction_args) / 8.0;
 
-      // return f_darcy * (Re - 1e3) * Pr / (1 + 12.7 * std::sqrt(f_darcy) * (std::pow(Pr, 2./3.)
-      // - 1.) + 4.0);
       return f_darcy * (Re - 1e3) * (Pr + 0.01) /
              (1 + 12.7 * std::sqrt(f_darcy) * (std::pow(Pr + 0.01, 2. / 3.) - 1.));
     }
