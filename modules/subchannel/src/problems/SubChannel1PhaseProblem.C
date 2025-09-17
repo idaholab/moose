@@ -392,7 +392,8 @@ SubChannel1PhaseProblem::computeNusseltNumber(NusseltStruct nusselt_args)
   auto subch_type = _subchannel_mesh.getSubchannelType(nusselt_args.i_ch);
 
   // Lambda function for laminar flow Nusselt
-  auto laminar_Nu = [subch_type]() -> Real {
+  auto laminar_Nu = [subch_type]() -> Real
+  {
     if (subch_type == EChannelType::CENTER)
       return 4.0;
     else if (subch_type == EChannelType::EDGE)
@@ -409,7 +410,8 @@ SubChannel1PhaseProblem::computeNusseltNumber(NusseltStruct nusselt_args)
     return laminar_Nu();
 
   // Lambda function for turbulent Nusselt
-  auto blended_Nu = [&](Real NuT) -> Real {
+  auto blended_Nu = [&](Real NuT) -> Real
+  {
     if (Re >= ReT)
       return NuT;
     else // transition regime
@@ -425,12 +427,10 @@ SubChannel1PhaseProblem::computeNusseltNumber(NusseltStruct nusselt_args)
     {
       if (Pr < 0.7 || Pr > 1.6e2)
       {
-        mooseDoOnce(mooseWarning(
-          "Pr number out of range in the Dittus Bolter correlation for "
-          "pin or duct surface temperture calculation."));
-        flagInvalidSolution(
-            "Pr number is out of range for the Dittus Boelter correlation "
-            "in the pin or duct surface temperature calculation.");
+        mooseDoOnce(mooseWarning("Pr number out of range in the Dittus Bolter correlation for "
+                                 "pin or duct surface temperture calculation."));
+        flagInvalidSolution("Pr number is out of range for the Dittus Boelter correlation "
+                            "in the pin or duct surface temperature calculation.");
       }
 
       const auto NuT = 0.023 * std::pow(Re, 0.8) * std::pow(Pr, 0.4);
@@ -441,12 +441,10 @@ SubChannel1PhaseProblem::computeNusseltNumber(NusseltStruct nusselt_args)
     {
       if (Pr < 1e-5 || Pr > 2e3)
       {
-        mooseDoOnce(mooseWarning(
-          "Pr number out of range in the Gnielinski correlation for "
-          "pin or duct surface temperture calculation."));
-        flagInvalidSolution(
-            "Pr number is out of range for the Gnielinski correlation "
-            "in the pin or duct surface temperature calculation.");
+        mooseDoOnce(mooseWarning("Pr number out of range in the Gnielinski correlation for "
+                                 "pin or duct surface temperture calculation."));
+        flagInvalidSolution("Pr number is out of range for the Gnielinski correlation "
+                            "in the pin or duct surface temperature calculation.");
       }
 
       const auto iz = nusselt_args.iz;
@@ -461,7 +459,7 @@ SubChannel1PhaseProblem::computeNusseltNumber(NusseltStruct nusselt_args)
       Real f_darcy = computeFrictionFactor(friction_args) / 8.0;
 
       const auto NuT = f_darcy * (Re - 1e3) * (Pr + 0.01) /
-             (1 + 12.7 * std::sqrt(f_darcy) * (std::pow(Pr + 0.01, 2. / 3.) - 1.));
+                       (1 + 12.7 * std::sqrt(f_darcy) * (std::pow(Pr + 0.01, 2. / 3.) - 1.));
       return blended_Nu(NuT);
     }
 
@@ -471,16 +469,14 @@ SubChannel1PhaseProblem::computeNusseltNumber(NusseltStruct nusselt_args)
 
       if (Pe < 1.5 || Pe > 1e4)
       {
-        mooseDoOnce(mooseWarning(
-          "Pr number out of range in the Kazimi Carelli correlation for "
-          "pin or duct surface temperture calculation."));
-        flagInvalidSolution(
-            "Pr number is out of range for the Kazimi Carelli correlation "
-            "in the pin or duct surface temperature calculation.");
+        mooseDoOnce(mooseWarning("Pr number out of range in the Kazimi Carelli correlation for "
+                                 "pin or duct surface temperture calculation."));
+        flagInvalidSolution("Pr number is out of range for the Kazimi Carelli correlation "
+                            "in the pin or duct surface temperature calculation.");
       }
-      
-      const auto NuT = 4.0 + 0.33 * std::pow(poD, 3.8) * 
-                        std::pow((Pe / 1e2), 0.86) + 0.16 * std::pow(poD, 5);
+
+      const auto NuT =
+          4.0 + 0.33 * std::pow(poD, 3.8) * std::pow((Pe / 1e2), 0.86) + 0.16 * std::pow(poD, 5);
       return blended_Nu(NuT);
     }
 
