@@ -322,4 +322,10 @@
     requirement = 'The system shall provide the ability to set whether or not a test can run using the capabilities system using properties of the currently running test suite.'
     issues = '#31135'
   []
+  [only_tests_that_require]
+    type = PythonUnitTest
+    input = test_OnlyTestsThatRequire.py
+    requirement = 'The system shall provide the ability to filter tests based on whether or not they are dependent on certain capabilities.'
+    issues = '#31310'
+  []
 []
