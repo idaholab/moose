@@ -1,4 +1,4 @@
-
+### If you change these versions, change also conda/wasp/*, conda/seacas/*
 moose_cmake:
   - cmake 3
 
@@ -7,13 +7,13 @@ moose_cc:
   - clang 18.1.8 default_h576c50e_9                         # [not arm64 and osx]
   - clang 18.1.8 default_h474c9e2_9                         # [arm64]
 
-
+### If you change these versions, change also conda/wasps/*, conda/seacas/*
 moose_cxx:
   - gxx 12.3.0 h915e2ae_13                                  # [linux]
   - clangxx 18.1.8 default_heb2e8d1_9                       # [not arm64 and osx]
   - clangxx 18.1.8 default_h1ffe849_9                       # [arm64]
 
-
+### If you change these versions, change also conda/mpi/*
 moose_gfortran:
   - gfortran 12.3.0 h915e2ae_13                             # [linux]
   - gfortran 13.3.0 hcc3c99d_1                              # [not arm64 and osx]
