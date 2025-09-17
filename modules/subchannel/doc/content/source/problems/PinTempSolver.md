@@ -12,7 +12,7 @@ It inherits from the base class : `TriSubChannel1PhaseProblem`. Information rega
 
 ## Example Input File Syntax
 
-!listing /test/tests/problems/SFR/pin_temp_solverSS/pin_tempss_.i block=Problem language=moose
+!listing /test/tests/problems/SFR/pin_temp_solverSS/pin_tempss.i block=Problem language=moose
 
 !syntax parameters /Problem/PinTempSolver
 
