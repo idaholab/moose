@@ -117,7 +117,7 @@ Let's generate a more interesting mesh, one that represents something like a fue
 ## Run: Concentric Circle Mesh
 
 ```bash
-cardinal-opt -i step1-2_meshing.basic.i --mesh-only
+cardinal-opt -i step1-2_concentric_circle.i --mesh-only
 ```
 
 !---
@@ -125,4 +125,31 @@ cardinal-opt -i step1-2_meshing.basic.i --mesh-only
 ## Result: Concentric Circle Mesh Input
 
 !style halign=center
-!media step1-2_mesh.png style=width:40%
+!media step1-2_mesh.png style=width:25%
+
+The grey elements represent void (subdomain `1`), the red elements represent the fuel (subdomain `2`), and the green elements represent the clad (subdomain `3`). There is a sideset on the outer boundary with name `outer` and ID `1`.
+
+!---
+
+## Concentric Circle Mesh With Hole
+
+For the purposes of this tutorial, we will consider no net heat transfer within or across the void region. Thus, let's remove it from the mesh:
+
+!listing ictp/step1-3_concentric_circle_no_void.i diff=ictp/step1-2_concentric_circle.i
+
+!---
+
+## Run: Concentric Circle Mesh With Hole
+
+```bash
+cardinal-opt -i step1-3_concentric_circle_no_void.i --mesh-only
+```
+
+!---
+
+## Result: Concentric Circle Mesh Input With Hole
+
+!style halign=center
+!media step1-3_mesh.png style=width:25%
+
+The grey elements represent the fuel (subdomain `2`), and the red elements represent the clad (subdomain `3`). There is a sideset on the outer boundary with name `outer` and ID `1` and sideset on the inner boundary with the name `inner` and ID `2` .
