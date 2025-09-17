@@ -70,10 +70,10 @@ LineSearches\\
 Markers\\
 Materials\\
 Mesh\\
+MeshGenerators\\
 !col-end!
 
 !col! small=12 medium=6 large=3 style=margin-right:2%;
-MeshGenerators\\
 MeshModifiers\\
 Multiapps\\
 NodalKernels\\
@@ -84,10 +84,10 @@ Positions\\
 Postprocessors\\
 Preconditioners\\
 Predictors\\
+Problems\\
 !col-end!
 
 !col! small=12 medium=6 large=3 style=margin-right:10%;
-Problems\\
 Reporters\\
 RelationshipManagers\\
 Samplers\\
@@ -129,6 +129,7 @@ Peridynamics\\
 Phase Field\\
 Porous Flow\\
 Solid Mechanics\\
+Subchannel\\
 Thermal Hydraulics\\
 !col-end!
 
