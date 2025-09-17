@@ -209,22 +209,6 @@ public:
   NodePtr simplify(const NodePtr & expr);
   
 private:
-  NodePtr simplifyNode(const NodePtr & node);
-  NodePtr simplifyVectorAssembly(const VectorAssemblyNode * node);
-  
-  NodePtr simplifyAdd(const BinaryOpNode * node);
-  NodePtr simplifyMultiply(const BinaryOpNode * node);
-  NodePtr simplifyDivide(const BinaryOpNode * node);
-  NodePtr simplifyPower(const BinaryOpNode * node);
-  
-  bool isZero(const NodePtr & node) const;
-  bool isOne(const NodePtr & node) const;
-  bool isConstant(const NodePtr & node) const;
-  
-  Real getConstantValue(const NodePtr & node) const;
-  
-  NodePtr foldConstants(const NodePtr & left, const NodePtr & right, NodeType op);
-  
   std::map<std::string, NodePtr> _simplified_cache;
 };
 
