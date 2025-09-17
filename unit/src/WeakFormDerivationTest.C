@@ -322,6 +322,63 @@ TEST_F(WeakFormDerivationTest, VectorAssemblyOperations)
   }
 }
 
+TEST_F(WeakFormDerivationTest, HigherOrderDerivatives)
+{
+  // Test 1: div(laplacian(u)) produces first-order coefficient 1
+  {
+    auto expr = parser->parse("div(laplacian(u))");
+    ASSERT_NE(expr, nullptr);
+
+    DifferentiationVisitor dv("u");
+    auto diff = dv.differentiate(expr);
+
+    EXPECT_FALSE(diff.hasOrder(0));
+    ASSERT_TRUE(diff.hasOrder(1));
+    auto coeff = diff.getCoefficient(1);
+    ASSERT_NE(coeff, nullptr);
+
+    auto simplified = simplifier->simplify(coeff);
+    EXPECT_EQ(simplified->toString(), "1.000000");
+  }
+
+  // Test 2: div(grad(laplacian(u))) -> coefficient at order 2 equals 1
+  {
+    auto expr = parser->parse("div(grad(laplacian(u)))");
+    ASSERT_NE(expr, nullptr);
+
+    DifferentiationVisitor dv("u");
+    auto diff = dv.differentiate(expr);
+
+    EXPECT_FALSE(diff.hasOrder(0));
+    EXPECT_TRUE(diff.hasOrder(1));
+    ASSERT_TRUE(diff.hasOrder(2));
+
+    auto coeff = diff.getCoefficient(2);
+    ASSERT_NE(coeff, nullptr);
+
+    auto simplified = simplifier->simplify(coeff);
+    EXPECT_EQ(simplified->toString(), "1.000000");
+  }
+
+  // Test 3: Mixed gradient dot-product derivative
+  {
+    auto expr = parser->parse("dot(grad(u), grad(v))");
+    ASSERT_NE(expr, nullptr);
+
+    DifferentiationVisitor dv("u");
+    auto diff = dv.differentiate(expr);
+
+    EXPECT_FALSE(diff.hasOrder(0));
+    ASSERT_TRUE(diff.hasOrder(1));
+
+    auto coeff = diff.getCoefficient(1);
+    ASSERT_NE(coeff, nullptr);
+
+    auto simplified = simplifier->simplify(coeff);
+    EXPECT_EQ(simplified->toString(), "grad(v)");
+  }
+}
+
 // Test anisotropic energy expressions with exact results
 TEST_F(WeakFormDerivationTest, AnisotropicEnergy)
 {
