@@ -50,12 +50,16 @@ protected:
   /// Returns friction factor
   virtual Real computeFrictionFactor(FrictionStruct friction_args) = 0;
 
-  struct NusseltStruct {
+  struct NusseltStruct
+  {
     Real Re, Pr;
     unsigned int i_pin, iz, i_ch;
     MooseEnum htc_correlation;
 
-    NusseltStruct() : Re(1.0), Pr(1.0), i_pin(0), iz(0), i_ch(0), htc_correlation(MooseEnum("dittus-boelter")) {} // Default constructor
+    NusseltStruct()
+      : Re(1.0), Pr(1.0), i_pin(0), iz(0), i_ch(0), htc_correlation(MooseEnum("dittus-boelter"))
+    {
+    } // Default constructor
   };
 
   NusseltStruct _nusselt_args;
