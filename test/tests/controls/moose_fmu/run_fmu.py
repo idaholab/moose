@@ -25,13 +25,15 @@ def simulate_moose_fmu(moose_filename, t0, t1, dt):
         'moose_inputfile':  'fmu_diffusion.i',
         'server_name':      'web_server',
         'max_retries':      10},
-        debug_logging=False,
-        output      = ['time','moose_time', 'diffused']
+        debug_logging=True,
+        output      = ['time','moose_time', 'diffused', "rep_value"]
     )
 
     df = pd.DataFrame(result)
 
     df.to_csv("run_fmu.csv", index=False)
+
+    return result
 
 def moose_fmu_step_by_step(
     moose_filename: str,
@@ -87,12 +89,13 @@ def moose_fmu_step_by_step(
 
             moose_time = fmu.getReal([vrs["moose_time"]])[0]
             diffused   = fmu.getReal([vrs["diffused"]])[0]
-            print(f"fmu_time={t:.3f} → moose_time={moose_time:.6f} → diffused={diffused:.6f}")
-            rows.append((t, moose_time, diffused))
+            rep_value = fmu.getReal([vrs["rep_value"]])[0]
+            print(f"fmu_time={t:.3f} → moose_time={moose_time:.6f} → diffused={diffused:.6f}→ rep_value={rep_value:.6f}")
+            rows.append((t, moose_time, diffused, rep_value))
 
         result = np.array(
             rows,
-            dtype=[("time", np.float64), ("moose_time", np.float64), ("diffused", np.float64)],
+            dtype=[("time", np.float64), ("moose_time", np.float64), ("diffused", np.float64), ("rep_value", np.float64)],
         )
 
         # Save our step-by-step results
@@ -117,7 +120,7 @@ def moose_fmu_step_by_step(
             suffixes=("_base", "_step")
         )
         # Drop any rows that failed to align within tolerance
-        aligned = aligned.dropna(subset=["moose_time_base", "moose_time_step", "diffused_base", "diffused_step"])
+        aligned = aligned.dropna(subset=["moose_time_base", "moose_time_step", "diffused_base", "diffused_step", "rep_value_base", "rep_value_step"])
 
         n_base   = len(df_base)
         n_step   = len(df_step)
@@ -126,14 +129,17 @@ def moose_fmu_step_by_step(
         # Compute diffs and metrics
         mt_diff = aligned["moose_time_base"].to_numpy() - aligned["moose_time_step"].to_numpy()
         du_diff = aligned["diffused_base"].to_numpy()    - aligned["diffused_step"].to_numpy()
+        rep_diff = aligned["rep_value_base"].to_numpy()  - aligned["rep_value_step"].to_numpy()
 
         def rmse(x: np.ndarray) -> float:
             return float(np.sqrt(np.mean(np.square(x)))) if x.size else float("nan")
 
         mt_max  = float(np.max(np.abs(mt_diff))) if mt_diff.size else float("nan")
         du_max  = float(np.max(np.abs(du_diff))) if du_diff.size else float("nan")
+        rep_max  = float(np.max(np.abs(rep_diff))) if rep_diff.size else float("nan")
         mt_rmse = rmse(mt_diff)
         du_rmse = rmse(du_diff)
+        rep_rmse = rmse(rep_diff)
 
         # allclose checks (vectorized) for the aligned rows
         ok_mt = np.allclose(
@@ -147,10 +153,17 @@ def moose_fmu_step_by_step(
             rtol=rtol, atol=atol
         )
 
+        ok_rep = np.allclose(
+            aligned["rep_value_base"].to_numpy(),
+            aligned["rep_value_step"].to_numpy(),
+            rtol=rtol, atol=atol
+        )
+
         print("\n=== Comparison vs. baseline ===")
         print(f"Rows: baseline={n_base}, step_by_step={n_step}, aligned={n_align} (time_tol={time_tol})")
         print(f"moose_time: allclose={ok_mt} (rtol={rtol}, atol={atol}) | max_abs={mt_max:.3e} | rmse={mt_rmse:.3e}")
         print(f"diffused:   allclose={ok_du} (rtol={rtol}, atol={atol}) | max_abs={du_max:.3e} | rmse={du_rmse:.3e}")
+        print(f"rep_value:  allclose={ok_rep} (rtol={rtol}, atol={atol}) | max_abs={rep_max:.3e} | rmse={rep_rmse:.3e}")
 
         if n_align < min(n_base, n_step):
             logger.warning(
@@ -175,17 +188,18 @@ def main():
 
     t0, t1, dt = 0, 3.0, 0.5
     moose_filename = 'MooseTest.fmu'
-    # simulate_moose_fmu(moose_filename, t0, t1, dt)
-    # logger.info("Start the second moose run after 10s")
-    # time.sleep(10)
+    result = simulate_moose_fmu(moose_filename, t0, t1, dt)
+    logger.info("Start the second moose run after 10s")
+    time.sleep(10)
     result = moose_fmu_step_by_step(moose_filename, t0, t1, dt)
 
-    time     = result["time"]
-    dt     = result["moose_time"]
-    diff_u = result["diffused"]
+    fmu_time  = result["time"]
+    dt        = result["moose_time"]
+    diff_u    = result["diffused"]
+    rep_value = result["rep_value"]
 
-    for ti, di, diff in zip(time, dt, diff_u):
-        print(f"fmu_time={ti:.1f} → moose_time={di:.5f} → diffused={diff:.5f} ")
+    for ti, di, diff, rep in zip(fmu_time, dt, diff_u, rep_value):
+        print(f"fmu_time={ti:.1f} → moose_time={di:.5f} → diffused={diff:.5f}→ rep_value={rep:.5f} ")
 
 
 if __name__ == "__main__":
