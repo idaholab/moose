@@ -53,18 +53,23 @@ class MooseTest(Moose2FMU):
 
         # MOOSE time is synced with FMU time, we will get the value needed from MOOSE
         if signal:
+            # get the postprocessor value named "diffused" from MOOSE
             diffused = self.get_postprocessor_value(self.flag, "diffused", current_time)
 
+            # if the value is not found, fail the step
             if diffused is None:
                 return False
 
+            # send value to FMU variable
             self.diffused = diffused
 
+             # get the value of "pi" reporter named "constant" from MOOSE
             rep_value = self.get_reporter_value(self.flag, "constant/pi", current_time)
 
             if rep_value is None:
                 return False
 
+            # send value to FMU variable
             self.rep_value = rep_value
 
         return True
