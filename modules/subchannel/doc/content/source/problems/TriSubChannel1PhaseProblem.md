@@ -53,11 +53,43 @@ The following correlations have been implemented for the Nusselt number
 which can be selected via the [!param](/Problem/TriSubChannel1PhaseProblem/pin_htc_correlation) parameter
 for the pin and the [!param](/Problem/TriSubChannel1PhaseProblem/duct_htc_correlation) for the duct, respectively.
 
-### Dittus-Boelter Equation
+### General Expression for the Nusselt number
+
+The bounding laminar and turbulent Reynolds numbers for the turbulent transition are defined as follows:
+
+\begin{equation}
+Re_L = 300 \times 10^{1.7 \times (P/D_{\text{pin} - 1.0)}
+\end{equation}
+
+\begin{equation}
+Re_T = 10^4 \times 10^{1.7 \times (P/D_{\text{pin} - 1.0)}
+\end{equation}
+
+where:
+- P is the pitch
+- D_{\text{pin} is the pin diameter
+
+The flow is laminar if $Re \leq Re_L$, turbulent if $Re \geq Re_T$, and in the transition regime if it lies in between.
+The modeling of each regime is explained below.
+
+#### Laminar Nusselt Number
+
+The following relation is used dependeing on the subchannel type~\cite{Todreas}:
+
+\begin{equation}
+\text{Nu}_{\text{laminar}} = 
+\begin{cases} 
+4.0 & \text{if subchannel is CENTER} \\
+3.7 & \text{if subchannel is EDGE} \\
+3.3 & \text{if subchannel is CORNER}
+\end{cases}
+\end{equation}
+
+### Dittus-Boelter Correlation for Turbulent Nusselt Number
 The Dittus-Boelter equation~\cite{incropera1990} is implemented as follows:
 
 \being{equation}
-Nu = 0.023 \times Re^{0.8} \times Pr^{0.4},
+\text{Nu}_{\text{turbulent}} = 0.023 \times Re^{0.8} \times Pr^{0.4},
 \end{equation}
 
 where:
@@ -65,11 +97,11 @@ where:
 - $Re$: Reynolds number
 - $Pr$: Prandtl number
 
-### Gnielinski Correlation
+### Gnielinski Correlation for Turbulent Nusselt Number
 The modified Gnielinski correlation for low Prandtl numbers~\cite{angelucci2018} is used for calculating the Nusselt number for transitional and turbulent flows as follows:
 
 \being{equation}
-Nu = \frac{f/8.0 \times (Re - 1000) \times (Pr + 0.01)}{1 + 12.7 \times \sqrt{f/8.0} \times \left( (Pr + 0.01)^{2/3} - 1 \right)},
+\text{Nu}_{\text{turbulent}} = \frac{f/8.0 \times (Re - 1000) \times (Pr + 0.01)}{1 + 12.7 \times \sqrt{f/8.0} \times \left( (Pr + 0.01)^{2/3} - 1 \right)},
 \end{equation}
 
 where:
@@ -78,11 +110,11 @@ where:
 - $Pr$: Prandtl number
 - $f: Darcy friction factor
 
-### Kazimi-Carelli Correlation
+### Kazimi-Carelli Correlation for Turbulent Nusselt Number
 The Kazimi-Carelli correlation~\cite{kazimi1976} is used for calculating the Nusselt number in rod bundles, considering the geometry of the bundle.
 
 \being{equation}
-Nu = 4.0 + 0.33 \times \left( \frac{p}{D} \right)^{3.8} \times \left( \frac{Pe}{100} \right)^{0.86} + 0.16 \times \left( \frac{p}{D} \right)^{5},
+\text{Nu}_{\text{turbulent}} = 4.0 + 0.33 \times \left( \frac{p}{D} \right)^{3.8} \times \left( \frac{Pe}{100} \right)^{0.86} + 0.16 \times \left( \frac{p}{D} \right)^{5},
 \end{equation}
 
 where:
@@ -97,6 +129,21 @@ where:
 !alert note
 The Kazimi-Carelli correlation is not currently implemented for computing the duct surface temperature.
 The code will error out if 'Kazimi-Carelli' is used in [!param](/Problem/TriSubChannel1PhaseProblem/duct_htc_correlation).
+
+#### Transition Regime
+
+A linear interplation weight is defined as follows:
+
+\being{equation}
+w_T = \frac{Re - Re_L}{Re_T - Re_L}.
+\end{equation}
+
+Then, the Nusselt is defined by linearly interpolating the laminar Nusselt number and ther turbulent one,
+which is defined with the chosen correlation for the pin or duct, as follows:
+
+\being{equation}
+\text{Nu}_{\text{transition}} = w_T \times \text{Nu}_{\text{turbulent}} + (1.0 - w_T) \times \text{Nu}_{\text{laminar}}.
+\end{equation}
 
 ## Example Input File Syntax
 
