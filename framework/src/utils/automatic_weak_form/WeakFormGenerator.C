@@ -538,37 +538,19 @@ Differential DifferentiationVisitor::handleMultiply(const NodePtr & left, const 
   else if (left_depends && right_depends)
   {
     for (auto & [order_l, coeff_l] : left_diff.coefficients)
-    {
       if (coeff_l)
         result.coefficients[order_l] = multiply(coeff_l, right);
-    }
-    
+
     for (auto & [order_r, coeff_r] : right_diff.coefficients)
     {
-      if (coeff_r)
-      {
-        auto term = multiply(left, coeff_r);
-        if (result.coefficients.count(order_r))
-          result.coefficients[order_r] = add(result.coefficients[order_r], term);
-        else
-          result.coefficients[order_r] = term;
-      }
-    }
-    
-    for (auto & [order_l, coeff_l] : left_diff.coefficients)
-    {
-      for (auto & [order_r, coeff_r] : right_diff.coefficients)
-      {
-        if (coeff_l && coeff_r && (order_l > 0 || order_r > 0))
-        {
-          unsigned int combined_order = order_l + order_r;
-          auto term = multiply(coeff_l, coeff_r);
-          if (result.coefficients.count(combined_order))
-            result.coefficients[combined_order] = add(result.coefficients[combined_order], term);
-          else
-            result.coefficients[combined_order] = term;
-        }
-      }
+      if (!coeff_r)
+        continue;
+
+      auto term = multiply(left, coeff_r);
+      if (result.coefficients.count(order_r))
+        result.coefficients[order_r] = add(result.coefficients[order_r], term);
+      else
+        result.coefficients[order_r] = term;
     }
   }
   

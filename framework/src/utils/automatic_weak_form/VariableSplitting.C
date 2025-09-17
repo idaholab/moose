@@ -229,6 +229,10 @@ VariableSplittingAnalyzer::transformNode(const NodePtr & node,
   if (!node)
     return nullptr;
 
+  for (const auto & [name, sv] : split_vars)
+    if (sv.definition && node->equals(*sv.definition))
+      return fieldVariable(name, sv.shape);
+
   switch (node->type())
   {
     case NodeType::Constant:
@@ -495,7 +499,7 @@ VariableSplittingAnalyzer::buildDerivativeExpression(
 
     const auto & ops = order_it->second;
 
-    if (ops.count(NodeType::Laplacian))
+    if (ops.count(NodeType::Laplacian) && k == 2)
     {
       expr = laplacian(fieldVariable(original_var, original_shape));
       continue;
