@@ -37,6 +37,7 @@ if __name__ == '__main__':
 
             pp_t = control.getPostprocessor('t')
             t  = control.getTime()
+            print(f"pp time is {pp_t}, t time is {t}")
             expect_close(pp_t, t)
 
             pp_dt = control.getPostprocessor('dt')
