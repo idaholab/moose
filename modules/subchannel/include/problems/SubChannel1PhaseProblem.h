@@ -14,6 +14,7 @@
 #include "QuadSubChannelMesh.h"
 #include "SolutionHandle.h"
 #include "SinglePhaseFluidProperties.h"
+#include "SolutionInvalidInterface.h"
 #include <petscdm.h>
 #include <petscdmda.h>
 #include <petscksp.h>
@@ -24,7 +25,9 @@
 /**
  * Base class for the 1-phase steady-state/transient subchannel solver.
  */
-class SubChannel1PhaseProblem : public ExternalProblem, public PostprocessorInterface
+class SubChannel1PhaseProblem : public ExternalProblem,
+                                public PostprocessorInterface,
+                                protected SolutionInvalidInterface
 {
 public:
   SubChannel1PhaseProblem(const InputParameters & params);
