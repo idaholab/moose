@@ -40,7 +40,19 @@ TEST(WeakFormGeneratorSplitTest, LaplacianEnergyMatchesBaseline)
   NodePtr split_strong = split_generator.generateWeakForm(transformed, "u");
   ASSERT_TRUE(split_strong);
 
-  EXPECT_EQ(split_strong->toString(), baseline_strong->toString());
+  std::string substituted = split_strong->toString();
+  for (const auto & [name, def] : split_defs)
+  {
+    const std::string def_str = def->toString();
+    std::string::size_type pos = 0;
+    while ((pos = substituted.find(name, pos)) != std::string::npos)
+    {
+      substituted.replace(pos, name.size(), def_str);
+      pos += def_str.size();
+    }
+  }
+
+  EXPECT_EQ(substituted, baseline_strong->toString());
 }
 
 TEST(WeakFormGeneratorSplitTest, SplitVariableCarriesDerivativeInformation)

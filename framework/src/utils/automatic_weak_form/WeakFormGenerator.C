@@ -933,7 +933,11 @@ NodePtr WeakFormGenerator::applyDivergence(const NodePtr & expr, unsigned int ti
 {
   NodePtr result = expr;
   for (unsigned int i = 0; i < times; ++i)
+  {
+    if (result->isScalar())
+      result = grad(result, _dim);
     result = div(result);
+  }
   return result;
 }
 
@@ -946,6 +950,12 @@ NodePtr WeakFormGenerator::multiplyByTestFunction(
     return multiply(expr, testFunction(var_name, false));
   else if (derivative_order == 1)
     return dot(expr, testFunction(var_name, true));
+  else if (derivative_order == 2)
+  {
+    auto grad_test = testFunction(var_name, true);
+    auto hessian_test = grad(grad_test, _dim);
+    return contract(expr, hessian_test);
+  }
   else
     mooseError("Test functions for derivative order > 1 not yet implemented");
 }
