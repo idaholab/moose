@@ -7,7 +7,8 @@ from typing import Optional
 import logging
 import time
 from . import fmu_utils
-
+from typing import Iterable, Union, Set
+import re
 
 logging.basicConfig(
     level=logging.INFO,
@@ -79,15 +80,10 @@ class Moose2FMU(Fmi2Slave):
 
         return True
 
-    def setup_experiment(
-        self,
-        start_time: float,
-        stop_time: Optional[float],
-        tolerance: Optional[float],
-    ) -> bool:
+    def setup_experiment(self, start_time: float, stop_time: Optional[float], step_size: Optional[float]):
         self.sim_start_time = start_time
         self.sim_stop_time = stop_time
-        self.sim_tolerance = tolerance
+
         return True
 
     def do_step(
@@ -125,7 +121,7 @@ class Moose2FMU(Fmi2Slave):
                         f"Successfully got flag '{result}' after {retries} retries."
                     )
                     return result
-            except Exception as exc:  # pragma: no cover - defensive logging
+            except Exception as exc:
                 self.logger.warning(
                     f"Attempt {retries + 1}/{max_retries} failed: {exc}"
                 )
@@ -140,3 +136,44 @@ class Moose2FMU(Fmi2Slave):
             f"Failed to get flag '{flag}' after {max_retries} retries."
         )
         return None
+
+    def _parse_flags(self, flags: Union[str, Iterable[str]]) -> Set[str]:
+        """
+        Normalize flags to an uppercase set.
+        Accepts a space/comma/semicolon/pipe-separated string or an iterable.
+        """
+        if isinstance(flags, str):
+            tokens = re.split(r"[,\s;|]+", flags.strip())
+        else:
+            tokens = list(flags)
+        return {t.strip().upper() for t in tokens if t and t.strip()}
+
+    # def _get_moose_postprocessor(self, postprocessor_name) -> Real:
+
+    #     allowed_flags = self._parse_flags(self.flag)
+    #     self.logger.info(f"Allowed flags for handling: {sorted(allowed_flags)}")
+
+
+    #     while True:
+    #         flag = self._get_flag_with_retries(allowed_flags, self.max_retries)
+    #         if not flag:
+    #             self.logger.error(f"Failed to fast-forward to {current_time}")
+    #             self.control.finalize()
+    #             return False
+
+    #         t_val = self.control.getTime()
+
+    #         if flag in allowed_flags:
+    #             self.control.wait(flag)
+    #             diffused = self.control.getPostprocessor(postprocessor_name)
+    #             self.control.setContinue()
+    #             self.logger.info(f"get {str(diffused)} from MOOSE at {flag}")
+    #         else:
+    #             self.control.wait(flag)
+    #             self.control.setContinue()
+
+    #         if abs(t_val - current_time) < self.dt_tolerance:
+    #             self.logger.info("Successfully sync MOOSE time with FMU step")
+    #             break
+
+    #     return t_val, diffused

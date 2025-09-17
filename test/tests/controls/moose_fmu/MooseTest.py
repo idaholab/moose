@@ -9,7 +9,7 @@ import logging
 class MooseTest(Moose2FMU):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.logger.info("MooseTest instance created.")
+
         # State variables specific to the DemoSlave
         self.moose_time: float = 0.0
         self.time: float = 0.0
@@ -25,13 +25,12 @@ class MooseTest(Moose2FMU):
         self.register_variable(Real("BC_value", causality=Fmi2Causality.input, variability=Fmi2Variability.continuous))
         # Default experiment configuration
         self.default_experiment = DefaultExperiment(start_time=0.0, stop_time=3.0, step_size=0.5)
+        self.logger.info("MooseTest instance created.")
 
     def do_step(self,
                 current_time: float,
                 step_size:    float,
                 no_set_fmu_state_prior: bool = False) -> bool:
-
-
 
         self.logger.info(f"The change boundary flag is {self.change_BC}")
         if self.change_BC:
@@ -39,19 +38,30 @@ class MooseTest(Moose2FMU):
              self.control.setControllableReal(self.BC_info, self.BC_value)
              self.change_BC = False
 
+        #t_val, diffused = _get_moose_postprocessor("diffused")
+        allowed_flags = self._parse_flags(self.flag)
+        self.logger.info(f"Allowed flags for handling: {sorted(allowed_flags)}")
 
         while True:
-            flag = self._get_flag_with_retries(self.flag, self.max_retries)
+            flag = self._get_flag_with_retries(allowed_flags, self.max_retries)
             if not flag:
                 self.logger.error(f"Failed to fast-forward to {current_time}")
                 self.control.finalize()
                 return False
-            self.control.wait(flag)
+
             t_val = self.control.getTime()
-            diffused = self.control.getPostprocessor("diffused")
-            self.control.setContinue()
+
+            if flag in allowed_flags:
+                self.control.wait(flag)
+                diffused = self.control.getPostprocessor("diffused")
+                self.control.setContinue()
+                self.logger.info(f"get {str(diffused)} from MOOSE at {flag}")
+            else:
+                self.control.wait(flag)
+                self.control.setContinue()
 
             if abs(t_val - current_time) < self.dt_tolerance:
+                self.logger.info("Successfully sync MOOSE time with FMU step")
                 break
 
         # Now do a normal FMU step
