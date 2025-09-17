@@ -696,9 +696,13 @@ AutomaticWeakFormAction::addKernels()
              << "[AutomaticWeakForm] Adding Kernels\n"
              << "========================================\n";
 
-  // First add constraint kernels for split variables
-  if (_enable_splitting && !_split_variables.empty())
-    addSplitConstraintKernels();
+  std::map<std::string, moose::automatic_weak_form::NodePtr> split_definitions;
+  const bool have_split_defs = _enable_splitting && !_split_variables.empty();
+  if (have_split_defs)
+  {
+    split_definitions = buildSplitDefinitionMap();
+    _weak_form_gen->setSplitDefinitions(split_definitions);
+  }
 
   // Check if this is a transient problem and add time derivative kernels
   bool is_transient = _problem->isTransient();
@@ -884,32 +888,14 @@ AutomaticWeakFormAction::addKernels()
         _console << "null\n";
 
       generateKernelForVariable(var_name, weak_form, transformed_energy);
-
-      // Also generate kernels for split variables (inside the loop where transformed_energy exists)
-      if (_enable_splitting && !_split_variables.empty())
-      {
-        Moose::out << "  [DEBUG] Generating kernels for split variables\n";
-        for (const auto & [name, sv] : _split_variables)
-        {
-          Moose::out << "    [DEBUG] Generating kernel for split variable: " << sv.name << "\n";
-
-          // Generate weak form for the split variable
-          auto split_weak_form = _weak_form_gen->generateWeakForm(transformed_energy, sv.name);
-          _weak_forms[sv.name] = split_weak_form;
-
-          if (split_weak_form)
-          {
-            _console << "Generated weak form for split variable " << sv.name << ": " << split_weak_form->toString() << "\n";
-            generateKernelForVariable(sv.name, split_weak_form, transformed_energy);
-          }
-          else
-          {
-            Moose::out << "      WARNING: No weak form generated for " << sv.name << "\n";
-          }
-        }
-      }
     }
   }
+
+  if (have_split_defs)
+    _weak_form_gen->clearSplitDefinitions();
+
+  if (_enable_splitting && !_split_variables.empty())
+    addSplitConstraintKernels();
 
   if (_verbose)
     _console << "\n========================================\n"
@@ -920,69 +906,29 @@ AutomaticWeakFormAction::addKernels()
 void
 AutomaticWeakFormAction::addSplitConstraintKernels()
 {
-  if (_verbose)
-    _console << "\n[AutomaticWeakForm] Adding constraint kernels for split variables\n";
+  if (_split_variables.empty())
+    return;
+
+  auto split_definitions = buildSplitDefinitionMap();
+  _weak_form_gen->setSplitDefinitions(split_definitions);
 
   for (const auto & [name, sv] : _split_variables)
   {
-    if (_verbose)
-      _console << "  - Adding constraint kernel for: " << sv.name
-               << " = grad(" << sv.original_variable << ")\n";
+    if (!sv.constraint_residual)
+      continue;
 
-    // For first-order splits (q = ∇u), add gradient constraint
-    if (sv.derivative_order == 1)
-    {
-      // We'll add separate scalar constraints for each component
-      // This is simpler than dealing with vector kernels
-      std::vector<std::string> comp_names = {"x", "y", "z"};
+    auto constraint = sv.constraint_residual;
+    auto penalty = moose::automatic_weak_form::multiply(
+        moose::automatic_weak_form::constant(0.5),
+        moose::automatic_weak_form::multiply(constraint, constraint));
 
-      for (unsigned int comp = 0; comp < _problem->mesh().dimension(); ++comp)
-      {
-        std::string var_name = sv.name + "_" + comp_names[comp];
-        std::string kernel_name = var_name + "_constraint";
+    auto weak_form = _weak_form_gen->generateWeakForm(penalty, sv.name);
+    _weak_forms[sv.name] = weak_form;
 
-        // Check if this component variable exists
-        // (for now, we assume scalar split variables)
-        if (!_problem->hasVariable(var_name))
-        {
-          // Add the component variable
-          InputParameters var_params = _factory.getValidParams("MooseVariable");
-          var_params.set<MooseEnum>("family") = "LAGRANGE";
-          var_params.set<MooseEnum>("order") = "FIRST";
-          _problem->addVariable("MooseVariable", var_name, var_params);
-
-          if (_verbose)
-            _console << "    - Added component variable: " << var_name << "\n";
-        }
-
-        // Add constraint kernel: q_x = ∂u/∂x
-        InputParameters params = _factory.getValidParams("ScalarGradientConstraint");
-        params.set<NonlinearVariableName>("variable") = var_name;
-        params.set<std::vector<VariableName>>("u") = {sv.original_variable};
-        params.set<unsigned int>("component") = comp;
-
-        _problem->addKernel("ScalarGradientConstraint", kernel_name, params);
-
-        if (_verbose)
-          _console << "    - Added constraint kernel: " << kernel_name
-                   << " (enforces " << var_name << " = d" << sv.original_variable
-                   << "/d" << comp_names[comp] << ")\n";
-      }
-    }
-    else if (sv.derivative_order == 2)
-    {
-      if (_verbose)
-        _console << "    - Adding variational kernel for Hessian variable: " << sv.name << "\n";
-
-      // The split variable needs its own variational kernel
-      // The transformed energy now contains c_hess, so we need to compute δF/δ(c_hess)
-      // For now, we'll let the main kernel generation handle this
-      // We don't add a constraint kernel here since c_hess is treated as an independent variable
-
-      if (_verbose)
-        _console << "    - Hessian variable " << sv.name << " will get its own variational kernel\n";
-    }
+    generateKernelForVariable(sv.name, weak_form, penalty, true);
   }
+
+  _weak_form_gen->clearSplitDefinitions();
 }
 
 void
@@ -1020,11 +966,22 @@ AutomaticWeakFormAction::addTimeDerivativeKernelForVariable(const std::string & 
     _console << "  - Kernel name: " << kernel_name << "\n";
 }
 
+std::map<std::string, moose::automatic_weak_form::NodePtr>
+AutomaticWeakFormAction::buildSplitDefinitionMap() const
+{
+  std::map<std::string, moose::automatic_weak_form::NodePtr> defs;
+  for (const auto & [name, sv] : _split_variables)
+    if (sv.definition)
+      defs[name] = sv.definition;
+  return defs;
+}
+
 void
 AutomaticWeakFormAction::generateKernelForVariable(
     const std::string & var_name,
     const moose::automatic_weak_form::NodePtr & weak_form,
-    const moose::automatic_weak_form::NodePtr & energy_expr)
+    const moose::automatic_weak_form::NodePtr & energy_expr,
+    bool force_custom_energy)
 {
   (void)weak_form;
   std::string kernel_name = generateKernelName(var_name);
@@ -1048,11 +1005,14 @@ AutomaticWeakFormAction::generateKernelForVariable(
 
   // Get the energy type string from the input
   const auto & energy_type_enum = getParam<MooseEnum>("energy_type");
-  params.set<MooseEnum>("energy_type") = energy_type_enum;
+  if (force_custom_energy || _energy_type == EnergyType::EXPRESSION)
+    params.set<MooseEnum>("energy_type") = "custom";
+  else
+    params.set<MooseEnum>("energy_type") = energy_type_enum;
   params.set<bool>("use_automatic_differentiation") = _use_automatic_differentiation;
   params.set<bool>("compute_jacobian_numerically") = _compute_jacobian_numerically;
   params.set<Real>("fd_eps") = _fd_epsilon;
-  params.set<bool>("enable_variable_splitting") = _enable_splitting;
+  params.set<bool>("enable_variable_splitting") = force_custom_energy ? false : _enable_splitting;
   params.set<unsigned int>("fe_order") = _max_fe_order;
 
   // Pass the energy expression - use transformed if splitting was applied

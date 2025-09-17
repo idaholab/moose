@@ -45,7 +45,8 @@ protected:
   
   void generateKernelForVariable(const std::string & var_name,
                                   const moose::automatic_weak_form::NodePtr & weak_form,
-                                  const moose::automatic_weak_form::NodePtr & energy_expr = nullptr);
+                                  const moose::automatic_weak_form::NodePtr & energy_expr = nullptr,
+                                  bool force_custom_energy = false);
   
   void generateSplitVariableKernel(const moose::automatic_weak_form::SplitVariable & split_var);
   
@@ -217,6 +218,8 @@ private:
   void reportAnalysisResults();
   
   void setupAdaptiveSplitting();
+  
+  std::map<std::string, moose::automatic_weak_form::NodePtr> buildSplitDefinitionMap() const;
   
   void addErrorIndicators();
   
