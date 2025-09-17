@@ -71,6 +71,7 @@ endif
 ifneq ($(PETSC_HAVE_CUDA),)
   KOKKOS_DEVICE     := CUDA
   KOKKOS_ARCH       := $(KOKKOS_CUDA_ARCH_$(CUDA_ARCH))
+  KOKKOS_COMPILER   := GPU
   KOKKOS_CXX         = $(CUDA_COMPILER)
   KOKKOS_CXXFLAGS    = -arch=sm_$(CUDA_ARCH) --extended-lambda
   KOKKOS_CXXFLAGS   += --forward-unknown-to-host-compiler --disable-warnings -x cu -ccbin $(word 1, $(libmesh_CXX))
@@ -80,6 +81,7 @@ ifneq ($(PETSC_HAVE_CUDA),)
 else ifneq ($(PETSC_HAVE_HIP),) # To be determined for HIP
   KOKKOS_DEVICE     := HIP
   KOKKOS_ARCH       :=
+  KOKKOS_COMPILER   := GPU
   KOKKOS_CXX         = $(HIP_COMPILER)
   KOKKOS_CXXFLAGS    =
   KOKKOS_CPPFLAGS    =
@@ -87,11 +89,13 @@ else ifneq ($(PETSC_HAVE_HIP),) # To be determined for HIP
 else ifneq ($(PETSC_HAVE_SYCL),) # To be determined for SYCL
   KOKKOS_DEVICE     := SYCL
   KOKKOS_ARCH       :=
+  KOKKOS_COMPILER   := GPU
   KOKKOS_CXX         = $(SYCL_COMPILER)
   KOKKOS_CXXFLAGS    = -fsycl
   KOKKOS_CPPFLAGS    =
   KOKKOS_LDFLAGS     =
 else
+  KOKKOS_COMPILER   := CPU
   KOKKOS_CXX         = $(libmesh_CXX)
   KOKKOS_CXXFLAGS    = $(CXXFLAGS) $(libmesh_CXXFLAGS) -x c++
   KOKKOS_CPPFLAGS    = $(libmesh_CPPFLAGS) $(ADDITIONAL_CPPFLAGS) ${ADDITIONAL_KOKKOS_CPPFLAGS}
@@ -115,8 +119,23 @@ ifeq ($(METHOD),opt)
   KOKKOS_CXXFLAGS += -DNDEBUG
 endif
 
+ifeq ($(KOKKOS_COMPILER),CPU)
+
+KOKKOS_LIB_SUFFIX := _kokkos-$(METHOD).la
+KOKKOS_OBJ_SUFFIX := $(libmesh_HOST).$(METHOD).lo
+
+%.$(KOKKOS_OBJ_SUFFIX) : %.K
+	@echo "Compiling Kokkos C++ (in "$(METHOD)" mode, $(KOKKOS_DEVICE), $(KOKKOS_ARCH)) "$<"..."
+	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=compile --quiet \
+	  $(KOKKOS_CXX) $(KOKKOS_CXXFLAGS) $(KOKKOS_CPPFLAGS) $(KOKKOS_INCLUDE) $(app_INCLUDES) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
+
+else
+
+KOKKOS_LIB_SUFFIX := _kokkos-$(METHOD).so
 KOKKOS_OBJ_SUFFIX := $(libmesh_HOST).$(METHOD).o
 
 %.$(KOKKOS_OBJ_SUFFIX) : %.K
 	@echo "Compiling Kokkos C++ (in "$(METHOD)" mode, $(KOKKOS_DEVICE), $(KOKKOS_ARCH)) "$<"..."
 	@$(KOKKOS_CXX) $(KOKKOS_CXXFLAGS) $(KOKKOS_CPPFLAGS) $(KOKKOS_INCLUDE) $(app_INCLUDES) -MMD -MP -MF $@.d -MT $@ -c $< -o $@
+
+endif
