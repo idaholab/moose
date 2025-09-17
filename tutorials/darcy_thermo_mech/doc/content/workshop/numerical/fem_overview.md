@@ -402,7 +402,7 @@ Write in inner product notation. Each term of the equation will inherit from an 
 
 !col! width=10%
 
-!listing test/tests/kernels/2d_diffusion/neumannbc.i block=Kernels remove=Kernels/active link=False
+!listing test/tests/kernels/2d_diffusion/neumannbc.i block=Kernels link=False
 
 !col-end!
 
@@ -414,7 +414,7 @@ $\quad$
 
 !col! width=10%
 
-!listing test/tests/kernels/2d_diffusion/neumannbc.i block=BCs remove=BCs/active BCs/left link=False
+!listing test/tests/kernels/2d_diffusion/neumannbc.i block=BCs BCs/left link=False
 
 !col-end!
 
