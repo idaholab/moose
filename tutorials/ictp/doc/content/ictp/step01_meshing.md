@@ -38,12 +38,12 @@ The above defines a [`GeneratedMeshGenerator`](GeneratedMeshGenerator.md) named 
 ## Run: Simple Mesh Input
 
 ```bash
-cardinal-opt -i step01_1_meshing.basic.i --mesh-only
+cardinal-opt -i step1-1_meshing.basic.i --mesh-only
 ```
 
 - The argument `-i` specifies which input file(s) to run (multiple will be merged)
 - The `--mesh-only` argument forces only mesh generation and output in Exodus format
-- In the same folder, the file `step01_1_meshing_basic_out.e` will be created
+- In the same folder, the file `step1-1_meshing_basic_out.e` will be created
 - These output files are commonly inspected using Paraview
 
 !---
@@ -51,7 +51,7 @@ cardinal-opt -i step01_1_meshing.basic.i --mesh-only
 ## Result: Simple Mesh Input
 
 !style halign=center
-!media step01-1_mesh.png style=width:40%
+!media step1-1_mesh.png style=width:40%
 
 !---
 
@@ -110,14 +110,14 @@ radius = ${fparse diameter/2}
 
 Let's generate a more interesting mesh, one that represents something like a fuel pin in 2D:
 
-!listing ictp/step01-2_concentric_circle.i
+!listing ictp/step1-2_concentric_circle.i
 
 !--
 
 ## Run: Concentric Circle Mesh
 
 ```bash
-cardinal-opt -i step01-2_meshing.basic.i --mesh-only
+cardinal-opt -i step1-2_meshing.basic.i --mesh-only
 ```
 
 !---
@@ -125,4 +125,4 @@ cardinal-opt -i step01-2_meshing.basic.i --mesh-only
 ## Result: Concentric Circle Mesh Input
 
 !style halign=center
-!media step01-2_mesh.png style=width:40%
+!media step1-2_mesh.png style=width:40%
