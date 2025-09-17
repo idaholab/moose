@@ -1179,7 +1179,9 @@ MooseApp::registerCapabilities()
   // compiler
   {
     const auto doc = "Compiler used to build the MOOSE framework.";
-#if defined(__clang__)
+#if defined(__INTEL_LLVM_COMPILER)
+    addCapability("compiler", "intel", doc);
+#elif defined(__clang__)
     addCapability("compiler", "clang", doc);
 #elif defined(__GNUC__) || defined(__GNUG__)
     addCapability("compiler", "gcc", doc);
