@@ -113,6 +113,7 @@ SubChannel1PhaseProblem::validParams()
 SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
   : ExternalProblem(params),
     PostprocessorInterface(this),
+    SolutionInvalidInterface(this),
     _subchannel_mesh(SCM::getMesh<SubChannelMesh>(_mesh)),
     _n_blocks(getParam<unsigned int>("n_blocks")),
     _Wij(declareRestartableData<libMesh::DenseMatrix<Real>>("Wij")),
@@ -378,17 +379,76 @@ SubChannel1PhaseProblem::computeInterpolatedValue(PetscScalar topValue,
 Real
 SubChannel1PhaseProblem::computeNusseltNumber(NusseltStruct nusselt_args)
 {
+  // Correlation Specific Parameters
   const auto htc_correlation = nusselt_args.htc_correlation;
   const auto Re = nusselt_args.Re;
   const auto Pr = nusselt_args.Pr;
 
+  // Geometry Specific Parameters
+  const auto pitch = _subchannel_mesh.getPitch();
+  const auto * pin_node = _subchannel_mesh.getPinNode(nusselt_args.i_pin, nusselt_args.iz);
+  const auto D = (*_Dpin_soln)(pin_node);
+  const auto poD = pitch / D;
+  auto subch_type = _subchannel_mesh.getSubchannelType(nusselt_args.i_ch);
+
+  // Lambda function for laminar flow Nusselt
+  auto laminar_Nu = [subch_type]() -> Real {
+    if (subch_type == EChannelType::CENTER)
+      return 4.0;
+    else if (subch_type == EChannelType::EDGE)
+      return 3.7;
+    else // corner channel
+      return 3.3;
+  };
+
+  // Precompute ReL and ReT
+  const auto ReL = 300 * std::pow(10.0, 1.7 * (poD - 1.0));
+  const auto ReT = 1e4 * std::pow(10.0, 1.7 * (poD - 1.0));
+
+  if (Re <= ReL)
+    return laminar_Nu();
+
+  // Lambda function for turbulent Nusselt
+  auto blended_Nu = [&](Real NuT) -> Real {
+    if (Re >= ReT)
+      return NuT;
+    else // transition regime
+    {
+      const auto w = (Re - ReL) / (ReT - ReL);
+      return w * NuT + (1.0 - w) * laminar_Nu();
+    }
+  };
+
   switch (htc_correlation)
   {
     case 0: // dittus-boelter
-      return 0.023 * std::pow(Re, 0.8) * std::pow(Pr, 0.4);
+    {
+      if (Pr < 0.7 || Pr > 1.6e2)
+      {
+        mooseDoOnce(mooseWarning(
+          "Pr number out of range in the Dittus Bolter correlation for "
+          "pin or duct surface temperture calculation."));
+        flagInvalidSolution(
+            "Pr number is out of range for the Dittus Boelter correlation "
+            "in the pin or duct surface temperature calculation.");
+      }
+
+      const auto NuT = 0.023 * std::pow(Re, 0.8) * std::pow(Pr, 0.4);
+      return blended_Nu(NuT);
+    }
 
     case 1: // gnielinski
     {
+      if (Pr < 1e-5 || Pr > 2e3)
+      {
+        mooseDoOnce(mooseWarning(
+          "Pr number out of range in the Gnielinski correlation for "
+          "pin or duct surface temperture calculation."));
+        flagInvalidSolution(
+            "Pr number is out of range for the Gnielinski correlation "
+            "in the pin or duct surface temperature calculation.");
+      }
+
       const auto iz = nusselt_args.iz;
       const auto i_ch = nusselt_args.i_ch;
 
@@ -400,22 +460,28 @@ SubChannel1PhaseProblem::computeNusseltNumber(NusseltStruct nusselt_args)
       friction_args.w_perim = (*_w_perim_soln)(node);
       Real f_darcy = computeFrictionFactor(friction_args) / 8.0;
 
-      return f_darcy * (Re - 1e3) * (Pr + 0.01) /
+      const auto NuT = f_darcy * (Re - 1e3) * (Pr + 0.01) /
              (1 + 12.7 * std::sqrt(f_darcy) * (std::pow(Pr + 0.01, 2. / 3.) - 1.));
+      return blended_Nu(NuT);
     }
 
     case 2: // kazimi-carelli
     {
-      const auto i_pin = nusselt_args.i_pin;
-      const auto iz = nusselt_args.iz;
-
-      const auto pitch = _subchannel_mesh.getPitch();
-      const auto * pin_node = _subchannel_mesh.getPinNode(i_pin, iz);
-      const auto D = (*_Dpin_soln)(pin_node);
-      const auto poD = pitch / D;
       const auto Pe = Re * Pr;
 
-      return 4.0 + 0.33 * std::pow(poD, 3.8) * std::pow((Pe / 1e2), 0.86) + 0.16 * std::pow(poD, 5);
+      if (Pe < 1.5 || Pe > 1e4)
+      {
+        mooseDoOnce(mooseWarning(
+          "Pr number out of range in the Kazimi Carelli correlation for "
+          "pin or duct surface temperture calculation."));
+        flagInvalidSolution(
+            "Pr number is out of range for the Kazimi Carelli correlation "
+            "in the pin or duct surface temperature calculation.");
+      }
+      
+      const auto NuT = 4.0 + 0.33 * std::pow(poD, 3.8) * 
+                        std::pow((Pe / 1e2), 0.86) + 0.16 * std::pow(poD, 5);
+      return blended_Nu(NuT);
     }
 
     default:
