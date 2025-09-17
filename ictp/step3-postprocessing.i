@@ -46,10 +46,24 @@ clad_diameter = 0.6
   []
 []
 
+[Postprocessors]
+  [inner_average]
+    type = SideAverageValue
+    variable = u
+    boundary = inner
+  []
+  [outer_average]
+    type = SideAverageValue
+    variable = u
+    boundary = outer
+  []
+[]
+
 [Executioner]
   type = Steady
 []
 
 [Outputs]
   exodus = true
+  csv = true
 []
