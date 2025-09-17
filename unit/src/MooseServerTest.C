@@ -1688,7 +1688,9 @@ expression = '0.1 - 2.0 * 0.2 * x^1 + 3.0 * 0.3 * x^2 - 4.0 * 0.4 * x^3 + 5.0 * 
     !include    include_variables.i    # inline comment 01
 
         # normal comment 01
-   [Problem] solve=  false []
+   Problem/solve=  true
+
+   [Kernels/diff]type=Diffusion variable=u[]
 
 [Executioner]        # inline comment 02
 # normal comment 02
@@ -1755,7 +1757,7 @@ expression = '0.1 - 2.0 * 0.2 * x^1 + 3.0 * 0.3 * x^2 - 4.0 * 0.4 * x^3 + 5.0 * 
   // expected textedits with zero-based lines and columns
 
   std::string textedits_expect = R"INPUT(
-textedit_position: [2.0]-[58.11]
+textedit_position: [2.0]-[60.11]
 textedit_new_text:
 num_dim = 2
 
@@ -1811,8 +1813,11 @@ num_dim = 2
 !include include_variables.i # inline comment 01
 
 # normal comment 01
-[Problem]
-    solve = false
+Problem/solve = true
+
+[Kernels/diff]
+    type = Diffusion
+    variable = u
 []
 
 [Executioner] # inline comment 02

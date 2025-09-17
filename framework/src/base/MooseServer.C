@@ -1337,6 +1337,9 @@ MooseServer::gatherDocumentFormattingTextEdits(wasp::DataArray & formattingTextE
   std::size_t starting_line = view_root.line() - 1;
   std::string document_format = formatDocument(view_root, starting_line, 0);
 
+  // remove beginning newline character from formatted document text string
+  document_format.erase(0, 1);
+
   // add formatted text with whole line and column range to formatting list
   formattingTextEdits.push_back(wasp::DataObject());
   wasp::DataObject * item = formattingTextEdits.back().to_object();
@@ -1372,6 +1375,9 @@ MooseServer::formatDocument(wasp::HITNodeView parent, std::size_t & prev_line, s
     // walk must be index based to catch file include and skip its children
     wasp::HITNodeView child = parent.child_at(i);
 
+    // get declarator to address shorthand syntax object with no declarator
+    auto decl = child.child_count_by_name("decl") ? child.first_child_by_name("decl").data() : "";
+
     // add blank line if necessary after previous line and before this line
     std::string blank = child.line() > prev_line + 1 ? "\n" : "";
 
@@ -1384,15 +1390,19 @@ MooseServer::formatDocument(wasp::HITNodeView parent, std::size_t & prev_line, s
       format_string += (child.line() == prev_line ? " " : blank + newline_indent) +
                        MooseUtils::trim(child.data());
 
+    // pass object with no declarator through without increased indentation
+    else if (child.type() == wasp::OBJECT && decl.empty())
+      format_string += formatDocument(child, prev_line, level);
+
     // format object recursively with indentation and without legacy syntax
     else if (child.type() == wasp::OBJECT)
-      format_string += blank + newline_indent + "[" + child.name() + "]" +
+      format_string += blank + newline_indent + "[" + decl + "]" +
                        formatDocument(child, prev_line, level + 1) + newline_indent + "[]";
 
     // format keyed value with indentation and calling reusable hit methods
     else if (child.type() == wasp::KEYED_VALUE || child.type() == wasp::ARRAY)
     {
-      const std::string prefix = newline_indent + child.name() + " = ";
+      const std::string prefix = newline_indent + decl + " = ";
 
       const std::string render_val = hit::extractValue(child.data());
       std::size_t val_column = child.child_count() > 2 ? child.child_at(2).column() : 0;
@@ -1405,8 +1415,8 @@ MooseServer::formatDocument(wasp::HITNodeView parent, std::size_t & prev_line, s
     prev_line = child.last_line();
   }
 
-  // remove leading newline if this is level zero returning entire document
-  return level != 0 ? format_string : format_string.substr(1);
+  // return formatted text string that gets appended to each recursive call
+  return format_string;
 }
 
 bool
