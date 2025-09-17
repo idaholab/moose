@@ -31,5 +31,5 @@ September 24, 2025
 
 !---
 
-!include ictp/step01_meshing.md
+!include ictp/step1_meshing_and_input.md
 

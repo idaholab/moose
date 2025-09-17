@@ -1,4 +1,4 @@
-# Step 1: Input and Meshing id=step01
+# Step 1: Input and Meshing id=step1
 
 !---
 
@@ -25,7 +25,7 @@ A listing of all syntax can be found [here](syntax/index.md).
 
 Start with the generation of a 2D uniform grid:
 
-!listing ictp/step01-1_meshing_basic.i
+!listing ictp/step1-1_meshing_basic.i
 
 The above defines a [`GeneratedMeshGenerator`](GeneratedMeshGenerator.md) named `gmg` with the parameters:
 
