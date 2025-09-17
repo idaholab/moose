@@ -80,8 +80,8 @@ VariationalKernelBase::VariationalKernelBase(const InputParameters & parameters)
     _parameters(isParamValid("parameters") ? getParam<std::map<std::string, Real>>("parameters") : std::map<std::string, Real>()),
     _use_automatic_differentiation(getParam<bool>("use_automatic_differentiation")),
     _enable_variable_splitting(getParam<bool>("enable_variable_splitting")),
-    _use_evaluation_tape(getParam<bool>("use_evaluation_tape")),
-    _fe_order(getParam<unsigned int>("fe_order"))
+    _fe_order(getParam<unsigned int>("fe_order")),
+    _use_evaluation_tape(getParam<bool>("use_evaluation_tape"))
 {
   _builder = std::make_unique<MooseExpressionBuilder>(_mesh.dimension());
   _weak_form_gen = std::make_unique<WeakFormGenerator>(_mesh.dimension());

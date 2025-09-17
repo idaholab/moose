@@ -56,6 +56,7 @@ DifferentiationVisitor::handlerMap()
       {NodeType::Divide, &DifferentiationVisitor::differentiateBinaryOp},
       {NodeType::Power, &DifferentiationVisitor::differentiateBinaryOp},
       {NodeType::Dot, &DifferentiationVisitor::differentiateBinaryOp},
+      {NodeType::Cross, &DifferentiationVisitor::differentiateBinaryOp},
       {NodeType::Contract, &DifferentiationVisitor::differentiateBinaryOp},
       {NodeType::Outer, &DifferentiationVisitor::differentiateBinaryOp},
       {NodeType::Negate, &DifferentiationVisitor::differentiateUnaryOp},
@@ -229,6 +230,8 @@ Differential DifferentiationVisitor::differentiateBinaryOp(const NodePtr & node)
       return handlePower(binary->left(), binary->right());
     case NodeType::Dot:
       return handleDot(binary->left(), binary->right());
+    case NodeType::Cross:
+      return handleCross(binary->left(), binary->right());
     case NodeType::Contract:
       return handleContract(binary->left(), binary->right());
     case NodeType::Outer:
@@ -635,6 +638,32 @@ Differential DifferentiationVisitor::handleDot(const NodePtr & left, const NodeP
     }
   }
   
+  return result;
+}
+
+Differential DifferentiationVisitor::handleCross(const NodePtr & left, const NodePtr & right)
+{
+  Differential left_diff = visit(left);
+  Differential right_diff = visit(right);
+
+  Differential result;
+
+  for (auto & [order, coeff] : left_diff.coefficients)
+    if (coeff)
+      result.coefficients[order] = cross(coeff, right);
+
+  for (auto & [order, coeff] : right_diff.coefficients)
+  {
+    if (!coeff)
+      continue;
+
+    auto term = cross(left, coeff);
+    if (result.coefficients.count(order))
+      result.coefficients[order] = add(result.coefficients[order], term);
+    else
+      result.coefficients[order] = term;
+  }
+
   return result;
 }
 

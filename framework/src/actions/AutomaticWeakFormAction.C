@@ -1026,6 +1026,7 @@ AutomaticWeakFormAction::generateKernelForVariable(
     const moose::automatic_weak_form::NodePtr & weak_form,
     const moose::automatic_weak_form::NodePtr & energy_expr)
 {
+  (void)weak_form;
   std::string kernel_name = generateKernelName(var_name);
 
   if (_verbose)

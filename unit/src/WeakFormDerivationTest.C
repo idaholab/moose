@@ -265,6 +265,20 @@ TEST_F(WeakFormDerivationTest, VectorAssemblyOperations)
 
     EXPECT_EQ(expr->toString(), "vec(x, y, z)");
   }
+
+  // Test 6: Cross product differentiation
+  {
+    auto expr = parser->parse("cross(vec(u, 0.0, 0.0), vec(0.0, 1.0, 0.0))");
+    ASSERT_NE(expr, nullptr);
+
+    DifferentiationVisitor dv("u");
+    auto diff = dv.differentiate(expr);
+
+    EXPECT_TRUE(diff.hasOrder(0));
+    auto coeff = diff.getCoefficient(0);
+    ASSERT_NE(coeff, nullptr);
+    EXPECT_EQ(coeff->toString(), "vec(0.000000, 0.000000, 1.000000)");
+  }
 }
 
 // Test anisotropic energy expressions with exact results

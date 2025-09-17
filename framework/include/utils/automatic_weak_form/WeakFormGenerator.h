@@ -74,6 +74,7 @@ private:
   Differential handleDivide(const NodePtr & left, const NodePtr & right);
   Differential handlePower(const NodePtr & left, const NodePtr & right);
   Differential handleDot(const NodePtr & left, const NodePtr & right);
+  Differential handleCross(const NodePtr & left, const NodePtr & right);
   Differential handleContract(const NodePtr & left, const NodePtr & right);
   Differential handleOuter(const NodePtr & left, const NodePtr & right);
   
