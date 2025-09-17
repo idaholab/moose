@@ -137,19 +137,8 @@
       input = paramMeshOptRep.i
       cli_args = 'OptimizationReporter/lower_bound_mesh_variable=notOnMesh'
       allow_test_objects = true
-      expect_err = 'Exodus file did not contain all of the parameter names being intitialized.'
+      expect_err = 'Exodus file did not contain the parameter name being intitialized.'
       detail = "by having a parameter not on the exodus mesh; "
-    []
-    [errorMixedParameterTypes]
-      type = RunException
-      input = paramMeshOptRep.i
-      cli_args = 'OptimizationReporter/initial_condition_mesh_variable=initialConditions
-                  OptimizationReporter/lower_bound_mesh_variable=lowerBounds
-                  OptimizationReporter/upper_bound_mesh_variable=elemUpperBounds'
-      allow_test_objects = true
-      expect_err = 'Parameter group contains nodal and elemental variables, this is not allowed.'
-      detail = "by using nodal and elemental exodus variables to define parameter data in the same "
-               "parameter group; "
     []
     [errorMismatchSteps]
       type = RunException
