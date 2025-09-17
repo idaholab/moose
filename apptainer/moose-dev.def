@@ -393,6 +393,17 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     rm -rf ${GOPATH} ${ROOT_BUILD_DIR}/go
 {%- endif %}
 
+    # Build and add pythonfmu only with GCC
+    COMPILER=$(mpicxx -show | awk '{ print $1 }')
+    if [ "$COMPILER" == "g++" ]; then
+        cd ${ROOT_BUILD_DIR}
+        git clone https://github.com/NTNU-IHB/PythonFMU.git
+        cd PythonFMU/
+        bash build_unix.sh
+        cd ${ROOT_BUILD_DIR}/PythonFMU
+        pip install .
+    fi
+
     # Clean up
     conda clean -ya
     dnf clean all
