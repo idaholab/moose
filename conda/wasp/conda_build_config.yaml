@@ -4,7 +4,7 @@ moose_python:
   - python 3.11
   - python 3.10
 
-### If you change these versions, change also conda/mpi/*, conda/seacas/*
+### If you change these versions, change also conda/mpi/*
 moose_cmake:
   - cmake 3
 
@@ -13,7 +13,7 @@ moose_cc:
   - clang 18.1.8 default_h1323312_15                        # [not arm64 and osx]
   - clang 18.1.8 default_hf9bcbb7_15                        # [arm64]
 
-### If you change these versions, change also conda/mpi/*, conda/seacas/*
+### If you change these versions, change also conda/mpi/*
 moose_cxx:
   - gxx 14.3.0 he448592_5                                   # [linux]
   - clangxx 18.1.8 default_h1c12a56_15                      # [not arm64 and osx]
