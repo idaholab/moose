@@ -22,7 +22,7 @@ InputParameters
 PinTempSolver::validParams()
 {
   InputParameters params = TriSubChannel1PhaseProblem::validParams();
-  params.addClassDescription("Solver class for fuel pin temperature distribution "
+  params.addClassDescription("Solver class for metal fuel pin temperature distribution "
                              " for liquid metal cooled metallic fuel pins");
   params.addRequiredParam<Real>("fuel_inner_radius", "fuel inner radius");
   params.addRequiredParam<Real>("fuel_outer_radius", "fuel outer radius");
