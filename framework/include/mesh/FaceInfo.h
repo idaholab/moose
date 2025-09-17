@@ -37,7 +37,11 @@ class Node;
 class FaceInfo
 {
 public:
-   FaceInfo(const ElemInfo * elem_info, unsigned int side, const dof_id_type id, libMesh::ElemSideBuilder & side_builder);
+  FaceInfo(const ElemInfo * elem_info,
+           unsigned int side,
+           const dof_id_type id,
+           libMesh::ElemSideBuilder & side_builder,
+           libMesh::FEBase * fe);
 
   /// This enum is used to indicate which side(s) of a face a particular
   /// variable is defined on.  This is important for certain BC-related finite
