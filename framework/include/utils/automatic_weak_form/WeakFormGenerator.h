@@ -43,8 +43,9 @@ class DifferentiationVisitor
 {
 public:
   DifferentiationVisitor(const std::string & var_name,
-                         const std::map<std::string, NodePtr> * split_definitions = nullptr)
-    : _var_name(var_name), _split_definitions(split_definitions)
+                         const std::map<std::string, NodePtr> * split_definitions = nullptr,
+                         unsigned int dim = 3)
+    : _var_name(var_name), _split_definitions(split_definitions), _dim(dim)
   {
   }
   
@@ -55,6 +56,7 @@ private:
 
   std::string _var_name;
   const std::map<std::string, NodePtr> * _split_definitions = nullptr;
+  unsigned int _dim;
   std::unordered_map<const Node *, Differential> _cache;
   
   Differential visit(const NodePtr & node);

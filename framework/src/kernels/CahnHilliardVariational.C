@@ -82,7 +82,7 @@ CahnHilliardVariational::setupSplitFormulation()
   if (!_split_formulation)
     return;
 
-  DifferentiationVisitor dv(_var.name());
+  DifferentiationVisitor dv(_var.name(), nullptr, _mesh.dimension());
   _variational_derivative = dv.differentiate(_total_energy);
 }
 

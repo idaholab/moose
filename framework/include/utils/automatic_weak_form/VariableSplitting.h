@@ -55,7 +55,7 @@ public:
 
   std::map<std::string, SplitVariable> generateSplitVariables(const NodePtr & expr);
   
-  NodePtr transformExpression(const NodePtr & expr, 
+  NodePtr transformExpression(const NodePtr & expr,
                                const std::map<std::string, SplitVariable> & split_vars);
   
   std::vector<NodePtr> generateConstraintEquations(
@@ -107,6 +107,7 @@ private:
     bool pure = false;
     std::string variable;
     unsigned int order = 0;
+    bool base_is_split = false;
   };
 
   DerivativeInfo getDerivativeInfo(const NodePtr & node,

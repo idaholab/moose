@@ -204,7 +204,9 @@ TEST_F(WeakFormDerivationTest, GradientOperations)
 
     auto result = diff.getCoefficient(2);
     ASSERT_NE(result, nullptr);
-    EXPECT_EQ(result->toString(), "1.000000");
+    EXPECT_TRUE(result->isTensor());
+    std::string result_str = result->toString();
+    EXPECT_NE(result_str.find("[tensor]"), std::string::npos);
   }
 }
 

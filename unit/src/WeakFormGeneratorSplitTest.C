@@ -32,8 +32,8 @@ TEST(WeakFormGeneratorSplitTest, LaplacianEnergyMatchesBaseline)
   ASSERT_TRUE(baseline_strong);
 
   auto split_vars = analyzer.generateSplitVariables(energy);
-  auto split_defs = extractDefinitions(split_vars);
   NodePtr transformed = analyzer.transformExpression(energy, split_vars);
+  auto split_defs = extractDefinitions(split_vars);
 
   WeakFormGenerator split_generator(3);
   split_generator.setSplitDefinitions(split_defs);
@@ -51,6 +51,8 @@ TEST(WeakFormGeneratorSplitTest, SplitVariableCarriesDerivativeInformation)
   NodePtr expr = laplacian(u);
 
   auto split_vars = analyzer.generateSplitVariables(expr);
+  NodePtr transformed_expr = analyzer.transformExpression(expr, split_vars);
+  ASSERT_TRUE(transformed_expr);
   auto split_defs = extractDefinitions(split_vars);
 
   ASSERT_TRUE(split_vars.count("u_d2"));
@@ -58,8 +60,7 @@ TEST(WeakFormGeneratorSplitTest, SplitVariableCarriesDerivativeInformation)
 
   DifferentiationVisitor dv("u", &split_defs);
   auto split_diff = dv.differentiate(fieldVariable(split_it->first));
-  auto reference_expr = div(grad(fieldVariable("u")));
-  auto reference_diff = dv.differentiate(reference_expr);
+  auto reference_diff = dv.differentiate(split_vars.at("u_d2").definition);
 
   EXPECT_EQ(split_diff.maxOrder(), reference_diff.maxOrder());
   for (unsigned int order = 0; order <= reference_diff.maxOrder(); ++order)

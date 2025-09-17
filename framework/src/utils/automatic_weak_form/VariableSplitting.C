@@ -157,6 +157,14 @@ VariableSplittingAnalyzer::analyzeNode(const NodePtr & node,
         const unsigned int derivative_order = depth + 1;
         const NodeType op = derivative_stack[derivative_stack.size() - 1 - depth];
         derivative_ops[name][derivative_order].insert(op);
+
+        if (op == NodeType::Divergence && derivative_order == 2 && depth > 0)
+        {
+          const std::size_t prev_index = derivative_stack.size() - depth;
+          if (prev_index < derivative_stack.size() &&
+              derivative_stack[prev_index] == NodeType::Gradient)
+            derivative_ops[name][derivative_order].insert(NodeType::Laplacian);
+        }
       }
       break;
     }
@@ -449,8 +457,14 @@ VariableSplittingAnalyzer::chooseOperator(const std::set<NodeType> & ops) const
                                                       NodeType::Divergence,
                                                       NodeType::Curl,
                                                       NodeType::Laplacian};
+  static const std::array<NodeType, 4> laplace_precedence = {NodeType::Laplacian,
+                                                             NodeType::Gradient,
+                                                             NodeType::Divergence,
+                                                             NodeType::Curl};
 
-  for (auto preferred : precedence)
+  const auto & order = ops.count(NodeType::Laplacian) ? laplace_precedence : precedence;
+
+  for (auto preferred : order)
     if (ops.count(preferred))
       return preferred;
 
@@ -479,7 +493,15 @@ VariableSplittingAnalyzer::buildDerivativeExpression(
     if (order_it == ops_it->second.end() || order_it->second.empty())
       mooseError("Missing derivative operator of order ", k, " for variable ", original_var);
 
-    NodeType op = chooseOperator(order_it->second);
+    const auto & ops = order_it->second;
+
+    if (ops.count(NodeType::Laplacian))
+    {
+      expr = laplacian(fieldVariable(original_var, original_shape));
+      continue;
+    }
+
+    NodeType op = chooseOperator(ops);
     expr = applyOperator(op, expr);
   }
 
@@ -504,10 +526,11 @@ VariableSplittingAnalyzer::getDerivativeInfo(
       info.pure = true;
       info.variable = it->second.original_variable;
       info.order = it->second.derivative_order;
+      info.base_is_split = true;
       return info;
     }
 
-    return {true, field->name(), 0};
+    return {true, field->name(), 0, false};
   }
 
   if (node->type() == NodeType::Gradient || node->type() == NodeType::Divergence ||

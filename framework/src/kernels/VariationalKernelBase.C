@@ -220,7 +220,7 @@ VariationalKernelBase::computeVariationalDerivative()
     mooseError("Energy density not initialized");
 
   // First check if splitting is needed
-  DifferentiationVisitor dv(_var.name());
+  DifferentiationVisitor dv(_var.name(), nullptr, _mesh.dimension());
   auto diff = dv.differentiate(_energy_density);
 
   if (_enable_variable_splitting && _weak_form_gen->requiresVariableSplitting(diff, _fe_order))
@@ -408,7 +408,7 @@ VariationalKernelBase::computeQpJacobian()
   bool debug = false; // (_qp == 0 && _i == 0 && _j == 0); // Debug first element
   
   // Get the differential coefficients C^k from the energy functional
-  DifferentiationVisitor dv(_var.name());
+  DifferentiationVisitor dv(_var.name(), nullptr, _mesh.dimension());
   auto diff = dv.differentiate(_energy_density);
   
   // Jacobian from C^0 term: ∂C^0/∂u · φ_j · ψ_i
@@ -529,7 +529,7 @@ VariationalKernelBase::computeQpOffDiagJacobian(unsigned int jvar)
   clearCache();
   updateVariableValues(_qp);
 
-  DifferentiationVisitor dv(coupled_var_name);
+  DifferentiationVisitor dv(coupled_var_name, nullptr, _mesh.dimension());
   auto residual_expr = _weak_form_gen->generateWeakForm(_energy_density, _var.name());
   auto jacobian_diff = dv.differentiate(residual_expr);
 
@@ -558,7 +558,7 @@ VariationalKernelBase::evaluateC0Contribution()
 
   if (!_c0_cache.computed)
   {
-    DifferentiationVisitor dv(_var.name());
+    DifferentiationVisitor dv(_var.name(), nullptr, _mesh.dimension());
     auto diff = dv.differentiate(_energy_density);
 
     if (diff.hasOrder(0))
@@ -584,7 +584,7 @@ VariationalKernelBase::evaluateC1Contribution()
 {
   if (!_c1_cache.computed)
   {
-    DifferentiationVisitor dv(_var.name());
+    DifferentiationVisitor dv(_var.name(), nullptr, _mesh.dimension());
     auto diff = dv.differentiate(_energy_density);
 
     if (diff.hasOrder(1))
@@ -613,7 +613,7 @@ VariationalKernelBase::evaluateC2Contribution()
 {
   if (!_c2_cache.computed)
   {
-    DifferentiationVisitor dv(_var.name());
+    DifferentiationVisitor dv(_var.name(), nullptr, _mesh.dimension());
     auto diff = dv.differentiate(_energy_density);
 
     if (diff.hasOrder(2))
@@ -890,7 +890,7 @@ VariationalKernelBase::differentiateWithRespectToField(const NodePtr & expr, con
     return nullptr;
     
   // Use the differentiation visitor to compute ∂expr/∂var
-  DifferentiationVisitor dv(var_name);
+  DifferentiationVisitor dv(var_name, nullptr, _mesh.dimension());
   auto diff = dv.differentiate(expr);
   
   // The 0-th order coefficient is ∂expr/∂var

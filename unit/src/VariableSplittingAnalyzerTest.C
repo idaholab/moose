@@ -22,6 +22,9 @@ TEST(VariableSplittingAnalyzerTest, LaplacianSplitting)
   NodePtr expr = laplacian(u);
 
   auto split_vars = analyzer.generateSplitVariables(expr);
+  NodePtr transformed = analyzer.transformExpression(expr, split_vars);
+  ASSERT_TRUE(transformed);
+  EXPECT_EQ(transformed->toString(), "u_d2");
 
   ASSERT_EQ(split_vars.size(), 1u);
   ASSERT_TRUE(split_vars.count("u_d2"));
@@ -31,13 +34,9 @@ TEST(VariableSplittingAnalyzerTest, LaplacianSplitting)
   EXPECT_EQ(sv.derivative_order, 2u);
   ASSERT_TRUE(std::holds_alternative<ScalarShape>(sv.shape));
   ASSERT_TRUE(sv.definition);
-  EXPECT_EQ(sv.definition->toString(), "div(grad(u))");
+  EXPECT_EQ(sv.definition->toString(), "laplacian(u)");
   ASSERT_TRUE(sv.constraint_residual);
-  EXPECT_EQ(sv.constraint_residual->toString(), "(u_d2 - div(grad(u)))");
-
-  NodePtr transformed = analyzer.transformExpression(expr, split_vars);
-  ASSERT_TRUE(transformed);
-  EXPECT_EQ(transformed->toString(), "u_d2");
+  EXPECT_EQ(sv.constraint_residual->toString(), "(u_d2 - laplacian(u))");
 }
 
 TEST(VariableSplittingAnalyzerTest, TripleDerivativeSplitting)
@@ -47,6 +46,9 @@ TEST(VariableSplittingAnalyzerTest, TripleDerivativeSplitting)
   NodePtr expr = div(grad(grad(u)));
 
   auto split_vars = analyzer.generateSplitVariables(expr);
+  NodePtr transformed = analyzer.transformExpression(expr, split_vars);
+  ASSERT_TRUE(transformed);
+  EXPECT_EQ(transformed->toString(), "u_d3");
 
   ASSERT_EQ(split_vars.size(), 2u);
   ASSERT_TRUE(split_vars.count("u_d2"));
@@ -60,10 +62,6 @@ TEST(VariableSplittingAnalyzerTest, TripleDerivativeSplitting)
   EXPECT_EQ(u_d2.definition->toString(), "grad(grad(u))");
   EXPECT_EQ(u_d3.definition->toString(), "div(grad(grad(u)))");
   EXPECT_EQ(u_d3.constraint_residual->toString(), "(u_d3 - div(grad(grad(u))))");
-
-  NodePtr transformed = analyzer.transformExpression(expr, split_vars);
-  ASSERT_TRUE(transformed);
-  EXPECT_EQ(transformed->toString(), "u_d3");
 }
 
 TEST(VariableSplittingAnalyzerTest, MixedVariableSplitting)
@@ -74,6 +72,9 @@ TEST(VariableSplittingAnalyzerTest, MixedVariableSplitting)
   NodePtr expr = add(div(grad(grad(u))), laplacian(v));
 
   auto split_vars = analyzer.generateSplitVariables(expr);
+  NodePtr transformed = analyzer.transformExpression(expr, split_vars);
+  ASSERT_TRUE(transformed);
+  EXPECT_EQ(transformed->toString(), "(u_d3 + v_d2)");
 
   ASSERT_EQ(split_vars.size(), 3u);
   ASSERT_TRUE(split_vars.count("u_d2"));
@@ -82,9 +83,5 @@ TEST(VariableSplittingAnalyzerTest, MixedVariableSplitting)
 
   EXPECT_EQ(split_vars.at("u_d2").definition->toString(), "grad(grad(u))");
   EXPECT_EQ(split_vars.at("u_d3").definition->toString(), "div(grad(grad(u)))");
-  EXPECT_EQ(split_vars.at("v_d2").definition->toString(), "div(grad(v))");
-
-  NodePtr transformed = analyzer.transformExpression(expr, split_vars);
-  ASSERT_TRUE(transformed);
-  EXPECT_EQ(transformed->toString(), "(u_d3 + v_d2)");
+  EXPECT_EQ(split_vars.at("v_d2").definition->toString(), "laplacian(v)");
 }

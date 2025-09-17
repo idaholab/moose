@@ -1,6 +1,7 @@
 #include "WeakFormGenerator.h"
 #include "ExpressionSimplifier.h"
 #include "MooseError.h"
+#include "RankTwoTensor.h"
 #include <algorithm>
 #include <cmath>
 #include <unordered_map>
@@ -419,13 +420,21 @@ Differential DifferentiationVisitor::handleLaplacian(const NodePtr & operand)
 {
   Differential operand_diff = visit(operand);
   Differential result;
-  
+  auto identity = constant(RankTwoTensor::Identity(), _dim);
+
   for (auto & [order, coeff] : operand_diff.coefficients)
   {
-    if (coeff)
-      result.coefficients[order + 2] = coeff;
+    if (!coeff)
+      continue;
+
+    NodePtr lifted = coeff;
+
+    if (coeff->isScalar())
+      lifted = multiply(coeff, identity);
+
+    result.coefficients[order + 2] = lifted;
   }
-  
+
   return result;
 }
 
@@ -781,7 +790,17 @@ bool DifferentiationVisitor::dependsOnVariable(const NodePtr & expr) const
   if (expr->type() == NodeType::FieldVariable)
   {
     auto var = std::static_pointer_cast<FieldVariableNode>(expr);
-    return var->name() == _var_name;
+    if (var->name() == _var_name)
+      return true;
+
+    if (_split_definitions)
+    {
+      auto it = _split_definitions->find(var->name());
+      if (it != _split_definitions->end())
+        return dependsOnVariable(it->second);
+    }
+
+    return false;
   }
   
   for (const auto & child : expr->children())
@@ -837,7 +856,7 @@ Differential DifferentiationVisitor::combineDifferentials(
 
 NodePtr WeakFormGenerator::generateWeakForm(const NodePtr & energy_density, const std::string & var_name)
 {
-  DifferentiationVisitor dv(var_name, &_split_definitions);
+  DifferentiationVisitor dv(var_name, &_split_definitions, _dim);
   Differential diff = dv.differentiate(energy_density);
   return computeEulerLagrange(diff);
 }
@@ -900,7 +919,7 @@ WeakFormGenerator::WeakFormContributions WeakFormGenerator::computeContributions
     const NodePtr & energy_density,
     const std::string & var_name)
 {
-  DifferentiationVisitor dv(var_name, &_split_definitions);
+  DifferentiationVisitor dv(var_name, &_split_definitions, _dim);
   Differential diff = dv.differentiate(energy_density);
   
   WeakFormContributions contributions;
