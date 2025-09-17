@@ -972,6 +972,8 @@ NodePtr SymbolicSimplifier::simplifyNode(const NodePtr & node)
       return simplifyDivide(static_cast<const BinaryOpNode *>(node.get()));
     case NodeType::Power:
       return simplifyPower(static_cast<const BinaryOpNode *>(node.get()));
+    case NodeType::VectorAssembly:
+      return simplifyVectorAssembly(static_cast<const VectorAssemblyNode *>(node.get()));
     default:
       return node;
   }
@@ -1047,6 +1049,27 @@ NodePtr SymbolicSimplifier::simplifyPower(const BinaryOpNode * node)
     return foldConstants(left, right, NodeType::Power);
   
   return power(left, right);
+}
+
+NodePtr SymbolicSimplifier::simplifyVectorAssembly(const VectorAssemblyNode * node)
+{
+  std::vector<NodePtr> simplified_components;
+  simplified_components.reserve(node->components().size());
+  bool changed = false;
+
+  for (const auto & component : node->components())
+  {
+    NodePtr simplified = simplify(component);
+    if (simplified != component)
+      changed = true;
+    simplified_components.push_back(simplified);
+  }
+
+  if (!changed)
+    return node->clone();
+
+  VectorShape vec_shape = std::get<VectorShape>(node->shape());
+  return std::make_shared<VectorAssemblyNode>(simplified_components, Shape(vec_shape));
 }
 
 bool SymbolicSimplifier::isZero(const NodePtr & node) const

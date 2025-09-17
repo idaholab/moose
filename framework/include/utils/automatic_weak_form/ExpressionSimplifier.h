@@ -26,6 +26,7 @@ private:
   static NodePtr simplifyNode(const NodePtr & node);
   static NodePtr simplifyBinaryOp(const BinaryOpNode * node);
   static NodePtr simplifyUnaryOp(const UnaryOpNode * node);
+  static NodePtr simplifyVectorAssembly(const VectorAssemblyNode * node);
   static NodePtr simplifyAdd(const NodePtr & left, const NodePtr & right);
   static NodePtr simplifySubtract(const NodePtr & left, const NodePtr & right);
   static NodePtr simplifyMultiply(const NodePtr & left, const NodePtr & right);

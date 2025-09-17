@@ -88,6 +88,9 @@ NodePtr ExpressionSimplifier::simplifyNode(const NodePtr & node)
       
     case NodeType::Negate:
       return simplifyUnaryOp(static_cast<const UnaryOpNode*>(node.get()));
+
+    case NodeType::VectorAssembly:
+      return simplifyVectorAssembly(static_cast<const VectorAssemblyNode*>(node.get()));
       
     case NodeType::Gradient:
     {
@@ -174,6 +177,27 @@ NodePtr ExpressionSimplifier::simplifyUnaryOp(const UnaryOpNode * node)
   if (operand != node->operand())
     return std::make_shared<UnaryOpNode>(node->type(), operand, node->shape());
   return node->clone();
+}
+
+NodePtr ExpressionSimplifier::simplifyVectorAssembly(const VectorAssemblyNode * node)
+{
+  std::vector<NodePtr> simplified_components;
+  simplified_components.reserve(node->components().size());
+  bool changed = false;
+
+  for (const auto & component : node->components())
+  {
+    NodePtr simplified = simplifyNode(component);
+    if (simplified != component)
+      changed = true;
+    simplified_components.push_back(simplified);
+  }
+
+  if (!changed)
+    return node->clone();
+
+  VectorShape vec_shape = std::get<VectorShape>(node->shape());
+  return std::make_shared<VectorAssemblyNode>(simplified_components, Shape(vec_shape));
 }
 
 NodePtr ExpressionSimplifier::simplifyAdd(const NodePtr & left, const NodePtr & right)

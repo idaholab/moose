@@ -210,6 +210,7 @@ public:
   
 private:
   NodePtr simplifyNode(const NodePtr & node);
+  NodePtr simplifyVectorAssembly(const VectorAssemblyNode * node);
   
   NodePtr simplifyAdd(const BinaryOpNode * node);
   NodePtr simplifyMultiply(const BinaryOpNode * node);
