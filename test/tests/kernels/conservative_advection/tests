@@ -4,6 +4,13 @@
 
   [error]
     requirement = 'The system shall handle unique cases when trying to compute conservative advection '
+    [u_velocity]
+      type = RunException
+      input = no_upwinding_1D_coupled.i
+      cli_args = 'Kernels/advection/velocity_as_variable_gradient=u'
+      detail = 'by throwing an error when no the member variable gradient is used as velocity is given,'
+      expect_err = "if the gradient used as the velocity is the same as the member variable"
+    []
     [no_velocity]
       type = RunException
       input = no_upwinding_1D.i

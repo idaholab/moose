@@ -93,6 +93,10 @@ ConservativeAdvectionTempl<is_ad>::ConservativeAdvectionTempl(const InputParamet
     _upwind_node(0),
     _dtotal_mass_out(0)
 {
+  if (_coupled_variable_present && _coupled_variable_var == _var.number())
+    paramError("velocity_as_variable_gradient",
+               "Use a different kernel (i.e., diffusion) if the gradient used as the velocity is "
+               "the same as the member variable");
   if (_upwinding != UpwindingType::none && this->isParamValid("advected_quantity"))
     paramError(
         "advected_quantity",
