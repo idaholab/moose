@@ -16,7 +16,11 @@
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/remote_elem.h"
 
-FaceInfo::FaceInfo(const ElemInfo * elem_info, unsigned int side, const dof_id_type id, libMesh::ElemSideBuilder & side_builder)
+FaceInfo::FaceInfo(const ElemInfo * elem_info,
+                   unsigned int side,
+                   const dof_id_type id,
+                   libMesh::ElemSideBuilder & side_builder,
+                   libMesh::FEBase * fe)
   : _elem_info(elem_info),
     _neighbor_info(nullptr),
     _id(id),
@@ -26,12 +30,7 @@ FaceInfo::FaceInfo(const ElemInfo * elem_info, unsigned int side, const dof_id_t
     _gc(0.5)
 {
   // Compute face-related quantities
-  unsigned int dim = _elem_info->elem()->dim();
   const auto & face = side_builder(*_elem_info->elem(), side);
-  std::unique_ptr<libMesh::FEBase> fe(
-      libMesh::FEBase::build(dim, libMesh::FEType(_elem_info->elem()->default_order())));
-  libMesh::QGauss qface(dim - 1, libMesh::CONSTANT);
-  fe->attach_quadrature_rule(&qface);
   const std::vector<Point> & normals = fe->get_normals();
   fe->reinit(_elem_info->elem(), _elem_side_id);
   mooseAssert(normals.size() == 1, "FaceInfo construction broken w.r.t. computing face normals");
