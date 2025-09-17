@@ -393,6 +393,13 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     rm -rf ${GOPATH} ${ROOT_BUILD_DIR}/go
 {%- endif %}
 
+    cd ${ROOT_BUILD_DIR}
+    git clone https://github.com/NTNU-IHB/PythonFMU.git
+    cd PythonFMU/
+    bash build_unix.sh
+    cd ${ROOT_BUILD_DIR}/PythonFMU
+    pip install .
+
     # Clean up
     conda clean -ya
     dnf clean all
