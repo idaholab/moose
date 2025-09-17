@@ -73,19 +73,19 @@ cdef class Formatter:
         if style_file != '':
             with open(style_file, 'r') as f:
                 data = f.read()
-            self._formatter = chit.Formatter(style_file, data)
+            self._formatter = chit.Formatter(style_file.encode('utf-8'), data.encode('utf-8'))
 
     def addPattern(self, prefix, order):
         cdef vector[string] order_vec
         for o in order:
-            order_vec.push_back(o)
-        self._formatter.addPattern(prefix, order_vec)
+            order_vec.push_back(o.encode("utf-8"))
+        self._formatter.addPattern(prefix.encode('utf-8'), order_vec)
 
     def config(self, canonical_section_markers=True):
         self._formatter.canonical_section_markers = canonical_section_markers
 
     def format(self, fname, content):
-        return str(self._formatter.format(fname, content))
+        return self._formatter.format(fname.encode('utf-8'), content.encode('utf-8')).decode('utf-8')
 
     def formatTree(self, Node root):
         self._formatter.format(root._cnode)
