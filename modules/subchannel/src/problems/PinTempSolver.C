@@ -1021,7 +1021,6 @@ PinTempSolver::externalSolve()
       }
     }
   }
-
   /// Assigning temperatures to duct
   if (_duct_mesh_exist)
   {
@@ -1038,10 +1037,10 @@ PinTempSolver::externalSolve()
       auto k = _fp->k_from_p_T((*_P_soln)(node_chan) + _P_out, (*_T_soln)(node_chan));
       auto cp = _fp->cp_from_p_T((*_P_soln)(node_chan) + _P_out, (*_T_soln)(node_chan));
       auto Pr = (*_mu_soln)(node_chan)*cp / k;
+      /// FIXME - model assumes HTC calculation via Dittus-Boelter correlation
       auto Nu = 0.023 * std::pow(Re, 0.8) * std::pow(Pr, 0.4);
       auto hw = Nu * k / Dh_i;
-      auto T_chan = (*_q_prime_duct_soln)(dn) / (_subchannel_mesh.getPinDiameter() * M_PI * hw) +
-                    (*_T_soln)(node_chan);
+      auto T_chan = (*_duct_heat_flux_soln)(dn) / hw + (*_T_soln)(node_chan);
       _Tduct_soln->set(dn, T_chan);
     }
   }
@@ -1092,3 +1091,4 @@ PinTempSolver::externalSolve()
         "Energy conservation equation might not be solved correctly, Power added to coolant:  " +
         std::to_string(power_out - power_in) + " Watt ");
 }
+
