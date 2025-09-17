@@ -16,6 +16,31 @@
 #include "libmesh/quadrature_gauss.h"
 #include "libmesh/remote_elem.h"
 
+FaceInfo::FaceInfo(const ElemInfo * elem_info, unsigned int side, const dof_id_type id)
+  : _elem_info(elem_info),
+    _neighbor_info(nullptr),
+    _id(id),
+    _processor_id(_elem_info->elem()->processor_id()),
+    _elem_side_id(side),
+    _neighbor_side_id(libMesh::invalid_uint),
+    _gc(0.5)
+{
+  // Compute face-related quantities
+  unsigned int dim = _elem_info->elem()->dim();
+  const std::unique_ptr<const Elem> face = _elem_info->elem()->build_side_ptr(_elem_side_id);
+  std::unique_ptr<libMesh::FEBase> fe(
+      libMesh::FEBase::build(dim, libMesh::FEType(_elem_info->elem()->default_order())));
+  libMesh::QGauss qface(dim - 1, libMesh::CONSTANT);
+  fe->attach_quadrature_rule(&qface);
+  const std::vector<Point> & normals = fe->get_normals();
+  fe->reinit(_elem_info->elem(), _elem_side_id);
+  mooseAssert(normals.size() == 1, "FaceInfo construction broken w.r.t. computing face normals");
+  _normal = normals[0];
+
+  _face_area = face->volume();
+  _face_centroid = face->vertex_average();
+}
+
 FaceInfo::FaceInfo(const ElemInfo * elem_info,
                    unsigned int side,
                    const dof_id_type id,
@@ -30,14 +55,17 @@ FaceInfo::FaceInfo(const ElemInfo * elem_info,
     _gc(0.5)
 {
   // Compute face-related quantities
-  const auto & face = side_builder(*_elem_info->elem(), side);
-  const std::vector<Point> & normals = fe->get_normals();
-  fe->reinit(_elem_info->elem(), _elem_side_id);
-  mooseAssert(normals.size() == 1, "FaceInfo construction broken w.r.t. computing face normals");
-  _normal = normals[0];
-
+  auto & face = side_builder(*_elem_info->elem(), side);
   _face_area = face.volume();
   _face_centroid = face.vertex_average();
+  const std::vector<Point> & normals = fe->get_normals();
+  Point pt0(0, 0, 0);
+  std::vector<Point> pts = {pt0};
+  // We pass this point to avoid the re-init caching that fails when
+  // the same FE is used for a boundary and a volume element (of the same dimension here)
+  fe->reinit(_elem_info->elem(), _elem_side_id, libMesh::TOLERANCE, &pts);
+  mooseAssert(normals.size() == 1, "FaceInfo construction broken w.r.t. computing face normals");
+  _normal = normals[0];
 }
 
 void
