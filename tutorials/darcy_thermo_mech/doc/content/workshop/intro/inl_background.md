@@ -54,3 +54,10 @@ NRIC is composed of two physical test beds to build prototypes of advanced nucle
 
 And an open-source [online virtual test bed](https://mooseframework.inl.gov/virtual_test_bed)
 to demonstrate advanced reactors through modeling and simulation. More information about NRIC can be found at [https://nric.inl.gov](https://nric.inl.gov).
+
+!--
+
+## Advanced Reactor Demonstration Timeline
+
+!style halign=center
+!media inl_reactor_timeline.png

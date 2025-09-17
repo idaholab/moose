@@ -48,6 +48,13 @@ cardinal-opt -i step01_1_meshing.basic.i --mesh-only
 
 !---
 
+## Result: Simple Mesh Input
+
+!style halign=center
+!media step01-1_mesh.png style=width:40%
+
+!---
+
 ## MeshGenerator System
 
 - The previous example utilized the MOOSE [`MeshGenerator`](Mesh/index.md) system
@@ -112,3 +119,10 @@ Let's generate a more interesting mesh, one that represents something like a fue
 ```bash
 cardinal-opt -i step01-2_meshing.basic.i --mesh-only
 ```
+
+!---
+
+## Result: Concentric Circle Mesh Input
+
+!style halign=center
+!media step01-2_mesh.png style=width:40%

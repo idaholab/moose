@@ -18,9 +18,9 @@ Multi-physics Object Oriented Simulation Environment
 - Designed to solve computational engineering problems and
   reduce the expense and time required to develop new =applications= by:
 
-  - being easily extended and maintained
-  - working efficiently on a few and many processors
-  - providing an object-oriented, extensible system for creating all aspects of a simulation tool
+  - Being easily extended and maintained
+  - Working efficiently on a few and many processors
+  - Providing an object-oriented, extensible system for creating all aspects of a simulation tool
 
 !---
 
@@ -54,6 +54,7 @@ Multi-physics Object Oriented Simulation Environment
 - Mesh adaptivity (refinement and coarsening)
 - Massively parallel (MPI and threads)
 - User code agnostic of dimension, parallelism, shape functions, etc
+- Native support for executing multiphysics simulations across applications
 - Operating Systems:
 
   - macOS (Conda, Docker)

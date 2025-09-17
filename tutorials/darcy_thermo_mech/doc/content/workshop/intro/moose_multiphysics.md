@@ -1,8 +1,65 @@
-# Creating a Multiphysics Code
+# Multiphysics
 
 !---
 
-- Multiphysics is popular, but how is it achieved?
+## Questions to Answer
+
+- What is multiphysics simulation?
+- Why do we want it?
+- How has it improved?
+- What makes it difficult?
+- Where does MOOSE fit in?
+
+!---
+
+## Historical Multiphysics Simulation
+
+- Predictive multiphysics capability involved best-estimate calculations
+
+  - Best estimates: data and correlation driven, many approximations
+  - Necessitated experimental data for each design
+
+- Physics performed independently
+
+  - Was a "siloed" task; handoffs of data/results from person to person
+
+- Codes are very computationally efficient and well validated
+
+  - ... but the process wasn't necessarily efficient
+
+- Used many approximations for evaluations of safety parameters
+
+  - Pin-power reconstruction, gap conductance, spacer grid models
+
+!---
+
+## Current Multiphysics Simulation
+
+- Direct, physics-based models of all components
+
+  - Reduces approximations as needed
+  - Can be computationally expensive
+  - Validation?
+
+- Tighter and consistent coupling
+
+  - How separate - full coupling or loose coupling?
+
+- Length and time scales of physics can be vastly different
+
+  - What does this change for the analyst?
+
+- Quite new: +validation is not nearly as mature as with methods in the past+
+
+!---
+
+!style halign=center
+!media multiphysics_scale.png
+
+!--
+
+## Writing a Multiphysics Code
+
 - Scientists are adept at creating applications in their domain
 - What about collaborating across research groups and/or disciplines?
 
@@ -18,10 +75,10 @@
 
   - Allows for "decoupling" of code
   - Leads to more reuse and less bugs
-  - +Challenging for FEM+: Shape functions, DOFs, Elements, QPs, Material Properties, Analytic
-    Functions, Global Integrals, Transferred Data and much more are needed in FEM assembly
+  - +Challenging for FEM+
 
-    The complexity makes computational science codes brittle and hard to reuse
+    - Shape functions, degrees of freedom, meshing, quadrature points, material properties, analytic functions, global integrals, data transfer, ...
+    - The complexity makes computational science codes brittle and hard to reuse
 
 - A consistent set of "systems" are needed to carry out common actions, these systems should be
   separated by interfaces
@@ -41,7 +98,7 @@
 
 !---
 
-## MOOSE Pluggable Systems
+## MOOSE Pluggable System List
 
 !style! halign=center
 !row!
@@ -152,6 +209,29 @@ Reactor\\
 !col-end!
 !row-end!
 !style-end!
+
+!---
+
+## MOOSE Coupling Strategy
+
+- Numerically separates a multiphysics solve by physics components
+
+  - Connect physics together via transfers
+
+- Input file based
+
+  - No code needed!
+
+- There is no single unique hierarchy to solve a specific problem
+
+  - Multiple may exist, some may be more efficient
+
+- +Provides a standardized interface for an analyst to produce a coupled model+
+
+!---
+
+!style halign=center
+!media multiapp_tree.png style=width:70%
 
 !---
 
