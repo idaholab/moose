@@ -3855,9 +3855,15 @@ MooseMesh::buildFiniteVolumeInfo() const
 
   // We prepare a map connecting the Elem* and the corresponding ElemInfo
   // for the active elements.
+  _elem_to_elem_info.reserve(nActiveElem());
+  unsigned int num_sides = 0;
   for (const Elem * elem : as_range(begin, end))
+  {
     _elem_to_elem_info.emplace(elem->id(), elem);
+    num_sides += elem->n_sides();
+  }
 
+  _all_face_info.reserve(num_sides / 2);
   dof_id_type face_index = 0;
   for (const Elem * elem : as_range(begin, end))
   {
@@ -3910,6 +3916,9 @@ MooseMesh::buildFiniteVolumeInfo() const
   // Build the local face info and elem_side to face info maps. We need to do this after
   // _all_face_info is finished being constructed because emplace_back invalidates all iterators and
   // references if ever the new size exceeds capacity
+  _elem_side_to_face_info.reserve(_all_face_info.size());
+  // heuristic to avoid resizing too much
+  _face_info.reserve(_all_face_info.size() * (nActiveLocalElem() + 1e-8) / nActiveElem());
   for (auto & fi : _all_face_info)
   {
     const Elem * const elem = &fi.elem();
@@ -3928,6 +3937,7 @@ MooseMesh::buildFiniteVolumeInfo() const
       _face_info.push_back(&fi);
   }
 
+  _elem_info.reserve(nActiveLocalElem());
   for (auto & ei : _elem_to_elem_info)
     if (ei.second.elem()->processor_id() == this->processor_id())
       _elem_info.push_back(&ei.second);
