@@ -375,13 +375,15 @@ SubChannel1PhaseProblem::computeInterpolatedValue(PetscScalar topValue,
   return alpha * botValue + (1.0 - alpha) * topValue;
 }
 
-Real SubChannel1PhaseProblem::computeNusseltNumber(NusseltStruct nusselt_args)
+Real
+SubChannel1PhaseProblem::computeNusseltNumber(NusseltStruct nusselt_args)
 {
   const auto htc_correlation = nusselt_args.htc_correlation;
   const auto Re = nusselt_args.Re;
   const auto Pr = nusselt_args.Pr;
 
-  switch (htc_correlation) {
+  switch (htc_correlation)
+  {
     case 0: // dittus-boelter
       return 0.023 * std::pow(Re, 0.8) * std::pow(Pr, 0.4);
 
@@ -398,15 +400,17 @@ Real SubChannel1PhaseProblem::computeNusseltNumber(NusseltStruct nusselt_args)
       friction_args.w_perim = (*_w_perim_soln)(node);
       Real f_darcy = computeFrictionFactor(friction_args) / 8.0;
 
-      // return f_darcy * (Re - 1e3) * Pr / (1 + 12.7 * std::sqrt(f_darcy) * (std::pow(Pr, 2./3.) - 1.) + 4.0);
-      return f_darcy * (Re - 1e3) * (Pr + 0.01) / (1 + 12.7 * std::sqrt(f_darcy) * (std::pow(Pr + 0.01, 2./3.) - 1.));
+      // return f_darcy * (Re - 1e3) * Pr / (1 + 12.7 * std::sqrt(f_darcy) * (std::pow(Pr, 2./3.)
+      // - 1.) + 4.0);
+      return f_darcy * (Re - 1e3) * (Pr + 0.01) /
+             (1 + 12.7 * std::sqrt(f_darcy) * (std::pow(Pr + 0.01, 2. / 3.) - 1.));
     }
-    
+
     case 2: // kazimi-carelli
     {
       const auto i_pin = nusselt_args.i_pin;
       const auto iz = nusselt_args.iz;
-      
+
       const auto pitch = _subchannel_mesh.getPitch();
       const auto * pin_node = _subchannel_mesh.getPinNode(i_pin, iz);
       const auto D = (*_Dpin_soln)(pin_node);
@@ -417,9 +421,10 @@ Real SubChannel1PhaseProblem::computeNusseltNumber(NusseltStruct nusselt_args)
     }
 
     default:
-      mooseError(name(), ": Invalid heat transfer correlation, "
-                         "please use 'dittus-boelter', 'gnielinski', or 'kazimi-carelli'");
-    }
+      mooseError(name(),
+                 ": Invalid heat transfer correlation, "
+                 "please use 'dittus-boelter', 'gnielinski', or 'kazimi-carelli'");
+  }
 }
 
 void
@@ -2772,7 +2777,7 @@ SubChannel1PhaseProblem::externalSolve()
       nusselt_struct.Pr = Pr;
       nusselt_struct.i_pin = 0; // don't care about this one at the moment
       const auto channel_node = _subchannel_mesh.getChannelNodeFromDuct(dn);
-      const libMesh::Point& node_point = *channel_node;
+      const libMesh::Point & node_point = *channel_node;
       nusselt_struct.iz = _subchannel_mesh.getZIndex(node_point);
       nusselt_struct.i_ch = _subchannel_mesh.channelIndex(node_point);
       nusselt_struct.htc_correlation = _duct_htc_correlation;
