@@ -3,11 +3,36 @@
 #include "MooseError.h"
 #include <algorithm>
 #include <cmath>
+#include <unordered_map>
 
 namespace moose
 {
 namespace automatic_weak_form
 {
+
+namespace
+{
+NodePtr expandCross(const NodePtr & left, const NodePtr & right)
+{
+  auto left_vec = std::dynamic_pointer_cast<VectorAssemblyNode>(left);
+  auto right_vec = std::dynamic_pointer_cast<VectorAssemblyNode>(right);
+
+  if (!left_vec || !right_vec)
+    return cross(left, right);
+
+  if (left_vec->components().size() != 3 || right_vec->components().size() != 3)
+    return cross(left, right);
+
+  const auto & a = left_vec->components();
+  const auto & b = right_vec->components();
+
+  NodePtr c1 = subtract(multiply(a[1], b[2]), multiply(a[2], b[1]));
+  NodePtr c2 = subtract(multiply(a[2], b[0]), multiply(a[0], b[2]));
+  NodePtr c3 = subtract(multiply(a[0], b[1]), multiply(a[1], b[0]));
+
+  return vec3(c1, c2, c3);
+}
+}
 
 Differential DifferentiationVisitor::differentiate(const NodePtr & expr)
 {
@@ -74,7 +99,9 @@ DifferentiationVisitor::handlerMap()
       {NodeType::Skew, &DifferentiationVisitor::differentiateUnaryOp},
       {NodeType::Deviatoric, &DifferentiationVisitor::differentiateUnaryOp},
       {NodeType::Function, &DifferentiationVisitor::differentiateFunction},
-      {NodeType::VectorAssembly, &DifferentiationVisitor::differentiateVectorAssembly}};
+      {NodeType::VectorAssembly, &DifferentiationVisitor::differentiateVectorAssembly},
+      {NodeType::VectorComponent, &DifferentiationVisitor::differentiateComponent},
+      {NodeType::TensorComponent, &DifferentiationVisitor::differentiateComponent}};
   return handlers;
 }
 
@@ -250,59 +277,34 @@ Differential DifferentiationVisitor::differentiateFunction(const NodePtr & node)
   auto func = std::static_pointer_cast<FunctionNode>(node);
   Differential result;
 
-  if (func->name() == "W" && func->args().size() == 1)
+  static const std::unordered_map<std::string, std::function<NodePtr(const NodePtr &)>> unary_derivatives = {
+      {"sin", [](const NodePtr & arg) { return function("cos", {arg}); }},
+      {"cos", [](const NodePtr & arg) { return negate(function("sin", {arg})); }},
+      {"exp", [](const NodePtr & arg) { return function("exp", {arg}); }},
+      {"log", [](const NodePtr & arg) { return divide(constant(1.0), arg); }},
+      {"sqrt", [](const NodePtr & arg) {
+         return divide(constant(1.0), multiply(constant(2.0), function("sqrt", {arg})));
+       }},
+      {"tanh", [](const NodePtr & arg) {
+         auto tanh_arg = function("tanh", {arg});
+         return subtract(constant(1.0), power(tanh_arg, constant(2.0)));
+       }},
+      {"sinh", [](const NodePtr & arg) { return function("cosh", {arg}); }},
+      {"cosh", [](const NodePtr & arg) { return function("sinh", {arg}); }},
+      {"W", [](const NodePtr & arg) { return function("dW_dc", {arg}); }} };
+
+  const auto & args = func->args();
+  if (args.size() == 1)
   {
-    auto arg_diff = visit(func->args()[0]);
-    if (arg_diff.hasOrder(0))
+    auto it = unary_derivatives.find(func->name());
+    if (it != unary_derivatives.end())
     {
-      auto dW_dc = function("dW_dc", {func->args()[0]});
+      auto arg_diff = visit(args[0]);
+      NodePtr derivative = it->second(args[0]);
       for (auto & [order, coeff] : arg_diff.coefficients)
         if (coeff)
-          result.coefficients[order] = multiply(dW_dc, coeff);
-    }
-  }
-  else if (func->name() == "log" && func->args().size() == 1)
-  {
-    auto arg_diff = visit(func->args()[0]);
-    if (arg_diff.hasOrder(0))
-    {
-      auto one_over_arg = divide(constant(1.0), func->args()[0]);
-      for (auto & [order, coeff] : arg_diff.coefficients)
-        if (coeff)
-          result.coefficients[order] = multiply(one_over_arg, coeff);
-    }
-  }
-  else if (func->name() == "exp" && func->args().size() == 1)
-  {
-    auto arg_diff = visit(func->args()[0]);
-    if (arg_diff.hasOrder(0))
-    {
-      auto exp_arg = function("exp", {func->args()[0]});
-      for (auto & [order, coeff] : arg_diff.coefficients)
-        if (coeff)
-          result.coefficients[order] = multiply(exp_arg, coeff);
-    }
-  }
-  else if (func->name() == "sin" && func->args().size() == 1)
-  {
-    auto arg_diff = visit(func->args()[0]);
-    if (arg_diff.hasOrder(0))
-    {
-      auto cos_arg = function("cos", {func->args()[0]});
-      for (auto & [order, coeff] : arg_diff.coefficients)
-        if (coeff)
-          result.coefficients[order] = multiply(cos_arg, coeff);
-    }
-  }
-  else if (func->name() == "cos" && func->args().size() == 1)
-  {
-    auto arg_diff = visit(func->args()[0]);
-    if (arg_diff.hasOrder(0))
-    {
-      auto neg_sin = negate(function("sin", {func->args()[0]}));
-      for (auto & [order, coeff] : arg_diff.coefficients)
-        if (coeff)
-          result.coefficients[order] = multiply(neg_sin, coeff);
+          result.coefficients[order] = multiply(derivative, coeff);
+      return result;
     }
   }
 
@@ -364,6 +366,30 @@ Differential DifferentiationVisitor::differentiateVectorAssembly(const NodePtr &
       VectorShape vec_shape{static_cast<unsigned int>(components.size())};
       entry = std::make_shared<VectorAssemblyNode>(updated_components, Shape(vec_shape));
     }
+  }
+
+  return result;
+}
+
+Differential DifferentiationVisitor::differentiateComponent(const NodePtr & node)
+{
+  auto component_node = std::static_pointer_cast<ComponentNode>(node);
+  Differential expr_diff = visit(component_node->expr());
+  Differential result;
+
+  ScalarShape scalar_shape{};
+
+  for (auto & [order, coeff] : expr_diff.coefficients)
+  {
+    if (!coeff)
+      continue;
+
+    if (component_node->type() == NodeType::VectorComponent)
+      result.coefficients[order] = std::make_shared<ComponentNode>(
+          coeff, component_node->component(), Shape(scalar_shape));
+    else
+      result.coefficients[order] = std::make_shared<ComponentNode>(
+          coeff, component_node->i(), component_node->j(), Shape(scalar_shape));
   }
 
   return result;
@@ -666,14 +692,14 @@ Differential DifferentiationVisitor::handleCross(const NodePtr & left, const Nod
 
   for (auto & [order, coeff] : left_diff.coefficients)
     if (coeff)
-      result.coefficients[order] = cross(coeff, right);
+      result.coefficients[order] = expandCross(coeff, right);
 
   for (auto & [order, coeff] : right_diff.coefficients)
   {
     if (!coeff)
       continue;
 
-    auto term = cross(left, coeff);
+    auto term = expandCross(left, coeff);
     if (result.coefficients.count(order))
       result.coefficients[order] = add(result.coefficients[order], term);
     else

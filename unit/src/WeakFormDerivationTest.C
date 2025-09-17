@@ -125,6 +125,30 @@ TEST_F(WeakFormDerivationTest, BasicDifferentiation)
     EXPECT_FALSE(diff.hasOrder(0));
     EXPECT_FALSE(diff.hasOrder(1));
   }
+
+  // Test 6: d/dx(sqrt(x)) = 1/(2*sqrt(x))
+  {
+    auto expr = parser->parse("sqrt(x)");
+    DifferentiationVisitor dv("x");
+    auto diff = dv.differentiate(expr);
+    auto result = diff.getCoefficient(0);
+    ASSERT_NE(result, nullptr);
+
+    auto simplified = simplifier->simplify(result);
+    EXPECT_EQ(simplified->toString(), "(1.000000 / (2.000000 * sqrt(x)))");
+  }
+
+  // Test 7: d/dx(tanh(x)) = 1 - tanh(x)^2
+  {
+    auto expr = parser->parse("tanh(x)");
+    DifferentiationVisitor dv("x");
+    auto diff = dv.differentiate(expr);
+    auto result = diff.getCoefficient(0);
+    ASSERT_NE(result, nullptr);
+
+    auto simplified = simplifier->simplify(result);
+    EXPECT_EQ(simplified->toString(), "(1.000000 - pow(tanh(x), 2.000000))");
+  }
 }
 
 // Test gradient operations with exact results
@@ -277,7 +301,9 @@ TEST_F(WeakFormDerivationTest, VectorAssemblyOperations)
     EXPECT_TRUE(diff.hasOrder(0));
     auto coeff = diff.getCoefficient(0);
     ASSERT_NE(coeff, nullptr);
-    EXPECT_EQ(coeff->toString(), "vec(0.000000, 0.000000, 1.000000)");
+
+    auto simplified = simplifier->simplify(coeff);
+    EXPECT_EQ(simplified->toString(), "vec(0.000000, 0.000000, 1.000000)");
   }
 
   // Test 7: Curl differentiation increases derivative order

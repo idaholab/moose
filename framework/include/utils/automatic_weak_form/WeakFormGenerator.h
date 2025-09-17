@@ -61,6 +61,7 @@ private:
   Differential differentiateBinaryOp(const NodePtr & node);
   Differential differentiateFunction(const NodePtr & node);
   Differential differentiateVectorAssembly(const NodePtr & node);
+  Differential differentiateComponent(const NodePtr & node);
 
   Differential handleGradient(const NodePtr & operand);
   Differential handleCurl(const NodePtr & operand);
