@@ -42,7 +42,11 @@ struct Differential
 class DifferentiationVisitor
 {
 public:
-  DifferentiationVisitor(const std::string & var_name) : _var_name(var_name) {}
+  DifferentiationVisitor(const std::string & var_name,
+                         const std::map<std::string, NodePtr> * split_definitions = nullptr)
+    : _var_name(var_name), _split_definitions(split_definitions)
+  {
+  }
   
   Differential differentiate(const NodePtr & expr);
   
@@ -50,6 +54,7 @@ private:
   using Handler = Differential (DifferentiationVisitor::*)(const NodePtr &);
 
   std::string _var_name;
+  const std::map<std::string, NodePtr> * _split_definitions = nullptr;
   std::unordered_map<const Node *, Differential> _cache;
   
   Differential visit(const NodePtr & node);
@@ -97,6 +102,13 @@ class WeakFormGenerator
 public:
   WeakFormGenerator(unsigned int dim = 3) : _dim(dim) {}
   
+  void setSplitDefinitions(const std::map<std::string, NodePtr> & definitions)
+  {
+    _split_definitions = definitions;
+  }
+
+  void clearSplitDefinitions() { _split_definitions.clear(); }
+
   NodePtr generateWeakForm(const NodePtr & energy_density, const std::string & var_name);
   
   NodePtr computeEulerLagrange(const Differential & diff);
@@ -167,6 +179,7 @@ public:
   
 private:
   unsigned int _dim;
+  std::map<std::string, NodePtr> _split_definitions;
   
   NodePtr applyDivergence(const NodePtr & expr, unsigned int times = 1);
   

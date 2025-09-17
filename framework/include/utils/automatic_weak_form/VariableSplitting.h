@@ -16,19 +16,19 @@ struct SplitVariable
 {
   std::string name;
   std::string original_variable;
-  unsigned int derivative_order;
+  /// Derivative order of the original variable represented by this split variable
+  unsigned int derivative_order = 0;
   Shape shape;
-  
+
   NodePtr definition;
-  
+
   NodePtr constraint_residual;
-  
+
   bool is_primary;
-  
+
   std::string toString() const
   {
-    return name + " = " + (derivative_order == 1 ? "grad(" : "hessian(") + 
-           original_variable + ")";
+    return name + " (order " + std::to_string(derivative_order) + ")";
   }
 };
 
@@ -48,11 +48,11 @@ public:
   };
   
   std::vector<SplitRequirement> analyzeExpression(const NodePtr & expr);
-  
+
   bool requiresSplitting(const NodePtr & expr) const;
-  
+
   unsigned int getMaxDerivativeOrder(const NodePtr & expr, const std::string & var_name) const;
-  
+
   std::map<std::string, SplitVariable> generateSplitVariables(const NodePtr & expr);
   
   NodePtr transformExpression(const NodePtr & expr, 
@@ -60,9 +60,6 @@ public:
   
   std::vector<NodePtr> generateConstraintEquations(
       const std::map<std::string, SplitVariable> & split_vars);
-  
-  NodePtr createSplitVariableDefinition(const std::string & original_var,
-                                         unsigned int derivative_order);
   
   bool canHandleWithCurrentOrder(const NodePtr & expr) const;
   
@@ -75,23 +72,45 @@ private:
   unsigned int _dim;
   bool _use_hessians = false;
   
-  void analyzeNode(const NodePtr & node, 
-                    std::map<std::string, unsigned int> & max_orders,
-                    unsigned int current_derivative_level = 0);
-  
+  void analyzeNode(const NodePtr & node,
+                   std::map<std::string, unsigned int> & max_orders,
+                   std::map<std::string, std::map<unsigned int, std::set<NodeType>>> & derivative_ops,
+                   std::vector<NodeType> & derivative_stack) const;
+
   NodePtr transformNode(const NodePtr & node,
-                        const std::map<std::string, SplitVariable> & split_vars,
-                        unsigned int current_derivative_level = 0);
-  
+                        const std::map<std::string, SplitVariable> & split_vars) const;
+
   bool isDerivativeOperator(NodeType type) const;
-  
+
   unsigned int getDerivativeIncrement(NodeType type) const;
-  
+
   std::string generateSplitVariableName(const std::string & original_var,
-                                         unsigned int derivative_order);
-  
+                                         unsigned int derivative_order) const;
+
   Shape computeSplitVariableShape(const Shape & original_shape,
-                                   unsigned int derivative_order);
+                                   unsigned int derivative_order) const;
+
+  Shape findVariableShape(const NodePtr & node, const std::string & var_name) const;
+
+  NodePtr applyOperator(NodeType type, const NodePtr & operand) const;
+
+  NodeType chooseOperator(const std::set<NodeType> & ops) const;
+
+  NodePtr buildDerivativeExpression(
+      const std::string & original_var,
+      unsigned int order,
+      const Shape & original_shape,
+      const std::map<std::string, std::map<unsigned int, std::set<NodeType>>> & derivative_ops) const;
+
+  struct DerivativeInfo
+  {
+    bool pure = false;
+    std::string variable;
+    unsigned int order = 0;
+  };
+
+  DerivativeInfo getDerivativeInfo(const NodePtr & node,
+                                   const std::map<std::string, SplitVariable> & split_vars) const;
 };
 
 class SplitVariableKernelGenerator

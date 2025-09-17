@@ -125,6 +125,12 @@ Differential DifferentiationVisitor::differentiateFieldVariable(const NodePtr & 
   Differential result;
   if (field->name() == _var_name)
     result.coefficients[0] = constant(1.0);
+  else if (_split_definitions)
+  {
+    auto it = _split_definitions->find(field->name());
+    if (it != _split_definitions->end())
+      return visit(it->second);
+  }
   return result;
 }
 
@@ -831,7 +837,7 @@ Differential DifferentiationVisitor::combineDifferentials(
 
 NodePtr WeakFormGenerator::generateWeakForm(const NodePtr & energy_density, const std::string & var_name)
 {
-  DifferentiationVisitor dv(var_name);
+  DifferentiationVisitor dv(var_name, &_split_definitions);
   Differential diff = dv.differentiate(energy_density);
   return computeEulerLagrange(diff);
 }
@@ -894,7 +900,7 @@ WeakFormGenerator::WeakFormContributions WeakFormGenerator::computeContributions
     const NodePtr & energy_density,
     const std::string & var_name)
 {
-  DifferentiationVisitor dv(var_name);
+  DifferentiationVisitor dv(var_name, &_split_definitions);
   Differential diff = dv.differentiate(energy_density);
   
   WeakFormContributions contributions;

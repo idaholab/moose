@@ -2,6 +2,8 @@
 #include "WeakFormGenerator.h"
 #include "MooseError.h"
 #include <algorithm>
+#include <array>
+#include <functional>
 #include <queue>
 
 namespace moose
@@ -13,25 +15,27 @@ std::vector<VariableSplittingAnalyzer::SplitRequirement>
 VariableSplittingAnalyzer::analyzeExpression(const NodePtr & expr)
 {
   std::map<std::string, unsigned int> max_orders;
-  analyzeNode(expr, max_orders, 0);
+  std::map<std::string, std::map<unsigned int, std::set<NodeType>>> derivative_ops;
+  std::vector<NodeType> derivative_stack;
+  analyzeNode(expr, max_orders, derivative_ops, derivative_stack);
 
   std::vector<SplitRequirement> requirements;
+
+  const unsigned int available = _use_hessians ? std::max<unsigned int>(_fe_order, 2) : _fe_order;
 
   for (const auto & [var_name, max_order] : max_orders)
   {
     SplitRequirement req;
     req.variable_name = var_name;
     req.max_derivative_order = max_order;
-    req.available_order = _use_hessians ? 2 : 1;
+    req.available_order = available;
     req.requires_splitting = (max_order > req.available_order);
 
     if (req.requires_splitting)
-    {
       for (unsigned int order = req.available_order + 1; order <= max_order; ++order)
         req.split_orders.push_back(order);
-    }
 
-    requirements.push_back(req);
+    requirements.push_back(std::move(req));
   }
 
   return requirements;
@@ -40,12 +44,10 @@ VariableSplittingAnalyzer::analyzeExpression(const NodePtr & expr)
 bool
 VariableSplittingAnalyzer::requiresSplitting(const NodePtr & expr) const
 {
-  auto requirements = const_cast<VariableSplittingAnalyzer*>(this)->analyzeExpression(expr);
-
+  auto requirements = const_cast<VariableSplittingAnalyzer *>(this)->analyzeExpression(expr);
   for (const auto & req : requirements)
     if (req.requires_splitting)
       return true;
-
   return false;
 }
 
@@ -53,43 +55,52 @@ unsigned int
 VariableSplittingAnalyzer::getMaxDerivativeOrder(const NodePtr & expr, const std::string & var_name) const
 {
   std::map<std::string, unsigned int> max_orders;
-  const_cast<VariableSplittingAnalyzer*>(this)->analyzeNode(expr, max_orders, 0);
+  std::map<std::string, std::map<unsigned int, std::set<NodeType>>> derivative_ops;
+  std::vector<NodeType> derivative_stack;
+  const_cast<VariableSplittingAnalyzer *>(this)->analyzeNode(
+      expr, max_orders, derivative_ops, derivative_stack);
 
-  if (max_orders.count(var_name))
-    return max_orders[var_name];
-
-  return 0;
+  auto it = max_orders.find(var_name);
+  return it != max_orders.end() ? it->second : 0;
 }
 
 std::map<std::string, SplitVariable>
 VariableSplittingAnalyzer::generateSplitVariables(const NodePtr & expr)
 {
-  auto requirements = analyzeExpression(expr);
+  std::map<std::string, unsigned int> max_orders;
+  std::map<std::string, std::map<unsigned int, std::set<NodeType>>> derivative_ops;
+  std::vector<NodeType> derivative_stack;
+  analyzeNode(expr, max_orders, derivative_ops, derivative_stack);
+
   std::map<std::string, SplitVariable> split_vars;
 
-  for (const auto & req : requirements)
+  const unsigned int available = _use_hessians ? std::max<unsigned int>(_fe_order, 2) : _fe_order;
+
+  for (const auto & [var_name, max_order] : max_orders)
   {
-    if (req.requires_splitting)
+    if (max_order <= available)
+      continue;
+
+    const Shape original_shape = findVariableShape(expr, var_name);
+
+    for (unsigned int order = available + 1; order <= max_order; ++order)
     {
-      for (unsigned int order : req.split_orders)
-      {
-        SplitVariable sv;
-        sv.name = generateSplitVariableName(req.variable_name, order);
-        sv.original_variable = req.variable_name;
-        sv.derivative_order = order;
-        sv.definition = createSplitVariableDefinition(req.variable_name, order);
-        sv.is_primary = false;
+      NodePtr definition = buildDerivativeExpression(var_name, order, original_shape, derivative_ops);
 
-        Shape orig_shape = ScalarShape{};
-        sv.shape = computeSplitVariableShape(orig_shape, order);
+      if (!definition)
+        mooseError("Unable to build definition for split variable order ", order,
+                   " of variable ", var_name);
 
-        sv.constraint_residual = subtract(
-          variable(sv.name, sv.shape),
-          sv.definition
-        );
+      SplitVariable sv;
+      sv.name = generateSplitVariableName(var_name, order);
+      sv.original_variable = var_name;
+      sv.derivative_order = order;
+      sv.shape = definition->shape();
+      sv.definition = definition;
+      sv.constraint_residual = subtract(fieldVariable(sv.name, sv.shape), definition);
+      sv.is_primary = false;
 
-        split_vars[sv.name] = sv;
-      }
+      split_vars.emplace(sv.name, std::move(sv));
     }
   }
 
@@ -100,7 +111,7 @@ NodePtr
 VariableSplittingAnalyzer::transformExpression(const NodePtr & expr,
                                                 const std::map<std::string, SplitVariable> & split_vars)
 {
-  return transformNode(expr, split_vars, 0);
+  return transformNode(expr, split_vars);
 }
 
 std::vector<NodePtr>
@@ -117,18 +128,6 @@ VariableSplittingAnalyzer::generateConstraintEquations(
   return constraints;
 }
 
-NodePtr
-VariableSplittingAnalyzer::createSplitVariableDefinition(const std::string & original_var,
-                                                          unsigned int derivative_order)
-{
-  NodePtr var = fieldVariable(original_var);
-
-  for (unsigned int i = 0; i < derivative_order; ++i)
-    var = grad(var, _dim);
-
-  return var;
-}
-
 bool
 VariableSplittingAnalyzer::canHandleWithCurrentOrder(const NodePtr & expr) const
 {
@@ -137,8 +136,9 @@ VariableSplittingAnalyzer::canHandleWithCurrentOrder(const NodePtr & expr) const
 
 void
 VariableSplittingAnalyzer::analyzeNode(const NodePtr & node,
-                                        std::map<std::string, unsigned int> & max_orders,
-                                        unsigned int current_derivative_level)
+                                       std::map<std::string, unsigned int> & max_orders,
+                                       std::map<std::string, std::map<unsigned int, std::set<NodeType>>> & derivative_ops,
+                                       std::vector<NodeType> & derivative_stack) const
 {
   if (!node)
     return;
@@ -148,8 +148,16 @@ VariableSplittingAnalyzer::analyzeNode(const NodePtr & node,
     case NodeType::FieldVariable:
     {
       auto field = std::static_pointer_cast<FieldVariableNode>(node);
-      std::string name = field->name();
-      max_orders[name] = std::max(max_orders[name], current_derivative_level);
+      const std::string & name = field->name();
+      const unsigned int order = derivative_stack.size();
+      max_orders[name] = std::max(max_orders[name], order);
+
+      for (unsigned int depth = 0; depth < derivative_stack.size(); ++depth)
+      {
+        const unsigned int derivative_order = depth + 1;
+        const NodeType op = derivative_stack[derivative_stack.size() - 1 - depth];
+        derivative_ops[name][derivative_order].insert(op);
+      }
       break;
     }
 
@@ -157,23 +165,50 @@ VariableSplittingAnalyzer::analyzeNode(const NodePtr & node,
     case NodeType::Divergence:
     case NodeType::Curl:
     {
+      derivative_stack.push_back(node->type());
       auto unary = std::static_pointer_cast<UnaryOpNode>(node);
-      unsigned int increment = getDerivativeIncrement(node->type());
-      analyzeNode(unary->operand(), max_orders, current_derivative_level + increment);
+      analyzeNode(unary->operand(), max_orders, derivative_ops, derivative_stack);
+      derivative_stack.pop_back();
       break;
     }
 
     case NodeType::Laplacian:
     {
       auto unary = std::static_pointer_cast<UnaryOpNode>(node);
-      analyzeNode(unary->operand(), max_orders, current_derivative_level + 2);
+      derivative_stack.push_back(NodeType::Divergence);
+      derivative_stack.push_back(NodeType::Gradient);
+      analyzeNode(unary->operand(), max_orders, derivative_ops, derivative_stack);
+      derivative_stack.pop_back();
+      derivative_stack.pop_back();
       break;
     }
 
     default:
     {
-      for (const auto & child : node->children())
-        analyzeNode(child, max_orders, current_derivative_level);
+      if (auto unary = std::dynamic_pointer_cast<UnaryOpNode>(node))
+      {
+        analyzeNode(unary->operand(), max_orders, derivative_ops, derivative_stack);
+      }
+      else if (auto bin = std::dynamic_pointer_cast<BinaryOpNode>(node))
+      {
+        analyzeNode(bin->left(), max_orders, derivative_ops, derivative_stack);
+        analyzeNode(bin->right(), max_orders, derivative_ops, derivative_stack);
+      }
+      else if (auto func = std::dynamic_pointer_cast<FunctionNode>(node))
+      {
+        for (const auto & arg : func->args())
+          analyzeNode(arg, max_orders, derivative_ops, derivative_stack);
+      }
+      else if (auto vec = std::dynamic_pointer_cast<VectorAssemblyNode>(node))
+      {
+        for (const auto & entry : vec->components())
+          analyzeNode(entry, max_orders, derivative_ops, derivative_stack);
+      }
+      else
+      {
+        for (const auto & child : node->children())
+          analyzeNode(child, max_orders, derivative_ops, derivative_stack);
+      }
       break;
     }
   }
@@ -181,48 +216,87 @@ VariableSplittingAnalyzer::analyzeNode(const NodePtr & node,
 
 NodePtr
 VariableSplittingAnalyzer::transformNode(const NodePtr & node,
-                                          const std::map<std::string, SplitVariable> & split_vars,
-                                          unsigned int current_derivative_level)
+                                         const std::map<std::string, SplitVariable> & split_vars) const
 {
   if (!node)
-    return node;
-
-  if (current_derivative_level > _fe_order)
-  {
-    if (node->type() == NodeType::Gradient)
-    {
-      auto unary = std::static_pointer_cast<UnaryOpNode>(node);
-      auto operand = unary->operand();
-
-      if (operand->type() == NodeType::FieldVariable)
-      {
-        auto field = std::static_pointer_cast<FieldVariableNode>(operand);
-        std::string split_name = generateSplitVariableName(field->name(), current_derivative_level);
-
-        if (split_vars.count(split_name))
-        {
-          const auto & sv = split_vars.at(split_name);
-          return variable(sv.name, sv.shape);
-        }
-      }
-    }
-  }
+    return nullptr;
 
   switch (node->type())
   {
+    case NodeType::Constant:
+    case NodeType::Variable:
+    case NodeType::FieldVariable:
+      return node->clone();
+
     case NodeType::Gradient:
     {
       auto unary = std::static_pointer_cast<UnaryOpNode>(node);
-      auto transformed_operand = transformNode(unary->operand(), split_vars,
-                                                current_derivative_level + 1);
+      auto transformed_operand = transformNode(unary->operand(), split_vars);
+      auto info = getDerivativeInfo(transformed_operand, split_vars);
+
+      if (info.pure)
+      {
+        unsigned int result_order = info.order + 1;
+        std::string split_name = generateSplitVariableName(info.variable, result_order);
+        auto it = split_vars.find(split_name);
+        if (result_order > _fe_order && it != split_vars.end())
+          return fieldVariable(it->second.name, it->second.shape);
+      }
+
       return grad(transformed_operand, _dim);
+    }
+
+    case NodeType::Divergence:
+    {
+      auto unary = std::static_pointer_cast<UnaryOpNode>(node);
+      auto transformed_operand = transformNode(unary->operand(), split_vars);
+      auto info = getDerivativeInfo(transformed_operand, split_vars);
+
+      if (info.pure)
+      {
+        unsigned int result_order = info.order + 1;
+        std::string split_name = generateSplitVariableName(info.variable, result_order);
+        auto it = split_vars.find(split_name);
+        if (result_order > _fe_order && it != split_vars.end())
+          return fieldVariable(it->second.name, it->second.shape);
+      }
+
+      return div(transformed_operand);
+    }
+
+    case NodeType::Curl:
+    {
+      auto unary = std::static_pointer_cast<UnaryOpNode>(node);
+      auto transformed_operand = transformNode(unary->operand(), split_vars);
+      auto info = getDerivativeInfo(transformed_operand, split_vars);
+
+      if (info.pure)
+      {
+        unsigned int result_order = info.order + 1;
+        std::string split_name = generateSplitVariableName(info.variable, result_order);
+        auto it = split_vars.find(split_name);
+        if (result_order > _fe_order && it != split_vars.end())
+          return fieldVariable(it->second.name, it->second.shape);
+      }
+
+      return curl(transformed_operand, _dim);
     }
 
     case NodeType::Laplacian:
     {
       auto unary = std::static_pointer_cast<UnaryOpNode>(node);
-      auto transformed_operand = transformNode(unary->operand(), split_vars,
-                                                current_derivative_level + 2);
+      auto transformed_operand = transformNode(unary->operand(), split_vars);
+      auto info = getDerivativeInfo(transformed_operand, split_vars);
+
+      if (info.pure)
+      {
+        unsigned int result_order = info.order + 2;
+        std::string split_name = generateSplitVariableName(info.variable, result_order);
+        auto it = split_vars.find(split_name);
+        if (result_order > _fe_order && it != split_vars.end())
+          return fieldVariable(it->second.name, it->second.shape);
+      }
+
       return laplacian(transformed_operand);
     }
 
@@ -230,10 +304,15 @@ VariableSplittingAnalyzer::transformNode(const NodePtr & node,
     case NodeType::Subtract:
     case NodeType::Multiply:
     case NodeType::Divide:
+    case NodeType::Power:
+    case NodeType::Dot:
+    case NodeType::Cross:
+    case NodeType::Contract:
+    case NodeType::Outer:
     {
       auto binary = std::static_pointer_cast<BinaryOpNode>(node);
-      auto left = transformNode(binary->left(), split_vars, current_derivative_level);
-      auto right = transformNode(binary->right(), split_vars, current_derivative_level);
+      auto left = transformNode(binary->left(), split_vars);
+      auto right = transformNode(binary->right(), split_vars);
 
       switch (node->type())
       {
@@ -241,6 +320,11 @@ VariableSplittingAnalyzer::transformNode(const NodePtr & node,
         case NodeType::Subtract: return subtract(left, right);
         case NodeType::Multiply: return multiply(left, right);
         case NodeType::Divide: return divide(left, right);
+        case NodeType::Power: return power(left, right);
+        case NodeType::Dot: return dot(left, right);
+        case NodeType::Cross: return cross(left, right);
+        case NodeType::Contract: return contract(left, right);
+        case NodeType::Outer: return outer(left, right);
         default: break;
       }
 
@@ -248,8 +332,206 @@ VariableSplittingAnalyzer::transformNode(const NodePtr & node,
     }
 
     default:
-      return node->clone();
+    {
+      if (auto unary = std::dynamic_pointer_cast<UnaryOpNode>(node))
+      {
+        auto transformed_operand = transformNode(unary->operand(), split_vars);
+        return std::make_shared<UnaryOpNode>(node->type(), transformed_operand, node->shape());
+      }
+      else if (auto func = std::dynamic_pointer_cast<FunctionNode>(node))
+      {
+        std::vector<NodePtr> args;
+        args.reserve(func->args().size());
+        for (const auto & arg : func->args())
+          args.push_back(transformNode(arg, split_vars));
+        return std::make_shared<FunctionNode>(func->name(), args, node->shape());
+      }
+      else if (auto vec = std::dynamic_pointer_cast<VectorAssemblyNode>(node))
+      {
+        std::vector<NodePtr> components;
+        components.reserve(vec->components().size());
+        for (const auto & comp : vec->components())
+          components.push_back(transformNode(comp, split_vars));
+        return std::make_shared<VectorAssemblyNode>(components, node->shape());
+      }
+      else
+      {
+        std::vector<NodePtr> children;
+        for (const auto & child : node->children())
+          children.push_back(transformNode(child, split_vars));
+        if (children.empty())
+          return node->clone();
+        // Fallback: rebuild using clone when possible
+        return node->clone();
+      }
+    }
   }
+}
+
+Shape
+VariableSplittingAnalyzer::findVariableShape(const NodePtr & node, const std::string & var_name) const
+{
+  Shape result = ScalarShape{};
+  bool found = false;
+
+  std::function<void(const NodePtr &)> recurse = [&](const NodePtr & current) {
+    if (!current || found)
+      return;
+
+    if (current->type() == NodeType::FieldVariable)
+    {
+      auto field = std::static_pointer_cast<FieldVariableNode>(current);
+      if (field->name() == var_name)
+      {
+        result = field->shape();
+        found = true;
+        return;
+      }
+    }
+
+    if (auto unary = std::dynamic_pointer_cast<UnaryOpNode>(current))
+    {
+      recurse(unary->operand());
+      return;
+    }
+
+    if (auto binary = std::dynamic_pointer_cast<BinaryOpNode>(current))
+    {
+      recurse(binary->left());
+      recurse(binary->right());
+      return;
+    }
+
+    if (auto func = std::dynamic_pointer_cast<FunctionNode>(current))
+    {
+      for (const auto & arg : func->args())
+        recurse(arg);
+      return;
+    }
+
+    if (auto vec = std::dynamic_pointer_cast<VectorAssemblyNode>(current))
+    {
+      for (const auto & comp : vec->components())
+        recurse(comp);
+      return;
+    }
+
+    for (const auto & child : current->children())
+      recurse(child);
+  };
+
+  recurse(node);
+  return result;
+}
+
+NodePtr
+VariableSplittingAnalyzer::applyOperator(NodeType type, const NodePtr & operand) const
+{
+  switch (type)
+  {
+    case NodeType::Gradient:
+      return grad(operand, _dim);
+    case NodeType::Divergence:
+      return div(operand);
+    case NodeType::Curl:
+      return curl(operand, _dim);
+    case NodeType::Laplacian:
+      return laplacian(operand);
+    default:
+      return nullptr;
+  }
+}
+
+NodeType
+VariableSplittingAnalyzer::chooseOperator(const std::set<NodeType> & ops) const
+{
+  static const std::array<NodeType, 4> precedence = {NodeType::Gradient,
+                                                      NodeType::Divergence,
+                                                      NodeType::Curl,
+                                                      NodeType::Laplacian};
+
+  for (auto preferred : precedence)
+    if (ops.count(preferred))
+      return preferred;
+
+  return ops.empty() ? NodeType::Gradient : *ops.begin();
+}
+
+NodePtr
+VariableSplittingAnalyzer::buildDerivativeExpression(
+    const std::string & original_var,
+    unsigned int order,
+    const Shape & original_shape,
+    const std::map<std::string, std::map<unsigned int, std::set<NodeType>>> & derivative_ops) const
+{
+  if (!order)
+    return fieldVariable(original_var, original_shape);
+
+  auto ops_it = derivative_ops.find(original_var);
+  if (ops_it == derivative_ops.end())
+    mooseError("No derivative information recorded for variable ", original_var);
+
+  NodePtr expr = fieldVariable(original_var, original_shape);
+
+  for (unsigned int k = 1; k <= order; ++k)
+  {
+    auto order_it = ops_it->second.find(k);
+    if (order_it == ops_it->second.end() || order_it->second.empty())
+      mooseError("Missing derivative operator of order ", k, " for variable ", original_var);
+
+    NodeType op = chooseOperator(order_it->second);
+    expr = applyOperator(op, expr);
+  }
+
+  return expr;
+}
+
+VariableSplittingAnalyzer::DerivativeInfo
+VariableSplittingAnalyzer::getDerivativeInfo(
+    const NodePtr & node,
+    const std::map<std::string, SplitVariable> & split_vars) const
+{
+  if (!node)
+    return {};
+
+  if (node->type() == NodeType::FieldVariable)
+  {
+    auto field = std::static_pointer_cast<FieldVariableNode>(node);
+    auto it = split_vars.find(field->name());
+    if (it != split_vars.end())
+    {
+      DerivativeInfo info;
+      info.pure = true;
+      info.variable = it->second.original_variable;
+      info.order = it->second.derivative_order;
+      return info;
+    }
+
+    return {true, field->name(), 0};
+  }
+
+  if (node->type() == NodeType::Gradient || node->type() == NodeType::Divergence ||
+      node->type() == NodeType::Curl)
+  {
+    auto unary = std::static_pointer_cast<UnaryOpNode>(node);
+    auto child_info = getDerivativeInfo(unary->operand(), split_vars);
+    if (!child_info.pure)
+      return {};
+    child_info.order += getDerivativeIncrement(node->type());
+    return child_info;
+  }
+
+  if (node->type() == NodeType::Laplacian)
+  {
+    auto unary = std::static_pointer_cast<UnaryOpNode>(node);
+    auto child_info = getDerivativeInfo(unary->operand(), split_vars);
+    if (!child_info.pure)
+      return {};
+    child_info.order += 2;
+    return child_info;
+  }
+
+  return {};
 }
 
 bool
@@ -279,20 +561,18 @@ VariableSplittingAnalyzer::getDerivativeIncrement(NodeType type) const
 
 std::string
 VariableSplittingAnalyzer::generateSplitVariableName(const std::string & original_var,
-                                                      unsigned int derivative_order)
+                                                      unsigned int derivative_order) const
 {
-  if (derivative_order == 1)
-    return original_var + "_grad";
-  else if (derivative_order == 2)
-    return original_var + "_hess";
-  else
-    return original_var + "_d" + std::to_string(derivative_order);
+  return original_var + "_d" + std::to_string(derivative_order);
 }
 
 Shape
 VariableSplittingAnalyzer::computeSplitVariableShape(const Shape & original_shape,
-                                                      unsigned int derivative_order)
+                                                      unsigned int derivative_order) const
 {
+  if (derivative_order == 0)
+    return original_shape;
+
   if (std::holds_alternative<ScalarShape>(original_shape))
   {
     if (derivative_order == 1)
