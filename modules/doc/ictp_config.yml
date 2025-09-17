@@ -1,8 +1,13 @@
 Content:
-    user_workshop:
-        root_dir: !include tutorials/ictp/doc/config.yml Content user_workshop root_dir
+    ictp:
+        root_dir: ${MOOSE_DIR}/tutorials/ictp/doc/content
         content:
             - ictp/**
+
+    ictp_input:
+        root_dir: ${MOOSE_DIR}
+        content:
+            - ictp/*.i
 
 Executioner: !include tutorials/ictp/doc/config.yml Executioner
 Renderer: !include tutorials/ictp/doc/config.yml Renderer
