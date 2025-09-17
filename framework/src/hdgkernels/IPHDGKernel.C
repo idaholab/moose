@@ -115,3 +115,9 @@ IPHDGKernel::getMatPropDependencies() const
 {
   return iphdgHelper().getMatPropDependencies();
 }
+
+bool
+IPHDGKernel::getMaterialPropertyCalled() const
+{
+  return iphdgHelper().getMaterialPropertyCalled();
+}

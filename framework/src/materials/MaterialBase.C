@@ -156,7 +156,7 @@ MaterialBase::MaterialBase(const MaterialBase & object, const Moose::Kokkos::Fun
 #endif
 
 void
-MaterialBase::initStatefulProperties(unsigned int n_points)
+MaterialBase::initStatefulProperties(const unsigned int n_points)
 {
   for (_qp = 0; _qp < n_points; ++_qp)
     initQpStatefulProperties();

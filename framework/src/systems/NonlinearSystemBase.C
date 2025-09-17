@@ -1534,7 +1534,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
     if (_constraints.hasActiveElemElemConstraints(it.first, displaced))
     {
       // ElemElemConstraint objects
-      const auto & _element_constraints =
+      const auto & element_constraints =
           _constraints.getActiveElemElemConstraints(it.first, displaced);
 
       // go over pair elements
@@ -1551,7 +1551,7 @@ NonlinearSystemBase::constraintResiduals(NumericVector<Number> & residual, bool 
         const ElementPairInfo & info = elem_pair_loc.getElemPairInfo(pr);
 
         // for each element process constraints on the
-        for (const auto & ec : _element_constraints)
+        for (const auto & ec : element_constraints)
         {
           _fe_problem.setCurrentSubdomainID(elem1, tid);
           subproblem.reinitElemPhys(elem1, info._elem1_constraint_q_point, tid);
@@ -2582,7 +2582,7 @@ NonlinearSystemBase::constraintJacobians(const SparseMatrix<Number> & jacobian_t
     if (_constraints.hasActiveElemElemConstraints(it.first, displaced))
     {
       // ElemElemConstraint objects
-      const auto & _element_constraints =
+      const auto & element_constraints =
           _constraints.getActiveElemElemConstraints(it.first, displaced);
 
       // go over pair elements
@@ -2599,7 +2599,7 @@ NonlinearSystemBase::constraintJacobians(const SparseMatrix<Number> & jacobian_t
         const ElementPairInfo & info = elem_pair_loc.getElemPairInfo(pr);
 
         // for each element process constraints on the
-        for (const auto & ec : _element_constraints)
+        for (const auto & ec : element_constraints)
         {
           _fe_problem.setCurrentSubdomainID(elem1, tid);
           subproblem.reinitElemPhys(elem1, info._elem1_constraint_q_point, tid);
@@ -3837,20 +3837,56 @@ NonlinearSystemBase::timeKernelVariableNames()
 bool
 NonlinearSystemBase::needBoundaryMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid) const
 {
-  return _integrated_bcs.hasActiveBoundaryObjects(bnd_id, tid);
+  // IntegratedBCs are for now the only objects we consider to be consuming
+  // matprops on boundaries.
+  if (_integrated_bcs.hasActiveBoundaryObjects(bnd_id, tid))
+    for (const auto & bc : _integrated_bcs.getActiveBoundaryObjects(bnd_id, tid))
+      if (std::static_pointer_cast<MaterialPropertyInterface>(bc)->getMaterialPropertyCalled())
+        return true;
+
+  // Thin layer heat transfer in the heat_transfer module is being used on a boundary even though
+  // it's an interface kernel. That boundary is external, on both sides of a gap in a mesh
+  if (_interface_kernels.hasActiveBoundaryObjects(bnd_id, tid))
+    for (const auto & ik : _interface_kernels.getActiveBoundaryObjects(bnd_id, tid))
+      if (std::static_pointer_cast<MaterialPropertyInterface>(ik)->getMaterialPropertyCalled())
+        return true;
+
+  // Because MortarConstraints do not inherit from BoundaryRestrictable, they are not sorted
+  // by boundary in the MooseObjectWarehouse. So for now, we return true for all boundaries
+  // Note: constraints are not threaded at this time
+  if (_constraints.hasActiveObjects(/*tid*/ 0))
+    for (const auto & ct : _constraints.getActiveObjects(/*tid*/ 0))
+      if (auto mpi = std::dynamic_pointer_cast<MaterialPropertyInterface>(ct);
+          mpi && mpi->getMaterialPropertyCalled())
+        return true;
+  return false;
 }
 
 bool
 NonlinearSystemBase::needInterfaceMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid) const
 {
-  return _interface_kernels.hasActiveBoundaryObjects(bnd_id, tid);
+  // InterfaceKernels are for now the only objects we consider to be consuming matprops on internal
+  // boundaries.
+  if (_interface_kernels.hasActiveBoundaryObjects(bnd_id, tid))
+    for (const auto & ik : _interface_kernels.getActiveBoundaryObjects(bnd_id, tid))
+      if (std::static_pointer_cast<MaterialPropertyInterface>(ik)->getMaterialPropertyCalled())
+        return true;
+  return false;
 }
 
 bool
-NonlinearSystemBase::needSubdomainMaterialOnSide(SubdomainID /*subdomain_id*/,
-                                                 THREAD_ID /*tid*/) const
+NonlinearSystemBase::needInternalNeighborSideMaterial(SubdomainID subdomain_id, THREAD_ID tid) const
 {
-  return _doing_dg;
+  // DGKernels are for now the only objects we consider to be consuming matprops on
+  // internal sides.
+  if (_dg_kernels.hasActiveBlockObjects(subdomain_id, tid))
+    for (const auto & dg : _dg_kernels.getActiveBlockObjects(subdomain_id, tid))
+      if (std::static_pointer_cast<MaterialPropertyInterface>(dg)->getMaterialPropertyCalled())
+        return true;
+  // NOTE:
+  // HDG kernels do not require face material properties on internal sides at this time.
+  // The idea is to have element locality of HDG for hybridization
+  return false;
 }
 
 bool

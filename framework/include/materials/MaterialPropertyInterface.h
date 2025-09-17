@@ -414,7 +414,7 @@ public:
   /**
    * Returns true if getMaterialProperty() has been called, false otherwise.
    */
-  bool getMaterialPropertyCalled() const { return _get_material_property_called; }
+  virtual bool getMaterialPropertyCalled() const { return _get_material_property_called; }
 
   /**
    * Retrieve the set of material properties that _this_ object depends on.
@@ -868,7 +868,10 @@ MaterialPropertyInterface::getPossiblyConstantGenericMaterialPropertyByName(
 {
   // Check if it's just a constant
   if (const auto * default_property = defaultGenericMaterialProperty<T, is_ad>(prop_name))
+  {
+    _get_material_property_called = true;
     return *default_property;
+  }
 
   if (state > 0 && !_stateful_allowed)
     mooseError("Stateful material properties not allowed for this object."

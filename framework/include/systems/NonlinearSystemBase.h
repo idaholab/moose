@@ -609,7 +609,7 @@ public:
    * Indicates whether this system needs material properties on internal sides.
    * @return Boolean if DGKernels are active
    */
-  bool needSubdomainMaterialOnSide(SubdomainID subdomain_id, THREAD_ID tid) const;
+  bool needInternalNeighborSideMaterial(SubdomainID subdomain_id, THREAD_ID tid) const;
 
   /**
    * Getter for _doing_dg

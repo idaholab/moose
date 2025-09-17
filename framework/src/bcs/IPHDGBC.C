@@ -68,3 +68,9 @@ IPHDGBC::getMatPropDependencies() const
 {
   return iphdgHelper().getMatPropDependencies();
 }
+
+bool
+IPHDGBC::getMaterialPropertyCalled() const
+{
+  return iphdgHelper().getMaterialPropertyCalled();
+}

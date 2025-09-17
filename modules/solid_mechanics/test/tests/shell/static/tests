@@ -103,7 +103,7 @@
   []
   [qp_error]
     type = 'RunException'
-    input = pressure_error.i
+    input = qp_count_error.i
     expect_err = 'Shell element needs to have exactly four quadrature points.'
 
     requirement = "The system shall generate an error if the shell strain material is evaluated when the number of quadrature points does not equal 4."
