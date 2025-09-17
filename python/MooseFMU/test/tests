@@ -1,11 +1,11 @@
 [Tests]
   issues = '#30912'
   design = 'source/controls/MOOSE_FMU.md'
-  [fmu_unit_test]
-    requirement = 'The functions in the FMU base class shall work properly.'
-    type = RunApp
-    command_proxy = test_moose_fmu.py
-    required_python_packages = pythonfmu
+  [fmu_python_unit_tests]
+    requirement = 'The MooseFMU Python helpers shall execute their pytest suite successfully.'
+    type = RunCommand
+    command = 'python3 -m pytest -q .'
+    required_python_packages = 'pytest'
     recover = false
     restep = false
     valgrind = 'none' # http library is not completely valgrind clean

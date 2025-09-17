@@ -4,11 +4,8 @@ from fmpy import extract, instantiate_fmu
 from MooseFMU import (
     fmu_info,
     get_real,
-    get_string,
-    get_bool,
     set_real,
     set_string,
-    set_bool,
 )
 import logging
 import math
@@ -93,7 +90,6 @@ def main():
         # Change boundary condition at specified time
         if math.isclose(t, change_time, rel_tol=1e-5, abs_tol=1e-9):
             newBC = val * 10
-            set_bool(moose_instance, vr_map, 'change_BC', True)
             set_string(moose_instance, vr_map, 'BC_info', "BCs/left/value")
             set_real(moose_instance, vr_map, 'BC_value', newBC)
             logger.info("Wait 10s to get the boundary condition set")

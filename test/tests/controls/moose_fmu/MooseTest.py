@@ -1,6 +1,6 @@
 from pythonfmu import Fmi2Slave
 from pythonfmu.enums import Fmi2Causality, Fmi2Variability
-from pythonfmu.variables import Boolean, Integer, Real, ScalarVariable, String
+from pythonfmu.variables import Integer, Real, String
 from MooseControl import MooseControl
 from pythonfmu.default_experiment import DefaultExperiment
 from MooseFMU import Moose2FMU
@@ -17,14 +17,13 @@ class MooseTest(Moose2FMU):
         self._fast_forwarded = False
         self.BC_info: str = ''
         self.BC_value: float = 0.0
-        self.change_BC: bool = False
+        self.rep_value: float = 0.0
 
         self.register_variable(Real("diffused", causality=Fmi2Causality.output, variability=Fmi2Variability.continuous))
-        self.register_variable(Boolean("change_BC", causality=Fmi2Causality.input, variability=Fmi2Variability.discrete))
+        self.register_variable(Real("rep_value", causality=Fmi2Causality.output, variability=Fmi2Variability.continuous))
         self.register_variable(String("BC_info", causality=Fmi2Causality.input, variability=Fmi2Variability.discrete))
         self.register_variable(Real("BC_value", causality=Fmi2Causality.input, variability=Fmi2Variability.continuous))
-        # Default experiment configuration
-        self.default_experiment = DefaultExperiment(start_time=0.0, stop_time=3.0, step_size=0.5)
+
         self.logger.info("MooseTest instance created.")
 
     def do_step(self,
@@ -32,40 +31,46 @@ class MooseTest(Moose2FMU):
                 step_size:    float,
                 no_set_fmu_state_prior: bool = False) -> bool:
 
-        # self.logger.info(f"The change boundary flag is {self.change_BC}")
-        # if self.change_BC:
-        #     self.logger.info(f"Change boundary condition {self.BC_info} to {self.BC_value}")
-        #     self.control.setControllableReal(self.BC_info, self.BC_value)
-        #     self.change_BC = False
-        #     self.control.setContinue()
+        # Set a controllable ``Real`` parameter as boundary condition.
+        if self.BC_info:
+            if self.set_controllable_real(self.BC_info, self.BC_value):
+                self.logger.info(
+                    f"Change boundary condition {self.BC_info} to {self.BC_value}")
 
-        moose_time, signal = self._sync_with_moose(current_time, self.flag)
+        # Synchronize MOOSE simulation time with FMU (support MOOSE simulation time stepping mechanism)
+        moose_time, signal = self.sync_with_moose(current_time, self.flag)
 
         if moose_time is None:
                 return False
 
-        if not self._ensure_control_listening():
+        # Verify the MooseControl server is listening before proceeding
+        if not self.ensure_control_listening():
             return False
 
-        self.logger.info("Write out results")
+        self.logger.info("Information exchange")
         self.moose_time = moose_time
         self.time = current_time
 
         # MOOSE time is synced with FMU time, we will get the value needed from MOOSE
         if signal:
-            flag = self._get_flag_with_retries(self.flag, self.max_retries)
+            # get the postprocessor value named "diffused" from MOOSE
+            diffused = self.get_postprocessor_value(self.flag, "diffused", current_time)
 
-            if not flag:
-                self.logger.error(f"Failed to fast-forward to {current_time}")
-                self.control.finalize()
+            # if the value is not found, fail the step
+            if diffused is None:
                 return False
 
-            self.control.wait(flag)
-            diffused = self.control.getPostprocessor("diffused")
-            self.control.setContinue()
-            self.logger.info(
-                f"Retrieved Postprocessor value {diffused} from MOOSE at flag {flag}")
+            # send value to FMU variable
             self.diffused = diffused
+
+             # get the value of "pi" reporter named "constant" from MOOSE
+            rep_value = self.get_reporter_value(self.flag, "constant/pi", current_time)
+
+            if rep_value is None:
+                return False
+
+            # send value to FMU variable
+            self.rep_value = rep_value
 
         return True
 

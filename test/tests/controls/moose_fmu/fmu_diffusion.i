@@ -84,6 +84,14 @@ l = 2
   []
 []
 
+[Reporters]
+  [constant]
+    type = ConstantReporter
+    real_names = 'pi'
+    real_values = '${fparse pi}'
+  []
+[]
+
 [Outputs]
   exodus = false
 []
