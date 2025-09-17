@@ -14,8 +14,9 @@
 #include <string>
 #include <vector>
 
-#include "libmesh/int_range.h"
+#ifndef NO_LIBMESH
 #include "libmesh/libmesh_common.h"
+#endif
 
 /*
  * This must stay a header-only utility! It is used in the capabilities python module and
@@ -132,10 +133,19 @@ convert(const std::string & str, T & value, const bool throw_on_failure)
   }
 
   if (throw_on_failure)
-    throw std::invalid_argument("Unable to convert '" + str + "' to type " +
-                                libMesh::demangle(typeid(T).name()));
+  {
+    std::string error = "Unable to convert '" + str + "' to type ";
+#ifdef NO_LIBMESH
+    error += typeid(T).name();
+#else
+    error += libMesh::demangle(typeid(T).name());
+#endif
+    throw std::invalid_argument(error);
+  }
+
   return false;
 }
+
 /**
  *  tokenizeAndConvert splits a string using delimiter and then converts to type T.
  *  If the conversion fails tokenizeAndConvert returns false, otherwise true.
@@ -149,7 +159,7 @@ tokenizeAndConvert(const std::string & str,
   std::vector<std::string> tokens;
   MooseUtils::tokenize(str, tokens, 1, delimiter);
   tokenized_vector.resize(tokens.size());
-  for (const auto i : libMesh::index_range(tokens))
+  for (std::size_t i = 0; i < tokens.size(); ++i)
     if (!convert<T>(tokens[i], tokenized_vector[i], false))
       return false;
   return true;
