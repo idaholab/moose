@@ -32,49 +32,40 @@ class MooseTest(Moose2FMU):
                 step_size:    float,
                 no_set_fmu_state_prior: bool = False) -> bool:
 
-        self.logger.info(f"The change boundary flag is {self.change_BC}")
-        if self.change_BC:
-             self.logger.info(f"Change boundary condition {self.BC_info} to {self.BC_value}")
-             self.control.setControllableReal(self.BC_info, self.BC_value)
-             self.change_BC = False
+        # self.logger.info(f"The change boundary flag is {self.change_BC}")
+        # if self.change_BC:
+        #     self.logger.info(f"Change boundary condition {self.BC_info} to {self.BC_value}")
+        #     self.control.setControllableReal(self.BC_info, self.BC_value)
+        #     self.change_BC = False
+        #     self.control.setContinue()
 
-        #t_val, diffused = _get_moose_postprocessor("diffused")
-        allowed_flags = self._parse_flags(self.flag)
-        self.logger.info(f"Allowed flags for handling: {sorted(allowed_flags)}")
+        moose_time, signal = self._sync_with_moose(current_time, self.flag)
 
-        while True:
-            flag = self._get_flag_with_retries(allowed_flags, self.max_retries)
+        if moose_time is None:
+                return False
+
+        if not self._ensure_control_listening():
+            return False
+
+        self.logger.info("Write out results")
+        self.moose_time = moose_time
+        self.time = current_time
+
+        # MOOSE time is synced with FMU time, we will get the value needed from MOOSE
+        if signal:
+            flag = self._get_flag_with_retries(self.flag, self.max_retries)
+
             if not flag:
                 self.logger.error(f"Failed to fast-forward to {current_time}")
                 self.control.finalize()
                 return False
 
-            t_val = self.control.getTime()
-
-            if flag in allowed_flags:
-                self.control.wait(flag)
-                diffused = self.control.getPostprocessor("diffused")
-                self.control.setContinue()
-                self.logger.info(f"get {str(diffused)} from MOOSE at {flag}")
-            else:
-                self.control.wait(flag)
-                self.control.setContinue()
-
-            if abs(t_val - current_time) < self.dt_tolerance:
-                self.logger.info("Successfully sync MOOSE time with FMU step")
-                break
-
-        # Now do a normal FMU step
-        if not self.control.isListening():
-            print("MOOSE is not listening")
-            self.control.finalize()
-            return False
-
-        self.logger.info("Write out results")
-        self.moose_time = t_val
-        self.time = current_time
-        self.diffused = diffused
-        self.logger.info(f"The current time is {self.time}, the moose time is {self.moose_time}")
+            self.control.wait(flag)
+            diffused = self.control.getPostprocessor("diffused")
+            self.control.setContinue()
+            self.logger.info(
+                f"Retrieved Postprocessor value {diffused} from MOOSE at flag {flag}")
+            self.diffused = diffused
 
         return True
 
