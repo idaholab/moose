@@ -61,6 +61,7 @@
 #include "libmesh/ghost_point_neighbors.h"
 #include "libmesh/fe_type.h"
 #include "libmesh/enum_to_string.h"
+#include "libmesh/elem_side_builder.h"
 
 static const int GRAIN_SIZE =
     1; // the grain_size does not have much influence on our execution speed
@@ -3863,6 +3864,9 @@ MooseMesh::buildFiniteVolumeInfo() const
     num_sides += elem->n_sides();
   }
 
+  // Used to speed up FaceInfo creation
+  libMesh::ElemSideBuilder side_builder;
+
   _all_face_info.reserve(num_sides / 2);
   dof_id_type face_index = 0;
   for (const Elem * elem : as_range(begin, end))
@@ -3882,7 +3886,7 @@ MooseMesh::buildFiniteVolumeInfo() const
                     "be active.");
 
         // We construct the faceInfo using the elementinfo and side index
-        _all_face_info.emplace_back(&_elem_to_elem_info[elem->id()], side, face_index++);
+        _all_face_info.emplace_back(&_elem_to_elem_info[elem->id()], side, face_index++, side_builder);
 
         auto & fi = _all_face_info.back();
 
