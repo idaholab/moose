@@ -55,6 +55,7 @@
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     recover = false
+    valgrind = heavy
   []
   [MFEMVacuumCutTransitionSubMesh]
     design = 'syntax/MFEM/ClosedCoilMagnetostatic.md'
@@ -78,5 +79,6 @@
     compute_devices = 'cpu cuda'
     recover = false
     restep = false
+    valgrind = heavy
   []  
 []
