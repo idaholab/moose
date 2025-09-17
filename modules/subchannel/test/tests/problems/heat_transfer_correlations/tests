@@ -1,7 +1,9 @@
 [Tests]
   design = 'SubChannel1PhaseProblem.md TriSubChannel1PhaseProblem.md'
   issues = '#31464'
-  [EBR-II_SHRT-17_SS_test_dittus_boelter]
+  [EBR-II_SHRT-17_SS]
+    requirement = 'The system shall be able to model the EBR-II steady state SHRT-17 case '
+    [dittus_boelter]
     type = CSVDiff
     input = 'XX09_SCM_SS17.i'
     csvdiff  = 'dittus_boelter.csv'
@@ -11,7 +13,7 @@
     valgrind = NONE
     recover = false
     max_parallel = 1
-    requirement = 'The system will examine the subchannel solver for the EBR-II steady state SHRT-17 case'
+  detail = 'using the Dittus Boelter correlation,'
     cli_args = 'Problem/pin_htc_correlation=dittus-boelter Problem/duct_htc_correlation=dittus-boelter Outputs/file_base=dittus_boelter'
   []
   [EBR-II_SHRT-17_SS_test_gnielinski]
