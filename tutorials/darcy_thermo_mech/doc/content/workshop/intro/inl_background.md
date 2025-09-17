@@ -1,7 +1,7 @@
 # Idaho National Laboratory
 
 !style halign=center
-www.inl.gov
+[www.inl.gov](https://inl.gov)
 
 !---
 
