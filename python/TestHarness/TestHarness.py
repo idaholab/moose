@@ -335,8 +335,8 @@ class TestHarness:
         self.options._required_capabilities = []
         if self.options.no_capabilities:
             self.options._capabilities = None
-            if self.options.require_capability:
-                self.errorExit('Cannot use --require-capability with --no-capabilities')
+            if self.options.only_tests_that_require:
+                self.errorExit('Cannot use --only-tests-that-require with --no-capabilities')
         else:
             assert self.executable
 
@@ -352,8 +352,8 @@ class TestHarness:
             # when temporarily augmenting the capabilities in a Tester
             # to perform a check to see if the capability check in the tester
             # changes if we change these value(s)
-            if self.options.require_capability:
-                required = self.options.require_capability
+            if self.options.only_tests_that_require:
+                required = self.options.only_tests_that_require
                 if isinstance(required, str):
                     required = [required]
                 self.options._required_capabilities = self.buildRequiredCapabilities(
@@ -1153,7 +1153,7 @@ class TestHarness:
         filtergroup.add_argument('--no-check-input', action='store_true', help='Do not run check_input (syntax) tests')
         filtergroup.add_argument('--not-group', action='store', type=str, help='Run only tests NOT in the named group')
         filtergroup.add_argument('--re', action='store', type=str, dest='reg_exp', help='Run tests that match the given regular expression')
-        filtergroup.add_argument('--require-capability', action='extend', nargs=1, type=str, help='Require that a test depend on this capability name; can be negated with "!"')
+        filtergroup.add_argument('--only-tests-that-require', action='extend', nargs=1, type=str, help='Require that a test depend on this capability name; can be negated with "!"')
         filtergroup.add_argument('--valgrind', action='store_const', dest='valgrind_mode', const='NORMAL', help='Run normal valgrind tests')
         filtergroup.add_argument('--valgrind-heavy', action='store_const', dest='valgrind_mode', const='HEAVY', help='Run heavy valgrind tests')
 
