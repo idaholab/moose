@@ -1,4 +1,4 @@
 # Tutorial Steps
 
 !style halign=center
-[#step1]
+[#ictp_step1]

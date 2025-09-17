@@ -1,4 +1,4 @@
-# Step 1: Input and Meshing id=step1
+# Step 1: Input and Meshing id=ictp_step1
 
 !---
 
