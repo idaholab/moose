@@ -10,7 +10,7 @@
 #include "AriaLaserWeld304LStainlessSteelFunctorMaterial.h"
 #include "NS.h"
 
-registerMooseObject("NavierStokesTestApp", AriaLaserWeld304LStainlessSteelFunctorMaterial);
+registerMooseObject("NavierStokesApp", AriaLaserWeld304LStainlessSteelFunctorMaterial);
 
 InputParameters
 AriaLaserWeld304LStainlessSteelFunctorMaterial::validParams()
