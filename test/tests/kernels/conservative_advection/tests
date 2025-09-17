@@ -82,12 +82,28 @@
       abs_zero = 1E-7
       detail = 'without upwinding in 1D, with velocity taken as the gradient of a coupled aux variable,'
     []
+    [no_upwinding_1D_coupled_aux_jacobian]
+      type = PetscJacobianTester
+      input = no_upwinding_1D_coupled_aux.i
+      cli_args = 'Executioner/num_steps=1'
+      ratio_tol = 1E-7
+      difference_tol = 1E-7
+      detail = 'without upwinding in 1D, with velocity taken as the gradient of a coupled aux variable and compute a perfect jacobian without upwinding in 1D,'
+    []
     [no_upwinding_1D_coupled]
       type = Exodiff
       input = no_upwinding_1D_coupled.i
       exodiff = no_upwinding_1D_coupled_out.e
       abs_zero = 1E-7
       detail = 'without upwinding in 1D, with velocity taken as the gradient of a coupled variable,'
+    []
+    [no_upwinding_1D_coupled_jacobian]
+      type = PetscJacobianTester
+      input = no_upwinding_1D_coupled.i
+      cli_args = 'Executioner/num_steps=1'
+      ratio_tol = 1E-7
+      difference_tol = 1E-7
+      detail = 'without upwinding in 1D, with velocity taken as the gradient of a coupled variable and compute a perfect jacobian without upwinding in 1D,'
     []
     [ad_no_upwinding_1D]
       type = Exodiff
