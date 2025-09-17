@@ -7,7 +7,7 @@ from typing import Optional
 import logging
 import time
 from . import fmu_utils
-from typing import Iterable, Union, Set
+from typing import Iterable, Union, Set, Tuple
 import re
 
 logging.basicConfig(
@@ -98,14 +98,15 @@ class Moose2FMU(Fmi2Slave):
         raise NotImplementedError("Subclasses must implement do_step()")
 
     def _get_flag_with_retries(
-        self, flag: str, max_retries: int, wait_seconds: float = 0.5
+        self, allowed_flags: Optional[Set[str]], max_retries: int, wait_seconds: float = 0.5
     ) -> Optional[str]:
         """Poll ``getWaitingFlag`` and retry before giving up.
 
         Parameters
         ----------
-        flag
-            Flag expected from ``MooseControl``.
+        allowed_flags
+            Optional set of flags expected from ``MooseControl``. Used for logging and
+            normalizing the responses.
         max_retries
             Number of times to attempt retrieving the flag.
         wait_seconds
@@ -117,6 +118,23 @@ class Moose2FMU(Fmi2Slave):
             try:
                 result = self.control.getWaitingFlag()
                 if result:
+                    normalized = result.strip().upper()
+                    if allowed_flags and normalized not in allowed_flags:
+                        self.logger.debug(
+                            "Received flag '%s' not present in allowed set %s",
+                            result,
+                            sorted(allowed_flags),
+                        )
+                        try:
+                            self._skip_flag(result)
+
+                        except Exception as exc:
+                            self.logger.warning(
+                                "Failed to acknowledge unexpected flag '%s': %s",
+                                result,
+                                exc,
+                            )
+                        continue
                     self.logger.info(
                         f"Successfully got flag '{result}' after {retries} retries."
                     )
@@ -132,9 +150,10 @@ class Moose2FMU(Fmi2Slave):
             )
             time.sleep(wait_seconds)
 
+        allowed_desc = (
+            f"one of {sorted(allowed_flags)}" if allowed_flags else "any flag")
         self.logger.error(
-            f"Failed to get flag '{flag}' after {max_retries} retries."
-        )
+             "Failed to get %s after %s retries.", allowed_desc, max_retries)
         return None
 
     def _parse_flags(self, flags: Union[str, Iterable[str]]) -> Set[str]:
@@ -148,32 +167,73 @@ class Moose2FMU(Fmi2Slave):
             tokens = list(flags)
         return {t.strip().upper() for t in tokens if t and t.strip()}
 
-    # def _get_moose_postprocessor(self, postprocessor_name) -> Real:
+    def _sync_with_moose(
+        self,
+        current_time: float,
+        allowed_flags: Optional[Union[str, Iterable[str]]] = None,
+    ) -> Tuple[Optional[float], Optional[str]]:
+        """Synchronize with the running MOOSE simulation.
 
-    #     allowed_flags = self._parse_flags(self.flag)
-    #     self.logger.info(f"Allowed flags for handling: {sorted(allowed_flags)}")
+        Parameters
+        ----------
+        current_time
+            Target FMU time to synchronize with.
+        allowed_flags
+            Subset of flags that require additional handling. Defaults to
+            synchronizing on the ``INITIAL`` and ``TIMESTEP_BEGIN`` signals
+            when omitted.
+        Returns
+        -------
+        tuple
+            A pair containing the synchronized MOOSE time and the flag that
+            triggered the synchronization (if any).
+        """
 
+        parsed_allowed_flags = {"INITIAL", "TIMESTEP_BEGIN"}
+        if allowed_flags:
+            parsed_allowed_flags |= self._parse_flags(allowed_flags)
 
-    #     while True:
-    #         flag = self._get_flag_with_retries(allowed_flags, self.max_retries)
-    #         if not flag:
-    #             self.logger.error(f"Failed to fast-forward to {current_time}")
-    #             self.control.finalize()
-    #             return False
+        if parsed_allowed_flags:
+            self.logger.info(
+                "Allowed flags for handling: %s", sorted(parsed_allowed_flags)
+            )
 
-    #         t_val = self.control.getTime()
+        signal: Optional[str] = None
 
-    #         if flag in allowed_flags:
-    #             self.control.wait(flag)
-    #             diffused = self.control.getPostprocessor(postprocessor_name)
-    #             self.control.setContinue()
-    #             self.logger.info(f"get {str(diffused)} from MOOSE at {flag}")
-    #         else:
-    #             self.control.wait(flag)
-    #             self.control.setContinue()
+        while True:
+            flag = self._get_flag_with_retries(parsed_allowed_flags, self.max_retries)
+            if not flag:
+                self.logger.error(f"Failed to fast-forward to {current_time}")
+                self.control.finalize()
+                return None, None
 
-    #         if abs(t_val - current_time) < self.dt_tolerance:
-    #             self.logger.info("Successfully sync MOOSE time with FMU step")
-    #             break
+            moose_time = self.control.getTime()
+            upper_flag = flag.strip().upper()
 
-    #     return t_val, diffused
+            if flag in parsed_allowed_flags:
+                signal = flag
+                self.logger.debug("Captured synchronization flag '%s'", flag)
+
+            if abs(moose_time - current_time) < self.dt_tolerance:
+                self.logger.debug(f"The current time is {self.time}, the moose time is {self.moose_time}")
+                self.logger.info("Successfully sync MOOSE time with FMU step")
+                return moose_time, signal
+
+            self._skip_flag(flag)
+
+    def _ensure_control_listening(self) -> bool:
+        """Verify the MooseControl server is listening before proceeding."""
+
+        if self.control.isListening():
+            return True
+
+        self.logger.error("MOOSE is not listening")
+        self.control.finalize()
+        return False
+
+    def _skip_flag(self, flag: str):
+        """Acknowledge a flag and allow the MOOSE execution to continue."""
+
+        self.control.wait(flag)
+        self.control.setContinue()
+

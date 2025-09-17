@@ -70,7 +70,7 @@ def main():
     moose_instance.freeInstance()
 
     # Pause before coupled run
-    logger.info("Start the second moose run after 30s")
+    logger.info("Start the second moose run after 10s")
     time.sleep(10)
 
     # Re-instantiate Moose for coupled run
