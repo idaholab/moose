@@ -46,16 +46,16 @@ class TestRequireCapability(TestHarnessTestCase):
         Test that the test harness will set the _required_capabilities option
         """
         # No capabilities set, can't run
-        with self.assertRaisesRegex(SystemExit, 'Cannot use --require-capability with --no-capabilities'):
-            self.runTests('--require-capability', 'petsc', no_capabilities=True)
+        with self.assertRaisesRegex(SystemExit, 'Cannot use --only-tests-that-require with --no-capabilities'):
+            self.runTests('--only-tests-that-require', 'petsc', no_capabilities=True)
 
         # Not registered
         with self.assertRaisesRegex(SystemExit, 'Required capability "foo" is not registered'):
-            self.runTests('--require-capability', 'foo', no_capabilities=False)
+            self.runTests('--only-tests-that-require', 'foo', no_capabilities=False)
 
         # Is registered and is set
         res = self.runTests(
-            '--require-capability',
+            '--only-tests-that-require',
             'moosetestapp',
             no_capabilities=False,
             run=False
@@ -64,9 +64,9 @@ class TestRequireCapability(TestHarnessTestCase):
 
         # Multiple
         res = self.runTests(
-            '--require-capability',
+            '--only-tests-that-require',
             'moosetestapp',
-            '--require-capability',
+            '--only-tests-that-require',
             '!compiler',
             no_capabilities=False,
             run=False
@@ -93,7 +93,7 @@ class TestRequireCapability(TestHarnessTestCase):
                 tests[test_name]['capabilities'] = f"'{test_capabilities}'"
             args = []
             for v in require_capabilities:
-                args += ['--require-capability', v]
+                args += ['--only-tests-that-require', v]
             res = self.runTests(*args, tests=tests, no_capabilities=False)
             job = self.getJobWithName(res.harness, test_name)
             if skip:
@@ -112,7 +112,7 @@ class TestRequireCapability(TestHarnessTestCase):
         # Test spec has complex capabilities and still runs
         run_test(False, ['moosetestapp'], 'moosetestapp & compiler')
 
-        # Multiple --require-capability
+        # Multiple --only-tests-that-require
         run_test(False, ['moosetestapp', 'compiler'], 'compiler & moosetestapp')
         run_test(False, ['moosetestapp', 'compiler'], 'compiler & method & moosetestapp')
 
