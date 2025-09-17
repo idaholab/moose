@@ -266,8 +266,14 @@ VariationalKernelBase::initializeTapeForContribution(const NodePtr & expr, Contr
   if (!expr)
     return;
 
-  std::vector<std::string> extras = _coupled_variable_names;
-  extras.reserve(extras.size() + _parameters.size());
+  std::vector<std::string> extras;
+  extras.reserve(2 * _coupled_variable_names.size() + _parameters.size());
+  for (const auto & name : _coupled_variable_names)
+  {
+    extras.push_back(name);
+    extras.push_back(name + "_grad");
+  }
+
   for (const auto & [name, _] : _parameters)
     extras.push_back(name);
 
@@ -291,9 +297,22 @@ VariationalKernelBase::evaluateTapeContribution(const ContributionCache & cache,
 
   for (const auto & name : cache.tape_inputs)
   {
-    if (name == _var.name())
+    auto cache_it = _variable_cache.find(name);
+    if (cache_it != _variable_cache.end())
     {
-      inputs[name] = _u[_qp];
+      const MooseValue & value = cache_it->second;
+      if (value.isScalar())
+        inputs[name] = value.asScalar();
+      else if (value.isVector())
+        inputs[name] = value.asVector();
+      else if (value.isTensor())
+        inputs[name] = value.asTensor();
+      else if (value.isRankThree())
+        inputs[name] = value.asRankThree();
+      else if (value.isRankFour())
+        inputs[name] = value.asRankFour();
+      else
+        return false;
       continue;
     }
 
@@ -303,28 +322,11 @@ VariationalKernelBase::evaluateTapeContribution(const ContributionCache & cache,
       continue;
     }
 
-    if (auto cache_it = _variable_cache.find(name); cache_it != _variable_cache.end())
-    {
-      if (!cache_it->second.isScalar())
-        return false;
-      inputs[name] = cache_it->second.asScalar();
-      continue;
-    }
-
-    if (auto coupled_it = _coupled_values.find(name); coupled_it != _coupled_values.end())
-    {
-      inputs[name] = (*coupled_it->second)[_qp];
-      continue;
-    }
-
     return false;
   }
 
   auto eval = cache.tape->evaluate(inputs);
   if (!eval.has_value())
-    return false;
-
-  if (!std::holds_alternative<TapeScalar>(*eval))
     return false;
 
   value_out = *eval;
@@ -548,7 +550,11 @@ VariationalKernelBase::evaluateC0Contribution()
 {
   TapeValue tape_value;
   if (evaluateTapeContribution(_c0_cache, tape_value))
-    return std::get<TapeScalar>(tape_value) * _test[_i][_qp];
+  {
+    if (std::holds_alternative<TapeScalar>(tape_value))
+      return std::get<TapeScalar>(tape_value) * _test[_i][_qp];
+    return 0.0;
+  }
 
   if (!_c0_cache.computed)
   {

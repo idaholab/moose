@@ -243,6 +243,8 @@ VariableSplittingAnalyzer::transformNode(const NodePtr & node,
         case NodeType::Divide: return divide(left, right);
         default: break;
       }
+
+      return node->clone();
     }
 
     default:
@@ -400,6 +402,8 @@ HigherOrderSplittingStrategy::computeOptimalSplitting(const NodePtr & energy_den
                                                        unsigned int max_derivative_order,
                                                        unsigned int fe_order)
 {
+  (void)energy_density;
+  (void)fe_order;
   std::vector<SplitPlan> candidates;
 
   candidates.push_back(createRecursiveSplitting(primary_var, max_derivative_order));
@@ -481,6 +485,48 @@ HigherOrderSplittingStrategy::createDirectSplitting(const std::string & var_name
   return plan;
 }
 
+HigherOrderSplittingStrategy::SplitPlan
+HigherOrderSplittingStrategy::createMixedSplitting(const std::string & var_name,
+                                                   unsigned int max_order,
+                                                   unsigned int threshold)
+{
+  SplitPlan plan;
+  plan.strategy = Strategy::MIXED;
+
+  if (threshold == 0)
+    threshold = 1;
+
+  std::string current_var = var_name;
+
+  for (unsigned int order = 1; order <= max_order; ++order)
+  {
+    SplitVariable sv;
+    sv.name = var_name + "_d" + std::to_string(order);
+    sv.is_primary = (order == 1);
+
+    if (order <= threshold)
+    {
+      sv.original_variable = current_var;
+      sv.derivative_order = 1;
+      plan.variables.push_back(sv);
+
+      plan.dependencies.push_back({sv.name, current_var});
+      current_var = sv.name;
+    }
+    else
+    {
+      sv.original_variable = var_name;
+      sv.derivative_order = order;
+      plan.variables.push_back(sv);
+      plan.dependencies.push_back({sv.name, var_name});
+    }
+  }
+
+  plan.total_dofs = plan.variables.size() + 1;
+
+  return plan;
+}
+
 Real
 HigherOrderSplittingStrategy::estimateComputationalCost(const SplitPlan & plan)
 {
@@ -501,6 +547,74 @@ HigherOrderSplittingStrategy::optimizeBandwidth(SplitPlan & plan)
   auto connectivity = buildConnectivityMatrix(plan);
   auto ordering = performRCMOrdering(connectivity);
   plan.bandwidth = computeBandwidth(plan, ordering);
+}
+
+unsigned int
+HigherOrderSplittingStrategy::computeBandwidth(const SplitPlan & plan,
+                                              const std::vector<unsigned int> & ordering)
+{
+  const unsigned int n = plan.variables.size();
+  if (n == 0 || ordering.size() != n)
+    return 0;
+
+  std::vector<unsigned int> position(n);
+  for (unsigned int idx = 0; idx < n; ++idx)
+  {
+    unsigned int var_index = ordering[idx];
+    if (var_index >= n)
+      mooseError("Invalid ordering index in computeBandwidth");
+    position[var_index] = idx;
+  }
+
+  auto connectivity = buildConnectivityMatrix(plan);
+
+  unsigned int bandwidth = 1;
+  for (unsigned int i = 0; i < n; ++i)
+    for (unsigned int j = i + 1; j < n; ++j)
+      if (connectivity[i][j])
+      {
+        unsigned int distance = position[i] > position[j] ? position[i] - position[j]
+                                                          : position[j] - position[i];
+        bandwidth = std::max(bandwidth, distance + 1);
+      }
+
+  return bandwidth;
+}
+
+std::vector<std::vector<bool>>
+HigherOrderSplittingStrategy::buildConnectivityMatrix(const SplitPlan & plan)
+{
+  const unsigned int n = plan.variables.size();
+  std::vector<std::vector<bool>> connectivity(n, std::vector<bool>(n, false));
+
+  if (n == 0)
+    return connectivity;
+
+  std::map<std::string, unsigned int> index_map;
+  for (unsigned int i = 0; i < n; ++i)
+  {
+    index_map[plan.variables[i].name] = i;
+    connectivity[i][i] = true;
+  }
+
+  auto link = [&](const std::string & a, const std::string & b) {
+    auto it_a = index_map.find(a);
+    auto it_b = index_map.find(b);
+    if (it_a != index_map.end() && it_b != index_map.end())
+    {
+      connectivity[it_a->second][it_b->second] = true;
+      connectivity[it_b->second][it_a->second] = true;
+    }
+  };
+
+  for (const auto & dep : plan.dependencies)
+    link(dep.first, dep.second);
+
+  // Ensure auxiliary variables are connected to their original variable
+  for (const auto & var : plan.variables)
+    link(var.name, var.original_variable);
+
+  return connectivity;
 }
 
 std::vector<unsigned int>

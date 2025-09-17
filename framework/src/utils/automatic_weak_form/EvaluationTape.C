@@ -19,59 +19,218 @@ constexpr std::size_t invalidIndex()
   return std::numeric_limits<std::size_t>::max();
 }
 
-TapeValue applyBinary(TapeOp op, const TapeValue & lhs, const TapeValue & rhs)
+TapeValue negateValue(const TapeValue & value)
 {
   return std::visit(
-      [&](const auto & a, const auto & b) -> TapeValue {
+      [](const auto & v) -> TapeValue {
+        using T = std::decay_t<decltype(v)>;
+        if constexpr (std::is_same_v<T, TapeScalar> ||
+                      std::is_same_v<T, TapeVector> ||
+                      std::is_same_v<T, TapeRank2> ||
+                      std::is_same_v<T, TapeRank3> ||
+                      std::is_same_v<T, TapeRank4>)
+          return -v;
+        else
+          mooseError("Unsupported tape negate operand type");
+      },
+      value);
+}
+
+TapeValue addValues(const TapeValue & lhs, const TapeValue & rhs)
+{
+  return std::visit(
+      [](const auto & a, const auto & b) -> TapeValue {
         using L = std::decay_t<decltype(a)>;
         using R = std::decay_t<decltype(b)>;
-
-        if constexpr (!std::is_same_v<L, R>)
-          mooseError("Tape binary operation requires matching operand types");
-        else if constexpr (std::is_same_v<L, TapeScalar>)
-        {
-          switch (op)
-          {
-            case TapeOp::Add:
-              return a + b;
-            case TapeOp::Subtract:
-              return a - b;
-            case TapeOp::Multiply:
-              return a * b;
-            case TapeOp::Divide:
-              return a / b;
-            case TapeOp::Power:
-              return std::pow(a, b);
-            default:
-              mooseError("Unsupported scalar binary operation in tape evaluation");
-          }
-        }
+        if constexpr (std::is_same_v<L, R>)
+          return a + b;
         else
-          mooseError("Tape binary operation not implemented for operand type");
+          mooseError("Tape addition requires matching operand types");
       },
       lhs,
       rhs);
 }
 
-TapeValue applyUnary(TapeOp op, const TapeValue & value)
+TapeValue subtractValues(const TapeValue & lhs, const TapeValue & rhs)
 {
   return std::visit(
-      [&](const auto & v) -> TapeValue {
-        using T = std::decay_t<decltype(v)>;
-        if constexpr (std::is_same_v<T, TapeScalar>)
+      [](const auto & a, const auto & b) -> TapeValue {
+        using L = std::decay_t<decltype(a)>;
+        using R = std::decay_t<decltype(b)>;
+        if constexpr (std::is_same_v<L, R>)
+          return a - b;
+        else
+          mooseError("Tape subtraction requires matching operand types");
+      },
+      lhs,
+      rhs);
+}
+
+TapeValue multiplyValues(const TapeValue & lhs, const TapeValue & rhs)
+{
+  return std::visit(
+      [](const auto & a, const auto & b) -> TapeValue {
+        using L = std::decay_t<decltype(a)>;
+        using R = std::decay_t<decltype(b)>;
+
+        if constexpr (std::is_same_v<L, TapeScalar> && std::is_same_v<R, TapeScalar>)
+          return a * b;
+        else if constexpr (std::is_same_v<L, TapeScalar> && std::is_same_v<R, TapeVector>)
+          return b * a;
+        else if constexpr (std::is_same_v<L, TapeVector> && std::is_same_v<R, TapeScalar>)
+          return a * b;
+        else if constexpr (std::is_same_v<L, TapeScalar> && std::is_same_v<R, TapeRank2>)
         {
-          switch (op)
-          {
-            case TapeOp::Negate:
-              return -v;
-            default:
-              mooseError("Unsupported scalar unary operation in tape evaluation");
-          }
+          TapeRank2 result = b;
+          result *= a;
+          return result;
+        }
+        else if constexpr (std::is_same_v<L, TapeRank2> && std::is_same_v<R, TapeScalar>)
+        {
+          TapeRank2 result = a;
+          result *= b;
+          return result;
+        }
+        else if constexpr (std::is_same_v<L, TapeScalar> && std::is_same_v<R, TapeRank3>)
+        {
+          TapeRank3 result = b;
+          result *= a;
+          return result;
+        }
+        else if constexpr (std::is_same_v<L, TapeRank3> && std::is_same_v<R, TapeScalar>)
+        {
+          TapeRank3 result = a;
+          result *= b;
+          return result;
+        }
+        else if constexpr (std::is_same_v<L, TapeScalar> && std::is_same_v<R, TapeRank4>)
+        {
+          TapeRank4 result = b;
+          result *= a;
+          return result;
+        }
+        else if constexpr (std::is_same_v<L, TapeRank4> && std::is_same_v<R, TapeScalar>)
+        {
+          TapeRank4 result = a;
+          result *= b;
+          return result;
+        }
+        else if constexpr (std::is_same_v<L, TapeRank2> && std::is_same_v<R, TapeVector>)
+          return a * b;
+        else if constexpr (std::is_same_v<L, TapeVector> && std::is_same_v<R, TapeRank2>)
+          return b.transpose() * a; // transpose multiply to keep vector result
+        else if constexpr (std::is_same_v<L, TapeRank2> && std::is_same_v<R, TapeRank2>)
+          return a * b;
+        else
+          mooseError("Unsupported tape multiplication operand types");
+      },
+      lhs,
+      rhs);
+}
+
+TapeValue divideValues(const TapeValue & lhs, const TapeValue & rhs)
+{
+  return std::visit(
+      [](const auto & a, const auto & b) -> TapeValue {
+        using L = std::decay_t<decltype(a)>;
+        using R = std::decay_t<decltype(b)>;
+
+        if constexpr (std::is_same_v<L, TapeScalar> && std::is_same_v<R, TapeScalar>)
+          return a / b;
+        else if constexpr (std::is_same_v<L, TapeVector> && std::is_same_v<R, TapeScalar>)
+          return a / b;
+        else if constexpr (std::is_same_v<L, TapeRank2> && std::is_same_v<R, TapeScalar>)
+        {
+          TapeRank2 result = a;
+          result /= b;
+          return result;
+        }
+        else if constexpr (std::is_same_v<L, TapeRank3> && std::is_same_v<R, TapeScalar>)
+        {
+          TapeRank3 result = a;
+          result /= b;
+          return result;
+        }
+        else if constexpr (std::is_same_v<L, TapeRank4> && std::is_same_v<R, TapeScalar>)
+        {
+          TapeRank4 result = a;
+          result /= b;
+          return result;
         }
         else
-          mooseError("Tape unary operation not implemented for operand type");
+          mooseError("Unsupported tape division operand types");
       },
-      value);
+      lhs,
+      rhs);
+}
+
+TapeValue powerValues(const TapeValue & lhs, const TapeValue & rhs)
+{
+  return std::visit(
+      [](const auto & a, const auto & b) -> TapeValue {
+        using L = std::decay_t<decltype(a)>;
+        using R = std::decay_t<decltype(b)>;
+        if constexpr (std::is_same_v<L, TapeScalar> && std::is_same_v<R, TapeScalar>)
+          return std::pow(a, b);
+        else
+          mooseError("Tape power currently supports scalar operands only");
+      },
+      lhs,
+      rhs);
+}
+
+TapeValue dotValues(const TapeValue & lhs, const TapeValue & rhs)
+{
+  return std::visit(
+      [](const auto & a, const auto & b) -> TapeValue {
+        using L = std::decay_t<decltype(a)>;
+        using R = std::decay_t<decltype(b)>;
+
+        if constexpr (std::is_same_v<L, TapeVector> && std::is_same_v<R, TapeVector>)
+          return a * b;
+        else
+          mooseError("Tape dot product requires two vectors");
+      },
+      lhs,
+      rhs);
+}
+
+TapeValue outerValues(const TapeValue & lhs, const TapeValue & rhs)
+{
+  return std::visit(
+      [](const auto & a, const auto & b) -> TapeValue {
+        using L = std::decay_t<decltype(a)>;
+        using R = std::decay_t<decltype(b)>;
+
+        if constexpr (std::is_same_v<L, TapeVector> && std::is_same_v<R, TapeVector>)
+        {
+          RankTwoTensor result;
+          for (unsigned int i = 0; i < 3; ++i)
+            for (unsigned int j = 0; j < 3; ++j)
+              result(i, j) = a(i) * b(j);
+          return result;
+        }
+        else
+          mooseError("Tape outer product requires two vectors");
+      },
+      lhs,
+      rhs);
+}
+
+TapeValue contractValues(const TapeValue & lhs, const TapeValue & rhs)
+{
+  return std::visit(
+      [](const auto & a, const auto & b) -> TapeValue {
+        using L = std::decay_t<decltype(a)>;
+        using R = std::decay_t<decltype(b)>;
+
+        if constexpr (std::is_same_v<L, TapeRank2> && std::is_same_v<R, TapeRank2>)
+          return a.doubleContraction(b);
+        else
+          mooseError("Tape contract requires two rank-two tensors");
+      },
+      lhs,
+      rhs);
 }
 
 class ScalarTapeBuilder
@@ -81,6 +240,7 @@ public:
                     const std::vector<std::string> & additional)
   {
     _allowed.insert(primary_var);
+    _allowed.insert(primary_var + "_grad");
     for (const auto & name : additional)
       _allowed.insert(name);
   }
@@ -120,7 +280,10 @@ private:
         auto constant_node = std::static_pointer_cast<ConstantNode>(node);
         if (!constant_node->value().isScalar())
           return std::nullopt;
-        TapeNode tape_node{TapeOp::LoadConstant};
+        TapeNode tape_node{};
+        tape_node.op = TapeOp::LoadConstant;
+        tape_node.lhs = invalidIndex();
+        tape_node.rhs = invalidIndex();
         tape_node.payload = constant_node->value().asScalar();
         index = _tape.appendNode(tape_node);
         break;
@@ -140,8 +303,39 @@ private:
 
         _inputs.insert(name);
 
-        TapeNode tape_node{TapeOp::LoadInput};
+        TapeNode tape_node{};
+        tape_node.op = TapeOp::LoadInput;
+        tape_node.lhs = invalidIndex();
+        tape_node.rhs = invalidIndex();
         tape_node.label = name;
+        index = _tape.appendNode(tape_node);
+        break;
+      }
+
+      case NodeType::Gradient:
+      {
+        auto unary = std::static_pointer_cast<UnaryOpNode>(node);
+        auto operand = unary->operand();
+
+        std::string base_name;
+        if (operand->type() == NodeType::Variable)
+          base_name = std::static_pointer_cast<VariableNode>(operand)->name();
+        else if (operand->type() == NodeType::FieldVariable)
+          base_name = std::static_pointer_cast<FieldVariableNode>(operand)->name();
+        else
+          return std::nullopt;
+
+        std::string grad_name = base_name + "_grad";
+        if (_allowed.count(grad_name) == 0)
+          return std::nullopt;
+
+        _inputs.insert(grad_name);
+
+        TapeNode tape_node{};
+        tape_node.op = TapeOp::LoadInput;
+        tape_node.lhs = invalidIndex();
+        tape_node.rhs = invalidIndex();
+        tape_node.label = grad_name;
         index = _tape.appendNode(tape_node);
         break;
       }
@@ -166,6 +360,24 @@ private:
         break;
       }
 
+      case NodeType::Dot:
+      case NodeType::Contract:
+      case NodeType::Outer:
+      {
+        auto binary = std::static_pointer_cast<BinaryOpNode>(node);
+        auto left_index = buildNode(binary->left());
+        auto right_index = buildNode(binary->right());
+        if (!left_index.has_value() || !right_index.has_value())
+          return std::nullopt;
+
+        TapeNode tape_node;
+        tape_node.op = translateSpecialBinary(node->type());
+        tape_node.lhs = *left_index;
+        tape_node.rhs = *right_index;
+        index = _tape.appendNode(tape_node);
+        break;
+      }
+
       case NodeType::Negate:
       {
         auto unary = std::static_pointer_cast<UnaryOpNode>(node);
@@ -173,8 +385,10 @@ private:
         if (!operand_index.has_value())
           return std::nullopt;
 
-        TapeNode tape_node{TapeOp::Negate};
+        TapeNode tape_node{};
+        tape_node.op = TapeOp::Negate;
         tape_node.lhs = *operand_index;
+        tape_node.rhs = invalidIndex();
         index = _tape.appendNode(tape_node);
         break;
       }
@@ -204,6 +418,21 @@ private:
         return TapeOp::Power;
       default:
         mooseError("Unsupported binary node type in tape translation");
+    }
+  }
+
+  TapeOp translateSpecialBinary(NodeType type) const
+  {
+    switch (type)
+    {
+      case NodeType::Dot:
+        return TapeOp::Dot;
+      case NodeType::Outer:
+        return TapeOp::Outer;
+      case NodeType::Contract:
+        return TapeOp::Contract;
+      default:
+        mooseError("Unsupported special binary node type in tape translation");
     }
   }
 
@@ -250,12 +479,45 @@ EvaluationTape::evaluate(const std::unordered_map<std::string, TapeValue> & inpu
       case TapeOp::Multiply:
       case TapeOp::Divide:
       case TapeOp::Power:
+      case TapeOp::Dot:
+      case TapeOp::Outer:
+      case TapeOp::Contract:
       {
         if (node.lhs == invalidIndex() || node.rhs == invalidIndex())
           return std::nullopt;
         const auto & lhs = workspace.at(node.lhs);
         const auto & rhs = workspace.at(node.rhs);
-        workspace.push_back(applyBinary(node.op, lhs, rhs));
+
+        switch (node.op)
+        {
+          case TapeOp::Add:
+            workspace.push_back(addValues(lhs, rhs));
+            break;
+          case TapeOp::Subtract:
+            workspace.push_back(subtractValues(lhs, rhs));
+            break;
+          case TapeOp::Multiply:
+            workspace.push_back(multiplyValues(lhs, rhs));
+            break;
+          case TapeOp::Divide:
+            workspace.push_back(divideValues(lhs, rhs));
+            break;
+          case TapeOp::Power:
+            workspace.push_back(powerValues(lhs, rhs));
+            break;
+          case TapeOp::Dot:
+            workspace.push_back(dotValues(lhs, rhs));
+            break;
+          case TapeOp::Outer:
+            workspace.push_back(outerValues(lhs, rhs));
+            break;
+          case TapeOp::Contract:
+            workspace.push_back(contractValues(lhs, rhs));
+            break;
+          default:
+            return std::nullopt;
+        }
+
         break;
       }
 
@@ -264,7 +526,7 @@ EvaluationTape::evaluate(const std::unordered_map<std::string, TapeValue> & inpu
         if (node.lhs == invalidIndex())
           return std::nullopt;
         const auto & val = workspace.at(node.lhs);
-        workspace.push_back(applyUnary(node.op, val));
+        workspace.push_back(negateValue(val));
         break;
       }
 

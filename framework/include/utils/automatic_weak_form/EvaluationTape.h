@@ -31,7 +31,10 @@ enum class TapeOp
   Multiply,
   Divide,
   Negate,
-  Power
+  Power,
+  Dot,
+  Outer,
+  Contract
 };
 
 struct TapeNode

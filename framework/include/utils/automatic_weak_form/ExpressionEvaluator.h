@@ -4,6 +4,7 @@
 #include "MooseTypes.h"
 #include <map>
 #include <string>
+#include <vector>
 
 namespace moose
 {
@@ -73,6 +74,7 @@ private:
   
   // Map variable names to numbers for expression parsing
   std::map<std::string, unsigned int> _var_name_to_num;
+  std::map<unsigned int, std::string> _var_num_to_name;
   
   // Parameters
   std::map<std::string, Real> _parameters;
@@ -87,6 +89,7 @@ private:
   class EvaluationVisitor;
   
   // Internal evaluation methods
+  MooseValue evaluateNode(const NodePtr & expr);
   MooseValue evaluateNode(const Node * node);
   MooseValue visitConstant(const ConstantNode * node);
   MooseValue visitVariable(const VariableNode * node);
@@ -101,6 +104,8 @@ private:
   MooseValue applyUnaryOp(NodeType op, const MooseValue & operand);
   MooseValue applyBinaryOp(NodeType op, const MooseValue & left, const MooseValue & right);
   MooseValue applyFunction(const std::string & name, const std::vector<MooseValue> & args);
+
+  unsigned int getVarNum(const std::string & name) const;
 };
 
 }

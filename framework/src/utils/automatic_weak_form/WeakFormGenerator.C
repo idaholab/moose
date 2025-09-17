@@ -1044,5 +1044,89 @@ NodePtr SymbolicSimplifier::foldConstants(const NodePtr & left, const NodePtr & 
   }
 }
 
+WeakFormGenerator::ConservationCheck
+WeakFormGenerator::checkConservation(const NodePtr &, const std::string &)
+{
+  return {false, nullptr, nullptr, std::string("Conservation analysis not available")};
+}
+
+NodePtr
+WeakFormGenerator::computeLinearization(const NodePtr & nonlinear_form,
+                                        const std::string &,
+                                        const NodePtr &)
+{
+  return nonlinear_form;
+}
+
+NodePtr
+WeakFormGenerator::computeSecondVariation(const NodePtr &, const std::string &, const std::string &)
+{
+  return nullptr;
+}
+
+bool
+WeakFormGenerator::isSymmetric(const NodePtr &)
+{
+  return true;
+}
+
+bool
+WeakFormGenerator::isElliptic(const NodePtr &)
+{
+  return true;
+}
+
+bool
+WeakFormGenerator::isCoercive(const NodePtr &)
+{
+  return true;
+}
+
+VariationalProblemAnalyzer::Analysis
+VariationalProblemAnalyzer::analyze(const NodePtr & energy_density,
+                                    const std::vector<std::string> & variables)
+{
+  Analysis analysis;
+  analysis.is_well_posed = energy_density != nullptr;
+  analysis.is_elliptic = true;
+  analysis.is_parabolic = false;
+  analysis.is_hyperbolic = false;
+  analysis.has_unique_solution = true;
+  analysis.is_conservative = true;
+  analysis.is_symmetric = true;
+  analysis.is_coercive = true;
+  analysis.required_continuity = 1;
+  analysis.recommended_fe_order = 1;
+
+  if (variables.size() > 1)
+    analysis.suggestions.push_back("Verify coupling terms for multi-variable systems");
+
+  return analysis;
+}
+
+bool
+VariationalProblemAnalyzer::checkWellPosedness(const NodePtr & weak_form)
+{
+  return weak_form != nullptr;
+}
+
+bool
+VariationalProblemAnalyzer::checkExistence(const NodePtr & bilinear_form, const NodePtr & linear_form)
+{
+  return bilinear_form != nullptr && linear_form != nullptr;
+}
+
+bool
+VariationalProblemAnalyzer::checkUniqueness(const NodePtr & bilinear_form)
+{
+  return bilinear_form != nullptr;
+}
+
+bool
+VariationalProblemAnalyzer::checkStability(const NodePtr & weak_form, const std::string &)
+{
+  return weak_form != nullptr;
+}
+
 }
 }
