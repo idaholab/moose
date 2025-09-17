@@ -4,6 +4,7 @@
 #include "MooseAST.h"
 #include "MooseExpressionBuilder.h"
 #include "WeakFormGenerator.h"
+#include "EvaluationTape.h"
 
 namespace moose
 {
@@ -106,6 +107,9 @@ protected:
   {
     bool computed = false;
     std::map<unsigned int, MooseValue> values;
+    bool tape_attempted = false;
+    std::unique_ptr<EvaluationTape> tape;
+    std::vector<std::string> tape_inputs;
   } _c0_cache, _c1_cache, _c2_cache, _c3_cache;
 
   void clearCache()
@@ -116,6 +120,13 @@ protected:
     _c3_cache.computed = false;
     _variable_cache.clear();
   }
+
+  void initializeCoefficientTapes(const WeakFormGenerator::WeakFormContributions & contributions);
+  void initializeTapeForContribution(const NodePtr & expr, ContributionCache & cache);
+  bool evaluateTapeContribution(const ContributionCache & cache,
+                                TapeValue & value_out) const;
+
+  bool _use_evaluation_tape;
 };
 
 }

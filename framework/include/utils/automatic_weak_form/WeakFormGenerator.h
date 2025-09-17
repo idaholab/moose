@@ -3,8 +3,9 @@
 #include "MooseAST.h"
 #include "MooseValueTypes.h"
 #include <map>
-#include <vector>
 #include <memory>
+#include <unordered_map>
+#include <vector>
 
 namespace moose
 {
@@ -46,17 +47,20 @@ public:
   Differential differentiate(const NodePtr & expr);
   
 private:
+  using Handler = Differential (DifferentiationVisitor::*)(const NodePtr &);
+
   std::string _var_name;
+  std::unordered_map<const Node *, Differential> _cache;
   
   Differential visit(const NodePtr & node);
-  
-  Differential visitConstant(const ConstantNode * node);
-  Differential visitVariable(const VariableNode * node);
-  Differential visitFieldVariable(const FieldVariableNode * node);
-  Differential visitUnaryOp(const UnaryOpNode * node);
-  Differential visitBinaryOp(const BinaryOpNode * node);
-  Differential visitFunction(const FunctionNode * node);
-  Differential visitVectorAssembly(const VectorAssemblyNode * node);
+  static const std::unordered_map<NodeType, Handler> & handlerMap();
+  Differential differentiateConstant(const NodePtr & node);
+  Differential differentiateVariable(const NodePtr & node);
+  Differential differentiateFieldVariable(const NodePtr & node);
+  Differential differentiateUnaryOp(const NodePtr & node);
+  Differential differentiateBinaryOp(const NodePtr & node);
+  Differential differentiateFunction(const NodePtr & node);
+  Differential differentiateVectorAssembly(const NodePtr & node);
 
   Differential handleGradient(const NodePtr & operand);
   Differential handleDivergence(const NodePtr & operand);

@@ -3,6 +3,7 @@
 #include "Assembly.h"
 #include "MooseVariableFE.h"
 #include "SystemBase.h"
+#include <unordered_map>
 
 namespace moose
 {
@@ -60,6 +61,9 @@ VariationalKernelBase::validParams()
   params.addParam<bool>("has_time_derivatives", false,
                          "Whether the problem includes time derivatives");
 
+  params.addParam<bool>("use_evaluation_tape", false,
+                        "Use prebuilt evaluation tapes for coefficient evaluation when supported");
+
   return params;
 }
 
@@ -76,6 +80,7 @@ VariationalKernelBase::VariationalKernelBase(const InputParameters & parameters)
     _parameters(isParamValid("parameters") ? getParam<std::map<std::string, Real>>("parameters") : std::map<std::string, Real>()),
     _use_automatic_differentiation(getParam<bool>("use_automatic_differentiation")),
     _enable_variable_splitting(getParam<bool>("enable_variable_splitting")),
+    _use_evaluation_tape(getParam<bool>("use_evaluation_tape")),
     _fe_order(getParam<unsigned int>("fe_order"))
 {
   _builder = std::make_unique<MooseExpressionBuilder>(_mesh.dimension());
@@ -236,6 +241,94 @@ VariationalKernelBase::computeVariationalDerivative()
 
   auto contributions = _weak_form_gen->computeContributions(_energy_density, _var.name());
   _max_derivative_order = contributions.max_order;
+
+  initializeCoefficientTapes(contributions);
+}
+
+void
+VariationalKernelBase::initializeCoefficientTapes(
+    const WeakFormGenerator::WeakFormContributions & contributions)
+{
+  if (!_use_evaluation_tape)
+    return;
+
+  initializeTapeForContribution(contributions.c0_term, _c0_cache);
+}
+
+void
+VariationalKernelBase::initializeTapeForContribution(const NodePtr & expr, ContributionCache & cache)
+{
+  if (!_use_evaluation_tape || cache.tape_attempted)
+    return;
+
+  cache.tape_attempted = true;
+
+  if (!expr)
+    return;
+
+  std::vector<std::string> extras = _coupled_variable_names;
+  extras.reserve(extras.size() + _parameters.size());
+  for (const auto & [name, _] : _parameters)
+    extras.push_back(name);
+
+  auto result = buildScalarTape(expr, _var.name(), extras);
+  if (result.success)
+  {
+    cache.tape = std::make_unique<EvaluationTape>(std::move(result.tape));
+    cache.tape_inputs = std::move(result.inputs);
+  }
+}
+
+bool
+VariationalKernelBase::evaluateTapeContribution(const ContributionCache & cache,
+                                                TapeValue & value_out) const
+{
+  if (!_use_evaluation_tape || !cache.tape)
+    return false;
+
+  std::unordered_map<std::string, TapeValue> inputs;
+  inputs.reserve(cache.tape_inputs.size());
+
+  for (const auto & name : cache.tape_inputs)
+  {
+    if (name == _var.name())
+    {
+      inputs[name] = _u[_qp];
+      continue;
+    }
+
+    if (auto param_it = _parameters.find(name); param_it != _parameters.end())
+    {
+      inputs[name] = param_it->second;
+      continue;
+    }
+
+    if (auto cache_it = _variable_cache.find(name); cache_it != _variable_cache.end())
+    {
+      if (!cache_it->second.isScalar())
+        return false;
+      inputs[name] = cache_it->second.asScalar();
+      continue;
+    }
+
+    if (auto coupled_it = _coupled_values.find(name); coupled_it != _coupled_values.end())
+    {
+      inputs[name] = (*coupled_it->second)[_qp];
+      continue;
+    }
+
+    return false;
+  }
+
+  auto eval = cache.tape->evaluate(inputs);
+  if (!eval.has_value())
+    return false;
+
+  if (!std::holds_alternative<TapeScalar>(*eval))
+    return false;
+
+  value_out = *eval;
+  return true;
 }
 
 void
@@ -453,6 +546,10 @@ VariationalKernelBase::computeQpOffDiagJacobian(unsigned int jvar)
 Real
 VariationalKernelBase::evaluateC0Contribution()
 {
+  TapeValue tape_value;
+  if (evaluateTapeContribution(_c0_cache, tape_value))
+    return std::get<TapeScalar>(tape_value) * _test[_i][_qp];
+
   if (!_c0_cache.computed)
   {
     DifferentiationVisitor dv(_var.name());

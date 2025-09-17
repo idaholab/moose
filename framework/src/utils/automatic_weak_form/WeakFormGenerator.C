@@ -11,15 +11,15 @@ namespace automatic_weak_form
 
 Differential DifferentiationVisitor::differentiate(const NodePtr & expr)
 {
+  _cache.clear();
   auto diff = visit(expr);
-  
-  // Simplify all coefficients
+
   for (auto & [order, coeff] : diff.coefficients)
   {
     if (coeff)
       coeff = ExpressionSimplifier::simplify(coeff);
   }
-  
+
   return diff;
 }
 
@@ -27,78 +27,84 @@ Differential DifferentiationVisitor::visit(const NodePtr & node)
 {
   if (!node)
     return Differential{};
-  
-  switch (node->type())
-  {
-    case NodeType::Constant:
-      return visitConstant(static_cast<const ConstantNode *>(node.get()));
-    case NodeType::Variable:
-      return visitVariable(static_cast<const VariableNode *>(node.get()));
-    case NodeType::FieldVariable:
-      return visitFieldVariable(static_cast<const FieldVariableNode *>(node.get()));
-    case NodeType::Add:
-    case NodeType::Subtract:
-    case NodeType::Multiply:
-    case NodeType::Divide:
-    case NodeType::Power:
-    case NodeType::Dot:
-    case NodeType::Contract:
-    case NodeType::Outer:
-      return visitBinaryOp(static_cast<const BinaryOpNode *>(node.get()));
-    case NodeType::Negate:
-    case NodeType::Gradient:
-    case NodeType::Divergence:
-    case NodeType::Laplacian:
-    case NodeType::Norm:
-    case NodeType::Normalize:
-    case NodeType::Trace:
-    case NodeType::Determinant:
-    case NodeType::Inverse:
-    case NodeType::Transpose:
-    case NodeType::Symmetric:
-    case NodeType::Skew:
-    case NodeType::Deviatoric:
-      return visitUnaryOp(static_cast<const UnaryOpNode *>(node.get()));
-    case NodeType::Function:
-      return visitFunction(static_cast<const FunctionNode *>(node.get()));
-    case NodeType::VectorAssembly:
-      return visitVectorAssembly(static_cast<const VectorAssemblyNode *>(node.get()));
-    default:
-      mooseError("Unsupported node type in differentiation");
-  }
-}
 
-Differential DifferentiationVisitor::visitConstant(const ConstantNode * node)
-{
-  Differential result;
+  auto cache_it = _cache.find(node.get());
+  if (cache_it != _cache.end())
+    return cache_it->second;
+
+  const auto & handlers = handlerMap();
+  auto handler_it = handlers.find(node->type());
+  if (handler_it == handlers.end())
+    mooseError("Unsupported node type in differentiation: ", static_cast<int>(node->type()));
+
+  Handler handler = handler_it->second;
+  Differential result = (this->*handler)(node);
+  _cache.emplace(node.get(), result);
   return result;
 }
 
-Differential DifferentiationVisitor::visitVariable(const VariableNode * node)
+const std::unordered_map<NodeType, DifferentiationVisitor::Handler> &
+DifferentiationVisitor::handlerMap()
 {
+  static const std::unordered_map<NodeType, Handler> handlers = {
+      {NodeType::Constant, &DifferentiationVisitor::differentiateConstant},
+      {NodeType::Variable, &DifferentiationVisitor::differentiateVariable},
+      {NodeType::FieldVariable, &DifferentiationVisitor::differentiateFieldVariable},
+      {NodeType::Add, &DifferentiationVisitor::differentiateBinaryOp},
+      {NodeType::Subtract, &DifferentiationVisitor::differentiateBinaryOp},
+      {NodeType::Multiply, &DifferentiationVisitor::differentiateBinaryOp},
+      {NodeType::Divide, &DifferentiationVisitor::differentiateBinaryOp},
+      {NodeType::Power, &DifferentiationVisitor::differentiateBinaryOp},
+      {NodeType::Dot, &DifferentiationVisitor::differentiateBinaryOp},
+      {NodeType::Contract, &DifferentiationVisitor::differentiateBinaryOp},
+      {NodeType::Outer, &DifferentiationVisitor::differentiateBinaryOp},
+      {NodeType::Negate, &DifferentiationVisitor::differentiateUnaryOp},
+      {NodeType::Gradient, &DifferentiationVisitor::differentiateUnaryOp},
+      {NodeType::Divergence, &DifferentiationVisitor::differentiateUnaryOp},
+      {NodeType::Laplacian, &DifferentiationVisitor::differentiateUnaryOp},
+      {NodeType::Norm, &DifferentiationVisitor::differentiateUnaryOp},
+      {NodeType::Normalize, &DifferentiationVisitor::differentiateUnaryOp},
+      {NodeType::Trace, &DifferentiationVisitor::differentiateUnaryOp},
+      {NodeType::Determinant, &DifferentiationVisitor::differentiateUnaryOp},
+      {NodeType::Inverse, &DifferentiationVisitor::differentiateUnaryOp},
+      {NodeType::Transpose, &DifferentiationVisitor::differentiateUnaryOp},
+      {NodeType::Symmetric, &DifferentiationVisitor::differentiateUnaryOp},
+      {NodeType::Skew, &DifferentiationVisitor::differentiateUnaryOp},
+      {NodeType::Deviatoric, &DifferentiationVisitor::differentiateUnaryOp},
+      {NodeType::Function, &DifferentiationVisitor::differentiateFunction},
+      {NodeType::VectorAssembly, &DifferentiationVisitor::differentiateVectorAssembly}};
+  return handlers;
+}
+
+Differential DifferentiationVisitor::differentiateConstant(const NodePtr &)
+{
+  return Differential{};
+}
+
+Differential DifferentiationVisitor::differentiateVariable(const NodePtr & node)
+{
+  auto var = std::static_pointer_cast<VariableNode>(node);
   Differential result;
-  if (node->name() == _var_name)
-  {
+  if (var->name() == _var_name)
     result.coefficients[0] = constant(1.0);
-  }
   return result;
 }
 
-Differential DifferentiationVisitor::visitFieldVariable(const FieldVariableNode * node)
+Differential DifferentiationVisitor::differentiateFieldVariable(const NodePtr & node)
 {
+  auto field = std::static_pointer_cast<FieldVariableNode>(node);
   Differential result;
-  if (node->name() == _var_name)
-  {
+  if (field->name() == _var_name)
     result.coefficients[0] = constant(1.0);
-  }
   return result;
 }
 
-Differential DifferentiationVisitor::visitUnaryOp(const UnaryOpNode * node)
+Differential DifferentiationVisitor::differentiateUnaryOp(const NodePtr & node)
 {
-  Differential operand_diff = visit(node->operand());
-  
-  switch (node->type())
+  auto unary = std::static_pointer_cast<UnaryOpNode>(node);
+  Differential operand_diff = visit(unary->operand());
+
+  switch (unary->type())
   {
     case NodeType::Negate:
     {
@@ -107,22 +113,22 @@ Differential DifferentiationVisitor::visitUnaryOp(const UnaryOpNode * node)
         result.coefficients[order] = negate(coeff);
       return result;
     }
-    
+
     case NodeType::Gradient:
-      return handleGradient(node->operand());
-    
+      return handleGradient(unary->operand());
+
     case NodeType::Divergence:
-      return handleDivergence(node->operand());
-    
+      return handleDivergence(unary->operand());
+
     case NodeType::Laplacian:
-      return handleLaplacian(node->operand());
-    
+      return handleLaplacian(unary->operand());
+
     case NodeType::Norm:
-      return handleNorm(node->operand());
-    
+      return handleNorm(unary->operand());
+
     case NodeType::Normalize:
-      return handleNormalize(node->operand());
-    
+      return handleNormalize(unary->operand());
+
     case NodeType::Trace:
     {
       Differential result;
@@ -131,13 +137,13 @@ Differential DifferentiationVisitor::visitUnaryOp(const UnaryOpNode * node)
           result.coefficients[order] = trace(coeff);
       return result;
     }
-    
+
     case NodeType::Determinant:
     {
       Differential result;
       if (operand_diff.hasOrder(0))
       {
-        auto A = node->operand();
+        auto A = unary->operand();
         auto detA = det(A);
         auto invA = inv(A);
         auto ddetA = multiply(detA, trace(multiply(invA, operand_diff.coefficients[0])));
@@ -145,15 +151,12 @@ Differential DifferentiationVisitor::visitUnaryOp(const UnaryOpNode * node)
       }
       return result;
     }
-    
+
     case NodeType::Inverse:
     {
       Differential result;
       if (operand_diff.hasOrder(0))
       {
-        // For inverse: d(A^-1) = -A^-1 * dA * A^-1
-        // The node itself represents inv(A), so we reuse it
-        auto unary = static_cast<const UnaryOpNode *>(node);
         auto invA = inv(unary->operand());
         auto dA = operand_diff.coefficients[0];
         auto dinvA = negate(multiply(invA, multiply(dA, invA)));
@@ -161,7 +164,7 @@ Differential DifferentiationVisitor::visitUnaryOp(const UnaryOpNode * node)
       }
       return result;
     }
-    
+
     case NodeType::Transpose:
     {
       Differential result;
@@ -170,7 +173,7 @@ Differential DifferentiationVisitor::visitUnaryOp(const UnaryOpNode * node)
           result.coefficients[order] = transpose(coeff);
       return result;
     }
-    
+
     case NodeType::Symmetric:
     {
       Differential result;
@@ -179,7 +182,7 @@ Differential DifferentiationVisitor::visitUnaryOp(const UnaryOpNode * node)
           result.coefficients[order] = sym(coeff);
       return result;
     }
-    
+
     case NodeType::Skew:
     {
       Differential result;
@@ -188,121 +191,114 @@ Differential DifferentiationVisitor::visitUnaryOp(const UnaryOpNode * node)
           result.coefficients[order] = skew(coeff);
       return result;
     }
-    
+
     case NodeType::Deviatoric:
     {
       Differential result;
       for (auto & [order, coeff] : operand_diff.coefficients)
         if (coeff)
         {
-          auto tr_coeff = multiply(constant(1.0/3.0), trace(coeff));
+          auto tr_coeff = multiply(constant(1.0 / 3.0), trace(coeff));
           auto I = constant(RankTwoTensor::Identity(), 3);
           auto spherical = multiply(tr_coeff, I);
           result.coefficients[order] = subtract(coeff, spherical);
         }
       return result;
     }
-    
+
     default:
       mooseError("Unsupported unary operation in differentiation");
   }
 }
 
-Differential DifferentiationVisitor::visitBinaryOp(const BinaryOpNode * node)
+Differential DifferentiationVisitor::differentiateBinaryOp(const NodePtr & node)
 {
-  switch (node->type())
+  auto binary = std::static_pointer_cast<BinaryOpNode>(node);
+
+  switch (binary->type())
   {
     case NodeType::Add:
-      return handleAdd(node->left(), node->right());
+      return handleAdd(binary->left(), binary->right());
     case NodeType::Subtract:
-      return handleSubtract(node->left(), node->right());
+      return handleSubtract(binary->left(), binary->right());
     case NodeType::Multiply:
-      return handleMultiply(node->left(), node->right());
+      return handleMultiply(binary->left(), binary->right());
     case NodeType::Divide:
-      return handleDivide(node->left(), node->right());
+      return handleDivide(binary->left(), binary->right());
     case NodeType::Power:
-      return handlePower(node->left(), node->right());
+      return handlePower(binary->left(), binary->right());
     case NodeType::Dot:
-      return handleDot(node->left(), node->right());
+      return handleDot(binary->left(), binary->right());
     case NodeType::Contract:
-      return handleContract(node->left(), node->right());
+      return handleContract(binary->left(), binary->right());
     case NodeType::Outer:
-      return handleOuter(node->left(), node->right());
+      return handleOuter(binary->left(), binary->right());
     default:
       mooseError("Unsupported binary operation in differentiation");
   }
 }
 
-Differential DifferentiationVisitor::visitFunction(const FunctionNode * node)
+Differential DifferentiationVisitor::differentiateFunction(const NodePtr & node)
 {
+  auto func = std::static_pointer_cast<FunctionNode>(node);
   Differential result;
-  
-  if (node->name() == "W" && node->args().size() == 1)
+
+  if (func->name() == "W" && func->args().size() == 1)
   {
-    auto arg_diff = visit(node->args()[0]);
+    auto arg_diff = visit(func->args()[0]);
     if (arg_diff.hasOrder(0))
     {
-      auto dW_dc = function("dW_dc", {node->args()[0]});
+      auto dW_dc = function("dW_dc", {func->args()[0]});
       for (auto & [order, coeff] : arg_diff.coefficients)
-      {
         if (coeff)
           result.coefficients[order] = multiply(dW_dc, coeff);
-      }
     }
   }
-  else if (node->name() == "log" && node->args().size() == 1)
+  else if (func->name() == "log" && func->args().size() == 1)
   {
-    auto arg_diff = visit(node->args()[0]);
+    auto arg_diff = visit(func->args()[0]);
     if (arg_diff.hasOrder(0))
     {
-      auto one_over_arg = divide(constant(1.0), node->args()[0]);
+      auto one_over_arg = divide(constant(1.0), func->args()[0]);
       for (auto & [order, coeff] : arg_diff.coefficients)
-      {
         if (coeff)
           result.coefficients[order] = multiply(one_over_arg, coeff);
-      }
     }
   }
-  else if (node->name() == "exp" && node->args().size() == 1)
+  else if (func->name() == "exp" && func->args().size() == 1)
   {
-    auto arg_diff = visit(node->args()[0]);
+    auto arg_diff = visit(func->args()[0]);
     if (arg_diff.hasOrder(0))
     {
-      auto exp_arg = function("exp", {node->args()[0]});
+      auto exp_arg = function("exp", {func->args()[0]});
       for (auto & [order, coeff] : arg_diff.coefficients)
-      {
         if (coeff)
           result.coefficients[order] = multiply(exp_arg, coeff);
-      }
     }
   }
-  else if (node->name() == "sin" && node->args().size() == 1)
+  else if (func->name() == "sin" && func->args().size() == 1)
   {
-    auto arg_diff = visit(node->args()[0]);
+    auto arg_diff = visit(func->args()[0]);
     if (arg_diff.hasOrder(0))
     {
-      auto cos_arg = function("cos", {node->args()[0]});
+      auto cos_arg = function("cos", {func->args()[0]});
       for (auto & [order, coeff] : arg_diff.coefficients)
-      {
         if (coeff)
           result.coefficients[order] = multiply(cos_arg, coeff);
-      }
     }
   }
-  else if (node->name() == "cos" && node->args().size() == 1)
+  else if (func->name() == "cos" && func->args().size() == 1)
   {
-    auto arg_diff = visit(node->args()[0]);
+    auto arg_diff = visit(func->args()[0]);
     if (arg_diff.hasOrder(0))
     {
-      auto neg_sin = negate(function("sin", {node->args()[0]}));
+      auto neg_sin = negate(function("sin", {func->args()[0]}));
       for (auto & [order, coeff] : arg_diff.coefficients)
-      {
         if (coeff)
           result.coefficients[order] = multiply(neg_sin, coeff);
-      }
     }
   }
-  
+
   return result;
 }
 
@@ -310,58 +306,44 @@ Differential DifferentiationVisitor::handleGradient(const NodePtr & operand)
 {
   Differential operand_diff = visit(operand);
   Differential result;
-  
+
   for (auto & [order, coeff] : operand_diff.coefficients)
-  {
     if (coeff)
       result.coefficients[order + 1] = coeff;
-  }
-  
+
   return result;
 }
 
-Differential DifferentiationVisitor::visitVectorAssembly(const VectorAssemblyNode * node)
+Differential DifferentiationVisitor::differentiateVectorAssembly(const NodePtr & node)
 {
-  // VectorAssembly creates a vector from scalar components
-  // The derivative of vec(u1, u2, ..., un) w.r.t. a variable is vec(du1/dx, du2/dx, ..., dun/dx)
+  auto vector_node = std::static_pointer_cast<VectorAssemblyNode>(node);
 
   Differential result;
-  std::vector<NodePtr> diff_components;
+  const auto & components = vector_node->components();
 
-  // Differentiate each component
-  for (const auto & component : node->components())
+  for (std::size_t i = 0; i < components.size(); ++i)
   {
-    Differential comp_diff = visit(component);
+    Differential comp_diff = visit(components[i]);
 
-    // For each differentiation order, build the vector of derivatives
     for (auto & [order, coeff] : comp_diff.coefficients)
     {
-      if (coeff)
+      if (!coeff)
+        continue;
+
+      auto & entry = result.coefficients[order];
+      if (!entry)
       {
-        if (result.coefficients.count(order) == 0)
-        {
-          // Initialize vector for this order
-          std::vector<NodePtr> order_components;
-          for (size_t i = 0; i < node->components().size(); ++i)
-            order_components.push_back(constant(0.0));
-
-          // Create VectorAssemblyNode with appropriate shape
-          VectorShape vec_shape{static_cast<unsigned int>(node->components().size())};
-          result.coefficients[order] = std::make_shared<VectorAssemblyNode>(order_components, Shape(vec_shape));
-        }
-
-        // Update the component for this order
-        auto vec_node = std::static_pointer_cast<VectorAssemblyNode>(result.coefficients[order]);
-        std::vector<NodePtr> updated_components = vec_node->components();
-
-        // Find the index of the current component
-        size_t comp_index = &component - &node->components()[0];
-        updated_components[comp_index] = coeff;
-
-        // Create updated VectorAssemblyNode
-        VectorShape vec_shape{static_cast<unsigned int>(node->components().size())};
-        result.coefficients[order] = std::make_shared<VectorAssemblyNode>(updated_components, Shape(vec_shape));
+        std::vector<NodePtr> order_components(components.size(), constant(0.0));
+        VectorShape vec_shape{static_cast<unsigned int>(components.size())};
+        entry = std::make_shared<VectorAssemblyNode>(order_components, Shape(vec_shape));
       }
+
+      auto vec_entry = std::static_pointer_cast<VectorAssemblyNode>(entry);
+      auto updated_components = vec_entry->components();
+      updated_components[i] = coeff;
+
+      VectorShape vec_shape{static_cast<unsigned int>(components.size())};
+      entry = std::make_shared<VectorAssemblyNode>(updated_components, Shape(vec_shape));
     }
   }
 
