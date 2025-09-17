@@ -37,6 +37,9 @@ class Node;
 class FaceInfo
 {
 public:
+  // Simple constructor for unit tests
+  FaceInfo(const ElemInfo * elem_info, unsigned int side, const dof_id_type id);
+  // Optimized constructor for the MooseMesh to use
   FaceInfo(const ElemInfo * elem_info,
            unsigned int side,
            const dof_id_type id,
