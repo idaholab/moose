@@ -23,11 +23,7 @@ September 24, 2025
 
 !---
 
-!include ictp/overview.md
-
-!---
-
-!include ictp/summary.md
+!include ictp/tutorial_steps.md
 
 !---
 
@@ -35,4 +31,4 @@ September 24, 2025
 
 !---
 
-!include ictp/diffusion.md
+!include ictp/step2_diffusion.md
