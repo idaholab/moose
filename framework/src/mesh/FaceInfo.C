@@ -45,7 +45,7 @@ FaceInfo::FaceInfo(const ElemInfo * elem_info,
                    unsigned int side,
                    const dof_id_type id,
                    libMesh::ElemSideBuilder & side_builder,
-                   libMesh::FEBase * fe)
+                   libMesh::FEBase & fe)
   : _elem_info(elem_info),
     _neighbor_info(nullptr),
     _id(id),
@@ -58,12 +58,12 @@ FaceInfo::FaceInfo(const ElemInfo * elem_info,
   auto & face = side_builder(*_elem_info->elem(), side);
   _face_area = face.volume();
   _face_centroid = face.vertex_average();
-  const std::vector<Point> & normals = fe->get_normals();
+  const std::vector<Point> & normals = fe.get_normals();
   Point pt0(0, 0, 0);
   std::vector<Point> pts = {pt0};
   // We pass this point to avoid the re-init caching that fails when
   // the same FE is used for a boundary and a volume element (of the same dimension here)
-  fe->reinit(_elem_info->elem(), _elem_side_id, libMesh::TOLERANCE, &pts);
+  fe.reinit(_elem_info->elem(), _elem_side_id, libMesh::TOLERANCE, &pts);
   mooseAssert(normals.size() == 1, "FaceInfo construction broken w.r.t. computing face normals");
   _normal = normals[0];
 }

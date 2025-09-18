@@ -3845,7 +3845,7 @@ MooseMesh::buildFiniteVolumeInfo() const
                                     side,
                                     face_index++,
                                     side_builder,
-                                    fe_at_dim[elem_dim - 1][elem->default_order()].get());
+                                    *fe_at_dim[elem_dim - 1][elem->default_order()]);
 
         auto & fi = _all_face_info.back();
 
