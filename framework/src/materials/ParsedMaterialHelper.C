@@ -23,10 +23,9 @@ ParsedMaterialHelper<is_ad>::validParams()
                         true,
                         "Throw an error if any explicitly requested material property does not "
                         "exist. Otherwise assume it to be zero.");
-  MultiMooseEnum extra_symbols("x y z t dt");
   params.addParam<MultiMooseEnum>(
       "extra_symbols",
-      extra_symbols,
+      getExtraSymbolsOptions(),
       "Special symbols, like point coordinates, time, and timestep size.");
   params.addParam<std::vector<MaterialName>>(
       "upstream_materials",
