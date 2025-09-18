@@ -79,6 +79,7 @@
 #include "UserObject.h"
 #include "OffDiagonalScalingMatrix.h"
 #include "HDGKernel.h"
+#include "AutomaticMortarGeneration.h"
 
 // libMesh
 #include "libmesh/nonlinear_solver.h"
@@ -290,13 +291,11 @@ NonlinearSystemBase::initialSetup()
     {
       // go over mortar interfaces and construct functors
       const auto & mortar_interfaces = _fe_problem.getMortarInterfaces(displaced);
-      for (const auto & mortar_interface : mortar_interfaces)
+      for (const auto & [primary_secondary_boundary_pair, mortar_generation_ptr] :
+           mortar_interfaces)
       {
-        const auto primary_secondary_boundary_pair = mortar_interface.first;
         if (!_constraints.hasActiveMortarConstraints(primary_secondary_boundary_pair, displaced))
           continue;
-
-        const auto & mortar_generation_object = mortar_interface.second;
 
         auto & mortar_constraints =
             _constraints.getActiveMortarConstraints(primary_secondary_boundary_pair, displaced);
@@ -310,7 +309,7 @@ NonlinearSystemBase::initialSetup()
 
         mortar_functors.emplace(primary_secondary_boundary_pair,
                                 ComputeMortarFunctor(mortar_constraints,
-                                                     mortar_generation_object,
+                                                     *mortar_generation_ptr,
                                                      subproblem,
                                                      _fe_problem,
                                                      displaced,

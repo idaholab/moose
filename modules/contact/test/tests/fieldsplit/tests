@@ -13,16 +13,16 @@
     type = 'Exodiff'
     input = 'frictionless_mortar_FS.i'
     exodiff = 'frictionless_mortar_FS_out.e'
-    abs_zero = 1e-8
     requirement = 'The system shall allow split preconditioning of frictionless mortar contact.'
     capabilities = 'petsc>=3.16.6' # early versions of petsc can't handle change in sparsity pattern in field split
     restep = false # Test is prescribed to abort on failed timestep
+    custom_cmp = frictionless_mortar_FS.cmp
   []
   [mortar-FS-frictional]
     type = 'Exodiff'
     input = 'frictional_mortar_FS.i'
     exodiff = 'frictional_mortar_FS_out.e'
-    abs_zero = 1e-8
+    custom_cmp = frictional_mortar_FS.cmp
     requirement = 'The system shall allow split preconditioning of frictional mortar contact.'
     capabilities = 'petsc>=3.16.6' # early versions of petsc can't handle change in sparsity pattern in field split
     restep = false # Test is prescribed to abort on failed timestep
