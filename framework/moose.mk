@@ -163,33 +163,33 @@ endif
 # Conditional parts if the user wants to compile MOOSE with mfem
 #
 ifeq ($(ENABLE_MFEM),true)
-	MFEM_LIB := libmfem.$(lib_suffix)
-	MFEM_COMMON_LIB := libmfem-common.$(lib_suffix)
+  MFEM_LIB := libmfem-$(METHOD).$(lib_suffix)
+  MFEM_COMMON_LIB := libmfem-common-$(METHOD).$(lib_suffix)
 
   ifneq ($(and $(wildcard $(MFEM_DIR)/lib/$(MFEM_LIB)), $(wildcard $(MFEM_DIR)/lib/$(MFEM_COMMON_LIB))),)
     # Adding the include directories
-	  include $(MFEM_DIR)/share/mfem/config.mk
-	  libmesh_CPPFLAGS += $(MFEM_INCFLAGS)
+    include $(MFEM_DIR)/share/mfem/config.mk
+    libmesh_CPPFLAGS += $(MFEM_INCFLAGS) -DMFEM_CONFIG_FILE=\"_config-$(METHOD).hpp\"
 
     # Dynamically linking with the available MFEM library
-	  ifeq ($(shell uname -s),Darwin)
-	  	libmesh_LDFLAGS += -Wl,-rpath,$(MFEM_DIR)/lib
-	  else
-	    libmesh_LDFLAGS += -Wl,--copy-dt-needed-entries,-rpath,$(MFEM_DIR)/lib
-	  endif
+    ifeq ($(shell uname -s),Darwin)
+      libmesh_LDFLAGS += -Wl,-rpath,$(MFEM_DIR)/lib
+    else
+      libmesh_LDFLAGS += -Wl,--copy-dt-needed-entries,-rpath,$(MFEM_DIR)/lib
+    endif
 
-    libmesh_LDFLAGS += -L$(MFEM_DIR)/lib -lmfem -lmfem-common
+    libmesh_LDFLAGS += -L$(MFEM_DIR)/lib -lmfem-$(METHOD) -lmfem-common-$(METHOD)
 
   else
     # No mfem library found
     $(eval $(call check_library_should_error,mfem))
 
     ifeq ($(mfem_should_error),true)
-      $(error ERROR! Cannot locate libmfem and libmfem-common. Make sure to install mfem before compiling MOOSE!)
+      $(error ERROR! Cannot locate libmfem-$(METHOD) and libmfem-common-$(METHOD). Make sure to install mfem before compiling MOOSE!)
     else
       $(info Skipping libmfem error check for targets that don't involve compilation!)
     endif
-	endif
+  endif
 endif
 
 #

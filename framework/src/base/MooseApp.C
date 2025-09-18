@@ -89,8 +89,6 @@
 
 using namespace libMesh;
 
-#define QUOTE(macro) stringifyName(macro)
-
 void
 MooseApp::addAppParam(InputParameters & params)
 {

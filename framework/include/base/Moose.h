@@ -18,6 +18,9 @@
 #include <set>
 #include <string>
 
+#define QUOTE(macro) stringifyName(macro)
+#define stringifyName(name) #name
+
 namespace libMesh
 {
 template <typename>
@@ -327,3 +330,20 @@ std::string hitMessagePrefix(const hit::Node & node);
 #endif
 
 } // namespace Moose
+
+// If we are using MFEM, in addition to the checks we do as part of the build system in moose.mk,
+// we check at compile time if both MOOSE and MFEM were built in dbg mode or not
+#ifdef MOOSE_MFEM_ENABLED
+#include "libmesh/ignore_warnings.h"
+#include <mfem.hpp>
+#include "libmesh/restore_warnings.h"
+#ifdef MFEM_DEBUG
+static_assert(std::string_view(QUOTE(METHOD)) == "dbg",
+              "MFEM was built in dbg mode, but not MOOSE. Try reinstalling "
+              "MFEM using the scripts/update_and_rebuild_mfem.sh script.");
+#else
+static_assert(std::string_view(QUOTE(METHOD)) != "dbg",
+              "MOOSE was built in dbg mode, but not MFEM. Try reinstalling "
+              "MFEM using the scripts/update_and_rebuild_mfem.sh script.");
+#endif
+#endif
