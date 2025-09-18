@@ -709,6 +709,8 @@ template <bool is_ad>
 using GenericDenseVector = Moose::GenericType<DenseVector<Real>, is_ad>;
 template <bool is_ad>
 using GenericDenseMatrix = Moose::GenericType<DenseMatrix<Real>, is_ad>;
+template <bool is_ad>
+using GenericRealEigenVector = Moose::GenericType<RealEigenVector, is_ad>;
 
 namespace Moose
 {

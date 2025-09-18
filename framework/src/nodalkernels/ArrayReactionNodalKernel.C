@@ -9,14 +9,14 @@
 
 #include "ArrayReactionNodalKernel.h"
 
-#include "Function.h"
-
 registerMooseObject("MooseApp", ArrayReactionNodalKernel);
+registerMooseObject("MooseApp", ADArrayReactionNodalKernel);
 
+template <bool is_ad>
 InputParameters
-ArrayReactionNodalKernel::validParams()
+ArrayReactionNodalKernelTempl<is_ad>::validParams()
 {
-  InputParameters params = ArrayNodalKernel::validParams();
+  InputParameters params = GenericArrayNodalKernel<is_ad>::validParams();
   params.addClassDescription(
       "Implements a simple consuming reaction term at nodes for an array variable");
   params.addRequiredParam<RealEigenVector>("coeff",
@@ -24,22 +24,30 @@ ArrayReactionNodalKernel::validParams()
   return params;
 }
 
-ArrayReactionNodalKernel::ArrayReactionNodalKernel(const InputParameters & parameters)
-  : ArrayNodalKernel(parameters), _coeff(getParam<RealEigenVector>("coeff"))
+template <bool is_ad>
+ArrayReactionNodalKernelTempl<is_ad>::ArrayReactionNodalKernelTempl(
+    const InputParameters & parameters)
+  : GenericArrayNodalKernel<is_ad>(parameters),
+    _coeff(this->template getParam<RealEigenVector>("coeff"))
 {
   if (_coeff.size() != _count)
     paramError("coeff",
                "The size of the coefficient vector must match the size of the array variable");
 }
 
+template <bool is_ad>
 void
-ArrayReactionNodalKernel::computeQpResidual(RealEigenVector & residual)
+ArrayReactionNodalKernelTempl<is_ad>::computeQpResidual(GenericRealEigenVector<is_ad> & residual)
 {
   residual = _coeff.cwiseProduct(_u[_qp]);
 }
 
+template <bool is_ad>
 RealEigenVector
-ArrayReactionNodalKernel::computeQpJacobian()
+ArrayReactionNodalKernelTempl<is_ad>::computeQpJacobian()
 {
   return _coeff;
 }
+
+template class ArrayReactionNodalKernelTempl<false>;
+template class ArrayReactionNodalKernelTempl<true>;
