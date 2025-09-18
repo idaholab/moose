@@ -210,6 +210,32 @@ TEST_F(WeakFormDerivationTest, GradientOperations)
   }
 }
 
+TEST_F(WeakFormDerivationTest, EulerLagrangeOperator)
+{
+  parser->defineVariable("c");
+  parser->defineExpression("F", "W(c) + 0.5*kappa*dot(grad(c), grad(c))");
+
+  auto euler = parser->parse("el(F, c)");
+  ASSERT_NE(euler, nullptr);
+
+  auto simplified = simplifier->simplify(euler);
+  ASSERT_NE(simplified, nullptr);
+
+  auto expected = simplifier->simplify(parser->parse(
+      "(2.0*c*((c*c) - 1.0)) + (2.0*((c*c) - 1.0)*c) + -(div(kappa*grad(c)))"));
+  ASSERT_NE(expected, nullptr);
+
+  std::string actual_str = simplified->toString();
+  std::string expected_str = expected->toString();
+  debugCompare(actual_str, expected_str);
+  EXPECT_TRUE(simplified->equals(*expected));
+
+  auto zero_el = parser->parse("el(5.0, c)");
+  auto zero_simplified = simplifier->simplify(zero_el);
+  ASSERT_NE(zero_simplified, nullptr);
+  EXPECT_EQ(zero_simplified->toString(), "0.000000");
+}
+
 // Test VectorAssembly (vec operator) with exact results
 TEST_F(WeakFormDerivationTest, VectorAssemblyOperations)
 {

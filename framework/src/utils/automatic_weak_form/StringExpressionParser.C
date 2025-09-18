@@ -1,5 +1,6 @@
 #include "StringExpressionParser.h"
 #include "MooseError.h"
+#include "WeakFormGenerator.h"
 
 namespace moose
 {
@@ -87,6 +88,32 @@ NodePtr StringExpressionParser::parseOuter(const std::vector<NodePtr> & args)
     mooseError("outer() requires exactly 2 arguments");
   
   return outer(args[0], args[1]);
+}
+
+NodePtr StringExpressionParser::parseEulerLagrange(const std::vector<NodePtr> & args)
+{
+  if (args.size() != 2)
+    mooseError("el() requires exactly 2 arguments");
+
+  const auto & energy_density = args[0];
+  const auto & variable_node = args[1];
+
+  std::string var_name;
+
+  if (auto field_var = std::dynamic_pointer_cast<FieldVariableNode>(variable_node))
+    var_name = field_var->name();
+  else if (auto var = std::dynamic_pointer_cast<VariableNode>(variable_node))
+    var_name = var->name();
+  else
+    mooseError("el() second argument must be a variable identifier");
+
+  WeakFormGenerator generator(_dim);
+  NodePtr result = generator.generateWeakForm(energy_density, var_name);
+
+  if (!result)
+    return constant(0.0);
+
+  return result;
 }
 
 NodePtr StringExpressionParser::parseTan(const std::vector<NodePtr> & args)

@@ -160,8 +160,9 @@ private:
   NodePtr parseDev(const std::vector<NodePtr> & args);
   NodePtr parseContract(const std::vector<NodePtr> & args);
   NodePtr parseOuter(const std::vector<NodePtr> & args);
+  NodePtr parseEulerLagrange(const std::vector<NodePtr> & args);
   NodePtr parseVec(const std::vector<NodePtr> & args);  // Assemble vector from components
-  
+
   // Standard mathematical functions
   NodePtr parseExp(const std::vector<NodePtr> & args);
   NodePtr parseLog(const std::vector<NodePtr> & args);
@@ -551,6 +552,8 @@ inline NodePtr StringExpressionParser::parseFunction(const std::string & name, T
     return parseContract(args);
   else if (name == "outer")
     return parseOuter(args);
+  else if (name == "el" || name == "EL" || name == "eulerlagrange" || name == "euler_lagrange")
+    return parseEulerLagrange(args);
   else if (name == "vec" || name == "vector")
     return parseVec(args);
   else if (name == "exp")
