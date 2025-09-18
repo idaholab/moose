@@ -32,3 +32,15 @@ September 24, 2025
 !---
 
 !include ictp/step2_diffusion.md
+
+!---
+
+!include ictp/step3_postprocessing.md
+
+!---
+
+!include ictp/step4_materials.md
+
+!---
+
+!include ictp/step5_multiapp.md

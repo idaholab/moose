@@ -33,7 +33,12 @@ Content:
             - js/**
             - bib/**
             - syntax/**
+            - source/bcs/DirichletBC.md
+            - source/executioners/Steady.md
+            - source/executioners/Transient.md
+            - source/kernels/Diffusion.md
             - source/meshgenerators/GeneratedMeshGenerator.md
+            - source/outputs/Exodus.md
     modules:
         root_dir: ${MOOSE_DIR}/modules/doc/content
         content:
