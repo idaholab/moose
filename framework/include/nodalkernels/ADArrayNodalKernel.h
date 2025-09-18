@@ -15,7 +15,7 @@
 /**
  * Base class for creating nodal kernels with hand-coded Jacobians
  */
-class ArrayNodalKernel : public NodalKernelBase, public MooseVariableInterface<RealEigenVector>
+class ADArrayNodalKernel : public NodalKernelBase, public MooseVariableInterface<RealEigenVector>
 {
 public:
   /**
@@ -24,7 +24,7 @@ public:
    */
   static InputParameters validParams();
 
-  ArrayNodalKernel(const InputParameters & parameters);
+  ADArrayNodalKernel(const InputParameters & parameters);
 
   /**
    * Compute the residual at the current node.
@@ -56,35 +56,34 @@ public:
    */
   const MooseVariableFE<RealEigenVector> & variable() const override { return _var; }
 
+  virtual void jacobianSetup() override { _my_node = nullptr; }
+
 protected:
   /**
    * The user can override this function to compute the residual at a node.
    */
-  virtual void computeQpResidual(RealEigenVector & residual) = 0;
+  virtual void computeQpResidual(ADRealEigenVector & residual) = 0;
 
   /**
-   * The user can override this function to compute the "on-diagonal"
-   * Jacobian contribution.  If not overriden,
-   * returns an array of 1s.
-   */
-  virtual RealEigenVector computeQpJacobian();
-
-  /**
-   * This is the virtual that derived classes should override for
-   * computing an off-diagonal jacobian component.
-   */
-  virtual RealEigenMatrix computeQpOffDiagJacobian(const MooseVariableFieldBase & jvar);
+   * Dummy method so we can make derived generic classes that template on <bool is_ad> */
+  virtual RealEigenVector computeQpJacobian()
+  {
+    mooseError("I'm an AD object, so computeQpJacobian should never be called");
+  }
 
   /// variable this works on
   MooseVariableFE<RealEigenVector> & _var;
 
   /// Value of the unknown variable this is acting on
-  const ArrayVariableValue & _u;
+  const ADArrayVariableValue & _u;
 
   /// Number of components of the array variable
   const unsigned int _count;
 
 private:
   /// Work vector for residual
-  RealEigenVector _work_vector;
+  ADRealEigenVector _work_vector;
+
+  /// Cache variable to make sure we don't do duplicate AD computations
+  const Node * _my_node = nullptr;
 };
