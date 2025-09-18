@@ -28,6 +28,9 @@ Without numerical stabilization the corresponding Jacobian is given by
 \frac{\partial R_i(u_h)}{\partial u_j} = -(\nabla \psi_i, \vec{v} \phi_j).
 \end{equation}
 
+!alert warning
+The non-AD version of this kernel does not incorporate key off-diagonal Jacobian terms, namely the [!param](/Kernels/ConservativeAdvection/velocity_variable) and [!param](/Kernels/ConservativeAdvection/velocity_material) parameters.
+
 ## Full upwinding
 
 Advective flow is notoriously prone to physically-incorrect overshoots
