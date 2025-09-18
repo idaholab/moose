@@ -38,19 +38,19 @@ Real
 LinearFVAdvectionDiffusionFunctorNeumannBC::computeBoundaryValue() const
 {
   const auto face_arg = makeCDFace(*_current_face_info);
-  const auto elem_arg = makeElemArg(_current_face_type == FaceInfo::VarFaceNeighbors::ELEM
-                                        ? _current_face_info->elemPtr()
-                                        : _current_face_info->neighborPtr());
+  const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
+                             ? _current_face_info->elemInfo()
+                             : _current_face_info->neighborInfo();
   const Real distance = computeCellToFaceDistance();
   const auto d_cf = computeCellToFaceVector();
   // For non-orthogonal meshes we compute an extra correction vector to increase order accuracy
   // correction_vector is a vector orthogonal to the boundary normal
   const auto correction_vector =
       (d_cf - (d_cf * _current_face_info->normal()) * _current_face_info->normal());
-  return raw_value(_var(elem_arg, determineState())) +
+  return _var.getElemValue(*elem_info, determineState()) +
          _functor(singleSidedFaceArg(_current_face_info), determineState()) /
              _diffusion_coeff(face_arg, determineState()) * distance +
-         _var.gradSln(*_current_face_info->elemInfo()) * correction_vector;
+         _var.gradSln(*elem_info) * correction_vector;
 }
 
 Real
@@ -71,6 +71,10 @@ Real
 LinearFVAdvectionDiffusionFunctorNeumannBC::computeBoundaryValueRHSContribution() const
 {
   const auto face_arg = makeCDFace(*_current_face_info);
+  const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
+                             ? _current_face_info->elemInfo()
+                             : _current_face_info->neighborInfo();
+
   // Fetch the boundary value from the provided functor.
   const Real distance = computeCellToFaceDistance();
   const auto d_cf = computeCellToFaceVector();
@@ -80,7 +84,7 @@ LinearFVAdvectionDiffusionFunctorNeumannBC::computeBoundaryValueRHSContribution(
       (d_cf - (d_cf * _current_face_info->normal()) * _current_face_info->normal());
   return _functor(singleSidedFaceArg(_current_face_info), determineState()) /
              _diffusion_coeff(face_arg, determineState()) * distance +
-         _var.gradSln(*_current_face_info->elemInfo()) * correction_vector;
+         _var.gradSln(*elem_info) * correction_vector;
 }
 
 Real
