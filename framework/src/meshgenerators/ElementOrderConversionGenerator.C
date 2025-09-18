@@ -20,15 +20,11 @@ InputParameters
 ElementOrderConversionGenerator::validParams()
 {
   InputParameters params = MeshGenerator::validParams();
-
-  MooseEnum conversion_type("FIRST_ORDER SECOND_ORDER_NONFULL SECOND_ORDER COMPLETE_ORDER",
-                            "FIRST_ORDER");
-
   params.addClassDescription("Mesh generator which converts orders of elements");
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
-  params.addParam<MooseEnum>(
-      "conversion_type", conversion_type, "The type of element order conversion to perform");
-
+  params.addParam<MooseEnum>("conversion_type",
+                             MooseEnum(getOrderConversionTypeOptions()),
+                             "The type of element order conversion to perform");
   return params;
 }
 

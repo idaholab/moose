@@ -13,29 +13,16 @@
 #include "MooseTypes.h"
 #include "MooseEnum.h"
 
-enum class ContactModel
-{
-  FRICTIONLESS,
-  GLUED,
-  COULOMB
-};
-
-enum class ContactFormulation
-{
-  RANFS,
-  KINEMATIC,
-  PENALTY,
-  AUGMENTED_LAGRANGE,
-  TANGENTIAL_PENALTY,
-  MORTAR,
-  MORTAR_PENALTY
-};
-
-enum class ProximityMethod
-{
-  NODE,
-  CENTROID
-};
+CreateMooseEnumClass(ContactModel, FRICTIONLESS, GLUED, COULOMB);
+CreateMooseEnumClass(ContactFormulation,
+                     RANFS,
+                     KINEMATIC,
+                     PENALTY,
+                     AUGMENTED_LAGRANGE,
+                     TANGENTIAL_PENALTY,
+                     MORTAR,
+                     MORTAR_PENALTY);
+CreateMooseEnumClass(ProximityMethod, NODE, CENTROID);
 
 /**
  * Action class for creating constraints, kernels, and user objects necessary for mechanical

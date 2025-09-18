@@ -1496,21 +1496,19 @@ ContactAction::createSidesetPairsFromGeometry()
 MooseEnum
 ContactAction::getModelEnum()
 {
-  return MooseEnum("frictionless glued coulomb", "frictionless");
+  return MooseEnum(getContactModelOptions(), "frictionless");
 }
 
 MooseEnum
 ContactAction::getProximityMethod()
 {
-  return MooseEnum("node centroid");
+  return MooseEnum(getProximityMethodOptions());
 }
 
 MooseEnum
 ContactAction::getFormulationEnum()
 {
-  auto formulations = MooseEnum(
-      "ranfs kinematic penalty augmented_lagrange tangential_penalty mortar mortar_penalty",
-      "kinematic");
+  auto formulations = MooseEnum(getContactFormulationOptions(), "kinematic");
 
   formulations.addDocumentation(
       "ranfs",

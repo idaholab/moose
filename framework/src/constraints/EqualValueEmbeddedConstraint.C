@@ -17,7 +17,6 @@
 #include "Assembly.h"
 #include "MooseMesh.h"
 #include "AddVariableAction.h"
-#include "MooseEnum.h"
 
 #include "libmesh/sparse_matrix.h"
 
@@ -33,7 +32,7 @@ EqualValueEmbeddedConstraintTempl<is_ad>::validParams()
   params.addClassDescription("This is a constraint enforcing overlapping portions of two blocks to "
                              "have the same variable value");
   params.set<bool>("use_displaced_mesh") = false;
-  MooseEnum formulation("kinematic penalty", "kinematic");
+  MooseEnum formulation(getFormulationOptions(), "kinematic");
   params.addParam<MooseEnum>(
       "formulation", formulation, "Formulation used to enforce the constraint");
   params.addRequiredParam<Real>(
