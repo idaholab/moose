@@ -80,7 +80,7 @@ $(eval $(call unity_dir_rule, $(unity_src_dir)))
 # that won't benefit from unity building
 # Also, exclude the base directory by default because it's another big jumble
 # of unrelated stuff.
-non_unity_dirs := %.libs %/src $(app_non_unity_dirs)
+non_unity_dirs := %.libs %/src %/kokkos $(app_non_unity_dirs)
 
 # Find all of the subdirectories in our src folder(s) up to $(app_unity_depth)
 app_unity_depth ?= 1
@@ -105,11 +105,11 @@ non_unity_srcsubdirs := $(filter $(non_unity_dirs), $(allsrcsubdirs))
 # Loop over the subdirectories, creating a rule to create the Unity source file
 # for each subdirectory.  To do that we need to create a unique name using the
 # full hierarchy of the path underneath src
-$(foreach srcsubdir,$(unity_srcsubdirs_nonmaxdepth),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir)),$(shell find $(srcsubdir) -maxdepth 1 \( -type f -o -type l \) -regex "[^\#~]*\.C"),$(srcsubdir),$(unity_src_dir))))
-$(foreach srcsubdir,$(unity_srcsubdirs_maxdepth),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir)),$(shell find $(srcsubdir) \( -type f -o -type l \) -regex "[^\#~]*\.C"),$(srcsubdir),$(unity_src_dir))))
+$(foreach srcsubdir,$(unity_srcsubdirs_nonmaxdepth),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir),C),$(shell find $(srcsubdir) -maxdepth 1 \( -type f -o -type l \) -regex "[^\#~]*\.C"),$(srcsubdir),$(unity_src_dir))))
+$(foreach srcsubdir,$(unity_srcsubdirs_maxdepth),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir),C),$(shell find $(srcsubdir) \( -type f -o -type l \) -regex "[^\#~]*\.C"),$(srcsubdir),$(unity_src_dir))))
 
 # This creates the whole list of Unity source files so we can use it as a dependency
-app_unity_srcfiles := $(foreach srcsubdir,$(unity_srcsubdirs),$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir)))
+app_unity_srcfiles := $(foreach srcsubdir,$(unity_srcsubdirs),$(call unity_unique_name,$(unity_src_dir),$(APPLICATION_DIR),$(srcsubdir),C))
 
 # Add to the global list of unity source files
 unity_srcfiles += $(app_unity_srcfiles)
