@@ -36,7 +36,11 @@ TEST(VariableSplittingAnalyzerTest, LaplacianSplitting)
   ASSERT_TRUE(sv.definition);
   EXPECT_EQ(sv.definition->toString(), "laplacian(u)");
   ASSERT_TRUE(sv.constraint_residual);
-  EXPECT_EQ(sv.constraint_residual->toString(), "(u_d2 - laplacian(u))");
+  EXPECT_EQ(sv.constraint_residual->toString(), "(laplacian(u) - u_d2)");
+
+  auto constraints = analyzer.generateConstraintEquations(split_vars);
+  ASSERT_EQ(constraints.size(), 1u);
+  EXPECT_EQ(constraints.front()->toString(), "(laplacian(u) - u_d2)");
 }
 
 TEST(VariableSplittingAnalyzerTest, TripleDerivativeSplitting)
@@ -61,7 +65,7 @@ TEST(VariableSplittingAnalyzerTest, TripleDerivativeSplitting)
   EXPECT_EQ(u_d3.derivative_order, 3u);
   EXPECT_EQ(u_d2.definition->toString(), "grad(grad(u))");
   EXPECT_EQ(u_d3.definition->toString(), "div(grad(grad(u)))");
-  EXPECT_EQ(u_d3.constraint_residual->toString(), "(u_d3 - div(grad(grad(u))))");
+  EXPECT_EQ(u_d3.constraint_residual->toString(), "(div(grad(grad(u))) - u_d3)");
 }
 
 TEST(VariableSplittingAnalyzerTest, MixedVariableSplitting)
@@ -84,4 +88,20 @@ TEST(VariableSplittingAnalyzerTest, MixedVariableSplitting)
   EXPECT_EQ(split_vars.at("u_d2").definition->toString(), "grad(grad(u))");
   EXPECT_EQ(split_vars.at("u_d3").definition->toString(), "div(grad(grad(u)))");
   EXPECT_EQ(split_vars.at("v_d2").definition->toString(), "laplacian(v)");
+}
+
+TEST(VariableSplittingAnalyzerTest, ComponentTransformation)
+{
+  auto analyzer = makeAnalyzer(1, 3);
+  NodePtr u = fieldVariable("u");
+  NodePtr hessian = grad(grad(u));
+  NodePtr component = std::make_shared<ComponentNode>(hessian, 0u, 0u, ScalarShape{});
+
+  auto split_vars = analyzer.generateSplitVariables(component);
+  NodePtr transformed = analyzer.transformExpression(component, split_vars);
+  ASSERT_TRUE(transformed);
+  EXPECT_EQ(transformed->toString(), "u_d2[0,0]");
+
+  ASSERT_TRUE(split_vars.count("u_d2"));
+  EXPECT_EQ(split_vars.at("u_d2").definition->toString(), "grad(grad(u))");
 }

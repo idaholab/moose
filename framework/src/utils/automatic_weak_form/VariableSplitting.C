@@ -154,7 +154,7 @@ VariableSplittingAnalyzer::generateSplitVariables(const NodePtr & expr)
       sv.derivative_order = order;
       sv.shape = definition->shape();
       sv.definition = definition;
-      sv.constraint_residual = subtract(fieldVariable(sv.name, sv.shape), definition);
+      sv.constraint_residual = subtract(definition->clone(), fieldVariable(sv.name, sv.shape));
       sv.is_primary = false;
 
       split_vars.emplace(sv.name, std::move(sv));
@@ -178,9 +178,8 @@ VariableSplittingAnalyzer::generateConstraintEquations(
   std::vector<NodePtr> constraints;
 
   for (const auto & [name, sv] : split_vars)
-  {
-    constraints.push_back(sv.constraint_residual);
-  }
+    if (sv.constraint_residual)
+      constraints.push_back(sv.constraint_residual->clone());
 
   return constraints;
 }
@@ -296,6 +295,20 @@ VariableSplittingAnalyzer::transformNode(const NodePtr & node,
     case NodeType::Variable:
     case NodeType::FieldVariable:
       return node->clone();
+
+    case NodeType::VectorComponent:
+    {
+      auto component = std::static_pointer_cast<ComponentNode>(node);
+      auto transformed_expr = transformNode(component->expr(), split_vars);
+      return std::make_shared<ComponentNode>(transformed_expr, component->component(), node->shape());
+    }
+
+    case NodeType::TensorComponent:
+    {
+      auto component = std::static_pointer_cast<ComponentNode>(node);
+      auto transformed_expr = transformNode(component->expr(), split_vars);
+      return std::make_shared<ComponentNode>(transformed_expr, component->i(), component->j(), node->shape());
+    }
 
     case NodeType::Gradient:
     {

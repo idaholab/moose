@@ -59,12 +59,12 @@ TEST_F(WeakFormDerivationTest, BasicDifferentiation)
 
     std::string result_str = result->toString();
     // Already simplified to 2*x
-    EXPECT_EQ(result_str, "(2.000000 * x)");
+    EXPECT_EQ(result_str, "(2 * x)");
 
     // Already simplified, verify it stays the same
     auto simplified = simplifier->simplify(result);
     std::string simplified_str = simplified->toString();
-    EXPECT_EQ(simplified_str, "(2.000000 * x)");
+    EXPECT_EQ(simplified_str, "(2 * x)");
   }
 
   // Test 2: d/dx(sin(x)) = cos(x)
@@ -108,11 +108,11 @@ TEST_F(WeakFormDerivationTest, BasicDifferentiation)
     ASSERT_NE(result, nullptr);
 
     std::string result_str = result->toString();
-    EXPECT_EQ(result_str, "(3.000000 * pow(x, 2.000000))");
+    EXPECT_EQ(result_str, "(3 * pow(x, 2))");
 
     // Already simplified
     auto simplified = simplifier->simplify(result);
-    EXPECT_EQ(simplified->toString(), "(3.000000 * pow(x, 2.000000))");
+    EXPECT_EQ(simplified->toString(), "(3 * pow(x, 2))");
   }
 
   // Test 5: d/dx(constant) = 0
@@ -135,7 +135,7 @@ TEST_F(WeakFormDerivationTest, BasicDifferentiation)
     ASSERT_NE(result, nullptr);
 
     auto simplified = simplifier->simplify(result);
-    EXPECT_EQ(simplified->toString(), "(0.500000 * pow(x, -0.500000))");
+    EXPECT_EQ(simplified->toString(), "(0.5 * pow(x, -0.5))");
   }
 
   // Test 7: d/dx(tanh(x)) = 1 - tanh(x)^2
@@ -147,7 +147,7 @@ TEST_F(WeakFormDerivationTest, BasicDifferentiation)
     ASSERT_NE(result, nullptr);
 
     auto simplified = simplifier->simplify(result);
-    EXPECT_EQ(simplified->toString(), "(1.000000 - pow(tanh(x), 2.000000))");
+    EXPECT_EQ(simplified->toString(), "(1 - pow(tanh(x), 2))");
   }
 }
 
@@ -168,7 +168,7 @@ TEST_F(WeakFormDerivationTest, GradientOperations)
     ASSERT_NE(result, nullptr);
 
     // The coefficient at order 1 should be the identity (constant 1.0)
-    EXPECT_EQ(result->toString(), "1.000000");
+    EXPECT_EQ(result->toString(), "1");
   }
 
   // Test 2: dot(grad(c), grad(c))
@@ -184,11 +184,11 @@ TEST_F(WeakFormDerivationTest, GradientOperations)
 
     // d/dc[dot(grad(c), grad(c))] = 2*grad(c)
     std::string result_str = result->toString();
-    EXPECT_EQ(result_str, "(2.000000 * grad(c))");
+    EXPECT_EQ(result_str, "(2 * grad(c))");
 
     // Already simplified
     auto simplified = simplifier->simplify(result);
-    EXPECT_EQ(simplified->toString(), "(2.000000 * grad(c))");
+    EXPECT_EQ(simplified->toString(), "(2 * grad(c))");
   }
 
   // Test 3: laplacian(u) increases order by 2
@@ -233,7 +233,7 @@ TEST_F(WeakFormDerivationTest, EulerLagrangeOperator)
   auto zero_el = parser->parse("el(5.0, c)");
   auto zero_simplified = simplifier->simplify(zero_el);
   ASSERT_NE(zero_simplified, nullptr);
-  EXPECT_EQ(zero_simplified->toString(), "0.000000");
+  EXPECT_EQ(zero_simplified->toString(), "0");
 }
 
 // Test VectorAssembly (vec operator) with exact results
@@ -268,7 +268,7 @@ TEST_F(WeakFormDerivationTest, VectorAssemblyOperations)
     EXPECT_EQ(vec_result->components().size(), 2);
 
     std::string result_str = result->toString();
-    EXPECT_EQ(result_str, "vec(1.000000, 0.000000)");
+    EXPECT_EQ(result_str, "vec(1, 0)");
   }
 
   // Test 3: Differentiation of vec(u, v) w.r.t. v
@@ -283,7 +283,7 @@ TEST_F(WeakFormDerivationTest, VectorAssemblyOperations)
 
     // Should be vec(0, 1)
     std::string result_str = result->toString();
-    EXPECT_EQ(result_str, "vec(0.000000, 1.000000)");
+    EXPECT_EQ(result_str, "vec(0, 1)");
   }
 
   // Test 4: dot(grad(u), vec(1.0, 0.0)) extracts x-component
@@ -303,7 +303,7 @@ TEST_F(WeakFormDerivationTest, VectorAssemblyOperations)
 
     // Result should be vec(1.0, 0.0) representing the x-direction
     std::string result_str = result->toString();
-    EXPECT_EQ(result_str, "vec(1.000000, 0.000000)");
+    EXPECT_EQ(result_str, "vec(1, 0)");
   }
 
   // Test 5: vec with three components
@@ -331,7 +331,7 @@ TEST_F(WeakFormDerivationTest, VectorAssemblyOperations)
     ASSERT_NE(coeff, nullptr);
 
     auto simplified = simplifier->simplify(coeff);
-    EXPECT_EQ(simplified->toString(), "vec(0.000000, 0.000000, 1.000000)");
+    EXPECT_EQ(simplified->toString(), "vec(0, 0, 1)");
   }
 
   // Test 7: Curl differentiation increases derivative order
@@ -346,7 +346,7 @@ TEST_F(WeakFormDerivationTest, VectorAssemblyOperations)
     EXPECT_TRUE(diff.hasOrder(1));
     auto coeff = diff.getCoefficient(1);
     ASSERT_NE(coeff, nullptr);
-    EXPECT_EQ(coeff->toString(), "vec(1.000000, 0.000000, 0.000000)");
+    EXPECT_EQ(coeff->toString(), "vec(1, 0, 0)");
   }
 }
 
@@ -366,7 +366,7 @@ TEST_F(WeakFormDerivationTest, HigherOrderDerivatives)
     ASSERT_NE(coeff, nullptr);
 
     auto simplified = simplifier->simplify(coeff);
-    EXPECT_EQ(simplified->toString(), "1.000000");
+    EXPECT_EQ(simplified->toString(), "1");
   }
 
   // Test 2: div(grad(grad(grad(u)))) -> coefficient at order 2 equals 1
@@ -385,7 +385,7 @@ TEST_F(WeakFormDerivationTest, HigherOrderDerivatives)
     ASSERT_NE(coeff, nullptr);
 
     auto simplified = simplifier->simplify(coeff);
-    EXPECT_EQ(simplified->toString(), "1.000000");
+    EXPECT_EQ(simplified->toString(), "1");
   }
 
   // Test 3: Mixed gradient dot-product derivative
@@ -426,7 +426,7 @@ TEST_F(WeakFormDerivationTest, AnisotropicEnergy)
     auto c0 = diff.getCoefficient(0);
     ASSERT_NE(c0, nullptr);
     // The zeroth-order term is 4*eta*(eta^2-1) expanded, with improved simplifier it has 2 factored out
-    EXPECT_EQ(c0->toString(), "((2.000000 * (eta * ((eta * eta) - 1.000000))) + (2.000000 * (((eta * eta) - 1.000000) * eta)))");
+    EXPECT_EQ(c0->toString(), "((2 * (eta * ((eta * eta) - 1))) + (2 * (((eta * eta) - 1) * eta)))");
 
     auto c1 = diff.getCoefficient(1);
     ASSERT_NE(c1, nullptr);
@@ -436,8 +436,8 @@ TEST_F(WeakFormDerivationTest, AnisotropicEnergy)
     // It should be a sum of two terms
     EXPECT_TRUE(c1_str.find("kappa_x") != std::string::npos);
     EXPECT_TRUE(c1_str.find("kappa_y") != std::string::npos);
-    EXPECT_TRUE(c1_str.find("vec(1.000000, 0.000000)") != std::string::npos);
-    EXPECT_TRUE(c1_str.find("vec(0.000000, 1.000000)") != std::string::npos);
+    EXPECT_TRUE(c1_str.find("vec(1, 0)") != std::string::npos);
+    EXPECT_TRUE(c1_str.find("vec(0, 1)") != std::string::npos);
   }
 }
 
@@ -465,7 +465,7 @@ TEST_F(WeakFormDerivationTest, ExpressionSimplification)
     auto expr = parser->parse("x - x");
     auto simplified = simplifier->simplify(expr);
     ASSERT_NE(simplified, nullptr);
-    EXPECT_EQ(simplified->toString(), "0.000000");
+    EXPECT_EQ(simplified->toString(), "0");
   }
 
   // Test 4: 2*3 = 6 (constant folding)
@@ -473,7 +473,7 @@ TEST_F(WeakFormDerivationTest, ExpressionSimplification)
     auto expr = parser->parse("2.0 * 3.0");
     auto simplified = simplifier->simplify(expr);
     ASSERT_NE(simplified, nullptr);
-    EXPECT_EQ(simplified->toString(), "6.000000");
+    EXPECT_EQ(simplified->toString(), "6");
   }
 
   // Test 5: x + 0 = x
@@ -489,7 +489,7 @@ TEST_F(WeakFormDerivationTest, ExpressionSimplification)
     auto expr = parser->parse("0.0 * x");
     auto simplified = simplifier->simplify(expr);
     ASSERT_NE(simplified, nullptr);
-    EXPECT_EQ(simplified->toString(), "0.000000");
+    EXPECT_EQ(simplified->toString(), "0");
   }
 
   // Test 7: x / 1 = x
@@ -533,11 +533,11 @@ TEST_F(WeakFormDerivationTest, ChainRule)
 
     std::string result_str = result->toString();
     // The simplifier produces 2 * (cos((x * x)) * x)
-    EXPECT_EQ(result_str, "(2.000000 * (cos((x * x)) * x))");
+    EXPECT_EQ(result_str, "(2 * (cos((x * x)) * x))");
 
     // Already simplified
     auto simplified = simplifier->simplify(result);
-    EXPECT_EQ(simplified->toString(), "(2.000000 * (cos((x * x)) * x))");
+    EXPECT_EQ(simplified->toString(), "(2 * (cos((x * x)) * x))");
   }
 }
 
@@ -585,7 +585,7 @@ TEST_F(WeakFormDerivationTest, TensorOperations)
     ASSERT_NE(coeff, nullptr);
     // The result should be sym(vec(1, 0)) without grad
     std::string coeff_str = coeff->toString();
-    EXPECT_EQ(coeff_str, "sym(vec(1.000000, 0.000000))");
+    EXPECT_EQ(coeff_str, "sym(vec(1, 0))");
   }
 
   // Test contract operation
@@ -680,7 +680,7 @@ TEST_F(WeakFormDerivationTest, WeakFormConstruction)
 
     std::string wf_str = weak_form->toString();
     // Should be 2*u - div(grad(u))
-    EXPECT_EQ(wf_str, "((2.000000 * u) + -(div(grad(u))))");
+    EXPECT_EQ(wf_str, "((2 * u) + -(div(grad(u))))");
   }
 }
 
@@ -789,7 +789,7 @@ TEST_F(WeakFormDerivationTest, EdgeCases)
 
     auto c0 = diff.getCoefficient(0);
     ASSERT_NE(c0, nullptr);
-    EXPECT_EQ(c0->toString(), "1.000000");
+    EXPECT_EQ(c0->toString(), "1");
   }
 }
 
@@ -856,14 +856,14 @@ TEST_F(WeakFormDerivationTest, SimplifierWorkingSimplifications)
   {
     auto expr = parser->parse("0.0 * x");
     auto simplified = simplifier->simplify(expr);
-    EXPECT_EQ(simplified->toString(), "0.000000");
+    EXPECT_EQ(simplified->toString(), "0");
   }
 
   // Test 6: x * 0 = 0
   {
     auto expr = parser->parse("x * 0.0");
     auto simplified = simplifier->simplify(expr);
-    EXPECT_EQ(simplified->toString(), "0.000000");
+    EXPECT_EQ(simplified->toString(), "0");
   }
 
   // Test 7: x / 1 = x
@@ -877,14 +877,14 @@ TEST_F(WeakFormDerivationTest, SimplifierWorkingSimplifications)
   {
     auto expr = parser->parse("x - x");
     auto simplified = simplifier->simplify(expr);
-    EXPECT_EQ(simplified->toString(), "0.000000");
+    EXPECT_EQ(simplified->toString(), "0");
   }
 
   // Test 9: Constant folding: 2 * 3 = 6
   {
     auto expr = parser->parse("2.0 * 3.0");
     auto simplified = simplifier->simplify(expr);
-    EXPECT_EQ(simplified->toString(), "6.000000");
+    EXPECT_EQ(simplified->toString(), "6");
   }
 }
 
@@ -937,7 +937,7 @@ TEST_F(WeakFormDerivationTest, SimplifierAdditionLimitation)
     auto expr = parser->parse("((x * 1.0) + (1.0 * x))");
     auto simplified = simplifier->simplify(expr);
     // The simplifier does simplify this to 2*x
-    EXPECT_EQ(simplified->toString(), "(2.000000 * x)");
+    EXPECT_EQ(simplified->toString(), "(2 * x)");
   }
 }
 
@@ -977,7 +977,7 @@ TEST_F(WeakFormDerivationTest, SimplifierCorrectnessPreservation)
     auto expr = parser->parse("(2.0 * 3.0) * 4.0");
     auto simplified = simplifier->simplify(expr);
     // Should be 24.0 after constant folding
-    EXPECT_EQ(simplified->toString(), "24.000000");
+    EXPECT_EQ(simplified->toString(), "24");
   }
 
   // Test that order of operations is preserved
@@ -985,7 +985,7 @@ TEST_F(WeakFormDerivationTest, SimplifierCorrectnessPreservation)
     auto expr = parser->parse("x + 2.0 * 3.0");
     auto simplified = simplifier->simplify(expr);
     // Should be x + 6.0
-    EXPECT_EQ(simplified->toString(), "(x + 6.000000)");
+    EXPECT_EQ(simplified->toString(), "(x + 6)");
   }
 }
 
@@ -1006,7 +1006,7 @@ TEST_F(WeakFormDerivationTest, SimplifierIdealSimplifierBehavior)
     auto expr = parser->parse("kappa * grad(u) + kappa * grad(u)");
     auto simplified = simplifier->simplify(expr);
     std::string result = simplified->toString();
-    EXPECT_EQ(result, "(2.000000 * (kappa * grad(u)))");
+    EXPECT_EQ(result, "(2 * (kappa * grad(u)))");
   }
 }
 
@@ -1021,14 +1021,14 @@ TEST_F(WeakFormDerivationTest, SimplifierComplexExpressions)
 
     // But the original expression should remain unchanged
     auto simplified = simplifier->simplify(expr);
-    EXPECT_EQ(simplified->toString(), "(0.500000 * dot(grad(u), grad(u)))");
+    EXPECT_EQ(simplified->toString(), "(0.5 * dot(grad(u), grad(u)))");
   }
 
   // Test that vec operations are preserved
   {
     auto expr = parser->parse("vec(1.0, 0.0)");
     auto simplified = simplifier->simplify(expr);
-    EXPECT_EQ(simplified->toString(), "vec(1.000000, 0.000000)");
+    EXPECT_EQ(simplified->toString(), "vec(1, 0)");
   }
 
   // Test that function calls are preserved
@@ -1064,7 +1064,7 @@ TEST_F(WeakFormDerivationTest, ToleranceNearZeroSimplification)
   auto simplified = simplifier->simplify(expr);
 
   // Should be simplified to 0 since the coefficient is numerically 0
-  EXPECT_EQ(simplified->toString(), "0.000000");
+  EXPECT_EQ(simplified->toString(), "0");
 }
 
 // Test that 0.5 * 2.0 is correctly recognized as 1.0
@@ -1091,13 +1091,13 @@ TEST_F(WeakFormDerivationTest, ToleranceQuarterTimesFour)
 TEST_F(WeakFormDerivationTest, ToleranceNotNearOne)
 {
   // This should be detectable as different from 1.0
-  auto expr = parser->parse("1.000001 * x");
+  auto expr = parser->parse(" 1.00000099999999 * x");
   auto simplified = simplifier->simplify(expr);
 
   // Should NOT be simplified to x
   EXPECT_NE(simplified->toString(), "x");
   // Should keep the multiplication
-  EXPECT_EQ(simplified->toString(), "(1.000001 * x)");
+  EXPECT_EQ(simplified->toString(), "(1.0000009999999899 * x)");
 }
 
 // Test division by small but non-zero values

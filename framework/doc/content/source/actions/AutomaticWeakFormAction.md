@@ -24,24 +24,11 @@ The variational derivative (Euler-Lagrange equation) is:
 
 ### Expression Parsing
 
-The action includes a comprehensive mathematical expression parser supporting:
-
-- **Basic operations**: `+`, `-`, `*`, `/`, `^`
-- **Differential operators**: `grad()`, `div()`, `laplacian()`
-- **Vector operations**: `dot()`, `cross()`, `norm()`, `normalize()`, `outer()`
-- **Tensor operations**: `trace()`, `det()`, `inv()`, `transpose()`, `sym()`, `skew()`, `dev()`, `contract()`, `frobenius()`
-- **Mathematical functions**: `exp()`, `log()`, `sin()`, `cos()`, `sqrt()`, `abs()`, `pow()`
-- **Special functions**: `W()` (double-well potential), `gamma()` (surface energy coefficient)
+The action includes a comprehensive mathematical expression parser. Arithmetic operators (`+`, `-`, `*`, `/`, `^`) are handled alongside a catalogue of differential, vector, tensor, and transcendental helpers. Custom symbols can be registered through `StringExpressionParser::registerFunction`. See [Supported Operators and Functions](#supported-operators-and-functions) for the complete reference.
 
 ### Variable Splitting for Higher-Order PDEs
 
-For problems with derivatives of order higher than what standard finite elements support (typically 2nd order), the action can automatically introduce auxiliary variables to split the problem into a system of lower-order equations.
-
-For example, a 4th-order Cahn-Hilliard equation with term `∇⁴c` can be automatically split:
-- Original: `f = λ|∇²c|²`
-- Split: Introduce `q = ∇²c`, then `f = λ|q|²`
-
-This enables solving 4th, 6th, or higher-order PDEs with standard C¹ continuous elements.
+For problems with derivatives beyond the supported finite-element order, the action can introduce additional primary variables (not auxiliary variables) together with constraint energies to enforce the derivative relationships. For example, a 4th-order Cahn–Hilliard energy containing `∇⁴c` yields `q = ∇²c` and transforms the energy into `λ|q|² + ...`. The resulting system stays fully coupled in Newton solves.
 
 ### Coupled Multi-Physics Problems
 
@@ -164,12 +151,12 @@ The action automatically creates:
 
 1. **Variables**:
    - Primary field variables specified in `variables`
-   - Auxiliary split variables for higher-order derivatives (e.g., `c_grad`, `c_hess`)
+   - Split `MooseVariable`s for higher-order derivatives (e.g., `c_grad`, `c_hess`)
 
 2. **Kernels**:
-   - `VariationalKernelBase` for each primary variable
-   - `GradientConstraintKernel`, `ScalarGradientConstraint`, or `VectorGradientConstraint` for split variables
-   - Kernels automatically handle coupled variables
+   - `VariationalKernelBase` for each primary or split variable
+   - Constraint kernels derived from the generated split-variable energies
+   - Kernels automatically handle all required couplings
 
 3. **Coupling**:
    - Variables are automatically coupled based on the energy expression
@@ -228,3 +215,16 @@ Enable `verbose = true` to see:
 - [VectorGradientConstraint.md] - Vector gradient constraint kernel
 
 !syntax children /AutomaticWeakForm/AutomaticWeakFormAction
+
+## Supported Operators and Functions
+
+| Category | Operators / Functions | Notes |
+| --- | --- | --- |
+| Arithmetic | `+`, `-`, unary `-`, `*`, `/`, `^`, `pow(a, b)` | Standard scalar, vector, and tensor arithmetics obey broadcasting rules defined by the AST builders. |
+| Differential | `grad(...)`, `gradient(...)`, `div(...)`, `divergence(...)`, `laplacian(...)`, `laplace(...)`, `hessian(...)`, `curl(...)` | `curl` is restricted to 3D; `hessian` is represented as a gradient of a gradient. |
+| Vector & Tensor | `dot(...)`, `cross(...)`, `norm(...)`, `magnitude(...)`, `normalize(...)`, `trace(...)`, `tr(...)`, `det(...)`, `determinant(...)`, `inv(...)`, `inverse(...)`, `transpose(...)`, `trans(...)`, `sym(...)`, `symmetric(...)`, `skew(...)`, `dev(...)`, `deviatoric(...)`, `contract(...)`, `outer(...)`, `vec(...)`, `vector(...)` | `vec` assembles vectors from scalar components; contraction follows index-based shape rules. |
+| Scalar Functions | `exp(...)`, `log(...)`, `ln(...)`, `sin(...)`, `cos(...)`, `tan(...)`, `sqrt(...)`, `abs(...)` | `sqrt` is internally emitted as `pow(arg, 0.5)`. |
+| Energy Helpers | `W(...)`, `doublewell(...)` | Adds the canonical double-well potential `(u^2 - 1)^2`. |
+| Variational Tools | `el(energy, variable)` (`EL`, `eulerlagrange`, `euler_lagrange`) | Computes the Euler–Lagrange residual for the given energy density and variable. |
+
+Custom functions can be registered at runtime via `StringExpressionParser::registerFunction`, provided their derivatives are supplied when needed.

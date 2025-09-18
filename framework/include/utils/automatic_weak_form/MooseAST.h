@@ -1,6 +1,7 @@
 #pragma once
 
 #include "MooseValueTypes.h"
+#include "Conversion.h"
 #include <memory>
 #include <string>
 #include <vector>
@@ -86,7 +87,7 @@ public:
   std::string toString() const override
   {
     if (_value.isScalar())
-      return std::to_string(_value.asScalar());
+      return Moose::stringifyExact(_value.asScalar());
     else if (_value.isVector())
       return "[vector]";
     else if (_value.isTensor())
