@@ -48,8 +48,10 @@ LinearFVScalarSymmetryBC::computeBoundaryValue() const
   {
     const auto cell_gradient = _var.gradSln(*elem_info);
     const auto & normal = _current_face_info->normal();
-    boundary_value +=
-        (cell_gradient - (cell_gradient * normal) * normal) * computeCellToFaceVector();
+    const auto d_cf = computeCellToFaceVector();
+
+    const auto correction_vector = (d_cf - (d_cf * normal) * normal);
+    boundary_value += cell_gradient * correction_vector;
   }
 
   return boundary_value;
@@ -75,21 +77,22 @@ LinearFVScalarSymmetryBC::computeBoundaryValueRHSContribution() const
 {
   // If we request linear extrapolation, we add the gradient term to the right hand
   // side.
-  Real boundary_value_rhs = 0;
   if (_two_term_expansion)
   {
     // We allow internal boundaries too so we need to check which side we are on
-    const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
-                               ? _current_face_info->elemInfo()
-                               : _current_face_info->neighborInfo();
+    const auto & elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
+                                 ? _current_face_info->elemInfo()
+                                 : _current_face_info->neighborInfo();
 
-    const auto cell_gradient = _var.gradSln(*elem_info);
+    const auto & d_cf = computeCellToFaceVector();
     const auto & normal = _current_face_info->normal();
-    boundary_value_rhs +=
-        (cell_gradient - (cell_gradient * normal) * normal) * computeCellToFaceVector();
+    const auto correction_vector = (d_cf - (d_cf * normal) * normal);
+    const auto & cell_gradient = _var.gradSln(*elem_info);
+
+    return cell_gradient * correction_vector;
   }
 
-  return boundary_value_rhs;
+  return 0.0;
 }
 
 Real

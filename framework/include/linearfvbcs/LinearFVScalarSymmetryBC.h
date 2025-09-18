@@ -33,6 +33,8 @@ public:
   virtual Real computeBoundaryGradientMatrixContribution() const override;
   virtual Real computeBoundaryGradientRHSContribution() const override;
 
+  virtual bool includesMaterialPropertyMultiplier() const override { return true; }
+
 protected:
   /// Switch for enabling linear extrapolation for the boundary face value
   const bool _two_term_expansion;
