@@ -52,7 +52,7 @@ We will go through each of these individually.
 
 Define the variable $u$:
 
-!listing ictp/step2_diffusion.i block=Variables
+!listing moose/step2_diffusion.i block=Variables
 
 The default parameters designate first-order linear Lagrange shape functions.
 
@@ -62,7 +62,7 @@ The default parameters designate first-order linear Lagrange shape functions.
 
 Define a [`Diffusion`](Diffusion.md) kernel on the variable `u`:
 
-!listing ictp/step2_diffusion.i block=Kernels
+!listing moose/step2_diffusion.i block=Kernels
 
 !--
 
@@ -70,7 +70,7 @@ Define a [`Diffusion`](Diffusion.md) kernel on the variable `u`:
 
 Define two [`DirichletBC`](DirichletBC.md) boundary conditions on the variable `u`; one on the boundary `inner` with a value of `0` and one on the boundary `outer` with a value of `1`:
 
-!listing ictp/step2_diffusion.i block=BCs
+!listing moose/step2_diffusion.i block=BCs
 
 !--
 
@@ -78,7 +78,7 @@ Define two [`DirichletBC`](DirichletBC.md) boundary conditions on the variable `
 
 Define a [`Steady`](Steady.md) executioner:
 
-!listing ictp/step2_diffusion.i block=Executioner
+!listing moose/step2_diffusion.i block=Executioner
 
 The other common executioner is the [`Transient`](Transient.md) executioner, which enables transient simulation.
 
@@ -88,7 +88,7 @@ The other common executioner is the [`Transient`](Transient.md) executioner, whi
 
 Use the shorthand `Outputs/exodus` syntax for enabling Exodus output:
 
-!listing ictp/step2_diffusion.i block=Outputs
+!listing moose/step2_diffusion.i block=Outputs
 
 The shorthand syntax effectively creates a [`Exodus`](Exodus.md) output where the output files are created with the name `<input_file_name>_out.e`.
 
@@ -96,7 +96,7 @@ The shorthand syntax effectively creates a [`Exodus`](Exodus.md) output where th
 
 ## Input: Diffusion Problem
 
-!listing ictp/step2_diffusion.i diff=ictp/step1-3_concentric_circle_no_void.i
+!listing moose/step2_diffusion.i diff=ictp/step1-3_concentric_circle_no_void.i
 
 !---
 

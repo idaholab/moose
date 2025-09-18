@@ -25,7 +25,7 @@ A listing of all syntax can be found [here](syntax/index.md).
 
 Start with the generation of a 2D uniform grid:
 
-!listing ictp/step1-1_meshing_basic.i
+!listing moose/step1-1_meshing_basic.i
 
 The above defines a [`GeneratedMeshGenerator`](GeneratedMeshGenerator.md) named `gmg` with the parameters:
 
@@ -110,7 +110,7 @@ radius = ${fparse diameter/2}
 
 Let's generate a more interesting mesh, one that represents something like a fuel pin in 2D:
 
-!listing ictp/step1-2_concentric_circle.i
+!listing moose/step1-2_concentric_circle.i
 
 !--
 
@@ -135,7 +135,7 @@ The grey elements represent void (subdomain `1`), the red elements represent the
 
 For the purposes of this tutorial, we will consider no net heat transfer within or across the void region. Thus, let's remove it from the mesh:
 
-!listing ictp/step1-3_concentric_circle_no_void.i diff=ictp/step1-2_concentric_circle.i
+!listing moose/step1-3_concentric_circle_no_void.i diff=ictp/step1-2_concentric_circle.i
 
 !---
 
