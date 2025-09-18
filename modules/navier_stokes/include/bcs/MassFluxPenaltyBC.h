@@ -30,6 +30,7 @@ public:
   virtual void computeResidual() override;
 
 protected:
+  void precalculateResidual() override;
   virtual ADReal computeQpResidual() override;
 
   const ADVariableValue & _vel_x;
@@ -40,4 +41,6 @@ protected:
   /// Stabilization magnitude parameter
   const Real _gamma;
   const Function * const _dirichlet_func;
+  /// Facet characteristic length for correct norm computations
+  Real _hmax;
 };
