@@ -151,6 +151,8 @@ private:
   std::map<std::string, moose::automatic_weak_form::StringExpressionParser::StrongFormEquation> _strong_form_equations;
   
   std::map<std::string, moose::automatic_weak_form::SplitVariable> _split_variables;
+  std::map<std::string, moose::automatic_weak_form::HigherOrderSplittingStrategy::SplitPlan> _split_plans;
+  std::vector<std::string> _split_plan_order;
   
   std::map<std::string, std::map<std::string, moose::automatic_weak_form::NodePtr>> _jacobian_blocks;
   
@@ -220,6 +222,14 @@ private:
   void setupAdaptiveSplitting();
   
   std::map<std::string, moose::automatic_weak_form::NodePtr> buildSplitDefinitionMap() const;
+
+  unsigned int computeSplitComponents(const moose::automatic_weak_form::Shape & shape) const;
+
+  void registerSplitVariableInfo(const moose::automatic_weak_form::SplitVariable & sv,
+                                 const moose::automatic_weak_form::HigherOrderSplittingStrategy::SplitPlan & plan);
+
+  moose::automatic_weak_form::NodePtr
+  buildConstraintEnergy(const moose::automatic_weak_form::SplitVariable & sv) const;
   
   void addErrorIndicators();
   

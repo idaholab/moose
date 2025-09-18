@@ -7,6 +7,9 @@
 #include "MooseUtils.h"
 #include "ExpressionTransformer.h"
 
+#include <algorithm>
+#include <set>
+
 registerMooseAction("MooseApp", AutomaticWeakFormAction, "create_problem_complete");
 registerMooseAction("MooseApp", AutomaticWeakFormAction, "add_variable");
 registerMooseAction("MooseApp", AutomaticWeakFormAction, "add_kernel");
@@ -544,45 +547,98 @@ AutomaticWeakFormAction::setupVariableSplitting()
     return;
   }
 
-  _split_variables = _split_analyzer->generateSplitVariables(_energy_functional);
+  _split_variables.clear();
+  _split_plans.clear();
+  _split_plan_order.clear();
 
-  Moose::out << "  [DEBUG] Number of split variables generated: " << _split_variables.size() << "\n";
+  auto requirements = _split_analyzer->analyzeExpression(_energy_functional);
+  auto generated_splits = _split_analyzer->generateSplitVariables(_energy_functional);
 
-  for (const auto & [name, sv] : _split_variables)
+  Moose::out << "  [DEBUG] Number of candidate split variables: " << generated_splits.size() << "\n";
+
+  moose::automatic_weak_form::HigherOrderSplittingStrategy strategy;
+
+  auto strategyToString = [](moose::automatic_weak_form::HigherOrderSplittingStrategy::Strategy s) {
+    using moose::automatic_weak_form::HigherOrderSplittingStrategy;
+    switch (s)
+    {
+      case HigherOrderSplittingStrategy::Strategy::RECURSIVE: return "recursive";
+      case HigherOrderSplittingStrategy::Strategy::DIRECT: return "direct";
+      case HigherOrderSplittingStrategy::Strategy::MIXED: return "mixed";
+      case HigherOrderSplittingStrategy::Strategy::OPTIMAL: return "optimal";
+    }
+    return "unknown";
+  };
+
+  for (const auto & req : requirements)
   {
-    Moose::out << "    [DEBUG] Split variable: " << sv.name
-               << " (order " << sv.derivative_order << " of " << sv.original_variable << ")\n";
-    if (sv.definition)
-      Moose::out << "      Definition: " << sv.definition->toString() << "\n";
+    if (!req.requires_splitting)
+      continue;
+
+    auto plan = strategy.computeOptimalSplitting(
+        _energy_functional, req.variable_name, req.max_derivative_order, _max_fe_order);
+
+    if (plan.variables.empty())
+      continue;
+
+    auto [plan_it, inserted] = _split_plans.emplace(req.variable_name, plan);
+    if (inserted)
+      _split_plan_order.push_back(req.variable_name);
+    else
+      plan_it->second = plan;
   }
 
-  if (_verbose)
+  if (_split_plans.empty())
   {
-    if (_split_variables.empty())
+    Moose::out << "  [DEBUG] No split plans required\n";
+    if (_verbose)
       _console << "  No variable splitting required (all derivatives within FE order "
                << _max_fe_order << ")\n";
-    else
-      _console << "  Found " << _split_variables.size() << " variables requiring splitting\n";
+    return;
   }
 
-  for (const auto & [name, sv] : _split_variables)
+  std::map<std::string, moose::automatic_weak_form::SplitVariable> filtered_splits;
+
+  for (const auto & [primary, plan] : _split_plans)
   {
-    if (_verbose)
-      _console << "  - Split variable: " << sv.name
-               << " = " << sv.definition->toString() << "\n";
-    VariableInfo info;
-    info.name = sv.name;
-    info.family = "LAGRANGE";
-    info.order = "FIRST";
-    info.is_vector = std::holds_alternative<moose::automatic_weak_form::VectorShape>(sv.shape);
-    info.is_tensor = std::holds_alternative<moose::automatic_weak_form::TensorShape>(sv.shape);
-    info.components = info.is_vector ? _problem->mesh().dimension() : 1;
-    info.is_auxiliary = true;
-    info.is_split = true;
-    info.parent_variable = sv.original_variable;
+    Moose::out << "    [DEBUG] Split plan for " << primary << " (strategy="
+               << strategyToString(plan.strategy) << ")\n";
 
-    _variable_info[sv.name] = info;
+    if (_verbose)
+      _console << "  Split plan for " << primary << " (" << plan.variables.size()
+               << " variables, bandwidth " << plan.bandwidth << ")\n";
+
+    for (const auto & plan_sv : plan.variables)
+    {
+      auto gen_it = generated_splits.find(plan_sv.name);
+      if (gen_it == generated_splits.end())
+      {
+        Moose::out << "      [WARN] Missing generated split variable for " << plan_sv.name << "\n";
+        continue;
+      }
+
+      auto sv = gen_it->second;
+
+      auto [iter, inserted] = filtered_splits.emplace(sv.name, sv);
+
+      Moose::out << "      [DEBUG] Using split variable: " << iter->second.name
+                 << " (order " << iter->second.derivative_order << ", base "
+                 << iter->second.original_variable << ")\n";
+
+      if (_verbose)
+        _console << "    - " << iter->second.name << " := "
+                 << (iter->second.definition ? iter->second.definition->toString()
+                                              : std::string("<undefined>"))
+                 << "\n";
+
+      registerSplitVariableInfo(iter->second, plan);
+    }
   }
+
+  _split_variables = std::move(filtered_splits);
+
+  Moose::out << "  [DEBUG] Number of split variables after planning: " << _split_variables.size()
+             << "\n";
 }
 
 void
@@ -606,85 +662,70 @@ AutomaticWeakFormAction::addPrimaryVariables()
 void
 AutomaticWeakFormAction::addSplitVariables()
 {
-  Moose::out << "  [DEBUG] addSplitVariables() called with " << _split_variables.size() << " split variables\n";
+  Moose::out << "  [DEBUG] addSplitVariables() called with " << _split_plans.size()
+             << " split plans\n";
 
-  if (_verbose && !_split_variables.empty())
+  if (_split_plans.empty())
+    return;
+
+  if (_verbose)
     _console << "\n[AutomaticWeakForm] Adding split variables to nonlinear system\n";
 
-  for (const auto & [name, sv] : _split_variables)
-  {
-    // Create variable info if it doesn't exist
-    if (_variable_info.find(sv.name) == _variable_info.end())
-    {
-      VariableInfo info;
-      info.name = sv.name;
-      info.family = "LAGRANGE";
-      info.order = "FIRST";
-      info.is_vector = std::holds_alternative<moose::automatic_weak_form::VectorShape>(sv.shape);
-      info.is_tensor = std::holds_alternative<moose::automatic_weak_form::TensorShape>(sv.shape);
-      info.components = info.is_tensor ? _problem->mesh().dimension() * _problem->mesh().dimension() : 1;
-      info.is_auxiliary = false;  // Split variables are part of the nonlinear system
-      info.is_split = true;
-      info.parent_variable = sv.original_variable;
-      _variable_info[sv.name] = info;
-    }
-
-    const auto & info = _variable_info[sv.name];
+  auto add_variable = [&](const moose::automatic_weak_form::SplitVariable & sv) {
+    const auto & info = _variable_info.at(sv.name);
 
     if (_problem->hasVariable(sv.name))
     {
       Moose::out << "    [DEBUG] Variable " << sv.name << " already exists\n";
-      continue;
+      return;
     }
 
-    Moose::out << "    [DEBUG] Adding split variable: " << sv.name << " (tensor=" << info.is_tensor << ")\n";
+    Moose::out << "    [DEBUG] Adding split variable: " << sv.name
+               << " (components=" << info.components << ")\n";
 
-    // For tensor variables (Hessian), we need to handle them specially
-    // In 1D, the Hessian is just a scalar (d²u/dx²)
-    if (info.is_tensor && _problem->mesh().dimension() == 1)
-    {
-      // In 1D, Hessian is just a scalar
-      InputParameters params = _factory.getValidParams("MooseVariable");
-      params.set<MooseEnum>("family") = info.family;
-      params.set<MooseEnum>("order") = info.order;
-      _problem->addVariable("MooseVariable", sv.name, params);
-      Moose::out << "      Added as scalar (1D Hessian)\n";
-    }
-    else if (info.is_tensor)
-    {
-      // For higher dimensions, we'd need to add multiple component variables
-      // For now, just add as scalar
-      InputParameters params = _factory.getValidParams("MooseVariable");
-      params.set<MooseEnum>("family") = info.family;
-      params.set<MooseEnum>("order") = info.order;
-      _problem->addVariable("MooseVariable", sv.name, params);
-      Moose::out << "      WARNING: Tensor variable added as scalar for now\n";
-    }
-    else
-    {
-      InputParameters params = _factory.getValidParams("MooseVariable");
-      params.set<MooseEnum>("family") = info.family;
-      params.set<MooseEnum>("order") = info.order;
-      _problem->addVariable("MooseVariable", sv.name, params);
-    }
+    InputParameters params = _factory.getValidParams("MooseVariable");
+    params.set<MooseEnum>("family") = info.family;
+    params.set<MooseEnum>("order") = info.order;
+    _problem->addVariable("MooseVariable", sv.name, params);
 
     if (_verbose)
       _console << "  - Added split variable '" << sv.name
-               << "' as nonlinear variable (order " << sv.derivative_order
-               << " derivative of '" << sv.original_variable << "')\n";
+               << "' (derivative order " << sv.derivative_order << ")\n";
+  };
+
+  for (const auto & primary : _split_plan_order)
+  {
+    auto plan_it = _split_plans.find(primary);
+    if (plan_it == _split_plans.end())
+      continue;
+
+    for (const auto & plan_sv : plan_it->second.variables)
+    {
+      auto split_it = _split_variables.find(plan_sv.name);
+      if (split_it == _split_variables.end())
+      {
+        Moose::out << "    [WARN] Missing split variable info for " << plan_sv.name << "\n";
+        continue;
+      }
+
+      if (_variable_info.find(plan_sv.name) == _variable_info.end())
+        registerSplitVariableInfo(split_it->second, plan_it->second);
+
+      add_variable(split_it->second);
+    }
   }
 }
 
 void
 AutomaticWeakFormAction::addKernels()
 {
-  // Re-generate split variables if needed (action state doesn't persist across tasks)
-  if (_enable_splitting && _split_variables.empty())
+  // Rebuild splitting data if needed when transitioning between action stages
+  if (_enable_splitting && (_split_variables.empty() || _split_plans.empty()))
   {
     if (!_energy_functional)
       parseEnergyFunctional();
     if (_energy_functional)
-      _split_variables = _split_analyzer->generateSplitVariables(_energy_functional);
+      setupVariableSplitting();
   }
 
   Moose::out << "  [DEBUG] AutomaticWeakFormAction::addKernels() called\n";
@@ -912,20 +953,50 @@ AutomaticWeakFormAction::addSplitConstraintKernels()
   auto split_definitions = buildSplitDefinitionMap();
   _weak_form_gen->setSplitDefinitions(split_definitions);
 
+  std::set<std::string> processed;
+
+  for (const auto & primary : _split_plan_order)
+  {
+    auto plan_it = _split_plans.find(primary);
+    if (plan_it == _split_plans.end())
+      continue;
+
+    for (const auto & plan_sv : plan_it->second.variables)
+    {
+      auto split_it = _split_variables.find(plan_sv.name);
+      if (split_it == _split_variables.end())
+        continue;
+
+      const auto & sv = split_it->second;
+      if (!sv.constraint_residual)
+        continue;
+
+      auto energy = buildConstraintEnergy(sv);
+      if (!energy)
+        continue;
+
+      auto weak_form = _weak_form_gen->generateWeakForm(energy, sv.name);
+      _weak_forms[sv.name] = weak_form;
+
+      generateKernelForVariable(sv.name, weak_form, energy, true);
+      processed.insert(sv.name);
+    }
+  }
+
   for (const auto & [name, sv] : _split_variables)
   {
+    if (processed.count(name))
+      continue;
     if (!sv.constraint_residual)
       continue;
 
-    auto constraint = sv.constraint_residual;
-    auto penalty = moose::automatic_weak_form::multiply(
-        moose::automatic_weak_form::constant(0.5),
-        moose::automatic_weak_form::multiply(constraint, constraint));
+    auto energy = buildConstraintEnergy(sv);
+    if (!energy)
+      continue;
 
-    auto weak_form = _weak_form_gen->generateWeakForm(penalty, sv.name);
+    auto weak_form = _weak_form_gen->generateWeakForm(energy, sv.name);
     _weak_forms[sv.name] = weak_form;
-
-    generateKernelForVariable(sv.name, weak_form, penalty, true);
+    generateKernelForVariable(sv.name, weak_form, energy, true);
   }
 
   _weak_form_gen->clearSplitDefinitions();
@@ -974,6 +1045,78 @@ AutomaticWeakFormAction::buildSplitDefinitionMap() const
     if (sv.definition)
       defs[name] = sv.definition;
   return defs;
+}
+
+unsigned int
+AutomaticWeakFormAction::computeSplitComponents(const moose::automatic_weak_form::Shape & shape) const
+{
+  using namespace moose::automatic_weak_form;
+
+  if (std::holds_alternative<ScalarShape>(shape))
+    return 1u;
+  if (const auto * vec = std::get_if<VectorShape>(&shape))
+    return vec->dim;
+  if (const auto * tensor = std::get_if<TensorShape>(&shape))
+    return tensor->dim * tensor->dim;
+  if (const auto * rank3 = std::get_if<RankThreeShape>(&shape))
+    return rank3->dim * rank3->dim * rank3->dim;
+  if (const auto * rank4 = std::get_if<RankFourShape>(&shape))
+    return rank4->dim1 * rank4->dim2;
+
+  return 1u;
+}
+
+void
+AutomaticWeakFormAction::registerSplitVariableInfo(
+    const moose::automatic_weak_form::SplitVariable & sv,
+    const moose::automatic_weak_form::HigherOrderSplittingStrategy::SplitPlan & plan)
+{
+  VariableInfo info;
+  info.name = sv.name;
+  info.family = "LAGRANGE";
+  info.order = "FIRST";
+  info.is_vector = std::holds_alternative<moose::automatic_weak_form::VectorShape>(sv.shape);
+  info.is_tensor = std::holds_alternative<moose::automatic_weak_form::TensorShape>(sv.shape) ||
+                   std::holds_alternative<moose::automatic_weak_form::RankThreeShape>(sv.shape) ||
+                   std::holds_alternative<moose::automatic_weak_form::RankFourShape>(sv.shape);
+  info.components = computeSplitComponents(sv.shape);
+  info.is_auxiliary = false;
+  info.is_split = true;
+  info.parent_variable = sv.original_variable;
+
+  for (const auto & dep : plan.dependencies)
+    if (dep.first == sv.name)
+    {
+      info.parent_variable = dep.second;
+      break;
+    }
+
+  _variable_info[sv.name] = info;
+}
+
+moose::automatic_weak_form::NodePtr
+AutomaticWeakFormAction::buildConstraintEnergy(
+    const moose::automatic_weak_form::SplitVariable & sv) const
+{
+  using namespace moose::automatic_weak_form;
+
+  if (!sv.constraint_residual)
+    return nullptr;
+
+  NodePtr quadratic = nullptr;
+
+  if (std::holds_alternative<ScalarShape>(sv.shape))
+    quadratic = multiply(sv.constraint_residual, sv.constraint_residual);
+  else if (std::holds_alternative<VectorShape>(sv.shape))
+    quadratic = dot(sv.constraint_residual, sv.constraint_residual);
+  else if (std::holds_alternative<TensorShape>(sv.shape) ||
+           std::holds_alternative<RankThreeShape>(sv.shape) ||
+           std::holds_alternative<RankFourShape>(sv.shape))
+    quadratic = contract(sv.constraint_residual, sv.constraint_residual);
+  else
+    quadratic = multiply(sv.constraint_residual, sv.constraint_residual);
+
+  return multiply(constant(0.5), quadratic);
 }
 
 void
@@ -1055,6 +1198,14 @@ AutomaticWeakFormAction::generateKernelForVariable(
     // Don't add if it's the current variable or already in the list
     if (name != var_name && std::find(coupled_vars.begin(), coupled_vars.end(), name) == coupled_vars.end())
       coupled_vars.push_back(name);
+  }
+
+  for (const auto & [split_name, _] : _split_variables)
+  {
+    if (split_name == var_name)
+      continue;
+    if (std::find(coupled_vars.begin(), coupled_vars.end(), split_name) == coupled_vars.end())
+      coupled_vars.push_back(split_name);
   }
 
   if (!coupled_vars.empty())
