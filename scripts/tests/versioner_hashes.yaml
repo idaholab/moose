@@ -1425,3 +1425,31 @@ a62abba3f218c71fadda32d9ca52b828abbbafbb: #31536; update code-server in apptaine
   wasp:
     full_version: 2025.09.04_0
     hash: 41363d4
+de2bc60791676d39c1f7f2e0c04b41f35444d529: #31569; Enable builds of MFEM at multiple optimisation levels
+  libmesh:
+    full_version: 2025.08.06_0
+    hash: e1f499b
+  libmesh-vtk:
+    full_version: 9.4.2_5
+    hash: 2b88261
+  moose-dev:
+    full_version: 2025.09.19
+    hash: 557829e
+  mpi:
+    full_version: 2025.08.06
+    hash: de1bd33
+  petsc:
+    full_version: 3.23.4_0
+    hash: 437fa22
+  pprof:
+    full_version: 2025.06.13
+    hash: 3d296db
+  seacas:
+    full_version: 2025.05.22_0
+    hash: '1278418'
+  tools:
+    full_version: 2025.06.26
+    hash: d73012a
+  wasp:
+    full_version: 2025.09.04_0
+    hash: 41363d4
