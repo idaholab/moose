@@ -49,6 +49,9 @@ ChemicalReactionsApp::registerAll(Factory & f, ActionFactory & af, Syntax & synt
   registerSyntax("AddCoupledSolidKinSpeciesAction", "ReactionNetwork/SolidKineticReactions");
   registerSyntax("CommonChemicalCompositionAction", "ChemicalComposition");
   registerSyntax("ChemicalCompositionAction", "ChemicalComposition/*");
+
+  // Physics syntax
+  registerSyntax("AqueousReactionsEquilibriumPhysics", "Physics/AqueousReactionsEquilibrium/*");
 }
 
 void
