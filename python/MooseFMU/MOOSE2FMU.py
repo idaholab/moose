@@ -62,10 +62,6 @@ class Moose2FMU(Fmi2Slave):
         self.register_variable(Integer("max_retries", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
         self.register_variable(Real("dt_tolerance", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
 
-        # Register outputs
-        self.register_variable(Real("moose_time", causality=Fmi2Causality.output, variability=Fmi2Variability.continuous))
-        self.register_variable(Real("time", causality=Fmi2Causality.output, variability=Fmi2Variability.continuous))
-
         # Setup MooseControl
         if self.moose_mpi:
             self.cmd = [self.moose_mpi, "-n", self.mpi_num, self.moose_executable, "-i", self.moose_inputfile]
@@ -151,7 +147,7 @@ class Moose2FMU(Fmi2Slave):
                 self.logger.debug("Captured synchronization flag '%s'", flag)
 
             if abs(moose_time - current_time) < self.dt_tolerance:
-                self.logger.debug(f"The current time is {self.time}, the moose time is {self.moose_time}")
+                self.logger.debug(f"The current time is {current_time}, the moose time is {moose_time}")
                 self.logger.info("Successfully sync MOOSE time with FMU step")
                 return moose_time, signal
 
