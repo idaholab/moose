@@ -10,7 +10,7 @@ from TestHarness.tests.TestHarnessTestCase import MOOSE_DIR
 
 class TestAppendPythonPath(unittest.TestCase):
     def setUp(self):
-        self.dir = tempfile.mkdtemp()
+        self.dir = os.path.realpath(tempfile.mkdtemp())
         self.orig_cwd = os.getcwd()
 
     def tearDown(self):
@@ -46,8 +46,7 @@ class TestAppendPythonPath(unittest.TestCase):
         with self.assertRaisesRegex(FileNotFoundError, f"Could not find .*/{new_paths[0]}"):
             readTestRoot(testroot_path)
 
-    @mock.patch("TestHarness.TestHarness.TestHarness.__init__", return_value=None)
-    def test_append_pythonpath_from_testroot(self, mock_th_init):
+    def test_append_pythonpath_from_testroot(self):
         # Create paths to set as extra pythonpaths
         new_paths = ["fake_package", "mock_package"]
         new_paths_abs = [os.path.join(self.dir, path) for path in new_paths]
@@ -63,14 +62,20 @@ class TestAppendPythonPath(unittest.TestCase):
         with open(testroot_path, "w") as fid:
             fid.writelines(content)
 
+        # Create a fake executioner
+        app_name = "test_harness_test"
+        with open(os.path.join(self.dir, f"{app_name}-opt"), "w") as fid:
+            fid.write("")
+
         # Go into directory and build TestHarness
         os.chdir(self.dir)
-        TestHarness.build([], "test_harness_test", MOOSE_DIR)
+        TestHarness.build(
+            ["unused", "--no-capabilities"], "test_harness_test", MOOSE_DIR
+        )
         for path in new_paths_abs:
             self.assertEqual(sys.path.count(path), 1)
 
-    @mock.patch("TestHarness.TestHarness.findDepApps", return_value="") # Avoid Resource warnings
-    def test_append_pythonpath_from_executable(self, _mock_finddepapps):
+    def test_append_pythonpath_from_executable(self):
         # Add a fake package in the directory to grab
         fake_package = os.path.join(self.dir, "python")
         os.mkdir(fake_package)
