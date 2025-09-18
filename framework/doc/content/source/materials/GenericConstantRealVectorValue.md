@@ -2,6 +2,13 @@
 
 !syntax description /Materials/GenericConstantRealVectorValue
 
+!alert warning
+This object is deprecated in factor of the [GenericConstantVectorMaterial.md]
+
+!alert note
+If you are working with a `std::vector<double>`-valued material property, e.g. a variable-size
+vector, you have to use the [GenericConstantStdVectorMaterial.md].
+
 ## Overview
 
 `GenericConstantRealVectorValue` creates a `RealVectorValue` material property that use
