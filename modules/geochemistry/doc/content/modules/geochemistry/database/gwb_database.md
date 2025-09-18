@@ -7,7 +7,7 @@ This page describes the GWB format, using a database file downloaded from the ge
 A database in GWB format can be converted to a MOOSE-formatted database using the supplied python utility
 
 ```bash
-geochemistry/python/database_converter.py -i gwb_database --format gwb -o moose_database.json
+geochemistry/python/moose_geochemistry/database_converter.py -i gwb_database --format gwb -o moose_database.json
 ```
 
 The following details the GWB database section-by-section.

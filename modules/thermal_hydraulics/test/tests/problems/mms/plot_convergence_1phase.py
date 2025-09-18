@@ -16,7 +16,7 @@
 #   p_err
 
 import matplotlib.pyplot as plt
-from thm_utilities import readCSVFile
+from moose_thm.thm_utilities import readCSVFile
 
 input_file = "convergence.csv"
 output_file = "convergence.png"

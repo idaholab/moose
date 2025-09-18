@@ -10,18 +10,13 @@
 # Note that this script requires sympy to be installed in your python environment
 
 import sys, os
+import importlib.util
 
-split_path = list(filter(None, os.getcwd().split('/')))
-s = '/'
-ns_root = ''
-for sub in split_path:
-    ns_root = s.join((ns_root, sub))
-    if sub == 'navier_stokes':
-        break
-ns_python = s.join((ns_root, 'python'))
-sys.path.append(ns_python)
+if importlib.util.find_spec('moose_navier_stokes') is None:
+    _ns_python_path = os.path.abspath(os.path.join(os.path.dirname(__file__), *(['..'] * 6), 'python'))
+    sys.path.append(_ns_python_path)
 
-from ins_calc_routines import *
+from moose_navier_stokes.ins_calc_routines import *
 from sympy import *
 import sympy as sp
 import numpy as np
