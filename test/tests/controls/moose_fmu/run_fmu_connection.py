@@ -67,8 +67,8 @@ def main():
     moose_instance.freeInstance()
 
     # Pause before coupled run
-    logger.info("Start the second moose run after 10s")
-    time.sleep(10)
+    logger.info("Start the second moose run after 2s")
+    time.sleep(2)
 
     # Re-instantiate Moose for coupled run
     moose_instance = instantiate_fmu(moose_model, moose_description)
@@ -92,8 +92,8 @@ def main():
             newBC = val * 10
             set_string(moose_instance, vr_map, 'BC_info', "BCs/left/value")
             set_real(moose_instance, vr_map, 'BC_value', newBC)
-            logger.info("Wait 10s to get the boundary condition set")
-            time.sleep(10)
+            logger.info("Wait 2s to get the boundary condition set")
+            time.sleep(2)
 
         # Step Moose
         moose_instance.doStep(currentCommunicationPoint=t,
