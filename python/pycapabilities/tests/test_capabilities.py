@@ -10,13 +10,10 @@
 
 import os
 import unittest
+import pycapabilities
 
 class TestCapabilities(unittest.TestCase):
     def test(self):
-
-        # Load the packages
-        import pycapabilities
-
         # Dummy capabilities
         cap = {
             'petsc': ['3.9.1', "PETSc doc"],
