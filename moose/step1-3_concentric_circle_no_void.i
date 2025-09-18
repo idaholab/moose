@@ -1,6 +1,4 @@
-hole_diameter = 0.16
-pellet_diameter = 0.520
-clad_diameter = 0.6
+!include common.i
 
 [Mesh]
   [concentric_circle]

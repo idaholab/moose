@@ -1,6 +1,6 @@
 [Mesh/fuel_pin]
   type = FileMeshGenerator
-  input = fuel_pin.e
+  file = fuel_pin.e
 []
 
 [Variables]
@@ -10,7 +10,7 @@
 
 [Kernels]
   [diffusion]
-    type = Diffusion
+    type = MatDiffusion
     variable = u
   []
 []
@@ -27,6 +27,21 @@
     variable = u
     boundary = outer
     value = 1
+  []
+[]
+
+[Materials]
+  [D_fuel]
+    type = GenericConstantMaterial
+    prop_names = D
+    prop_values = 100
+    block = fuel
+  []
+  [D_clad]
+    type = GenericConstantMaterial
+    prop_names = D
+    prop_values = 2
+    block = clad
   []
 []
 
