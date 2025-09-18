@@ -1,0 +1,31 @@
+[Tests]
+  issues = '#30912'
+  design = 'syntax/Controls/index.md source/controls/MOOSE_FMU.md'
+
+  [moosefmu]
+    requirement = 'The system shall support'
+    [create_fmu]
+      type = RunCommand
+      command = 'pythonfmu build -f MooseTest.py'
+      required_python_packages = 'pythonfmu'
+      detail = 'creating a MOOSE FMU from the Moose2FMU base class.'
+      platform = 'linux'
+    []
+    [run_fmu]
+      type = RunCommand
+      command = 'python run_fmu.py'
+      required_python_packages = 'fmpy pandas numpy'
+      prereq = 'moosefmu/create_fmu'
+      detail = 'running the created MOOSE FMU and verifying its outputs.'
+      platform = 'linux'
+    []
+    [couple_fmus]
+      type = RunCommand
+      command = 'python run_fmu_connection.py'
+      required_python_packages = 'fmpy pandas matplotlib'
+      prereq = 'moosefmu/create_fmu'
+      detail = 'coupling the MOOSE FMU with other open-source FMUs.'
+      platform = 'linux'
+    []
+  []
+[]
