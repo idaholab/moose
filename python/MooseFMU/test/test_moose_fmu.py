@@ -1,6 +1,20 @@
+import importlib.util
 import logging
+import sys
+import unittest
+from pathlib import Path
 from types import MethodType
-import pytest
+
+_TEST_DIR = Path(__file__).resolve().parent
+_SPEC = importlib.util.spec_from_file_location(
+    "MooseFMU.test", _TEST_DIR / "__init__.py"
+)
+if "MooseFMU.test" not in sys.modules:
+    _package_module = importlib.util.module_from_spec(_SPEC)
+    sys.modules["MooseFMU.test"] = _package_module
+    assert _SPEC.loader is not None
+    _SPEC.loader.exec_module(_package_module)
+
 from MooseFMU import Moose2FMU
 
 
@@ -16,276 +30,295 @@ class _DummyMoose(Moose2FMU):
         return True
 
 
-def test_get_flag_with_retries_success(caplog):
-    slave = _DummyMoose(instance_name="test", guid="1234")
+class TestMoose2FMU(unittest.TestCase):
+    def test_get_flag_with_retries_success(self):
+        slave = _DummyMoose(instance_name="test", guid="1234")
 
-    class Control:
-        def __init__(self):
-            self.calls = 0
+        class Control:
+            def __init__(self):
+                self.calls = 0
 
-        def getWaitingFlag(self):
-            self.calls += 1
-            return " READY " if self.calls >= 2 else None
+            def getWaitingFlag(self):
+                self.calls += 1
+                return " READY " if self.calls >= 2 else None
 
-    slave.control = Control()
+        slave.control = Control()
 
-    with caplog.at_level(logging.INFO):
-        result = slave.get_flag_with_retries({"READY"}, max_retries=5, wait_seconds=0)
+        with self.assertLogs(slave.logger, level=logging.INFO) as logs:
+            result = slave.get_flag_with_retries(
+                {"READY"}, max_retries=5, wait_seconds=0
+            )
 
-    assert result == " READY "
-    assert slave.control.calls == 2
-    assert "Successfully got flag ' READY ' after 1 retries." in caplog.text
+        self.assertEqual(result, " READY ")
+        self.assertEqual(slave.control.calls, 2)
+        self.assertIn(
+            "Successfully got flag ' READY ' after 1 retries.",
+            "\n".join(logs.output),
+        )
 
-def test_get_flag_with_retries_skips_unexpected_flags(monkeypatch):
-    slave = _DummyMoose(instance_name="test", guid="1234")
+    def test_get_flag_with_retries_skips_unexpected_flags(self):
+        slave = _DummyMoose(instance_name="test", guid="1234")
 
-    calls = {"skip": [], "waiting": 0}
+        calls = {"skip": [], "waiting": 0}
 
-    class Control:
-        def __init__(self):
-            self._responses = iter(["foo", "READY"])
+        class Control:
+            def __init__(self):
+                self._responses = iter(["foo", "READY"])
 
-        def getWaitingFlag(self):
-            calls["waiting"] += 1
-            return next(self._responses)
+            def getWaitingFlag(self):
+                calls["waiting"] += 1
+                return next(self._responses)
 
-    slave.control = Control()
+        slave.control = Control()
 
-    def fake_skip(self, flag):
-        calls["skip"].append(flag)
-
-    slave._skip_flag = MethodType(fake_skip, slave)
-
-    result = slave.get_flag_with_retries({"READY"}, max_retries=3, wait_seconds=0)
-
-    assert result == "READY"
-    assert calls["waiting"] == 2
-    assert calls["skip"] == ["foo"]
+        def fake_skip(self, flag):
+            calls["skip"].append(flag)
 
 
-def test_get_flag_with_retries_failure(caplog):
-    slave = _DummyMoose(instance_name="test", guid="1234")
+        slave._skip_flag = MethodType(fake_skip, slave)
 
-    class Control:
-        def __init__(self):
-            self.calls = 0
+        result = slave.get_flag_with_retries({"READY"}, max_retries=3, wait_seconds=0)
 
         def getWaitingFlag(self):
             self.calls += 1
             return None
 
-    slave.control = Control()
+    def test_get_flag_with_retries_failure(self):
+        slave = _DummyMoose(instance_name="test", guid="1234")
 
-    with caplog.at_level(logging.ERROR):
-        result = slave.get_flag_with_retries({"READY"}, max_retries=3, wait_seconds=0)
+        class Control:
+            def __init__(self):
+                self.calls = 0
 
-    assert result is None
-    assert slave.control.calls == 3
-    assert "Failed to get one of ['READY'] after 3 retries." in caplog.text
+            def getWaitingFlag(self):
+                self.calls += 1
+                return None
 
-def test_get_flag_with_retries_handles_exception(caplog):
-    slave = _DummyMoose(instance_name="test", guid="1234")
+        slave.control = Control()
 
-    class Control:
-        def __init__(self):
-            self.calls = 0
+        with self.assertLogs(slave.logger, level=logging.ERROR) as logs:
+            result = slave.get_flag_with_retries(
+                {"READY"}, max_retries=3, wait_seconds=0
+            )
 
-        def getWaitingFlag(self):
-            self.calls += 1
-            if self.calls < 2:
-                raise RuntimeError("temporary failure")
-            return "OK"
+        self.assertIsNone(result)
+        self.assertEqual(slave.control.calls, 3)
+        self.assertIn(
+            "Failed to get one of ['READY'] after 3 retries.",
+            "\n".join(logs.output),
+        )
 
-    slave.control = Control()
+    def test_get_flag_with_retries_handles_exception(self):
+        slave = _DummyMoose(instance_name="test", guid="1234")
 
-    with caplog.at_level(logging.WARNING):
-        result = slave.get_flag_with_retries({"OK"}, max_retries=4, wait_seconds=0)
+        class Control:
+            def __init__(self):
+                self.calls = 0
 
-    assert result == "OK"
-    assert slave.control.calls == 2
-    assert "Attempt 1/4 failed" in caplog.text
+            def getWaitingFlag(self):
+                self.calls += 1
+                if self.calls < 2:
+                    raise RuntimeError("temporary failure")
+                return "OK"
 
-def test_set_controllable_real_caches_values():
-    slave = _DummyMoose(instance_name="test", guid="1234")
+        slave.control = Control()
 
-    class Control:
-        def __init__(self):
-            self.set_calls = []
-            self.continue_calls = 0
+        with self.assertLogs(slave.logger, level=logging.WARNING) as logs:
+            result = slave.get_flag_with_retries({"OK"}, max_retries=4, wait_seconds=0)
 
-        def setControllableReal(self, path, value):
-            self.set_calls.append((path, value))
+        self.assertEqual(result, "OK")
+        self.assertEqual(slave.control.calls, 2)
+        self.assertIn("Attempt 1/4 failed", "\n".join(logs.output))
 
-        def setContinue(self):
-            self.continue_calls += 1
+    def test_set_controllable_real_caches_values(self):
+        slave = _DummyMoose(instance_name="test", guid="1234")
 
-    slave.control = Control()
+        class Control:
+            def __init__(self):
+                self.set_calls = []
+                self.continue_calls = 0
 
-    assert slave.set_controllable_real("alpha", 1.0) is True
-    assert slave.control.set_calls == [("alpha", 1.0)]
-    assert slave.control.continue_calls == 1
+            def setControllableReal(self, path, value):
+                self.set_calls.append((path, value))
 
-    assert slave.set_controllable_real("alpha", 1.0) is False
-    assert slave.control.set_calls == [("alpha", 1.0)]
+            def setContinue(self):
+                self.continue_calls += 1
 
-    assert slave.set_controllable_real("alpha", 1.0, force=True) is True
-    assert slave.control.set_calls == [("alpha", 1.0), ("alpha", 1.0)]
+        slave.control = Control()
 
+        self.assertTrue(slave.set_controllable_real("alpha", 1.0))
+        self.assertEqual(slave.control.set_calls, [("alpha", 1.0)])
+        self.assertEqual(slave.control.continue_calls, 1)
 
-def test_parse_flags_handles_strings_and_iterables():
-    slave = _DummyMoose(instance_name="test", guid="1234")
+        self.assertFalse(slave.set_controllable_real("alpha", 1.0))
+        self.assertEqual(slave.control.set_calls, [("alpha", 1.0)])
 
-    parsed = slave._parse_flags("initial, timestep_begin;custom | Another")
-    assert parsed == {"INITIAL", "TIMESTEP_BEGIN", "CUSTOM", "ANOTHER"}
+        self.assertTrue(slave.set_controllable_real("alpha", 1.0, force=True))
+        self.assertEqual(
+            slave.control.set_calls, [("alpha", 1.0), ("alpha", 1.0)]
+        )
 
-    parsed_iterable = slave._parse_flags(["Ready", " done ", ""])
-    assert parsed_iterable == {"READY", "DONE"}
+    def test_parse_flags_handles_strings_and_iterables(self):
+        slave = _DummyMoose(instance_name="test", guid="1234")
 
+        parsed = slave._parse_flags("initial, timestep_begin;custom | Another")
+        self.assertEqual(
+            parsed, {"INITIAL", "TIMESTEP_BEGIN", "CUSTOM", "ANOTHER"}
+        )
 
-def test_sync_with_moose_success(monkeypatch):
-    slave = _DummyMoose(instance_name="test", guid="1234")
+        parsed_iterable = slave._parse_flags(["Ready", " done ", ""])
+        self.assertEqual(parsed_iterable, {"READY", "DONE"})
 
-    class Control:
-        def __init__(self):
-            self._times = iter([0.0, 1.0005])
-            self.wait_calls = []
-            self.continue_calls = 0
+    def test_sync_with_moose_success(self):
+        slave = _DummyMoose(instance_name="test", guid="1234")
 
-        def getTime(self):
-            return next(self._times)
+        class Control:
+            def __init__(self):
+                self._times = iter([0.0, 1.0005])
+                self.wait_calls = []
+                self.continue_calls = 0
 
-        def wait(self, flag):
-            self.wait_calls.append(flag)
+            def getTime(self):
+                return next(self._times)
 
-        def setContinue(self):
-            self.continue_calls += 1
+            def wait(self, flag):
+                self.wait_calls.append(flag)
 
-    slave.control = Control()
+            def setContinue(self):
+                self.continue_calls += 1
 
-    flags = iter(["INITIAL", "TIMESTEP_BEGIN"])
+        slave.control = Control()
 
-    def fake_get_flag(self, allowed_flags, max_retries, wait_seconds=0.5):
-        return next(flags)
+        flags = iter(["INITIAL", "TIMESTEP_BEGIN"])
 
-    slave.get_flag_with_retries = MethodType(fake_get_flag, slave)
+        def fake_get_flag(self, allowed_flags, max_retries, wait_seconds=0.5):
+            return next(flags)
 
-    moose_time, signal = slave.sync_with_moose(1.0)
+        slave.get_flag_with_retries = MethodType(fake_get_flag, slave)
 
-    assert signal == "TIMESTEP_BEGIN"
-    assert pytest.approx(moose_time, rel=0.0, abs=1e-3) == 1.0005
-    assert slave.control.wait_calls == ["INITIAL"]
-    assert slave.control.continue_calls == 1
+        moose_time, signal = slave.sync_with_moose(1.0)
 
+        self.assertEqual(signal, "TIMESTEP_BEGIN")
+        self.assertAlmostEqual(moose_time, 1.0005, delta=1e-3)
+        self.assertEqual(slave.control.wait_calls, ["INITIAL"])
+        self.assertEqual(slave.control.continue_calls, 1)
 
-def test_ensure_control_listening(monkeypatch):
-    slave = _DummyMoose(instance_name="test", guid="1234")
 
-    class Control:
-        def __init__(self, listening: bool):
-            self._listening = listening
-            self.finalized = False
+        def test_ensure_control_listening(self):
+            slave = _DummyMoose(instance_name="test", guid="1234")
 
-        def isListening(self):
-            return self._listening
+        class Control:
+            def __init__(self, listening: bool):
+                self._listening = listening
+                self.finalized = False
 
-        def finalize(self):
-            self.finalized = True
+            def isListening(self):
+                return self._listening
 
-    slave.control = Control(True)
-    assert slave.ensure_control_listening() is True
-    assert slave.control.finalized is False
+            def finalize(self):
+                self.finalized = True
 
-    slave.control = Control(False)
-    assert slave.ensure_control_listening() is False
-    assert slave.control.finalized is True
+        slave.control = Control(True)
+        self.assertTrue(slave.ensure_control_listening())
+        self.assertFalse(slave.control.finalized)
 
+        slave.control = Control(False)
+        self.assertFalse(slave.ensure_control_listening())
+        self.assertTrue(slave.control.finalized)
 
-def test_get_postprocessor_value(monkeypatch):
-    slave = _DummyMoose(instance_name="test", guid="1234")
+    def test_get_postprocessor_value(self):
+        slave = _DummyMoose(instance_name="test", guid="1234")
 
-    class Control:
-        def __init__(self):
-            self.waited = []
-            self.continue_calls = 0
+        class Control:
+            def __init__(self):
+                self.waited = []
+                self.continue_calls = 0
+                self.finalized = False
 
-        def wait(self, flag):
-            self.waited.append(flag)
+            def wait(self, flag):
+                self.waited.append(flag)
 
-        def getPostprocessor(self, name):
-            return {"temp": 42.0}[name]
+            def getPostprocessor(self, name):
+                return {"temp": 42.0}[name]
 
-        def setContinue(self):
-            self.continue_calls += 1
+            def setContinue(self):
+                self.continue_calls += 1
 
-        def finalize(self):
-            raise AssertionError("should not finalize on success")
+            def finalize(self):
+                self.finalized = True
 
-    slave.control = Control()
+        slave.control = Control()
 
-    def fake_get_flag(self, allowed_flags, max_retries, wait_seconds=0.5):
-        return "READY"
+        def fake_get_flag(self, allowed_flags, max_retries, wait_seconds=0.5):
+            return "READY"
 
-    slave.get_flag_with_retries = MethodType(fake_get_flag, slave)
+        slave.get_flag_with_retries = MethodType(fake_get_flag, slave)
 
-    value = slave.get_postprocessor_value({"READY"}, "temp", 1.0)
+        value = slave.get_postprocessor_value("READY", "temp", 1.0)
 
-    assert value == 42.0
-    assert slave.control.waited == ["READY"]
-    assert slave.control.continue_calls == 1
+        self.assertEqual(value, 42.0)
+        self.assertEqual(slave.control.waited, ["READY"])
+        self.assertEqual(slave.control.continue_calls, 1)
+        self.assertFalse(slave.control.finalized)
 
+    def test_get_postprocessor_value_failure(self):
+        slave = _DummyMoose(instance_name="test", guid="1234")
 
-def test_get_postprocessor_value_failure(monkeypatch):
-    slave = _DummyMoose(instance_name="test", guid="1234")
+        class Control:
+            def __init__(self):
+                self.finalized = False
 
-    class Control:
-        def __init__(self):
-            self.finalized = False
+            def finalize(self):
+                self.finalized = True
 
-        def finalize(self):
-            self.finalized = True
+        slave.control = Control()
 
-    slave.control = Control()
+        def fake_get_flag(self, allowed_flags, max_retries, wait_seconds=0.5):
+            return None
 
-    def fake_get_flag(self, allowed_flags, max_retries, wait_seconds=0.5):
-        return None
+        slave.get_flag_with_retries = MethodType(fake_get_flag, slave)
 
-    slave.get_flag_with_retries = MethodType(fake_get_flag, slave)
+        result = slave.get_postprocessor_value("READY", "temp", 5.0)
 
-    result = slave.get_postprocessor_value({"READY"}, "temp", 5.0)
+        self.assertIsNone(result)
+        self.assertTrue(slave.control.finalized)
 
-    assert result is None
-    assert slave.control.finalized is True
+    def test_get_reporter_value(self):
+        slave = _DummyMoose(instance_name="test", guid="1234")
 
+        class Control:
+            def __init__(self):
+                self.waited = []
+                self.continue_calls = 0
+                self.finalized = False
 
-def test_get_reporter_value(monkeypatch):
-    slave = _DummyMoose(instance_name="test", guid="1234")
+            def wait(self, flag):
+                self.waited.append(flag)
 
-    class Control:
-        def __init__(self):
-            self.waited = []
-            self.continue_calls = 0
+            def getReporterValue(self, name):
+                return {"flux": 3.14}[name]
 
-        def wait(self, flag):
-            self.waited.append(flag)
+            def setContinue(self):
+                self.continue_calls += 1
 
-        def getReporterValue(self, name):
-            return {"flux": 3.14}[name]
+            def finalize(self):
+                self.finalized = True
 
-        def setContinue(self):
-            self.continue_calls += 1
+        slave.control = Control()
 
-        def finalize(self):
-            raise AssertionError("should not finalize on success")
+        def fake_get_flag(self, allowed_flags, max_retries, wait_seconds=0.5):
+            return "READY"
 
-    slave.control = Control()
+        slave.get_flag_with_retries = MethodType(fake_get_flag, slave)
 
-    def fake_get_flag(self, allowed_flags, max_retries, wait_seconds=0.5):
-        return "READY"
+        value = slave.get_reporter_value("READY", "flux", 2.0)
 
-    slave.get_flag_with_retries = MethodType(fake_get_flag, slave)
 
-    value = slave.get_reporter_value({"READY"}, "flux", 2.0)
 
-    assert value == 3.14
-    assert slave.control.waited == ["READY"]
-    assert slave.control.continue_calls == 1
+        self.assertEqual(value, 3.14)
+        self.assertEqual(slave.control.waited, ["READY"])
+        self.assertEqual(slave.control.continue_calls, 1)
+        self.assertFalse(slave.control.finalized)
+
+if __name__ == "__main__":
+    unittest.main()

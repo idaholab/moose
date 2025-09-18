@@ -62,7 +62,7 @@ l = 2
 [Executioner]
   type = Transient
   num_steps = 110
-  dt = 0.1
+  dt = 0.25
 []
 
 [Controls]
