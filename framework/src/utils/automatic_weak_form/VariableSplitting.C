@@ -4,12 +4,69 @@
 #include <algorithm>
 #include <array>
 #include <functional>
+#include <limits>
 #include <queue>
 
 namespace moose
 {
 namespace automatic_weak_form
 {
+
+namespace
+{
+
+std::vector<SplitVariable>
+collectSplitVariables(const std::string & var_name,
+                      unsigned int fe_order,
+                      const std::map<std::string, SplitVariable> & split_vars)
+{
+  std::vector<SplitVariable> result;
+  result.reserve(split_vars.size());
+
+  for (const auto & [name, sv] : split_vars)
+    if (sv.original_variable == var_name && sv.derivative_order > fe_order)
+      result.push_back(sv);
+
+  std::sort(result.begin(), result.end(), [](const SplitVariable & a, const SplitVariable & b) {
+    if (a.derivative_order == b.derivative_order)
+      return a.name < b.name;
+    return a.derivative_order < b.derivative_order;
+  });
+
+  return result;
+}
+
+unsigned int
+shapeComponentCount(const Shape & shape)
+{
+  if (std::holds_alternative<ScalarShape>(shape))
+    return 1u;
+
+  if (const auto * vec = std::get_if<VectorShape>(&shape))
+    return vec->dim;
+
+  if (const auto * tensor = std::get_if<TensorShape>(&shape))
+    return tensor->dim * tensor->dim;
+
+  if (const auto * rank3 = std::get_if<RankThreeShape>(&shape))
+    return rank3->dim * rank3->dim * rank3->dim;
+
+  if (const auto * rank4 = std::get_if<RankFourShape>(&shape))
+    return rank4->dim1 * rank4->dim2;
+
+  return 1u;
+}
+
+unsigned int
+computePlanDofs(const HigherOrderSplittingStrategy::SplitPlan & plan)
+{
+  unsigned int total = 1u; // primary variable
+  for (const auto & sv : plan.variables)
+    total += shapeComponentCount(sv.shape);
+  return total;
+}
+
+} // namespace
 
 std::vector<VariableSplittingAnalyzer::SplitRequirement>
 VariableSplittingAnalyzer::analyzeExpression(const NodePtr & expr)
@@ -709,127 +766,131 @@ HigherOrderSplittingStrategy::computeOptimalSplitting(const NodePtr & energy_den
                                                        unsigned int max_derivative_order,
                                                        unsigned int fe_order)
 {
-  (void)energy_density;
-  (void)fe_order;
-  std::vector<SplitPlan> candidates;
+  VariableSplittingAnalyzer analyzer(fe_order);
+  auto split_vars = analyzer.generateSplitVariables(energy_density);
 
-  candidates.push_back(createRecursiveSplitting(primary_var, max_derivative_order));
-  candidates.push_back(createDirectSplitting(primary_var, max_derivative_order));
-
-  if (max_derivative_order > 2)
-    candidates.push_back(createMixedSplitting(primary_var, max_derivative_order));
-
-  SplitPlan best_plan = candidates[0];
-  Real best_cost = estimateComputationalCost(best_plan);
-
-  for (size_t i = 1; i < candidates.size(); ++i)
+  auto relevant_splits = collectSplitVariables(primary_var, fe_order, split_vars);
+  if (relevant_splits.empty() || max_derivative_order <= fe_order)
   {
-    Real cost = estimateComputationalCost(candidates[i]);
+    SplitPlan no_split;
+    no_split.primary_variable = primary_var;
+    no_split.strategy = Strategy::DIRECT;
+    no_split.total_dofs = 1u;
+    no_split.bandwidth = 1u;
+    no_split.estimated_condition_number = estimateConditionNumber(no_split);
+    return no_split;
+  }
+
+  std::vector<SplitPlan> candidates;
+  candidates.push_back(createRecursiveSplitting(primary_var, split_vars, fe_order));
+  candidates.push_back(createDirectSplitting(primary_var, split_vars, fe_order));
+
+  if (relevant_splits.size() > 1)
+    candidates.push_back(createMixedSplitting(primary_var, split_vars, fe_order));
+
+  SplitPlan best_plan;
+  Real best_cost = std::numeric_limits<Real>::max();
+
+  for (auto & candidate : candidates)
+  {
+    optimizeBandwidth(candidate);
+    Real cost = estimateComputationalCost(candidate);
     if (cost < best_cost)
     {
       best_cost = cost;
-      best_plan = candidates[i];
+      best_plan = candidate;
     }
   }
 
-  best_plan.strategy = Strategy::OPTIMAL;
-  optimizeBandwidth(best_plan);
+  if (best_plan.bandwidth == 0u)
+  {
+    best_plan.bandwidth = 1u;
+    best_plan.total_dofs = computePlanDofs(best_plan);
+    best_plan.estimated_condition_number = estimateConditionNumber(best_plan);
+  }
 
   return best_plan;
 }
 
 HigherOrderSplittingStrategy::SplitPlan
 HigherOrderSplittingStrategy::createRecursiveSplitting(const std::string & var_name,
-                                                        unsigned int max_order)
+                                                        const std::map<std::string, SplitVariable> & split_vars,
+                                                        unsigned int fe_order)
 {
   SplitPlan plan;
   plan.strategy = Strategy::RECURSIVE;
+  plan.primary_variable = var_name;
+  plan.total_dofs = 1u;
+  plan.bandwidth = 1u;
+  plan.estimated_condition_number = 0.0;
 
-  std::string current_var = var_name;
+  auto relevant = collectSplitVariables(var_name, fe_order, split_vars);
+  plan.variables = relevant;
 
-  for (unsigned int order = 1; order <= max_order; ++order)
+  std::string previous = var_name;
+  for (const auto & sv : plan.variables)
   {
-    SplitVariable sv;
-    sv.name = var_name + "_d" + std::to_string(order);
-    sv.original_variable = current_var;
-    sv.derivative_order = 1;
-    sv.is_primary = (order == 1);
-
-    plan.variables.push_back(sv);
-
-    if (order > 1)
-      plan.dependencies.push_back({sv.name, current_var});
-
-    current_var = sv.name;
+    plan.dependencies.emplace_back(sv.name, previous);
+    previous = sv.name;
   }
-
-  plan.total_dofs = plan.variables.size() + 1;
 
   return plan;
 }
 
 HigherOrderSplittingStrategy::SplitPlan
 HigherOrderSplittingStrategy::createDirectSplitting(const std::string & var_name,
-                                                     unsigned int max_order)
+                                                     const std::map<std::string, SplitVariable> & split_vars,
+                                                     unsigned int fe_order)
 {
   SplitPlan plan;
   plan.strategy = Strategy::DIRECT;
+  plan.primary_variable = var_name;
+  plan.total_dofs = 1u;
+  plan.bandwidth = 1u;
+  plan.estimated_condition_number = 0.0;
 
-  for (unsigned int order = 1; order <= max_order; ++order)
-  {
-    SplitVariable sv;
-    sv.name = var_name + "_d" + std::to_string(order);
-    sv.original_variable = var_name;
-    sv.derivative_order = order;
-    sv.is_primary = false;
+  auto relevant = collectSplitVariables(var_name, fe_order, split_vars);
+  plan.variables = relevant;
 
-    plan.variables.push_back(sv);
-    plan.dependencies.push_back({sv.name, var_name});
-  }
-
-  plan.total_dofs = plan.variables.size() + 1;
+  for (const auto & sv : plan.variables)
+    plan.dependencies.emplace_back(sv.name, var_name);
 
   return plan;
 }
 
 HigherOrderSplittingStrategy::SplitPlan
 HigherOrderSplittingStrategy::createMixedSplitting(const std::string & var_name,
-                                                   unsigned int max_order,
+                                                   const std::map<std::string, SplitVariable> & split_vars,
+                                                   unsigned int fe_order,
                                                    unsigned int threshold)
 {
   SplitPlan plan;
   plan.strategy = Strategy::MIXED;
+  plan.primary_variable = var_name;
+  plan.total_dofs = 1u;
+  plan.bandwidth = 1u;
+  plan.estimated_condition_number = 0.0;
+
+  auto relevant = collectSplitVariables(var_name, fe_order, split_vars);
+  plan.variables = relevant;
 
   if (threshold == 0)
     threshold = 1;
 
-  std::string current_var = var_name;
+  unsigned int recursive_count = std::min<unsigned int>(threshold, plan.variables.size());
+  std::string previous = var_name;
 
-  for (unsigned int order = 1; order <= max_order; ++order)
+  for (unsigned int i = 0; i < plan.variables.size(); ++i)
   {
-    SplitVariable sv;
-    sv.name = var_name + "_d" + std::to_string(order);
-    sv.is_primary = (order == 1);
-
-    if (order <= threshold)
+    const auto & sv = plan.variables[i];
+    if (i < recursive_count)
     {
-      sv.original_variable = current_var;
-      sv.derivative_order = 1;
-      plan.variables.push_back(sv);
-
-      plan.dependencies.push_back({sv.name, current_var});
-      current_var = sv.name;
+      plan.dependencies.emplace_back(sv.name, previous);
+      previous = sv.name;
     }
     else
-    {
-      sv.original_variable = var_name;
-      sv.derivative_order = order;
-      plan.variables.push_back(sv);
-      plan.dependencies.push_back({sv.name, var_name});
-    }
+      plan.dependencies.emplace_back(sv.name, var_name);
   }
-
-  plan.total_dofs = plan.variables.size() + 1;
 
   return plan;
 }
@@ -851,9 +912,23 @@ HigherOrderSplittingStrategy::estimateComputationalCost(const SplitPlan & plan)
 void
 HigherOrderSplittingStrategy::optimizeBandwidth(SplitPlan & plan)
 {
+  plan.total_dofs = computePlanDofs(plan);
+
+  if (plan.variables.empty())
+  {
+    plan.bandwidth = 1u;
+    plan.estimated_condition_number = estimateConditionNumber(plan);
+    return;
+  }
+
   auto connectivity = buildConnectivityMatrix(plan);
   auto ordering = performRCMOrdering(connectivity);
   plan.bandwidth = computeBandwidth(plan, ordering);
+
+  if (plan.bandwidth == 0u)
+    plan.bandwidth = 1u;
+
+  plan.estimated_condition_number = estimateConditionNumber(plan);
 }
 
 unsigned int
@@ -928,6 +1003,8 @@ std::vector<unsigned int>
 HigherOrderSplittingStrategy::performRCMOrdering(const std::vector<std::vector<bool>> & connectivity)
 {
   unsigned int n = connectivity.size();
+  if (n == 0)
+    return {};
   std::vector<unsigned int> ordering(n);
   std::vector<bool> visited(n, false);
   std::vector<unsigned int> degree(n);
@@ -937,39 +1014,55 @@ HigherOrderSplittingStrategy::performRCMOrdering(const std::vector<std::vector<b
     degree[i] = std::count(connectivity[i].begin(), connectivity[i].end(), true);
   }
 
-  auto min_it = std::min_element(degree.begin(), degree.end());
-  unsigned int start = std::distance(degree.begin(), min_it);
-
-  std::queue<unsigned int> q;
-  q.push(start);
-  visited[start] = true;
-
   std::vector<unsigned int> level_order;
+  level_order.reserve(n);
 
-  while (!q.empty())
-  {
-    unsigned int current = q.front();
-    q.pop();
-    level_order.push_back(current);
-
-    std::vector<std::pair<unsigned int, unsigned int>> neighbors;
+  auto pick_start = [&]() -> unsigned int {
+    unsigned int best = n;
+    unsigned int best_degree = std::numeric_limits<unsigned int>::max();
     for (unsigned int i = 0; i < n; ++i)
-    {
-      if (connectivity[current][i] && !visited[i])
+      if (!visited[i] && degree[i] < best_degree)
       {
-        neighbors.push_back({degree[i], i});
-        visited[i] = true;
+        best = i;
+        best_degree = degree[i];
       }
+    return best;
+  };
+
+  while (true)
+  {
+    unsigned int start = pick_start();
+    if (start == n)
+      break;
+
+    std::queue<unsigned int> q;
+    q.push(start);
+    visited[start] = true;
+
+    while (!q.empty())
+    {
+      unsigned int current = q.front();
+      q.pop();
+      level_order.push_back(current);
+
+      std::vector<std::pair<unsigned int, unsigned int>> neighbors;
+      for (unsigned int i = 0; i < n; ++i)
+        if (connectivity[current][i] && !visited[i])
+        {
+          neighbors.emplace_back(degree[i], i);
+          visited[i] = true;
+        }
+
+      std::sort(neighbors.begin(), neighbors.end());
+
+      for (const auto & [deg, idx] : neighbors)
+        q.push(idx);
     }
-
-    std::sort(neighbors.begin(), neighbors.end());
-
-    for (const auto & [d, neighbor] : neighbors)
-      q.push(neighbor);
   }
 
-  for (unsigned int i = 0; i < n; ++i)
-    ordering[i] = level_order[n - 1 - i];
+  std::reverse(level_order.begin(), level_order.end());
+  for (unsigned int i = 0; i < level_order.size(); ++i)
+    ordering[i] = level_order[i];
 
   return ordering;
 }

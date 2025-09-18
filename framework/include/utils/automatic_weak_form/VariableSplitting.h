@@ -215,6 +215,7 @@ public:
   
   struct SplitPlan
   {
+    std::string primary_variable;
     std::vector<SplitVariable> variables;
     std::vector<std::pair<std::string, std::string>> dependencies;
     Strategy strategy;
@@ -229,13 +230,16 @@ public:
                                      unsigned int fe_order);
   
   SplitPlan createRecursiveSplitting(const std::string & var_name,
-                                      unsigned int max_order);
+                                      const std::map<std::string, SplitVariable> & split_vars,
+                                      unsigned int fe_order);
   
   SplitPlan createDirectSplitting(const std::string & var_name,
-                                   unsigned int max_order);
+                                   const std::map<std::string, SplitVariable> & split_vars,
+                                   unsigned int fe_order);
   
   SplitPlan createMixedSplitting(const std::string & var_name,
-                                  unsigned int max_order,
+                                  const std::map<std::string, SplitVariable> & split_vars,
+                                  unsigned int fe_order,
                                   unsigned int threshold = 2);
   
   Real estimateComputationalCost(const SplitPlan & plan);
