@@ -240,7 +240,7 @@ capabilities_LDFLAGS      := $(DYNAMIC_LOOKUP)
 
 capabilities $(capabilities_LIB) : $(capabilities_srcfiles)
 	@echo "Building and linking $(capabilities_LIB)..."
-	@bash -c '(cd "$(CAPABILITIES_DIR)" && $(libmesh_CXX) -I$(LIBMESH_DIR)/include -std=c++17 -w -fPIC -lstdc++ -shared $(capabilities_srcfiles) $(capabilities_COMPILEFLAGS) $(capabilities_LDFLAGS) $(libmesh_LIBS) $(LDFLAGS) $(libmesh_LDFLAGS) -o $(capabilities_LIB))'
+	@bash -c '(cd "$(CAPABILITIES_DIR)" && $(libmesh_CXX) -DMOOSESTRINGUTILS_NO_LIBMESH -std=c++17 -w -fPIC -lstdc++ -shared $(capabilities_srcfiles) $(capabilities_COMPILEFLAGS) $(capabilities_LDFLAGS) $(LDFLAGS) -o $(capabilities_LIB))'
 
 #
 # gtest
