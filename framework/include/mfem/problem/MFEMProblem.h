@@ -115,6 +115,19 @@ public:
                  InputParameters & parameters) override;
 
   /**
+   * Adds a real or imaginary component kernel to the parent MFEMComplexKernel.
+   */
+  void addComplexComponentToKernel(const std::string & kernel_name,
+                                   const std::string & name,
+                                   InputParameters & parameters);
+  /**
+   * Adds a real or imaginary component BC to the parent MFEMComplexIntegratedBC.
+   */
+  void addComplexComponentToBC(const std::string & kernel_name,
+                               const std::string & name,
+                               InputParameters & parameters);
+
+  /**
    * Override of ExternalProblem::addAuxKernel. Uses ExternalProblem::addAuxKernel to create a
    * MFEMGeneralUserObject representing the kernel in MOOSE, and creates corresponding MFEM kernel
    * to be used in the MFEM solve.
@@ -122,6 +135,13 @@ public:
   void addAuxKernel(const std::string & kernel_name,
                     const std::string & name,
                     InputParameters & parameters) override;
+
+  /**
+   * Creates an auxiliary boundary condition which is one component of a complex boundary condition.
+   */
+  void addAuxBoundaryCondition(const std::string & bc_name,
+                               const std::string & name,
+                               InputParameters & parameters);
 
   /**
    * Override of ExternalProblem::addFunction. Uses ExternalProblem::addFunction to create a
