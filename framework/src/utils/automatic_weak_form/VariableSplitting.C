@@ -774,13 +774,14 @@ MixedFormulationGenerator::requiresMixedFormulation(const NodePtr & energy_densi
 }
 
 HigherOrderSplittingStrategy::SplitPlan
-HigherOrderSplittingStrategy::computeOptimalSplitting(const NodePtr & energy_density,
-                                                       const std::string & primary_var,
-                                                       unsigned int max_derivative_order,
-                                                       unsigned int fe_order)
+HigherOrderSplittingStrategy::computeOptimalSplitting(
+    const NodePtr & energy_density,
+    const std::string & primary_var,
+    unsigned int max_derivative_order,
+    unsigned int fe_order,
+    const std::map<std::string, SplitVariable> & split_vars)
 {
-  VariableSplittingAnalyzer analyzer(fe_order);
-  auto split_vars = analyzer.generateSplitVariables(energy_density);
+  (void)energy_density;
 
   auto relevant_splits = collectSplitVariables(primary_var, fe_order, split_vars);
   if (relevant_splits.empty() || max_derivative_order <= fe_order)

@@ -576,7 +576,11 @@ AutomaticWeakFormAction::setupVariableSplitting()
       continue;
 
     auto plan = strategy.computeOptimalSplitting(
-        _energy_functional, req.variable_name, req.max_derivative_order, _max_fe_order);
+        _energy_functional,
+        req.variable_name,
+        req.max_derivative_order,
+        _max_fe_order,
+        generated_splits);
 
     if (plan.variables.empty())
       continue;

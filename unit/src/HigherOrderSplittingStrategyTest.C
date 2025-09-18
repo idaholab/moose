@@ -3,6 +3,8 @@
 
 #include "gtest/gtest.h"
 
+#include <algorithm>
+
 using namespace moose::automatic_weak_form;
 
 namespace
@@ -110,4 +112,33 @@ TEST(HigherOrderSplittingStrategyTest, MixedPlanBlendsChainAndDirect)
   EXPECT_EQ(plan.total_dofs, expectedDofs(plan));
   EXPECT_EQ(plan.bandwidth, 2u);
   EXPECT_EQ(plan.strategy, HigherOrderSplittingStrategy::Strategy::MIXED);
+}
+
+TEST(HigherOrderSplittingStrategyTest, ComputeOptimalUsesProvidedSplits)
+{
+  auto analyzer = makeAnalyzer();
+  NodePtr u = fieldVariable("u");
+  NodePtr energy = laplacian(laplacian(u));
+
+  auto split_map = analyzer.generateSplitVariables(energy);
+  auto requirements = analyzer.analyzeExpression(energy);
+
+  auto req_it = std::find_if(requirements.begin(), requirements.end(), [](const auto & req) {
+    return req.variable_name == "u";
+  });
+  ASSERT_NE(req_it, requirements.end());
+
+  HigherOrderSplittingStrategy strategy;
+  auto plan = strategy.computeOptimalSplitting(
+      energy, "u", req_it->max_derivative_order, 1, split_map);
+
+  ASSERT_EQ(plan.variables.size(), 3u);
+  EXPECT_EQ(plan.strategy, HigherOrderSplittingStrategy::Strategy::DIRECT);
+
+  std::vector<std::pair<std::string, std::string>> expected_deps = {
+      {"u_d2", "u"}, {"u_d3", "u"}, {"u_d4", "u"}};
+  EXPECT_EQ(plan.dependencies, expected_deps);
+
+  EXPECT_EQ(plan.bandwidth, 1u);
+  EXPECT_EQ(plan.total_dofs, expectedDofs(plan));
 }

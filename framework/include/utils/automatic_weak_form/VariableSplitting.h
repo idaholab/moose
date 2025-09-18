@@ -227,7 +227,8 @@ public:
   SplitPlan computeOptimalSplitting(const NodePtr & energy_density,
                                      const std::string & primary_var,
                                      unsigned int max_derivative_order,
-                                     unsigned int fe_order);
+                                     unsigned int fe_order,
+                                     const std::map<std::string, SplitVariable> & split_vars);
   
   SplitPlan createRecursiveSplitting(const std::string & var_name,
                                       const std::map<std::string, SplitVariable> & split_vars,
