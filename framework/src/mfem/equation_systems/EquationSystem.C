@@ -351,23 +351,23 @@ EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
     ApplyEssVals(*(_var_ess_constraints.at(i)), _ess_tdof_lists.at(i), _trueBlockSol.GetBlock(i));
     _gfuncs->Get(trial_var_name)->Distribute(&(_trueBlockSol.GetBlock(i)));
   }
-  UpdateJacobian();
-  const_cast<EquationSystem*>(this)->FormLinearSystem(_jacobian,  _trueBlockSol, _trueBlockRHS);
-  //_jacobian->Mult(_trueBlockSol, residual);
-  residual = 0.0;
 
-  const_cast<EquationSystem*>(this)->CopyVec(residual, _BlockResidual);
-  
+  UpdateJacobian();
+
+  _BlockResidual=0.0;
+
   for (int i = 0; i < _test_var_names.size(); i++)
   {
     auto & test_var_name = _test_var_names.at(i);
     auto lf = _lfs.GetShared(test_var_name);
     lf->Assemble();
     lf->ParallelAssemble(_BlockResidual.GetBlock(i));
-    _BlockResidual.GetBlock(i).SetSubVector(_ess_tdof_lists.at(i), 0.0);
   }
-
+  const_cast<EquationSystem*>(this)->FormLinearSystem(_jacobian,  _trueBlockSol, _BlockResidual);
   const_cast<EquationSystem*>(this)->CopyVec(_BlockResidual, residual);
+
+  residual *= -1.0;
+  _jacobian->AddMult(_trueBlockSol, residual);
 
   sol.HostRead();
   residual.HostRead();
@@ -532,6 +532,7 @@ EquationSystem::BuildEquationSystem(Moose::MFEM::GridFunctions & gridfunctions, 
   _block_true_offsets = &btoffsets;
   _trueBlockRHS.Update(*_block_true_offsets);
   _trueBlockSol.Update(*_block_true_offsets);
+  _BlockResidual.Update(*_block_true_offsets);
   BuildBilinearForms();
   BuildMixedBilinearForms();
   BuildLinearForms();
