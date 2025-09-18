@@ -96,7 +96,7 @@ The shorthand syntax effectively creates a [`Exodus`](Exodus.md) output where th
 
 ## Input: Diffusion Problem
 
-!listing moose/step2_diffusion.i diff=ictp/step1-3_concentric_circle_no_void.i
+!listing moose/step2_diffusion.i diff=moose/step1-3_concentric_circle_no_void.i
 
 !---
 

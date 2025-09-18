@@ -135,7 +135,7 @@ The grey elements represent void (subdomain `1`), the red elements represent the
 
 For the purposes of this tutorial, we will consider no net heat transfer within or across the void region. Thus, let's remove it from the mesh:
 
-!listing moose/step1-3_concentric_circle_no_void.i diff=ictp/step1-2_concentric_circle.i
+!listing moose/step1-3_concentric_circle_no_void.i diff=moose/step1-2_concentric_circle.i
 
 !---
 
