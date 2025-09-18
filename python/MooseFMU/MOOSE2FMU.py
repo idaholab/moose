@@ -51,6 +51,7 @@ class Moose2FMU(Fmi2Slave):
         self.server_name: str = server_name
         self.max_retries: int = max_retries
         self.dt_tolerance: Real = dt_tolerance
+        self.moose_time: Real = 0.0
 
         # Register tunable parameters
         self.register_variable(String("flag", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
@@ -61,6 +62,10 @@ class Moose2FMU(Fmi2Slave):
         self.register_variable(String("server_name", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
         self.register_variable(Integer("max_retries", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
         self.register_variable(Real("dt_tolerance", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
+
+        # Register outputs
+        self.register_variable(Real("moose_time", causality=Fmi2Causality.output, variability=Fmi2Variability.continuous))
+
 
         # Setup MooseControl
         if self.moose_mpi:
@@ -78,12 +83,6 @@ class Moose2FMU(Fmi2Slave):
 
         self.control = MooseControl(moose_command=self.cmd, moose_control_name=self.server_name)
         self.control.initialize()
-
-        return True
-
-    def setup_experiment(self, start_time: float, stop_time: Optional[float], step_size: Optional[float]):
-        self.sim_start_time = start_time
-        self.sim_stop_time = stop_time
 
         return True
 
@@ -149,6 +148,9 @@ class Moose2FMU(Fmi2Slave):
             if abs(moose_time - current_time) < self.dt_tolerance:
                 self.logger.debug(f"The current time is {current_time}, the moose time is {moose_time}")
                 self.logger.info("Successfully sync MOOSE time with FMU step")
+
+                self.moose_time = moose_time
+
                 return moose_time, signal
 
             self._skip_flag(flag)

@@ -19,6 +19,7 @@ def simulate_moose_fmu(moose_filename, t0, t1, dt):
         moose_filename,
         start_time=t0,
         stop_time=t1,
+        step_size =dt,
         start_values={
         'flag':             'INITIAL TIMESTEP_END',
         'moose_executable': '../../../moose_test-opt',
@@ -186,11 +187,11 @@ def moose_fmu_step_by_step(
 
 def main():
 
-    t0, t1, dt = 0, 3.0, 0.5
+    t0, t1, dt = 0, 2.0, 0.5
     moose_filename = 'MooseTest.fmu'
     result = simulate_moose_fmu(moose_filename, t0, t1, dt)
-    logger.info("Start the second moose run after 10s")
-    time.sleep(10)
+    logger.info("Start the second moose run after 2s")
+    time.sleep(2)
     result = moose_fmu_step_by_step(moose_filename, t0, t1, dt)
 
     fmu_time  = result["time"]
