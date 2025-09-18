@@ -53,6 +53,11 @@ libmesh_LIBS     := $(shell METHOD=$(METHOD) $(libmesh_config) --libs)
 libmesh_HOST     := $(shell METHOD=$(METHOD) $(libmesh_config) --host)
 libmesh_LDFLAGS  := $(shell METHOD=$(METHOD) $(libmesh_config) --ldflags)
 
+# In the event that we're using something like mpicxx, query it for
+# the underlying compiler (like mpicxx -show); otherwise, fallback to
+# whatever libmesh_CXX is
+libmesh_UNDERLYING_CXX := $(shell ($(libmesh_CXX) -show 2>/dev/null || echo "$(libmesh_CXX)") | awk '{print $$1}')
+
 # You can completely disable timing by setting MOOSE_NO_PERF_GRAPH in your environment
 ifneq (x$(MOOSE_NO_PERF_GRAPH), x)
   libmesh_CXXFLAGS += -DMOOSE_NO_PERF_GRAPH
