@@ -21,12 +21,12 @@ MeshCutUserObjectBase::validParams()
   InputParameters params = GeometricCutUserObject::validParams();
   params.addDeprecatedParam<MeshFileName>(
       "mesh_file",
-      "Mesh file for the XFEM geometric cut; currently only the Exodus type is supported.",
+      "Mesh file for the XFEM geometric cut.",
       "This parameter is deprecated in favor of reading in the cuttermesh from the mesh system "
       "using 'mesh_generator_name'.");
   params.addParam<std::string>("mesh_generator_name",
                                "Mesh generator for the XFEM geometric cutter.");
-  params.addClassDescription("Creates a UserObject base class for a mesh cutter in XFEM.");
+  params.addClassDescription("Base class for mesh-based cutters used with XFEM.");
   return params;
 }
 
