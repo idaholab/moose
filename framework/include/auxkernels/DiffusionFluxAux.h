@@ -41,4 +41,7 @@ protected:
 
   /// normals at quadrature points
   const MooseArray<Point> & _normals;
+
+  /// Pointer to the variable as a finite volume variable (nullptr if not FV)
+  const MooseVariableFVReal * const _fv_var;
 };
