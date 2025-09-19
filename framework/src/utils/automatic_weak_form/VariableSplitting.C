@@ -154,28 +154,21 @@ VariableSplittingAnalyzer::generateSplitVariables(const NodePtr & expr)
 
     const Shape original_shape = findVariableShape(expr, var_name);
 
-    NodePtr previous_variable = fieldVariable(var_name, original_shape);
-
     for (unsigned int order = 1; order <= max_order; ++order)
     {
-      auto ops_it = derivative_ops.find(var_name);
-      std::set<NodeType> ops;
-      if (ops_it != derivative_ops.end())
-      {
-        auto order_it = ops_it->second.find(order);
-        if (order_it != ops_it->second.end())
-          ops = order_it->second;
-      }
-
-      NodeType op = chooseOperator(ops);
-
-      NodePtr operand = (order == 1) ? fieldVariable(var_name, original_shape) : previous_variable;
-
-      NodePtr definition = applyOperator(op, operand);
+      NodePtr definition = buildDerivativeExpression(var_name, order, original_shape, derivative_ops);
 
       if (!definition)
         mooseError("Unable to build definition for split variable order ", order,
                    " of variable ", var_name);
+
+      if (!split_vars.empty())
+      {
+        ExpressionTransformer transformer(split_vars, _dim);
+        NodePtr transformed = transformer.transform(definition);
+        if (transformed)
+          definition = transformed;
+      }
 
       SplitVariable sv;
       sv.name = generateSplitVariableName(var_name, order);
@@ -188,8 +181,6 @@ VariableSplittingAnalyzer::generateSplitVariables(const NodePtr & expr)
 
       auto [iter, inserted] = split_vars.emplace(sv.name, std::move(sv));
       (void)inserted;
-
-      previous_variable = fieldVariable(iter->second.name, iter->second.shape);
     }
   }
 

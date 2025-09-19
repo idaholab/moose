@@ -41,14 +41,20 @@ TEST(WeakFormGeneratorSplitTest, LaplacianEnergyMatchesBaseline)
   ASSERT_TRUE(split_strong);
 
   std::string substituted = split_strong->toString();
-  for (const auto & [name, def] : split_defs)
+  bool replaced = true;
+  while (replaced)
   {
-    const std::string def_str = def->toString();
-    std::string::size_type pos = 0;
-    while ((pos = substituted.find(name, pos)) != std::string::npos)
+    replaced = false;
+    for (const auto & [name, def] : split_defs)
     {
-      substituted.replace(pos, name.size(), def_str);
-      pos += def_str.size();
+      const std::string def_str = def->toString();
+      std::string::size_type pos = 0;
+      while ((pos = substituted.find(name, pos)) != std::string::npos)
+      {
+        substituted.replace(pos, name.size(), def_str);
+        pos += def_str.size();
+        replaced = true;
+      }
     }
   }
 
