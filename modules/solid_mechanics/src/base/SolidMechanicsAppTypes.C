@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#pragma once
-#include "Moose.h"
+#include "SolidMechanicsAppTypes.h"
+#include "ExecFlagRegistry.h"
 
-// XFEM typedefs
-typedef unsigned int CutSubdomainID;
+const ExecFlagType EXEC_XFEM_MARK = registerDefaultExecFlag("XFEM_MARK");

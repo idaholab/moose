@@ -7,5 +7,9 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "XFEMAppTypes.h"
-#include "ExecFlagRegistry.h"
+#pragma once
+#include "Moose.h"
+
+/// Exec flag used to execute MooseObjects while elements are being
+/// marked for cutting by XFEM
+extern const ExecFlagType EXEC_XFEM_MARK;
