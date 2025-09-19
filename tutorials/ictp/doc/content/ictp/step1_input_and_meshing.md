@@ -25,7 +25,7 @@ A listing of all syntax can be found [here](syntax/index.md).
 
 Start with the generation of a 2D uniform grid:
 
-!listing moose/step1-1_meshing_basic.i
+!listing ictp/inputs/step1-1_meshing_basic.i
 
 The above defines a [`GeneratedMeshGenerator`](GeneratedMeshGenerator.md) named `gmg` with the parameters:
 
@@ -116,7 +116,7 @@ Let's generate a mesh that represents represents a fuel pin surrounded by water 
 
 ## Concentric Circle Mesh
 
-!listing moose/step1-2_concentric_circle.i
+!listing ictp/inputs/step1-2_concentric_circle.i
 
 !--
 
@@ -167,7 +167,7 @@ For the tasks that follow, we will utilize the:
 
 ## Input: Fuel Mesh
 
-!listing moose/step1-3_fuel_pin.i
+!listing ictp/inputs/step1-3_fuel_pin.i
 
 !--
 
@@ -200,7 +200,7 @@ The grey elements represent the fuel (block `fuel`), and the red elements repres
 
 ## Input: Fluid Mesh
 
-!listing moose/step1-4_fluid.i
+!listing ictp/inputs/step1-4_fluid.i
 
 !---
 

@@ -5,11 +5,6 @@ Content:
             - ictp/**
             - index.md
 
-    ictp_input:
-        root_dir: ${MOOSE_DIR}
-        content:
-            - moose/*.i
-
     regular_workshop:
         root_dir: ${MOOSE_DIR}/tutorials/darcy_thermo_mech/doc/content
         content:

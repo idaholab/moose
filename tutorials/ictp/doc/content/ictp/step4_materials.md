@@ -33,7 +33,7 @@ This will require two changes:
 
 ## Input: Spatially-Dependent Diffusion
 
-!listing moose/step4_diffusion_materials.i diff=moose/step2-1_diffusion.i
+!listing ictp/inputs/step4_diffusion_materials.i diff=ictp/inputs/step2-1_diffusion.i
 
 !---
 

@@ -52,7 +52,7 @@ We will go through each of these individually.
 
 Define the variable $u$:
 
-!listing moose/step2-1_diffusion.i block=Variables
+!listing ictp/inputs/step2-1_diffusion.i block=Variables
 
 Variables can be thought of as the equation(s) you are trying to solve.
 
@@ -64,7 +64,7 @@ The default parameters designate first-order linear Lagrange shape functions, th
 
 Define a [`Diffusion`](Diffusion.md) kernel on the variable `u`:
 
-!listing moose/step2-1_diffusion.i block=Kernels
+!listing ictp/inputs/step2-1_diffusion.i block=Kernels
 
 A Kernel represents an object that contributes to the residual and the Jacobian matrix. Multiple can be used and they can also be coupled to one another to add nonlinearity.
 
@@ -76,7 +76,7 @@ Kernels can be "block restricted" (applied to a subset of the physical mesh) via
 
 Define two [`DirichletBC`](DirichletBC.md) boundary conditions on the variable `u`; one on the boundary `inner` with a value of `0` and one on the boundary `outer` with a value of `1`:
 
-!listing moose/step2-1_diffusion.i block=BCs
+!listing ictp/inputs/step2-1_diffusion.i block=BCs
 
 !--
 
@@ -84,7 +84,7 @@ Define two [`DirichletBC`](DirichletBC.md) boundary conditions on the variable `
 
 Define a [`Steady`](Steady.md) executioner:
 
-!listing moose/step2-1_diffusion.i block=Executioner
+!listing ictp/inputs/step2-1_diffusion.i block=Executioner
 
 The other common executioner is the [`Transient`](Transient.md) executioner, which enables transient simulation.
 
@@ -94,7 +94,7 @@ The other common executioner is the [`Transient`](Transient.md) executioner, whi
 
 Use the shorthand `Outputs/exodus` syntax for enabling Exodus output:
 
-!listing moose/step2-1_diffusion.i block=Outputs
+!listing ictp/inputs/step2-1_diffusion.i block=Outputs
 
 The shorthand syntax effectively creates a [`Exodus`](Exodus.md) output where the output files are created with the name `<input_file_name>_out.e`.
 
@@ -104,7 +104,7 @@ Other common shorthand syntax are `Outputs/csv` for CSV output and `Outputs/neme
 
 ## Input: Diffusion Problem
 
-!listing moose/step2-1_diffusion.i
+!listing ictp/inputs/step2-1_diffusion.i
 
 !---
 
@@ -132,7 +132,7 @@ We will remove the [`DirichletBC`](DirichletBC.md) named `outer_dirichlet` and a
 
 ## Input: Diffusion with Volumetric Source
 
-!listing moose/step2-2_diffusion_volumetric_source.i diff=moose/step2-1_diffusion.i
+!listing ictp/inputs/step2-2_diffusion_volumetric_source.i diff=ictp/inputs/step2-1_diffusion.i
 
 !---
 
