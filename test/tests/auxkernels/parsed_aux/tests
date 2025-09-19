@@ -41,6 +41,13 @@
     issues = '#21244'
     requirement = "The system shall be capable of computing values from a functor."
   []
+  [boundary_functor_test]
+    type = 'CSVDiff'
+    input = 'parsed_aux_boundary_test.i'
+    csvdiff = 'parsed_aux_boundary_test_out_sampler_left_0001.csv parsed_aux_boundary_test_out_sampler_right_0001.csv'
+    issues = '#31566'
+    requirement = "The system shall be capable of computing values from a functor using the boundary arguments when executing the auxkernel near a boundary."
+  []
   [errors]
     issues = '#21244'
     requirement = 'The system shall report an error if'
