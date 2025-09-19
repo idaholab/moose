@@ -147,8 +147,13 @@ FixedPointSolve::validParams()
 
 FixedPointSolve::FixedPointSolve(Executioner & ex)
   : SolveObject(ex),
-    _has_fixed_point_its(getParam<unsigned int>("fixed_point_max_its") > 1 ||
-                         isParamSetByUser("multiapp_fixed_point_convergence")),
+    _has_fixed_point_its(
+        getParam<unsigned int>("fixed_point_max_its") > 1 ||
+        isParamSetByUser("multiapp_fixed_point_convergence") ||
+        getParam<Real>("relaxation_factor") != 1 ||
+        getParam<unsigned int>("fixed_point_min_its") > 1 ||
+        getParam<std::vector<std::string>>("transformed_variables").size() ||
+        getParam<std::vector<PostprocessorName>>("transformed_postprocessors").size()),
     _relax_factor(getParam<Real>("relaxation_factor")),
     _transformed_vars(getParam<std::vector<std::string>>("transformed_variables")),
     _transformed_pps(getParam<std::vector<PostprocessorName>>("transformed_postprocessors")),
