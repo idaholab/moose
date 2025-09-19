@@ -29,6 +29,8 @@ SteffensenSolve::SteffensenSolve(Executioner & ex) : FixedPointSolve(ex) {}
 void
 SteffensenSolve::allocateStorage(const bool primary)
 {
+  findTransformedSystem(primary);
+
   TagID fxn_m1_tagid;
   TagID xn_m1_tagid;
   const std::vector<PostprocessorName> * transformed_pps;
@@ -53,8 +55,12 @@ SteffensenSolve::allocateStorage(const bool primary)
   }
 
   // Store a copy of the previous solution here
-  _transformed_sys->addVector(xn_m1_tagid, false, PARALLEL);
-  _transformed_sys->addVector(fxn_m1_tagid, false, PARALLEL);
+  // If we don't have a transformed system, we are not accelerating variables
+  if (_transformed_sys)
+  {
+    _transformed_sys->addVector(xn_m1_tagid, false, PARALLEL);
+    _transformed_sys->addVector(fxn_m1_tagid, false, PARALLEL);
+  }
 
   // Allocate storage for the previous postprocessor values
   (*transformed_pps_values).resize((*transformed_pps).size());

@@ -29,22 +29,28 @@ PicardSolve::allocateStorage(const bool primary)
 {
   if (!performingRelaxation(primary))
     return;
+  findTransformedSystem(primary);
 
   const std::vector<PostprocessorName> * transformed_pps;
   std::vector<std::vector<PostprocessorValue>> * transformed_pps_values;
   if (primary)
   {
-    _old_tag_id =
-        _problem.addVectorTag(Moose::PREVIOUS_FP_SOLUTION_TAG, Moose::VECTOR_TAG_SOLUTION);
-    _transformed_sys->needSolutionState(1, Moose::SolutionIterationType::FixedPoint, PARALLEL);
-
+    if (_transformed_sys)
+    {
+      _old_tag_id =
+          _problem.addVectorTag(Moose::PREVIOUS_FP_SOLUTION_TAG, Moose::VECTOR_TAG_SOLUTION);
+      _transformed_sys->needSolutionState(1, Moose::SolutionIterationType::FixedPoint, PARALLEL);
+    }
     transformed_pps = &_transformed_pps;
     transformed_pps_values = &_transformed_pps_values;
   }
   else
   {
-    _secondary_old_tag_id = _problem.addVectorTag("secondary_xn_m1", Moose::VECTOR_TAG_SOLUTION);
-    _transformed_sys->addVector(_secondary_old_tag_id, false, PARALLEL);
+    if (_transformed_sys)
+    {
+      _secondary_old_tag_id = _problem.addVectorTag("secondary_xn_m1", Moose::VECTOR_TAG_SOLUTION);
+      _transformed_sys->addVector(_secondary_old_tag_id, false, PARALLEL);
+    }
 
     transformed_pps = &_secondary_transformed_pps;
     transformed_pps_values = &_secondary_transformed_pps_values;
