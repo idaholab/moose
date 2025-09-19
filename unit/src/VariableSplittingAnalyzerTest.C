@@ -26,21 +26,27 @@ TEST(VariableSplittingAnalyzerTest, LaplacianSplitting)
   ASSERT_TRUE(transformed);
   EXPECT_EQ(transformed->toString(), "u_d2");
 
-  ASSERT_EQ(split_vars.size(), 1u);
+  ASSERT_EQ(split_vars.size(), 2u);
+  ASSERT_TRUE(split_vars.count("u_d1"));
   ASSERT_TRUE(split_vars.count("u_d2"));
 
-  const auto & sv = split_vars.at("u_d2");
-  EXPECT_EQ(sv.original_variable, "u");
-  EXPECT_EQ(sv.derivative_order, 2u);
-  ASSERT_TRUE(std::holds_alternative<ScalarShape>(sv.shape));
-  ASSERT_TRUE(sv.definition);
-  EXPECT_EQ(sv.definition->toString(), "laplacian(u)");
-  ASSERT_TRUE(sv.constraint_residual);
-  EXPECT_EQ(sv.constraint_residual->toString(), "(laplacian(u) - u_d2)");
+  const auto & u_d1 = split_vars.at("u_d1");
+  const auto & u_d2 = split_vars.at("u_d2");
+
+  EXPECT_EQ(u_d1.derivative_order, 1u);
+  ASSERT_TRUE(std::holds_alternative<VectorShape>(u_d1.shape));
+  EXPECT_EQ(u_d1.definition->toString(), "grad(u)");
+  EXPECT_EQ(u_d1.constraint_residual->toString(), "(grad(u) - u_d1)");
+
+  EXPECT_EQ(u_d2.derivative_order, 2u);
+  ASSERT_TRUE(std::holds_alternative<ScalarShape>(u_d2.shape));
+  EXPECT_EQ(u_d2.definition->toString(), "div(u_d1)");
+  EXPECT_EQ(u_d2.constraint_residual->toString(), "(div(u_d1) - u_d2)");
 
   auto constraints = analyzer.generateConstraintEquations(split_vars);
-  ASSERT_EQ(constraints.size(), 1u);
-  EXPECT_EQ(constraints.front()->toString(), "(laplacian(u) - u_d2)");
+  ASSERT_EQ(constraints.size(), 2u);
+  EXPECT_EQ(constraints[0]->toString(), "(grad(u) - u_d1)");
+  EXPECT_EQ(constraints[1]->toString(), "(div(u_d1) - u_d2)");
 }
 
 TEST(VariableSplittingAnalyzerTest, TripleDerivativeSplitting)
@@ -54,18 +60,26 @@ TEST(VariableSplittingAnalyzerTest, TripleDerivativeSplitting)
   ASSERT_TRUE(transformed);
   EXPECT_EQ(transformed->toString(), "u_d3");
 
-  ASSERT_EQ(split_vars.size(), 2u);
+  ASSERT_EQ(split_vars.size(), 3u);
+  ASSERT_TRUE(split_vars.count("u_d1"));
   ASSERT_TRUE(split_vars.count("u_d2"));
   ASSERT_TRUE(split_vars.count("u_d3"));
 
+  const auto & u_d1 = split_vars.at("u_d1");
   const auto & u_d2 = split_vars.at("u_d2");
   const auto & u_d3 = split_vars.at("u_d3");
 
+  EXPECT_EQ(u_d1.derivative_order, 1u);
+  EXPECT_EQ(u_d1.definition->toString(), "grad(u)");
+  EXPECT_EQ(u_d1.constraint_residual->toString(), "(grad(u) - u_d1)");
+
   EXPECT_EQ(u_d2.derivative_order, 2u);
+  EXPECT_EQ(u_d2.definition->toString(), "grad(u_d1)");
+  EXPECT_EQ(u_d2.constraint_residual->toString(), "(grad(u_d1) - u_d2)");
+
   EXPECT_EQ(u_d3.derivative_order, 3u);
-  EXPECT_EQ(u_d2.definition->toString(), "grad(grad(u))");
-  EXPECT_EQ(u_d3.definition->toString(), "div(grad(grad(u)))");
-  EXPECT_EQ(u_d3.constraint_residual->toString(), "(div(grad(grad(u))) - u_d3)");
+  EXPECT_EQ(u_d3.definition->toString(), "div(u_d2)");
+  EXPECT_EQ(u_d3.constraint_residual->toString(), "(div(u_d2) - u_d3)");
 }
 
 TEST(VariableSplittingAnalyzerTest, MixedVariableSplitting)
@@ -80,14 +94,18 @@ TEST(VariableSplittingAnalyzerTest, MixedVariableSplitting)
   ASSERT_TRUE(transformed);
   EXPECT_EQ(transformed->toString(), "(u_d3 + v_d2)");
 
-  ASSERT_EQ(split_vars.size(), 3u);
+  ASSERT_EQ(split_vars.size(), 5u);
+  ASSERT_TRUE(split_vars.count("u_d1"));
   ASSERT_TRUE(split_vars.count("u_d2"));
   ASSERT_TRUE(split_vars.count("u_d3"));
+  ASSERT_TRUE(split_vars.count("v_d1"));
   ASSERT_TRUE(split_vars.count("v_d2"));
 
-  EXPECT_EQ(split_vars.at("u_d2").definition->toString(), "grad(grad(u))");
-  EXPECT_EQ(split_vars.at("u_d3").definition->toString(), "div(grad(grad(u)))");
-  EXPECT_EQ(split_vars.at("v_d2").definition->toString(), "laplacian(v)");
+  EXPECT_EQ(split_vars.at("u_d1").definition->toString(), "grad(u)");
+  EXPECT_EQ(split_vars.at("u_d2").definition->toString(), "grad(u_d1)");
+  EXPECT_EQ(split_vars.at("u_d3").definition->toString(), "div(u_d2)");
+  EXPECT_EQ(split_vars.at("v_d1").definition->toString(), "grad(v)");
+  EXPECT_EQ(split_vars.at("v_d2").definition->toString(), "div(v_d1)");
 }
 
 TEST(VariableSplittingAnalyzerTest, ComponentTransformation)
@@ -102,6 +120,7 @@ TEST(VariableSplittingAnalyzerTest, ComponentTransformation)
   ASSERT_TRUE(transformed);
   EXPECT_EQ(transformed->toString(), "u_d2[0,0]");
 
+  ASSERT_TRUE(split_vars.count("u_d1"));
   ASSERT_TRUE(split_vars.count("u_d2"));
-  EXPECT_EQ(split_vars.at("u_d2").definition->toString(), "grad(grad(u))");
+  EXPECT_EQ(split_vars.at("u_d2").definition->toString(), "grad(u_d1)");
 }

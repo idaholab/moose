@@ -187,8 +187,9 @@ When `use_automatic_differentiation = true`:
 
 1. Analyzes energy expression for maximum derivative order
 2. If order > `max_fe_order`, introduces split variables:
-   - 1st order split: `u_grad = ∇u`
-   - 2nd order split: `u_hess = ∇²u`
+   - 1st order split: `u_d1 = ∇u`
+   - 2nd order split: `u_d2 = ∇(u_d1)` or `u_d2 = ∇·(u_d1)` depending on the detected operator
+   - Higher orders extend the chain (`u_d3 = ∇u_d2`, `u_d4 = ∇·u_d3`, …) so every constraint only requires first derivatives of the preceding split
 3. Transforms energy expression using split variables
 4. Generates constraint kernels to enforce the relationships
 

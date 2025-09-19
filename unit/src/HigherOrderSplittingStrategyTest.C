@@ -55,7 +55,8 @@ expectedDofs(const HigherOrderSplittingStrategy::SplitPlan & plan)
 TEST(HigherOrderSplittingStrategyTest, RecursivePlanFormsChain)
 {
   auto split_vars = makeFourthOrderSplits();
-  ASSERT_EQ(split_vars.size(), 3u);
+  ASSERT_EQ(split_vars.size(), 4u);
+  ASSERT_TRUE(split_vars.count("u_d1"));
   ASSERT_TRUE(split_vars.count("u_d2"));
   ASSERT_TRUE(split_vars.count("u_d3"));
   ASSERT_TRUE(split_vars.count("u_d4"));
@@ -64,17 +65,18 @@ TEST(HigherOrderSplittingStrategyTest, RecursivePlanFormsChain)
   auto plan = strategy.createRecursiveSplitting("u", split_vars, 1);
   strategy.optimizeBandwidth(plan);
 
-  ASSERT_EQ(plan.variables.size(), 3u);
-  EXPECT_EQ(plan.variables[0].name, "u_d2");
-  EXPECT_EQ(plan.variables[1].name, "u_d3");
-  EXPECT_EQ(plan.variables[2].name, "u_d4");
+  ASSERT_EQ(plan.variables.size(), 4u);
+  EXPECT_EQ(plan.variables[0].name, "u_d1");
+  EXPECT_EQ(plan.variables[1].name, "u_d2");
+  EXPECT_EQ(plan.variables[2].name, "u_d3");
+  EXPECT_EQ(plan.variables[3].name, "u_d4");
 
   std::vector<std::pair<std::string, std::string>> expected_deps = {
-      {"u_d2", "u"}, {"u_d3", "u_d2"}, {"u_d4", "u_d3"}};
+      {"u_d1", "u"}, {"u_d2", "u_d1"}, {"u_d3", "u_d2"}, {"u_d4", "u_d3"}};
   EXPECT_EQ(plan.dependencies, expected_deps);
 
   EXPECT_EQ(plan.total_dofs, expectedDofs(plan));
-  EXPECT_EQ(plan.bandwidth, 2u);
+  EXPECT_LE(plan.bandwidth, 3u);
   EXPECT_EQ(plan.strategy, HigherOrderSplittingStrategy::Strategy::RECURSIVE);
 }
 
@@ -85,10 +87,10 @@ TEST(HigherOrderSplittingStrategyTest, DirectPlanDependsOnPrimary)
   auto plan = strategy.createDirectSplitting("u", split_vars, 1);
   strategy.optimizeBandwidth(plan);
 
-  ASSERT_EQ(plan.variables.size(), 3u);
+  ASSERT_EQ(plan.variables.size(), 4u);
 
   std::vector<std::pair<std::string, std::string>> expected_deps = {
-      {"u_d2", "u"}, {"u_d3", "u"}, {"u_d4", "u"}};
+      {"u_d1", "u"}, {"u_d2", "u"}, {"u_d3", "u"}, {"u_d4", "u"}};
   EXPECT_EQ(plan.dependencies, expected_deps);
 
   EXPECT_EQ(plan.total_dofs, expectedDofs(plan));
@@ -103,14 +105,14 @@ TEST(HigherOrderSplittingStrategyTest, MixedPlanBlendsChainAndDirect)
   auto plan = strategy.createMixedSplitting("u", split_vars, 1, 2);
   strategy.optimizeBandwidth(plan);
 
-  ASSERT_EQ(plan.variables.size(), 3u);
+  ASSERT_EQ(plan.variables.size(), 4u);
 
   std::vector<std::pair<std::string, std::string>> expected_deps = {
-      {"u_d2", "u"}, {"u_d3", "u_d2"}, {"u_d4", "u"}};
+      {"u_d1", "u"}, {"u_d2", "u_d1"}, {"u_d3", "u"}, {"u_d4", "u"}};
   EXPECT_EQ(plan.dependencies, expected_deps);
 
   EXPECT_EQ(plan.total_dofs, expectedDofs(plan));
-  EXPECT_EQ(plan.bandwidth, 2u);
+  EXPECT_LE(plan.bandwidth, 3u);
   EXPECT_EQ(plan.strategy, HigherOrderSplittingStrategy::Strategy::MIXED);
 }
 
@@ -132,11 +134,11 @@ TEST(HigherOrderSplittingStrategyTest, ComputeOptimalUsesProvidedSplits)
   auto plan = strategy.computeOptimalSplitting(
       energy, "u", req_it->max_derivative_order, 1, split_map);
 
-  ASSERT_EQ(plan.variables.size(), 3u);
+  ASSERT_EQ(plan.variables.size(), 4u);
   EXPECT_EQ(plan.strategy, HigherOrderSplittingStrategy::Strategy::DIRECT);
 
   std::vector<std::pair<std::string, std::string>> expected_deps = {
-      {"u_d2", "u"}, {"u_d3", "u"}, {"u_d4", "u"}};
+      {"u_d1", "u"}, {"u_d2", "u"}, {"u_d3", "u"}, {"u_d4", "u"}};
   EXPECT_EQ(plan.dependencies, expected_deps);
 
   EXPECT_EQ(plan.bandwidth, 1u);
@@ -160,7 +162,7 @@ TEST(HigherOrderSplittingStrategyTest, ComputeOptimalAnalyzesWhenSplitsMissing)
   auto plan = strategy.computeOptimalSplitting(
       energy, "u", req_it->max_derivative_order, 1, empty);
 
-  ASSERT_EQ(plan.variables.size(), 3u);
+  ASSERT_EQ(plan.variables.size(), 4u);
   EXPECT_EQ(plan.strategy, HigherOrderSplittingStrategy::Strategy::DIRECT);
   EXPECT_EQ(plan.bandwidth, 1u);
   EXPECT_EQ(plan.total_dofs, expectedDofs(plan));

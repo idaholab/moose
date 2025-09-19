@@ -20,18 +20,34 @@ collectSplitVariables(const std::string & var_name,
                       unsigned int fe_order,
                       const std::map<std::string, SplitVariable> & split_vars)
 {
-  std::vector<SplitVariable> result;
-  result.reserve(split_vars.size());
+  std::vector<SplitVariable> all_splits;
+  all_splits.reserve(split_vars.size());
 
-  for (const auto & [name, sv] : split_vars)
-    if (sv.original_variable == var_name && sv.derivative_order > fe_order)
-      result.push_back(sv);
+  for (const auto & [_, sv] : split_vars)
+    if (sv.original_variable == var_name)
+      all_splits.push_back(sv);
 
-  std::sort(result.begin(), result.end(), [](const SplitVariable & a, const SplitVariable & b) {
+  if (all_splits.empty())
+    return {};
+
+  std::sort(all_splits.begin(), all_splits.end(), [](const SplitVariable & a, const SplitVariable & b) {
     if (a.derivative_order == b.derivative_order)
       return a.name < b.name;
     return a.derivative_order < b.derivative_order;
   });
+
+  unsigned int max_required = 0;
+  for (const auto & sv : all_splits)
+    if (sv.derivative_order > fe_order)
+      max_required = std::max(max_required, sv.derivative_order);
+
+  if (!max_required)
+    return {};
+
+  std::vector<SplitVariable> result;
+  for (const auto & sv : all_splits)
+    if (sv.derivative_order <= max_required)
+      result.push_back(sv);
 
   return result;
 }
@@ -131,18 +147,31 @@ VariableSplittingAnalyzer::generateSplitVariables(const NodePtr & expr)
 
   std::map<std::string, SplitVariable> split_vars;
 
-  const unsigned int available = _use_hessians ? std::max<unsigned int>(_fe_order, 2) : _fe_order;
-
   for (const auto & [var_name, max_order] : max_orders)
   {
-    if (max_order <= available)
+    if (max_order <= _fe_order)
       continue;
 
     const Shape original_shape = findVariableShape(expr, var_name);
 
-    for (unsigned int order = available + 1; order <= max_order; ++order)
+    NodePtr previous_variable = fieldVariable(var_name, original_shape);
+
+    for (unsigned int order = 1; order <= max_order; ++order)
     {
-      NodePtr definition = buildDerivativeExpression(var_name, order, original_shape, derivative_ops);
+      auto ops_it = derivative_ops.find(var_name);
+      std::set<NodeType> ops;
+      if (ops_it != derivative_ops.end())
+      {
+        auto order_it = ops_it->second.find(order);
+        if (order_it != ops_it->second.end())
+          ops = order_it->second;
+      }
+
+      NodeType op = chooseOperator(ops);
+
+      NodePtr operand = (order == 1) ? fieldVariable(var_name, original_shape) : previous_variable;
+
+      NodePtr definition = applyOperator(op, operand);
 
       if (!definition)
         mooseError("Unable to build definition for split variable order ", order,
@@ -157,7 +186,10 @@ VariableSplittingAnalyzer::generateSplitVariables(const NodePtr & expr)
       sv.constraint_residual = subtract(definition->clone(), fieldVariable(sv.name, sv.shape));
       sv.is_primary = false;
 
-      split_vars.emplace(sv.name, std::move(sv));
+      auto [iter, inserted] = split_vars.emplace(sv.name, std::move(sv));
+      (void)inserted;
+
+      previous_variable = fieldVariable(iter->second.name, iter->second.shape);
     }
   }
 
@@ -531,18 +563,18 @@ VariableSplittingAnalyzer::chooseOperator(const std::set<NodeType> & ops) const
                                                       NodeType::Divergence,
                                                       NodeType::Curl,
                                                       NodeType::Laplacian};
-  static const std::array<NodeType, 4> laplace_precedence = {NodeType::Laplacian,
-                                                             NodeType::Gradient,
-                                                             NodeType::Divergence,
-                                                             NodeType::Curl};
 
-  const auto & order = ops.count(NodeType::Laplacian) ? laplace_precedence : precedence;
+  if (ops.empty())
+    return NodeType::Gradient;
 
-  for (auto preferred : order)
+  if (ops.count(NodeType::Laplacian) && ops.size() == 1)
+    return NodeType::Laplacian;
+
+  for (auto preferred : precedence)
     if (ops.count(preferred))
       return preferred;
 
-  return ops.empty() ? NodeType::Gradient : *ops.begin();
+  return *ops.begin();
 }
 
 NodePtr

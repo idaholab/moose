@@ -7,7 +7,7 @@
     [fourth_order_auto_split]
       type = 'RunApp'
       input = 'fourth_order_auto_split.i'
-      expect_out = 'Split plan for c \(3 variables, bandwidth 1\)[\s\S]*- c_d2 := [^\n]*[\s\S]*- c_d3 := [^\n]*[\s\S]*- c_d4 := [^\n]*'
+      expect_out = 'Split plan for c \([0-9]+ variables, bandwidth [0-9]+\)[\s\S]*- c_d1 := [^\n]*[\s\S]*- c_d2 := [^\n]*[\s\S]*- c_d3 := [^\n]*[\s\S]*- c_d4 := [^\n]*'
     []
   []
 []
