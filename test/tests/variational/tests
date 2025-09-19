@@ -1,0 +1,13 @@
+[Tests]
+  design = 'actions/AutomaticWeakFormAction.md'
+
+  [auto_split]
+    requirement = 'Automatic weak form generation shall split high-order derivatives into standard variables.'
+
+    [fourth_order_auto_split]
+      type = 'RunApp'
+      input = 'fourth_order_auto_split.i'
+      expect_out = 'Split plan for c \(3 variables, bandwidth 1\)[\s\S]*- c_d2 := [^\n]*[\s\S]*- c_d3 := [^\n]*[\s\S]*- c_d4 := [^\n]*'
+    []
+  []
+[]

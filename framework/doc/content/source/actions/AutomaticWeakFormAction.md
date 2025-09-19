@@ -228,3 +228,20 @@ Enable `verbose = true` to see:
 | Variational Tools | `el(energy, variable)` (`EL`, `eulerlagrange`, `euler_lagrange`) | Computes the Euler–Lagrange residual for the given energy density and variable. |
 
 Custom functions can be registered at runtime via `StringExpressionParser::registerFunction`, provided their derivatives are supplied when needed.
+
+## Auto-Splitting Example
+
+For an end-to-end reference of the automatic splitting workflow, see
+`test/tests/variational/fourth_order_auto_split.i`. The test exercises a
+fourth-order Cahn–Hilliard energy, lets the action introduce `c_d2`,
+`c_d3`, and `c_d4`, and verifies the console summary emitted by enabling
+`verbose = true`. You can run it directly with
+
+```
+./run_tests -i tests/variational --tests fourth_order_auto_split
+```
+
+The console output enumerates the split plan (including bandwidth and
+dependencies) and reports the generated weak forms for both the primary
+and constraint kernels, making it easy to compare against the manually
+split configuration while developing new energies.
