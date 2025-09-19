@@ -173,12 +173,21 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
     mooseWarning(
         "Both variable and postprocessor transformation are active. If the two share dofs, the "
         "transformation will not be correct.");
+  if (_relax_factor != 1 && _transformed_vars.empty() && _transformed_pps.empty())
+    paramError("relaxation_factor",
+               "Relaxation factor must act on at least one 'transformed_variables' or one "
+               "'transformed_postprocessors'");
 
   if (!_app.isUltimateMaster())
   {
     _secondary_relaxation_factor = _app.fixedPointConfig().sub_relaxation_factor;
     _secondary_transformed_variables = _app.fixedPointConfig().sub_transformed_vars;
     _secondary_transformed_pps = _app.fixedPointConfig().sub_transformed_pps;
+    if (_secondary_relaxation_factor != 1 && _secondary_transformed_variables.empty() &&
+        _secondary_transformed_pps.empty())
+      mooseError("Secondary relaxation factor must act on at least one "
+                 "'secondary_transformed_variables' or one 'secondary_transformed_postprocessors'. "
+                 "See parent application MultiApp parameters");
   }
 
   if (isParamValid("multiapp_fixed_point_convergence"))
