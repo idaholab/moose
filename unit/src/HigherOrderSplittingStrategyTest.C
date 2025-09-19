@@ -142,3 +142,26 @@ TEST(HigherOrderSplittingStrategyTest, ComputeOptimalUsesProvidedSplits)
   EXPECT_EQ(plan.bandwidth, 1u);
   EXPECT_EQ(plan.total_dofs, expectedDofs(plan));
 }
+
+TEST(HigherOrderSplittingStrategyTest, ComputeOptimalAnalyzesWhenSplitsMissing)
+{
+  auto analyzer = makeAnalyzer();
+  NodePtr u = fieldVariable("u");
+  NodePtr energy = laplacian(laplacian(u));
+
+  auto requirements = analyzer.analyzeExpression(energy);
+  auto req_it = std::find_if(requirements.begin(), requirements.end(), [](const auto & req) {
+    return req.variable_name == "u";
+  });
+  ASSERT_NE(req_it, requirements.end());
+
+  HigherOrderSplittingStrategy strategy;
+  std::map<std::string, SplitVariable> empty;
+  auto plan = strategy.computeOptimalSplitting(
+      energy, "u", req_it->max_derivative_order, 1, empty);
+
+  ASSERT_EQ(plan.variables.size(), 3u);
+  EXPECT_EQ(plan.strategy, HigherOrderSplittingStrategy::Strategy::DIRECT);
+  EXPECT_EQ(plan.bandwidth, 1u);
+  EXPECT_EQ(plan.total_dofs, expectedDofs(plan));
+}

@@ -781,9 +781,24 @@ HigherOrderSplittingStrategy::computeOptimalSplitting(
     unsigned int fe_order,
     const std::map<std::string, SplitVariable> & split_vars)
 {
-  (void)energy_density;
+  const std::map<std::string, SplitVariable> * splits = &split_vars;
+  std::map<std::string, SplitVariable> generated;
 
-  auto relevant_splits = collectSplitVariables(primary_var, fe_order, split_vars);
+  auto computeRelevant = [&](const std::map<std::string, SplitVariable> & map) {
+    return collectSplitVariables(primary_var, fe_order, map);
+  };
+
+  auto relevant_splits = computeRelevant(*splits);
+
+  if ((splits->empty() || (relevant_splits.empty() && max_derivative_order > fe_order)) &&
+      energy_density)
+  {
+    VariableSplittingAnalyzer analyzer(fe_order);
+    generated = analyzer.generateSplitVariables(energy_density);
+    splits = &generated;
+    relevant_splits = computeRelevant(*splits);
+  }
+
   if (relevant_splits.empty() || max_derivative_order <= fe_order)
   {
     SplitPlan no_split;
@@ -796,11 +811,11 @@ HigherOrderSplittingStrategy::computeOptimalSplitting(
   }
 
   std::vector<SplitPlan> candidates;
-  candidates.push_back(createRecursiveSplitting(primary_var, split_vars, fe_order));
-  candidates.push_back(createDirectSplitting(primary_var, split_vars, fe_order));
+  candidates.push_back(createRecursiveSplitting(primary_var, *splits, fe_order));
+  candidates.push_back(createDirectSplitting(primary_var, *splits, fe_order));
 
   if (relevant_splits.size() > 1)
-    candidates.push_back(createMixedSplitting(primary_var, split_vars, fe_order));
+    candidates.push_back(createMixedSplitting(primary_var, *splits, fe_order));
 
   SplitPlan best_plan;
   Real best_cost = std::numeric_limits<Real>::max();
