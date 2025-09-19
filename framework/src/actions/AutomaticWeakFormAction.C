@@ -627,7 +627,10 @@ AutomaticWeakFormAction::setupVariableSplitting()
 
       Moose::out << "      [DEBUG] Using split variable: " << iter->second.name
                  << " (order " << iter->second.derivative_order << ", base "
-                 << iter->second.original_variable << ")\n";
+                 << iter->second.original_variable << ") := "
+                 << (iter->second.definition ? iter->second.definition->toString()
+                                             : std::string("<undefined>"))
+                 << "\n";
 
       if (_verbose)
         _console << "    - " << iter->second.name << " := "

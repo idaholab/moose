@@ -1,5 +1,6 @@
 #include "VariableSplitting.h"
 #include "WeakFormGenerator.h"
+#include "ExpressionTransformer.h"
 #include "MooseError.h"
 #include <algorithm>
 #include <array>
@@ -591,12 +592,6 @@ VariableSplittingAnalyzer::buildDerivativeExpression(
       mooseError("Missing derivative operator of order ", k, " for variable ", original_var);
 
     const auto & ops = order_it->second;
-
-    if (ops.count(NodeType::Laplacian) && k == 2)
-    {
-      expr = laplacian(fieldVariable(original_var, original_shape));
-      continue;
-    }
 
     NodeType op = chooseOperator(ops);
     expr = applyOperator(op, expr);

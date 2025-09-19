@@ -102,109 +102,42 @@ ExpressionTransformer::transformNode(const NodePtr & node)
 NodePtr
 ExpressionTransformer::transformGradient(const UnaryOpNode * grad_node)
 {
-  auto operand = grad_node->operand();
-  
-  // Check if this is a second-order derivative: grad(grad(u))
-  if (operand->type() == NodeType::Gradient)
+  const NodePtr & operand = grad_node->operand();
+
+  std::string base_var = getBaseVariable(operand);
+  unsigned int target_order = base_var.empty() ? 0u : getDerivativeOrder(operand) + 1u;
+
+  if (!base_var.empty())
   {
-    auto inner_grad = static_cast<const UnaryOpNode*>(operand.get());
-    auto base_expr = inner_grad->operand();
-
-    // Check if the base is a field variable
-    if (base_expr->type() == NodeType::FieldVariable)
-    {
-      auto field_var = static_cast<const FieldVariableNode*>(base_expr.get());
-      std::string var_name = field_var->name();
-
-      // Look for split variable for the Hessian (2nd order derivative)
-      auto split_var = findSplitVariable(var_name, 2);
-      if (split_var)
-      {
-        // Replace grad(grad(u)) with the Hessian split variable
-        return split_var;
-      }
-
-      // Alternatively, look for q = grad(u) and return grad(q)
-      auto grad_split = findSplitVariable(var_name, 1);
-      if (grad_split)
-      {
-        // Replace grad(grad(u)) with grad(q)
-        return std::make_shared<UnaryOpNode>(NodeType::Gradient, grad_split, TensorShape{_dim});
-      }
-    }
+    if (auto split = findSplitVariable(base_var, target_order))
+      return split;
   }
-  // Check if this is grad(u) where u should use a split variable
-  else if (operand->type() == NodeType::FieldVariable)
-  {
-    auto field_var = static_cast<const FieldVariableNode*>(operand.get());
-    std::string var_name = field_var->name();
-    
-    // Check if we should replace grad(u) with the split variable q
-    // This happens when max_fe_order is very low (e.g., 0)
-    for (const auto & [split_name, sv] : _split_variables)
-    {
-      if (sv.original_variable == var_name && sv.derivative_order == 1)
-      {
-        // Instead of grad(u), return the split variable q directly
-        // We need to return a vector of component variables
-        std::vector<NodePtr> components;
-        std::vector<std::string> comp_names = {"x", "y", "z"};
-        
-        // Use actual mesh dimension
-        for (unsigned int i = 0; i < _dim; ++i)
-        {
-          std::string comp_var_name = sv.name + "_" + comp_names[i];
-          components.push_back(fieldVariable(comp_var_name));
-        }
-        
-        // Return as vector assembly
-        return std::make_shared<VectorAssemblyNode>(components, VectorShape{_dim});
-      }
-    }
-  }
-  
-  // No transformation needed, but transform the operand
+
   auto transformed_operand = transformNode(operand);
   if (transformed_operand != operand)
-  {
-    // Preserve the original shape from grad_node
     return std::make_shared<UnaryOpNode>(NodeType::Gradient, transformed_operand, grad_node->shape());
-  }
-  
+
   return std::make_shared<UnaryOpNode>(*grad_node);
 }
 
 NodePtr
 ExpressionTransformer::transformDivergence(const UnaryOpNode * div_node)
 {
-  auto operand = div_node->operand();
-  
-  // Check if this is div(grad(u)) = laplacian(u)
-  if (operand->type() == NodeType::Gradient)
+  const NodePtr & operand = div_node->operand();
+
+  std::string base_var = getBaseVariable(operand);
+  unsigned int target_order = base_var.empty() ? 0u : getDerivativeOrder(operand) + 1u;
+
+  if (!base_var.empty())
   {
-    auto grad_node = static_cast<const UnaryOpNode*>(operand.get());
-    auto base_expr = grad_node->operand();
-    
-    if (base_expr->type() == NodeType::FieldVariable)
-    {
-      auto field_var = static_cast<const FieldVariableNode*>(base_expr.get());
-      std::string var_name = field_var->name();
-      
-      // Look for split variable q = grad(u)
-      auto split_var = findSplitVariable(var_name, 1);
-      if (split_var)
-      {
-        // Replace div(grad(u)) with div(q)
-        return std::make_shared<UnaryOpNode>(NodeType::Divergence, split_var, ScalarShape{});
-      }
-    }
+    if (auto split = findSplitVariable(base_var, target_order))
+      return split;
   }
-  
-  // Transform the operand
+
   auto transformed_operand = transformNode(operand);
   if (transformed_operand != operand)
-    return std::make_shared<UnaryOpNode>(NodeType::Divergence, transformed_operand, ScalarShape{});
-  
+    return std::make_shared<UnaryOpNode>(NodeType::Divergence, transformed_operand, div_node->shape());
+
   return std::make_shared<UnaryOpNode>(*div_node);
 }
 
@@ -217,9 +150,7 @@ ExpressionTransformer::findSplitVariable(const std::string & original_var,
   {
     if (sv.original_variable == original_var && sv.derivative_order == derivative_order)
     {
-      // For now, return a field variable with the split variable name
-      // In reality, we might need to handle vector split variables differently
-      return fieldVariable(sv.name);
+      return fieldVariable(sv.name, sv.shape);
     }
   }
   
