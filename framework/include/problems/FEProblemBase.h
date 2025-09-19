@@ -2353,6 +2353,30 @@ public:
    */
   bool needsPreviousNewtonIteration() const;
 
+  /**
+   * Set a flag that indicated that user required values for the previous multiapp fixed point
+   * iterate
+   */
+  void needsPreviousMultiAppFixedPointIterationSolver(bool state);
+
+  /**
+   * Check to see whether we need to compute the variable values of the previous Newton iterate
+   * @return true if the user required values of the previous Newton iterate
+   */
+  bool needsPreviousMultiAppFixedPointIterationSolver() const;
+
+  /**
+   * Set a flag that indicated that user required values for the previous multiapp fixed point
+   * iterate
+   */
+  void needsPreviousMultiAppFixedPointIterationAuxiliary(bool state);
+
+  /**
+   * Check to see whether we need to compute the variable values of the previous Newton iterate
+   * @return true if the user required values of the previous Newton iterate
+   */
+  bool needsPreviousMultiAppFixedPointIterationAuxiliary() const;
+
   ///@{
   /**
    * Convenience zeros
@@ -3213,6 +3237,10 @@ protected:
 
   /// Indicates we need to save the previous NL iteration variable values
   bool _previous_nl_solution_required;
+  /// Indicates we need to save the previous multiapp fixed-point iteration solver variable values
+  bool _previous_multiapp_fp_nl_solution_required;
+  /// Indicates we need to save the previous multiapp fixed-point iteration auxiliary variable values
+  bool _previous_multiapp_fp_aux_solution_required;
 
   /// Indicates if nonlocal coupling is required/exists
   bool _has_nonlocal_coupling;

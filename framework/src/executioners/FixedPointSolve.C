@@ -212,6 +212,13 @@ FixedPointSolve::initialSetup()
 
   allocateStorage(true);
 
+  // Add to the systems to copy if requested in the Problem
+  if (_problem.needsPreviousMultiAppFixedPointIterationSolver())
+    for (const auto i : make_range(_problem.numSolverSystems()))
+      _systems_to_copy_previous_solutions_for.insert(&_problem.getSolverSystem(i));
+  if (_problem.needsPreviousMultiAppFixedPointIterationAuxiliary())
+    _systems_to_copy_previous_solutions_for.insert(&_aux);
+
   if (_has_fixed_point_its)
   {
     auto & conv = _problem.getConvergence(_problem.getMultiAppFixedPointConvergenceName());
@@ -452,9 +459,9 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
   // Save the current values of variables and postprocessors, before the solve
   saveAllValues(true);
 
-  // Save the previous fixed point iteration solution and aux variables
-  if (_transformed_sys)
-    _transformed_sys->copyPreviousFixedPointSolutions();
+  // Save the previous fixed point iteration solution and aux variables if requested
+  for (auto * sys : _systems_to_copy_previous_solutions_for)
+    sys->copyPreviousFixedPointSolutions();
 
   if (_has_fixed_point_its)
     _console << COLOR_MAGENTA << "\nMain app solve:" << COLOR_DEFAULT << std::endl;
@@ -636,4 +643,7 @@ FixedPointSolve::findTransformedSystem(const bool primary)
   if (primary && _transformed_sys == &_aux)
     mooseInfo("Transformation of auxiliary variables is only supported for auxiliary variables "
               "that are only transferred from the child application");
+
+  if (_transformed_sys)
+    _systems_to_copy_previous_solutions_for.insert(_transformed_sys);
 }
