@@ -1,6 +1,6 @@
 [Mesh/fuel_pin]
   type = FileMeshGenerator
-  input = fuel_pin.e
+  file = fuel_pin.e
 []
 
 [Variables]

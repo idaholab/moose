@@ -58,7 +58,7 @@ cardinal-opt -i step1-1_meshing.basic.i --mesh-only
 ## MeshGenerator System
 
 - The previous example utilized the MOOSE [`MeshGenerator`](Mesh/index.md) system
-- It only utilized a single `MeshGenerator`, but multiple can be chained together using the `input` parameter
+- It only utilized a single `MeshGenerator`, but multiple can be chained together (examples to follow)
 - All of our examples that follow (including the Cardinal tutorial) will utilize the [`MeshGenerator`](Mesh/index.md) system
 - The [`Reactor`](reactor/index.md) module supports the systematic mesh generation of common reactor types
 
@@ -106,9 +106,15 @@ radius = ${fparse diameter/2}
 
 !--
 
-## Concentric Circle Mesh
+## Fuel Pin Mesh
 
-Let's generate a more interesting mesh, one that represents something like a fuel pin in 2D:
+The grid we've generated so far isn't particularly interesting.
+
+Let's generate a mesh that represents represents a fuel pin surrounded by water in a square lattice using the [`ConcentricCircleMeshGenerator`](ConcentricCircleMeshGenerator.md).
+
+!--
+
+## Concentric Circle Mesh
 
 !listing moose/step1-2_concentric_circle.i
 
@@ -127,29 +133,110 @@ cardinal-opt -i step1-2_concentric_circle.i --mesh-only
 !style halign=center
 !media step1-2_mesh.png style=width:25%
 
-The grey elements represent void (subdomain `1`), the red elements represent the fuel (subdomain `2`), and the green elements represent the clad (subdomain `3`). There is a sideset on the outer boundary with name `outer` and ID `1`.
+This mesh has five blocks (also called subdomains):
+
+- $1$: The inner hole (grey)
+- $2$: The fuel meat (red)
+- $3$: The cladding (green)
+- $4$: The water boundary layer (blue)
+- $5$: The remaining water (yellow)
 
 !---
 
-## Concentric Circle Mesh With Hole
+## Separating Meshes
 
-For the purposes of this tutorial, we will consider no net heat transfer within or across the void region. Thus, let's remove it from the mesh:
+Later in this tutorial, we will be treating the fuel pin and the surrounding fluid independently. Thus, we will now take the mesh that we just generated and separate it into two components: one for the fuel pin and one for the fluid.
 
-!listing moose/step1-3_concentric_circle_no_void.i diff=moose/step1-2_concentric_circle.i
+This task reveals a capability of MeshGenerators - they can be combined together. Some MeshGenerators generate meshes, some modify meshes, and some do both. Oftentimes a generator will have an input parameter called `input`, which is used as the name of another MeshGenerator to be used as input to modify.
 
-!---
+For the tasks that follow, we will utilize the:
 
-## Run: Concentric Circle Mesh With Hole
+- [`BlockDeletionGenerator`](BlockDeletionGenerator.md): Removes blocks from a mesh
+- [`RenameBlockGenerator`](RenameBlockGenerator.md): Renames and optionally merges blocks on a mesh
+- [`RenameBoundaryGenerator`](RenameBoundaryGenerator.md): Renames and optionally merges boundaries on a mesh
+
+!--
+
+## Fuel Mesh
+
+- Remove the water elements using the [`BlockDeletionGenerator`](BlockDeletionGenerator.md)
+- Remove the hole (assume no net heat transfer across the hole) using the [`BlockDeletionGenerator`](BlockDeletionGenerator.md)
+- Name the blocks that contain the fuel and cladding using the [`RenameBlockGenerator`](RenameBlockGenerator.md)
+
+!--
+
+## Input: Fuel Mesh
+
+!listing moose/step1-3_fuel_pin.i
+
+!--
+
+## Run: Fuel Mesh
+
+Here, we add a value to `--mesh-only` that stores the resulting mesh in `fuel_pin.e`:
 
 ```bash
-cardinal-opt -i step1-3_concentric_circle_no_void.i --mesh-only
+cardinal-opt -i step1-3_fuel_pin.i --mesh-only fuel_pin.e
 ```
 
 !---
 
-## Result: Concentric Circle Mesh Input With Hole
+## Result: Fuel Mesh
 
 !style halign=center
-!media step1-3_mesh.png style=width:25%
+!media step1-3_mesh.png style=width:35%
 
-The grey elements represent the fuel (subdomain `2`), and the red elements represent the clad (subdomain `3`). There is a sideset on the outer boundary with name `outer` and ID `1` and sideset on the inner boundary with the name `inner` and ID `2` .
+The grey elements represent the fuel (block `fuel`), and the red elements represent the cladding (block `clad`). There is a sideset on the outer boundary with name `outer` and sideset on the inner boundary with the name `inner`.
+
+!---
+
+## Fluid Mesh
+
+- Remove the fuel pin elements using the [`BlockDeletionGenerator`](BlockDeletionGenerator.md)
+- Merge the water boundary layer and remaining water blocks into a single block named `water` using the [`RenameBlockGenerator`](RenameBlockGenerator.md)
+- Rename and merge the outer boundaries into a single boundary `outer` using the [`RenameBoundaryGenerator`](RenameBoundaryGenerator.md)
+
+!---
+
+## Input: Fluid Mesh
+
+!listing moose/step1-4_fluid.i
+
+!---
+
+## Run: Fluid Mesh
+
+Generate the mesh and output it to `fluid.e`:
+
+```bash
+cardinal-opt -i step1-4_fluid.i --mesh-only fluid.e
+```
+
+!---
+
+## Result: Fluid Mesh
+
+!style halign=center
+!media step1-4_mesh.png style=width:35%
+
+The grey elements represent the water (block `water`). There is a sideset on the inner boundary with the name `inner` and a sideset on the outer boundary with the name `outer`.
+
+!---
+
+## Re-using The Meshes
+
+We can then load these meshes in later inputs with:
+
+```moose
+[Mesh/fuel_pin]
+  type = FileMeshGenerator
+  file = fuel_pin.e
+[]
+```
+
+```moose
+[Mesh/fluid]
+  type = FileMeshGenerator
+  file = fluid.e
+[]
+```

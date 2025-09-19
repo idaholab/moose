@@ -36,8 +36,15 @@ Content:
             - source/bcs/DirichletBC.md
             - source/executioners/Steady.md
             - source/executioners/Transient.md
+            - source/kernels/BodyForce.md
             - source/kernels/Diffusion.md
+            - source/kernels/MatDiffusion.md
+            - source/materials/GenericConstantMaterial.md
+            - source/meshgenerators/BlockDeletionGenerator.md
+            - source/meshgenerators/ConcentricCircleMeshGenerator.md
             - source/meshgenerators/GeneratedMeshGenerator.md
+            - source/meshgenerators/RenameBlockGenerator.md
+            - source/meshgenerators/RenameBoundaryGenerator.md
             - source/outputs/Exodus.md
     modules:
         root_dir: ${MOOSE_DIR}/modules/doc/content

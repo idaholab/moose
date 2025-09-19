@@ -1,19 +1,19 @@
-hole_diameter = 0.16e-2    # [m]
-pellet_diameter = 0.52e-2  # [m]
-clad_diameter = 0.6e-2     # [m]
-pin_pitch = 0.695e-2       # [m]
+hole_radius = 0.08e-2     # [m]
+pellet_radius = 0.26e-2   # [m]
+clad_radius = 0.3e-2      # [m]
+water_radius = 0.3475e-2  # [m]
 
 boundary_layer_frac = 0.1
-boundary_layer_radius = ${fparse ((pin_pitch - clad_diameter) * boundary_layer_frac + clad_diameter) / 2}
+boundary_layer_radius = ${fparse ((water_radius - clad_radius) * boundary_layer_frac + clad_radius)}
 
 [Mesh]
   [concentric_circle]
     type = ConcentricCircleMeshGenerator
     num_sectors = 12
-    radii = '${fparse hole_diameter/2} ${fparse pellet_diameter/2} ${fparse clad_diameter/2} ${boundary_layer_radius}'
+    radii = '${hole_radius} ${pellet_radius} ${clad_radius} ${boundary_layer_radius}'
     has_outer_square = true
     preserve_volumes = false
     rings = '1 3 1 1 3'
-    pitch = ${pin_pitch}
+    pitch = ${fparse water_radius * 2}
   []
 []

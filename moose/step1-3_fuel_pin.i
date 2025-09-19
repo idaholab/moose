@@ -1,3 +1,5 @@
+# Include Mesh/concentric_circle, which builds the
+# full concentric circle mesh
 !include step1-2_concentric_circle.i
 
 [Mesh]

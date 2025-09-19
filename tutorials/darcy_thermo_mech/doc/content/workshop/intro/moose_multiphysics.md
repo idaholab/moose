@@ -214,9 +214,9 @@ Reactor\\
 
 ## MOOSE Coupling Strategy
 
-- Numerically separates a multiphysics solve by physics components
+- Numerically separates a multiphysics solve by physics components (equations)
 
-  - Connect physics together via transfers
+  - Connect physics together via in-memory transfer of fields and scalars
 
 - Input file based
 
