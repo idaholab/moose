@@ -40,7 +40,7 @@ This will require two changes:
 ## Run: Spatially-Dependent Diffusion
 
 ```bash
-cardinal-opt -i step4_diffusion_materials.i
+$ cardinal-opt -i step4_diffusion_materials.i
 ```
 
 !---

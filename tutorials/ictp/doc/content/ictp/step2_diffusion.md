@@ -44,8 +44,6 @@ We will utilize the following systems in MOOSE in addition to `[Mesh]` in our in
 
   - Exodus output for field visualization
 
-We will go through each of these individually.
-
 !--
 
 ## Variable Definition
@@ -111,8 +109,9 @@ Other common shorthand syntax are `Outputs/csv` for CSV output and `Outputs/neme
 ## Run: Diffusion Problem
 
 ```bash
-cardinal-opt -i step2-1_diffusion.i
+$ cardinal-opt -i step2-1_diffusion.i
 ```
+
 !---
 
 ## Result: Diffusion Problem
@@ -139,7 +138,7 @@ We will remove the [`DirichletBC`](DirichletBC.md) named `outer_dirichlet` and a
 ## Run: Diffusion with Volumetric Source
 
 ```bash
-cardinal-opt -i step2-2_diffusion_volumetric_source.i
+$ cardinal-opt -i step2-2_diffusion_volumetric_source.i
 ```
 
 !---

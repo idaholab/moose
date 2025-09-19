@@ -4,7 +4,7 @@
 
 ## `Postprocessor` System
 
-The [`PostProcessor`](Postprocessors/index.md) system is used to aggregate data from a solution.
+The [`PostProcessor`](Postprocessors/index.md) system is used to aggregate data from a simulation.
 
 Common use cases are:
 
@@ -38,7 +38,7 @@ For the simple diffusion problem in the previous step, the [`PostProcessor`](Pos
 ## Run: Diffusion Problem Postprocessing
 
 ```bash
-cardinal-opt -i step3_postprocessing.i
+$ cardinal-opt -i step3_postprocessing.i
 ```
 
 At the end of the simulation, the postprocessor values appear on screen:
