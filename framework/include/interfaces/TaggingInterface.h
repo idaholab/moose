@@ -266,6 +266,12 @@ protected:
                     const Indices & dof_indices,
                     Real scaling_factor);
 
+  template <typename Residuals, typename Indices>
+  void addResiduals(Assembly & assembly,
+                    const Residuals & residuals,
+                    const Indices & dof_indices,
+                    const std::vector<Real> & scaling_factors);
+
   /**
    * Add the provided incoming residuals corresponding to the provided dof indices
    */
@@ -485,6 +491,31 @@ TaggingInterface::addResiduals(Assembly & assembly,
                             Assembly::LocalDataKey{},
                             _abs_vector_tags);
   }
+}
+
+template <typename Residuals, typename Indices>
+void
+TaggingInterface::addResiduals(Assembly & assembly,
+                               const Residuals & residuals,
+                               const Indices & dof_indices,
+                               const std::vector<Real> & scaling_factors)
+{
+  const auto n = libMesh::cast_int<std::size_t>(std::size(residuals));
+
+  mooseAssert((n == libMesh::cast_int<std::size_t>(std::size(dof_indices))) &&
+                  (n == scaling_factors.size()),
+              "Residuals, dof indices, and scaling factors must all be the same size");
+
+  using R = Moose::ContainerElement<Residuals>;
+  using I = Moose::ContainerElement<Indices>;
+
+  for (const auto i : make_range(n))
+    // The Residuals type may not offer operator[] (e.g. eigen vectors) but more commonly it should
+    // offer data()
+    addResiduals(assembly,
+                 std::array<R, 1>{std::data(residuals)[i]},
+                 std::array<I, 1>{std::data(dof_indices)[i]},
+                 scaling_factors[i]);
 }
 
 template <typename T, typename Indices>
