@@ -209,6 +209,8 @@ protected:
   const std::vector<PostprocessorName> _transformed_pps;
   /// Previous values of the relaxed postprocessors
   std::vector<std::vector<PostprocessorValue>> _transformed_pps_values;
+  /// System holding the transformed variables
+  SystemBase * _transformed_sys;
 
   /// Relaxation factor outside of fixed point iteration (used as a subapp)
   Real _secondary_relaxation_factor;

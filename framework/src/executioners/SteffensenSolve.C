@@ -53,8 +53,8 @@ SteffensenSolve::allocateStorage(const bool primary)
   }
 
   // Store a copy of the previous solution here
-  _solver_sys.addVector(xn_m1_tagid, false, PARALLEL);
-  _solver_sys.addVector(fxn_m1_tagid, false, PARALLEL);
+  _transformed_sys->addVector(xn_m1_tagid, false, PARALLEL);
+  _transformed_sys->addVector(fxn_m1_tagid, false, PARALLEL);
 
   // Allocate storage for the previous postprocessor values
   (*transformed_pps_values).resize((*transformed_pps).size());
@@ -100,9 +100,9 @@ SteffensenSolve::saveVariableValues(const bool primary)
               "allocateStorage has not been called with primary = " + Moose::stringify(primary));
 
   // Save previous variable values
-  NumericVector<Number> & solution = _solver_sys.solution();
-  NumericVector<Number> & fxn_m1 = _solver_sys.getVector(fxn_m1_tagid);
-  NumericVector<Number> & xn_m1 = _solver_sys.getVector(xn_m1_tagid);
+  NumericVector<Number> & solution = _transformed_sys->solution();
+  NumericVector<Number> & fxn_m1 = _transformed_sys->getVector(fxn_m1_tagid);
+  NumericVector<Number> & xn_m1 = _transformed_sys->getVector(xn_m1_tagid);
 
   // What 'solution' is with regards to the Steffensen solve depends on the step
   if (iteration % 2 == 1)
@@ -211,9 +211,9 @@ SteffensenSolve::transformVariables(const std::set<dof_id_type> & transformed_do
     xn_m1_tagid = _secondary_xn_m1_tagid;
   }
 
-  NumericVector<Number> & solution = _solver_sys.solution();
-  NumericVector<Number> & fxn_m1 = _solver_sys.getVector(fxn_m1_tagid);
-  NumericVector<Number> & xn_m1 = _solver_sys.getVector(xn_m1_tagid);
+  NumericVector<Number> & solution = _transformed_sys->solution();
+  NumericVector<Number> & fxn_m1 = _transformed_sys->getVector(fxn_m1_tagid);
+  NumericVector<Number> & xn_m1 = _transformed_sys->getVector(xn_m1_tagid);
 
   for (const auto & dof : transformed_dofs)
   {
@@ -229,7 +229,7 @@ SteffensenSolve::transformVariables(const std::set<dof_id_type> & transformed_do
     solution.set(dof, new_value);
   }
   solution.close();
-  _solver_sys.update();
+  _transformed_sys->update();
 }
 
 void

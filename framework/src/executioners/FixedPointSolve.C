@@ -152,6 +152,7 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
     _relax_factor(getParam<Real>("relaxation_factor")),
     _transformed_vars(getParam<std::vector<std::string>>("transformed_variables")),
     _transformed_pps(getParam<std::vector<PostprocessorName>>("transformed_postprocessors")),
+    _transformed_sys(nullptr),
     // this value will be set by MultiApp
     _secondary_relaxation_factor(1.0),
     _fixed_point_it(0),
@@ -201,6 +202,31 @@ void
 FixedPointSolve::initialSetup()
 {
   SolveObject::initialSetup();
+
+  // Find the system for the transformed variables. They must all belong to the same system
+  if (!_transformed_vars.empty())
+  {
+    if (_problem.hasAuxiliaryVariable(_transformed_vars[0]))
+      _transformed_sys = &_aux;
+    else
+      _transformed_sys = &_solver_sys;
+  }
+  if (!_secondary_transformed_variables.empty())
+  {
+    if (_problem.hasAuxiliaryVariable(_secondary_transformed_variables[0]))
+      _transformed_sys = &_aux;
+    else
+      _transformed_sys = &_solver_sys;
+  }
+  for (const auto & var_name : _transformed_vars)
+    if (!_transformed_sys->hasVariable(var_name))
+      paramError("transformed_variables",
+                 "Transformed variables must all belong to the same system. Auxiliary and each "
+                 "solver system cannot be mixed");
+  for (const auto & var_name : _secondary_transformed_variables)
+    if (!_transformed_sys->hasVariable(var_name))
+      mooseError("Secondary transformed variables must all belong to the same system. Auxiliary "
+                 "and each solver system cannot be mixed");
 
   allocateStorage(true);
 
@@ -444,8 +470,8 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
   saveAllValues(true);
 
   // Save the previous fixed point iteration solution and aux variables
-  _solver_sys.copyPreviousFixedPointSolutions();
-  _aux.copyPreviousFixedPointSolutions();
+  if (_transformed_sys)
+    _transformed_sys->copyPreviousFixedPointSolutions();
 
   if (_has_fixed_point_its)
     _console << COLOR_MAGENTA << "\nMain app solve:" << COLOR_DEFAULT << std::endl;
