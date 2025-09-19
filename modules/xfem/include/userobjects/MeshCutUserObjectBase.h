@@ -11,7 +11,7 @@
 
 #include "GeometricCutUserObject.h"
 /**
- * Simple base class for XFEM cutting object that use a mesh to cut.
+ * Simple base class for XFEM cutting objects that use a mesh to cut.
  * This is mainly for output of the cutting mesh to exodus.
  */
 
@@ -21,7 +21,10 @@ public:
   static InputParameters validParams();
 
   MeshCutUserObjectBase(const InputParameters & parameters);
-  /// Function called by XFEMCutMeshOutput to output the cutter mesh to exodus
+  /**
+   * Get a reference to the cutter mesh
+   * @return reference to the cutter mesh
+   */
   MeshBase & getCutterMesh() const;
 
 protected:
