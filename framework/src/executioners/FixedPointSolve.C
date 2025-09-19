@@ -184,11 +184,13 @@ FixedPointSolve::FixedPointSolve(Executioner & ex)
     _secondary_relaxation_factor = _app.fixedPointConfig().sub_relaxation_factor;
     _secondary_transformed_variables = _app.fixedPointConfig().sub_transformed_vars;
     _secondary_transformed_pps = _app.fixedPointConfig().sub_transformed_pps;
+    // TODO: use paramError by retrieving parent app's MultiApp
     if (_secondary_relaxation_factor != 1 && _secondary_transformed_variables.empty() &&
         _secondary_transformed_pps.empty())
-      mooseError("Secondary relaxation factor must act on at least one "
-                 "'secondary_transformed_variables' or one 'secondary_transformed_postprocessors'. "
-                 "See parent application MultiApp parameters");
+      mooseError(
+          "Secondary relaxation factor, specified in the MultiApps block, must act on at least one "
+          "'secondary_transformed_variables' or one 'secondary_transformed_postprocessors'. "
+          "See parent application MultiApp parameters");
   }
 
   if (isParamValid("multiapp_fixed_point_convergence"))
