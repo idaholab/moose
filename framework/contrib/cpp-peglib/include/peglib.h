@@ -489,7 +489,7 @@ inline constexpr unsigned int str2tag(std::string_view sv) {
 
 namespace udl {
 
-inline constexpr unsigned int operator"" _(const char *s, size_t l) {
+inline constexpr unsigned int operator""_(const char *s, size_t l) {
   return str2tag_core(s, l, 0);
 }
 
