@@ -16,7 +16,7 @@
 MooseEnum
 ComputeFiniteStrain::decompositionType()
 {
-  return MooseEnum("TaylorExpansion EigenSolution HughesWinget", "TaylorExpansion");
+  return MooseEnum(getDecompMethodOptions(), "TaylorExpansion");
 }
 
 registerMooseObject("SolidMechanicsApp", ComputeFiniteStrain);
