@@ -207,7 +207,7 @@ NonlinearThread::onInterface(const Elem * elem, unsigned int side, BoundaryID bn
       // still remember to swap back during stack unwinding. Note that face, boundary, and interface
       // all operate with the same MaterialData object
       SwapBackSentinel face_sentinel(_fe_problem, &FEProblem::swapBackMaterialsFace, _tid);
-      _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
+      _fe_problem.reinitMaterialsFaceOnBoundary(bnd_id, elem->subdomain_id(), _tid);
       _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
 
       SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblem::swapBackMaterialsNeighbor, _tid);
@@ -434,9 +434,13 @@ NonlinearThread::prepareFace(const Elem * const elem,
   if (lower_d_elem)
     _fe_problem.reinitLowerDElem(lower_d_elem, _tid);
 
-  _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
   if (bnd_id != Moose::INVALID_BOUNDARY_ID)
+  {
+    _fe_problem.reinitMaterialsFaceOnBoundary(bnd_id, elem->subdomain_id(), _tid);
     _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
+  }
+  else
+    _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
 }
 
 bool

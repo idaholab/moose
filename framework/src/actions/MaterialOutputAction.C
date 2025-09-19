@@ -21,6 +21,7 @@
 #include "MooseEnum.h"
 #include "MooseVariableConstMonomial.h"
 #include "FunctorMaterial.h"
+#include "VariableSizeMaterialPropertiesInterface.h"
 
 #include "libmesh/utility.h"
 
@@ -269,6 +270,20 @@ MaterialOutputAction::materialOutput(const std::string & property_name,
                          material,
                          get_names_only);
 
+  else if (hasProperty<std::vector<Real>>(property_name))
+    names = outputHelper({"MaterialStdVectorAux", "variable_size", {"index"}},
+                         property_name,
+                         property_name + "_",
+                         material,
+                         get_names_only);
+
+  else if (hasADProperty<std::vector<Real>>(property_name))
+    names = outputHelper({"ADMaterialStdVectorAux", "variable_size", {"index"}},
+                         property_name,
+                         property_name + "_",
+                         material,
+                         get_names_only);
+
   else if (hasProperty<RealTensorValue>(property_name))
     names = outputHelper({"MaterialRealTensorValueAux", "012", {"row", "column"}},
                          property_name,
@@ -381,6 +396,35 @@ MaterialOutputAction::outputHelper(const MaterialOutputAction::OutputMetaData & 
   const auto & [kernel_name, index_symbols, param_names] = metadata;
   const auto dim = param_names.size();
   const auto size = index_symbols.size();
+  auto size_inner = size;
+
+  // Handle the case the material property is of a variable input-defined size
+  bool variable_size = false;
+  std::string variable_size_symbols;
+  if (index_symbols == "variable_size")
+  {
+    variable_size = true;
+    size_inner = 0;
+    const auto * const vsmi =
+        dynamic_cast<const VariableSizeMaterialPropertiesInterface *>(&material);
+    if (vsmi)
+      size_inner = vsmi->getVectorPropertySize(property_name);
+
+    if (!size_inner)
+    {
+      mooseWarning("Vector material property '" + property_name + "' will not be output as we " +
+                   (vsmi ? "have a 0-size vector during the simulation setup."
+                         : "do not know the size of the vector at initialization. Add the "
+                           "'VariableSizeMaterialPropertiesInterface' as a base class of the "
+                           "Material defining the vector property and implement the "
+                           "get...Size(property_name) routine. Note that "
+                           "the size must be known during the simulation setup phase."));
+      return {};
+    }
+    // Use indices as symbols
+    for (const auto i : make_range(size_inner))
+      variable_size_symbols += std::to_string(i);
+  }
 
   std::vector<std::string> names;
   // general 0 to 4 dimensional loop
@@ -388,11 +432,13 @@ MaterialOutputAction::outputHelper(const MaterialOutputAction::OutputMetaData & 
   for (i[3] = 0; i[3] < (dim < 4 ? 1 : size); ++i[3])
     for (i[2] = 0; i[2] < (dim < 3 ? 1 : size); ++i[2])
       for (i[1] = 0; i[1] < (dim < 2 ? 1 : size); ++i[1])
-        for (i[0] = 0; i[0] < (dim < 1 ? 1 : size); ++i[0])
+        for (i[0] = 0; i[0] < (dim < 1 ? 1 : size_inner); ++i[0])
         {
           std::string var_name = var_name_base;
+          const auto & symbols = variable_size ? variable_size_symbols : index_symbols;
           for (const auto j : make_range(dim))
-            var_name += Moose::stringify(index_symbols[i[j]]);
+            var_name += Moose::stringify(symbols[i[j]]);
+
           names.push_back(var_name);
 
           if (!get_names_only)

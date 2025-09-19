@@ -16,6 +16,7 @@ from FactorySystem.MooseObject import MooseObject
 from FactorySystem.InputParameters import InputParameters
 from pathlib import Path
 from dataclasses import dataclass
+from copy import deepcopy
 
 class Tester(MooseObject, OutputInterface):
     """
@@ -712,14 +713,33 @@ class Tester(MooseObject, OutputInterface):
             reasons['libtorch_version'] = 'using libtorch ' + str(checks['libtorch_version']) + ' REQ: ' + libtorch_version
 
         # Check for supported capabilities
+        capabilities_present = None
         if self.specs['capabilities']:
-            if capabilities is None:
-                raise Exception('Capabilities are not available')
+            assert capabilities is not None
             capabilities_present = util.checkCapabilities(capabilities,
                                                           self.specs['capabilities'],
                                                           certain=self.specs['dynamic_capabilities'])[0]
             if not capabilities_present:
                 reasons['missing_capabilities'] = 'Needs: ' + self.specs['capabilities']
+
+        # Check for required capabilities
+        if options._required_capabilities:
+            assert capabilities is not None
+
+            missing = False
+            if capabilities_present is not None:
+                modified_capabilities = deepcopy(capabilities)
+                for k, v in options._required_capabilities:
+                    assert k in capabilities
+                    modified_capabilities[k][0] = v
+
+                modified_present = util.checkCapabilities(modified_capabilities,
+                                                          self.specs['capabilities'],
+                                                          certain=True)[0]
+                missing = capabilities_present != modified_present
+
+            if not missing:
+                reasons['missing_required_capabilities'] = 'Missing required capabilities'
 
         # PETSc and SLEPc is being explicitly checked above
         local_checks = ['platform', 'machine', 'compiler', 'mesh_mode', 'method', 'library_mode',
