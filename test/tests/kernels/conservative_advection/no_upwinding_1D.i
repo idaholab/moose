@@ -51,6 +51,8 @@
 [Executioner]
   type = Transient
   solve_type = LINEAR
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
   dt = 0.1
   end_time = 1
 []
