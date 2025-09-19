@@ -203,31 +203,6 @@ FixedPointSolve::initialSetup()
 {
   SolveObject::initialSetup();
 
-  // Find the system for the transformed variables. They must all belong to the same system
-  if (!_transformed_vars.empty())
-  {
-    if (_problem.hasAuxiliaryVariable(_transformed_vars[0]))
-      _transformed_sys = &_aux;
-    else
-      _transformed_sys = &_solver_sys;
-  }
-  if (!_secondary_transformed_variables.empty())
-  {
-    if (_problem.hasAuxiliaryVariable(_secondary_transformed_variables[0]))
-      _transformed_sys = &_aux;
-    else
-      _transformed_sys = &_solver_sys;
-  }
-  for (const auto & var_name : _transformed_vars)
-    if (!_transformed_sys->hasVariable(var_name))
-      paramError("transformed_variables",
-                 "Transformed variables must all belong to the same system. Auxiliary and each "
-                 "solver system cannot be mixed");
-  for (const auto & var_name : _secondary_transformed_variables)
-    if (!_transformed_sys->hasVariable(var_name))
-      mooseError("Secondary transformed variables must all belong to the same system. Auxiliary "
-                 "and each solver system cannot be mixed");
-
   allocateStorage(true);
 
   if (_has_fixed_point_its)
@@ -287,7 +262,7 @@ FixedPointSolve::solve()
       _main_fixed_point_it++;
 
       // Save variable values before the solve. Solving will provide new values
-      if (!_app.isUltimateMaster())
+      if (!_app.isUltimateMaster() && _transformed_sys)
         saveVariableValues(/*is parent app of this iteration=*/false);
     }
     else
@@ -401,7 +376,8 @@ FixedPointSolve::solve()
 void
 FixedPointSolve::saveAllValues(const bool primary)
 {
-  saveVariableValues(primary);
+  if (_transformed_sys)
+    saveVariableValues(primary);
   savePostprocessorValues(primary);
 }
 
@@ -623,4 +599,34 @@ FixedPointSolve::performingRelaxation(const bool primary) const
     return !MooseUtils::absoluteFuzzyEqual(_relax_factor, 1.0);
   else
     return !MooseUtils::absoluteFuzzyEqual(_secondary_relaxation_factor, 1.0);
+}
+
+void
+FixedPointSolve::findTransformedSystem(const bool primary)
+{
+  // Find the system for the transformed variables. They must all belong to the same system
+  const auto & transformed_vars = primary ? _transformed_vars : _secondary_transformed_variables;
+  if (!transformed_vars.empty())
+  {
+    if (_problem.hasAuxiliaryVariable(transformed_vars[0]))
+      _transformed_sys = &_aux;
+    else
+      _transformed_sys = &_solver_sys;
+  }
+
+  for (const auto & var_name : transformed_vars)
+    if (!_transformed_sys->hasVariable(var_name))
+    {
+      if (primary)
+        paramError("transformed_variables",
+                   "Transformed variables must all belong to the same system. Auxiliary and each "
+                   "solver system cannot be mixed");
+      else
+        mooseError("Secondary transformed variables must all belong to the same system. Auxiliary "
+                   "and each solver system cannot be mixed");
+    }
+
+  if (primary && _transformed_sys == &_aux)
+    mooseInfo("Transformation of auxiliary variables is only supported for auxiliary variables "
+              "that are only transferred from the child application");
 }

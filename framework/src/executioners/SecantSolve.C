@@ -36,6 +36,10 @@ SecantSolve::SecantSolve(Executioner & ex) : FixedPointSolve(ex)
 void
 SecantSolve::allocateStorage(const bool primary)
 {
+  findTransformedSystem(primary);
+  if (!_transformed_sys)
+    return;
+
   // TODO: We would only need to store the solution for the degrees of freedom that
   // will be transformed, not the entire solution.
   // Store solution vectors for the two previous points and their evaluation

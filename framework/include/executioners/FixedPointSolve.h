@@ -198,6 +198,10 @@ protected:
   /// Print information about the fixed point convergence
   void printFixedPointConvergenceReason();
 
+  /// Find the system holding the variables to be transformed (accelerated or relaxed)
+  /// @param primary whether we are looking at transformations as the parent or child app
+  void findTransformedSystem(const bool primary);
+
   /// Whether or not we activate fixed point iteration
   const bool _has_fixed_point_its;
 
