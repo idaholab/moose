@@ -11,7 +11,7 @@ Before reading this documentation, consider reading the following materials firs
 !alert note
 Kokkos-MOOSE boundary conditions do not support automatic differention yet.
 
-The basic design pattern of Kokkos-MOOSE kernels described in [Kokkos Kernels System](syntax/Kokkos/index.md) applies to the boundary conditions as well. You can create your own integrated and nodal boundary conditions by subclassing `Moose::Kokkos::IntegratedBC` and `Moose::Kokkos::NodalBC`, respectively, and following the same pattern with kernels. Especially, integrated boundary conditions have identical interfaces with kernels, so they will not be explained here in detail. See the following source codes of `KokkosCoupledVarNeumannBC` for an example of an integrated boundary condition:
+The basic design pattern of Kokkos-MOOSE kernels described in [Kokkos Kernels System](syntax/Kokkos/index.md) applies to the boundary conditions as well. You can create your own integrated and nodal boundary conditions by subclassing `Moose::Kokkos::IntegratedBC` and `Moose::Kokkos::NodalBC`, respectively, and following the same pattern with kernels including registering your boundary conditions with `registerKokkosResidualObject()`. Especially, integrated boundary conditions have identical interfaces with kernels, so they will not be explained here in detail. See the following source codes of `KokkosCoupledVarNeumannBC` for an example of an integrated boundary condition:
 
 !listing framework/include/kokkos/bcs/KokkosCoupledVarNeumannBC.h id=kokkos-neumann-header
          caption=The `KokkosCoupledVarNeumannBC` header file.
@@ -51,7 +51,7 @@ DirichletBCBase<Derived>::computeQpResidual(const ContiguousNodeID node) const
 }
 ```
 
-Also note here the static implementation of `computeValue` using the Curiosuly Recurring Template Pattern (CRTP) which is originally a virtual function. It shows the principle of base class implementations in Kokkos-MOOSE.
+Also note here the static implementation of `computeValue` using the [Curiously Recurring Template Pattern (CRTP)](syntax/Kokkos/index.md#kokkos_crtp) which is originally a virtual function.
 
 See the following source codes of `KokkosMatchedValueBC` for another example of a nodal boundary condition:
 

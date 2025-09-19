@@ -9,7 +9,7 @@
 
 #include "KokkosMTBC.h"
 
-registerMooseObject("MooseTestApp", KokkosMTBC);
+registerKokkosResidualObject("MooseTestApp", KokkosMTBC);
 
 InputParameters
 KokkosMTBC::validParams()

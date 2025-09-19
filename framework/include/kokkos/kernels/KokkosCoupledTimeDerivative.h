@@ -14,7 +14,7 @@
 /**
  * This calculates the time derivative for a coupled variable
  **/
-class KokkosCoupledTimeDerivative final : public Moose::Kokkos::Kernel<KokkosCoupledTimeDerivative>
+class KokkosCoupledTimeDerivative : public Moose::Kokkos::Kernel
 {
 public:
   static InputParameters validParams();

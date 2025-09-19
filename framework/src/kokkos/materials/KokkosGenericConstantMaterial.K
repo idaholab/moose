@@ -9,7 +9,7 @@
 
 #include "KokkosGenericConstantMaterial.h"
 
-registerMooseObject("MooseApp", KokkosGenericConstantMaterial);
+registerKokkosMaterial("MooseApp", KokkosGenericConstantMaterial);
 
 InputParameters
 KokkosGenericConstantMaterial::validParams()

@@ -9,7 +9,7 @@
 
 #include "KokkosHeatConductionMaterial.h"
 
-registerMooseObject("HeatTransferApp", KokkosHeatConductionMaterial);
+registerKokkosMaterial("HeatTransferApp", KokkosHeatConductionMaterial);
 
 InputParameters
 KokkosHeatConductionMaterial::validParams()

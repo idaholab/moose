@@ -9,7 +9,7 @@
 
 #include "KokkosRestartDiffusion.h"
 
-registerMooseObject("MooseTestApp", KokkosRestartDiffusion);
+registerKokkosResidualObject("MooseTestApp", KokkosRestartDiffusion);
 
 InputParameters
 KokkosRestartDiffusion::validParams()

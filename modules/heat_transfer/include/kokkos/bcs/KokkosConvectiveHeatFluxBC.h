@@ -15,8 +15,7 @@
  * Boundary condition for convective heat flux where temperature and heat transfer coefficient are
  * given by material properties.
  */
-class KokkosConvectiveHeatFluxBC final
-  : public Moose::Kokkos::IntegratedBC<KokkosConvectiveHeatFluxBC>
+class KokkosConvectiveHeatFluxBC : public Moose::Kokkos::IntegratedBC
 {
 public:
   static InputParameters validParams();

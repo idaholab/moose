@@ -13,21 +13,21 @@
 
 using Real3 = Moose::Kokkos::Real3;
 
-class KokkosDiffusionPrecompute final : public Moose::Kokkos::KernelGrad<KokkosDiffusionPrecompute>
+class KokkosDiffusionPrecompute : public Moose::Kokkos::KernelGrad
 {
 public:
   static InputParameters validParams();
 
   KokkosDiffusionPrecompute(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real3 precomputeQpResidual(const unsigned int qp, ResidualDatum & datum) const;
-  KOKKOS_FUNCTION Real3 precomputeQpJacobian(const unsigned int j,
-                                             const unsigned int qp,
-                                             ResidualDatum & datum) const;
+  KOKKOS_FUNCTION Real3 computeQpResidual(const unsigned int qp, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION Real3 computeQpJacobian(const unsigned int j,
+                                          const unsigned int qp,
+                                          ResidualDatum & datum) const;
 };
 
 KOKKOS_FUNCTION inline Real3
-KokkosDiffusionPrecompute::precomputeQpResidual(const unsigned int qp, ResidualDatum & datum) const
+KokkosDiffusionPrecompute::computeQpResidual(const unsigned int qp, ResidualDatum & datum) const
 {
   // Note we do not multiply by the gradient of the test function. That is done in the parent
   // class
@@ -35,9 +35,9 @@ KokkosDiffusionPrecompute::precomputeQpResidual(const unsigned int qp, ResidualD
 }
 
 KOKKOS_FUNCTION inline Real3
-KokkosDiffusionPrecompute::precomputeQpJacobian(const unsigned int j,
-                                                const unsigned int qp,
-                                                ResidualDatum & datum) const
+KokkosDiffusionPrecompute::computeQpJacobian(const unsigned int j,
+                                             const unsigned int qp,
+                                             ResidualDatum & datum) const
 {
   // Note we do not multiply by the gradient of the test function. That is done in the parent
   // class

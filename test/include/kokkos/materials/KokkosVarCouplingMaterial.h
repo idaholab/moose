@@ -14,7 +14,7 @@
 /**
  * A material that couples a variable
  */
-class KokkosVarCouplingMaterial final : public Moose::Kokkos::Material<KokkosVarCouplingMaterial>
+class KokkosVarCouplingMaterial : public Moose::Kokkos::Material
 {
 public:
   static InputParameters validParams();

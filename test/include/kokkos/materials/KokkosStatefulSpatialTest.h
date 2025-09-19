@@ -11,7 +11,7 @@
 
 #include "KokkosMaterial.h"
 
-class KokkosStatefulSpatialTest final : public Moose::Kokkos::Material<KokkosStatefulSpatialTest>
+class KokkosStatefulSpatialTest : public Moose::Kokkos::Material
 {
 public:
   static InputParameters validParams();

@@ -29,7 +29,7 @@ struct ArrayDeepCopy<NotTriviallyCopyable>
 } // namespace Kokkos
 } // namespace Moose
 
-class KokkosNontrivialStateful final : public Moose::Kokkos::Material<KokkosNontrivialStateful>
+class KokkosNontrivialStateful : public Moose::Kokkos::Material
 {
 public:
   static InputParameters validParams();

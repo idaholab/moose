@@ -9,7 +9,7 @@
 
 #include "KokkosConstantRate.h"
 
-registerMooseObject("MooseApp", KokkosConstantRate);
+registerKokkosResidualObject("MooseApp", KokkosConstantRate);
 
 InputParameters
 KokkosConstantRate::validParams()

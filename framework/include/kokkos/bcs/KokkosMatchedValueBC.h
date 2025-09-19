@@ -14,7 +14,7 @@
 /**
  * Implements a simple coupled boundary condition where u=v on the boundary.
  */
-class KokkosMatchedValueBC final : public Moose::Kokkos::NodalBC<KokkosMatchedValueBC>
+class KokkosMatchedValueBC : public Moose::Kokkos::NodalBC
 {
 public:
   static InputParameters validParams();

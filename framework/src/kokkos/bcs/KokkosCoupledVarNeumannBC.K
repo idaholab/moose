@@ -9,7 +9,7 @@
 
 #include "KokkosCoupledVarNeumannBC.h"
 
-registerMooseObject("MooseApp", KokkosCoupledVarNeumannBC);
+registerKokkosResidualObject("MooseApp", KokkosCoupledVarNeumannBC);
 
 InputParameters
 KokkosCoupledVarNeumannBC::validParams()
