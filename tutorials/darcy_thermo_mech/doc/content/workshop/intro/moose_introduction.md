@@ -1,4 +1,4 @@
-# MOOSE Introduction
+# MOOSE
 
 !style halign=center
 Multi-physics Object Oriented Simulation Environment
@@ -18,24 +18,24 @@ Multi-physics Object Oriented Simulation Environment
 - Designed to solve computational engineering problems and
   reduce the expense and time required to develop new =applications= by:
 
-  - being easily extended and maintained
-  - working efficiently on a few and many processors
-  - providing an object-oriented, extensible system for creating all aspects of a simulation tool
+  - Being easily extended and maintained
+  - Working efficiently on a few and many processors
+  - Providing an object-oriented, extensible system for creating all aspects of a simulation tool
 
 !---
 
 ## MOOSE By The Numbers
 
 - 250 contributors
-- 56,000 commits
+- 58,000 commits
 - 5000 unique visitors per month
 - ~40 new Discussion participants per week
-- 1500 citations for the MOOSE papers
+- 1400 citations for the MOOSE papers
 
   - Most cited paper in Elsevier Software-X
   - More than 500 publications using MOOSE
 
-- 30M tests per week
+- 150M tests per week
 
 !---
 
@@ -53,12 +53,13 @@ Multi-physics Object Oriented Simulation Environment
 - Higher order geometry
 - Mesh adaptivity (refinement and coarsening)
 - Massively parallel (MPI and threads)
-- User code agnostic of dimension, parallelism, shape functions, etc.
+- User code agnostic of dimension, parallelism, shape functions, etc
+- Native support for executing multiphysics simulations across applications
 - Operating Systems:
 
-  - macOS
-  - Linux
-  - Windows (WSL)
+  - macOS (Conda, Docker)
+  - Linux (Apptainer, Conda, Docker)
+  - Windows (Docker, WSL)
 
 !---
 
@@ -97,10 +98,6 @@ Multi-physics Object Oriented Simulation Environment
 ###### https://github.com/idaholab/moose/discussions
 
 !media darcy_thermo_mech/moose_users.png style=width:50%;margin-left:auto;margin-right:auto;display:block;
-
-!---
-
-!media darcy_thermo_mech/moose_contributors.png style=width:80%;margin-left:auto;margin-right:auto;display:block;background:white;
 
 !---
 

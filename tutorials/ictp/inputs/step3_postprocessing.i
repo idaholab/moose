@@ -1,0 +1,53 @@
+[Mesh/fuel_pin]
+  type = FileMeshGenerator
+  file = fuel_pin.e
+[]
+
+[Variables]
+  [u]
+  []
+[]
+
+[Kernels]
+  [diffusion]
+    type = Diffusion
+    variable = u
+  []
+[]
+
+[BCs]
+  [inner_dirichlet]
+    type = DirichletBC
+    variable = u
+    boundary = inner
+    value = 0
+  []
+  [outer_dirichlet]
+    type = DirichletBC
+    variable = u
+    boundary = outer
+    value = 1
+  []
+[]
+
+[Postprocessors]
+  [fuel_average]
+    type = ElementAverageValue
+    variable = u
+    block = fuel
+  []
+  [outer_average]
+    type = SideAverageValue
+    variable = u
+    boundary = outer
+  []
+[]
+
+[Executioner]
+  type = Steady
+[]
+
+[Outputs]
+  exodus = true
+  csv = true
+[]
