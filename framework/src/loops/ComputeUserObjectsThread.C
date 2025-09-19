@@ -131,11 +131,8 @@ ComputeUserObjectsThread::onElement(const Elem * elem)
 
     // update the aux solution vector if writable coupled variables are used
     if (uo->hasWritableCoupledVariables())
-    {
-      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
       for (auto * var : uo->getWritableCoupledVariables())
         var->insert(_aux_sys.solution());
-    }
   }
 
   for (auto & uo : _domain_objs)

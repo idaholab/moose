@@ -1,0 +1,32 @@
+[Tests]
+  [test]
+    requirement = 'The system shall be able to solve du/dt + u = 0 ODEs at every node in the domain for variables stored in an array format and'
+    [result_diff]
+      type = CSVDiff
+      input = test.i
+      csvdiff = test_out.csv
+      detail = 'produce expected results using a hand-coded Jacobian,'
+    []
+    [jac]
+      type = PetscJacobianTester
+      input = test.i
+      run_sim = true
+      detail = 'show a correct hand-coded Jacobian,'
+      cli_args = 'Outputs/active=""'
+    []
+    [ad_result_diff]
+      type = CSVDiff
+      input = test.i
+      csvdiff = ad_test_out.csv
+      cli_args = 'Outputs/file_base=ad_test_out NodalKernels/reaction/type=ADArrayReactionNodalKernel'
+      detail = 'produce expected results using an automatic differentiation generated Jacobian, and'
+    []
+    [ad_jac]
+      type = PetscJacobianTester
+      input = test.i
+      run_sim = true
+      cli_args = 'Outputs/active="" NodalKernels/reaction/type=ADArrayReactionNodalKernel'
+      detail = 'show a correct automatic differentiation generated Jacobian.'
+    []
+  []
+[]
