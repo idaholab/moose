@@ -13,7 +13,7 @@
 #include "Action.h"
 #include "MooseEnum.h"
 #include "MooseTypes.h"
-
+#include "SolidMechanicsAppTypes.h"
 #include "libmesh/vector_value.h"
 
 /**
