@@ -341,8 +341,8 @@ ifeq ($(MOOSE_UNITY),true)
 srcsubdirs := $(shell find $(FRAMEWORK_DIR)/src -mindepth 1 -maxdepth 1 -type d -not -path '*/.libs*')
 allsrcsubdirs := $(shell find $(FRAMEWORK_DIR)/src -type d -not -path '*/.libs*')
 
-# This folder does not build with unity
-moose_non_unity := %/utils_nonunity
+# These folders do not build with unity
+moose_non_unity := %/utils_nonunity %/kokkos
 
 # Add additional non-unity directories if libtorch is enabled
 ifeq ($(ENABLE_LIBTORCH),true)
@@ -387,14 +387,15 @@ endif
 # 1: The directory where the unity source files will go
 # 2: The application directory
 # 3: A subdir that will be unity built
-# The output: is the unique .C file name for the unity file
+# 4: The source file extension
+# The output: is the unique .C or .K file name for the unity file
 # Here's what this does:
 # For each explicit path we're going to create a unique unity filename by:
 # 1. Stripping off $(FRAMEWORK_DIR)/src
 # 2. For the special case of src itself strip off $(FRAMEWORK_DIR)
 # 3. Turn every remaining '/' into an '_'
-# 4. Add '_Unity.C'
-unity_unique_name = $(1)/$(subst /,_,$(patsubst $(2)/%,%,$(patsubst $(2)/src/%,%,$(3))))_Unity.C
+# 4. Add '_Unity.C' or '_Unity.K'
+unity_unique_name = $(1)/$(subst /,_,$(patsubst $(2)/%,%,$(patsubst $(2)/src/%,%,$(3))))_Unity.$(4)
 
 # Here's what this does:
 # 1. Defines a rule to build a unity file from each subdirectory under src
@@ -403,9 +404,9 @@ unity_unique_name = $(1)/$(subst /,_,$(patsubst $(2)/%,%,$(patsubst $(2)/src/%,%
 # 4. Now that we have the name of the Unity file we need to find all of the .C files that should be #included in it
 # 4a. Use find to pick up all .C files
 # 4b. Make sure we don't pick up any _Unity.C files (we shouldn't have any anyway)
-$(foreach srcsubdir,$(unity_srcsubdirs),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(FRAMEWORK_DIR),$(srcsubdir)),$(shell find $(srcsubdir) \( -type f -o -type l \) -name "*.C"),$(srcsubdir),$(unity_src_dir))))
+$(foreach srcsubdir,$(unity_srcsubdirs),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(FRAMEWORK_DIR),$(srcsubdir),C),$(shell find $(srcsubdir) \( -type f -o -type l \) -name "*.C"),$(srcsubdir),$(unity_src_dir))))
 
-app_unity_srcfiles := $(foreach srcsubdir,$(unity_srcsubdirs),$(call unity_unique_name,$(unity_src_dir),$(FRAMEWORK_DIR),$(srcsubdir)))
+app_unity_srcfiles := $(foreach srcsubdir,$(unity_srcsubdirs),$(call unity_unique_name,$(unity_src_dir),$(FRAMEWORK_DIR),$(srcsubdir),C))
 
 unity_srcfiles += $(app_unity_srcfiles)
 
@@ -493,13 +494,26 @@ app_KOKKOS_LIBS :=
 
 ifeq ($(ENABLE_KOKKOS),true)
 
-MOOSE_KOKKOS_SRC_FILES := $(shell find $(FRAMEWORK_DIR) -name "*.K")
-MOOSE_KOKKOS_OBJECTS   := $(patsubst %.K, %.$(KOKKOS_OBJ_SUFFIX), $(MOOSE_KOKKOS_SRC_FILES))
-MOOSE_KOKKOS_DEPS      := $(patsubst %.$(KOKKOS_OBJ_SUFFIX), %.$(KOKKOS_OBJ_SUFFIX).d, $(MOOSE_KOKKOS_OBJECTS))
-MOOSE_KOKKOS_LIB       := $(FRAMEWORK_DIR)/libmoose_kokkos-$(METHOD).so
+ifeq ($(MOOSE_UNITY),true)
 
-KOKKOS_OBJECTS := $(MOOSE_KOKKOS_OBJECTS)
-KOKKOS_DEPS    := $(MOOSE_KOKKOS_DEPS)
+kokkos_unity_srcsubdirs := $(shell find $(FRAMEWORK_DIR)/src/kokkos -mindepth 1 -maxdepth 1 -type d -not -path '*/.libs*')
+$(foreach srcsubdir,$(kokkos_unity_srcsubdirs),$(eval $(call unity_file_rule,$(call unity_unique_name,$(unity_src_dir),$(FRAMEWORK_DIR),$(srcsubdir),K),$(shell find $(srcsubdir) \( -type f -o -type l \) -name "*.K"),$(srcsubdir),$(unity_src_dir))))
+
+app_KOKKOS_UNITY_SRC_FILES := $(foreach srcsubdir,$(kokkos_unity_srcsubdirs),$(call unity_unique_name,$(unity_src_dir),$(FRAMEWORK_DIR),$(srcsubdir),K))
+MOOSE_KOKKOS_SRC_FILES     := $(app_KOKKOS_UNITY_SRC_FILES)
+
+else
+
+MOOSE_KOKKOS_SRC_FILES     := $(shell find $(FRAMEWORK_DIR) -name "*.K")
+
+endif
+
+MOOSE_KOKKOS_OBJECTS       := $(patsubst %.K, %.$(KOKKOS_OBJ_SUFFIX), $(MOOSE_KOKKOS_SRC_FILES))
+MOOSE_KOKKOS_DEPS          := $(patsubst %.$(KOKKOS_OBJ_SUFFIX), %.$(KOKKOS_OBJ_SUFFIX).d, $(MOOSE_KOKKOS_OBJECTS))
+MOOSE_KOKKOS_LIB           := $(FRAMEWORK_DIR)/libmoose_kokkos-$(METHOD).so
+
+KOKKOS_OBJECTS             := $(MOOSE_KOKKOS_OBJECTS)
+KOKKOS_DEPS                := $(MOOSE_KOKKOS_DEPS)
 
 -include $(MOOSE_KOKKOS_DEPS)
 
@@ -727,7 +741,7 @@ app_KOKKOS_LIB := $(MOOSE_KOKKOS_LIB)
 clean:
 	@$(libmesh_LIBTOOL) --mode=uninstall --quiet rm -f $(app_LIB) $(app_test_LIB)
 	@rm -rf $(app_EXEC) $(app_objects) $(main_object) $(app_deps) $(app_HEADER) $(app_test_objects) $(app_unity_srcfiles)
-	@rm -rf $(app_KOKKOS_LIB) $(app_KOKKOS_OBJECTS) $(app_KOKKOS_DEPS)
+	@rm -rf $(app_KOKKOS_LIB) $(app_KOKKOS_OBJECTS) $(app_KOKKOS_DEPS) $(app_KOKKOS_UNITY_SRC_FILES)
 	@rm -rf $(APPLICATION_DIR)/build
 
 # The clobber target does 'make clean' and then uses 'find' to clean a
