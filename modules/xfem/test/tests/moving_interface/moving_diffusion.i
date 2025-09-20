@@ -116,18 +116,25 @@
   [../]
 []
 
+[Preconditioning]
+  [smp]
+    type = SMP
+    full = true
+  []
+[]
+
 [Executioner]
   type = Transient
 
   solve_type = 'PJFNK'
-  petsc_options_iname = '-ksp_gmres_restart -pc_type -pc_hypre_type -pc_hypre_boomeramg_max_iter'
-  petsc_options_value = '201                hypre    boomeramg      8'
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
 
   l_max_its = 20
   l_tol = 1e-3
   nl_max_its = 15
-  nl_rel_tol = 1e-6
-  nl_abs_tol = 1e-5
+  nl_rel_tol = 1e-12
+  nl_abs_tol = 1e-12
 
   start_time = 0.0
   dt = 1
