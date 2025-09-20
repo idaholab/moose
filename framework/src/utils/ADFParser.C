@@ -33,7 +33,11 @@ ADFParser::JITCompile()
 
   std::string fopenmp;
 #if defined(_OPENMP)
+#if defined(__INTEL_LLVM_COMPILER)
+  fopenmp = "-qopenmp";
+#else
   fopenmp = "-fopenmp";
+#endif
 #endif
 
   const auto include_path_env = std::getenv("MOOSE_ADFPARSER_JIT_INCLUDE");
