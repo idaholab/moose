@@ -10,24 +10,32 @@
 []
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 3
-  nx = 5
-  ny = 5
-  nz = 2
-  xmin = 0.0
-  xmax = 1.0
-  ymin = 0.0
-  ymax = 1.0
-  zmin = 0.0
-  zmax = 0.2
-  elem_type = HEX8
+  [read_in_cutter_mesh]
+    type = FileMeshGenerator
+    file = mesh_edge_crack.xda
+    save_with_name = mesh_cutter
+  []
+  [FEM_mesh]
+    type = GeneratedMeshGenerator
+    dim = 3
+    nx = 5
+    ny = 5
+    nz = 2
+    xmin = 0.0
+    xmax = 1.0
+    ymin = 0.0
+    ymax = 1.0
+    zmin = 0.0
+    zmax = 0.2
+    elem_type = HEX8
+  []
+  final_generator = FEM_mesh
 []
 
 [UserObjects]
   [./cut_mesh]
     type = CrackMeshCut3DUserObject
-    mesh_file = mesh_edge_crack.xda
+    mesh_generator_name = mesh_cutter
     growth_dir_method = MAX_HOOP_STRESS
     size_control = 1
     n_step_growth = 1
@@ -158,6 +166,10 @@
   file_base = edge_crack_3d_mhs_out
   execute_on = 'timestep_end'
   exodus = true
+  [./xfemcutter]
+    type = XFEMCutMeshOutput
+    xfem_cutter_uo = cut_mesh
+  [../]
   [./console]
     type = Console
     output_linear = true

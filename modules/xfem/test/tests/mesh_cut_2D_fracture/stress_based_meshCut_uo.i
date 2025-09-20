@@ -11,7 +11,7 @@
 [UserObjects]
   [cut_mesh2]
     type = MeshCut2DFractureUserObject
-    mesh_file = make_edge_crack_in.e
+    mesh_generator_name = mesh_cutter
     growth_increment = 0.05
     stress_vectorpostprocessor = "CrackFrontNonlocalStressVpp"
     stress_vector_name = "crack_tip_stress"

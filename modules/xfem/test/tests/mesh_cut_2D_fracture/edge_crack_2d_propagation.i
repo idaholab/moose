@@ -10,6 +10,20 @@
 []
 
 [Mesh]
+  [cutter_mesh]
+    type = GeneratedMeshGenerator
+    dim = 1
+    nx = 2
+    xmin = -0.301
+    xmax = 0.301
+  []
+  [move_cutter_mesh]
+    type = TransformGenerator
+    transform = TRANSLATE
+    vector_value = '0 0.5 0'
+    input = cutter_mesh
+    save_with_name = mesh_cutter
+  []
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
@@ -28,6 +42,7 @@
     top_right = '0.1 1.01 0'
     input = gen
   []
+  final_generator = dispBlock
 []
 
 [DomainIntegral]

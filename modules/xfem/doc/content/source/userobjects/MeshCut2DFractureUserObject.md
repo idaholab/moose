@@ -26,9 +26,13 @@ Quasistatic behavior is assumed, and an iterative approach is taken to repeatedl
 
 ## Example Input Syntax
 
-The following input file provides an example of a `MeshCut2DFractureUserObject` that uses fracture integrals to propagate the crack.  In this example, crack growth stops before the crack grows through the right boundary due to the fracture integral q-function intersecting the boundary.  A stress based crack growth criterion is used in conjunction with the fracture integrals by uncommenting the two lines containing `stress_vectorpostprocessor` and `stress_threshold` in the `MeshCut2DFractureUserObject`.  The stress based growth criterion causes the crack to continue to grow through the right boundary, as expected.
+The following input file in [list:cutter] provides an example of a `MeshCut2DFractureUserObject` that uses fracture integrals to propagate the crack.  In this example, crack growth stops before the crack grows through the right boundary due to the fracture integral q-function intersecting the boundary.  A stress based crack growth criterion is used in conjunction with the fracture integrals by uncommenting the two lines containing `stress_vectorpostprocessor` and `stress_threshold` in the `MeshCut2DFractureUserObject`.  The stress based growth criterion causes the crack to continue to grow through the right boundary, as expected.
 
-!listing test/tests/mesh_cut_2D_fracture/kcrit_stress_based_meshCut_uo.i block=UserObjects
+The `[Mesh]` block creating the simulation domain and cutter mesh is shown in [list:mesh]. This mesh block creates two seperate meshes.  The simulation mesh is specified by [!param](/Mesh/MeshGeneratorMesh/final_generator)`=dispBlock`. The cutter mesh is created in the `[cutter_mesh]` and `[move_cutter_mesh]` blocks.  The final mesh cutter block `[move_cutter_mesh]` gives the cutter mesh a name using [!param](/Mesh/FileMeshGenerator/save_with_name) which enables the `MeshCut2DFractureUserObject` shown in [list:cutter] to specify this mesh with [!param](/UserObjects/CrackMeshCut3DUserObject/mesh_generator_name).
+
+!listing test/tests/mesh_cut_2D_fracture/kcrit_stress_based_meshCut_uo.i id=list:cutter block= UserObjects caption=MeshCut2DFractureUserObject userobject using the cutter mesh created by the `[Mesh]` block in [list:mesh].
+
+!listing test/tests/mesh_cut_2D_fracture/edge_crack_2d_propagation.i id=list:mesh block=Mesh caption=`[Mesh]` block to create the simulation and cutter meshes.
 
 !syntax parameters /UserObjects/MeshCut2DFractureUserObject
 
