@@ -55,21 +55,16 @@ private:
   bool parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList);
 
   /**
-   * Update document text changes - specific to this server implemention.
-   * @param replacement_text - text to be replaced over the provided range
-   * @param start_line - starting replace line number ( zero-based )
-   * @param start_character - starting replace column number ( zero-based )
-   * @param end_line - ending replace line number ( zero-based )
-   * @param end_character - ending replace column number ( zero-based )
-   * @param range_length - length of replace range - server specific
-   * @return - true if the document text was updated successfully
+   * Add paths from includes and FileName parameters for client to watch.
    */
-  bool updateDocumentTextChanges(const std::string & replacement_text,
-                                 int start_line,
-                                 int start_character,
-                                 int end_line,
-                                 int end_character,
-                                 int range_length);
+  void addResourcesForDocument();
+
+  /**
+   * Recursively walk input to gather all FileName type parameter values.
+   * @param filename_vals - set to fill up with FileName parameter values
+   * @param parent - nodeview for recursive tree traversal starting point
+   */
+  void getFileNameTypeValues(std::set<std::string> & filename_vals, wasp::HITNodeView parent);
 
   /**
    * Gather document completion items - specific to this server implemention.
@@ -425,10 +420,6 @@ private:
    * @return The root node from the check parser for the current document path, if any
    */
   const hit::Node * queryRoot() const;
-  /**
-   * @return up to date text string associated with current document path, if any
-   */
-  const std::string * queryDocumentText() const;
 
   /**
    * @return The check app for the current document path, with error checking on if it exists
@@ -439,11 +430,6 @@ private:
    * on if it exists
    */
   const hit::Node & getRoot() const;
-
-  /**
-   * @return up to date text string associated with current document path
-   */
-  const std::string & getDocumentText() const;
 
   /**
    * @brief _moose_app - reference to parent application that owns this server
