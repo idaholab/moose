@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "XFEMCutMeshOutput.h"
-#include "MeshCut2DUserObjectBase.h"
+#include "MeshCutUserObjectBase.h"
 
 registerMooseObject("XFEMApp", XFEMCutMeshOutput);
 
@@ -16,16 +16,16 @@ InputParameters
 XFEMCutMeshOutput::validParams()
 {
   InputParameters params = FileOutput::validParams();
-  params.addClassDescription("Outputs XFEM MeshCut2DUserObjectBase cutter mesh in Exodus format.");
+  params.addClassDescription("Outputs XFEM MeshCutUserObjectBase cutter mesh in Exodus format.");
   params.addRequiredParam<UserObjectName>("xfem_cutter_uo",
-                                          "The MeshCut2DUserObject to get cutter mesh from");
+                                          "The MeshCutUserObject to get cutter mesh from");
   return params;
 }
 
 XFEMCutMeshOutput::XFEMCutMeshOutput(const InputParameters & params)
   : FileOutput(params),
     UserObjectInterface(this),
-    _cutter_uo(getUserObject<MeshCut2DUserObjectBase>("xfem_cutter_uo"))
+    _cutter_uo(getUserObject<MeshCutUserObjectBase>("xfem_cutter_uo"))
 {
 }
 

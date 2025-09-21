@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "GeometricCutUserObject.h"
+#include "MeshCutUserObjectBase.h"
 class MeshCut2DNucleationBase;
 class CrackFrontDefinition;
 /**
@@ -18,7 +18,7 @@ class CrackFrontDefinition;
  * Derived classes modify the class and grow the mesh
  */
 
-class MeshCut2DUserObjectBase : public GeometricCutUserObject
+class MeshCut2DUserObjectBase : public MeshCutUserObjectBase
 {
 public:
   static InputParameters validParams();
@@ -49,14 +49,9 @@ public:
   virtual const std::vector<RealVectorValue>
   getCrackPlaneNormals(unsigned int num_crack_front_points) const override;
 
-  MeshBase & getCutterMesh() const;
-
 protected:
   /// The FE solution mesh
   MooseMesh & _mesh;
-
-  /// The xfem cutter mesh
-  std::unique_ptr<MeshBase> _cutter_mesh;
 
   /// 2D UO for nucleating cracks
   const MeshCut2DNucleationBase * _nucleate_uo;
