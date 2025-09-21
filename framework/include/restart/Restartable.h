@@ -42,14 +42,14 @@ public:
   class ManagedValue
   {
   public:
-    ManagedValue<T>(RestartableData<T> & value) : _value(value) {}
+    ManagedValue(RestartableData<T> & value) : _value(value) {}
 
     /**
      * Destructor.
      *
      * Destructs the managed restartable data.
      */
-    ~ManagedValue<T>() { _value.reset(); }
+    ~ManagedValue() { _value.reset(); }
 
     /**
      * Get the restartable value.
