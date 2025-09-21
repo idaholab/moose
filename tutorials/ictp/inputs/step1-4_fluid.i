@@ -4,13 +4,13 @@
 
 [Mesh]
   # Remove block 1 (hole), 2 (fuel), 3 (clad)
-  # and define a boundary "inner" on the interface
-  # (the inside)
+  # and define a boundary "water_solid_interface"
+  # on the interface (the inside)
   [remove_fuel_pin]
     type = BlockDeletionGenerator
     input = concentric_circle
     block = '1 2 3'
-    new_boundary = inner
+    new_boundary = water_solid_interface
   []
 
   # Merge the remaining blocks (4 - water boundary layer,

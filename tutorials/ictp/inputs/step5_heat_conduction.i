@@ -1,69 +1,50 @@
-hole_diameter = 0.16e-2    # [m]
-pellet_diameter = 0.52e-2. # [m]
-clad_diameter = 0.6e-2     # [m]
-pin_pitch = 0.695e-2       # [m]
-
-[Mesh]
-  [concentric_circle]
-    type = ConcentricCircleMeshGenerator
-    num_sectors = 12
-    radii = '${fparse hole_diameter/2} ${fparse pellet_diameter/2} ${fparse clad_diameter/2}'
-    has_outer_square = false
-    preserve_volumes = false
-    rings = '1 3 1'
-    pitch = ${pin_pitch}
-  []
-  [delete_hole]
-    type = BlockDeletionGenerator
-    input = concentric_circle
-    block = 1
-    new_boundary = inner
-  []
-  [rename_blocks]
-    type = RenameBlockGenerator
-    input = delete_hole
-    old_block = '2 3'
-    new_block = 'fuel clad'
-  []
+[Mesh/fuel_pin]
+  type = FileMeshGenerator
+  file = fuel_pin.e
 []
 
 [Physics/HeatConduction/FiniteElement/heat_conduction]
-  # Apply heat conduction to the fuel and the cladding
+  # Solve heat conduction on fuel and cladding
   block = 'fuel clad'
 
-  # Fix the outer boundary to a value of 300
-  boundary_temperatures = 300 # [K]
-  fixed_temperature_boundaries = outer
+  # Apply to the variable "T" with an initial condition
+  temperature_name = T
+  initial_temperature = 310 # [K]
+
+  # Fix the outer boundary temperature to the fluid boundary temperature
+  fixed_temperature_boundaries = water_solid_interface
+  boundary_temperatures = T_fluid # [K]
 
   # Insulate the inner boundary (zero heat flux)
   insulated_boundaries = inner
 
-  # Name of the thermal conductivity material property
+  # Name of the material properties
   thermal_conductivity = k
+  specific_heat = cp
+  density = rho
 
-  # Apply a constant heat source to the fuel
-  heat_source_blocks = fuel
-  heat_source_functor = 1e8 # [W/m^2]
-
+  # Numerical parameters
   use_automatic_differentiation = false
 []
 
-[Variables]
-  [T] # [K]
-  []
+# Apply a constant heat source to the fuel
+[Kernels/heat_source]
+  type = BodyForce
+  variable = T
+  value = 1e8 # [W/m^2 in 2D]
 []
 
 [Materials]
-  [k_fuel]
+  [fuel]
     type = GenericConstantMaterial
-    prop_names = k
-    prop_values = 2 # [W/m*K]
+    prop_names = 'k cp rho'
+    prop_values = '2 3100 10700' # [W/m*K], [W/K*kg], [kg/m3]
     block = fuel
   []
-  [k_clad]
+  [clad]
     type = GenericConstantMaterial
-    prop_names = k
-    prop_values = 10 # [W/m*K]
+    prop_names = 'k cp rho'
+    prop_values = '10 2800 5400' # [W/m*K], [W/K*kg], [kg/m3]
     block = clad
   []
 []
@@ -74,4 +55,11 @@ pin_pitch = 0.695e-2       # [m]
 
 [Outputs]
   exodus = true
+[]
+
+[Postprocessors]
+  [T_max]
+    type = NodalExtremeValue
+    variable = T
+  []
 []

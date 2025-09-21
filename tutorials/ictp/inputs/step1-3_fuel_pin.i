@@ -14,12 +14,13 @@
 
   # Remove block 4 (water boundary layer) and
   # block 5 (water bulk) and define a boundary
-  # "outer" on the interface (the outside)
+  # "water_solid_interface" on the interface
+  # (the outside)
   [remove_water]
     type = BlockDeletionGenerator
     input = remove_hole
     block = '4 5'
-    new_boundary = outer
+    new_boundary = water_solid_interface
   []
 
   # Rename the remaining blocks (2: fuel, 3: clad)
