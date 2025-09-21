@@ -22,6 +22,14 @@
   []
 []
 
+[Materials]
+  [v]
+    type = GenericConstantVectorMaterial
+    prop_names = v
+    prop_values = '1 0 0'
+  []
+[]
+
 [Kernels]
   [udot]
     type = TimeDerivative
@@ -33,12 +41,20 @@
   []
 []
 
+[Preconditioning]
+  [smp]
+    type = SMP
+    full = true
+  []
+[]
+
 [Executioner]
   type = Transient
   solve_type = LINEAR
+  petsc_options_iname = '-pc_type'
+  petsc_options_value = 'lu'
   dt = 0.1
   end_time = 1
-  l_tol = 1E-14
 []
 
 [Outputs]

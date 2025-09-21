@@ -28,13 +28,26 @@ public:
 protected:
   virtual GenericReal<is_ad> computeQpResidual() override;
   virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
+
+  /// Material property multiplied against the velocity to scale advection strength
+  const GenericMaterialProperty<Real, is_ad> & _scalar;
+
+  /// Flag to determine if coupled variable is present
+  const bool _coupled_variable_present;
+
+  /// Coupled variable variable number
+  const unsigned int _coupled_variable_var;
 
   /// advection velocity
   const MooseArray<GenericRealVectorValue<is_ad>> * _velocity;
 
-  /// advected quantity
+  /// Flag to determine if user supplied variable is used as advective quantity
+  const bool _user_supplied_adv_quant;
+
+  /// Quantity, as a variable value, that is advected. Defaults to the equation variable if unspecified
   const MooseArray<GenericReal<is_ad>> & _adv_quant;
 
   /// enum to make the code clearer

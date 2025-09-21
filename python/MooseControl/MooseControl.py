@@ -17,6 +17,7 @@ import logging
 import tempfile
 from threading import Thread
 import numpy as np
+import numpy.typing as npt
 from typing import Any
 
 # Common logger for the MooseControl
@@ -541,7 +542,7 @@ class MooseControl:
             value[i] = str(value[i])
         self._setControllable(path, 'std::vector<std::string>', value)
 
-    def setControllableMatrix(self, path: str, value: np.typing.ArrayLike):
+    def setControllableMatrix(self, path: str, value: npt.ArrayLike):
         """Sets a controllable RealEigenMatrix.
 
         The provided value must be something convertible to a numpy array. If it
