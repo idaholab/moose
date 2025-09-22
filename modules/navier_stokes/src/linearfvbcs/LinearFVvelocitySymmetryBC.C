@@ -109,7 +109,8 @@ LinearFVVelocitySymmetryBC::computeBoundaryValueMatrixContribution() const
   // No matter if we have a one-term or two-term expansion we will always
   // have a contribution to the matrix
   const auto normal_component = _current_face_info->normal()(_index);
-  return 1.0 - normal_component * normal_component;
+
+  return 0.0; // 1.0 - normal_component * normal_component;
 }
 
 Real
@@ -129,13 +130,14 @@ LinearFVVelocitySymmetryBC::computeBoundaryValueRHSContribution() const
       boundary_value_rhs +=
           scaled_normal(dim_i) * _vel_vars[dim_i]->getElemValue(*elem_info, determineState());
 
-  return boundary_value_rhs;
+  return 0.0; // boundary_value_rhs;
 }
 
 Real
 LinearFVVelocitySymmetryBC::computeBoundaryGradientMatrixContribution() const
 {
   const auto normal_component = _current_face_info->normal()(_index);
+
   return normal_component * normal_component / computeCellToFaceDistance();
 }
 
