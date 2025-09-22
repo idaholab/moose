@@ -358,8 +358,8 @@ RestartableEquationSystems::restore(const SystemHeader & from_sys_header,
 #endif
 
   //_test print sys,vec,var
-  // std::cerr << "restarted " << from_sys_header.name << " " << from_vec_header.name << " "
-  //         << from_var_header.name << " " << std::endl;
+  std::cerr << "restarted " << from_sys_header.name << " " << from_vec_header.name << " "
+            << from_var_header.name << " " << std::endl;
 
   const auto error =
       [&from_sys_header, &from_vec_header, &from_var_header, &to_sys, &to_var](auto... args)
@@ -491,4 +491,21 @@ dataLoad(std::istream & stream, RestartableEquationSystems::VectorHeader & heade
   dataLoad(stream, header.projections, nullptr);
   dataLoad(stream, header.type, nullptr);
   dataLoad(stream, header.variable_offset, nullptr);
+}
+
+void
+to_json(nlohmann::json & json, const RestartableEquationSystems & res)
+{
+  std::cout << "json for RestartableEquationSystems" << std::endl;
+
+  nlohmann::json loaded_vars = nlohmann::json::array();
+
+  for (const auto & tup : res.getRestoredVariableGroup())
+  {
+    const auto & [system, vector, variable] = tup;
+
+    loaded_vars.push_back({{"system", system}, {"vector", vector}, {"variable", variable}});
+  }
+
+  json["loaded_variables"] = loaded_vars;
 }

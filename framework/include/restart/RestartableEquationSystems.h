@@ -146,6 +146,12 @@ public:
                           const std::string & vector_name,
                           const std::string & variable_name) const;
 
+  const std::set<std::tuple<std::string, std::string, std::string>> &
+  getRestoredVariableGroup() const
+  {
+    return _restored_variable_group;
+  }
+
 private:
   /// Internal method for building the header struct
   EquationSystemsHeader
@@ -195,3 +201,5 @@ void dataLoad(std::istream & stream, RestartableEquationSystems::VariableHeader 
 
 void dataStore(std::ostream & stream, RestartableEquationSystems::VectorHeader & header, void *);
 void dataLoad(std::istream & stream, RestartableEquationSystems::VectorHeader & header, void *);
+
+void to_json(nlohmann::json & json, const RestartableEquationSystems & res);
