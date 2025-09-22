@@ -35,6 +35,9 @@ protected:
   /// The velocity as a function
   const Function * const _velocity_function;
 
+  /// Flag to check if user has supplied an advective quantity or not
+  const bool _user_supplied_adv_quant;
+
   /// The advected quantity
   const MooseArray<GenericReal<is_ad>> & _adv_quant;
 
@@ -47,5 +50,17 @@ protected:
   usingGenericIntegratedBCMembers;
 };
 
-typedef ConservativeAdvectionBCTempl<false> ConservativeAdvectionBC;
+class ConservativeAdvectionBC : public ConservativeAdvectionBCTempl<false>
+{
+public:
+  static InputParameters validParams();
+
+  ConservativeAdvectionBC(const InputParameters & parameters);
+
+  using ConservativeAdvectionBCTempl<false>::ConservativeAdvectionBCTempl;
+
+protected:
+  virtual Real computeQpJacobian() override;
+};
+
 typedef ConservativeAdvectionBCTempl<true> ADConservativeAdvectionBC;

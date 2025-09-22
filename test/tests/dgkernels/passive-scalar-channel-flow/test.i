@@ -1,4 +1,5 @@
 AD = ''
+ADBC = ''
 
 [Mesh]
   [gen]
@@ -65,17 +66,17 @@ AD = ''
     diff = 1
   []
   [u_in]
-    type = ${AD}ConservativeAdvectionBC
+    type = ${ADBC}ConservativeAdvectionBC
     boundary = 'left'
     variable = u
     velocity_function = v_inlet
     primal_dirichlet_value = 1
   []
   [u_out]
-    type = ${AD}ConservativeAdvectionBC
+    type = ${ADBC}ConservativeAdvectionBC
     boundary = 'right'
     variable = u
-    velocity_mat_prop = '${AD}velocity'
+    velocity_mat_prop = '${ADBC}velocity'
   []
 []
 
