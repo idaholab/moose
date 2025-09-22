@@ -160,6 +160,12 @@ protected:
       Moose::MFEM::NamedFieldsMap<
           Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map);
 
+  void ApplyDomainNLActionIntegrators(
+      const std::string & test_var_name,
+      std::shared_ptr<mfem::ParLinearForm> form,
+      Moose::MFEM::NamedFieldsMap<
+          Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map);
+
   template <class FormType>
   void ApplyBoundaryBLFIntegrators(
       const std::string & trial_var_name,
@@ -203,6 +209,8 @@ protected:
   mfem::Array<int> empty_tdof;
 
   mfem::AssemblyLevel _assembly_level;
+
+  bool _non_linear = false;
 };
 
 template <class FormType>
@@ -252,6 +260,33 @@ EquationSystem::ApplyDomainLFIntegrators(
     }
   }
 }
+
+
+inline void
+EquationSystem::ApplyDomainNLActionIntegrators(
+    const std::string & test_var_name,
+    std::shared_ptr<mfem::ParLinearForm> form,
+    Moose::MFEM::NamedFieldsMap<
+        Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>> & kernels_map)
+{
+  if (kernels_map.Has(test_var_name) && kernels_map.Get(test_var_name)->Has(test_var_name))
+  {
+    auto kernels = kernels_map.GetRef(test_var_name).GetRef(test_var_name);
+    for (auto & kernel : kernels)
+    {
+      mfem::LinearFormIntegrator * integ = kernel->createNLActionIntegrator();
+      if (integ != nullptr)
+      {
+        _non_linear = true;
+        kernel->isSubdomainRestricted()
+            ? form->AddDomainIntegrator(std::move(integ), kernel->getSubdomainMarkers())
+            : form->AddDomainIntegrator(std::move(integ));
+      }
+    }
+  }
+}
+
+
 
 template <class FormType>
 void
