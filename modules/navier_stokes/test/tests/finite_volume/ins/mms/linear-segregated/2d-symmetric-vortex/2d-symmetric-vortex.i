@@ -7,13 +7,12 @@ advected_interp_method = 'average'
   previous_nl_solution_required = true
 []
 
-
 [Mesh]
   [gmg]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = 2
-    ny = 2
+    nx = 3
+    ny = 3
   []
 []
 
@@ -140,7 +139,7 @@ advected_interp_method = 'average'
     type = LinearFVExtrapolatedPressureBC
     boundary = 'left right top'
     variable = pressure
-    use_two_term_expansion = true
+    use_two_term_expansion = false
   []
   [pressure-symmetry]
     type = LinearFVScalarSymmetryBC
@@ -165,13 +164,15 @@ advected_interp_method = 'average'
   []
   [forcing_u]
     type = ParsedFunction
-    expression = '2*mu*(1-2*y^2)+rho*(x-x^2)*(1-2*y^2)*(1-2*x)*(1-2*y^2)+rho*(-y+2/3*y^3)*(1-2*x)*(x-x^2)*(-4*y)'
+    # expression = '2*mu*(1-2*y^2)+rho*(x-x^2)*(1-2*y^2)*(1-2*x)*(1-2*y^2)+rho*(-y+2/3*y^3)*(1-2*x)*(x-x^2)*(-4*y)'
+    expression = '-mu*(4*x^2-4*x+4*y^2-2)+rho/3*x*(x-1)*(2*x-1)*(4*y^4+3)'
     symbol_names = 'mu rho'
     symbol_values = '${mu} ${rho}'
   []
   [forcing_v]
     type = ParsedFunction
-    expression = '-mu*4*y*(1-2*x)+rho*(x-x^2)*(1-2*y^2)*(-y+2/3*y^3)*(-2)+rho*(-y+2/3*y^3)*(-1+2*y^2)*(1-2*x)+2*y'
+    # expression = '-mu*4*y*(1-2*x)+rho*(x-x^2)*(1-2*y^2)*(-y+2/3*y^3)*(-2)+rho*(-y+2/3*y^3)*(-1+2*y^2)*(1-2*x)+2*y'
+    expression = '-mu*4*y*(1-2*x)+rho/3*y*(2*y^2-3)*(2*y^2-1)*(2*x^2-2*x+1)+2*y'
     symbol_names = 'mu rho'
     symbol_values = '${mu} ${rho}'
   []
@@ -188,7 +189,7 @@ advected_interp_method = 'average'
   pressure_system = 'pressure_system'
   momentum_equation_relaxation = 0.8
   pressure_variable_relaxation = 0.3
-  num_iterations = 2000
+  num_iterations = 1000
   pressure_absolute_tolerance = 1e-8
   momentum_absolute_tolerance = 1e-8
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
@@ -206,35 +207,35 @@ advected_interp_method = 'average'
   exodus = true
   [csv]
     type = CSV
-    execute_on = FINAL
+    execute_on = TIMESTEP_END
   []
 []
 
 [Postprocessors]
   [h]
     type = AverageElementSize
-    outputs = 'csv'
-    execute_on = FINAL
+    # outputs = 'csv'
+    execute_on = TIMESTEP_END
   []
   [L2u]
     type = ElementL2FunctorError
     approximate = vel_x
     exact = exact_u
-    outputs = 'csv'
-    execute_on = FINAL
+    # outputs = 'csv'
+    execute_on = TIMESTEP_END
   []
   [L2v]
     type = ElementL2FunctorError
     approximate = vel_y
     exact = exact_v
-    outputs = 'csv'
-    execute_on = FINAL
+    # outputs = 'csv'
+    execute_on = TIMESTEP_END
   []
   [L2p]
     approximate = pressure
     exact = exact_p
     type = ElementL2FunctorError
-    outputs = 'csv'
-    execute_on = FINAL
+    # outputs = 'csv'
+    execute_on = TIMESTEP_END
   []
 []
