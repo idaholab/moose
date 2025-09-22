@@ -16,9 +16,16 @@ if __name__ == '__main__':
 
         # Control through initialization
         control.wait('INITIAL')
+
+        # Check simulation time
         pp_t = control.getPostprocessor('t')
         t  = control.getTime()
         expect_close(pp_t, t)
+
+        # Check time step size
+        pp_dt = control.getPostprocessor('dt')
+        dt  = control.getTimeStepSize()
+        expect_close(pp_dt, dt)
 
         # Tell MOOSE to continue with the solve
         control.setContinue()
@@ -28,10 +35,13 @@ if __name__ == '__main__':
             # Wait, where we shold be at TIMESTEP_END
             control.wait('TIMESTEP_END')
 
-            # Get the current value of the postprocessor and simulation time for comparision
             pp_t = control.getPostprocessor('t')
             t  = control.getTime()
             expect_close(pp_t, t)
+
+            pp_dt = control.getPostprocessor('dt')
+            dt  = control.getTimeStepSize()
+            expect_close(pp_dt, dt)
 
             # Tell MOOSE to continue with the solve
             control.setContinue()
