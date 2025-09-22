@@ -10,6 +10,20 @@
 []
 
 [Mesh]
+  [cutter_mesh]
+    type = GeneratedMeshGenerator
+    dim = 1
+    nx = 2
+    xmin = -0.301
+    xmax = 0.301
+  []
+  [move_cutter_mesh]
+    type = TransformGenerator
+    transform = TRANSLATE
+    vector_value = '0 0.5 0'
+    input = cutter_mesh
+    save_with_name = mesh_cutter
+  []
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
@@ -21,6 +35,7 @@
     ymax = 0.65
     elem_type = QUAD4
   []
+  final_generator = gen
 []
 
 [Problem]
@@ -52,7 +67,7 @@
 [UserObjects]
   [cut_mesh2]
     type = MeshCut2DFunctionUserObject
-    mesh_file = make_edge_crack_in.e
+    mesh_generator_name = mesh_cutter
     growth_direction_x = growth_func_x
     growth_direction_y = growth_func_y
     growth_rate = growth_func_v
