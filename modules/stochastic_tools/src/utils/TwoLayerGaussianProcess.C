@@ -414,7 +414,7 @@ TwoLayerGaussianProcess::krig(const RealEigenMatrix & y, const RealEigenMatrix &
 
 
 void 
-TwoLayerGaussianProcess::check_settings(Settings &settings) {
+TwoLayerGaussianProcess::initializeSettings(Settings &settings) {
   settings.l = 1;
   settings.u = 2;
 
@@ -447,7 +447,7 @@ TwoLayerGaussianProcess::tuneHyperParamsMcmc(const RealEigenMatrix & training_pa
   Real scale_0 = 1;
 
   Settings settings;
-  check_settings(settings);
+  initializeSettings(settings);
 
   Initial initial = {w_0, lengthscale_y_0, lengthscale_w_0, noise_0, scale_0};
 

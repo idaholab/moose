@@ -286,7 +286,7 @@ public:
    * Sets up constant parameter.
    * @param settings Structure that stores parameter setting.
    */
-  void check_settings(Settings & settings);
+  void initializeSettings(Settings & settings);
 
   // Tune hyperparameters using MCMC
   void tuneHyperParamsMcmc(const RealEigenMatrix & training_params,
