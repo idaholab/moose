@@ -11,6 +11,7 @@
 #include "MooseVariableField.h"
 #include "MortarUtils.h"
 #include "MooseUtils.h"
+#include "AutomaticMortarGeneration.h"
 #include "libmesh/quadrature.h"
 
 namespace
