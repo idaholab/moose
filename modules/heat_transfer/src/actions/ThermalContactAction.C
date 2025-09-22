@@ -123,6 +123,7 @@ ThermalContactAction::validParams()
       "boundaries whose elements are not connected via shared nodes. ");
 
   params.addParamNamesToGroup("primary secondary", "Gap surface definition");
+  params.addParamNamesToGroup("search_using_point_locator", "Gap geometry search");
   params.addParamNamesToGroup(
       "tangential_tolerance normal_smoothing_distance normal_smoothing_method",
       "Gap edge and edge normal smoothing");
