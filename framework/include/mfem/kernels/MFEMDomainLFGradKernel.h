@@ -24,10 +24,11 @@ public:
 
   MFEMDomainLFGardKernel(const InputParameters & parameters);
 
-  virtual mfem::LinearFormIntegrator * createLFIntegrator() override;
+  virtual mfem::LinearFormIntegrator * createNLActionIntegrator() override;
 
 protected:
-  mfem::VectorCoefficient & _vec_coef;
+  mfem::Coefficient & _coef;
+  mfem::ScalarVectorProductCoefficient * _product_coeff;
 };
 
 #endif

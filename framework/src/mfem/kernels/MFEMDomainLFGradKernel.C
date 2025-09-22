@@ -21,20 +21,25 @@ MFEMDomainLFGardKernel::validParams()
   params.addClassDescription("Adds the domain integrator to an MFEM problem for the linear form "
                              "$(f, v)_\\Omega$ "
                              "arising from the weak form of the forcing term $f$.");
-  params.addParam<MFEMVectorCoefficientName>(
-      "vector_coefficient", "1. 1. 1.", "The name of the vector coefficient f");
+  params.addParam<MFEMScalarCoefficientName>(
+      "coefficient", "1.", "The name of the scalar coefficient f");
   return params;
 }
 
 MFEMDomainLFGardKernel::MFEMDomainLFGardKernel(const InputParameters & parameters)
-  : MFEMKernel(parameters), _vec_coef(getVectorCoefficient("vector_coefficient"))
+  : MFEMKernel(parameters), _coef(getScalarCoefficient("coefficient"))
 {
+  // declares GradientGridFunctionCoefficient
+  getMFEMProblem().getCoefficients().declareVector<mfem::GradientGridFunctionCoefficient>(
+      name(), getMFEMProblem().getProblemData().gridfunctions.Get(_test_var_name));
 }
 
 mfem::LinearFormIntegrator *
-MFEMDomainLFGardKernel::createLFIntegrator()
+MFEMDomainLFGardKernel::createNLActionIntegrator()
 {
-  return new mfem::DomainLFGradIntegrator(_vec_coef);
+  mfem::VectorCoefficient & vec_coef = getMFEMProblem().getCoefficients().getVectorCoefficient(name());
+  _product_coeff = new mfem::ScalarVectorProductCoefficient(_coef, vec_coef);
+  return new mfem::DomainLFGradIntegrator(*_product_coeff);
 }
 
 #endif
