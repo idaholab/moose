@@ -21,10 +21,16 @@
   dt = 0.123
 []
 
-[Postprocessors/t]
-  type = FunctionValuePostprocessor
-  function = 't'
-  execute_on = 'INITIAL TIMESTEP_BEGIN'
+[Postprocessors]
+  [dt]
+    type = TimestepSize
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
+  []
+  [t]
+    type = FunctionValuePostprocessor
+    function = 't'
+    execute_on = 'INITIAL TIMESTEP_BEGIN'
+  []
 []
 
 [Outputs]
