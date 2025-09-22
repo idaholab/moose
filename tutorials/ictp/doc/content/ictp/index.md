@@ -43,4 +43,8 @@ September 24, 2025
 
 !---
 
-!include ictp/step5_multiapp.md
+!include ictp/step5_heat_conduction.md
+
+!---
+
+!include ictp/step6_coupling.md

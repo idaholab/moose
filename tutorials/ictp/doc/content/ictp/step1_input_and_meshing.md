@@ -31,9 +31,9 @@ The first step will be the generation of a mesh that is uniform two-dimensional 
 
 !---
 
-## Simple Mesh Input
+## Basic Mesh Input
 
-!listing ictp/inputs/step1-1_meshing_basic.i
+!listing ictp/inputs/step1_input_and_meshing/basic.i
 
 The above defines a [`GeneratedMeshGenerator`](GeneratedMeshGenerator.md) named `gmg` with the parameters:
 
@@ -43,26 +43,30 @@ The above defines a [`GeneratedMeshGenerator`](GeneratedMeshGenerator.md) named 
 
 !---
 
-## Run: Simple Mesh Input
+## Run: Basic Mesh Input
 
 ```bash
-$ cardinal-opt -i step1-1_meshing.basic.i --mesh-only
+$ cd moose/step1_input_and_meshing
+$ cardinal-opt -i basic.i --mesh-only
 ```
 
 - The argument `-i` specifies which input file to run
 - The `--mesh-only` argument forces only mesh generation and output in Exodus format
 
-  - Without arguments to `--mesh-only`, the mesh will be output as Exodus in the same folder as the input with the name `<input_file>_out.e`, i.e., `step1-1_meshing_basic_out.e`
+  - Without arguments to `--mesh-only`, the mesh will be output as Exodus in the same folder as the input with the name `<input_file>_in.e`, i.e., `basic_in.e`
   - If an argument is provided to `--mesh-only`, that argument will be used as the output path for the generated mesh
 
 - This output format, Exodus, is commonly inspected using Paraview
 
 !---
 
-## Result: Simple Mesh Input
+## Result: Basic Mesh Input
 
 !style halign=center
 !media step1-1_mesh.png style=width:40%
+
+!style halign=center
+From `basic_in.e` in Paraview
 
 !---
 
@@ -146,14 +150,14 @@ We will also apply a special treatment at the clad-fluid interface to support a 
 
 ## Input: Concentric Circle Mesh
 
-!listing ictp/inputs/step1-2_concentric_circle.i
+!listing ictp/inputs/step1_input_and_meshing/concentric_circle.i
 
 !--
 
 ## Run: Concentric Circle Mesh
 
 ```bash
-$ cardinal-opt -i step1-2_concentric_circle.i --mesh-only
+$ cardinal-opt -i concentric_circle.i --mesh-only
 ```
 
 ```
@@ -263,7 +267,7 @@ $ cardinal-opt -i step1-2_concentric_circle.i --mesh-only
 !style halign=center
 !media step1-2_mesh.png style=width:25%
 
-This mesh has five blocks (also called subdomains):
+This mesh in `concentric_circle_in.e` has five blocks (also called subdomains):
 
 - $1$: Inner hole (grey)
 - $2$: Fuel (red)
@@ -297,16 +301,14 @@ For the tasks that follow, we will utilize the:
 
 ## Input: Fuel Mesh
 
-!listing ictp/inputs/step1-3_fuel_pin.i
+!listing ictp/inputs/step1_input_and_meshing/fuel_pin.i
 
 !--
 
 ## Run: Fuel Mesh
 
-Here, we add a value to `--mesh-only` that stores the resulting mesh in `fuel_pin.e`:
-
 ```bash
-$ cardinal-opt -i step1-3_fuel_pin.i --mesh-only fuel_pin.e
+$ cardinal-opt -i fuel_pin.i --mesh-only
 ```
 
 ```
@@ -353,7 +355,7 @@ $ cardinal-opt -i step1-3_fuel_pin.i --mesh-only fuel_pin.e
    Bounding box minimum: (x,y,z)=( -0.0008,  -0.0008,        0)
    Bounding box maximum: (x,y,z)=(  0.0008,   0.0008,        0)
    Bounding box delta: (x,y,z)=(  0.0016,   0.0016,        0)
-  Sideset 6 (outer), 48 sides (EDGE2), 48 elems (QUAD4), 48 nodes
+  Sideset 6 (water_solid_interface), 48 sides (EDGE2), 48 elems (QUAD4), 48 nodes
    Side volume: 0.0188361
    Bounding box minimum: (x,y,z)=(  -0.003,   -0.003,        0)
    Bounding box maximum: (x,y,z)=(   0.003,    0.003,        0)
@@ -383,7 +385,7 @@ $ cardinal-opt -i step1-3_fuel_pin.i --mesh-only fuel_pin.e
 !style halign=center
 !media step1-3_mesh.png style=width:35%
 
-The grey elements represent the fuel (block `fuel`), and the red elements represent the cladding (block `clad`). There is a sideset on the outer boundary with name `outer` and sideset on the inner boundary with the name `inner`.
+From `fuel_pin_in.e`: The grey elements represent the fuel (block `fuel`), and the red elements represent the cladding (block `clad`). There is a sideset on the outer boundary with name `water_solid_interface` and sideset on the inner boundary with the name `inner`.
 
 !---
 
@@ -397,16 +399,14 @@ The grey elements represent the fuel (block `fuel`), and the red elements repres
 
 ## Input: Fluid Mesh
 
-!listing ictp/inputs/step1-4_fluid.i
+!listing ictp/inputs/step1_input_and_meshing/fluid.i
 
 !---
 
 ## Run: Fluid Mesh
 
-Generate the mesh and output it to `fluid.e`:
-
 ```bash
-$ cardinal-opt -i step1-4_fluid.i --mesh-only fluid.e
+$ cardinal-opt -i fluid.i --mesh-only
 ```
 
 ```
@@ -453,7 +453,7 @@ $ cardinal-opt -i step1-4_fluid.i --mesh-only fluid.e
    Bounding box minimum: (x,y,z)=(-0.003475, -0.003475,        0)
    Bounding box maximum: (x,y,z)=(0.003475, 0.003475,        0)
    Bounding box delta: (x,y,z)=( 0.00695,  0.00695,        0)
-  Sideset 5 (inner), 48 sides (EDGE2), 48 elems (QUAD4), 48 nodes
+  Sideset 5 (water_solid_interface), 48 sides (EDGE2), 48 elems (QUAD4), 48 nodes
    Side volume: 0.0188361
    Bounding box minimum: (x,y,z)=(  -0.003,   -0.003,        0)
    Bounding box maximum: (x,y,z)=(   0.003,    0.003,        0)
@@ -478,7 +478,7 @@ $ cardinal-opt -i step1-4_fluid.i --mesh-only fluid.e
 !style halign=center
 !media step1-4_mesh.png style=width:35%
 
-The grey elements represent the water (block `water`). There is a sideset on the inner boundary with the name `inner` and a sideset on the outer boundary with the name `outer`.
+From `fluid_in.e`: The grey elements represent the water (block `water`). There is a sideset on the inner boundary with the name `water_solid_interface` and a sideset on the outer boundary with the name `outer`.
 
 !---
 
@@ -489,13 +489,13 @@ We can then load these meshes in later inputs with:
 ```moose
 [Mesh/fuel_pin]
   type = FileMeshGenerator
-  file = fuel_pin.e
+  file = ../step1_input_and_meshing/fuel_pin_in.e
 []
 ```
 
 ```moose
 [Mesh/fluid]
   type = FileMeshGenerator
-  file = fluid.e
+  file = ../step1_input_and_meshing/fluid_in.e
 []
 ```

@@ -1,9 +1,112 @@
-# Step 5: MultiApps id=ictp_step5
+# Step 5: Heat Conduction id=ictp_step5
 
 !---
 
-- Create bulk fluid problem, which is fluid around the pin cell with the pin cell removed
-- Set a fixed heat flux on the inner fluid problem (to be transferred later from the pin cell surface)
-- Set a fixed temperature on the outer boundary
-- Run just this problem on its own
-- Setup multiapp where the pin cell transfers heat flux (via average postprocessor) to the fluid
+## Solid Heat Conduction
+
+Thus far, we've solved the diffusion problem on our pin cell with heterogeneity between the clad and the fuel. Let's solve something a little more realistic. We will solve a heat conduction problem on the same solid geometry where:
+
+- The outer boundary (`water_solid_interface`) has a prescribed temperature of $300$ K
+- The inner boundary has zero heat flux
+- There is a volumetric heat source in the fuel (`fuel`) of $10^8~\text{W}/\text{m}^2$
+
+The material properties are as follows:
+
+| Property | Fuel | Clad |
+| - | - | - |
+| $k$ | $2~\text{W}/\text{m}^2$ | $10~\text{W}/\text{m}^2$ |
+| $c_p$ | $3100~\text{W}/(\text{K} \cdot \text{kg})$ | $2800~\text{W}/(\text{K} \cdot \text{kg})$ |
+| $\rho$ | $10700~\text{kg}/\text{m}^3$ | $5400~\text{kg}/\text{m}^3$ |
+
+!---
+
+## Solid Heat Conduction: New Capabilities
+
+A few new things will be introduced in this step:
+
+- [`Physics`](Physics/index.md) system: for setting up a heat conduction problem using the convenience [`Physics/HeatConduction/FiniteElement`](physics/HeatConductionCG.md) syntax
+- [`AuxVariable`](AuxVariables/index.md) system: for defining fields that are auxiliary (not solved for)
+- [`AuxKernel`](AuxKernels/index.md) system: for filling an `AuxVariable`
+
+!---
+
+## Auxiliary Variables and Kernels
+
+The term "auxiliary variable" is defined, in MOOSE language, as a variable that is directly calculated using an `AuxKernel` object. An `AuxKernel` fills into an `AuxVariable`. This allows for postprocessing, coupling, and proxy calculations.
+
+Auxiliary variables come in two flavors:
+
+- Elemental: constant or higher-order monomials; discontinuous across elements
+- Nodal: like linear-lagrange; continuous across elements
+
+In particular, we will utilize the [`DiffusionFluxAux`](DiffusionFluxAux.md) to compute the integral of the heat flux on the outer boundary (`water_solid_interface`).
+
+!---
+
+## Input: Solid Heat Conduction
+
+!listing ictp/inputs/step5_heat_conduction/solid.i
+
+!---
+
+## Run: Solid Heat Conduction
+
+!---
+
+```bash
+$ cd ../step5_heat_conduction
+$ cardinal-opt -i solid.i
+```
+
+```
+Postprocessor Values:
++----------------+----------------+--------------------+
+| time           | T_max          | heat_flux_integral |
++----------------+----------------+--------------------+
+|   0.000000e+00 |   0.000000e+00 |       0.000000e+00 |
+|   1.000000e+00 |   3.636917e+02 |       2.421074e+03 |
++----------------+----------------+--------------------+
+```
+
+!---
+
+## Result: Solid Heat Conduction
+
+!style halign=center
+!media step5-1_solution.png style=width:50%
+
+!style halign=center
+From `solid_out.e` in Paraview
+
+!---
+
+## Result: Solid Heat Conduction Line
+
+!style halign=center
+!media step5-1_line.png style=width:50%
+
+!style halign=center
+Line plot of $T$ through $y = 0$ from `solid_out.e` in Paraview with refinement
+
+!---
+
+## Input: Fluid Heat Conduction
+
+!listing ictp/inputs/step5_heat_conduction/fluid.i
+
+!---
+
+## Run: Fluid Heat Conduction
+
+!---
+
+```bash
+$ cardinal-opt -i fluid.i
+```
+
+!---
+
+## Result: Solid Heat Conduction
+
+!style halign=center
+TO DO

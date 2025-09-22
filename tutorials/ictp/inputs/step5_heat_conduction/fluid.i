@@ -32,7 +32,7 @@
 # flux from the solid
 [AuxVariables]
   [flux_from_solid]
-    initial_condition = 500 # [W/m]
+    initial_condition = 10000
   []
 []
 

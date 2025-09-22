@@ -50,7 +50,7 @@ We will utilize the following systems in MOOSE in addition to `[Mesh]` in our in
 
 Define the variable $u$:
 
-!listing ictp/inputs/step2-1_diffusion.i block=Variables
+!listing ictp/inputs/step2_diffusion/diffusion.i block=Variables
 
 Variables can be thought of as the equation(s) you are trying to solve.
 
@@ -62,7 +62,7 @@ The default parameters designate first-order linear Lagrange shape functions, th
 
 Define a [`Diffusion`](Diffusion.md) kernel on the variable `u`:
 
-!listing ictp/inputs/step2-1_diffusion.i block=Kernels
+!listing ictp/inputs/step2_diffusion/diffusion.i block=Kernels
 
 A Kernel represents an object that contributes to the residual and the Jacobian matrix. Multiple can be used and they can also be coupled to one another to add nonlinearity.
 
@@ -74,7 +74,7 @@ Kernels can be "block restricted" (applied to a subset of the physical mesh) via
 
 Define two [`DirichletBC`](DirichletBC.md) boundary conditions on the variable `u`; one on the boundary `inner` with a value of `0` and one on the boundary `outer` with a value of `1`:
 
-!listing ictp/inputs/step2-1_diffusion.i block=BCs
+!listing ictp/inputs/step2_diffusion/diffusion.i block=BCs
 
 !--
 
@@ -82,7 +82,7 @@ Define two [`DirichletBC`](DirichletBC.md) boundary conditions on the variable `
 
 Define a [`Steady`](Steady.md) executioner:
 
-!listing ictp/inputs/step2-1_diffusion.i block=Executioner
+!listing ictp/inputs/step2_diffusion/diffusion.i block=Executioner
 
 The other common executioner is the [`Transient`](Transient.md) executioner, which enables transient simulation.
 
@@ -92,9 +92,9 @@ The other common executioner is the [`Transient`](Transient.md) executioner, whi
 
 Use the shorthand `Outputs/exodus` syntax for enabling Exodus output:
 
-!listing ictp/inputs/step2-1_diffusion.i block=Outputs
+!listing ictp/inputs/step2_diffusion/diffusion.i block=Outputs
 
-The shorthand syntax effectively creates a [`Exodus`](Exodus.md) output where the output files are created with the name `<input_file_name>_out.e`.
+The shorthand syntax effectively creates a [`Exodus`](Exodus.md) output where the output files are created with the name `<input_file_name>_out.e` (in our case, `diffusion_out.e`)
 
 Other common shorthand syntax are `Outputs/csv` for CSV output and `Outputs/nemesis` for Nemesis (distributed Exodus) field output.
 
@@ -102,14 +102,15 @@ Other common shorthand syntax are `Outputs/csv` for CSV output and `Outputs/neme
 
 ## Input: Diffusion Problem
 
-!listing ictp/inputs/step2-1_diffusion.i
+!listing ictp/inputs/step2_diffusion/diffusion.i
 
 !---
 
 ## Run: Diffusion Problem
 
 ```bash
-$ cardinal-opt -i step2-1_diffusion.i
+$ cd ../step2_diffusion
+$ cardinal-opt -i diffusion.i
 ```
 
 !---
@@ -118,6 +119,9 @@ $ cardinal-opt -i step2-1_diffusion.i
 
 !style halign=center
 !media step2-1_solution.png style=width:50%
+
+!style halign=center
+From `diffusion_out.e` in Paraview
 
 !--
 
@@ -131,14 +135,14 @@ We will remove the [`DirichletBC`](DirichletBC.md) named `outer_dirichlet` and a
 
 ## Input: Diffusion with Volumetric Source
 
-!listing ictp/inputs/step2-2_diffusion_volumetric_source.i diff=ictp/inputs/step2-1_diffusion.i
+!listing ictp/inputs/step2_diffusion/diffusion_volumetric_source.i diff=ictp/inputs/step2_diffusion/diffusion.i
 
 !---
 
 ## Run: Diffusion with Volumetric Source
 
 ```bash
-$ cardinal-opt -i step2-2_diffusion_volumetric_source.i
+$ cardinal-opt -i diffusion_volumetric_source.i
 ```
 
 !---
@@ -147,3 +151,6 @@ $ cardinal-opt -i step2-2_diffusion_volumetric_source.i
 
 !style halign=center
 !media step2-2_solution.png style=width:50%
+
+!style halign=center
+From `diffusion_volumetric_source_out.e` in Paraview

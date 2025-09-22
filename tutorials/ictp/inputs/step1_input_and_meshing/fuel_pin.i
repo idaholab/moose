@@ -1,6 +1,6 @@
 # Include Mesh/concentric_circle, which builds the
 # full concentric circle mesh
-!include step1-2_concentric_circle.i
+!include concentric_circle.i
 
 [Mesh]
   # Remove block 1 (hole) and define a boundary

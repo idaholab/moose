@@ -28,6 +28,7 @@ Content:
             - js/**
             - bib/**
             - syntax/**
+            - source/auxkernels/DiffusionFluxAux.md
             - source/bcs/DirichletBC.md
             - source/executioners/Steady.md
             - source/executioners/Transient.md
@@ -59,6 +60,10 @@ Content:
         root_dir: ${MOOSE_DIR}/modules/reactor/doc/content
         content:
             - modules/reactor/index.md
+    heat_transfer:
+        root_dir: ${MOOSE_DIR}/modules/heat_transfer/doc/content
+        content:
+            - source/physics/HeatConductionCG.md
 
 Executioner:
     type: MooseDocs.base.Serial

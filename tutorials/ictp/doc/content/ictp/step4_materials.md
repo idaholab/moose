@@ -22,7 +22,7 @@ Objects like Kernels then consume material properties. This pluggable design ena
 
 ## Spatially-Dependent Diffusion
 
-We will take our previous diffusion solve and introduce coefficients of the diffusivity to the fuel region (block `fuel`, of value $100$) and the cladding region (block `clad`, of value $100$). The previous coefficient of diffusivity was $1$ for both regions.
+We will take our previous diffusion solve and introduce coefficients of the diffusivity to the fuel region (block `fuel`, of value $100$) and the cladding region (block `clad`, of value $2$). The previous coefficient of diffusivity was $1$ for both regions.
 
 This will require two changes:
 
@@ -33,14 +33,15 @@ This will require two changes:
 
 ## Input: Spatially-Dependent Diffusion
 
-!listing ictp/inputs/step4_diffusion_materials.i diff=ictp/inputs/step2-1_diffusion.i
+!listing ictp/inputs/step4_materials/diffusion_materials.i diff=ictp/inputs/step2_diffusion/diffusion.i
 
 !---
 
 ## Run: Spatially-Dependent Diffusion
 
 ```bash
-$ cardinal-opt -i step4_diffusion_materials.i
+$ cd ../step4_materials
+$ cardinal-opt -i diffusion_materials.i
 ```
 
 !---
@@ -49,3 +50,16 @@ $ cardinal-opt -i step4_diffusion_materials.i
 
 !style halign=center
 !media step4-1_solution.png style=width:50%
+
+!style halign=center
+From `diffusion_materials_out.e` in Paraview
+
+!---
+
+## Result: Spatially-Dependent Diffusion Line
+
+!style halign=center
+!media step4-1_line.png style=width:50%
+
+!style halign=center
+Line plot of $u$ through $y = 0$ from `diffusion_materials_out.e` in Paraview with refinement

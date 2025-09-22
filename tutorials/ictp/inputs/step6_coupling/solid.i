@@ -58,7 +58,7 @@
   # fluid on the outer boundary
   [T_fluid]
     initial_condition = 300 # [K]
-    boundary = clad
+    block = clad
   []
   # Define an aux field variable that stores the heat flux
   # on the outer boundary (the fluid interface)
@@ -76,16 +76,33 @@
 # flux at the inner and outer interface
 [AuxKernels/heat_flux]
   type = DiffusionFluxAux
+  variable = heat_flux
   diffusivity = k
   diffusion_variable = T
-  component = normal
   boundary = 'inner water_solid_interface'
+  component = normal
 []
 
 [Postprocessors]
+  # Compute the maximum temperature
   [T_max]
     type = NodalExtremeValue
     variable = T
+  []
+
+  # Compute the integral of the outgoing heat flux
+  [heat_flux]
+    type = SideIntegralVariablePostprocessor
+    variable = heat_flux
+    boundary = 'water_solid_interface'
+  []
+  # Compute the integral of the heat source; with an
+  # insulated inner boundary condition, this should be
+  # equal to the outgoing heat flux
+  [heat_source]
+    type = FunctionElementIntegral
+    function = '1e8'
+    block = 'fuel'
   []
 []
 
@@ -125,6 +142,8 @@
 
 [Executioner]
   type = Transient
+  num_steps = 20
+  dt = 1
 
   # Nonlinear solver parameters
   automatic_scaling = true

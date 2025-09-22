@@ -31,14 +31,15 @@ Common use cases are:
 
 For the simple diffusion problem in the previous step, the [`PostProcessor`](Postprocessors/index.md) system will be used to output the average value of the solution variable $u$ on the outer boundary and within the fuel.
 
-!listing ictp/inputs/step3_postprocessing.i diff=ictp/inputs/step2-1_diffusion.i
+!listing ictp/inputs/step3_postprocessing/postprocessing.i diff=ictp/inputs/step2_diffusion/diffusion.i
 
 !---
 
 ## Run: Diffusion Problem Postprocessing
 
 ```bash
-$ cardinal-opt -i step3_postprocessing.i
+$ cd ../step3_postprocessing
+$ cardinal-opt -i postprocessing.i
 ```
 
 At the end of the simulation, the postprocessor values appear on screen:
@@ -53,4 +54,4 @@ Postprocessor Values:
 +----------------+----------------+----------------+
 ```
 
-You may also open the `step3_postprocessing_out.csv` file to view the csv contents.
+You may also open the `postprocessing_out.csv` file to view the csv contents.
