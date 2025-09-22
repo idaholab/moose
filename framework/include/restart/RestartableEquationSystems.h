@@ -142,6 +142,10 @@ public:
    */
   void setLoadAllVectors(const bool load_all_vectors) { _load_all_vectors = load_all_vectors; }
 
+  bool isVariableRestored(const std::string & system_name,
+                          const std::string & vector_name,
+                          const std::string & variable_name) const;
+
 private:
   /// Internal method for building the header struct
   EquationSystemsHeader
@@ -169,6 +173,9 @@ private:
   std::vector<const libMesh::DofObject *> _loaded_ordered_objects;
   /// The loaded header
   EquationSystemsHeader _loaded_header;
+
+  // To store restored variables
+  std::set<std::tuple<std::string, std::string, std::string>> _restored_variable_group;
 };
 
 void dataStore(std::ostream & stream, RestartableEquationSystems & res, void *);

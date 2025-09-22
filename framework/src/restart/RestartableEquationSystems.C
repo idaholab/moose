@@ -309,6 +309,28 @@ RestartableEquationSystems::load(std::istream & stream)
   stream.seekg(_loaded_stream_data_begin + _loaded_header.data_size);
 }
 
+bool
+RestartableEquationSystems::isVariableRestored(const std::string & system_name,
+                                               const std::string & vector_name,
+                                               const std::string & variable_name) const
+{
+
+  for (const auto & restore_data : _restored_variable_group)
+  {
+    if (std::get<0>(restore_data) == system_name && std::get<1>(restore_data) == vector_name &&
+        std::get<2>(restore_data) == variable_name)
+    {
+      // std::cerr << "restarted_data_get " << std::get<0>(restore_data) << " "
+      //           << std::get<1>(restore_data) << " " << std::get<2>(restore_data) << " " <<
+      //           std::endl;
+      // std::cerr << "restarted_data " << system_name << " " << vector_name << " " << variable_name
+      //           << " " << std::endl;
+      return true;
+    }
+  }
+  return false;
+}
+
 void
 RestartableEquationSystems::restore(const SystemHeader & from_sys_header,
                                     const VectorHeader & from_vec_header,
@@ -331,7 +353,13 @@ RestartableEquationSystems::restore(const SystemHeader & from_sys_header,
   mooseAssert(var_it != sys_header.variables.end(), "Variable does not exist");
   const auto & var_header = var_it->second;
   mooseAssert(var_header == from_var_header, "Not my variable");
+  mooseAssert(!isVariableRestored(from_sys_header.name, from_vec_header.name, from_var_header.name),
+              "Variable already restored");
 #endif
+
+  //_test print sys,vec,var
+  // std::cerr << "restarted " << from_sys_header.name << " " << from_vec_header.name << " "
+  //         << from_var_header.name << " " << std::endl;
 
   const auto error =
       [&from_sys_header, &from_vec_header, &from_var_header, &to_sys, &to_var](auto... args)
@@ -380,6 +408,15 @@ RestartableEquationSystems::restore(const SystemHeader & from_sys_header,
       to_vec.set(dof, val);
     }
   }
+
+  // insert into the member variable
+  std::tuple<std::string, std::string, std::string> _restore_variable = {
+      from_sys_header.name, from_vec_header.name, from_var_header.name};
+
+  _restored_variable_group.insert(_restore_variable);
+
+  mooseAssert(isVariableRestored(from_sys_header.name, from_vec_header.name, from_var_header.name),
+              "Variable not marked as restored");
 }
 
 void
