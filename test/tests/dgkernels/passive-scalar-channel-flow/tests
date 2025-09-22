@@ -7,11 +7,21 @@
     design = 'ConservativeAdvection.md ADDGAdvection.md ConservativeAdvectionBC.md MatDiffusion.md DGDiffusion.md DGFunctionDiffusionDirichletBC.md'
     requirement = 'The system shall be ablve to solve an advection-diffusion problem discretized with discontinuous Galerkin, using some hand-coded Jacobians and some automatic differentiation Jacobians.'
   []
+  [test_jacbian]
+    type = PetscJacobianTester
+    input = test.i
+    cli_args = 'AD=AD'
+    ratio_tol = 1E-7
+    difference_tol = 1E-7
+    issues = '#31593'
+    design = 'ConservativeAdvectionBC.md'
+    requirement = 'The system shall be ablve to solve an advection-diffusion problem discretized with discontinuous Galerkin, using some hand-coded Jacobians and some automatic differentiation Jacobians and compute a perfect Jacobian.'
+  []
   [ad_test]
     type = Exodiff
     input = test.i
     exodiff = test_out.e
-    cli_args = 'AD=AD'
+    cli_args = 'AD=AD ADBC=AD'
     issues = '#24055'
     design = 'ConservativeAdvection.md ADDGAdvection.md ConservativeAdvectionBC.md MatDiffusion.md DGDiffusion.md DGFunctionDiffusionDirichletBC.md'
     requirement = 'The system shall be ablve to solve an advection-diffusion problem discretized with discontinuous Galerkin, using automatic differentiation.'

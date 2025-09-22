@@ -40,6 +40,12 @@ ConservativeAdvectionBCTempl<is_ad>::validParams()
   return params;
 }
 
+InputParameters
+ConservativeAdvectionBC::validParams()
+{
+  return ConservativeAdvectionBCTempl<false>::validParams();
+}
+
 template <bool is_ad>
 ConservativeAdvectionBCTempl<is_ad>::ConservativeAdvectionBCTempl(
     const InputParameters & parameters)
@@ -50,8 +56,9 @@ ConservativeAdvectionBCTempl<is_ad>::ConservativeAdvectionBCTempl(
                            : nullptr),
     _velocity_function(isParamValid("velocity_function") ? &getFunction("velocity_function")
                                                          : nullptr),
+    _user_supplied_adv_quant(isParamValid("advected_quantity")),
     _adv_quant(
-        isParamValid("advected_quantity")
+        _user_supplied_adv_quant
             ? this->template getGenericMaterialProperty<Real, is_ad>("advected_quantity").get()
             : _u),
     _primal_dirichlet(
@@ -65,6 +72,11 @@ ConservativeAdvectionBCTempl<is_ad>::ConservativeAdvectionBCTempl(
     mooseError("Only one of 'primal_dirichlet_value' or 'advected_quantity' should be provided");
   if (static_cast<bool>(_velocity_mat_prop) + static_cast<bool>(_velocity_function) != 1)
     mooseError("Exactly one of 'velocity_mat_prop' or 'velocity_function' should be provided");
+}
+
+ConservativeAdvectionBC::ConservativeAdvectionBC(const InputParameters & parameters)
+  : ConservativeAdvectionBCTempl<false>(parameters)
+{
 }
 
 template <bool is_ad>
@@ -82,6 +94,18 @@ ConservativeAdvectionBCTempl<is_ad>::computeQpResidual()
            _primal_coeff[_qp];
   else
     return _test[_i][_qp] * vdotn * _adv_quant[_qp];
+}
+
+Real
+ConservativeAdvectionBC::computeQpJacobian()
+{
+  if (!_user_supplied_adv_quant && !_primal_dirichlet)
+    return _test[_i][_qp] *
+           (_velocity_mat_prop
+                ? (*_velocity_mat_prop)[_qp]
+                : RealVectorValue(_velocity_function->vectorValue(_t, _q_point[_qp]))) *
+           this->_normals[_qp] * _phi[_j][_qp];
+  return 0.0;
 }
 
 template class ConservativeAdvectionBCTempl<false>;
