@@ -69,17 +69,18 @@
     # T does not have a well-defined gradient at nodes
     order = CONSTANT
     family = MONOMIAL
+    block = clad
   []
 []
 
 # Define an aux kernel that fills in the heat
-# flux at the inner and outer interface
+# flux at the outer interface
 [AuxKernels/heat_flux]
   type = DiffusionFluxAux
   variable = heat_flux
   diffusivity = k
   diffusion_variable = T
-  boundary = 'inner water_solid_interface'
+  boundary = 'water_solid_interface'
   component = normal
 []
 
@@ -91,18 +92,10 @@
   []
 
   # Compute the integral of the outgoing heat flux
-  [heat_flux]
+  [heat_flux_integral]
     type = SideIntegralVariablePostprocessor
     variable = heat_flux
     boundary = 'water_solid_interface'
-  []
-  # Compute the integral of the heat source; with an
-  # insulated inner boundary condition, this should be
-  # equal to the outgoing heat flux
-  [heat_source]
-    type = FunctionElementIntegral
-    function = '1e8'
-    block = 'fuel'
   []
 []
 

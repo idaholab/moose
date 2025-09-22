@@ -20,7 +20,7 @@ The material properties are as follows:
 
 !---
 
-## Solid Heat Conduction: New Capabilities
+## Additional Capabilities
 
 A few new things will be introduced in this step:
 
@@ -40,6 +40,8 @@ Auxiliary variables come in two flavors:
 - Nodal: like linear-lagrange; continuous across elements
 
 In particular, we will utilize the [`DiffusionFluxAux`](DiffusionFluxAux.md) to compute the integral of the heat flux on the outer boundary (`water_solid_interface`).
+
+We will also use an `AuxVaraible` named `T_fluid` to define the field that is used as the outer boundary condition.
 
 !---
 
@@ -90,23 +92,26 @@ Line plot of $T$ through $y = 0$ from `solid_out.e` in Paraview with refinement
 
 !---
 
-## Input: Fluid Heat Conduction
+## Fluid Heat Conduction
 
-!listing ictp/inputs/step5_heat_conduction/fluid.i
-
-!---
-
-## Run: Fluid Heat Conduction
-
-!---
-
-```bash
-$ cardinal-opt -i fluid.i
-```
-
-!---
-
-## Result: Solid Heat Conduction
+Recall our "fluid" mesh from [#ictp_step1]:
 
 !style halign=center
-TO DO
+!media step1-4_mesh.png style=width:35%
+
+!---
+
+## Fluid Heat Conduction
+
+It will become clear why in the next step -- but let's also solve a heat conduction problem on our fluid mesh with the following:
+
+- The outer boundary (`outer`) has a prescribed temperature of $300~\text{K}$
+- The inner boundary (`water_solid_interface`) has a Neumann boundary condition that fixes the incoming heat flux to a value of $2 \times 10^4~\text{W}/\text{m}^2$
+
+The material properties are as follows:
+
+| Property | Value |
+| - | - | - |
+| $k$ | $0.6~\text{W}/\text{m}^2$ |
+| $c_p$ | $1000~\text{W}/(\text{K} \cdot \text{kg})$ |
+| $\rho$ | $4100~\text{kg}/\text{m}^3$ |
