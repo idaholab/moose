@@ -23,13 +23,15 @@ class MFEMScalarParsedCoefficient : public mfem::Coefficient
 private:
   Moose::MFEM::CoefficientManager & _coefficients;
   const std::vector<MFEMScalarCoefficientName> & _coef_names;
-  bool _use_xyzt;
+  const bool & _use_xyzt;
   const FunctionParserUtils<false>::SymFunctionPtr & _func;
+  mfem::Array<mfem::real_t> _vals;
+  mfem::Vector _transip;
 
 public:
   MFEMScalarParsedCoefficient(Moose::MFEM::CoefficientManager & coefficients,
                               const std::vector<MFEMScalarCoefficientName> & coef_names,
-                              bool use_xyzt,
+                              const bool & use_xyzt,
                               const FunctionParserUtils<false>::SymFunctionPtr & func);
 
   mfem::real_t Eval(mfem::ElementTransformation & T, const mfem::IntegrationPoint & ip) override;
