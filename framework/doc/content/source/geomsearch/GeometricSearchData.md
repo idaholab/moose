@@ -9,7 +9,7 @@
     - Mesh Tying
 - The Geometric Search system allows an application to track evolving geometric relationships.
 - Currently, this entails two main capabilities: [`NearestNodeLocator`](/NearestNodeLocator.md) and [`PenetrationLocator`](/PenetrationLocator.md).
-- Both of the capabilities work in parallel and with both Parallel- and Serial-Mesh.
+- Both of the capabilities work in parallel and with both distributed and replicated meshes.
 - Locators can be requested using four different methods on the `GeometricSearchData` API:
     - `getQuadraturePenetrationLocator`
     - `getPenetrationLocator`
