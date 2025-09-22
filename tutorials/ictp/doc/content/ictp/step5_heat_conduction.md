@@ -115,3 +115,9 @@ The material properties are as follows:
 | $k$ | $0.6~\text{W}/\text{m}^2$ |
 | $c_p$ | $1000~\text{W}/(\text{K} \cdot \text{kg})$ |
 | $\rho$ | $4100~\text{kg}/\text{m}^3$ |
+
+!---
+
+## Input: Fluid Heat Conduction
+
+!listing ictp/inputs/step5_heat_conduction/fluid.i

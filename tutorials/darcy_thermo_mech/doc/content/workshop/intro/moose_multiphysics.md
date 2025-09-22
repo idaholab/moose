@@ -51,11 +51,6 @@
 
 - Quite new: +validation is not nearly as mature as with methods in the past+
 
-!---
-
-!style halign=center
-!media multiphysics_scale.png
-
 !--
 
 ## Writing a Multiphysics Code
@@ -96,69 +91,6 @@
 - Outputs can be manipulated (e.g. multiplication by radius for cylindrical coordinates)
 - An object, by itself, can be lifted from one application and used by another
 
-!---
-
-## MOOSE Pluggable System List
-
-!style! halign=center
-!row!
-!col! small=12 medium=6 large=3 style=margin-left:auto;margin-right:20px;
-Actions\\
-AuxKernels\\
-Base\\
-BCs\\
-Constraints\\
-Controls\\
-Dampers\\
-DGKernels\\
-DiracKernels\\
-Distributions\\
-Executioners\\
-!col-end!
-
-!col! small=12 medium=6 large=3 style=margin-right:2%;
-Functions\\
-Geomsearch\\
-ICs\\
-Indicators\\
-InterfaceKernels\\
-Kernels\\
-LineSearches\\
-Markers\\
-Materials\\
-Mesh\\
-MeshGenerators\\
-!col-end!
-
-!col! small=12 medium=6 large=3 style=margin-right:2%;
-MeshModifiers\\
-Multiapps\\
-NodalKernels\\
-Outputs\\
-Parser\\
-Partitioner\\
-Positions\\
-Postprocessors\\
-Preconditioners\\
-Predictors\\
-Problems\\
-!col-end!
-
-!col! small=12 medium=6 large=3 style=margin-right:10%;
-Reporters\\
-RelationshipManagers\\
-Samplers\\
-Splits\\
-TimeIntegrators\\
-TimeSteppers\\
-Transfers\\
-UserObject\\
-Utils\\
-Variables\\
-VectorPostprocessors\\
-!col-end!
-!row-end!
-!style-end!
 
 !---
 
