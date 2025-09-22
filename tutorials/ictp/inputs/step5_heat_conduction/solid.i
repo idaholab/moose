@@ -10,7 +10,10 @@
   # Store temperature as the variable "T"
   temperature_name = T
 
-  # Fix the outer boundary temperature to the fluid boundary temperature
+  # Fix the outer boundary temperature to the
+  # fluid boundary temperature, pulled in from
+  # the aux variable "T_fluid"
+  # (for now is the value 300 K)
   fixed_temperature_boundaries = water_solid_interface
   boundary_temperatures = T_fluid # [K]
 
@@ -30,7 +33,7 @@
 # fluid on the outer boundary (defined in the clad because
 # boundary restriction not currently possible)
 [AuxVariables/T_fluid]
-  initial_condition = 300
+  initial_condition = 300 # [K]
   boundary = clad
 []
 
