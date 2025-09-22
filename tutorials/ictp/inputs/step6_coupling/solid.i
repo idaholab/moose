@@ -31,14 +31,6 @@
   use_automatic_differentiation = false
 []
 
-# Define a field variable that stores the temperature of
-# fluid on the outer boundary (defined in the clad because
-# boundary restriction not currently possible)
-[AuxVariables/T_fluid]
-  initial_condition = 300 # [K]
-  boundary = clad
-[]
-
 # Apply a constant heat source to the fuel
 [Kernels/heat_source]
   type = BodyForce
@@ -61,6 +53,35 @@
   []
 []
 
+[AuxVariables]
+  # Define an aux field variable that stores the temperature of
+  # fluid on the outer boundary
+  [T_fluid]
+    initial_condition = 300 # [K]
+    boundary = clad
+  []
+  # Define an aux field variable that stores the heat flux
+  # on the outer boundary (the fluid interface)
+  # To store the heat flux computation
+  [heat_flux]
+    # We compute the heat flux on the boundary cell
+    # centers rather than nodes because linear-Lagrange
+    # T does not have a well-defined gradient at nodes
+    order = CONSTANT
+    family = MONOMIAL
+  []
+[]
+
+# Define an aux kernel that fills in the heat
+# flux at the inner and outer interface
+[AuxKernels/heat_flux]
+  type = DiffusionFluxAux
+  diffusivity = k
+  diffusion_variable = T
+  component = normal
+  boundary = 'inner water_solid_interface'
+[]
+
 [Postprocessors]
   [T_max]
     type = NodalExtremeValue
@@ -68,8 +89,60 @@
   []
 []
 
+# Create a MultiApp for the fluid problem, with the input
+# file "fluid.i"
+[MultiApps/fluid]
+  type = TransientMultiApp
+  input_files = fluid.i
+
+  # Couple at the end of each timestep
+  execute_on = TIMESTEP_END
+
+  no_restore = true
+[]
+
+# Setup Dirichlet-Neumann coupling as an example
+[Transfers]
+  # Send the outgoing heat flux from the solid problem
+  # at the end of each timestep
+  [send_heat_flux]
+    type = MultiAppGeneralFieldNearestLocationTransfer
+    to_multi_app = fluid
+    source_variable = 'heat_flux'
+    variable = 'flux_from_solid'
+    to_boundaries = 'water_solid_interface'
+  []
+  # Receive the fluid temperature field from the
+  # fluid multiapp at the end of each timestep
+  [receive_Tfluid]
+    type = MultiAppGeneralFieldNearestLocationTransfer
+    from_multi_app = fluid
+    source_variable = 'T_fluid'
+    variable = 'T_fluid'
+    to_boundaries = 'water_solid_interface'
+  []
+[]
+
 [Executioner]
-  type = Steady
+  type = Transient
+
+  # Nonlinear solver parameters
+  automatic_scaling = true
+  nl_abs_tol = 1e-10
+  line_search = none
+  petsc_options_iname = '-pc_type -pc_hypre_type'
+  petsc_options_value = 'hypre boomeramg'
+
+  # Perform fixed point iterations with the multiapp; with this
+  # we obtain the first order implicit Euler scheme. Without this,
+  # we get loose coupling
+  fixed_point_max_its = 30
+  fixed_point_rel_tol = 1e-3
+  fixed_point_abs_tol = 1e-5
+
+  # The CHT problem needs relaxation, or very small time steps
+  relaxation_factor = 0.3
+  transformed_variables = 'T'
 []
 
 [Outputs]
