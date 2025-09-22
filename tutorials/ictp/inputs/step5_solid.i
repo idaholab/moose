@@ -7,9 +7,8 @@
   # Solve heat conduction on fuel and cladding
   block = 'fuel clad'
 
-  # Apply to the variable "T" with an initial condition
+  # Store temperature as the variable "T"
   temperature_name = T
-  initial_temperature = 310 # [K]
 
   # Fix the outer boundary temperature to the fluid boundary temperature
   fixed_temperature_boundaries = water_solid_interface
@@ -25,6 +24,14 @@
 
   # Numerical parameters
   use_automatic_differentiation = false
+[]
+
+# Define a field variable that stores the temperature of
+# fluid on the outer boundary (defined in the clad because
+# boundary restriction not currently possible)
+[AuxVariables/T_fluid]
+  initial_condition = 300
+  boundary = clad
 []
 
 # Apply a constant heat source to the fuel
@@ -49,17 +56,17 @@
   []
 []
 
+[Postprocessors]
+  [T_max]
+    type = NodalExtremeValue
+    variable = T
+  []
+[]
+
 [Executioner]
   type = Steady
 []
 
 [Outputs]
   exodus = true
-[]
-
-[Postprocessors]
-  [T_max]
-    type = NodalExtremeValue
-    variable = T
-  []
 []
