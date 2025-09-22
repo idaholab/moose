@@ -367,7 +367,8 @@ EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
   const_cast<EquationSystem*>(this)->CopyVec(_BlockResidual, residual);
 
   residual *= -1.0;
-  _jacobian->AddMult(_trueBlockSol, residual);
+  if(!_non_linear)
+    _jacobian->AddMult(_trueBlockSol, residual);
 
   sol.HostRead();
   residual.HostRead();
@@ -457,6 +458,7 @@ EquationSystem::BuildLinearForms()
     // Apply kernels
     auto lf = _lfs.GetShared(test_var_name);
     ApplyDomainLFIntegrators(test_var_name, lf, _kernels_map);
+    ApplyDomainNLActionIntegrators(test_var_name, lf, _kernels_map);
     ApplyBoundaryLFIntegrators(test_var_name, lf, _integrated_bc_map);
     lf->Assemble();
   }
