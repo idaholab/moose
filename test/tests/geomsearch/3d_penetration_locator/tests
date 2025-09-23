@@ -24,6 +24,15 @@
                   "disjoint surfaces in 2D with tetrahedron elements."
   []
 
+  [3d_disconnected_tet]
+    type = 'CSVDiff'
+    input = '3d_disconnected_tet.i'
+    csvdiff = '3d_disconnected_tet_out_gap_sampler_0001.csv'
+    group = 'geometric'
+    requirement = "The PenetrationAux object shall compute the signed distance between "
+                  "disjoint boundaries in disconnected tet meshes."
+  []
+
   [rings_facing_each_other]
     type = CSVDiff
     input = '3d_rings.i'
