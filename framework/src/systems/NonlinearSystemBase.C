@@ -3837,6 +3837,7 @@ NonlinearSystemBase::timeKernelVariableNames()
 bool
 NonlinearSystemBase::needBoundaryMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid) const
 {
+<<<<<<< HEAD
   // IntegratedBCs are for now the only objects we consider to be consuming
   // matprops on boundaries.
   if (_integrated_bcs.hasActiveBoundaryObjects(bnd_id, tid))
@@ -3860,11 +3861,16 @@ NonlinearSystemBase::needBoundaryMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid
           mpi && mpi->getMaterialPropertyCalled())
         return true;
   return false;
+=======
+  // TODO: improve this and check if we actually need materials
+  return _integrated_bcs.hasActiveBoundaryObjects(bnd_id, tid);
+>>>>>>> 13bf940c11 (const a few variables)
 }
 
 bool
 NonlinearSystemBase::needInterfaceMaterialOnSide(BoundaryID bnd_id, THREAD_ID tid) const
 {
+<<<<<<< HEAD
   // InterfaceKernels are for now the only objects we consider to be consuming matprops on internal
   // boundaries.
   if (_interface_kernels.hasActiveBoundaryObjects(bnd_id, tid))
@@ -3872,11 +3878,16 @@ NonlinearSystemBase::needInterfaceMaterialOnSide(BoundaryID bnd_id, THREAD_ID ti
       if (std::static_pointer_cast<MaterialPropertyInterface>(ik)->getMaterialPropertyCalled())
         return true;
   return false;
+=======
+  // TODO: improve this and check if we actually need materials
+  return _interface_kernels.hasActiveBoundaryObjects(bnd_id, tid);
+>>>>>>> 13bf940c11 (const a few variables)
 }
 
 bool
 NonlinearSystemBase::needInternalNeighborSideMaterial(SubdomainID subdomain_id, THREAD_ID tid) const
 {
+<<<<<<< HEAD
   // DGKernels are for now the only objects we consider to be consuming matprops on
   // internal sides.
   if (_dg_kernels.hasActiveBlockObjects(subdomain_id, tid))
@@ -3887,6 +3898,10 @@ NonlinearSystemBase::needInternalNeighborSideMaterial(SubdomainID subdomain_id, 
   // HDG kernels do not require face material properties on internal sides at this time.
   // The idea is to have element locality of HDG for hybridization
   return false;
+=======
+  // TODO: improve this and check if we actually need materials
+  return _doing_dg;
+>>>>>>> 13bf940c11 (const a few variables)
 }
 
 bool
