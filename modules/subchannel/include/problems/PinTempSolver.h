@@ -154,8 +154,8 @@ protected:
    */
   Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz) override;
 
-  /** @name Material property models (metallic fuel U–Pu–Zr, HT9 cladding)
-   *  Temperatures are in Kelvin; densities in kg/m^3; cp in J/kg/K; k in W/m/K.
+  /** @name Material property models (metallic fuel U Pu Zr, HT9 cladding)
+   *  Temperatures are in Kelvin; densities in kg/m3; cp in J/kg/K; k in W/m/K.
    *  @{
    */
   /// Metallic fuel thermal conductivity k_f(T; w_Pu, w_Zr, porosity) [W/m/K]
@@ -179,10 +179,10 @@ protected:
   unsigned int pintemp_ss = 0;
   /** @} */
 
-  Real _r0;              ///< Fuel inner radius r0 [m] (use ~0 for solid fuel)
+  Real _r0;              ///< Fuel inner radius r0 [m] (use approximately 0 for solid fuel)
   Real _rfu;             ///< Fuel outer radius r_fu [m]
   Real _rci;             ///< Cladding inner radius r_ci [m]
-  Real _hgap;            ///< Effective fuel–clad gap conductance h_gap [W/m^2/K]
+  Real _hgap;            ///< Effective fuel clad gap conductance h_gap [W/m^2/K]
   Real _wpu;             ///< Pu weight fraction [-]
   Real _wzr;             ///< Zr weight fraction [-]
   Real _por;             ///< Fuel porosity fraction [-]
@@ -204,7 +204,7 @@ protected:
 
   /** @name Linear system (per pin, per axial cell) @{ */
   std::vector<std::vector<Real>> _a; ///< Coefficient matrix storage (banded/tridiagonal form)
-  std::vector<Real> _b;              ///< Right-hand side vector
+  std::vector<Real> _b;              ///< Right hand side vector
   /** @} */
 
   /** @name Cached material properties at nodes @{ */
@@ -215,8 +215,7 @@ protected:
   std::vector<Real> _rhofuel; ///< Fuel density [kg/m^3]
   std::vector<Real> _rhoclad; ///< Clad density [kg/m^3]
   /** @} */
-
-  /** @name Pin-averaged coolant fields (per axial, per pin) @{ */
+/** \name Pin averaged coolant fields (per axial, per pin) @{ */
   Eigen::ArrayXXd _tcool_pin_ave;    ///< Coolant average temperature [K]
   Eigen::ArrayXXd _pcool_pin_ave;    ///< Coolant average pressure [Pa]
   Eigen::ArrayXXd _hcool_pin_ave;    ///< Coolant average wall HTC [W/m^2/K]
