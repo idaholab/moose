@@ -3,8 +3,8 @@
   issues = '#30572'
   [CDAP_test]
     type = CSVDiff
-    input = cdaptr.i
-    csvdiff = cdaptr_out.csv
+    input = cdaptr1.i
+    csvdiff = cdaptr1_out.csv
     capabilities = 'method!=dbg'
     valgrind = NONE
     recover = false
