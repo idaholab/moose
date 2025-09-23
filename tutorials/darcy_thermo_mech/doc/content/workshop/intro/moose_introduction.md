@@ -30,11 +30,6 @@ Multi-physics Object Oriented Simulation Environment
 - 58,000 commits
 - 5000 unique visitors per month
 - ~40 new Discussion participants per week
-- 1400 citations for the MOOSE papers
-
-  - Most cited paper in Elsevier Software-X
-  - More than 500 publications using MOOSE
-
 - 150M tests per week
 
 !---
