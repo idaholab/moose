@@ -71,6 +71,7 @@
       exodiff = 'edge_crack_3d_mhs_out.e edge_crack_3d_mhs_out.e-s002 edge_crack_3d_mhs_out.e-s003 edge_crack_3d_mhs_out_XFEMCutMeshOutput.e-s0004'
       abs_zero = 1e-4 #crack face is normal to z so this gets rid of exodiffs caused by z-direction variables
       map = false
+      partial=true
       # XFEM requires --enable-unique-ids in libmesh
       capabilities = 'unique_id'
       detail = ' growth directions determined by computing the maximum hoop stress law using interaction integrals, or'

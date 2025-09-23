@@ -94,7 +94,6 @@ MeshCut2DFractureUserObject::initialize()
 {
   _is_mesh_modified = false;
   findActiveBoundaryGrowth();
-
   growFront();
   addNucleatedCracksToMesh();
   // update _crack_front_definition with nucleated nodes
@@ -124,8 +123,7 @@ MeshCut2DFractureUserObject::findActiveBoundaryGrowth()
 
   if (_use_stress && ((_stress_vpp->size() != _original_and_current_front_node_ids.size())))
     mooseError("stress_vectorpostprocessor should have the same number of crack front points as "
-               "CrackFrontDefinition.  If it is empty, check that CrackFrontNonlocalStress "
-               "vectorpostprocess has execute_on = TIMESTEP_BEGIN",
+               "CrackFrontDefinition.",
                "\n  stress_vectorpostprocessor size = ",
                _stress_vpp->size(),
                "\n  cracktips in MeshCut2DFractureUserObject = ",
@@ -142,15 +140,18 @@ MeshCut2DFractureUserObject::findActiveBoundaryGrowth()
   _active_front_node_growth_vectors.clear();
   for (unsigned int i = 0; i < _original_and_current_front_node_ids.size(); ++i)
   {
+    // only extend crack with kcrit or nonlocal stress, never both.
+    bool was_crack_extended_kcrit = false;
     if (_use_k)
     {
       Real k_crit = _k_critical;
       if (_k_critical_vpp)
         k_crit = std::min(_k_critical_vpp->at(i), _k_critical);
+
       Real k_squared = _ki_vpp->at(i) * _ki_vpp->at(i) + _kii_vpp->at(i) * _kii_vpp->at(i);
       if (k_squared > (k_crit * k_crit) && _ki_vpp->at(i) > 0)
       {
-
+        was_crack_extended_kcrit = true;
         // growth direction in crack front coord (cfc) system based on the  max hoop stress
         // criterion
         Real ki = _ki_vpp->at(i);
@@ -171,8 +172,9 @@ MeshCut2DFractureUserObject::findActiveBoundaryGrowth()
             std::make_pair(_original_and_current_front_node_ids[i].second, nodal_offset));
       }
     }
-    else if (_use_stress && _stress_vpp->at(i) > _stress_threshold)
+    if (_use_stress && !was_crack_extended_kcrit && _stress_vpp->at(i) > _stress_threshold)
     {
+      // crack will only be extended if it was not already extended by kcrit
       // just extending the crack in the same direction it was going
       RealVectorValue dir_cfc(1.0, 0.0, 0.0);
       RealVectorValue dir_global =

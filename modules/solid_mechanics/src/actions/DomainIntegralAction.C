@@ -359,7 +359,7 @@ DomainIntegralAction::act()
   const std::string aux_grad_disp_base_name("aux_grad_disp");
 
   // checking if built with xfem and setting flags for vpps used by xfem
-  std::vector<std::string> xfem_exec_flags = {EXEC_XFEM_MARK};
+  std::vector<std::string> xfem_exec_flags = {EXEC_XFEM_MARK, EXEC_TIMESTEP_END};
 
   std::string ad_prepend = "";
   if (_use_ad)
