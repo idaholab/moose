@@ -121,3 +121,21 @@ The material properties are as follows:
 ## Input: Fluid Heat Conduction
 
 !listing ictp/inputs/step5_heat_conduction/fluid.i prefix=moose/step5_heat_conduction
+
+## Run: Fluid Heat Conduction
+
+!---
+
+```bash
+$ cardinal-opt -i fluid.i
+```
+
+!---
+
+## Result: Fluid Heat Conduction
+
+!style halign=center
+!media step5-2_solution.png style=width:50%
+
+!style halign=center
+From `fluid_out.e` in Paraview
