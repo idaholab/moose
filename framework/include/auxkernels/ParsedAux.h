@@ -78,6 +78,9 @@ protected:
   /// Vector of pointers to functors
   std::vector<const Moose::Functor<Real> *> _functors;
 
+  /// Whether to use qp-functor arguments
+  const bool _use_qp_functor_arguments;
+
   /// Vector of coupled variable names
   std::vector<std::string> _coupled_variable_names;
 };
