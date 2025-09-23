@@ -151,6 +151,7 @@ PinTempSolver::initializeSolutionPinTempSolver()
   for (unsigned int i = 0; i < _n_pins; ++i)
   {
     _temp_pin[i].resize(_n_cells + 1, _nrpin + 1);
+    _temp_pin0[i].resize(_n_cells + 1, _nrpin + 1);
     auto * node_in = _subchannel_mesh.getChannelNode(i, 0);
     auto T_in = (*_T_soln)(node_in);
     for (unsigned int j = 0; j < _n_cells + 1; ++j)
@@ -263,7 +264,7 @@ PinTempSolver::set_convective_bc()
     }
   }
 
-  for (unsigned int iz = 1; iz < _n_cells + 1; ++iz)
+  for (unsigned int iz = 0; iz < _n_cells + 1; ++iz)
   {
 
     if (z_grid[iz] > unheated_length_entry && z_grid[iz] <= unheated_length_entry + heated_length)
