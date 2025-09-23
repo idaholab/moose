@@ -544,7 +544,7 @@ endif
 
 # Pre-make for checking current dependency versions and showing useful warnings
 # if things like conda packages are out of date. The variable is such that
-# rules can use $(prebuild), instead of prebuild, as a prerequisite. In those
+# rules can use $$(prebuild), instead of prebuild, as a prerequisite. In those
 # cases, if this file, moose.mk, is not included, the variable expands to the
 # empty string, establishing no dependency, and keeping the rule valid. The
 # order-only prerequisite $(moose_config), guarantees _some_ configuration file
