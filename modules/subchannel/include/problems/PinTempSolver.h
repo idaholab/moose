@@ -69,19 +69,18 @@ public:
   /// Jet reference temperature [K]
   std::vector<Real> _temp_jet;
   int _ijet_any;
- 
+
   /** @name Geometry & discretization (radii in meters) @{ */
 
   /// Cladding outer radius r_co [m] (≈ D/2 from mesh)
-  Real _rco;  
-  
+  Real _rco;
 
-  unsigned int _nrpin;   ///< Total pin radial nodes (fuel + gap/clad)
+  unsigned int _nrpin; ///< Total pin radial nodes (fuel + gap/clad)
   /** @} */
 
-  Real r0()   const { return _r0; }
-  Real rfu()  const { return _rfu; }
-  Real rci()  const { return _rci; }
+  Real r0() const { return _r0; }
+  Real rfu() const { return _rfu; }
+  Real rci() const { return _rci; }
   unsigned nrfuel() const { return _nrfuel; }
 
   /**
@@ -191,7 +190,7 @@ protected:
   Real _tliq;            ///< Fuel liquidus temperature [K] (placeholder for future melting)
   Real _ufmelt;          ///< Fuel heat of fusion [J/kg] (placeholder for future melting)
   unsigned int _nrfuel;  ///< Number of fuel radial nodes
-  
+
   std::vector<Real> _r;  ///< Radial node locations [m]
   std::vector<Real> _dr; ///< Radial control-volume widths [m]
   /** @} */
