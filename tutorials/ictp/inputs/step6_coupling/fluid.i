@@ -8,7 +8,7 @@
   block = 'water'
 
   # Store temperature as the variable "T"
-  temperature_name = T_fluid
+  temperature_name = T
   # ...with an initial condition of 300 K
   initial_temperature = 300
 
@@ -54,8 +54,6 @@
   automatic_scaling = true
   nl_abs_tol = 2e-12
   line_search = none
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
 []
 
 [Outputs]

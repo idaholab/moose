@@ -8,7 +8,7 @@
   block = 'water'
 
   # Store temperature as the variable "T"
-  temperature_name = T_fluid
+  temperature_name = T
 
   # Prescribe the heat flux on the water solid
   # interface to that from the interface, pulled

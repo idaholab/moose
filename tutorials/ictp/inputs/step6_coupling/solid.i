@@ -127,7 +127,7 @@
   [receive_Tfluid]
     type = MultiAppGeneralFieldNearestLocationTransfer
     from_multi_app = fluid
-    source_variable = 'T_fluid'
+    source_variable = 'T'
     variable = 'T_fluid'
     to_boundaries = 'water_solid_interface'
   []
@@ -135,15 +135,13 @@
 
 [Executioner]
   type = Transient
-  num_steps = 20
-  dt = 1
+  num_steps = 100
+  dt = 0.1
 
   # Nonlinear solver parameters
   automatic_scaling = true
   nl_abs_tol = 1e-10
   line_search = none
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
 
   # Perform fixed point iterations with the multiapp; with this
   # we obtain the first order implicit Euler scheme. Without this,
@@ -159,4 +157,5 @@
 
 [Outputs]
   exodus = true
+  csv = true
 []
