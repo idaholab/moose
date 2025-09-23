@@ -39,7 +39,7 @@
 
   - What does this change for the analyst?
 
-- Quite new: +validation is not nearly as mature as with methods in the past+
+- Quite new: +validation of direct physics-based models are not as well validated+
 
 !--
 

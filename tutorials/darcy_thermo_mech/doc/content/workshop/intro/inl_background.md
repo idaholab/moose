@@ -1,13 +1,13 @@
 # Idaho National Laboratory
 
-
 ### [www.inl.gov](https://inl.gov)
 
 !---
 
 ### Established in 2005, INL is the lead nuclear energy R&D laboratory for the Department of Energy
 
-#### "Establish a world-class capability in the modeling and simulation of advanced energy systems..." style=color:grey;
+!style halign=center color=grey
+"Establish a world-class capability in the modeling and simulation of advanced energy systems..."
 
 !---
 

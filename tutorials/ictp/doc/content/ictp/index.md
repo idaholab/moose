@@ -4,10 +4,8 @@
 ##### Second Joint ICTP-IAEA Workshop on Open-Source\\
 Nuclear Codes for Reactor Analysis
 
-!style halign=center
-September 24, 2025
-
-!style halign=center
+!style halign=center color=grey
+September 24, 2025\\
 Logan Harbour\\
 logan.harbour@inl.gov
 
