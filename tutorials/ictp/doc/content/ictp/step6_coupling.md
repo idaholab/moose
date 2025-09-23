@@ -93,22 +93,22 @@ This will require a single `[MultiApp]` in `solid.i` (for `fluid.i`) and two tra
 
 ## Problem `MultiApp` Block
 
-!listing ictp/inputs/step6_coupling/solid.i block=MultiApps
+!listing ictp/inputs/step6_coupling/solid.i block=MultiApps prefix=moose/step6_coupling
 
 !---
 
 ## Problem `Transfers` Block
 
-!listing ictp/inputs/step6_coupling/solid.i block=Transfers
+!listing ictp/inputs/step6_coupling/solid.i block=Transfers prefix=moose/step6_coupling
 
 !---
 
 ## Problem Input: Solid
 
-!listing ictp/inputs/step6_coupling/solid.i diff=ictp/inputs/step5_heat_conduction/solid.i
+!listing ictp/inputs/step6_coupling/solid.i diff=ictp/inputs/step5_heat_conduction/solid.i prefix=moose/step6_coupling diff_prefix=moose/step5_heat_conduction
 
 !---
 
 ## Problem Input: Fluid
 
-!listing ictp/inputs/step6_coupling/fluid.i diff=ictp/inputs/step5_heat_conduction/fluid.i
+!listing ictp/inputs/step6_coupling/fluid.i diff=ictp/inputs/step5_heat_conduction/fluid.i prefix=moose/step6_coupling diff_prefix=moose/step5_heat_conduction

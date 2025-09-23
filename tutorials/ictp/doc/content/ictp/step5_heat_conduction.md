@@ -47,7 +47,7 @@ We will also use an `AuxVaraible` named `T_fluid` to define the field that is us
 
 ## Input: Solid Heat Conduction
 
-!listing ictp/inputs/step5_heat_conduction/solid.i
+!listing ictp/inputs/step5_heat_conduction/solid.i prefix=moose/step5_heat_conduction
 
 !---
 
@@ -120,4 +120,4 @@ The material properties are as follows:
 
 ## Input: Fluid Heat Conduction
 
-!listing ictp/inputs/step5_heat_conduction/fluid.i
+!listing ictp/inputs/step5_heat_conduction/fluid.i prefix=moose/step5_heat_conduction

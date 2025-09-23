@@ -277,6 +277,8 @@ class FileListingCommand(LocalListingCommand):
         settings['after_link_prefix'] = (FileListingCommand.DEFAULT_AFTER_LINK_PREFIX,
                                          'Prefix for the modal link to the diffed "after" file')
         settings['link'] = (True, "Show the complete file via a link; overridden by SourceExtension")
+        settings['prefix'] = (None, "foo")
+        settings['diff_prefix'] = (None, "foo")
         settings.update(common.extractContentSettings())
         return settings
 
@@ -331,11 +333,13 @@ class FileListingCommand(LocalListingCommand):
         if settings['link']:
             if settings['diff']:
                 modal.ModalSourceLink(flt, src=before_filename, language=link_lang,
-                                      link_prefix=settings['before_link_prefix'])
+                                      link_prefix=settings['before_link_prefix'],
+                                      src_alt=settings['diff_prefix'])
                 html.Tag(flt, 'link_break', string='<br>')
             link_prefix = (settings['after_link_prefix']) if settings['diff'] else None
             modal.ModalSourceLink(flt, src=filename, language=link_lang,
-                                  link_prefix=link_prefix)
+                                  link_prefix=link_prefix,
+                                  src_alt=settings['prefix'])
 
         return parent
 

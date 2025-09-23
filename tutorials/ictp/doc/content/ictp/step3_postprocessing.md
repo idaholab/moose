@@ -31,7 +31,7 @@ Common use cases are:
 
 For the simple diffusion problem in the previous step, the [`PostProcessor`](Postprocessors/index.md) system will be used to output the average value of the solution variable $u$ on the outer boundary and within the fuel.
 
-!listing ictp/inputs/step3_postprocessing/postprocessing.i diff=ictp/inputs/step2_diffusion/diffusion.i
+!listing ictp/inputs/step3_postprocessing/postprocessing.i diff=ictp/inputs/step2_diffusion/diffusion.i prefix=moose/step3_postprocessing diff_prefix=moose/step2_diffusion
 
 !---
 

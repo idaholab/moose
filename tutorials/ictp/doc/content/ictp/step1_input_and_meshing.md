@@ -33,7 +33,7 @@ The first step will be the generation of a mesh that is uniform two-dimensional 
 
 ## Basic Mesh Input
 
-!listing ictp/inputs/step1_input_and_meshing/basic.i
+!listing ictp/inputs/step1_input_and_meshing/basic.i prefix=moose/step1_input_and_meshing
 
 The above defines a [`GeneratedMeshGenerator`](GeneratedMeshGenerator.md) named `gmg` with the parameters:
 
@@ -150,7 +150,7 @@ We will also apply a special treatment at the clad-fluid interface to support a 
 
 ## Input: Concentric Circle Mesh
 
-!listing ictp/inputs/step1_input_and_meshing/concentric_circle.i
+!listing ictp/inputs/step1_input_and_meshing/concentric_circle.i prefix=moose/step1_input_and_meshing
 
 !--
 
@@ -301,7 +301,7 @@ For the tasks that follow, we will utilize the:
 
 ## Input: Fuel Mesh
 
-!listing ictp/inputs/step1_input_and_meshing/fuel_pin.i
+!listing ictp/inputs/step1_input_and_meshing/fuel_pin.i prefix=moose/step1_input_and_meshing
 
 !--
 
@@ -399,7 +399,7 @@ From `fuel_pin_in.e`: The grey elements represent the fuel (block `fuel`), and t
 
 ## Input: Fluid Mesh
 
-!listing ictp/inputs/step1_input_and_meshing/fluid.i
+!listing ictp/inputs/step1_input_and_meshing/fluid.i prefix=moose/step1_input_and_meshing
 
 !---
 
