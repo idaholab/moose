@@ -73,6 +73,7 @@ PinTempSolver::initializeSolutionPinTempSolver()
     _console << "Fuel pin Geometry Error is found. Check radial dimensions." << std::endl;
     exit(0);
   }
+  _HTFG_IntenseRod.setOnes(_n_cells+1,_n_pins) ;
 
   _tcool_pin_ave.setZero(_n_cells + 1, _n_pins);
   _pcool_pin_ave.setZero(_n_cells + 1, _n_pins);
@@ -234,13 +235,13 @@ PinTempSolver::set_convective_bc()
         _pcool_pin_ave(iz, i_rod) = sump;
         if (_ijet[i_rod] == 1)
         {
-          _hcool_pin_ave(iz, i_rod) = _h_jet[i_rod];
-          _tcool_pin_ave(iz, i_rod) = _temp_jet[i_rod];
+          _hcool_pin_ave(_peak_loc, i_rod) = _h_jet[i_rod];
+          _tcool_pin_ave(_peak_loc, i_rod) = _temp_jet[i_rod];
         }
         else
         {
-          _hcool_pin_ave(iz, i_rod) = sumh;
-          _tcool_pin_ave(iz, i_rod) = sumt;
+          _hcool_pin_ave(iz, i_rod) = sumh * _HTFG_IntenseRod(iz,i_rod);
+          _tcool_pin_ave(iz, i_rod) = sumt * _HTFG_IntenseRod(iz,i_rod);
         }
       }
     }

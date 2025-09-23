@@ -64,6 +64,34 @@ Real compute2pRadius(Real zloc, Real zfail, Real theta_deg) const;
 //    Outputs: fills InodeFG_Intense_row (0/1) and returns alpha_intense_j.
 void computeIntensifiedVoiding();
 
+//
+Real _radius_frac;    
+Real _deqFail;
+Real _breach_diameter_ref;
+Real _pgas_to_coolant_ratio_ref;
+Real _r_oil;     // m
+Real _m_oil;       // slope [m/m]
+Real _max_two_phase_radius; // m
+/// initial plenum pressure
+Real _plegas0;
+/// initial plenum temperature
+Real _Tplegas0;
+/// plenum to fuel ratio
+Real _ptof_ratio;
+/// upper limit of CDF
+Real _cdfuplim;
+/// molar weight of Argon
+Real _mgas;
+/// input jet length
+Real _jetLength;
+/// mean value of failure probability/CDF normal distribution
+Real _cdfmean;
+/// sigma of failure probability/CDF normal distribution
+Real _cdfsigma;
+    
+Real _mu_oil = 3.4e-3, _mu_na = 2.4e-4;
+Real _sigma_oil = 0.023, _sigma_na = 0.18;
+
 // ---------- Minimal state this module keeps -----------
 Real _breach_vec_x = 1.0, _breach_vec_y = 0.0;  // unit vector
 Real _breach_loc_x = 0.0, _breach_loc_y = 0.0;  // breach point on OD
@@ -74,17 +102,13 @@ Real _mdot_ratio;
 unsigned int _channel_fg = -1;
 // ---------- Model parameters used by the helpers ----------
 
-//
-Real _radius_frac            = 0.20;    // “radius frac” in OCR
-Real _deqFail                = 1.0e-3;     // DeqFail
+
+
+
 std::vector<Real> _p_ratio; //
-Real _breach_diameter_ref    = 1.0e-3;
-Real _pgas_to_coolant_ratio_ref = 50.0;
-Real _mu_oil = 3.4e-3, _mu_na = 2.4e-4;
-Real _sigma_oil = 0.023, _sigma_na = 0.18;
-Real _r_oil = 0.02;     // m
-Real _m_oil = 0.2;       // slope [m/m]
-Real _max_two_phase_radius = 1.0; // m
+
+
+
 
 Real _alpha;
 Real _fric_mult;
@@ -128,7 +152,9 @@ public:
   static InputParameters validParams();
 
 protected:
-
+  /// Computes mass flow per channel for block iblock
+ virtual void computeMdot(int iblock) override;
+  
  virtual void externalSolve() override;
 
     Real _r0;
@@ -138,16 +164,7 @@ protected:
     Real _rfu;
     
     int _nrfuel;
-    /// initial plenum pressure
-    Real _plegas0 = 20.0e+6;
-    /// initial plenum temperature
-    Real _Tplegas0 = 800.0;
-	/// mean value of failure probability/CDF normal distribution
-    Real _cdfmean = 0.0;
-    /// sigma of failure probability/CDF normal distribution
-    Real _cdfsigma = 1.0;
-    /// plenum to fuel ratio
-    Real _ptof_ratio = 1.6;
+
 
     /// total failure probability over all pins
     Real _total_prob;
@@ -155,8 +172,7 @@ protected:
     Real _total_survivor_prob;
     /// total pin failures
     Real _total_fail;
-    /// upper limit of CDF
-    Real _cdfuplim = 10.0;
+
     ///gas constant
     Real _rgas = 8.31446261815324;
 
@@ -255,10 +271,7 @@ protected:
 
 
     /// Experiment-4 Argon
-    /// molar weight of Argon
-    Real _mgas = 39.948e-03;
-    /// input jet length
-    Real _jetLength = 1.42e-3;
+
     /// input orifice equivalent diameter
 //    double DeqFail = 0.33e-03;
     /// Coolant pressure - Experiment
@@ -373,7 +386,7 @@ protected:
 	std::vector<unsigned int> _origin_rod;
 
 
-    Eigen::ArrayXXd _HTFG_IntenseRod;
+
     Eigen::ArrayXXd _HTFG_IntenseChan;
     Eigen::ArrayXXi _inodeFG_Intense;
     std::vector<Real> _alpha_intense;

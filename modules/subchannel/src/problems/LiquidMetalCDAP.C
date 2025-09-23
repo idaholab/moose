@@ -31,13 +31,70 @@ LiquidMetalCDAP::validParams()
   InputParameters params = PinTempSolver::validParams();
   params.addClassDescription("Solver class for Clad Damage Propagation for SFR metal fuels in a triangular lattice "
                              "assembly and bare/wire-wrapped fuel rods");
+
+  params.addRequiredParam<Real>("normalized_min_radius", "Minimum radius of two phase exposure");
+  params.addRequiredParam<Real>("breach_size", "fuel breach size");
+  params.addRequiredParam<Real>("breach_diameter_ref", "Reference breach diameter");
+  params.addRequiredParam<Real>("plenum_gas_to_coolant_ratio_ref", "Reference plenum gas to coolant ratio");
+  params.addRequiredParam<Real>("two_phase_radius_oil", "Two-phase radius at breach plane in oil");
+  params.addRequiredParam<Real>("two_phase_slope_oil", "Two-phase expansion slope in oil");
+  params.addRequiredParam<Real>("max_two_phase_radius", "Maximum allowed radius for two phase expansion");
+  params.addRequiredParam<Real>("initial_plenum_pressure", "Initial or reference plenum pressure");
+  params.addRequiredParam<Real>("initial_plenum_temperature", "Initial plenum gas temperature");
+  params.addRequiredParam<Real>("plenum_to_fuel_ratio", "Plenum to fuel volume ratio");
+  params.addRequiredParam<Real>("upper_limit_cdf", "Upper limit of cladding CDF");
+  params.addRequiredParam<Real>("molar_gas_mass", "Molar plenum gas mass");
+  params.addRequiredParam<Real>("jet_length", "Fission gas impinging jet length");
+  params.addRequiredParam<Real>("mean_of_cdf", "Mean of CDF for normal dist");
+  params.addRequiredParam<Real>("sigma_of_cdf", "Sigma of CDf for normal dist");
+
+//Real _radius_frac            = 0.20;    // “radius frac” in OCR
+//Real _deqFail                = 1.0e-3;     // DeqFail
+//std::vector<Real> _p_ratio; //
+//Real _breach_diameter_ref    = 1.0e-3;
+//Real _pgas_to_coolant_ratio_ref = 50.0;
+
+//Real _r_oil = 0.02;     // m
+//Real _m_oil = 0.2;       // slope [m/m]
+//Real _max_two_phase_radius = 1.0; // m
+
+    /// initial plenum pressure
+ //   Real _plegas0 = 20.0e+6;
+    /// initial plenum temperature
+  //  Real _Tplegas0 = 800.0;
+
+//    Real _ptof_ratio = 1.6;
+    
+  //    Real _cdfuplim = 10.0;
+ //  Real _mgas = 39.948e-03;
+  //   Real _jetLength = 1.42e-3;
+     
+   //     Real _cdfmean = 0.0;
+    /// sigma of failure probability/CDF normal distribution
+  //  Real _cdfsigma = 1.0;
+     
   return params;
 }
 
 LiquidMetalCDAP::LiquidMetalCDAP(
     const InputParameters & params)
   : PinTempSolver(params),
-    _tri_sch_mesh(dynamic_cast<TriSubChannelMesh &>(_subchannel_mesh))
+    _tri_sch_mesh(dynamic_cast<TriSubChannelMesh &>(_subchannel_mesh)),
+    _radius_frac(getParam<Real>("normalized_min_radius")),
+    _deqFail(getParam<Real>("breach_size")),
+    _breach_diameter_ref(getParam<Real>("breach_diameter_ref")),
+    _pgas_to_coolant_ratio_ref(getParam<Real>("plenum_gas_to_coolant_ratio_ref")),
+    _r_oil(getParam<Real>("two_phase_radius_oil")),
+    _m_oil(getParam<Real>("two_phase_slope_oil")),
+    _max_two_phase_radius(getParam<Real>("max_two_phase_radius")),
+    _plegas0(getParam<Real>("initial_plenum_pressure")),
+    _Tplegas0(getParam<Real>("initial_plenum_temperature")),
+    _ptof_ratio(getParam<Real>("plenum_to_fuel_ratio")),
+    _cdfuplim(getParam<Real>("upper_limit_cdf")),
+    _mgas(getParam<Real>("molar_gas_mass")),
+    _jetLength(getParam<Real>("jet_length")),
+    _cdfmean(getParam<Real>("mean_of_cdf")),
+    _cdfsigma(getParam<Real>("sigma_of_cdf"))
 {
 
 }
@@ -97,7 +154,7 @@ LiquidMetalCDAP::initializeSolutionCDAP()
   
   _alpha_intense.resize(_n_cells+1,0.0);
   _HTFG_IntenseChan.setOnes(_n_cells+1,_n_channels) ;
-  _HTFG_IntenseRod.setOnes(_n_cells+1,_n_pins) ;
+ 
   _inodeFG_Intense.setZero(_n_cells+1,_n_channels) ;
 
   _mdot_ratio = 1.0;
@@ -1238,6 +1295,117 @@ LiquidMetalCDAP::computeHTfg()
     }
   }
 }
+// TODO: Check application mdot ratio as a multiplier to the inlet mass flow rate boundary condition.
+void
+LiquidMetalCDAP::computeMdot(int iblock)
+{
+  unsigned int last_node = (iblock + 1) * _block_size;
+  unsigned int first_node = iblock * _block_size + 1;
+  if (!_implicit_bool)
+  {
+    for (unsigned int iz = first_node; iz < last_node + 1; iz++)
+    {
+      auto dz = _z_grid[iz] - _z_grid[iz - 1];
+      for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
+      {
+        auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+        auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
+        auto volume = dz * (*_S_flow_soln)(node_in);
+        auto time_term = _TR * ((*_rho_soln)(node_out)-_rho_soln->old(node_out)) * volume / _dt;
+        // Wij positive out of i into j;
+        auto mdot_out = (*_mdot_soln)(node_in) * _mdot_ratio - (*_SumWij_soln)(node_out)-time_term;
+        if (mdot_out < 0)
+        {
+          _console << "Wij = : " << _Wij << "\n";
+          mooseError(name(),
+                     " : Calculation of negative mass flow mdot_out = : ",
+                     mdot_out,
+                     " Axial Level= : ",
+                     iz,
+                     " - Implicit solves are required for recirculating flow.");
+        }
+        _mdot_soln->set(node_out, mdot_out); // kg/sec
+      }
+    }
+  }
+  else
+  {
+    for (unsigned int iz = first_node; iz < last_node + 1; iz++)
+    {
+      auto dz = _z_grid[iz] - _z_grid[iz - 1];
+      auto iz_ind = iz - first_node;
+      for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
+      {
+        auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
+        auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
+        auto volume = dz * (*_S_flow_soln)(node_in);
+
+        // Adding time derivative to the RHS
+        auto time_term = _TR * ((*_rho_soln)(node_out)-_rho_soln->old(node_out)) * volume / _dt;
+        PetscInt row_vec = i_ch + _n_channels * iz_ind;
+        PetscScalar value_vec = -1.0 * time_term;
+        LibmeshPetscCall(
+            VecSetValues(_mc_axial_convection_rhs, 1, &row_vec, &value_vec, INSERT_VALUES));
+
+        // Imposing bottom boundary condition or adding of diagonal elements
+        if (iz == first_node)
+        {
+          PetscScalar value_vec = (*_mdot_soln)(node_in);
+          PetscInt row_vec = i_ch + _n_channels * iz_ind;
+          LibmeshPetscCall(
+              VecSetValues(_mc_axial_convection_rhs, 1, &row_vec, &value_vec, ADD_VALUES));
+        }
+        else
+        {
+          PetscInt row = i_ch + _n_channels * iz_ind;
+          PetscInt col = i_ch + _n_channels * (iz_ind - 1);
+          PetscScalar value = -1.0;
+          LibmeshPetscCall(
+              MatSetValues(_mc_axial_convection_mat, 1, &row, 1, &col, &value, INSERT_VALUES));
+        }
+
+        // Adding diagonal elements
+        PetscInt row = i_ch + _n_channels * iz_ind;
+        PetscInt col = i_ch + _n_channels * iz_ind;
+        PetscScalar value = 1.0;
+        LibmeshPetscCall(
+            MatSetValues(_mc_axial_convection_mat, 1, &row, 1, &col, &value, INSERT_VALUES));
+
+        // Adding cross flows RHS
+        if (_segregated_bool)
+        {
+          PetscScalar value_vec_2 = -1.0 * (*_SumWij_soln)(node_out);
+          PetscInt row_vec_2 = i_ch + _n_channels * iz_ind;
+          LibmeshPetscCall(
+              VecSetValues(_mc_axial_convection_rhs, 1, &row_vec_2, &value_vec_2, ADD_VALUES));
+        }
+      }
+    }
+    LibmeshPetscCall(MatAssemblyBegin(_mc_axial_convection_mat, MAT_FINAL_ASSEMBLY));
+    LibmeshPetscCall(MatAssemblyEnd(_mc_axial_convection_mat, MAT_FINAL_ASSEMBLY));
+
+    if (_segregated_bool)
+    {
+      KSP ksploc;
+      PC pc;
+      Vec sol;
+      LibmeshPetscCall(VecDuplicate(_mc_axial_convection_rhs, &sol));
+      LibmeshPetscCall(KSPCreate(PETSC_COMM_WORLD, &ksploc));
+      LibmeshPetscCall(KSPSetOperators(ksploc, _mc_axial_convection_mat, _mc_axial_convection_mat));
+      LibmeshPetscCall(KSPGetPC(ksploc, &pc));
+      LibmeshPetscCall(PCSetType(pc, PCJACOBI));
+      LibmeshPetscCall(KSPSetTolerances(ksploc, _rtol, _atol, _dtol, _maxit));
+      LibmeshPetscCall(KSPSetFromOptions(ksploc));
+      LibmeshPetscCall(KSPSolve(ksploc, _mc_axial_convection_rhs, sol));
+      LibmeshPetscCall(populateSolutionChan<SolutionHandle>(
+          sol, *_mdot_soln, first_node, last_node, _n_channels));
+      LibmeshPetscCall(VecZeroEntries(_mc_axial_convection_rhs));
+      LibmeshPetscCall(KSPDestroy(&ksploc));
+      LibmeshPetscCall(VecDestroy(&sol));
+    }
+  }
+}
+
 
 
 void
@@ -1390,8 +1558,9 @@ LiquidMetalCDAP::externalSolve()
 
     if (pintemp_init == 0)
     {
-      _console << "initializing te PinTempSolver solution" << std::endl;
+      _console << "initializing the PinTempSolver solution" << std::endl;
       initializeSolutionPinTempSolver();
+      _console << "initializing CDAP" << std::endl;
       initializeSolutionCDAP();
       pintemp_init = 1;
     }
@@ -1410,8 +1579,10 @@ LiquidMetalCDAP::externalSolve()
   {
     _console << "running PinTempSolverDriver for transient" << std::endl;
     PinTempSolverDriver(_dt, pintemp_ss);
+    _console << "running CDAP for transient" << std::endl;
     initialize_timestepCDAP(_dt);
     executeCDAP(_dt);
+ //   _console << "peak cdf " <<  _peak_cdf[0] << " stress " << _stress(_n_cells, 0) << " temp " << _temp_pin[0](_n_cells, _nrpin-1) << std::endl;
   }
 
   if (_pin_mesh_exist)

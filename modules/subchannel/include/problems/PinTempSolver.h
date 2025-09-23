@@ -69,7 +69,7 @@ public:
   /// Jet reference temperature [K]
   std::vector<Real> _temp_jet;
   int _ijet_any;
-
+  Eigen::ArrayXXd _HTFG_IntenseRod;
   /** @name Geometry & discretization (radii in meters) @{ */
 
   /// Cladding outer radius r_co [m] (≈ D/2 from mesh)
