@@ -410,10 +410,10 @@ RestartableEquationSystems::restore(const SystemHeader & from_sys_header,
   }
 
   // insert into the member variable
-  std::tuple<std::string, std::string, std::string> _restore_variable = {
+  std::tuple<std::string, std::string, std::string> _loaded_variable = {
       from_sys_header.name, from_vec_header.name, from_var_header.name};
 
-  _restored_variable_group.insert(_restore_variable);
+  _loaded_variables.insert(_loaded_variable);
 
   mooseAssert(isVariableRestored(from_sys_header.name, from_vec_header.name, from_var_header.name),
               "Variable not marked as restored");
@@ -496,14 +496,11 @@ dataLoad(std::istream & stream, RestartableEquationSystems::VectorHeader & heade
 void
 to_json(nlohmann::json & json, const RestartableEquationSystems & res)
 {
-  std::cout << "json for RestartableEquationSystems" << std::endl;
 
   nlohmann::json loaded_vars = nlohmann::json::array();
 
-  for (const auto & tup : res.getRestoredVariableGroup())
+  for (const auto & [system, vector, variable] : res.getLoadedVariables())
   {
-    const auto & [system, vector, variable] = tup;
-
     loaded_vars.push_back({{"system", system}, {"vector", vector}, {"variable", variable}});
   }
 

@@ -146,10 +146,9 @@ public:
                           const std::string & vector_name,
                           const std::string & variable_name) const;
 
-  const std::set<std::tuple<std::string, std::string, std::string>> &
-  getRestoredVariableGroup() const
+  const std::set<std::tuple<std::string, std::string, std::string>> & getLoadedVariables() const
   {
-    return _restored_variable_group;
+    return _loaded_variables;
   }
 
 private:
@@ -180,8 +179,8 @@ private:
   /// The loaded header
   EquationSystemsHeader _loaded_header;
 
-  // To store restored variables
-  std::set<std::tuple<std::string, std::string, std::string>> _restored_variable_group;
+  // The variables that were loaded in load(); [system name, vector name, variable name]
+  std::set<std::tuple<std::string, std::string, std::string>> _loaded_variables;
 };
 
 void dataStore(std::ostream & stream, RestartableEquationSystems & res, void *);
