@@ -312,49 +312,49 @@ PenetrationThread::operator()(const NodeIdRange & range)
             thisElemInfo, p_info, &node, elem, nodesThatMustBeOnSide, _check_whether_reasonable);
       }
 
-      if (p_info.size() == 1)
+      if (_use_point_locator)
       {
-        if (p_info[0]->_tangential_distance <= _tangential_tolerance)
-        {
-          switchInfo(info, p_info[0]);
-          info_set = true;
-        }
-      }
-      else if (p_info.size() > 1)
-      {
-        if (_use_point_locator)
-        {
-          Real min_distance_sq = std::numeric_limits<Real>::max();
-          Point best_point;
-          unsigned int best_i = invalid_uint;
+        Real min_distance_sq = std::numeric_limits<Real>::max();
+        Point best_point;
+        unsigned int best_i = invalid_uint;
 
-          for (unsigned int i = 0; i < p_info.size(); ++i)
+        for (unsigned int i = 0; i < p_info.size(); ++i)
+        {
+          const Point closest_point = closest_point_to_side(node, *p_info[i]->_side);
+          const Real distance_sq = (closest_point - node).norm_sq();
+          if (distance_sq < min_distance_sq)
           {
-            const Point closest_point = closest_point_to_side(node, *p_info[i]->_side);
-            const Real distance_sq = (closest_point - node).norm_sq();
-            if (distance_sq < min_distance_sq)
-            {
-              min_distance_sq = distance_sq;
-              best_point = closest_point;
-              best_i = i;
-            }
+            min_distance_sq = distance_sq;
+            best_point = closest_point;
+            best_i = i;
           }
-
-          p_info[best_i]->_closest_point = best_point;
-          p_info[best_i]->_distance =
-              (p_info[best_i]->_distance >= 0.0 ? 1.0 : -1.0) * std::sqrt(min_distance_sq);
-          if (_do_normal_smoothing)
-            mooseError("Normal smoothing not implemented with point locator code");
-          Point normal = (best_point - node).unit();
-          const Real dot = normal * p_info[best_i]->_normal;
-          if (dot < 0)
-            normal *= -1;
-          p_info[best_i]->_normal = normal;
-
-          switchInfo(info, p_info[best_i]);
-          info_set = true;
         }
-        else
+
+        p_info[best_i]->_closest_point = best_point;
+        p_info[best_i]->_distance =
+            (p_info[best_i]->_distance >= 0.0 ? 1.0 : -1.0) * std::sqrt(min_distance_sq);
+        if (_do_normal_smoothing)
+          mooseError("Normal smoothing not implemented with point locator code");
+        Point normal = (best_point - node).unit();
+        const Real dot = normal * p_info[best_i]->_normal;
+        if (dot < 0)
+          normal *= -1;
+        p_info[best_i]->_normal = normal;
+
+        switchInfo(info, p_info[best_i]);
+        info_set = true;
+      }
+      else
+      {
+        if (p_info.size() == 1)
+        {
+          if (p_info[0]->_tangential_distance <= _tangential_tolerance)
+          {
+            switchInfo(info, p_info[0]);
+            info_set = true;
+          }
+        }
+        else if (p_info.size() > 1)
         {
           // Loop through all pairs of faces, and check for contact on ridge between each face pair
           std::vector<RidgeData> ridgeDataVec;
