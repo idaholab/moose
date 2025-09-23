@@ -54,6 +54,7 @@ public:
 
   /// Build linear forms and eliminate constrained DoFs
   virtual void BuildLinearForms();
+  virtual void BuildNonLinearActions();
   virtual void ApplyEssentialBCs();
   virtual void EliminateCoupledVariables();
 
@@ -138,7 +139,7 @@ protected:
   // Components of weak form. // Named according to test variable
   Moose::MFEM::NamedFieldsMap<mfem::ParBilinearForm> _blfs;
   Moose::MFEM::NamedFieldsMap<mfem::ParLinearForm> _lfs;
-  Moose::MFEM::NamedFieldsMap<mfem::ParNonlinearForm> _nlfs;
+  Moose::MFEM::NamedFieldsMap<mfem::ParLinearForm> _nlfs;
   Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>
       _mblfs; // named according to trial variable
 

@@ -363,6 +363,10 @@ EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
     lf->Assemble();
     lf->ParallelAssemble(_BlockResidual.GetBlock(i));
 
+    auto nlf = _nlfs.GetShared(test_var_name);
+    nlf->Assemble();
+    nlf->ParallelAssemble(_BlockResidual.GetBlock(i));
+
     if(_non_linear)
       _BlockResidual.GetBlock(i).SetSubVector(_ess_tdof_lists.at(i),0.00);
   }
@@ -468,13 +472,32 @@ EquationSystem::BuildLinearForms()
     // Apply kernels
     auto lf = _lfs.GetShared(test_var_name);
     ApplyDomainLFIntegrators(test_var_name, lf, _kernels_map);
-    ApplyDomainNLActionIntegrators(test_var_name, lf, _kernels_map);
     ApplyBoundaryLFIntegrators(test_var_name, lf, _integrated_bc_map);
     lf->Assemble();
   }
 
   // Eliminate trivially eliminated variables by subtracting contributions from linear forms
   EliminateCoupledVariables();
+}
+
+void
+EquationSystem::BuildNonLinearActions()
+{
+  // Register linear forms
+  for (const auto i : index_range(_test_var_names))
+  {
+    auto test_var_name = _test_var_names.at(i);
+    _nlfs.Register(test_var_name, std::make_shared<mfem::ParLinearForm>(_test_pfespaces.at(i)));
+    _nlfs.GetRef(test_var_name) = 0.0;
+  }
+
+  for (auto & test_var_name : _test_var_names)
+  {
+    // Apply kernels
+    auto nlf = _nlfs.GetShared(test_var_name);
+    ApplyDomainNLActionIntegrators(test_var_name, nlf, _kernels_map);
+    nlf->Assemble();
+  }
 }
 
 void
@@ -548,6 +571,7 @@ EquationSystem::BuildEquationSystem(Moose::MFEM::GridFunctions & gridfunctions, 
   BuildBilinearForms();
   BuildMixedBilinearForms();
   BuildLinearForms();
+  BuildNonLinearActions();
 }
 
 TimeDependentEquationSystem::TimeDependentEquationSystem() : _dt_coef(1.0) {}
