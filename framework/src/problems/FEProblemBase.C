@@ -1508,12 +1508,6 @@ FEProblemBase::initialSetup()
     _app.finalizeRestore();
 
   setCurrentExecuteOnFlag(EXEC_NONE);
-
-  // Testing getRestartableEquationSystems
-  std::cout << "\n [Testing] Loaded variables:\n";
-  const auto & eq_sys = getRestartableEquationSystems();
-  for (const auto & [system, vector, variable] : eq_sys.getLoadedVariables())
-    std::cout << "  " << system << "," << vector << "," << variable << "\n";
 }
 
 void
