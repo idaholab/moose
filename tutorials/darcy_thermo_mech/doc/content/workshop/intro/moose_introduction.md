@@ -50,6 +50,7 @@ Multi-physics Object Oriented Simulation Environment
 - Massively parallel (MPI and threads)
 - User code agnostic of dimension, parallelism, shape functions, etc
 - Native support for executing multiphysics simulations across applications
+- GPU support for execution via MFEM and Kokkos
 - Operating Systems:
 
   - macOS (Conda, Docker)
