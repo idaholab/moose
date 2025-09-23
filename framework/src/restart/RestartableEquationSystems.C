@@ -314,21 +314,8 @@ RestartableEquationSystems::isVariableRestored(const std::string & system_name,
                                                const std::string & vector_name,
                                                const std::string & variable_name) const
 {
-
-  for (const auto & restore_data : _restored_variable_group)
-  {
-    if (std::get<0>(restore_data) == system_name && std::get<1>(restore_data) == vector_name &&
-        std::get<2>(restore_data) == variable_name)
-    {
-      // std::cerr << "restarted_data_get " << std::get<0>(restore_data) << " "
-      //           << std::get<1>(restore_data) << " " << std::get<2>(restore_data) << " " <<
-      //           std::endl;
-      // std::cerr << "restarted_data " << system_name << " " << vector_name << " " << variable_name
-      //           << " " << std::endl;
-      return true;
-    }
-  }
-  return false;
+  std::tuple<std::string, std::string, std::string> key(system_name, vector_name, variable_name);
+  return _loaded_variables.count(key);
 }
 
 void
@@ -356,10 +343,6 @@ RestartableEquationSystems::restore(const SystemHeader & from_sys_header,
   mooseAssert(!isVariableRestored(from_sys_header.name, from_vec_header.name, from_var_header.name),
               "Variable already restored");
 #endif
-
-  //_test print sys,vec,var
-  std::cerr << "restarted " << from_sys_header.name << " " << from_vec_header.name << " "
-            << from_var_header.name << " " << std::endl;
 
   const auto error =
       [&from_sys_header, &from_vec_header, &from_var_header, &to_sys, &to_var](auto... args)
