@@ -1,13 +1,15 @@
 # Introduction to MOOSE
 
 !style halign=center
-Second Joint ICTP-IAEA Workshop on Open-Source Nuclear Codes for Reactor Analysis
+##### Second Joint ICTP-IAEA Workshop on Open-Source\\
+Nuclear Codes for Reactor Analysis
 
 !style halign=center
 September 24, 2025
 
 !style halign=center
-[mooseframework.inl.gov](https://mooseframework.inl.gov)
+Logan Harbour\\
+logan.harbour@inl.gov
 
 !---
 
