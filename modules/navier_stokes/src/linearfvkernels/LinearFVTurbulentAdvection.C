@@ -242,7 +242,7 @@ LinearFVTurbulentAdvection::setupFaceData(const FaceInfo * face_info)
 {
   LinearFVFluxKernel::setupFaceData(face_info);
 
-  // Caching the velocity on the face which will be reused in the advection term's matrix and right
+  // Caching the mass flux on the face which will be reused in the advection term's matrix and right
   // hand side contributions
   _mass_face_flux = _mass_flux_provider.getMassFlux(*face_info);
 

@@ -52,7 +52,7 @@ private:
   /// we don't compute it multiple times for different terms.
   std::pair<Real, Real> _advected_interp_coeffs;
 
-  /// Container for the velocity on the face which will be reused in the advection term's
+  /// Container for the mass flux on the face which will be reused in the advection term's
   /// matrix and right hand side contribution
   Real _mass_face_flux;
 
