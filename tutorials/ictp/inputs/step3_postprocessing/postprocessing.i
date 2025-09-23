@@ -25,7 +25,7 @@
   [outer_dirichlet]
     type = DirichletBC
     variable = u
-    boundary = outer
+    boundary = water_solid_interface
     value = 1
   []
 []
@@ -39,7 +39,7 @@
   [outer_average]
     type = SideAverageValue
     variable = u
-    boundary = outer
+    boundary = water_solid_interface
   []
 []
 
