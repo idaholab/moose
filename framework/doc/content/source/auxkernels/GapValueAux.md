@@ -5,7 +5,7 @@
 This object is typically used in mechanical contact problems to get information about the variable
 on the other side of the boundary.
 
-See [GeometricSearchData.md] for more information on the treatment of contact problems.
+See [GeometricSearchData.md] for more information on the treatment of gap problems.
 
 ## Example syntax
 

@@ -17,6 +17,7 @@ SPHERE) for the model geometry.
 
 Two-dimensional Cartesian geometries are not restricted to be in or parallel to the X-Y coordinate plane.
 
+See [GeometricSearchData.md] for more information on the treatment of gap problems.
 
 ## Example Input syntax
 

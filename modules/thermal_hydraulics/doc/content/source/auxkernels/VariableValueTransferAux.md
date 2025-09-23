@@ -5,6 +5,8 @@
 The variable values can only be set on one boundary at a time and may only
 be received from a single boundary as well.
 
+See [GeometricSearchData.md] for more information on the treatment of gap problems.
+
 !alert note
 This class assumes a first order mesh.
 
