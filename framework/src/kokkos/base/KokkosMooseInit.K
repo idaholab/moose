@@ -56,6 +56,9 @@ MooseInit::initKokkos()
 
 #endif
 
+  // Set this environment variable if not set already to silence Kokkos warning
+  setenv("OMP_PROC_BIND", "false", false);
+
   Kokkos::initialize(settings);
 
   LibmeshPetscCall(PetscRegisterFinalize(finalizeKokkos));
