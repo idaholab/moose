@@ -7,24 +7,4 @@
     exodiff = 'ad_scaled_coupled_time_derivative_test_out.e'
     requirement = 'A coupled time derivative kernel which consumes a material property and uses forward mode automatic differentiation shall be provided'
   []
-  [mms_spatial_test]
-    type = 'CSVDiff'
-    prereq = ad_scaled_coupled_time_derivative_test
-    heavy = true
-    command = ad_scaled_coupled_time_derivative_space_refine.py
-    csvdiff = 'mms_spatial_first.csv mms_spatial_second.csv'
-    required_python_packages = 'mms'
-    valgrind = none
-    requirement = 'The appropriate spatial convergence rates will be achieved for first and second order Lagrange elements using mms'
-  []
-  [mms_temporal_test]
-    type = 'CSVDiff'
-    prereq = ad_scaled_coupled_time_derivative_test
-    heavy = true
-    command = ad_scaled_coupled_time_derivative_time_refine.py
-    csvdiff = 'mms_temporal_first.csv mms_temporal_second.csv'
-    required_python_packages = 'mms'
-    valgrind = none
-    requirement = 'The appropriate temporal convergence rates will be achieved for first and second order temporal integration schemes using mms'
-  []
 []

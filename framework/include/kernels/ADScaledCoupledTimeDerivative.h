@@ -24,5 +24,6 @@ public:
 protected:
   virtual ADReal precomputeQpResidual() override;
 
+  /// Scaling factor as an AD material property
   const ADMaterialProperty<Real> & _mat_prop;
 };
