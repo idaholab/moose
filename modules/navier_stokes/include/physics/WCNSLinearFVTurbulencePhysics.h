@@ -16,12 +16,12 @@
  * Creates all the objects needed to add a turbulence model to an incompressible /
  * weakly-compressible Navier Stokes finite volume flow simulation
  */
-class WCNSFVTurbulencePhysics final : public WCNSFVTurbulencePhysicsBase
+class WCNSLinearFVTurbulencePhysics final : public WCNSFVTurbulencePhysicsBase
 {
 public:
   static InputParameters validParams();
 
-  WCNSFVTurbulencePhysics(const InputParameters & parameters);
+  WCNSLinearFVTurbulencePhysics(const InputParameters & parameters);
 
 protected:
   virtual void initializePhysicsAdditional() override;
@@ -29,11 +29,8 @@ protected:
 
 private:
   virtual void addSolverVariables() override;
-  virtual void addAuxiliaryVariables() override;
   virtual void addFVKernels() override;
   virtual void addFVBCs() override;
-  virtual void addAuxiliaryKernels() override;
-  virtual void addMaterials() override;
 
   /**
    * Functions adding kernels for turbulence in the other equation(s)
@@ -49,7 +46,4 @@ private:
   void addKEpsilonAdvection();
   void addKEpsilonDiffusion();
   void addKEpsilonSink();
-
-  /// Name of the mixing length auxiliary variable
-  const VariableName _mixing_length_name;
 };
