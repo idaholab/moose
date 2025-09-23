@@ -26,7 +26,6 @@ MOOSE was originally created to solve fully-coupled systems of [!ac](PDEs). Syst
 - Tight coupling can be accomplished by solving multiple [!ac](PDEs) in a single matrix system, or via operator-splitting plus fixed point iteration
 - Multiscale systems are generally loosely coupled between scales
 - Systems with both fast and slow physics can be decoupled in time
-- Simulations involving input from external codes might be solved somewhat decoupled
 
 A `MultiApp` allows you to simultaneously solve for individual physics systems.
 
