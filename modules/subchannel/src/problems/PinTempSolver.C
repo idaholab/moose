@@ -80,15 +80,15 @@ PinTempSolver::initializeSolutionPinTempSolver()
 
   _qbarconv_channel.setZero(_n_cells + 1, _n_channels);
 
-  ijet.resize(_n_pins, 0);
-  rodjet.resize(_n_pins, 0);
-  peak_loc.resize(_n_pins, 0);
+  _ijet.resize(_n_pins, 0);
+  _rodjet.resize(_n_pins, 0);
+  _peak_loc.resize(_n_pins, 0);
 
-  h_jet.resize(_n_pins, 0);
-  temp_jet.resize(_n_pins, 0);
+  _h_jet.resize(_n_pins, 0);
+  _temp_jet.resize(_n_pins, 0);
 
   _temp_pin.resize(_n_pins);
-
+  _temp_pin0.resize(_n_pins);
   _r.resize(_nrpin + 1, 0);
   _dr.resize(_nrpin + 1, 0);
 
@@ -158,6 +158,7 @@ PinTempSolver::initializeSolutionPinTempSolver()
       for (unsigned int k = 0; k < _nrpin + 1; ++k)
       {
         _temp_pin[i](j, k) = T_in;
+        _temp_pin0[i](j, k) = T_in;
       }
     }
   }
@@ -219,7 +220,7 @@ PinTempSolver::set_convective_bc()
 
           sump += frac * pcool;
 
-          if (ijet[i_rod] == 1)
+          if (_ijet[i_rod] == 1)
           {
           }
           else
@@ -230,10 +231,10 @@ PinTempSolver::set_convective_bc()
         }
 
         _pcool_pin_ave(iz, i_rod) = sump;
-        if (ijet[i_rod] == 1)
+        if (_ijet[i_rod] == 1)
         {
-          _hcool_pin_ave(iz, i_rod) = h_jet[i_rod];
-          _tcool_pin_ave(iz, i_rod) = temp_jet[i_rod];
+          _hcool_pin_ave(iz, i_rod) = _h_jet[i_rod];
+          _tcool_pin_ave(iz, i_rod) = _temp_jet[i_rod];
         }
         else
         {
@@ -284,10 +285,10 @@ PinTempSolver::set_convective_bc()
             frac = 1.0 / 4.0;
           }
 
-          if (ijet[i_rod] == 1)
+          if (_ijet[i_rod] == 1)
           {
-            _qbarconv_channel(iz, i_ch) += frac * libMesh::pi * dpin * h_jet[i_rod] *
-                                           (_temp_pin[i_rod](iz, _nrfuel + 2) - temp_jet[i_rod]);
+            _qbarconv_channel(iz, i_ch) += frac * libMesh::pi * dpin * _h_jet[i_rod] *
+                                           (_temp_pin[i_rod](iz, _nrfuel + 2) - _temp_jet[i_rod]);
           }
           else
           {
@@ -314,7 +315,7 @@ PinTempSolver::PinTempSolverDriver(Real dt, unsigned int pintemp_ss)
   auto z_grid = _subchannel_mesh.getZGrid();
   for (unsigned int i_pin = 0; i_pin < _n_pins; i_pin++)
   {
-    for (unsigned int iz = 0; iz < _n_cells + 1; ++iz)
+    for (unsigned int iz = 1; iz < _n_cells + 1; ++iz)
     {
 
       if (z_grid[iz] > unheated_length_entry && z_grid[iz] <= unheated_length_entry + heated_length)
@@ -628,6 +629,7 @@ PinTempSolver::TempSolverSS(unsigned int iz, unsigned int i_pin, Real hcoef, Rea
   for (unsigned int i = 0; i < _nrpin + 1; i++)
   {
     _temp_pin[i_pin](iz, i) = _temp[i];
+  	_temp_pin0[i_pin](iz, i) = _temp[i];
   }
 }
 
@@ -658,6 +660,7 @@ PinTempSolver::TempSolverTR(Real dt, unsigned int iz, unsigned int i_pin, Real h
   // set the matrix and vector...
   for (unsigned int i = 0; i < _nrpin + 1; i++)
   {
+   _temp_pin0[i_pin](iz, i) = _temp_pin[i_pin](iz, i);
     _temp[i] = _temp_pin[i_pin](iz, i);
   }
 

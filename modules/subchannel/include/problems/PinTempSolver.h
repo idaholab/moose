@@ -59,16 +59,30 @@ public:
    *  @{
    */
   /// Flag indicating whether a jet is active on a pin (0/1)
-  std::vector<unsigned int> ijet;
+  std::vector<unsigned int> _ijet;
   /// Rod index for the originating jet (pin id)
-  std::vector<unsigned int> rodjet;
+  std::vector<unsigned int> _rodjet;
   /// Axial index of peak CDF location for the associated failure/jet model
-  std::vector<unsigned int> peak_loc;
+  std::vector<unsigned int> _peak_loc;
   /// Jet heat transfer coefficient [W/m^2/K]
-  std::vector<Real> h_jet;
+  std::vector<Real> _h_jet;
   /// Jet reference temperature [K]
-  std::vector<Real> temp_jet;
+  std::vector<Real> _temp_jet;
+  int _ijet_any;
+ 
+  /** @name Geometry & discretization (radii in meters) @{ */
+
+  /// Cladding outer radius r_co [m] (≈ D/2 from mesh)
+  Real _rco;  
+  
+
+  unsigned int _nrpin;   ///< Total pin radial nodes (fuel + gap/clad)
   /** @} */
+
+  Real r0()   const { return _r0; }
+  Real rfu()  const { return _rfu; }
+  Real rci()  const { return _rci; }
+  unsigned nrfuel() const { return _nrfuel; }
 
   /**
    * @brief Define and document MOOSE input parameters for PinTempSolver.
@@ -166,7 +180,6 @@ protected:
   unsigned int pintemp_ss = 0;
   /** @} */
 
-  /** @name Geometry & discretization (radii in meters) @{ */
   Real _r0;              ///< Fuel inner radius r0 [m] (use ~0 for solid fuel)
   Real _rfu;             ///< Fuel outer radius r_fu [m]
   Real _rci;             ///< Cladding inner radius r_ci [m]
@@ -178,8 +191,7 @@ protected:
   Real _tliq;            ///< Fuel liquidus temperature [K] (placeholder for future melting)
   Real _ufmelt;          ///< Fuel heat of fusion [J/kg] (placeholder for future melting)
   unsigned int _nrfuel;  ///< Number of fuel radial nodes
-  unsigned int _nrpin;   ///< Total pin radial nodes (fuel + gap/clad)
-  Real _rco;             ///< Cladding outer radius r_co [m] (≈ D/2 from mesh)
+  
   std::vector<Real> _r;  ///< Radial node locations [m]
   std::vector<Real> _dr; ///< Radial control-volume widths [m]
   /** @} */
@@ -215,5 +227,7 @@ protected:
   /** @name Output fields @{ */
   /// Pin radial temperature profiles (per axial, per pin, per radial node) [K]
   Eigen::Array<Eigen::ArrayXXd, Eigen::Dynamic, 1> _temp_pin;
+  /// Previous time value of _temp_pin
+  Eigen::Array<Eigen::ArrayXXd, Eigen::Dynamic, 1> _temp_pin0;
   /** @} */
 };

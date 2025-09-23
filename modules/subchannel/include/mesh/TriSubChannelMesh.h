@@ -153,6 +153,15 @@ public:
    */
   virtual const std::vector<Node *> getDuctNodes() const override { return _duct_nodes; }
 
+  // Channel centroid (x,y) as a Point; z=0 for convenience
+  Point getChannelCenter(unsigned int i_chan) const
+  {
+    return Point(_subchannel_position[i_chan][0], _subchannel_position[i_chan][1], 0.0);
+  }
+
+  // Pin center
+  Point getPinCenter(unsigned int i_pin) const { return _pin_position[i_pin]; }
+
 protected:
   /// number of rings of fuel pins
   unsigned int _n_rings;
