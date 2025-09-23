@@ -112,3 +112,22 @@ This will require a single `[MultiApp]` in `solid.i` (for `fluid.i`) and two tra
 ## Problem Input: Fluid
 
 !listing ictp/inputs/step6_coupling/fluid.i diff=ictp/inputs/step5_heat_conduction/fluid.i prefix=moose/step6_coupling diff_prefix=moose/step5_heat_conduction
+
+!---
+
+# Run: Coupled Problem
+
+```bash
+$ cd ../step6_coupling
+$ cardinal-opt -i solid.i
+```
+
+!--
+
+# Result: Coupled Problem $T$, Last Timestep
+
+!style halign=center
+!media step6_solution.png style=width:50%
+
+!style halign=center
+From `solid_out.e` and `solid_out_fluid0.e` in Paraview, last timestep
