@@ -21,13 +21,14 @@ The two inputs that were created in [#ictp_step5] will be extended in this probl
 
 ## `MultiApp` System
 
-MOOSE was originally created to solve fully-coupled systems of [!ac](PDEs), but not all systems need to be or are fully coupled:
+MOOSE was originally created to solve fully-coupled systems of [!ac](PDEs). Systems of [!ac](PDEs) in MOOSE can be solved either tightly-coupled or loosely-coupled:
 
+- Tight coupling can be accomplished by solving multiple [!ac](PDEs) in a single matrix system, or via operator-splitting plus fixed point iteration
 - Multiscale systems are generally loosely coupled between scales
 - Systems with both fast and slow physics can be decoupled in time
 - Simulations involving input from external codes might be solved somewhat decoupled
 
-To MOOSE these situations look like loosely-coupled systems of fully-coupled equations. A `MultiApp` allows you to simultaneously solve for individual physics systems.
+A `MultiApp` allows you to simultaneously solve for individual physics systems.
 
 You can think of a `MultiApp` of an instantiation (or many instantiations!) of another input file that can be executed during the main application's solve.
 
@@ -82,7 +83,7 @@ There are three common ways a `Transfer` can read information and deposit inform
 
 ## Problem `MultiApp` Summary
 
-We will have two input files: `solid.i` and `fluid.i`. The solid (fuel pin) input will the "main" input, thus the fluid input will a `MultiApp`.
+We will have two input files: `solid.i` and `fluid.i`. The solid (fuel pin) input will the "main" input, thus the fluid input will have a `MultiApp`.
 
 This will require a single `[MultiApp]` in `solid.i` (for `fluid.i`) and two transfers in `solid.i`:
 
