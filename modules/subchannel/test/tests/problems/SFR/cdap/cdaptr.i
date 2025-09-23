@@ -327,8 +327,8 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
 [Executioner]
   type = Transient
 
-  start_time = -1
-  end_time = 5.0
+  start_time = -1.0
+  end_time = 1.0
   [TimeStepper]
     type = FunctionDT
     function = dts
