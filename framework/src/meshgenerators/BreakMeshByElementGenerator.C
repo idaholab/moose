@@ -25,7 +25,10 @@ BreakMeshByElementGenerator::validParams()
   InputParameters params = MeshGenerator::validParams();
   params.addClassDescription("Break all element-element interfaces in the specified subdomains.");
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
-  params.addParam<std::vector<SubdomainID>>("subdomains", "The list of subdomain IDs to explode.");
+  params.addParam<std::vector<SubdomainID>>(
+      "subdomains",
+      std::vector<SubdomainID>(),
+      "The list of subdomain IDs to explode.  Leave unset to explode all subdomains.");
   params.addParam<BoundaryName>(
       "interface_name",
       "element_boundaries",
@@ -87,8 +90,9 @@ BreakMeshByElementGenerator::buildSubdomainRestrictedNodeToElemMap(
   NodeToElemMapType node_to_elem_map;
   for (const auto & elem : mesh->active_element_ptr_range())
   {
-    // Skip if the element is not in the specified subdomains
-    if (std::find(subdomains.begin(), subdomains.end(), elem->subdomain_id()) == subdomains.end())
+    // Skip if subdomains are specified and the element is not in them
+    if (!subdomains.empty() &&
+        std::find(subdomains.begin(), subdomains.end(), elem->subdomain_id()) == subdomains.end())
       continue;
 
     std::set<const Elem *> neighbors;
@@ -96,17 +100,18 @@ BreakMeshByElementGenerator::buildSubdomainRestrictedNodeToElemMap(
 
     for (auto n : make_range(elem->n_nodes()))
     {
-      // if ANY neighboring element that contains this node is not in the specified subdomains,
+      // if ANY neighboring element that contains this node is not in specified subdomains,
       // don't add this node to the map, i.e. don't split this node.
       bool should_duplicate = true;
-      for (auto neighbor : neighbors)
-        if (neighbor->contains_point(elem->node_ref(n)) &&
-            std::find(subdomains.begin(), subdomains.end(), neighbor->subdomain_id()) ==
-                subdomains.end())
-        {
-          should_duplicate = false;
-          break;
-        }
+      if (!subdomains.empty())
+        for (auto neighbor : neighbors)
+          if (neighbor->contains_point(elem->node_ref(n)) &&
+              std::find(subdomains.begin(), subdomains.end(), neighbor->subdomain_id()) ==
+                  subdomains.end())
+          {
+            should_duplicate = false;
+            break;
+          }
 
       if (should_duplicate)
         node_to_elem_map[elem->node_id(n)].insert(elem->id());
