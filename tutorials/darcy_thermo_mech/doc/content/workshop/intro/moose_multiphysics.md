@@ -1,14 +1,4 @@
-# Multiphysics
-
-!---
-
-## Questions to Answer
-
-- What is multiphysics simulation?
-- Why do we want it?
-- How has it improved?
-- What makes it difficult?
-- Where does MOOSE fit in?
+# Multiphysics Simulation
 
 !---
 
@@ -60,7 +50,6 @@
 
   - Iterating between design teams?
   - Development of "coupling" codes?
-  - Is there something better?
 
 !---
 
@@ -85,10 +74,8 @@
 
 - Systems break apart responsibility
 - No direct communication between systems
-- Everything flows through MOOSE interfaces
+- Data flows through MOOSE interfaces
 - Objects can be mixed and matched to achieve simulation goals
-- Incoming data can be changed dynamically
-- Outputs can be manipulated (e.g. multiplication by radius for cylindrical coordinates)
 - An object, by itself, can be lifted from one application and used by another
 
 

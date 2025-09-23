@@ -1,7 +1,6 @@
 # MOOSE
 
-!style halign=center
-Multi-physics Object Oriented Simulation Environment
+### Multi-physics Object Oriented Simulation Environment
 
 !---
 
@@ -24,17 +23,13 @@ Multi-physics Object Oriented Simulation Environment
 
 !---
 
-## MOOSE By The Numbers
+## By The Numbers
 
 - 250 contributors
 - 58,000 commits
 - 5000 unique visitors per month
 - ~40 new Discussion participants per week
 - 150M tests per week
-
-!---
-
-!media darcy_thermo_mech/moose_design.png style=width:75%;margin-left:auto;margin-right:auto;display:block;
 
 !---
 
@@ -73,13 +68,10 @@ Multi-physics Object Oriented Simulation Environment
 
 ## Software Quality
 
-- MOOSE follows an Nuclear Quality Assurance Level 1 (NQA-1) development process
-- All commits undergo review using GitHub Pull Requests and must pass a set of application
-  regression tests before they are available to our users
-- MOOSE includes a test suite and documentation system to allow for agile development while
-  maintaining a NQA-1 process
-- Utilizes the Continuous Integration Environment for Verification, Enhancement, and Testing (CIVET)
-- External contributions are guided through the process by the team, and are very welcome!
+- Follows an Nuclear Quality Assurance Level 1 (NQA-1) development process
+- All changes undergo independent review using and must pass regression tests before merge
+- Includes a test suite and documentation system to allow for agile development while maintaining a NQA-1 process
+- **External contributions are guided through the process by the team, and are very welcome!**
 
 !---
 
@@ -91,7 +83,7 @@ Multi-physics Object Oriented Simulation Environment
 
 ## Community
 
-###### https://github.com/idaholab/moose/discussions
+###### [github.com/idaholab/moose/discussions](https://github.com/idaholab/moose/discussions)
 
 !media darcy_thermo_mech/moose_users.png style=width:50%;margin-left:auto;margin-right:auto;display:block;
 
