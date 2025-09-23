@@ -1,0 +1,254 @@
+{
+    "reporters": {
+        "data": {
+            "type": "RestartableDataReporter",
+            "values": {
+                "values": {
+                    "type": "std::map<std::string, RestartableDataReporter::Value, std::less<std::string>, std::allocator<std::pair<std::stringconst, RestartableDataReporter::Value>>>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "data": {
+                "values": {
+                    "FEProblemBase/MOOSE Problem/equation_systems": {
+                        "type": "RestartableEquationSystems",
+                        "value": {
+                            "loaded_variables": [
+                                {
+                                    "system": "aux0",
+                                    "variable": "diffusivity",
+                                    "vector": "SOLUTION_STATE_1"
+                                },
+                                {
+                                    "system": "aux0",
+                                    "variable": "diffusivity",
+                                    "vector": "SYSTEM_SOLUTION"
+                                },
+                                {
+                                    "system": "aux0",
+                                    "variable": "diffusivity",
+                                    "vector": "u_dot"
+                                },
+                                {
+                                    "system": "nl0",
+                                    "variable": "u",
+                                    "vector": "NONTIME"
+                                },
+                                {
+                                    "system": "nl0",
+                                    "variable": "u",
+                                    "vector": "RHS Vector"
+                                },
+                                {
+                                    "system": "nl0",
+                                    "variable": "u",
+                                    "vector": "SOLUTION_STATE_1"
+                                },
+                                {
+                                    "system": "nl0",
+                                    "variable": "u",
+                                    "vector": "SYSTEM_SOLUTION"
+                                },
+                                {
+                                    "system": "nl0",
+                                    "variable": "u",
+                                    "vector": "TIME"
+                                },
+                                {
+                                    "system": "nl0",
+                                    "variable": "u",
+                                    "vector": "u_dot"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "time": 1.0,
+            "time_step": 0
+        },
+        {
+            "data": {
+                "values": {
+                    "FEProblemBase/MOOSE Problem/equation_systems": {
+                        "type": "RestartableEquationSystems",
+                        "value": {
+                            "loaded_variables": [
+                                {
+                                    "system": "aux0",
+                                    "variable": "diffusivity",
+                                    "vector": "SOLUTION_STATE_1"
+                                },
+                                {
+                                    "system": "aux0",
+                                    "variable": "diffusivity",
+                                    "vector": "SYSTEM_SOLUTION"
+                                },
+                                {
+                                    "system": "aux0",
+                                    "variable": "diffusivity",
+                                    "vector": "u_dot"
+                                },
+                                {
+                                    "system": "nl0",
+                                    "variable": "u",
+                                    "vector": "NONTIME"
+                                },
+                                {
+                                    "system": "nl0",
+                                    "variable": "u",
+                                    "vector": "RHS Vector"
+                                },
+                                {
+                                    "system": "nl0",
+                                    "variable": "u",
+                                    "vector": "SOLUTION_STATE_1"
+                                },
+                                {
+                                    "system": "nl0",
+                                    "variable": "u",
+                                    "vector": "SYSTEM_SOLUTION"
+                                },
+                                {
+                                    "system": "nl0",
+                                    "variable": "u",
+                                    "vector": "TIME"
+                                },
+                                {
+                                    "system": "nl0",
+                                    "variable": "u",
+                                    "vector": "u_dot"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "time": 1.1,
+            "time_step": 1
+        },
+        {
+            "data": {
+                "values": {
+                    "FEProblemBase/MOOSE Problem/equation_systems": {
+                        "type": "RestartableEquationSystems",
+                        "value": {
+                            "loaded_variables": [
+                                {
+                                    "system": "aux0",
+                                    "variable": "diffusivity",
+                                    "vector": "SOLUTION_STATE_1"
+                                },
+                                {
+                                    "system": "aux0",
+                                    "variable": "diffusivity",
+                                    "vector": "SYSTEM_SOLUTION"
+                                },
+                                {
+                                    "system": "aux0",
+                                    "variable": "diffusivity",
+                                    "vector": "u_dot"
+                                },
+                                {
+                                    "system": "nl0",
+                                    "variable": "u",
+                                    "vector": "NONTIME"
+                                },
+                                {
+                                    "system": "nl0",
+                                    "variable": "u",
+                                    "vector": "RHS Vector"
+                                },
+                                {
+                                    "system": "nl0",
+                                    "variable": "u",
+                                    "vector": "SOLUTION_STATE_1"
+                                },
+                                {
+                                    "system": "nl0",
+                                    "variable": "u",
+                                    "vector": "SYSTEM_SOLUTION"
+                                },
+                                {
+                                    "system": "nl0",
+                                    "variable": "u",
+                                    "vector": "TIME"
+                                },
+                                {
+                                    "system": "nl0",
+                                    "variable": "u",
+                                    "vector": "u_dot"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "time": 1.2000000000000002,
+            "time_step": 2
+        },
+        {
+            "data": {
+                "values": {
+                    "FEProblemBase/MOOSE Problem/equation_systems": {
+                        "type": "RestartableEquationSystems",
+                        "value": {
+                            "loaded_variables": [
+                                {
+                                    "system": "aux0",
+                                    "variable": "diffusivity",
+                                    "vector": "SOLUTION_STATE_1"
+                                },
+                                {
+                                    "system": "aux0",
+                                    "variable": "diffusivity",
+                                    "vector": "SYSTEM_SOLUTION"
+                                },
+                                {
+                                    "system": "aux0",
+                                    "variable": "diffusivity",
+                                    "vector": "u_dot"
+                                },
+                                {
+                                    "system": "nl0",
+                                    "variable": "u",
+                                    "vector": "NONTIME"
+                                },
+                                {
+                                    "system": "nl0",
+                                    "variable": "u",
+                                    "vector": "RHS Vector"
+                                },
+                                {
+                                    "system": "nl0",
+                                    "variable": "u",
+                                    "vector": "SOLUTION_STATE_1"
+                                },
+                                {
+                                    "system": "nl0",
+                                    "variable": "u",
+                                    "vector": "SYSTEM_SOLUTION"
+                                },
+                                {
+                                    "system": "nl0",
+                                    "variable": "u",
+                                    "vector": "TIME"
+                                },
+                                {
+                                    "system": "nl0",
+                                    "variable": "u",
+                                    "vector": "u_dot"
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "time": 1.3000000000000003,
+            "time_step": 3
+        }
+    ]
+}

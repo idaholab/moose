@@ -18,4 +18,14 @@
     requirement = 'The systen shall support restart with a solution containing only a subset of the variables in the restart simulation.'
     issues = '#13438'
   [../]
+
+  [equation_systems_json]
+    type = 'JSONDiff'
+    input = 'add_variable_restart.i'
+    jsondiff = 'add_variable_restart_json.json'
+    prereq = 'transient_with_stateful'
+
+    requirement = 'The system shall support an interface to query and check whether a subset of variables was restarted from a previous simulation.'
+    issues = '#31545'
+  []
 []
