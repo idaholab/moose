@@ -32,7 +32,7 @@ A few new things will be introduced in this step:
 
 ## Auxiliary Variables and Kernels
 
-The term "auxiliary variable" is defined, in MOOSE language, as a variable that is directly calculated using an `AuxKernel` object. An `AuxKernel` fills into an `AuxVariable`. This allows for postprocessing, coupling, and proxy calculations.
+The term "auxiliary variable" is defined, in MOOSE language, as a variable that is directly calculated using an [`AuxKernel`](AuxKernels/index.md) object. An [`AuxKernel`](AuxKernels/index.md) fills into an [`AuxVariable`](AuxVariables/index.md). This allows for postprocessing, coupling, and proxy calculations.
 
 Auxiliary variables come in two flavors:
 
@@ -41,7 +41,7 @@ Auxiliary variables come in two flavors:
 
 In particular, we will utilize the [`DiffusionFluxAux`](DiffusionFluxAux.md) to compute the integral of the heat flux on the outer boundary (`water_solid_interface`).
 
-We will also use an `AuxVaraible` named `T_fluid` to define the field that is used as the outer boundary condition.
+We will also use an [`AuxVariable`](AuxVariables/index.md) named `T_fluid` to define the field that is used as the outer boundary condition.
 
 !---
 

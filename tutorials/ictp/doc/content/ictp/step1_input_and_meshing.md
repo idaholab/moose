@@ -293,9 +293,9 @@ For the tasks that follow, we will utilize the:
 
 ## Fuel Mesh
 
-- Remove the water elements using the [`BlockDeletionGenerator`](BlockDeletionGenerator.md)
-- Remove the hole (assume no net heat transfer across the hole) using the [`BlockDeletionGenerator`](BlockDeletionGenerator.md)
-- Name the blocks that contain the fuel and cladding using the [`RenameBlockGenerator`](RenameBlockGenerator.md)
+1. Remove the hole (assume no net heat transfer across the hole) using the [`BlockDeletionGenerator`](BlockDeletionGenerator.md)
+1. Remove the water elements using the [`BlockDeletionGenerator`](BlockDeletionGenerator.md)
+1. Name the blocks that contain the fuel and cladding using the [`RenameBlockGenerator`](RenameBlockGenerator.md)
 
 !--
 
@@ -391,9 +391,9 @@ From `fuel_pin_in.e`: The grey elements represent the fuel (block `fuel`), and t
 
 ## Fluid Mesh
 
-- Remove the fuel pin elements using the [`BlockDeletionGenerator`](BlockDeletionGenerator.md)
-- Merge the water boundary layer and remaining water blocks into a single block named `water` using the [`RenameBlockGenerator`](RenameBlockGenerator.md)
-- Rename and merge the outer boundaries into a single boundary `outer` using the [`RenameBoundaryGenerator`](RenameBoundaryGenerator.md)
+1. Remove the fuel pin elements using the [`BlockDeletionGenerator`](BlockDeletionGenerator.md)
+1. Merge the water boundary layer and remaining water blocks into a single block named `water` using the [`RenameBlockGenerator`](RenameBlockGenerator.md)
+1. Rename and merge the outer boundaries into a single boundary `outer` using the [`RenameBoundaryGenerator`](RenameBoundaryGenerator.md)
 
 !---
 
