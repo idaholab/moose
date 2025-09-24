@@ -1,0 +1,10 @@
+[Tests]
+  issues = '#31354'
+  design = '/ADScaledCoupledTimeDerivative.md'
+  [ad_scaled_coupled_time_derivative_test]
+    type = 'Exodiff'
+    input = 'ad_scaled_coupled_time_derivative_test.i'
+    exodiff = 'ad_scaled_coupled_time_derivative_test_out.e'
+    requirement = 'A coupled time derivative kernel which consumes a material property and uses forward mode automatic differentiation shall be provided'
+  []
+[]
