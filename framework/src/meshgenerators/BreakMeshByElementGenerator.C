@@ -185,6 +185,7 @@ BreakMeshByElementGenerator::createInterface(MeshBase & mesh,
         boundary_info.add_side(elem_id, side, interface_id);
   }
 
+  // Remove element neighbor connections on the broken sides
   for (const auto & [elem_id, side] : sides_breaking)
     mesh.elem_ref(elem_id).set_neighbor(side, nullptr);
 }

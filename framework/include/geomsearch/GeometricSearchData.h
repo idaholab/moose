@@ -141,7 +141,8 @@ private:
 
   /**
    * Denotes whether the PenetrationLocator objects should use a point
-   * locator rather than cheaper nodal connectivity searches.
+   * locator rather than cheaper node-to-element connectivity searches once
+   * the nearest nodes have been identified.
    */
   bool _search_using_point_locator;
 };
