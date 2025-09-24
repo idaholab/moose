@@ -1,5 +1,5 @@
-mu = 1
-rho = 1
+mu = 2
+rho = 2
 
 [Mesh]
   [gen]
@@ -18,27 +18,27 @@ rho = 1
 [Variables]
   [vel_x]
     family = L2_HIERARCHIC
-    order = SECOND
+    order = FIRST
   []
   [vel_y]
     family = L2_HIERARCHIC
-    order = SECOND
+    order = FIRST
   []
   [pressure]
-    family = L2_HIERARCHIC
-    order = FIRST
+    family = MONOMIAL
+    order = CONSTANT
   []
   [vel_bar_x]
     family = SIDE_HIERARCHIC
-    order = SECOND
+    order = FIRST
   []
   [vel_bar_y]
     family = SIDE_HIERARCHIC
-    order = SECOND
+    order = FIRST
   []
   [pressure_bar]
     family = SIDE_HIERARCHIC
-    order = SECOND
+    order = FIRST
   []
 []
 
@@ -77,13 +77,12 @@ rho = 1
     pressure_face_variable = pressure_bar
     component = 1
   []
-  [pressure_advection]
-    type = AdvectionIPHDGKernel
+  [pressure]
+    type = MassContinuityIPHDGKernel
     variable = pressure
     face_variable = pressure_bar
-    velocity = 'velocity'
-    coeff = '${fparse -rho}'
-    self_advection = false
+    interior_velocity_vars = 'vel_x vel_y'
+    face_velocity_functors = 'vel_bar_x vel_bar_y'
   []
 []
 
@@ -106,64 +105,30 @@ rho = 1
 []
 
 [BCs]
-  # walls
-  [momentum_x_diffusion_walls]
-    type = NavierStokesStressIPHDGDirichletBC
-    boundary = 'top bottom'
-    variable = vel_x
-    face_variable = vel_bar_x
-    pressure_variable = pressure
-    pressure_face_variable = pressure_bar
-    alpha = 6
-    functor = 'exact_u'
-    diffusivity = 'mu'
-    component = 0
-  []
-  [momentum_y_diffusion_walls]
-    type = NavierStokesStressIPHDGDirichletBC
-    boundary = 'top bottom'
-    variable = vel_y
-    face_variable = vel_bar_y
-    pressure_variable = pressure
-    pressure_face_variable = pressure_bar
-    alpha = 6
-    functor = 'exact_v'
-    diffusivity = 'mu'
-    component = 1
-  []
-  [mass_advection_walls]
-    type = AdvectionIPHDGPrescribedFluxBC
-    face_variable = pressure_bar
-    variable = pressure
-    velocity = 'velocity'
-    coeff = '${fparse -rho}'
-    self_advection = false
-    boundary = 'top bottom'
-    prescribed_normal_flux = 0
-  []
-
-  # inlet
-  [momentum_x_advection_inlet]
+  #
+  # dirichlet
+  #
+  [momentum_x_advection_dirichlet]
     type = AdvectionIPHDGDirichletBC
-    boundary = 'left'
+    boundary = 'top bottom left'
     face_variable = vel_bar_x
     functor = exact_u
     variable = vel_x
     velocity = velocity
     coeff = ${rho}
   []
-  [momentum_y_advection_inlet]
+  [momentum_y_advection_dirichlet]
     type = AdvectionIPHDGDirichletBC
-    boundary = 'left'
+    boundary = 'top bottom left'
     face_variable = vel_bar_y
     functor = exact_v
     variable = vel_y
     velocity = velocity
     coeff = ${rho}
   []
-  [momentum_x_diffusion_inlet]
+  [momentum_x_diffusion_dirichlet]
     type = NavierStokesStressIPHDGDirichletBC
-    boundary = 'left'
+    boundary = 'top bottom left'
     variable = vel_x
     face_variable = vel_bar_x
     pressure_variable = pressure
@@ -173,9 +138,9 @@ rho = 1
     diffusivity = 'mu'
     component = 0
   []
-  [momentum_y_diffusion_inlet]
+  [momentum_y_diffusion_dirichlet]
     type = NavierStokesStressIPHDGDirichletBC
-    boundary = 'left'
+    boundary = 'top bottom left'
     variable = vel_y
     face_variable = vel_bar_y
     pressure_variable = pressure
@@ -185,64 +150,65 @@ rho = 1
     diffusivity = 'mu'
     component = 1
   []
-  [mass_advection_inlet]
-    type = AdvectionIPHDGPrescribedFluxBC
+  [mass_dirichlet]
+    type = MassContinuityIPHDGBC
     face_variable = pressure_bar
     variable = pressure
-    velocity = 'velocity'
-    coeff = '${fparse -rho}'
-    self_advection = false
-    boundary = 'left'
-    prescribed_normal_flux = 'negative_rhou'
+    boundary = 'top bottom left'
+    face_velocity_functors = 'exact_u exact_v'
+    interior_velocity_vars = 'vel_x vel_y'
   []
 
-  # outlet
-  [momentum_x_advection_outlet]
+  #
+  # Neumann
+  #
+  [momentum_x_advection_neumann]
     type = AdvectionIPHDGOutflowBC
     boundary = 'right'
-    variable = vel_x
+    constrain_lm = false
     face_variable = vel_bar_x
-    velocity = 'velocity'
+    variable = vel_x
+    velocity = velocity
     coeff = ${rho}
   []
-  [momentum_y_advection_outlet]
+  [momentum_y_advection_neumann]
     type = AdvectionIPHDGOutflowBC
     boundary = 'right'
-    variable = vel_y
+    constrain_lm = false
     face_variable = vel_bar_y
-    velocity = 'velocity'
+    variable = vel_y
+    velocity = velocity
     coeff = ${rho}
   []
-  [momentum_x_diffusion_outlet]
+  [momentum_x_diffusion_neumann]
     type = NavierStokesStressIPHDGPrescribedFluxBC
     boundary = 'right'
     component = 0
-    diffusivity = ${mu}
+    diffusivity = 'mu'
     face_variable = vel_bar_x
     prescribed_normal_flux = 0
     pressure_face_variable = pressure_bar
     pressure_variable = pressure
     variable = vel_x
   []
-  [momentum_y_diffusion_outlet]
+  [momentum_y_diffusion_neumann]
     type = NavierStokesStressIPHDGPrescribedFluxBC
     boundary = 'right'
     component = 1
-    diffusivity = ${mu}
+    diffusivity = 'mu'
     face_variable = vel_bar_y
     prescribed_normal_flux = 0
     pressure_face_variable = pressure_bar
     pressure_variable = pressure
     variable = vel_y
   []
-  [mass_outlet]
-    type = AdvectionIPHDGOutflowBC
-    boundary = 'right'
-    variable = pressure
+  [mass_neumann]
+    type = MassContinuityIPHDGBC
     face_variable = pressure_bar
-    velocity = 'velocity'
-    coeff = '${fparse -rho}'
-    self_advection = false
+    variable = pressure
+    boundary = 'right'
+    face_velocity_functors = 'vel_bar_x vel_bar_y'
+    interior_velocity_vars = 'vel_x vel_y'
   []
 []
 
@@ -287,41 +253,29 @@ rho = 1
   []
   [forcing_p]
     type = ParsedFunction
-    expression = '-1/2*pi*rho*sin((1/4)*x*pi)*sin((1/2)*y*pi) - 1/2*pi*rho*sin((1/2)*x*pi)*sin((1/2)*y*pi)'
-    symbol_names = 'rho'
-    symbol_values = '${rho}'
-  []
-[]
-
-[FunctorMaterials]
-  [constant]
-    type = GenericFunctorMaterial
-    prop_names = 'rho'
-    prop_values = '${rho}'
-  []
-  [rhou]
-    type = ParsedFunctorMaterial
-    expression = '-rho * exact_u'
-    property_name = 'negative_rhou'
-    functor_names = 'rho exact_u'
+    expression = '(1/2)*pi*sin((1/4)*x*pi)*sin((1/2)*y*pi) + (1/2)*pi*sin((1/2)*x*pi)*sin((1/2)*y*pi)'
   []
 []
 
 [Postprocessors]
-  [l2u]
+  [L2u]
     type = ElementL2Error
     function = exact_u
     variable = vel_x
   []
-  [l2v]
+  [L2v]
     type = ElementL2Error
     function = exact_v
     variable = vel_y
   []
-  [l2p]
+  [L2p]
     type = ElementL2Error
     function = exact_p
     variable = pressure
+  []
+  [h]
+    type = AverageElementSize
+    execute_on = 'timestep_end'
   []
 []
 
@@ -334,8 +288,9 @@ rho = 1
 []
 
 [Outputs]
+  csv = true
   [out]
     type = Exodus
-    hide = 'pressure_bar vel_bar_x vel_bar_y l2u l2v l2p'
+    hide = 'pressure_bar vel_bar_x vel_bar_y L2u L2v L2p'
   []
 []
