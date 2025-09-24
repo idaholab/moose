@@ -17,6 +17,7 @@
 #include "libmesh/enum_order.h"
 #include "libmesh/fe_type.h"
 #include "libmesh/equation_systems.h"
+#include "nlohmann/json.h"
 
 namespace libMesh
 {
