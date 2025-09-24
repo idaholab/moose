@@ -142,7 +142,6 @@ coil_conductivity = 1.0
     type = MFEMSumAux
     variable = e_field
     source_variables = 'induced_e_field external_e_field'
-    scale_factors = '1.0 1.0'
     execute_on = TIMESTEP_END
     execution_order_group = 3
   []
