@@ -51,9 +51,9 @@
 [Functions]
   [force]
     type = MFEMParsedFunction
-    expression = aux_var*sin(y*x)
-    coefficients = aux_var
-    use_xyzt = true
+    expression = v*sin(y*x)
+    symbol_names = v
+    symbol_values = aux_var
   []
 []
 
