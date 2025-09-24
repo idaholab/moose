@@ -23,7 +23,7 @@ NodalKernel::validParams()
 
 NodalKernel::NodalKernel(const InputParameters & parameters)
   : NodalKernelBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD),
-    _u(kokkosSystems(), _var),
+    _u(_var, Moose::SOLUTION_TAG, true),
     _boundary_restricted(boundaryRestricted())
 {
 }

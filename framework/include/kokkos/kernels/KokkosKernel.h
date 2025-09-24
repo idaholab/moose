@@ -181,7 +181,12 @@ Kernel::operator()(ResidualLoop, const ThreadID tid, const Derived & kernel) con
 {
   auto elem = kokkosBlockElementID(tid);
 
-  ResidualDatum datum(elem, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+  ResidualDatum datum(elem,
+                      libMesh::invalid_uint,
+                      kokkosAssembly(),
+                      kokkosSystems(),
+                      _kokkos_var,
+                      _kokkos_var.var());
 
   kernel.computeResidualInternal(kernel, datum);
 }
@@ -192,7 +197,12 @@ Kernel::operator()(JacobianLoop, const ThreadID tid, const Derived & kernel) con
 {
   auto elem = kokkosBlockElementID(tid);
 
-  ResidualDatum datum(elem, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+  ResidualDatum datum(elem,
+                      libMesh::invalid_uint,
+                      kokkosAssembly(),
+                      kokkosSystems(),
+                      _kokkos_var,
+                      _kokkos_var.var());
 
   kernel.computeJacobianInternal(kernel, datum);
 }
@@ -209,7 +219,8 @@ Kernel::operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & kern
   if (!sys.isVariableActive(jvar, kokkosMesh().getElementInfo(elem).subdomain))
     return;
 
-  ResidualDatum datum(elem, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar);
+  ResidualDatum datum(
+      elem, libMesh::invalid_uint, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar);
 
   kernel.computeOffDiagJacobianInternal(kernel, datum);
 }
