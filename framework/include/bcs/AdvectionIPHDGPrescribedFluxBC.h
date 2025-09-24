@@ -11,6 +11,8 @@
 
 #include "IPHDGPrescribedFluxBC.h"
 
+class AdvectionIPHDGAssemblyHelper;
+
 /**
  * Implements a prescribed advective flux boundary condition for use with a hybridized
  * discretization of an advection term. This BC may most often be used to prescribe zero advective
@@ -24,7 +26,7 @@ public:
   AdvectionIPHDGPrescribedFluxBC(const InputParameters & parameters);
 
 protected:
-  virtual IPHDGAssemblyHelper & iphdgHelper() override { return *_iphdg_helper; }
+  virtual IPHDGAssemblyHelper & iphdgHelper() override;
 
   /// The assembly helper providing the required IP-HDG method implementations
   std::unique_ptr<AdvectionIPHDGAssemblyHelper> _iphdg_helper;
