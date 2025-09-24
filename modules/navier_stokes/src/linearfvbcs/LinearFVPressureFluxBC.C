@@ -41,11 +41,6 @@ LinearFVPressureFluxBC::computeBoundaryValue() const
                                         ? _current_face_info->elemPtr()
                                         : _current_face_info->neighborPtr());
   const Real distance = computeCellToFaceDistance();
-  const auto d_cf = computeCellToFaceVector();
-  // For non-orthogonal meshes we compute an extra correction vector to increase order accuracy
-  // correction_vector is a vector orthogonal to the boundary normal
-  const auto correction_vector =
-      (d_cf - (d_cf * _current_face_info->normal()) * _current_face_info->normal());
 
   if (_Ainv(face_arg, determineState())(0) != 0.0 )
       return raw_value(_var(elem_arg, determineState()))
@@ -61,9 +56,11 @@ LinearFVPressureFluxBC::computeBoundaryNormalGradient() const
 {
   const auto face_arg = makeCDFace(*_current_face_info);
 
+  const Real distance = computeCellToFaceDistance();
+
   if (_Ainv(face_arg, determineState())(0) != 0.0 )
       return -_HbyA_flux(singleSidedFaceArg(_current_face_info), determineState()) /
-        _Ainv(face_arg, determineState())(0);
+        _Ainv(face_arg, determineState())(0) * distance ;
   else
       return 0.0;
 }
@@ -80,11 +77,6 @@ LinearFVPressureFluxBC::computeBoundaryValueRHSContribution() const
   const auto face_arg = makeCDFace(*_current_face_info);
   // Fetch the boundary value from the provided functor.
   const Real distance = computeCellToFaceDistance();
-  const auto d_cf = computeCellToFaceVector();
-  // For non-orthogonal meshes we compute an extra correction vector to increase order accuracy
-  // correction_vector is a vector orthogonal to the boundary normal
-  const auto correction_vector =
-      (d_cf - (d_cf * _current_face_info->normal()) * _current_face_info->normal());
 
   if (_Ainv(face_arg, determineState())(0) != 0.0 )
       return -_HbyA_flux(singleSidedFaceArg(_current_face_info), determineState()) /
