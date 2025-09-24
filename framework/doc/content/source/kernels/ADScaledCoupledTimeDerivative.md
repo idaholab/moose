@@ -4,12 +4,8 @@
 
 The `ADScaledCoupledTimeDerivative` kernel is an extension of the
 [`ADCoupledTimeDerivative`](/ADCoupledTimeDerivative.md) kernel that has a scaling factor.
-This factor can be:
-
-- an ADReal-valued material property using the [!param](/Kernels/ADScaledCoupledTimeDerivative/mat_prop) parameter
-
-The Jacobian contribution is computed using forward mode automatic
-differentiation.
+This factor can be an ADReal-valued material property, set using the [!param](/Kernels/ADScaledCoupledTimeDerivative/mat_prop)
+parameter. The Jacobian contribution is computed using forward mode automatic differentiation.
 
 ## Example Syntax
 

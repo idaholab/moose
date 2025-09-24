@@ -5,6 +5,6 @@
     type = 'Exodiff'
     input = 'ad_scaled_coupled_time_derivative_test.i'
     exodiff = 'ad_scaled_coupled_time_derivative_test_out.e'
-    requirement = 'A coupled time derivative kernel which consumes a material property and uses forward mode automatic differentiation shall be provided'
+    requirement = 'The system shall provide a coupled time derivative kernel which consumes a material property as a scaling factor and uses forward mode automatic differentiation.'
   []
 []

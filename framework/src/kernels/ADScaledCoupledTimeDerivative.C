@@ -17,7 +17,7 @@ ADScaledCoupledTimeDerivative::validParams()
   auto params = ADCoupledTimeDerivative::validParams();
   params.addClassDescription(
       "Extension of the ADCoupledTimeDerivative kernel that calculates the time derivative "
-      "of a coupled variable scaled by a material property");
+      "of a coupled variable scaled by a material property.");
 
   params.addRequiredParam<MaterialPropertyName>("mat_prop", "Name of the material property factor");
   return params;
