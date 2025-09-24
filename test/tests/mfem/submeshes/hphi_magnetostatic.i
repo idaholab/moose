@@ -136,8 +136,8 @@ vacuum_permeability = 1.0
   [update_total_h_field]
     type = MFEMSumAux
     variable = vacuum_h_field
-    first_source_variable = background_h_field
-    second_source_variable = cut_function_field
+    source_variables = 'background_h_field cut_function_field'
+    scale_factors = '1.0 1.0'
     execute_on = TIMESTEP_END
     execution_order_group = 3
   []
