@@ -41,7 +41,7 @@ public:
   {
   }
 
-  virtual void parallelFor(const Policy & policy) override final
+  void parallelFor(const Policy & policy) override final
   {
     ::Kokkos::parallel_for(policy, *this);
     ::Kokkos::fence();
@@ -61,10 +61,10 @@ class DispatcherRegistryEntryBase
 {
 public:
   virtual ~DispatcherRegistryEntryBase() {}
-  virtual std::unique_ptr<DispatcherBase> build(const void * object) = 0;
+  virtual std::unique_ptr<DispatcherBase> build(const void * object) const = 0;
 
   void hasUserMethod(bool flag) { _has_user_method = flag; }
-  bool hasUserMethod() { return _has_user_method; }
+  bool hasUserMethod() const { return _has_user_method; }
 
 private:
   bool _has_user_method = false;
@@ -74,7 +74,7 @@ template <typename Operation, typename Object>
 class DispatcherRegistryEntry : public DispatcherRegistryEntryBase
 {
 public:
-  virtual std::unique_ptr<DispatcherBase> build(const void * object) override final
+  std::unique_ptr<DispatcherBase> build(const void * object) const override final
   {
     return std::make_unique<Dispatcher<Operation, Object>>(object);
   }
@@ -127,8 +127,10 @@ private:
     auto operation = std::type_index(typeid(Operation));
 
     auto it = getRegistry()._dispatchers.find(std::make_pair(operation, name));
-    mooseAssert(it != getRegistry()._dispatchers.end(),
-                "Kokkos functor dispatcher not registered.");
+    if (it == getRegistry()._dispatchers.end())
+      mooseError("Kokkos functor dispatcher not registered for object type '",
+                 name,
+                 "'. Double check that you used Kokkos-specific registration macro.");
 
     return it->second;
   }
