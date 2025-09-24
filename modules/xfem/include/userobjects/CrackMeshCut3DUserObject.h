@@ -105,6 +105,7 @@ protected:
   enum class GrowthRateEnum
   {
     FATIGUE,
+    SCC,
     FUNCTION
   };
   /// The rate method for growing mesh at the front
@@ -152,10 +153,6 @@ protected:
 
   /// Growth size for the active boundary in a subcritical simulation
   std::vector<Real> _growth_size;
-
-  /// Fatigue life
-  std::vector<unsigned long int> _dn;
-  std::vector<unsigned long int> _n;
 
   /// New boundary after growth
   std::vector<std::vector<dof_id_type>> _front;
@@ -267,4 +264,9 @@ protected:
   const Function * _func_y;
   const Function * _func_z;
   const Function * _func_v;
+
+  /// Pointer fracture integral ki if available
+  const std::vector<Real> * const _ki_vpp;
+  /// Pointer fracture integral kii if available
+  const std::vector<Real> * const _kii_vpp;
 };
