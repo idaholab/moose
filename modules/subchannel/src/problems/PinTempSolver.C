@@ -241,7 +241,7 @@ PinTempSolver::set_convective_bc()
         else
         {
           _hcool_pin_ave(iz, i_rod) = sumh * _HTFG_IntenseRod(iz,i_rod);
-          _tcool_pin_ave(iz, i_rod) = sumt * _HTFG_IntenseRod(iz,i_rod);
+          _tcool_pin_ave(iz, i_rod) = sumt;
         }
       }
     }
