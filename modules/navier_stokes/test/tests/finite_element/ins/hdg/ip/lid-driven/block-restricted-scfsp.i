@@ -146,13 +146,12 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
     pressure_face_variable = pressure_bar
     component = 1
   []
-  [pressure_convection]
-    type = AdvectionIPHDGKernel
+  [pressure]
+    type = MassContinuityIPHDGKernel
     variable = pressure
     face_variable = pressure_bar
-    velocity = 'velocity'
-    coeff = '${fparse -rho}'
-    self_advection = false
+    interior_velocity_vars = 'vel_x vel_y'
+    face_velocity_functors = 'vel_bar_x vel_bar_y'
   []
 
   [u_jump]
@@ -221,15 +220,21 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
     component = 1
   []
 
-  [mass_convection]
-    type = AdvectionIPHDGPrescribedFluxBC
+  [pressure_walls]
+    type = MassContinuityIPHDGBC
     face_variable = pressure_bar
     variable = pressure
-    velocity = 'velocity'
-    coeff = '${fparse -rho}'
-    self_advection = false
-    boundary = 'left bottom_v2 top_v2 right_v2'
-    prescribed_normal_flux = 0
+    boundary = 'left bottom_v2 right_v2'
+    face_velocity_functors = '0 0'
+    interior_velocity_vars = 'vel_x vel_y'
+  []
+  [pressure_lid]
+    type = MassContinuityIPHDGBC
+    face_variable = pressure_bar
+    variable = pressure
+    boundary = 'top_v2'
+    face_velocity_functors = '${U} 0'
+    interior_velocity_vars = 'vel_x vel_y'
   []
 
   [pb_mass]

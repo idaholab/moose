@@ -11,6 +11,8 @@
 
 #include "IPHDGKernel.h"
 
+class DiffusionIPHDGAssemblyHelper;
+
 /**
  * Implements the diffusion equation for a interior penalty hybridized discretization
  */
@@ -21,7 +23,7 @@ public:
   DiffusionIPHDGKernel(const InputParameters & params);
 
 protected:
-  virtual IPHDGAssemblyHelper & iphdgHelper() override { return *_iphdg_helper; }
+  virtual IPHDGAssemblyHelper & iphdgHelper() override;
 
 private:
   /// The assembly helper providing the required IP-HDG method implementations
