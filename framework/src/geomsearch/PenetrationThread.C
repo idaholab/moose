@@ -62,8 +62,8 @@ closest_point_to_side(const Point & src, const Elem & side)
       const Point l01 = p1 - p0, l02 = p2 - p0;
       const Point tri_normal = (l01.cross(l02)).unit();
       const Point linecs = ((src - p0) * tri_normal) / tri_normal.norm_sq() * tri_normal;
-      Point in_plane = src - linecs;
-      Point planar_offset = in_plane - p0;
+      const Point in_plane = src - linecs;
+      const Point planar_offset = in_plane - p0;
       // If we're outside the triangle past line 01, our closest point
       // is on that line.
       if (planar_offset.cross(l01) * tri_normal > 0)
