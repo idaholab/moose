@@ -400,18 +400,35 @@ wall_treatment = 'eq_newton'  # Options: eq_newton, eq_incremental, eq_linearize
   csv = true
 []
 
+[AuxVariables]
+  [pressure_over_density]
+    type = MooseLinearVariableFVReal
+    solver_sys = TKE_system
+    initial_condition = ${k_init}
+  []
+[]
+
+[AuxKernels]
+  [compute_pressure_over_density]
+    type = ParsedAux
+    variable = pressure_over_density
+    coupled_variables = 'pressure'
+    expression = 'pressure/${rho}'
+  []
+[]
+
 [VectorPostprocessors]
   [side_bottom]
     type = SideValueSampler
     boundary = 'bottom'
-    variable = 'vel_x vel_y pressure TKE TKED'
+    variable = 'vel_x vel_y pressure_over_density TKE TKED'
     sort_by = 'x'
     execute_on = 'timestep_end'
   []
   [side_top]
     type = SideValueSampler
     boundary = 'top'
-    variable = 'vel_x vel_y pressure TKE TKED'
+    variable = 'vel_x vel_y pressure_over_density TKE TKED'
     sort_by = 'x'
     execute_on = 'timestep_end'
   []
@@ -420,7 +437,7 @@ wall_treatment = 'eq_newton'  # Options: eq_newton, eq_incremental, eq_linearize
     start_point = '${fparse 0.125 * L} ${fparse 0.0001} 0'
     end_point = '${fparse 0.875 * L} ${fparse 0.0001} 0'
     num_points = ${Mesh/block_1/nx}
-    variable = 'vel_x vel_y pressure TKE TKED'
+    variable = 'vel_x vel_y pressure_over_density TKE TKED'
     sort_by = 'x'
     execute_on = 'timestep_end'
   []
@@ -429,7 +446,7 @@ wall_treatment = 'eq_newton'  # Options: eq_newton, eq_incremental, eq_linearize
     start_point = '${fparse 0.125 * L} ${fparse 0.5 * H} 0'
     end_point = '${fparse 0.875 * L} ${fparse 0.5 * H} 0'
     num_points =  ${Mesh/block_1/nx}
-    variable = 'vel_x vel_y pressure TKE TKED'
+    variable = 'vel_x vel_y pressure_over_density TKE TKED'
     sort_by = 'x'
     execute_on = 'timestep_end'
   []
