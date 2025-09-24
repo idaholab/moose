@@ -35,17 +35,9 @@ associateSyntax(Syntax & syntax, ActionFactory & /*action_factory*/)
   registerSyntax("AddMeshGeneratorAction", "QuadSubChannelMesh/*");
   registerSyntax("AddDefaultSubchannelPartitioner", "QuadSubChannelMesh");
 
-  registerSyntax("QuadInterWrapperBuildMeshAction", "QuadInterWrapperMesh");
-  registerSyntax("AddMeshGeneratorAction", "QuadInterWrapperMesh/*");
-  registerSyntax("AddDefaultSubchannelPartitioner", "QuadInterWrapperMesh");
-
   registerSyntax("TriSubChannelBuildMeshAction", "TriSubChannelMesh");
   registerSyntax("AddMeshGeneratorAction", "TriSubChannelMesh/*");
   registerSyntax("AddDefaultSubchannelPartitioner", "TriSubChannelMesh");
-
-  registerSyntax("TriInterWrapperBuildMeshAction", "TriInterWrapperMesh");
-  registerSyntax("AddMeshGeneratorAction", "TriInterWrapperMesh/*");
-  registerSyntax("AddDefaultSubchannelPartitioner", "TriInterWrapperMesh");
 }
 
 }
