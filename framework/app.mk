@@ -421,7 +421,7 @@ endif
 # Target-specific Variable Values (See GNU-make manual)
 $(app_LIB): curr_objs := $(app_objects)
 $(app_LIB): curr_dir  := $(APPLICATION_DIR)
-$(app_LIB): curr_deps := $(depend_libs) $(app_KOKKOS_LIB)
+$(app_LIB): curr_deps := $(depend_libs)
 $(app_LIB): curr_libs := $(depend_libs_flags)
 $(app_LIB): curr_additional_depend_libs := $(ADDITIONAL_DEPEND_LIBS)
 $(app_LIB): curr_additional_libs := $(ADDITIONAL_LIBS)
@@ -440,11 +440,11 @@ else
 # Target-specific Variable Values (See GNU-make manual)
 $(app_test_LIB): curr_objs := $(app_test_objects)
 $(app_test_LIB): curr_dir  := $(APPLICATION_DIR)/test
-$(app_test_LIB): curr_deps := $(depend_libs) $(app_KOKKOS_LIB)
+$(app_test_LIB): curr_deps := $(depend_libs)
 $(app_test_LIB): curr_libs := $(depend_libs_flags)
 $(app_test_LIB): curr_additional_depend_libs := $(ADDITIONAL_DEPEND_LIBS)
 $(app_test_LIB): curr_additional_libs := $(ADDITIONAL_LIBS)
-$(app_test_LIB): $(app_HEADER) $(app_plugin_deps) $(depend_libs) $(app_test_objects) $(ADDITIONAL_DEPEND_LIBS)
+$(app_test_LIB): $(app_HEADER) $(app_plugin_deps) $(depend_libs) $(gtest_LIB) $(app_test_objects) $(ADDITIONAL_DEPEND_LIBS)
 	@echo "Linking Test Library "$@"..."
 	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
 	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(curr_objs) $(LDFLAGS) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) $(curr_additional_libs) -rpath $(curr_dir)/lib $(curr_libs)
