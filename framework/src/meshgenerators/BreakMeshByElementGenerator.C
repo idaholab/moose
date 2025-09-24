@@ -37,7 +37,8 @@ BreakMeshByElementGenerator::validParams()
       "interface_sides",
       1,
       "interface_sides<3",
-      "Whether to add no interface boundary, a 1-sided boundary, or a 2-sided boundary");
+      "Whether to add no interface boundary, a 1-sided boundary (facing from lower to higher "
+      "element id), or a 2-sided boundary");
   return params;
 }
 
