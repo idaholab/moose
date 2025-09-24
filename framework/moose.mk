@@ -220,7 +220,7 @@ ifeq ($(UNAME10), MINGW64_NT)
 	PYMOD_COMPILEFLAGS := $(shell $(pyconfig) --cflags --ldflags --libs)
 else
 	PYMOD_EXTENSION    := so
-	PYMOD_COMPILEFLAGS := -L$(shell $(pyconfig) --prefix)/lib $(shell $(pyconfig) --includes)
+	PYMOD_COMPILEFLAGS := -L$(shell $(pyconfig) --prefix)/lib -Wl,-rpath,$(shell $(pyconfig) --prefix)/lib $(shell $(pyconfig) --includes)
 endif
 
 $(pyhit_srcfiles) $(hit_CLI_srcfiles): | prebuild
