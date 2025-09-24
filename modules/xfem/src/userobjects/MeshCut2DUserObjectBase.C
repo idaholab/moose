@@ -165,10 +165,9 @@ MeshCut2DUserObjectBase::getCrackFrontPoints(unsigned int number_crack_front_poi
   // number_crack_front_points is updated via
   // _crack_front_definition->updateNumberOfCrackFrontPoints(_crack_front_points.size())
   if (number_crack_front_points != _original_and_current_front_node_ids.size())
-    mooseError("MeshCut2DFractureUserObject::getCrackFrontPoints:  number_crack_front_points=" +
-               Moose::stringify(number_crack_front_points) +
-               " does not match the number of nodes given in "
-               "_original_and_current_front_node_ids=" +
+    mooseError("Number of nodes in CrackFrontDefinition does not match the number of nodes in the "
+               "cutter_mesh.\nCrackFrontDefinition nodes = " +
+               Moose::stringify(number_crack_front_points) + "\ncutter_mesh nodes = " +
                Moose::stringify(_original_and_current_front_node_ids.size()));
 
   for (unsigned int i = 0; i < number_crack_front_points; ++i)
