@@ -53,6 +53,9 @@ public:
   /// De-scales the assumed scaled input
   void getDescaled(RealEigenMatrix & input) const;
 
+  /// Scales the assumed de-scaled input
+  void getScaled(RealEigenMatrix & input) const;
+
 protected:
   std::vector<Real> _mean;
   std::vector<Real> _stdev;
