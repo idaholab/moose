@@ -31,7 +31,9 @@ MFEMSumAux::validParams()
 MFEMSumAux::MFEMSumAux(const InputParameters & parameters)
   : MFEMAuxKernel(parameters),
     _var_names(getParam<std::vector<VariableName>>("source_variables")),
-    _scale_factors(getParam<std::vector<mfem::real_t>>("scale_factors"))
+    _scale_factors(parameters.isParamValid("scale_factors")
+                       ? getParam<std::vector<mfem::real_t>>("scale_factors")
+                       : std::vector<mfem::real_t>(_var_names.size(), 1.0))
 {
   for (const auto & var_name : _var_names)
   {
