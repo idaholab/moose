@@ -27,6 +27,7 @@ void
 Variable::init(const MooseVariableBase & variable, const TagID tag)
 {
   _coupled = true;
+  _nodal = variable.isNodal();
   _components = variable.count();
   _tag = tag;
 
@@ -49,6 +50,7 @@ Variable::init(const std::vector<const MooseVariableBase *> & variables,
                CoupleableKey)
 {
   _coupled = true;
+  _nodal = true;
   _components = variables.size();
   _tag = tag;
 
@@ -57,6 +59,8 @@ Variable::init(const std::vector<const MooseVariableBase *> & variables,
 
   for (unsigned int comp = 0; comp < _components; ++comp)
   {
+    _nodal = _nodal && variables[comp]->isNodal();
+
     _var[comp] = variables[comp]->number();
     _sys[comp] = variables[comp]->sys().number();
   }
@@ -69,6 +73,7 @@ void
 Variable::init(const std::vector<Real> & values, CoupleableKey)
 {
   _coupled = false;
+  _nodal = true;
   _components = values.size();
 
   _default_value = values;

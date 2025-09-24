@@ -21,10 +21,11 @@ public:
 
   KokkosUpperBoundNodalKernel(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real getResidual(const ContiguousNodeID node) const;
-  KOKKOS_FUNCTION Real getJacobian(const ContiguousNodeID node) const;
+  KOKKOS_FUNCTION Real getResidual(const unsigned int qp, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION Real getJacobian(const unsigned int qp, ResidualDatum & datum) const;
   KOKKOS_FUNCTION Real getOffDiagJacobian(const unsigned int jvar,
-                                          const ContiguousNodeID node) const;
+                                          const unsigned int qp,
+                                          ResidualDatum & datum) const;
 
 private:
   /// The upper bound on the coupled variable
@@ -32,15 +33,15 @@ private:
 };
 
 KOKKOS_FUNCTION inline Real
-KokkosUpperBoundNodalKernel::getResidual(const ContiguousNodeID node) const
+KokkosUpperBoundNodalKernel::getResidual(const unsigned int qp, ResidualDatum & datum) const
 {
-  return ::Kokkos::min(_u(node), _upper_bound - _v(node));
+  return ::Kokkos::min(_u(datum, qp), _upper_bound - _v(datum, qp));
 }
 
 KOKKOS_FUNCTION inline Real
-KokkosUpperBoundNodalKernel::getJacobian(const ContiguousNodeID node) const
+KokkosUpperBoundNodalKernel::getJacobian(const unsigned int qp, ResidualDatum & datum) const
 {
-  if (_u(node) <= _upper_bound - _v(node))
+  if (_u(datum, qp) <= _upper_bound - _v(datum, qp))
     return 1;
 
   return 0;
@@ -48,10 +49,11 @@ KokkosUpperBoundNodalKernel::getJacobian(const ContiguousNodeID node) const
 
 KOKKOS_FUNCTION inline Real
 KokkosUpperBoundNodalKernel::getOffDiagJacobian(const unsigned int jvar,
-                                                const ContiguousNodeID node) const
+                                                const unsigned int qp,
+                                                ResidualDatum & datum) const
 {
   if (jvar == _v_var)
-    if (_upper_bound - _v(node) < _u(node))
+    if (_upper_bound - _v(datum, qp) < _u(datum, qp))
       return -1;
 
   return 0;

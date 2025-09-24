@@ -123,16 +123,26 @@ public:
   /**
    * Constructor
    * @param var The Kokkos variable
+   * @param nodal Whether to get nodal values
    */
-  VariableValue(Variable var) : _var(var) {}
+  VariableValue(Variable var, bool nodal = false) : _var(var), _nodal(nodal)
+  {
+    if (nodal && !var.nodal())
+      mooseError("Cannot get nodal values of a non-nodal variable.");
+  }
   /**
    * Constructor
    * @param var The MOOSE variable
    * @param tag The vector tag name
+   * @param nodal Whether to get nodal values
    */
-  VariableValue(const MooseVariableBase & var, const TagName & tag = Moose::SOLUTION_TAG)
-    : _var(var, tag)
+  VariableValue(const MooseVariableBase & var,
+                const TagName & tag = Moose::SOLUTION_TAG,
+                bool nodal = false)
+    : _var(var, tag), _nodal(nodal)
   {
+    if (nodal && !var.isNodal())
+      mooseError("Cannot get nodal values of a non-nodal variable.");
   }
 
   /**
@@ -144,7 +154,7 @@ public:
   /**
    * Get the current variable value
    * @param datum The Datum object of the current thread
-   * @param qp The local quadrature-point index
+   * @param qp The local quadrature point index
    * @param comp The variable component
    * @returns The variable value
    */
@@ -152,15 +162,29 @@ public:
   {
     if (_var.coupled())
     {
-      auto & elem = datum.elem();
-      auto side = datum.side();
-      auto qp_offset = datum.qpOffset();
+      if (_nodal)
+      {
+        KOKKOS_ASSERT(datum.isNodal());
 
-      return side == libMesh::invalid_uint
-                 ? datum.system(_var.sys(comp))
-                       .getVectorQpValue(elem, qp_offset + qp, _var.var(comp), _var.tag())
-                 : datum.system(_var.sys(comp))
-                       .getVectorQpValueFace(elem, side, qp, _var.var(comp), _var.tag());
+        auto node = datum.node();
+        auto dof = datum.system(_var.sys(comp)).getNodeLocalDofIndex(node, _var.var(comp));
+
+        return datum.system(_var.sys(comp)).getVectorDofValue(dof, _var.tag());
+      }
+      else
+      {
+        KOKKOS_ASSERT(!datum.isNodal());
+
+        auto & elem = datum.elem();
+        auto side = datum.side();
+        auto qp_offset = datum.qpOffset();
+
+        return side == libMesh::invalid_uint
+                   ? datum.system(_var.sys(comp))
+                         .getVectorQpValue(elem, qp_offset + qp, _var.var(comp), _var.tag())
+                   : datum.system(_var.sys(comp))
+                         .getVectorQpValueFace(elem, side, qp, _var.var(comp), _var.tag());
+      }
     }
     else
       return _var.value(comp);
@@ -171,59 +195,10 @@ private:
    * Coupled Kokkos variable
    */
   Variable _var;
-};
-
-class VariableNodalValue : public SystemHolder
-{
-public:
   /**
-   * Constructor
-   * @param systems The Kokkos systems
-   * @param var The Kokkos variable
+   * Flag whether nodal values are requested
    */
-  VariableNodalValue(Array<System> & systems, Variable var) : SystemHolder(systems), _var(var) {}
-  /**
-   * Constructor
-   * @param systems The Kokkos systems
-   * @param var The MOOSE variable
-   * @param tag The vector tag name
-   */
-  VariableNodalValue(Array<System> & systems,
-                     const MooseVariableBase & var,
-                     const TagName & tag = Moose::SOLUTION_TAG)
-    : SystemHolder(systems), _var(var, tag)
-  {
-  }
-
-  /**
-   * Get whether the variable was coupled
-   * @returns Whether the variable was coupled
-   */
-  KOKKOS_FUNCTION operator bool() const { return _var.coupled(); }
-
-  /**
-   * Get the current variable nodal value
-   * @param node The current contiguous node ID
-   * @param comp The variable component
-   * @returns The variable nodal value
-   */
-  KOKKOS_FUNCTION Real operator()(ContiguousNodeID node, unsigned int comp = 0) const
-  {
-    if (_var.coupled())
-    {
-      auto dof = kokkosSystem(_var.sys(comp)).getNodeLocalDofIndex(node, _var.var(comp));
-
-      return kokkosSystem(_var.sys(comp)).getVectorDofValue(dof, _var.tag());
-    }
-    else
-      return _var.value(comp);
-  }
-
-private:
-  /**
-   * Coupled Kokkos variable
-   */
-  Variable _var;
+  const bool _nodal;
 };
 
 class VariableGradient
