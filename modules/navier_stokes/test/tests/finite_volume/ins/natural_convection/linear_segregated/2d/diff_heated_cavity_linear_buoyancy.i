@@ -5,7 +5,7 @@ rho_0 = 3279.
 mu = 1.0
 k_cond = 38.0
 cp = ${fparse 640}
-alpha_b = 3.26e-4#3.26e-4
+alpha_b = 3.26e-4
 T_0 = 875.0
 
 walls = 'right left top bottom'
@@ -30,10 +30,10 @@ walls = 'right left top bottom'
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
-    xmin = 1 #
-    xmax = 2.0 #1
-    ymin = 1.0 #0
-    ymax = 2.0 #1
+    xmin = 1
+    xmax = 2.0
+    ymin = 1.0
+    ymax = 2.0
     nx = 30
     ny = 30
   []
@@ -82,7 +82,7 @@ walls = 'right left top bottom'
     variable = superficial_vel_x
     mu = ${mu}
     momentum_component = 'x'
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
   []
   [u_pressure]
     type = LinearFVMomentumPressure
@@ -104,7 +104,7 @@ walls = 'right left top bottom'
     variable = superficial_vel_y
     mu = ${mu}
     momentum_component = 'y'
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
   []
   [v_pressure]
     type = LinearFVMomentumPressure
@@ -197,12 +197,6 @@ walls = 'right left top bottom'
     functor_names = 'T_fluid'
     expression = '${rho_0}*(1-${alpha_b}*(T_fluid-${T_0})) '
   []
-  [d_rho_g_function]
-    type = ParsedFunctorMaterial
-    property_name = 'delta_rho_g'
-    functor_names = 'rho'
-    expression = ' (rho - ${rho_0}) * (-9.8)'
-  []
 []
 
 ################################################################################
@@ -221,13 +215,13 @@ walls = 'right left top bottom'
   momentum_systems = 'u_system v_system'
   pressure_system = 'pressure_system'
   energy_system = 'energy_system'
-  momentum_equation_relaxation = 0.3
+  momentum_equation_relaxation = 0.7
   pressure_variable_relaxation = 0.3
-  energy_equation_relaxation = 0.95
+  energy_equation_relaxation = 0.9
   num_iterations = 1500
-  pressure_absolute_tolerance = 1e-9
-  momentum_absolute_tolerance = 1e-9
-  energy_absolute_tolerance = 1e-9
+  pressure_absolute_tolerance = 1e-8
+  momentum_absolute_tolerance = 1e-8
+  energy_absolute_tolerance = 1e-8
   print_fields = false
   momentum_l_max_its = 300
 

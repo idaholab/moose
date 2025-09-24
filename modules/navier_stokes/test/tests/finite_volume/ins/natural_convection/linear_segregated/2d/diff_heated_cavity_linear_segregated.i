@@ -82,7 +82,7 @@ walls = 'right left top bottom'
     variable = superficial_vel_x
     mu = ${mu}
     momentum_component = 'x'
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
   []
   [u_pressure]
     type = LinearFVMomentumPressure
@@ -106,7 +106,7 @@ walls = 'right left top bottom'
     variable = superficial_vel_y
     mu = ${mu}
     momentum_component = 'y'
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
   []
   [v_pressure]
     type = LinearFVMomentumPressure
@@ -129,13 +129,13 @@ walls = 'right left top bottom'
     type = LinearFVAnisotropicDiffusion
     variable = pressure
     diffusion_tensor = Ainv
-    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction = false
   []
   [HbyA_divergence]
     type = LinearFVDivergence
     variable = pressure
     face_flux = HbyA
-    force_boundary_execution = true
+    force_boundary_execution = false
   []
 
    ####### FUEL ENERGY EQUATION #######
@@ -218,10 +218,10 @@ walls = 'right left top bottom'
   momentum_systems = 'u_system v_system'
   pressure_system = 'pressure_system'
   energy_system = 'energy_system'
-  momentum_equation_relaxation = 0.3
-  pressure_variable_relaxation = 0.7
+  momentum_equation_relaxation = 0.7
+  pressure_variable_relaxation = 0.3
   energy_equation_relaxation = 0.95
-  num_iterations = 3000
+  num_iterations = 1500
   pressure_absolute_tolerance = 1e-8
   momentum_absolute_tolerance = 1e-8
   energy_absolute_tolerance = 1e-8
