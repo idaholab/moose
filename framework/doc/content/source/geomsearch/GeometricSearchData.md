@@ -9,7 +9,7 @@
     - Mesh Tying
 - The Geometric Search system allows an application to track evolving geometric relationships.
 - Currently, this entails two main capabilities: [`NearestNodeLocator`](/NearestNodeLocator.md) and [`PenetrationLocator`](/PenetrationLocator.md).
-- The `PenetrationLocator` capability defaults to a quick, mesh-topology-based location algorithm. cases where a node may touch a surface element that does not incorporate it, such as Flex IGA meshes and adaptively-refined 3D meshes, should `setSearchUsingPointLocator(true)` to switch to a more thorough octree-based algorithm.
+- The `PenetrationLocator` capability defaults to a quick, mesh-topology-based location algorithm.  Cases where a surface element may touch a node that is not one of its own nodes, such as Flex IGA meshes and adaptively-refined 3D meshes, should `setSearchUsingPointLocator(true)` to switch to a more thorough octree-based algorithm.
 - Most user interaction with GeometricSearchData is likely to be through objects which inherit from `GeometricSearchInterface`.  Users can change the algorithm of PenetrationLocator by setting `search_using_point_locator=true` on such objects.
 - Both of the capabilities work in parallel and with both distributed and replicated meshes.
 - Locators can be requested using four different methods on the `GeometricSearchData` API:
