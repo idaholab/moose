@@ -12,16 +12,10 @@
 #include "MFEMScalarParsedCoefficient.h"
 
 MFEMScalarParsedCoefficient::MFEMScalarParsedCoefficient(
-    Moose::MFEM::CoefficientManager & coefficients,
-    const std::vector<MFEMScalarCoefficientName> & coef_names,
-    const bool & use_xyzt,
-    const FunctionParserUtils<false>::SymFunctionPtr & func)
-  : _coefficients(coefficients),
-    _coef_names(coef_names),
-    _use_xyzt(use_xyzt),
-    _func(func),
-    _vals(coef_names.size() + (use_xyzt ? 4 : 0)),
-    _transip(3)
+    const unsigned & arity,
+    const std::vector<std::reference_wrapper<mfem::Coefficient>> & coefficients,
+    const FunctionParserUtils<false>::SymFunctionPtr & sym_function)
+  : _coefficients(coefficients), _sym_function(sym_function), _vals(arity), _transip(3)
 {
 }
 
@@ -29,20 +23,17 @@ mfem::real_t
 MFEMScalarParsedCoefficient::Eval(mfem::ElementTransformation & T,
                                   const mfem::IntegrationPoint & ip)
 {
-  for (unsigned i = 0; i < _coef_names.size(); i++)
-    _vals[i] = _coefficients.getScalarCoefficient(_coef_names[i]).Eval(T, ip);
+  for (unsigned i = 0; i < _coefficients.size(); i++)
+    _vals[i] = _coefficients[i].get().Eval(T, ip);
 
-  if (_use_xyzt)
-  {
-    T.Transform(ip, _transip);
+  T.Transform(ip, _transip);
 
-    for (int i = 0; i < 3; i++)
-      _vals[_coef_names.size() + i] = i < _transip.Size() ? _transip(i) : 0.;
+  for (int i = 0; i < 3; i++)
+    _vals[_coefficients.size() + i] = i < _transip.Size() ? _transip(i) : 0.;
 
-    _vals[_coef_names.size() + 3] = GetTime();
-  }
+  _vals[_coefficients.size() + 3] = GetTime();
 
-  return _func->Eval(_vals.GetData());
+  return _sym_function->Eval(_vals.GetData());
 }
 
 #endif
