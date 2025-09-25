@@ -9,7 +9,7 @@
 
 #include "LinearFVPressureFluxBC.h"
 
-registerMooseObject("MooseApp", LinearFVPressureFluxBC);
+registerMooseObject("NavierStokesApp", LinearFVPressureFluxBC);
 
 InputParameters
 LinearFVPressureFluxBC::validParams()
