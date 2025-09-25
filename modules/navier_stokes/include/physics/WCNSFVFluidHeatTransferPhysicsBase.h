@@ -16,7 +16,7 @@
 #define registerWCNSFVFluidHeatTransferPhysicsBaseTasks(app_name, derived_name)                    \
   registerMooseAction(app_name, derived_name, "get_turbulence_physics");                           \
   registerMooseAction(app_name, derived_name, "add_variable");                                     \
-  registerMooseAction(app_name, derived_name, "add_ic");                                           \
+  registerMooseAction(app_name, derived_name, "add_fv_ic");                                        \
   registerMooseAction(app_name, derived_name, "add_fv_kernel");                                    \
   registerMooseAction(app_name, derived_name, "add_fv_bc");                                        \
   registerMooseAction(app_name, derived_name, "add_material")
@@ -62,7 +62,6 @@ protected:
   void addInitialConditions() override;
   void addFVKernels() override;
   void addFVBCs() override;
-  void addMaterials() override;
 
   unsigned short getNumberAlgebraicGhostingLayersNeeded() const override;
 
@@ -84,6 +83,8 @@ protected:
   /// Process thermal conductivity (multiple functor input options are available).
   /// Return true if we have vector thermal conductivity and false if scalar
   bool processThermalConductivity();
+  /// Define the k/cp diffusion coefficients when solving for enthalpy
+  void defineKOverCpFunctors(const bool use_ad);
 
   /// A boolean to help compatibility with the old Modules/NavierStokesFV syntax
   const bool _has_energy_equation;
