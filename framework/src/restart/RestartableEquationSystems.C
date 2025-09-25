@@ -231,6 +231,9 @@ RestartableEquationSystems::load(std::istream & stream)
   // Order objects (elements and then node) by ID for storing
   _loaded_ordered_objects = orderDofObjects();
 
+  // Clear previously loaded variables to ensure a clean state
+  _loaded_variables.clear();
+
   // Sanity check on if we're loading the same thing
   {
     std::vector<dof_id_type> from_ordered_objects_ids;
