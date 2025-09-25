@@ -22,7 +22,6 @@ LinearFVMomentumBuoyancy::validParams()
   params.addClassDescription("Represents the buoyancy term in the Navier Stokes momentum "
                              "equations, added to the right hand side.");
 
-
   params.addRequiredParam<RealVectorValue>("gravity", "Gravitational acceleration vector.");
   params.addRequiredParam<MooseFunctorName>(NS::density, "The value for the density");
   params.addRequiredParam<Real>("reference_rho", "The value for the reference density");
@@ -55,5 +54,5 @@ LinearFVMomentumBuoyancy::computeRightHandSideContribution()
 {
   const auto elem = makeElemArg(_current_elem_info->elem());
   const auto state = determineState();
-  return (_rho(elem,state) -_rho_0) * _gravity(_index) * _current_elem_volume;
+  return (_rho(elem, state) - _rho_0) * _gravity(_index) * _current_elem_volume;
 }

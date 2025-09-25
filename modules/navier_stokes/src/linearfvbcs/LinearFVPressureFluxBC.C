@@ -19,14 +19,12 @@ LinearFVPressureFluxBC::validParams()
       "Adds a fixed diffusive flux BC which can be used for the assembly of linear "
       "finite volume system and whose normal face gradient values are determined "
       "using a functor. This kernel is only designed to work with advection-diffusion problems.");
-  params.addRequiredParam<MooseFunctorName>(
-      "HbyA_flux", "The total HbyA face flux value.");
+  params.addRequiredParam<MooseFunctorName>("HbyA_flux", "The total HbyA face flux value.");
   params.addRequiredParam<MooseFunctorName>("Ainv", "The 1/A momentum system diagonal vector.");
   return params;
 }
 
-LinearFVPressureFluxBC::LinearFVPressureFluxBC(
-    const InputParameters & parameters)
+LinearFVPressureFluxBC::LinearFVPressureFluxBC(const InputParameters & parameters)
   : LinearFVAdvectionDiffusionBC(parameters),
     _HbyA_flux(getFunctor<Real>("HbyA_flux")),
     _Ainv(getFunctor<RealVectorValue>("Ainv"))
@@ -42,13 +40,12 @@ LinearFVPressureFluxBC::computeBoundaryValue() const
                                         : _current_face_info->neighborPtr());
   const Real distance = computeCellToFaceDistance();
 
-  if (_Ainv(face_arg, determineState())(0) != 0.0 )
-      return raw_value(_var(elem_arg, determineState()))
-            -_HbyA_flux(singleSidedFaceArg(_current_face_info), determineState()) /
-             _Ainv(face_arg, determineState())(0) * distance ;
+  if (_Ainv(face_arg, determineState())(0) != 0.0)
+    return raw_value(_var(elem_arg, determineState())) -
+           _HbyA_flux(singleSidedFaceArg(_current_face_info), determineState()) /
+               _Ainv(face_arg, determineState())(0) * distance;
   else
-      return raw_value(_var(elem_arg, determineState())); //zero-term expansion
-
+    return raw_value(_var(elem_arg, determineState())); // zero-term expansion
 }
 
 Real
@@ -58,11 +55,11 @@ LinearFVPressureFluxBC::computeBoundaryNormalGradient() const
 
   const Real distance = computeCellToFaceDistance();
 
-  if (_Ainv(face_arg, determineState())(0) != 0.0 )
-      return -_HbyA_flux(singleSidedFaceArg(_current_face_info), determineState()) /
-        _Ainv(face_arg, determineState())(0) * distance ;
+  if (_Ainv(face_arg, determineState())(0) != 0.0)
+    return -_HbyA_flux(singleSidedFaceArg(_current_face_info), determineState()) /
+           _Ainv(face_arg, determineState())(0) * distance;
   else
-      return 0.0;
+    return 0.0;
 }
 
 Real
@@ -78,11 +75,11 @@ LinearFVPressureFluxBC::computeBoundaryValueRHSContribution() const
   // Fetch the boundary value from the provided functor.
   const Real distance = computeCellToFaceDistance();
 
-  if (_Ainv(face_arg, determineState())(0) != 0.0 )
-      return -_HbyA_flux(singleSidedFaceArg(_current_face_info), determineState()) /
-             _Ainv(face_arg, determineState())(0) * distance ;
+  if (_Ainv(face_arg, determineState())(0) != 0.0)
+    return -_HbyA_flux(singleSidedFaceArg(_current_face_info), determineState()) /
+           _Ainv(face_arg, determineState())(0) * distance;
   else
-      return 0.0;
+    return 0.0;
 }
 
 Real

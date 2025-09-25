@@ -43,9 +43,11 @@ RhieChowMassFlux::validParams()
   params.addParam<VariableName>("w", "The z-component of velocity");
   params.addRequiredParam<std::string>("p_diffusion_kernel",
                                        "The diffusion kernel acting on the pressure.");
-  params.addParam<std::vector<std::vector<std::string>>>("body_force_kernels_name",{}, //REMEMBER TO MAKE THIS A VECTOR OF VECTOR of STRINGS BEFORE MERGE
-                                        "The body force kernel names."
-                                        "this double vector would have size index_x_dim: 'f1x f2x; f1y f2y; f1z f2z'");
+  params.addParam<std::vector<std::vector<std::string>>>(
+      "body_force_kernels_name",
+      {}, // REMEMBER TO MAKE THIS A VECTOR OF VECTOR of STRINGS BEFORE MERGE
+      "The body force kernel names."
+      "this double vector would have size index_x_dim: 'f1x f2x; f1y f2y; f1z f2z'");
 
   params.addRequiredParam<MooseFunctorName>(NS::density, "Density functor");
 
@@ -78,7 +80,8 @@ RhieChowMassFlux::RhieChowMassFlux(const InputParameters & params)
     _face_mass_flux(
         declareRestartableData<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>>(
             "face_flux", _moose_mesh, blockIDs(), "face_values")),
-    _body_force_kernels_name(getParam<std::vector<std::vector<std::string>>>("body_force_kernels_name")),
+    _body_force_kernels_name(
+        getParam<std::vector<std::vector<std::string>>>("body_force_kernels_name")),
     _rho(getFunctor<Real>(NS::density)),
     _pressure_projection_method(getParam<MooseEnum>("pressure_projection_method"))
 {
@@ -165,12 +168,13 @@ RhieChowMassFlux::initialSetup()
   // We fetch the body forces kernel to ensure that the face flux correction
   // is accurate.
 
-  //Check if components match the dimension.
+  // Check if components match the dimension.
 
   if (!_body_force_kernels_name.empty())
   {
     if (_body_force_kernels_name.size() != _dim)
-      paramError("body_force_kernels_name", "The dimension of the body force vector does not match the problem dimension.");
+      paramError("body_force_kernels_name",
+                 "The dimension of the body force vector does not match the problem dimension.");
 
     _body_force_kernels.resize(_dim);
 
@@ -180,20 +184,20 @@ RhieChowMassFlux::initialSetup()
       {
         std::vector<LinearFVElementalKernel *> temp_storage;
         auto base_query_force = _fe_problem.theWarehouse()
-                            .query()
-                            .template condition<AttribThread>(_tid)
-                            .template condition<AttribSysNum>(_vel[dim_i]->sys().number())
-                            .template condition<AttribSystem>("LinearFVElementalKernel")
-                            .template condition<AttribName>(force_name)
-                            .queryInto(temp_storage);
+                                    .query()
+                                    .template condition<AttribThread>(_tid)
+                                    .template condition<AttribSysNum>(_vel[dim_i]->sys().number())
+                                    .template condition<AttribSystem>("LinearFVElementalKernel")
+                                    .template condition<AttribName>(force_name)
+                                    .queryInto(temp_storage);
         if (temp_storage.size() != 1)
-        paramError("body_force_kernels_name",
-                  "The kernel with the given name: " +force_name+ " could not be found or multiple instances were identified.");
+          paramError("body_force_kernels_name",
+                     "The kernel with the given name: " + force_name +
+                         " could not be found or multiple instances were identified.");
         _body_force_kernels[dim_i].push_back(temp_storage[0]);
       }
     }
   }
-
 }
 
 void
@@ -381,7 +385,6 @@ RhieChowMassFlux::computeFaceMassFlux()
 
       // On the boundary, only the element side has a contribution
       p_grad_flux = (p_elem_value * matrix_contribution - rhs_contribution);
-
     }
     // Compute the new face flux
 
@@ -512,8 +515,9 @@ RhieChowMassFlux::populateCouplingFunctors(
             for (const auto & force_kernel : _body_force_kernels[dim_i])
             {
               force_kernel->setCurrentElemInfo(&elem_info);
-              face_hbya(dim_i) -= force_kernel->computeRightHandSideContribution()
-                                  * ainv_reader[dim_i](elem_dof)/elem_info.volume();  //zero-term expansion
+              face_hbya(dim_i) -= force_kernel->computeRightHandSideContribution() *
+                                  ainv_reader[dim_i](elem_dof) /
+                                  elem_info.volume(); // zero-term expansion
             }
           }
           face_hbya(dim_i) *= boundary_normal_multiplier;
@@ -532,7 +536,6 @@ RhieChowMassFlux::populateCouplingFunctors(
       // We just do a one-term expansion for 1/A no matter what
       for (const auto dim_i : index_range(raw_Ainv))
         Ainv(dim_i) = elem_rho * ainv_reader[dim_i](elem_dof);
-
     }
     // Lastly, we populate the face flux resulted by H/A
     _HbyA_flux[fi->id()] = face_hbya * fi->normal() * face_rho;
