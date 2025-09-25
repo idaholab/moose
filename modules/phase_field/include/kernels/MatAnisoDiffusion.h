@@ -11,15 +11,25 @@
 
 #include "MatDiffusionBase.h"
 
+template <bool is_ad>
+using MatAnisoDiffusionBaseParent =
+    typename std::conditional<is_ad,
+                              MatDiffusionBaseTempl<RealTensorValue, true>,
+                              MatDiffusionBase<RealTensorValue>>::type;
+
 /**
  * Anisotropic diffusion kernel that takes a diffusion coefficient of type
  * RealTensorValue. All logic is implemnted in the MatDiffusionBase class
  * template.
  */
-class MatAnisoDiffusion : public MatDiffusionBase<RealTensorValue>
+template <bool is_ad>
+class MatAnisoDiffusionTempl : public MatAnisoDiffusionBaseParent<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  MatAnisoDiffusion(const InputParameters & parameters);
+  MatAnisoDiffusionTempl(const InputParameters & parameters);
 };
+
+typedef MatAnisoDiffusionTempl<false> MatAnisoDiffusion;
+typedef MatAnisoDiffusionTempl<true> ADMatAnisoDiffusion;
