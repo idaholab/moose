@@ -253,7 +253,7 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
     component = 0
     boundary = 'left right_v2 bottom_v2'
     gamma = ${gamma}
-    dirichlet_value = walls
+    face_functor = walls
   []
   [v_jump_walls]
     type = MassFluxPenaltyBC
@@ -263,7 +263,7 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
     component = 1
     boundary = 'left right_v2 bottom_v2'
     gamma = ${gamma}
-    dirichlet_value = walls
+    face_functor = walls
   []
   [u_jump_top]
     type = MassFluxPenaltyBC
@@ -273,7 +273,7 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
     component = 0
     boundary = 'top_v2'
     gamma = ${gamma}
-    dirichlet_value = top_vel
+    face_functor = top_vel
   []
   [v_jump_top]
     type = MassFluxPenaltyBC
@@ -283,21 +283,27 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
     component = 1
     boundary = 'top_v2'
     gamma = ${gamma}
-    dirichlet_value = top_vel
+    face_functor = top_vel
   []
 []
 
 [Functions]
-  [top_vel]
-    type = ParsedVectorFunction
-    expression_x = ${U}
-  []
-  [walls]
-    type = ParsedVectorFunction
-  []
   [reynolds]
     type = ParsedFunction
     expression = '10^(log10(${starting_re}) + (t - 1) * ${step_length})'
+  []
+[]
+
+[FunctorMaterials]
+  [top]
+    type = GenericConstantVectorFunctorMaterial
+    prop_names = top_vel
+    prop_values = '${U} 0 0'
+  []
+  [walls]
+    type = GenericConstantVectorFunctorMaterial
+    prop_names = walls
+    prop_values = '0 0 0'
   []
 []
 

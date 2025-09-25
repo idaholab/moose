@@ -23,8 +23,10 @@ MassFluxPenaltyBC::validParams()
   params.addParam<Real>("gamma", 1, "The penalty to multiply the jump with");
   params.addClassDescription("Adds the exterior boundary contribution of penalized jumps in the "
                              "velocity variable in one component of the momentum equations.");
-  params.addRequiredParam<FunctionName>("dirichlet_value",
-                                        "The velocity Dirichlet value on the boundary");
+  params.addRequiredParam<MooseFunctorName>(
+      "face_functor",
+      "The velocity value on the boundary. For a Dirichlet boundary this should be the Dirichlet "
+      "value. For a Neumann boundary this should be the trace velocity");
   return params;
 }
 
@@ -35,7 +37,7 @@ MassFluxPenaltyBC::MassFluxPenaltyBC(const InputParameters & parameters)
     _comp(getParam<unsigned short>("component")),
     _matrix_only(getParam<bool>("matrix_only")),
     _gamma(getParam<Real>("gamma")),
-    _dirichlet_func(isParamValid("dirichlet_value") ? &getFunction("dirichlet_value") : nullptr)
+    _face_functor(getFunctor<ADRealVectorValue>("face_functor"))
 {
   if (_mesh.dimension() > 2)
     mooseError("This class only supports 2D simulations at this time");
@@ -52,8 +54,9 @@ ADReal
 MassFluxPenaltyBC::computeQpResidual()
 {
   ADRealVectorValue soln_jump(_vel_x[_qp], _vel_y[_qp], 0);
-  if (_dirichlet_func)
-    soln_jump -= _dirichlet_func->vectorValue(_t, _q_point[_qp]);
+  soln_jump -=
+      _face_functor(Moose::ElemSideQpArg{_current_elem, _current_side, _qp, _qrule, _q_point[_qp]},
+                    determineState());
 
   return _gamma * soln_jump * _normals[_qp] * _test[_i][_qp] * _normals[_qp](_comp);
 }
