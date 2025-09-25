@@ -1089,10 +1089,8 @@ EFAElement3D::createChild(const std::set<EFAElement *> & CrackTipElements,
         if (_fragments.size() == 1 && !shouldDuplicateForCrackTip(CrackTipElements))
           childElem->setNode(j, _nodes[j]); // inherit parent's node
         else if (!use_temp)
-        {
           childElem->setNode(j, _nodes[j]); // inherit parent's node
-        }
-        else // parent element's node is not in fragment
+        else                                // parent element's node is not in fragment
         {
           unsigned int new_node_id = Efa::getNewID(TempNodes);
           EFANode * newNode = new EFANode(new_node_id, EFANode::N_CATEGORY_TEMP, _nodes[j]);
@@ -1264,10 +1262,10 @@ EFAElement3D::connectNeighbors(std::map<unsigned int, EFANode *> & PermanentNode
               } // i
             }
           } // loop over NeighborElem's children
-        } // if (merge_phantom_edges)
-      } // IF edge-j has_intersection()
-    } // k, loop over neighbors on edge j
-  } // j, loop over all faces
+        }   // if (merge_phantom_edges)
+      }     // IF edge-j has_intersection()
+    }       // k, loop over neighbors on edge j
+  }         // j, loop over all faces
 
   // Now do a second loop through faces and convert remaining nodes to permanent nodes.
   // If there is no neighbor on that face, also duplicate the embedded node if it exists
