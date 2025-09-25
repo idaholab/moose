@@ -382,13 +382,10 @@ RhieChowMassFlux::computeFaceMassFlux()
       // On the boundary, only the element side has a contribution
       p_grad_flux = (p_elem_value * matrix_contribution - rhs_contribution);
 
-      // WOULD BE NICE TO ADD A CHECK FOR MASS FLUX IN WALLS
-     // std::cout << "facemassfluxbc: " << -_HbyA_flux[fi->id()] + p_grad_flux << std::endl ;
-
     }
     // Compute the new face flux
 
-    _face_mass_flux[fi->id()] = -_HbyA_flux[fi->id()] + p_grad_flux;///fi->faceArea();
+    _face_mass_flux[fi->id()] = -_HbyA_flux[fi->id()] + p_grad_flux;
   }
 }
 
