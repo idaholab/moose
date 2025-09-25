@@ -39,6 +39,12 @@ ParsedGenerateNodeset::validParams()
       {},
       "Vector of values for the constants in constant_names (can be an FParser expression)");
 
+  params.addParam<bool>(
+      "allow_distributed_meshes",
+      false,
+      "Can be used to avoid erroring on distributed meshes, when it is known to be safe. For "
+      "example, when only using a parsed expression to select nodes.");
+
   // This nodeset generator can only handle a single new nodeset name, not a vector of names
   params.suppressParameter<std::vector<BoundaryName>>("new_nodeset");
 
@@ -46,6 +52,7 @@ ParsedGenerateNodeset::validParams()
                              "node satisfies the `expression` expression.");
   params.addParamNamesToGroup("expression constant_names constant_expressions",
                               "Parsed expression");
+  params.addParamNamesToGroup("allow_distributed_meshes", "Advanced");
   return params;
 }
 
@@ -74,7 +81,7 @@ ParsedGenerateNodeset::generate()
   std::unique_ptr<MeshBase> mesh = std::move(_input);
   setup(*mesh);
 
-  if (!mesh->is_replicated())
+  if (!getParam<bool>("allow_distributed_meshes") && !mesh->is_replicated())
     mooseError("Not implemented for distributed meshes");
 
   // Get a reference to our BoundaryInfo object for later use

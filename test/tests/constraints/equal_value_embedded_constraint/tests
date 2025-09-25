@@ -115,7 +115,7 @@
   []
 
   [penalty_AD]
-    design = 'source/constraints/ADEqualValueEmbeddedConstraint.md'
+    design = 'source/constraints/EqualValueEmbeddedConstraint.md'
     requirement = "The system shall support embedded constraints with "
                   "automatic differentiation using a penalty formulation between "
     issues = '#30499'
@@ -171,7 +171,7 @@
     []
   []
   [error_kinematic_AD]
-    design = 'source/constraints/ADEqualValueEmbeddedConstraint.md'
+    design = 'source/constraints/EqualValueEmbeddedConstraint.md'
     requirement = "The system shall error when kinematic constraints are used with automatic differentiation."
     issues = '#30499'
     type = RunException
@@ -182,7 +182,7 @@
     mesh_mode = REPLICATED
   []
   [two_var_AD]
-    design = 'source/constraints/ADEqualValueEmbeddedConstraint.md'
+    design = 'source/constraints/EqualValueEmbeddedConstraint.md'
     requirement = "The system shall couple two different variables using automatic "
                   "differentiation and penalty constraint and it will produce the same "
                   "results as a single variable simulation."
@@ -192,7 +192,7 @@
     mesh_mode = REPLICATED
   []
   [two_var_nonAD]
-    design = 'source/constraints/ADEqualValueEmbeddedConstraint.md'
+    design = 'source/constraints/EqualValueEmbeddedConstraint.md'
     requirement = "The system shall couple two different variables using a hand-coded "
                   "Jacobian and penalty constraint and it will produce the same "
                   "results as a single variable simulation."

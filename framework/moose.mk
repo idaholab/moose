@@ -510,7 +510,7 @@ endif
 
 MOOSE_KOKKOS_OBJECTS       := $(patsubst %.K, %.$(KOKKOS_OBJ_SUFFIX), $(MOOSE_KOKKOS_SRC_FILES))
 MOOSE_KOKKOS_DEPS          := $(patsubst %.$(KOKKOS_OBJ_SUFFIX), %.$(KOKKOS_OBJ_SUFFIX).d, $(MOOSE_KOKKOS_OBJECTS))
-MOOSE_KOKKOS_LIB           := $(FRAMEWORK_DIR)/libmoose_kokkos-$(METHOD).so
+MOOSE_KOKKOS_LIB           := $(FRAMEWORK_DIR)/libmoose$(KOKKOS_LIB_SUFFIX)
 
 KOKKOS_OBJECTS             := $(MOOSE_KOKKOS_OBJECTS)
 KOKKOS_DEPS                := $(MOOSE_KOKKOS_DEPS)
@@ -523,15 +523,28 @@ else
   $(KOKKOS_OBJECTS): $(moose_config)
 endif
 
+ifeq ($(KOKKOS_COMPILER),CPU)
+
+$(MOOSE_KOKKOS_LIB): $(MOOSE_KOKKOS_OBJECTS)
+	@echo "Linking Kokkos Library "$@"..."
+	@$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
+		$(KOKKOS_CXX) -o $@ $(MOOSE_KOKKOS_OBJECTS) $(KOKKOS_LDFLAGS) $(KOKKOS_LIBS) -rpath $(FRAMEWORK_DIR)
+	@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(MOOSE_KOKKOS_LIB) $(FRAMEWORK_DIR)
+
+else
+
+# libtool ignores nvcc and just uses mpicxx to link, so cannot be used
 $(MOOSE_KOKKOS_LIB): $(MOOSE_KOKKOS_OBJECTS)
 	@echo "Linking Kokkos Library "$@"..."
 	@$(KOKKOS_CXX) --shared -o $@ $(MOOSE_KOKKOS_OBJECTS) $(KOKKOS_LDFLAGS) $(KOKKOS_LIBS)
 
 endif
 
+endif
+
 # Pre-make for checking current dependency versions and showing useful warnings
 # if things like conda packages are out of date. The variable is such that
-# rules can use $(prebuild), instead of prebuild, as a prerequisite. In those
+# rules can use $$(prebuild), instead of prebuild, as a prerequisite. In those
 # cases, if this file, moose.mk, is not included, the variable expands to the
 # empty string, establishing no dependency, and keeping the rule valid. The
 # order-only prerequisite $(moose_config), guarantees _some_ configuration file
