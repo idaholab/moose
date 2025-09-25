@@ -1,14 +1,55 @@
-# Creating a Multiphysics Code
+# Multiphysics Simulation
 
 !---
 
-- Multiphysics is popular, but how is it achieved?
+## Historical Multiphysics Simulation
+
+- Predictive multiphysics capability involved best-estimate calculations
+
+  - Best estimates: data and correlation driven, many approximations
+  - Necessitated experimental data for each design
+
+- Physics performed independently
+
+  - Was a "siloed" task; handoffs of data/results from person to person
+
+- Codes are very computationally efficient and well validated
+
+  - ... but the process wasn't necessarily efficient
+
+- Used many approximations for evaluations of safety parameters
+
+  - Pin-power reconstruction, gap conductance, spacer grid models
+
+!---
+
+## Current Multiphysics Simulation
+
+- Direct, physics-based models of all components
+
+  - Reduces approximations as needed
+  - Can be computationally expensive
+  - Validation?
+
+- Tighter and consistent coupling
+
+  - How separate - full coupling or loose coupling?
+
+- Length and time scales of physics can be vastly different
+
+  - What does this change for the analyst?
+
+- Quite new: +validation of direct physics-based models are not as well validated+
+
+!--
+
+## Writing a Multiphysics Code
+
 - Scientists are adept at creating applications in their domain
 - What about collaborating across research groups and/or disciplines?
 
   - Iterating between design teams?
   - Development of "coupling" codes?
-  - Is there something better?
 
 !---
 
@@ -18,10 +59,10 @@
 
   - Allows for "decoupling" of code
   - Leads to more reuse and less bugs
-  - +Challenging for FEM+: Shape functions, DOFs, Elements, QPs, Material Properties, Analytic
-    Functions, Global Integrals, Transferred Data and much more are needed in FEM assembly
+  - +Challenging for FEM+
 
-    The complexity makes computational science codes brittle and hard to reuse
+    - Shape functions, degrees of freedom, meshing, quadrature points, material properties, analytic functions, global integrals, data transfer, ...
+    - The complexity makes computational science codes brittle and hard to reuse
 
 - A consistent set of "systems" are needed to carry out common actions, these systems should be
   separated by interfaces
@@ -33,75 +74,10 @@
 
 - Systems break apart responsibility
 - No direct communication between systems
-- Everything flows through MOOSE interfaces
+- Data flows through MOOSE interfaces
 - Objects can be mixed and matched to achieve simulation goals
-- Incoming data can be changed dynamically
-- Outputs can be manipulated (e.g. multiplication by radius for cylindrical coordinates)
 - An object, by itself, can be lifted from one application and used by another
 
-!---
-
-## MOOSE Pluggable Systems
-
-!style! halign=center
-!row!
-!col! small=12 medium=6 large=3 style=margin-left:auto;margin-right:20px;
-Actions\\
-AuxKernels\\
-Base\\
-BCs\\
-Constraints\\
-Controls\\
-Dampers\\
-DGKernels\\
-DiracKernels\\
-Distributions\\
-Executioners\\
-!col-end!
-
-!col! small=12 medium=6 large=3 style=margin-right:2%;
-Functions\\
-Geomsearch\\
-ICs\\
-Indicators\\
-InterfaceKernels\\
-Kernels\\
-LineSearches\\
-Markers\\
-Materials\\
-Mesh\\
-!col-end!
-
-!col! small=12 medium=6 large=3 style=margin-right:2%;
-MeshGenerators\\
-MeshModifiers\\
-Multiapps\\
-NodalKernels\\
-Outputs\\
-Parser\\
-Partitioner\\
-Positions\\
-Postprocessors\\
-Preconditioners\\
-Predictors\\
-!col-end!
-
-!col! small=12 medium=6 large=3 style=margin-right:10%;
-Problems\\
-Reporters\\
-RelationshipManagers\\
-Samplers\\
-Splits\\
-TimeIntegrators\\
-TimeSteppers\\
-Transfers\\
-UserObject\\
-Utils\\
-Variables\\
-VectorPostprocessors\\
-!col-end!
-!row-end!
-!style-end!
 
 !---
 
@@ -129,6 +105,7 @@ Peridynamics\\
 Phase Field\\
 Porous Flow\\
 Solid Mechanics\\
+Subchannel\\
 Thermal Hydraulics\\
 !col-end!
 
@@ -151,6 +128,29 @@ Reactor\\
 !col-end!
 !row-end!
 !style-end!
+
+!---
+
+## MOOSE Coupling Strategy
+
+- Numerically separates a multiphysics solve by physics components (equations)
+
+  - Connect physics together via in-memory transfer of fields and scalars
+
+- Input file based
+
+  - No code needed!
+
+- There is no single unique hierarchy to solve a specific problem
+
+  - Multiple may exist, some may be more efficient
+
+- +Provides a standardized interface for an analyst to produce a coupled model+
+
+!---
+
+!style halign=center
+!media multiapp_tree.png style=width:70%
 
 !---
 
