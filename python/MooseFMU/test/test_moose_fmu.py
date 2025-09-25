@@ -2,6 +2,7 @@ import importlib.util
 import logging
 import sys
 import unittest
+from unittest import mock
 from pathlib import Path
 from types import MethodType
 
@@ -158,6 +159,92 @@ class TestMoose2FMU(unittest.TestCase):
             slave.control.set_calls, [("alpha", 1.0), ("alpha", 1.0)]
         )
 
+    def test_set_controllable_vector_infers_and_caches(self):
+        slave = _DummyMoose(instance_name="test", guid="1234")
+
+        class Control:
+            def __init__(self):
+                self.calls = []
+                self.continue_calls = 0
+
+            def setControllableVectorReal(self, path, value):
+                self.calls.append(("real", path, value))
+
+            def setControllableVectorInt(self, path, value):
+                self.calls.append(("int", path, value))
+
+            def setControllableVectorString(self, path, value):
+                self.calls.append(("string", path, value))
+
+            def setContinue(self):
+                self.continue_calls += 1
+
+        slave.control = Control()
+
+        self.assertTrue(slave.set_controllable_vector("vec", [1.0, 2, 3.5]))
+        self.assertEqual(
+            slave.control.calls,
+            [("real", "vec", [1.0, 2.0, 3.5])],
+        )
+        self.assertEqual(slave.control.continue_calls, 1)
+
+        # Cached call should be skipped
+        self.assertFalse(slave.set_controllable_vector("vec", [1, 2.0, 3.5]))
+        self.assertEqual(
+            slave.control.calls,
+            [("real", "vec", [1.0, 2.0, 3.5])],
+        )
+
+        # Changing type should trigger new setter and cache entry
+        self.assertTrue(slave.set_controllable_vector("vec", [1, 2, 3], value_type="int"))
+        self.assertEqual(
+            slave.control.calls,
+            [
+                ("real", "vec", [1.0, 2.0, 3.5]),
+                ("int", "vec", [1, 2, 3]),
+            ],
+        )
+
+        self.assertTrue(slave.set_controllable_vector("names", ("a", "b")))
+        self.assertEqual(
+            slave.control.calls[-1],
+            ("string", "names", ["a", "b"]),
+        )
+        self.assertEqual(slave.control.continue_calls, 3)
+
+    def test_set_controllable_vector_validation(self):
+        slave = _DummyMoose(instance_name="test", guid="1234")
+
+        class Control:
+            def setControllableVectorReal(self, path, value):
+                pass
+
+            def setControllableVectorInt(self, path, value):
+                pass
+
+            def setControllableVectorString(self, path, value):
+                pass
+
+            def setContinue(self):
+                pass
+
+        slave.control = Control()
+
+        with self.assertRaises(TypeError):
+            slave.set_controllable_vector("bad", "not-a-vector")
+
+        with self.assertRaises(ValueError):
+            slave.set_controllable_vector("empty", [], value_type=None)
+
+        with self.assertRaises(TypeError):
+            slave.set_controllable_vector("mixed", [1, "two"], value_type=None)
+
+        with self.assertRaises(TypeError):
+            slave.set_controllable_vector("vec", [1, 2], value_type="complex")
+
+        # Explicit type should allow empty sequences
+        self.assertTrue(slave.set_controllable_vector("empty", [], value_type="real"))
+
     def test_parse_flags_handles_strings_and_iterables(self):
         slave = _DummyMoose(instance_name="test", guid="1234")
 
@@ -168,6 +255,33 @@ class TestMoose2FMU(unittest.TestCase):
 
         parsed_iterable = slave._parse_flags(["Ready", " done ", ""])
         self.assertEqual(parsed_iterable, {"READY", "DONE"})
+
+    @mock.patch("MooseFMU.MOOSE2FMU.MooseControl")
+    def test_exit_initialization_mode_rebuilds_command(self, mock_control):
+        slave = _DummyMoose(instance_name="test", guid="1234")
+
+        slave.moose_mpi = "mpiexec"
+        slave.mpi_num = "4"
+        slave.moose_executable = "/custom/moose-opt"
+        slave.moose_inputfile = "custom_input.i"
+
+        self.assertTrue(slave.exit_initialization_mode())
+
+        expected_command = [
+            "mpiexec",
+            "-n",
+            "4",
+            "/custom/moose-opt",
+            "-i",
+            "custom_input.i",
+        ]
+
+        mock_control.assert_called_once_with(
+            moose_command=expected_command,
+            moose_control_name=slave.server_name,
+        )
+        mock_control.return_value.initialize.assert_called_once_with()
+        self.assertEqual(slave.cmd, expected_command)
 
     def test_sync_with_moose_success(self):
         slave = _DummyMoose(instance_name="test", guid="1234")
@@ -196,7 +310,7 @@ class TestMoose2FMU(unittest.TestCase):
 
         slave.get_flag_with_retries = MethodType(fake_get_flag, slave)
 
-        moose_time, signal = slave.sync_with_moose(1.0)
+        moose_time, signal = slave.sync_with_moose(1.0, 0.1)
 
         self.assertEqual(signal, "TIMESTEP_BEGIN")
         self.assertAlmostEqual(moose_time, 1.0005, delta=1e-3)

@@ -66,7 +66,6 @@ requirements:
     - uncertainties
     - xmltodict <0.14
     - yaml
-    - pythonfmu
     - fmpy
 test:
   commands:
@@ -99,7 +98,6 @@ test:
     - tabulate
     - xmltodict
     - yaml
-    - pythonfmu
     - fmpy
 
 about:

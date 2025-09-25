@@ -74,10 +74,6 @@ l = 2
 
 
 [Postprocessors]
-  [dt]
-    type = TimestepSize
-  []
-
   [diffused]
     type = ElementAverageValue
     variable = diffused
