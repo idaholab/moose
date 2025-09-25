@@ -37,7 +37,15 @@ MFEMSumAux::MFEMSumAux(const InputParameters & parameters)
 {
   for (const auto & var_name : _var_names)
   {
-    _summed_vars.push_back(getMFEMProblem().getProblemData().gridfunctions.Get(var_name));
+    const mfem::ParGridFunction * gf =
+        getMFEMProblem().getProblemData().gridfunctions.Get(var_name);
+    if (gf->ParFESpace() == _result_var.ParFESpace())
+      _summed_vars.push_back(gf);
+    else
+      mooseError("The MFEM variable ",
+                 var_name,
+                 " being summed has a different FESpace from ",
+                 _result_var_name);
   }
 }
 
