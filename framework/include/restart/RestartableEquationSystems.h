@@ -143,10 +143,12 @@ public:
    */
   void setLoadAllVectors(const bool load_all_vectors) { _load_all_vectors = load_all_vectors; }
 
+  /// Checks whether variable was successfully restored from a restart file
   bool isVariableRestored(const std::string & system_name,
                           const std::string & vector_name,
                           const std::string & variable_name) const;
 
+  /// Returns the set of variables that were loaded during the `load()` function. Each set of variables contain; [system name, vector name, variable name]
   const std::set<std::tuple<std::string, std::string, std::string>> & getLoadedVariables() const
   {
     return _loaded_variables;
@@ -180,7 +182,7 @@ private:
   /// The loaded header
   EquationSystemsHeader _loaded_header;
 
-  // The variables that were loaded in load(); [system name, vector name, variable name]
+  /// The variables that were loaded in load(); [system name, vector name, variable name]
   std::set<std::tuple<std::string, std::string, std::string>> _loaded_variables;
 };
 

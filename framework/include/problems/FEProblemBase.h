@@ -244,7 +244,7 @@ public:
                                                   const std::string & var_name) override;
   virtual libMesh::System & getSystem(const std::string & var_name) override;
 
-  // To reference to the RestartableEquationSystems
+  /// Get the RestartableEquationSystems object
   const RestartableEquationSystems & getRestartableEquationSystems() const;
 
   /**
