@@ -365,7 +365,6 @@ MFEMProblem::addPostprocessor(const std::string & type,
                               const std::string & name,
                               InputParameters & parameters)
 {
-  // For some reason this isn't getting called
   ExternalProblem::addPostprocessor(type, name, parameters);
   const PostprocessorValue & val = getPostprocessorValueByName(name);
   getCoefficients().declareScalar<mfem::FunctionCoefficient>(

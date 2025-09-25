@@ -133,6 +133,8 @@ class ScalarFESpaceTest : public MFEMFESpaceUnitTest<MFEMScalarFESpace, std::str
     InputParameters params = _factory.getValidParams("MFEMScalarFESpace");
     params.set<MooseEnum>("fec_type") = std::get<0>(raw_params);
     params.set<MooseEnum>("fec_order") = std::get<1>(raw_params);
+    if (params.set<MooseEnum>("fec_type") == "L2")
+      params.set<MooseEnum>("basis") = "GaussLegendre";
     return params;
   }
 };
@@ -170,6 +172,8 @@ class VectorFESpaceTest : public MFEMFESpaceUnitTest<MFEMVectorFESpace, std::str
     params.set<MooseEnum>("fec_type") = std::get<0>(raw_params);
     params.set<MooseEnum>("fec_order") = std::get<1>(raw_params);
     params.set<int>("range_dim") = std::get<2>(raw_params);
+    if (params.set<MooseEnum>("fec_type") == "L2")
+      params.set<MooseEnum>("basis") = "GaussLegendre";
     return params;
   }
 };
