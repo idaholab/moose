@@ -141,10 +141,4 @@ protected:
 
   /// The aux variables to save the diagonal Jacobian contributions of the secondary variables to
   std::vector<MooseVariableFEBase *> _secondary_save_in_jacobian_variables;
-
-  /// Mutex that prevents multiple threads from saving into the residual aux_var at the same time
-  static Threads::spin_mutex _resid_vars_mutex;
-
-  /// Mutex that prevents multiple threads from saving into the jacobian aux_var at the same time
-  static Threads::spin_mutex _jacoby_vars_mutex;
 };
