@@ -18,38 +18,35 @@ MFEMScalarFESpace::validParams()
 {
   InputParameters params = MFEMSimplifiedFESpace::validParams();
   params.addClassDescription("Convenience class to construct scalar finite element spaces.");
-  MooseEnum fec_types("H1 L2", "H1", true);
+  MooseEnum fec_types("H1 L2", "H1");
   params.addParam<MooseEnum>("fec_type", fec_types, "Specifies the family of FE shape functions.");
-  params.addParam<std::string>(
-      "basis", "GaussLobatto", "Specifies the quadrature basis used for scalar elements.");
+  MooseEnum basis_types("GaussLegendre GaussLobatto Positive OpenUniform ClosedUniform "
+                        "OpenHalfUniform Serendipity ClosedGL IntegratedGLL",
+                        "GaussLobatto");
+  params.addParam<MooseEnum>(
+      "basis",
+      basis_types,
+      "Specifies the basis used for scalar elements. H1 spaces require a closed basis "
+      "(GaussLobatto Positive ClosedUniform Serendipity ClosedGL)");
 
   return params;
 }
 
 MFEMScalarFESpace::MFEMScalarFESpace(const InputParameters & parameters)
-  : MFEMSimplifiedFESpace(parameters), _fec_type(parameters.get<MooseEnum>("fec_type"))
+  : MFEMSimplifiedFESpace(parameters), _fec_type(getParam<MooseEnum>("fec_type"))
 {
 }
 
 std::string
 MFEMScalarFESpace::getFECName() const
 {
-  const char b = mfem::BasisType::GetChar(getBasis(getParam<std::string>("basis")));
-  std::string basis(1, b);
+  std::string basis =
+      _fec_type == "L2"
+          ? "_T" + std::to_string(getParam<MooseEnum>("basis"))
+          : "@" + std::string({mfem::BasisType::GetChar(getParam<MooseEnum>("basis"))});
 
-  // This is to get around an MFEM bug where if you pass the full name of the default element type,
-  // it crashes
-  if (_fec_type == "H1")
-    basis = (basis == "G" ? "" : "@" + basis);
-  else if (_fec_type == "L2")
-  {
-    if (basis != "g")
-      mooseInfo("L2 finite element space only supports GaussLegendre basis. Ignoring " +
-                getParam<std::string>("basis") +
-                " basis choice and using GaussLegendre instead.\n");
-
-    basis = "";
-  }
+  // This is to get around an MFEM bug (to be removed in #31525)
+  basis = (basis == "@G" || basis == "_T0") ? "" : basis;
 
   return _fec_type + basis + "_" + std::to_string(getProblemDim()) + "D_P" +
          std::to_string(_fec_order);
