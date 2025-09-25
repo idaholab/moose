@@ -220,7 +220,7 @@ gamma = 1e5
     component = 0
     boundary = 'left right bottom'
     gamma = ${gamma}
-    dirichlet_value = 'walls'
+    face_functor = 'walls'
   []
   [v_jump_walls]
     type = MassFluxPenaltyBC
@@ -230,7 +230,7 @@ gamma = 1e5
     component = 1
     boundary = 'left right bottom'
     gamma = ${gamma}
-    dirichlet_value = 'walls'
+    face_functor = 'walls'
   []
   [u_jump_top]
     type = MassFluxPenaltyBC
@@ -240,7 +240,7 @@ gamma = 1e5
     component = 0
     boundary = 'top'
     gamma = ${gamma}
-    dirichlet_value = 'top'
+    face_functor = 'top'
   []
   [v_jump_top]
     type = MassFluxPenaltyBC
@@ -250,20 +250,20 @@ gamma = 1e5
     component = 1
     boundary = 'top'
     gamma = ${gamma}
-    dirichlet_value = 'top'
+    face_functor = 'top'
   []
 []
 
-[Functions]
+[FunctorMaterials]
   [top]
-    type = ParsedVectorFunction
-    value_x = ${U}
-    value_y = 0
+    type = GenericConstantVectorFunctorMaterial
+    prop_names = top
+    prop_values = '${U} 0 0'
   []
   [walls]
-    type = ParsedVectorFunction
-    value_x = 0
-    value_y = 0
+    type = GenericConstantVectorFunctorMaterial
+    prop_names = walls
+    prop_values = '0 0 0'
   []
 []
 
