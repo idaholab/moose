@@ -459,7 +459,7 @@ TimeDependentEquationSystem::AddCoupledVariableNameIfMissing(const std::string &
 }
 
 void
-TimeDependentEquationSystem::SetTimeStep(double dt)
+TimeDependentEquationSystem::SetTimeStep(mfem::real_t dt)
 {
   if (fabs(dt - _dt_coef.constant) > 1.0e-12 * dt)
   {

@@ -89,7 +89,7 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
                 getMFEMProblem().mesh().getMFEMParMesh().GetComm());
   MPI_Bcast(_cut_normal.GetData(),
             _cut_normal.Size(),
-            MPI_DOUBLE,
+            MFEM_MPI_REAL_T,
             rank_with_submesh,
             getMFEMProblem().mesh().getMFEMParMesh().GetComm());
   // Iterate over all vertices on cut, find elements with those vertices,

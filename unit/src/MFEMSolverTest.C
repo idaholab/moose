@@ -18,11 +18,9 @@ class MFEMSolverTest : public MFEMObjectUnitTest
 public:
   MFEMSolverTest() : MFEMObjectUnitTest("MooseUnitApp") {}
 
-  static double uexact(const mfem::Vector & x)
+  static mfem::real_t uexact(const mfem::Vector & x)
   {
-    double u;
-    u = x(2) * x(2) * x(2) - 5.0 * x(0) * x(0) * x(1) * x(2);
-    return u;
+    return x(2) * x(2) * x(2) - 5.0 * x(0) * x(0) * x(1) * x(2);
   }
 
   static void gradexact(const mfem::Vector & x, mfem::Vector & grad)
@@ -33,17 +31,14 @@ public:
     grad[2] = 3.0 * x(2) * x(2) - 5.0 * x(0) * x(0) * x(1);
   }
 
-  static double d2uexact(const mfem::Vector & x) // returns \Delta u
+  static mfem::real_t d2uexact(const mfem::Vector & x) // returns \Delta u
   {
-    double d2u;
-    d2u = -10.0 * x(1) * x(2) + 6.0 * x(2);
-    return d2u;
+    return -10.0 * x(1) * x(2) + 6.0 * x(2);
   }
 
-  static double fexact(const mfem::Vector & x) // returns -\Delta u
+  static mfem::real_t fexact(const mfem::Vector & x) // returns -\Delta u
   {
-    double d2u = d2uexact(x);
-    return -d2u;
+    return -d2uexact(x);
   }
 
   // Create a simple 3D mesh for testing

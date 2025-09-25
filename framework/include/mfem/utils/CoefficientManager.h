@@ -173,7 +173,7 @@ public:
   bool scalarPropertyIsDefined(const std::string & name, const std::string & block) const;
   bool vectorPropertyIsDefined(const std::string & name, const std::string & block) const;
   bool matrixPropertyIsDefined(const std::string & name, const std::string & block) const;
-  void setTime(const double time);
+  void setTime(const mfem::real_t time);
 
 private:
   ScalarMap _scalar_coeffs;
