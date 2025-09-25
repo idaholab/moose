@@ -11,7 +11,10 @@ Before reading this documentation, consider reading the following materials firs
 !alert note
 Kokkos-MOOSE boundary conditions do not support automatic differention yet.
 
-The basic design pattern of Kokkos-MOOSE kernels described in [Kokkos Kernels System](syntax/Kokkos/index.md) applies to the boundary conditions as well. You can create your own integrated and nodal boundary conditions by subclassing `Moose::Kokkos::IntegratedBC` and `Moose::Kokkos::NodalBC`, respectively, and following the same pattern with kernels including registering your boundary conditions with `registerKokkosResidualObject()`. Especially, integrated boundary conditions have identical interfaces with kernels, so they will not be explained here in detail. See the following source codes of `KokkosCoupledVarNeumannBC` for an example of an integrated boundary condition:
+The basic design pattern of Kokkos-MOOSE kernels described in [Kokkos Kernels System](syntax/Kokkos/index.md) applies to the boundary conditions as well.
+You can create your own integrated and nodal boundary conditions by subclassing `Moose::Kokkos::IntegratedBC` and `Moose::Kokkos::NodalBC`, respectively, and following the same pattern with kernels including registering your boundary conditions with `registerKokkosResidualObject()`.
+Especially, integrated boundary conditions have identical interfaces with kernels, so they will not be explained here in detail.
+See the following source codes of `KokkosCoupledVarNeumannBC` for an example of an integrated boundary condition:
 
 !listing framework/include/kokkos/bcs/KokkosCoupledVarNeumannBC.h id=kokkos-neumann-header
          caption=The `KokkosCoupledVarNeumannBC` header file.
@@ -19,7 +22,8 @@ The basic design pattern of Kokkos-MOOSE kernels described in [Kokkos Kernels Sy
 !listing framework/src/kokkos/bcs/KokkosCoupledVarNeumannBC.K id=kokkos-neumann-source language=cpp
          caption=The `KokkosCoupledVarNeumannBC` source file.
 
-On the other hand, nodal boundary conditions have slightly different interfaces. The hook methods for a nodal boundary condition have the following signatures:
+On the other hand, nodal boundary conditions have slightly different interfaces.
+The hook methods for a nodal boundary condition have the following signatures:
 
 ```cpp
 KOKKOS_FUNCTION Real computeQpResidual(const ContiguousNodeID node) const;
@@ -28,7 +32,11 @@ KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int jvar,
                                               const ContiguousNodeID node) const;
 ```
 
-There is no `datum` object for a node; instead, only a single node index is passed as the argument. Instead of `_current_node` which is a pointer to the current libMesh node object, the node index can be used to retrieve mesh data from the Kokkos mesh object. Also, the dummy `_qp` indexing in the original MOOSE was dropped, although the functions still contain "Qp" in their names. The nodal variable values are accessed by the node index instead of the dummy `_qp`. As a result, the following residual function in `DirichletBCBase`:
+There is no `datum` object for a node; instead, only a single node index is passed as the argument.
+Instead of `_current_node` which is a pointer to the current libMesh node object, the node index can be used to retrieve mesh data from the Kokkos mesh object.
+Also, the dummy `_qp` indexing in the original MOOSE was dropped, although the functions still contain "Qp" in their names.
+The nodal variable values are accessed by the node index instead of the dummy `_qp`.
+As a result, the following residual function in `DirichletBCBase`:
 
 ```cpp
 Real
