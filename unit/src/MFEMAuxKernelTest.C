@@ -52,16 +52,26 @@ TEST_F(MFEMAuxKernelTest, MFEMSumAux)
     // Check the value of the output gridfunction is the scaled sum of the components
     ASSERT_EQ(pgf_out->GetData()[5], 16.0);
   }
-
-  // Check for failure if a variable to be summed has a different FESpace from the parent
-  InputParameters auxkernel_params = _factory.getValidParams("MFEMSumAux");
-  auxkernel_params.set<AuxVariableName>("variable") = "summed_variable";
-  auxkernel_params.set<std::vector<VariableName>>("source_variables") = {
-      "source_variable_1", "source_ho_variable", "source_variable_3"};
-  auxkernel_params.set<std::vector<mfem::real_t>>("scale_factors") = {1.0, 2.0, 5.0};
-  EXPECT_THROW(addObject<MFEMSumAux>("MFEMSumAux", "failed_auxkernel", auxkernel_params),
-               std::runtime_error);
-}
+  {
+    // Check for failure if a variable to be summed has a different FESpace from the parent
+    InputParameters auxkernel_params = _factory.getValidParams("MFEMSumAux");
+    auxkernel_params.set<AuxVariableName>("variable") = "summed_variable";
+    auxkernel_params.set<std::vector<VariableName>>("source_variables") = {
+        "source_variable_1", "source_ho_variable", "source_variable_3"};
+    auxkernel_params.set<std::vector<mfem::real_t>>("scale_factors") = {1.0, 2.0, 5.0};
+    EXPECT_THROW(addObject<MFEMSumAux>("MFEMSumAux", "failed_auxkernel", auxkernel_params),
+                 std::runtime_error);
+  }
+  {
+    // Check for failure if an inconsistent number of scale factors are provided
+    InputParameters auxkernel_params = _factory.getValidParams("MFEMSumAux");
+    auxkernel_params.set<AuxVariableName>("variable") = "summed_variable";
+    auxkernel_params.set<std::vector<VariableName>>("source_variables") = {
+        "source_variable_1", "source_variable_2", "source_variable_3"};
+    auxkernel_params.set<std::vector<mfem::real_t>>("scale_factors") = {1.0, 2.0};
+    EXPECT_THROW(addObject<MFEMSumAux>("MFEMSumAux", "failed_scaled_auxkernel", auxkernel_params),
+                 std::runtime_error);
+  }
 }
 
 #endif

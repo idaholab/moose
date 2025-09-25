@@ -35,6 +35,9 @@ MFEMSumAux::MFEMSumAux(const InputParameters & parameters)
                        ? getParam<std::vector<mfem::real_t>>("scale_factors")
                        : std::vector<mfem::real_t>(_var_names.size(), 1.0))
 {
+  if (_var_names.size() != _scale_factors.size())
+    mooseError("Number of MFEM variables to sum over is different from the number of provided "
+               "scale factors.");
   for (const auto & var_name : _var_names)
   {
     const mfem::ParGridFunction * gf =
