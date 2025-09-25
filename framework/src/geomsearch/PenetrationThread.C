@@ -82,6 +82,7 @@ closest_point_to_side(const Point & src, const Elem & side)
     case QUAD4:
     case QUAD8:
     case QUAD9:
+    case C0POLYGON:
       mooseError("Not implemented");
     default:
       mooseError("Side type not recognized");
@@ -318,6 +319,7 @@ PenetrationThread::operator()(const NodeIdRange & range)
         Point best_point;
         unsigned int best_i = invalid_uint;
 
+        // Find closest point in all p_info to the node of interest
         for (unsigned int i = 0; i < p_info.size(); ++i)
         {
           const Point closest_point = closest_point_to_side(node, *p_info[i]->_side);
