@@ -195,6 +195,13 @@ FEProblemBase::initKokkosStatefulProps()
                                                                       needed_fe_var_vector_tags);
   }
 
+  for (auto boundary : _mesh.meshBoundaryIds())
+  {
+    _kokkos_materials.updateBoundaryVariableDependency(boundary, needed_moose_vars);
+    _kokkos_materials.updateBoundaryFEVariableCoupledVectorTagDependency(boundary,
+                                                                         needed_fe_var_vector_tags);
+  }
+
   // Copy data and preallocate quadature point solution vectors
 
   for (auto & system : _kokkos_systems)
