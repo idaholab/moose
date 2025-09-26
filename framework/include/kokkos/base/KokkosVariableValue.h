@@ -228,7 +228,7 @@ public:
   /**
    * Get the current variable gradient
    * @param datum The Datum object of the current thread
-   * @param qp The local quadrature-point index
+   * @param qp The local quadrature point index
    * @param comp The variable component
    * @returns The variable gradient
    */
