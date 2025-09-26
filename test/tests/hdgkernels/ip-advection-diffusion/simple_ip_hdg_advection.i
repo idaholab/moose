@@ -36,6 +36,7 @@
   [outflow]
     type = AdvectionIPHDGOutflowBC
     boundary = 'right'
+    constrain_lm = true
   []
 []
 

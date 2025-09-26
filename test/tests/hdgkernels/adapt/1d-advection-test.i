@@ -38,6 +38,7 @@
     type = AdvectionIPHDGOutflowBC
     boundary = 'right'
     velocity = vel
+    constrain_lm = true
   []
 []
 
