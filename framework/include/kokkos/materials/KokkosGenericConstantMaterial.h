@@ -9,8 +9,7 @@
 
 #include "KokkosMaterial.h"
 
-class KokkosGenericConstantMaterial final
-  : public Moose::Kokkos::Material<KokkosGenericConstantMaterial>
+class KokkosGenericConstantMaterial : public Moose::Kokkos::Material
 {
 public:
   static InputParameters validParams();

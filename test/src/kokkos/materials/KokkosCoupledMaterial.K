@@ -9,7 +9,7 @@
 
 #include "KokkosCoupledMaterial.h"
 
-registerMooseObject("MooseTestApp", KokkosCoupledMaterial);
+registerKokkosMaterial("MooseTestApp", KokkosCoupledMaterial);
 
 InputParameters
 KokkosCoupledMaterial::validParams()

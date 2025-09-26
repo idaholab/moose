@@ -9,7 +9,7 @@
 
 #include "KokkosXYBodyForce.h"
 
-registerMooseObject("MooseTestApp", KokkosXYBodyForce);
+registerKokkosResidualObject("MooseTestApp", KokkosXYBodyForce);
 
 InputParameters
 KokkosXYBodyForce::validParams()

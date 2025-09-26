@@ -9,7 +9,7 @@
 
 #include "KokkosUpperBoundNodalKernel.h"
 
-registerMooseObject("MooseApp", KokkosUpperBoundNodalKernel);
+registerKokkosResidualObject("MooseApp", KokkosUpperBoundNodalKernel);
 
 InputParameters
 KokkosUpperBoundNodalKernel::validParams()

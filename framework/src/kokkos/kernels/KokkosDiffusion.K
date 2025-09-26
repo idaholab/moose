@@ -9,18 +9,15 @@
 
 #include "KokkosDiffusion.h"
 
-registerMooseObjectAliased("MooseApp", KokkosDiffusionKernel, "KokkosDiffusion");
+registerKokkosResidualObject("MooseApp", KokkosDiffusion);
 
 InputParameters
-KokkosDiffusionKernel::validParams()
+KokkosDiffusion::validParams()
 {
-  InputParameters params = KokkosDiffusion::validParams();
+  InputParameters params = Kernel::validParams();
   params.addClassDescription("The Laplacian operator ($-\\nabla \\cdot \\nabla u$), with the weak "
                              "form of $(\\nabla \\phi_i, \\nabla u_h)$.");
   return params;
 }
 
-KokkosDiffusionKernel::KokkosDiffusionKernel(const InputParameters & parameters)
-  : KokkosDiffusion(parameters)
-{
-}
+KokkosDiffusion::KokkosDiffusion(const InputParameters & parameters) : Kernel(parameters) {}

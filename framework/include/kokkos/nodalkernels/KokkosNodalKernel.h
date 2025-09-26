@@ -19,22 +19,9 @@ namespace Kokkos
 /**
  * The base class for a user to derive their own Kokkos nodal kernels.
  *
- * The polymorphic design of the original MOOSE is reproduced statically by leveraging the Curiously
- * Recurring Template Pattern (CRTP), a programming idiom that involves a class template inheriting
- * from a template instantiation of itself. When the user derives their Kokkos object from this
- * class, the inheritance structure will look like:
- *
- * class UserNodalKernel final : public Moose::Kokkos::NodalKernel<UserNodalKernel>
- *
- * It is important to note that the template argument should point to the last derived class.
- * Therefore, if the user wants to define a derived class that can be further inherited, the derived
- * class should be a class template as well. Otherwise, it is recommended to mark the derived class
- * as final to prevent its inheritence by mistake.
- *
- * The user is expected to define computeQpResidual(), computeQpJacobian(), and
- * computeQpOffDiagJacobian() as inlined public methods in their derived class (not virtual
- * override). The signature of computeQpResidual() expected to be defined in the derived class is as
- * follows:
+ * The user should define computeQpResidual(), computeQpJacobian(), and computeQpOffDiagJacobian()
+ * as inlined public methods in their derived class (not virtual override). The signature of
+ * computeQpResidual() expected to be defined in the derived class is as follows:
  *
  * @param node The contiguous node ID
  * @returns The residual contribution
@@ -45,7 +32,6 @@ namespace Kokkos
  * below, and their definition in the derived class is optional. If they are defined in the derived
  * class, they will hide the default definitions in the base class.
  */
-template <typename Derived>
 class NodalKernel : public NodalKernelBase
 {
 public:
@@ -87,15 +73,29 @@ public:
   {
     return 0;
   }
+  /**
+   * Get the function pointer of the default computeQpJacobian()
+   * @returns The function pointer
+   */
+  static auto defaultJacobian() { return &NodalKernel::computeQpJacobian; }
+  /**
+   * Get the function pointer of the default computeQpOffDiagJacobian()
+   * @returns The function pointer
+   */
+  static auto defaultOffDiagJacobian() { return &NodalKernel::computeQpOffDiagJacobian; }
   ///@}
 
   /**
    * The parallel computation entry functions called by Kokkos
    */
   ///@{
-  KOKKOS_FUNCTION void operator()(ResidualLoop, const ThreadID tid) const;
-  KOKKOS_FUNCTION void operator()(JacobianLoop, const ThreadID tid) const;
-  KOKKOS_FUNCTION void operator()(OffDiagJacobianLoop, const ThreadID tid) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void operator()(ResidualLoop, const ThreadID tid, const Derived & kernel) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void operator()(JacobianLoop, const ThreadID tid, const Derived & kernel) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void
+  operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & kernel) const;
   ///@}
 
 protected:
@@ -109,107 +109,42 @@ private:
    * Flag whether this kernel is boundary-restricted
    */
   const bool _boundary_restricted;
-  /**
-   * Flag whether computeJacobian() was not defined in the derived class
-   */
-  const bool _default_diag;
-  /**
-   * Flag whether computeQpOffDiagJacobian() was not defined in the derived class
-   */
-  const bool _default_offdiag;
 };
 
 template <typename Derived>
-InputParameters
-NodalKernel<Derived>::validParams()
-{
-  InputParameters params = NodalKernelBase::validParams();
-  return params;
-}
-
-template <typename Derived>
-NodalKernel<Derived>::NodalKernel(const InputParameters & parameters)
-  : NodalKernelBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD),
-    _u(kokkosSystems(), _var),
-    _boundary_restricted(boundaryRestricted()),
-    _default_diag(&Derived::computeQpJacobian == &NodalKernel::computeQpJacobian),
-    _default_offdiag(&Derived::computeQpOffDiagJacobian == &NodalKernel::computeQpOffDiagJacobian)
-{
-}
-
-template <typename Derived>
-void
-NodalKernel<Derived>::computeResidual()
-{
-  ::Kokkos::RangePolicy<ResidualLoop, ExecSpace, ::Kokkos::IndexType<ThreadID>> policy(
-      0, _boundary_restricted ? numKokkosBoundaryNodes() : numKokkosBlockNodes());
-  ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
-  ::Kokkos::fence();
-}
-
-template <typename Derived>
-void
-NodalKernel<Derived>::computeJacobian()
-{
-  if (!_default_diag)
-  {
-    ::Kokkos::RangePolicy<JacobianLoop, ExecSpace, ::Kokkos::IndexType<ThreadID>> policy(
-        0, _boundary_restricted ? numKokkosBoundaryNodes() : numKokkosBlockNodes());
-    ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
-    ::Kokkos::fence();
-  }
-
-  if (!_default_offdiag)
-  {
-    auto & sys = kokkosSystem(_kokkos_var.sys());
-
-    _thread.resize({sys.getCoupling(_kokkos_var.var()).size(),
-                    _boundary_restricted ? numKokkosBoundaryNodes() : numKokkosBlockNodes()});
-
-    ::Kokkos::RangePolicy<OffDiagJacobianLoop, ExecSpace, ::Kokkos::IndexType<ThreadID>> policy(
-        0, _thread.size());
-    ::Kokkos::parallel_for(policy, *static_cast<Derived *>(this));
-    ::Kokkos::fence();
-  }
-}
-
-template <typename Derived>
 KOKKOS_FUNCTION void
-NodalKernel<Derived>::operator()(ResidualLoop, const ThreadID tid) const
+NodalKernel::operator()(ResidualLoop, const ThreadID tid, const Derived & kernel) const
 {
-  auto kernel = static_cast<const Derived *>(this);
   auto node = _boundary_restricted ? kokkosBoundaryNodeID(tid) : kokkosBlockNodeID(tid);
   auto & sys = kokkosSystem(_kokkos_var.sys());
 
   if (!sys.isNodalDefined(node, _kokkos_var.var()))
     return;
 
-  Real local_re = kernel->computeQpResidual(node);
+  Real local_re = kernel.computeQpResidual(node);
 
   accumulateTaggedNodalResidual(true, local_re, node);
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-NodalKernel<Derived>::operator()(JacobianLoop, const ThreadID tid) const
+NodalKernel::operator()(JacobianLoop, const ThreadID tid, const Derived & kernel) const
 {
-  auto kernel = static_cast<const Derived *>(this);
   auto node = _boundary_restricted ? kokkosBoundaryNodeID(tid) : kokkosBlockNodeID(tid);
   auto & sys = kokkosSystem(_kokkos_var.sys());
 
   if (!sys.isNodalDefined(node, _kokkos_var.var()))
     return;
 
-  Real local_ke = kernel->computeQpJacobian(node);
+  Real local_ke = kernel.computeQpJacobian(node);
 
   accumulateTaggedNodalMatrix(true, local_ke, node, _kokkos_var.var());
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-NodalKernel<Derived>::operator()(OffDiagJacobianLoop, const ThreadID tid) const
+NodalKernel::operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & kernel) const
 {
-  auto kernel = static_cast<const Derived *>(this);
   auto node = _boundary_restricted ? kokkosBoundaryNodeID(_thread(tid, 1))
                                    : kokkosBlockNodeID(_thread(tid, 1));
   auto & sys = kokkosSystem(_kokkos_var.sys());
@@ -218,19 +153,10 @@ NodalKernel<Derived>::operator()(OffDiagJacobianLoop, const ThreadID tid) const
   if (!sys.isNodalDefined(node, _kokkos_var.var()))
     return;
 
-  Real local_ke = kernel->computeQpOffDiagJacobian(jvar, node);
+  Real local_ke = kernel.computeQpOffDiagJacobian(jvar, node);
 
   accumulateTaggedNodalMatrix(true, local_ke, node, jvar);
 }
 
 } // namespace Kokkos
 } // namespace Moose
-
-#define usingKokkosNodalKernelMembers(T)                                                           \
-  usingKokkosNodalKernelBaseMembers;                                                               \
-                                                                                                   \
-protected:                                                                                         \
-  using Moose::Kokkos::NodalKernel<T>::_u;                                                         \
-                                                                                                   \
-public:                                                                                            \
-  using Moose::Kokkos::NodalKernel<T>::operator()

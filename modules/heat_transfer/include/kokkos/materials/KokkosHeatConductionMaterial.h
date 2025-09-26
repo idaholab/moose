@@ -14,8 +14,7 @@
 /**
  * Simple material with properties set as constants.
  */
-class KokkosHeatConductionMaterial final
-  : public Moose::Kokkos::Material<KokkosHeatConductionMaterial>
+class KokkosHeatConductionMaterial : public Moose::Kokkos::Material
 {
 public:
   static InputParameters validParams();

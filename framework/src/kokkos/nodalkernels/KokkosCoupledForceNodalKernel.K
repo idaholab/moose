@@ -9,7 +9,7 @@
 
 #include "KokkosCoupledForceNodalKernel.h"
 
-registerMooseObject("MooseApp", KokkosCoupledForceNodalKernel);
+registerKokkosResidualObject("MooseApp", KokkosCoupledForceNodalKernel);
 
 InputParameters
 KokkosCoupledForceNodalKernel::validParams()

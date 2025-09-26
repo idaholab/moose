@@ -11,7 +11,7 @@
 
 #include "KokkosDiffusion.h"
 
-class KokkosRestartDiffusion final : public KokkosDiffusion<KokkosRestartDiffusion>
+class KokkosRestartDiffusion : public KokkosDiffusion
 {
 public:
   static InputParameters validParams();

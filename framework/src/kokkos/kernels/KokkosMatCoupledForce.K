@@ -11,7 +11,7 @@
 
 #include "MooseVariable.h"
 
-registerMooseObject("MooseApp", KokkosMatCoupledForce);
+registerKokkosResidualObject("MooseApp", KokkosMatCoupledForce);
 
 InputParameters
 KokkosMatCoupledForce::validParams()

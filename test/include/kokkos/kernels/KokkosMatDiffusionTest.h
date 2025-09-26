@@ -11,7 +11,7 @@
 
 #include "KokkosKernel.h"
 
-class KokkosMatDiffusionTest final : public Moose::Kokkos::Kernel<KokkosMatDiffusionTest>
+class KokkosMatDiffusionTest : public Moose::Kokkos::Kernel
 {
 public:
   static InputParameters validParams();

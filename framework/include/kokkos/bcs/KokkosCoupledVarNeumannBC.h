@@ -15,8 +15,7 @@
  * Implements a Neumann BC where grad(u)=_coupled_var on the boundary.
  * Uses the term produced from integrating the diffusion operator by parts.
  */
-class KokkosCoupledVarNeumannBC final
-  : public Moose::Kokkos::IntegratedBC<KokkosCoupledVarNeumannBC>
+class KokkosCoupledVarNeumannBC : public Moose::Kokkos::IntegratedBC
 {
 public:
   static InputParameters validParams();

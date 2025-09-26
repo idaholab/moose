@@ -11,7 +11,7 @@
 
 #include "KokkosNodalKernel.h"
 
-class KokkosReactionNodalKernel final : public Moose::Kokkos::NodalKernel<KokkosReactionNodalKernel>
+class KokkosReactionNodalKernel : public Moose::Kokkos::NodalKernel
 {
 public:
   static InputParameters validParams();

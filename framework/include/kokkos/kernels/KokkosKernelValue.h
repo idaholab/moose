@@ -23,25 +23,22 @@ namespace Kokkos
  *
  * i.e. the test function $(\psi_i)$ can be factored out for optimization.
  *
- * The user is expected to define precomputeQpResidual() and precomputeQpJacobian() instead of
- * computeQpResidual() and computeQpJacobian(). The signature of precomputeQpResidual() expected to
- * be defined in the derived class is as follows:
+ * The user should still define computeQpResidual() and computeQpJacobian(), but their signatures
+ * are different from the base class. The signature of computeQpResidual() expected to be defined in
+ * the derived class is as follows:
  *
  * @param qp The local quadrature point index
  * @param datum The ResidualDatum object of the current thread
  * @returns The component of the residual contribution that will be multiplied by the test function
  *
- * KOKKOS_FUNCTION Real precomputeQpResidual(const unsigned int qp,
- *                                           ResidualDatum & datum) const;
+ * KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp,
+ *                                        ResidualDatum & datum) const;
  *
- * The signature of precomputeQpJacobian() can be found in the code below. The definition of
+ * The signature of computeQpJacobian() can be found in the code below. The definition of
  * computeQpOffDiagJacobian() is still the same with the original Kokkos kernel.
  */
-template <typename Derived>
-class KernelValue : public Kernel<Derived>
+class KernelValue : public Kernel
 {
-  usingKokkosKernelMembers(Derived);
-
 public:
   static InputParameters validParams();
 
@@ -63,12 +60,17 @@ public:
    * @returns The component of the Jacobian contribution that will be multiplied by the test
    * function
    */
-  KOKKOS_FUNCTION Real precomputeQpJacobian(const unsigned int /* j */,
-                                            const unsigned int /* qp */,
-                                            ResidualDatum & /* datum */) const
+  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int /* j */,
+                                         const unsigned int /* qp */,
+                                         ResidualDatum & /* datum */) const
   {
     return 0;
   }
+  /**
+   * Get the function pointer of the default computeQpJacobian()
+   * @returns The function pointer
+   */
+  static auto defaultJacobian() { return &KernelValue::computeQpJacobian; }
   ///@}
 
   /**
@@ -76,37 +78,16 @@ public:
    * out the test function
    */
   ///@{
-  KOKKOS_FUNCTION void computeResidualInternal(const Derived * kernel, ResidualDatum & datum) const;
-  KOKKOS_FUNCTION void computeJacobianInternal(const Derived * kernel, ResidualDatum & datum) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void computeResidualInternal(const Derived & kernel, ResidualDatum & datum) const;
+  template <typename Derived>
+  KOKKOS_FUNCTION void computeJacobianInternal(const Derived & kernel, ResidualDatum & datum) const;
   ///@}
-
-protected:
-  /**
-   * Get whether precomputeQpJacobian() was not defined in the derived class
-   * @returns Whether precomputeQpJacobian() was not defined in the derived class
-   */
-  virtual bool defaultJacobian() const override
-  {
-    return &Derived::precomputeQpJacobian == &KernelValue::precomputeQpJacobian;
-  }
 };
 
 template <typename Derived>
-InputParameters
-KernelValue<Derived>::validParams()
-{
-  InputParameters params = Kernel<Derived>::validParams();
-  return params;
-}
-
-template <typename Derived>
-KernelValue<Derived>::KernelValue(const InputParameters & parameters) : Kernel<Derived>(parameters)
-{
-}
-
-template <typename Derived>
 KOKKOS_FUNCTION void
-KernelValue<Derived>::computeResidualInternal(const Derived * kernel, ResidualDatum & datum) const
+KernelValue::computeResidualInternal(const Derived & kernel, ResidualDatum & datum) const
 {
   ResidualObject::computeResidualInternal(
       datum,
@@ -116,7 +97,7 @@ KernelValue<Derived>::computeResidualInternal(const Derived * kernel, ResidualDa
         {
           datum.reinit();
 
-          Real value = datum.JxW(qp) * kernel->precomputeQpResidual(qp, datum);
+          Real value = datum.JxW(qp) * kernel.computeQpResidual(qp, datum);
 
           for (unsigned int i = ib; i < ie; ++i)
             local_re[i] += value * _test(datum, i, qp);
@@ -126,7 +107,7 @@ KernelValue<Derived>::computeResidualInternal(const Derived * kernel, ResidualDa
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-KernelValue<Derived>::computeJacobianInternal(const Derived * kernel, ResidualDatum & datum) const
+KernelValue::computeJacobianInternal(const Derived & kernel, ResidualDatum & datum) const
 {
   Real value = 0;
 
@@ -147,7 +128,7 @@ KernelValue<Derived>::computeJacobianInternal(const Derived * kernel, ResidualDa
 
             if (j != j_old)
             {
-              value = datum.JxW(qp) * kernel->precomputeQpJacobian(j, qp, datum);
+              value = datum.JxW(qp) * kernel.computeQpJacobian(j, qp, datum);
               j_old = j;
             }
 
@@ -159,5 +140,3 @@ KernelValue<Derived>::computeJacobianInternal(const Derived * kernel, ResidualDa
 
 } // namespace Kokkos
 } // namespace Moose
-
-#define usingKokkosKernelValueMembers(T) usingKokkosKernelMembers(T)

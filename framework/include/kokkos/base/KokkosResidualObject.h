@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "KokkosDispatcher.h"
 #include "KokkosVariableValue.h"
 #include "KokkosMaterialPropertyValue.h"
 
@@ -84,6 +85,14 @@ protected:
    * Kokkos thread object
    */
   Thread _thread;
+  /**
+   * Kokkos functor dispatchers
+   */
+  ///@{
+  std::unique_ptr<DispatcherBase> _residual_dispatcher;
+  std::unique_ptr<DispatcherBase> _jacobian_dispatcher;
+  std::unique_ptr<DispatcherBase> _offdiag_jacobian_dispatcher;
+  ///@}
 
   /**
    * TODO: Move to TransientInterface
@@ -369,29 +378,3 @@ ResidualObject::computeJacobianInternal(ResidualDatum & datum, function body) co
 
 } // namespace Kokkos
 } // namespace Moose
-
-#define usingKokkosResidualObjectMembers                                                           \
-public:                                                                                            \
-  usingPostprocessorInterfaceMembers;                                                              \
-                                                                                                   \
-protected:                                                                                         \
-  using Moose::Kokkos::ResidualObject::kokkosAssembly;                                             \
-  using Moose::Kokkos::ResidualObject::kokkosSystems;                                              \
-  using Moose::Kokkos::ResidualObject::kokkosSystem;                                               \
-  using Moose::Kokkos::ResidualObject::accumulateTaggedElementalResidual;                          \
-  using Moose::Kokkos::ResidualObject::accumulateTaggedNodalResidual;                              \
-  using Moose::Kokkos::ResidualObject::accumulateTaggedElementalMatrix;                            \
-  using Moose::Kokkos::ResidualObject::accumulateTaggedNodalMatrix;                                \
-  using Moose::Kokkos::ResidualObject::_var;                                                       \
-  using Moose::Kokkos::ResidualObject::_kokkos_var;                                                \
-  using Moose::Kokkos::ResidualObject::_thread;                                                    \
-  using Moose::Kokkos::ResidualObject::_t;                                                         \
-  using Moose::Kokkos::ResidualObject::_t_old;                                                     \
-  using Moose::Kokkos::ResidualObject::_t_step;                                                    \
-  using Moose::Kokkos::ResidualObject::_dt;                                                        \
-  using Moose::Kokkos::ResidualObject::_dt_old;                                                    \
-                                                                                                   \
-public:                                                                                            \
-  using Moose::Kokkos::ResidualObject::ResidualLoop;                                               \
-  using Moose::Kokkos::ResidualObject::JacobianLoop;                                               \
-  using Moose::Kokkos::ResidualObject::OffDiagJacobianLoop
