@@ -16,10 +16,9 @@ Material::validParams()
 
   InputParameters params = MaterialBase::validParams();
   params += MaterialPropertyInterface::validParams();
-  MooseEnum const_option("NONE=0 ELEMENT=1 SUBDOMAIN=2", "none");
   params.addParam<MooseEnum>(
       "constant_on",
-      const_option,
+      MooseEnum(getConstantTypeEnumOptions(), "none"),
       "When ELEMENT, MOOSE will only call computeQpProperties() for the 0th "
       "quadrature point, and then copy that value to the other qps."
       "When SUBDOMAIN, MOOSE will only call computeQpProperties() for the 0th "

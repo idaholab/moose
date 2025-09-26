@@ -11,8 +11,29 @@
 
 // MOOSE includes
 #include "MooseEnumBase.h"
+#include "MooseStringUtils.h"
+#include "MooseUtils.h"
 
 #include <optional>
+#include <cctype>
+#include <algorithm>
+
+#define CreateMooseEnumClass(EnumName, /* enumerators */...)                                       \
+  static inline std::string get##EnumName##Options()                                               \
+  {                                                                                                \
+    /* 1) stringify the enumerator list                                               */           \
+    std::string s = #__VA_ARGS__;                                                                  \
+    /* 2) normalize to the format MooseEnum expects: "A B C=3 D ..."                  */           \
+    std::vector<std::string> elements;                                                             \
+    MooseUtils::tokenize(s, elements, 1, ",");                                                     \
+    for (auto & elem : elements)                                                                   \
+      elem.erase(std::remove_if(elem.begin(), elem.end(), isspace), elem.end());                   \
+    return MooseUtils::join(elements, " ");                                                        \
+  }                                                                                                \
+  enum class EnumName                                                                              \
+  {                                                                                                \
+    __VA_ARGS__                                                                                    \
+  }
 
 // Forward declarations
 namespace libMesh
