@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#30655'
+  design = 'KokkosVariableTimeIntegrationAux.md'
+  [time_integration_aux]
+    type = 'Exodiff'
+    input = 'kokkos_time_integration.i'
+    exodiff = 'kokkos_time_integration_out.e'
+    requirement = 'The Kokkos system shall include the ability to compute the integral of a variable over time.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+[]
