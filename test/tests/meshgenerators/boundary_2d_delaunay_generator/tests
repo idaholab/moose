@@ -83,6 +83,7 @@
       detail = 'from an arbitrary 2D boundary in a given 3D mesh. And the output put meshes '
                'can be combined to be used as input for 3D Delaunay mesh generation'
       mesh_mode = replicated # block to mesh conversion only supports replicated meshes
+      valgrind = none # see #31360
     []
   []
   [errors]
