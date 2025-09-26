@@ -9,7 +9,6 @@
       type = 'RunException'
       input = 'errors.i'
       cli_args = 'UserObjects/test/non_positive_polar_order=true'
-      allow_test_objects = true
       expect_err = 'polar_order must be positive in RayTracingAngularQuadrature'
       detail = 'the provided polar order is non-positive'
     []
@@ -17,7 +16,6 @@
       type = 'RunException'
       input = 'errors.i'
       cli_args = 'UserObjects/test/non_positive_azimuthal_order=true'
-      allow_test_objects = true
       expect_err = 'azimuthal_order must be positive in RayTracingAngularQuadrature'
       detail = 'the provided azimuthal order is non-positive'
     []
@@ -25,7 +23,6 @@
       type = 'RunException'
       input = 'errors.i'
       cli_args = 'UserObjects/test/mu_min_larger=true'
-      allow_test_objects = true
       expect_err = 'mu_min must be < mu_max in RayTracingAngularQuadrature'
       detail = 'the minimum polar cosine is greater than the maximum polar cosine'
     []
@@ -33,7 +30,6 @@
       type = 'RunException'
       input = 'errors.i'
       cli_args = 'UserObjects/test/mu_min_too_small=true'
-      allow_test_objects = true
       expect_err = 'mu_min must be >= -1 in RayTracingAngularQuadrature'
       detail = 'the minimum polar cosine is less than negative one'
     []
@@ -41,7 +37,6 @@
       type = 'RunException'
       input = 'errors.i'
       cli_args = 'UserObjects/test/mu_max_too_big=true'
-      allow_test_objects = true
       expect_err = 'mu_max must be <= 1 in RayTracingAngularQuadrature'
       detail = 'the maximum polar cosine is greater than one'
     []
@@ -49,7 +44,6 @@
       type = 'RunException'
       input = 'errors.i'
       cli_args = 'UserObjects/test/dim1=true'
-      allow_test_objects = true
       expect_err = 'RayTracingAngularQuadrature only supports dimensions 2 and 3'
       detail = 'the dimension is less than two'
     []
@@ -57,7 +51,6 @@
       type = 'RunException'
       input = 'errors.i'
       cli_args = 'UserObjects/test/non_positive_gauss_legendre_order=true'
-      allow_test_objects = true
       expect_err = 'Order must be positive in gaussLegendre\(\)'
       detail = 'the Gauss-Legendre order is non-positive'
     []
@@ -65,7 +58,6 @@
       type = 'RunException'
       input = 'errors.i'
       cli_args = 'UserObjects/test/check_direction=true'
-      allow_test_objects = true
       expect_err = 'RayTracingAngularQuadrature does not have direction 1337'
       detail = 'an invalid direction index is requested'
     []
@@ -73,7 +65,6 @@
       type = 'RunException'
       input = 'errors.i'
       cli_args = 'UserObjects/test/orthonormal_vector_zero=true'
-      allow_test_objects = true
       expect_err = 'Vector v has norm close to 0 in orthonormalVector\(\)'
       detail = 'an orthonormal vector is requested from a vector that has a zero norm'
     []

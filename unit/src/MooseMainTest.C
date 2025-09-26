@@ -11,6 +11,7 @@
 
 #include "MooseMain.h"
 #include "Parser.h"
+#include "MooseUnitUtils.h"
 
 struct Args
 {
@@ -31,89 +32,108 @@ TEST(MooseMainTest, createDefaultAppType)
 {
   Args args({});
   const auto app = Moose::createMooseApp("MooseUnitApp", args.argc(), args.argv());
-  EXPECT_EQ(app->parser().getAppType(), "MooseUnitApp");
+  EXPECT_TRUE(app->parser().getAppType().has_value());
+  EXPECT_EQ(app->parser().getAppType()->first, "MooseUnitApp");
+  EXPECT_EQ(app->parser().getAppType()->second, nullptr);
 }
 
 TEST(MooseMainTest, createInputAppType)
 {
   {
     Args args({"-i", "files/MooseMainTest/app_OtherMooseUnitApp.i"});
-    const auto app = Moose::createMooseApp("unused", args.argc(), args.argv());
-    EXPECT_EQ(app->parser().getAppType(), "OtherMooseUnitApp");
+    const auto app = Moose::createMooseApp("MooseUnitApp", args.argc(), args.argv());
+    const auto type_node = app->parser().getRoot().find("Application/type");
+    EXPECT_NE(type_node, nullptr);
+    EXPECT_TRUE(app->parser().getAppType().has_value());
+    EXPECT_EQ(app->parser().getAppType()->first, "OtherMooseUnitApp");
+    EXPECT_EQ(app->parser().getAppType()->second, type_node);
   }
   {
     Args args({"-i", "files/MooseMainTest/app_MooseUnitApp.i"});
-    const auto app = Moose::createMooseApp("unused", args.argc(), args.argv());
-    EXPECT_EQ(app->parser().getAppType(), "MooseUnitApp");
+    const auto app = Moose::createMooseApp("OtherMooseUnitApp", args.argc(), args.argv());
+    const auto type_node = app->parser().getRoot().find("Application/type");
+    EXPECT_NE(type_node, nullptr);
+    EXPECT_TRUE(app->parser().getAppType().has_value());
+    EXPECT_EQ(app->parser().getAppType()->first, "MooseUnitApp");
+    EXPECT_EQ(app->parser().getAppType()->second, type_node);
   }
 }
 
 TEST(MooseMainTest, createAppFromCLI)
 {
   Args args({"--app", "OtherMooseUnitApp"});
-  const auto app = Moose::createMooseApp("unused", args.argc(), args.argv());
-  EXPECT_EQ(app->parser().getAppType(), "OtherMooseUnitApp");
+  const auto app = Moose::createMooseApp("MooseUnitApp", args.argc(), args.argv());
+  EXPECT_TRUE(app->parser().getAppType().has_value());
+  EXPECT_EQ(app->parser().getAppType()->first, "OtherMooseUnitApp");
+  EXPECT_EQ(app->parser().getAppType()->second, &app->parser().getCommandLineRoot());
 }
 
 TEST(MooseMainTest, createAppFromHITCLI)
 {
   Args args({"Application/type=OtherMooseUnitApp"});
-  const auto app = Moose::createMooseApp("unused", args.argc(), args.argv());
-  EXPECT_EQ(app->parser().getAppType(), "OtherMooseUnitApp");
+  const auto app = Moose::createMooseApp("MooseUnitApp", args.argc(), args.argv());
+  EXPECT_TRUE(app->parser().getAppType().has_value());
+  EXPECT_EQ(app->parser().getAppType()->first, "OtherMooseUnitApp");
+  const auto node = app->parser().getCommandLineRoot().find("Application/type");
+  EXPECT_NE(node, nullptr);
+  EXPECT_EQ(app->parser().getAppType()->second, node);
 }
 
 TEST(MooseMainTest, createLastCLIAppWins)
 {
   Args args({"Application/type=BadApp", "--app=AnotherBadApp", "--app=OtherMooseUnitApp"});
-  const auto app = Moose::createMooseApp("unused", args.argc(), args.argv());
-  EXPECT_EQ(app->parser().getAppType(), "OtherMooseUnitApp");
+  const auto app = Moose::createMooseApp("MooseUnitApp", args.argc(), args.argv());
+  EXPECT_TRUE(app->parser().getAppType().has_value());
+  EXPECT_EQ(app->parser().getAppType()->first, "OtherMooseUnitApp");
 }
 
 TEST(MooseMainTest, createCLIWins)
 {
   Args args({"-i", "files/MooseMainTest/app_MooseUnitApp.i", "--app", "OtherMooseUnitApp"});
-  const auto app = Moose::createMooseApp("unused", args.argc(), args.argv());
-  EXPECT_EQ(app->parser().getAppType(), "OtherMooseUnitApp");
+  const auto app = Moose::createMooseApp("MooseUnitApp", args.argc(), args.argv());
+  EXPECT_TRUE(app->parser().getAppType().has_value());
+  EXPECT_EQ(app->parser().getAppType()->first, "OtherMooseUnitApp");
+  EXPECT_EQ(app->parser().getAppType()->second, &app->parser().getCommandLineRoot());
 }
 
 TEST(MooseMainTest, createUnregistered)
 {
-  const std::string app_name = "unregistered";
-  Args args({});
-  EXPECT_THROW(
-      {
-        try
-        {
-          Moose::createMooseApp("unregistered", args.argc(), args.argv());
-        }
-        catch (const std::exception & e)
-        {
-          EXPECT_EQ(std::string(e.what()),
-                    "'" + app_name + "' is not a registered application type.");
-          throw;
-        }
-      },
-      std::exception);
+  const std::string reg_name = "MooseUnitApp";
+  const std::string unreg_name = "unregistered";
+
+  // default app type is not registered
+  {
+    Args args({});
+    MOOSE_ASSERT_THROWS(MooseRuntimeError,
+                        Moose::createMooseApp(unreg_name, args.argc(), args.argv()),
+                        "createMooseApp: The default app type '" + unreg_name +
+                            "' is not a registered application type");
+  }
+  // not registered via --app
+  {
+    Args args({"--app=" + unreg_name});
+
+    MOOSE_ASSERT_THROWS(MooseRuntimeError,
+                        Moose::createMooseApp(reg_name, args.argc(), args.argv()),
+                        "'" + unreg_name + "' is not a registered application type");
+  }
+  // not registered via Application/type
+  {
+    Args args({"Application/type=" + unreg_name});
+    MOOSE_ASSERT_THROWS(MooseRuntimeError,
+                        Moose::createMooseApp(reg_name, args.argc(), args.argv()),
+                        Moose::hit_command_line_filename + ":Application/type:\n'" + unreg_name +
+                            "' is not a registered application type");
+  }
 }
 
 TEST(MooseMainTest, createMultiAppApplicationOverrideError)
 {
   const std::string arg = "subapp:Application/type=foo";
   Args args({arg});
-  EXPECT_THROW(
-      {
-        try
-        {
-          Moose::createMooseApp("MooseUnitApp", args.argc(), args.argv());
-        }
-        catch (const std::exception & e)
-        {
-          EXPECT_EQ(std::string(e.what()),
-                    "For command line argument '" + arg +
-                        "': overriding the application type for MultiApps via command line is not "
-                        "allowed.");
-          throw;
-        }
-      },
-      std::exception);
+  MOOSE_ASSERT_THROWS(
+      MooseRuntimeError,
+      Moose::createMooseApp("MooseUnitApp", args.argc(), args.argv()),
+      "For command line argument '" + arg +
+          "': overriding the application type for MultiApps via command line is not allowed.");
 }

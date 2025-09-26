@@ -64,7 +64,7 @@ AppFactory::create(const std::string & app_type,
 {
   auto parser = std::make_unique<Parser>(std::vector<std::string>());
   parser->parse();
-  parser->setAppType(app_type);
+  parser->setAppType(app_type, nullptr);
 
   auto command_line = std::make_unique<CommandLine>(std::vector<std::string>{"unused"});
   command_line->addArguments(cli_args);
@@ -77,14 +77,14 @@ std::unique_ptr<MooseApp>
 AppFactory::create(std::unique_ptr<Parser> parser, std::unique_ptr<CommandLine> command_line)
 {
   mooseAssert(parser, "Not set");
-  mooseAssert(parser->getAppType().size(), "App type not set");
+  mooseAssert(parser->getAppType(), "App type not set");
   mooseAssert(parser->queryRoot(), "Has not parsed");
   mooseAssert(command_line, "Not set");
   mooseAssert(command_line->hasParsed(), "Has not parsed");
 
-  const std::string app_type = parser->getAppType();
+  const auto & app_type = parser->getAppType()->first;
 
-  auto app_params = AppFactory::instance().getValidParams(parser->getAppType());
+  auto app_params = AppFactory::instance().getValidParams(app_type);
   app_params.set<std::shared_ptr<Parser>>("_parser") = std::move(parser);
   app_params.set<std::shared_ptr<CommandLine>>("_command_line") = std::move(command_line);
 
@@ -101,16 +101,15 @@ AppFactory::createAppShared(const std::string & default_app_type,
                   "see'test/src/main.C in MOOSE as an example of moose::main()'. ");
 
   // Populate the -i and --app parameters early
-  auto command_line_params = emptyInputParameters();
-  MooseApp::addInputParam(command_line_params);
-  MooseApp::addAppParam(command_line_params);
+  auto command_line_params = AppFactory::instance().getValidParams(default_app_type);
   {
     CommandLine pre_command_line(argc, argv);
     pre_command_line.parse();
-    pre_command_line.populateCommandLineParams(command_line_params);
+    pre_command_line.populateCommandLineParams(
+        command_line_params, nullptr, std::set<std::string>{"input_file", "type"});
   }
   const auto & input_filenames = command_line_params.get<std::vector<std::string>>("input_file");
-  std::string app_type = command_line_params.get<std::string>("app_to_run");
+  std::string app_type = command_line_params.get<std::string>("type");
 
   auto command_line = std::make_unique<CommandLine>(argc, argv);
   command_line->parse();
@@ -125,7 +124,7 @@ AppFactory::createAppShared(const std::string & default_app_type,
     mooseDeprecated("Please use [Application] block to specify application type, '--app <AppName>' "
                     "is deprecated and will be removed in a future release.");
 
-  parser->setAppType(app_type);
+  parser->setAppType(app_type, nullptr);
 
   auto app_params = AppFactory::instance().getValidParams(app_type);
   app_params.set<std::shared_ptr<Parser>>("_parser") = std::move(parser);
@@ -138,7 +137,8 @@ std::unique_ptr<MooseApp>
 AppFactory::create(const std::string & app_type,
                    const std::string & name,
                    InputParameters parameters,
-                   MPI_Comm comm_world_in)
+                   MPI_Comm comm_world_in,
+                   const bool throw_on_extract_error /* = false */)
 {
   // Error if the application type is not located
   const auto it = _name_to_build_info.find(app_type);
@@ -155,14 +155,22 @@ AppFactory::create(const std::string & app_type,
   parameters.set<std::shared_ptr<Parallel::Communicator>>("_comm") = comm;
   parameters.set<std::string>("_app_name") = name;
 
+  // Get the Parser, which should have already parsed
   auto parser = parameters.get<std::shared_ptr<Parser>>("_parser");
   mooseAssert(parser, "Parser not valid");
   mooseAssert(parser->queryRoot() && parser->queryCommandLineRoot(), "Parser has not parsed");
 
+  // Extract the parameters for the [Application] block; this will either throw a
+  // ParseError (for when being used by the MooseServer) or call mooseError if
+  // parameter extraction fails
+  MooseApp::extractApplicationParams(
+      parser->getRoot(), parser->getCommandLineRoot(), parameters, throw_on_extract_error);
+
+  // Extract the command line parameters
   auto command_line = parameters.get<std::shared_ptr<CommandLine>>("_command_line");
   mooseAssert(command_line, "Command line not valid");
   mooseAssert(command_line->hasParsed(), "Command line has not parsed");
-  command_line->populateCommandLineParams(parameters);
+  command_line->populateCommandLineParams(parameters, &parser->getCommandLineRoot());
 
   // Historically we decided to non-const copy construct all application parameters. In
   // order to get around that while apps are fixed (by taking a const reference instead),
@@ -171,9 +179,17 @@ AppFactory::create(const std::string & app_type,
   // copy of the derived app's parmeters)
   const auto & params = storeAppParams(parameters);
 
-  build_info->_app_creation_count++;
-
-  return build_info->build(params);
+  // Build the app; if it fails at construction, remove the parameters
+  // so that we don't have memory leaks
+  try
+  {
+    return build_info->build(params);
+  }
+  catch (...)
+  {
+    clearAppParams(params, {});
+    throw;
+  }
 }
 
 std::shared_ptr<MooseApp>
@@ -185,25 +201,13 @@ AppFactory::createShared(const std::string & app_type,
   return AppFactory::instance().create(app_type, name, parameters, comm_world_in);
 }
 
-std::size_t
-AppFactory::createdAppCount(const std::string & app_type) const
-{
-  // Error if the application type is not located
-  const auto it = _name_to_build_info.find(app_type);
-  if (it == _name_to_build_info.end())
-    mooseError("AppFactory::createdAppCount(): '", app_type, "' is not a registered app");
-
-  return it->second->_app_creation_count;
-}
-
 const InputParameters &
 AppFactory::storeAppParams(InputParameters & params)
 {
-  const std::size_t next_id =
-      _input_parameters.size() ? (std::prev(_input_parameters.end())->first + 1) : 0;
-  params.addPrivateParam<std::size_t>("_app_params_id", next_id);
+  const auto id = _next_input_parameters_id++;
+  params.addPrivateParam<std::size_t>("_app_params_id", id);
   const auto it_inserted_pair =
-      _input_parameters.emplace(next_id, std::make_unique<InputParameters>(params));
+      _input_parameters.emplace(id, std::make_unique<InputParameters>(params));
   mooseAssert(it_inserted_pair.second, "Already exists");
   auto & stored_params = *it_inserted_pair.first->second;
   stored_params.finalize("");

@@ -292,7 +292,10 @@ CommandLine::buildHitParams()
 }
 
 void
-CommandLine::populateCommandLineParams(InputParameters & params)
+CommandLine::populateCommandLineParams(
+    InputParameters & params,
+    const hit::Node * const command_line_root /* = nullptr */,
+    const std::optional<std::set<std::string>> & filter_names /* = {} */)
 {
   mooseAssert(!_command_line_params_populated, "Already populated");
 
@@ -302,12 +305,22 @@ CommandLine::populateCommandLineParams(InputParameters & params)
   for (const auto & name_value_pair : params)
   {
     const auto & name = name_value_pair.first;
+
+    // Filter enabled and not in filter
+    if (filter_names && !filter_names->count(name))
+      continue;
+    // Param is private, don't parse
+    if (params.isPrivate(name))
+      continue;
+
     if (const auto metadata = params.queryCommandLineMetadata(name))
     {
       auto it_inserted_pair = _command_line_params.emplace(name, CommandLineParam());
       auto & option = it_inserted_pair.first->second;
 
       option.description = params.getDocString(name);
+      if (const auto group_ptr = params.queryParameterGroup(name))
+        option.group = *group_ptr;
       option.metadata = *metadata;
 
       // Make sure that one switch isn't specified for multiple parameters
@@ -356,7 +369,7 @@ CommandLine::populateCommandLineParams(InputParameters & params)
 
       // If we found this parameter, that means we set it and we should mark in the
       // InputParameters that it is set so that isParamSetByUser() returns true for this param
-      params.commandLineParamSet(name, {});
+      params.commandLineParamSet(name, entry.name, command_line_root, {});
 
       // If this parameter is global, mark its entry as global
       if (param.metadata.global)
@@ -404,32 +417,66 @@ CommandLine::getExecutableNameBase() const
 void
 CommandLine::printUsage() const
 {
-  Moose::out << "Usage: " << getExecutableName() << " [<options>]\n\n";
+  std::ostringstream oss;
 
-  std::size_t max_len = 0;
-  for (const auto & name_option_pair : _command_line_params)
-    max_len = std::max(max_len, name_option_pair.second.metadata.syntax.size());
+  // Header
+  oss << "Usage: " << getExecutableName() << " [<options>]\n\n";
+  oss << "(G) denotes global parameter (applied to subapps)\n\n";
 
-  const auto output_options = [this, &max_len](const bool global)
-  {
-    Moose::out << (global ? "Global " : "") << "Options:\n" << std::left;
-    for (const auto & name_option_pair : _command_line_params)
+  // Collect all of the command line parameters so that we can sort them
+  std::size_t max_syntax_len = 0;                                 // max length of all switches
+  std::vector<std::pair<std::string, std::string>> sorted_params; // name -> switch without dashes
+  for (const auto & [name, option] : _command_line_params)
+    if (option.metadata.switches.size())
     {
-      const auto & option = name_option_pair.second;
-      if (option.metadata.syntax.empty() || option.metadata.global != global)
-        continue;
-
-      Moose::out << "  " << std::setw(max_len + 2) << option.metadata.syntax << option.description
-                 << "\n";
+      const auto & metadata = option.metadata;
+      max_syntax_len = std::max(max_syntax_len, metadata.syntax.size());
+      std::smatch match;
+      if (std::regex_match(metadata.switches[0], match, std::regex("^-{1,2}(.+)$")))
+        sorted_params.emplace_back(name, match[1]);
+      else
+        mooseAssert(false, "Parameter switch does not start with -");
     }
-    Moose::out << "\n";
+
+  // Sort all command line parameter names by their switch (after the dashes)
+  std::sort(sorted_params.begin(),
+            sorted_params.end(),
+            [](const auto & lhs, const auto & rhs) { return lhs.second < rhs.second; });
+
+  // Helper for ouputting a single parameter
+  const auto output_param = [&oss, &max_syntax_len](const auto & option)
+  {
+    const std::string global_prefix = option.metadata.global ? "(G) " : "";
+    oss << std::left << "  " << std::setw(max_syntax_len + 2) << option.metadata.syntax
+        << global_prefix + option.description << "\n";
   };
 
-  output_options(false);
-  output_options(true);
+  // Collect parameters by group, printing the non-grouped ones first
+  std::map<std::string, std::vector<std::string>> group_params;
+  std::vector<std::string> non_group_params;
+  for (const auto & name_switch_pair : sorted_params)
+  {
+    const auto & name = name_switch_pair.first;
+    const auto & option = _command_line_params.at(name);
+    if (option.group)
+      group_params[*option.group].push_back(name);
+    else
+      output_param(option);
+  }
+  oss << "\n";
 
-  Moose::out << "Solver Options:\n"
-             << "  See PETSc manual for details" << std::endl;
+  // Print the grouped parameters, per group
+  for (const auto & [group, names] : group_params)
+  {
+    oss << group << ":\n";
+    for (const auto & name : names)
+      output_param(_command_line_params.at(name));
+    oss << "\n";
+  }
+
+  oss << "Solver Options:\n  See PETSc manual for details\n";
+
+  Moose::out << oss.str();
 
   // If we get here, we are not running a simulation and should silence petsc's unused options
   // warning
