@@ -90,7 +90,8 @@ AdvectionIPHDGAssemblyHelper::scalarDirichlet(const Moose::Functor<Real> & diric
         Moose::ElemSideQpArg{
             _ip_current_elem, _ip_current_side, qp, _ip_qrule_face, _ip_q_point_face[qp]},
         _ti.determineState());
-    const auto adv_quant = dirichlet_value * _coeff;
+    const auto adv_quant =
+        _coeff * (MetaPhysicL::raw_value(vdotn) >= 0 ? _u_sol[qp] : dirichlet_value);
     const auto qp_term = _ip_JxW_face[qp] * vdotn * adv_quant;
     for (const auto i : index_range(_scalar_re))
       _scalar_re(i) += _scalar_phi_face[i][qp] * qp_term;
