@@ -18,6 +18,7 @@
 #include "libmesh/transient_system.h"
 
 // Forward declarations
+class AuxKernelBase;
 template <typename ComputeValueType>
 class AuxKernelTempl;
 typedef AuxKernelTempl<Real> AuxKernel;
@@ -66,6 +67,12 @@ public:
                  const std::string & name,
                  InputParameters & parameters);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  void addKokkosKernel(const std::string & kernel_name,
+                       const std::string & name,
+                       InputParameters & parameters);
+#endif
+
   /**
    * Adds a scalar kernel
    * @param kernel_name The type of the kernel
@@ -96,6 +103,10 @@ public:
    * @param type Time flag of which variables should be computed
    */
   virtual void compute(ExecFlagType type) override;
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  void kokkosCompute(ExecFlagType type);
+#endif
 
   /**
    * Get a list of dependent UserObjects for this exec type
@@ -135,6 +146,11 @@ public:
   const ExecuteMooseObjectWarehouse<AuxKernel> & elemAuxWarehouse() const;
   const ExecuteMooseObjectWarehouse<VectorAuxKernel> & elemVectorAuxWarehouse() const;
   const ExecuteMooseObjectWarehouse<ArrayAuxKernel> & elemArrayAuxWarehouse() const;
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  const ExecuteMooseObjectWarehouse<AuxKernelBase> & kokkosNodalAuxWarehouse() const;
+  const ExecuteMooseObjectWarehouse<AuxKernelBase> & kokkosElemAuxWarehouse() const;
+#endif
 
   /// Computes and stores ||current - old|| / ||current|| for each variable in the given vector
   /// @param var_diffs a vector being filled with the L2 norm of the solution difference
@@ -190,6 +206,12 @@ protected:
   ExecuteMooseObjectWarehouse<ArrayAuxKernel> _nodal_array_aux_storage;
   ExecuteMooseObjectWarehouse<ArrayAuxKernel> _elemental_array_aux_storage;
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  // Storage for KokkosAuxKernel objects
+  ExecuteMooseObjectWarehouse<AuxKernelBase> _kokkos_nodal_aux_storage;
+  ExecuteMooseObjectWarehouse<AuxKernelBase> _kokkos_elemental_aux_storage;
+#endif
+
   friend class ComputeIndicatorThread;
   friend class ComputeMarkerThread;
   friend class FlagElementsThread;
@@ -236,3 +258,17 @@ AuxiliarySystem::elemArrayAuxWarehouse() const
 {
   return _elemental_array_aux_storage;
 }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+inline const ExecuteMooseObjectWarehouse<AuxKernelBase> &
+AuxiliarySystem::kokkosNodalAuxWarehouse() const
+{
+  return _kokkos_nodal_aux_storage;
+}
+
+inline const ExecuteMooseObjectWarehouse<AuxKernelBase> &
+AuxiliarySystem::kokkosElemAuxWarehouse() const
+{
+  return _kokkos_elemental_aux_storage;
+}
+#endif
