@@ -246,6 +246,8 @@ private:
 } // namespace Kokkos
 } // namespace Moose
 
+// Kernel, NodalKernel, BC
+
 #define callRegisterKokkosResidualObjectFunction(classname, objectname)                            \
   static char registerKokkosResidualObject##classname()                                            \
   {                                                                                                \
@@ -272,6 +274,8 @@ private:
 #define registerKokkosResidualObjectAliased(app, classname, alias)                                 \
   registerMooseObjectAliased(app, classname, alias);                                               \
   callRegisterKokkosResidualObjectFunction(classname, alias)
+
+// Material
 
 #define callRegisterKokkosMaterialFunction(classname, objectname)                                  \
   static char registerKokkosMaterial##classname()                                                  \
@@ -304,3 +308,27 @@ private:
 #define registerKokkosMaterialAliased(app, classname, alias)                                       \
   registerMooseObjectAliased(app, classname, alias);                                               \
   callRegisterKokkosMaterialFunction(classname, alias)
+
+// AuxKernel
+
+#define callRegisterKokkosAuxKernelFunction(classname, objectname)                                 \
+  static char registerKokkosAuxKernel##classname()                                                 \
+  {                                                                                                \
+    using namespace Moose::Kokkos;                                                                 \
+                                                                                                   \
+    DispatcherRegistry::add<classname::ElementLoop, classname>(objectname);                        \
+    DispatcherRegistry::add<classname::NodeLoop, classname>(objectname);                           \
+                                                                                                   \
+    return 0;                                                                                      \
+  }                                                                                                \
+                                                                                                   \
+  static char combineNames(kokkos_dispatcher_auxkernel_##classname, __COUNTER__) =                 \
+      registerKokkosAuxKernel##classname()
+
+#define registerKokkosAuxKernel(app, classname)                                                    \
+  registerMooseObject(app, classname);                                                             \
+  callRegisterKokkosAuxKernelFunction(classname, #classname)
+
+#define registerKokkosAuxKernelAliased(app, classname, alias)                                      \
+  registerMooseObjectAliased(app, classname, alias);                                               \
+  callRegisterKokkosAuxKernelFunction(classname, alias)
