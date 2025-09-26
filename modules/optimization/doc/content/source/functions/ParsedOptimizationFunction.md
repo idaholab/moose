@@ -15,7 +15,7 @@ f(x,y,z,t; \vec{v}) = xv_1 + yv_2^2 + zv_3^3 + tv_4^4
 
 !listing parsed_function/parsed_function.i block=Functions
 
-`params/vals` is the name of a vector reporter value, define as:
+`params/vals` is the name of a vector reporter value, defined as:
 
 !listing parsed_function/parsed_function.i block=Reporters
 

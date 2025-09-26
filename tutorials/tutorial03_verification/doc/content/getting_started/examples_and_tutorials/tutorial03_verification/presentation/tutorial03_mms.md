@@ -222,13 +222,13 @@ Executing this script, assuming a name of `spatial_function.py` results in the f
 $ python spatial_function.py
 [mms_force]
   type = ParsedFunction
-  value = 'cp*rho*sin(x*pi)*sin(5*y*pi) + 26*pi^2*k*t*sin(x*pi)*sin(5*y*pi) - shortwave*exp(y*kappa)*sin((1/2)*x*pi)*sin((1/3600)*pi*t/hours)'
-  vars = 'hours rho shortwave k cp kappa'
-  vals = '1.0 1.0 1.0 1.0 1.0 1.0'
+  expression = 'cp*rho*sin(x*pi)*sin(5*y*pi) + 26*pi^2*k*t*sin(x*pi)*sin(5*y*pi) - shortwave*exp(y*kappa)*sin((1/2)*x*pi)*sin((1/3600)*pi*t/hours)'
+  symbol_names = 'hours rho shortwave k cp kappa'
+  symbol_values = '1.0 1.0 1.0 1.0 1.0 1.0'
 []
 [mms_exact]
   type = ParsedFunction
-  value = 't*sin(x*pi)*sin(5*y*pi)'
+  expression = 't*sin(x*pi)*sin(5*y*pi)'
 []
 
 !---
@@ -331,13 +331,13 @@ Executing this script, assuming a name of `temporal_function.py` results in the 
 $ python temporal_function.py
 [mms_force]
   type = ParsedFunction
-  value = '-3.08641975308642e-5*x*y*cp*rho*exp(-3.08641975308642e-5*t) - shortwave*exp(y*kappa)*sin((1/2)*x*pi)*sin((1/3600)*pi*t/hours)'
-  vars = 'kappa rho shortwave cp hours'
-  vals = '1.0 1.0 1.0 1.0 1.0'
+  expression = '-3.08641975308642e-5*x*y*cp*rho*exp(-3.08641975308642e-5*t) - shortwave*exp(y*kappa)*sin((1/2)*x*pi)*sin((1/3600)*pi*t/hours)'
+  symbol_names = 'kappa rho shortwave cp hours'
+  symbol_values = '1.0 1.0 1.0 1.0 1.0'
 []
 [mms_exact]
   type = ParsedFunction
-  value = 'x*y*exp(-3.08641975308642e-5*t)'
+  expression = 'x*y*exp(-3.08641975308642e-5*t)'
 []
 
 !---
