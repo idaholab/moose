@@ -1,30 +1,30 @@
-diff=2
-a=2
+diff = 2
+a = 2
 
 [GlobalParams]
   variable = u
   face_variable = side_u
   diffusivity = ${diff}
-  alpha = 6
+  alpha = 10
   velocity = vel
 []
 
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 2
-  ny = 2
-  elem_type = QUAD9
+  nx = 1
+  ny = 1
+  elem_type = TRI6
 []
 
 [Variables]
   [u]
     order = FIRST
-    family = MONOMIAL
+    family = L2_LAGRANGE
   []
   [side_u]
     order = FIRST
-    family = SIDE_HIERARCHIC
+    family = LAGRANGE
   []
 []
 
