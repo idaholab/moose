@@ -46,7 +46,8 @@ ErrorMaterial::computeQpProperties()
 
   // Check where we are, and error if needed
   // Note: neighbor materials have _bnd = true because they are using neighbor side materials
-  if (_bnd && !_neighbor)
+  // So this tests covers both face and neighbor (face) materials NOT executing
+  if (_bnd)
   {
     std::vector<BoundaryID> boundary_ids = _mesh.getBoundaryIDs(_current_elem, _current_side);
 
