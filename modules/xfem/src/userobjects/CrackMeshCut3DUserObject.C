@@ -46,7 +46,10 @@ CrackMeshCut3DUserObject::validParams()
                                            "II_KII_1",
                                            "The name of the vectorpostprocessor that contains KII");
   params.addParam<ReporterName>("fatigue_reporter",
-                                "The name of the reporter that contains fatigue growth rate");
+                                "The name of the reporter that contains fatigue growth increment");
+  params.addParam<ReporterName>(
+      "scc_reporter",
+      "The name of the reporter that contains stress corrosion cracking growth increment");
   params.addParam<FunctionName>("growth_rate", "Function defining crack growth rate");
   params.addParam<Real>(
       "size_control", 0, "Criterion for refining elements while growing the crack");
@@ -87,7 +90,11 @@ CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & param
         (_growth_rate_method == GrowthRateEnum::FATIGUE)
             ? &getReporterValueByName<std::vector<Real>>(getParam<ReporterName>("fatigue_reporter"),
                                                          REPORTER_MODE_ROOT)
-            : nullptr)
+            : nullptr),
+    _scc_growth_inc_vpp((_growth_rate_method == GrowthRateEnum::SCC)
+                            ? &getReporterValueByName<std::vector<Real>>(
+                                  getParam<ReporterName>("scc_reporter"), REPORTER_MODE_ROOT)
+                            : nullptr)
 {
   _grow = (_n_step_growth == 0 ? 0 : 1);
 
@@ -857,7 +864,9 @@ CrackMeshCut3DUserObject::growFront()
       }
       else if (_growth_rate_method == GrowthRateEnum::SCC)
       {
-        Real growth_size = _growth_size[j];
+        std::vector<int> index = getFrontPointsIndex();
+        int ind = index[j];
+        Real growth_size = _scc_growth_inc_vpp->at(ind);
         for (unsigned int k = 0; k < 3; ++k)
           x(k) = this_point(k) + dir(k) * growth_size;
       }
