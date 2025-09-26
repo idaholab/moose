@@ -36,7 +36,6 @@ namespace Kokkos
  * below, and their definition in the derived class is optional. If they are defined in the derived
  * class, they will hide the default definitions in the base class.
  */
-
 class Kernel : public KernelBase
 {
 public:
