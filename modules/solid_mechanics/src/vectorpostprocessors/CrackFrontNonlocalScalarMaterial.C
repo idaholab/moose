@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CrackFrontNonlocalScalarMaterial.h"
+#include "SolidMechanicsAppTypes.h"
 
 registerMooseObject("SolidMechanicsApp", CrackFrontNonlocalScalarMaterial);
 
@@ -19,7 +20,10 @@ CrackFrontNonlocalScalarMaterial::validParams()
                              "crack_front_definition vectorpostprocessor.");
   params.addRequiredParam<MaterialPropertyName>(
       "property_name", "Get name of material property to compute at crack front");
-
+  ExecFlagEnum & exec = params.set<ExecFlagEnum>("execute_on");
+  exec.addAvailableFlags(EXEC_XFEM_MARK);
+  params.setDocString("execute_on", exec.getDocString());
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_XFEM_MARK, EXEC_TIMESTEP_END};
   return params;
 }
 

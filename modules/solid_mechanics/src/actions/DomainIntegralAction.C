@@ -359,18 +359,7 @@ DomainIntegralAction::act()
   const std::string aux_grad_disp_base_name("aux_grad_disp");
 
   // checking if built with xfem and setting flags for vpps used by xfem
-  std::vector<std::string> xfem_exec_flags;
-  for (const auto & item :
-       moose::internal::ExecFlagRegistry::getExecFlagRegistry().getFlags().items())
-  {
-    if (item.name() == "XFEM_MARK")
-    {
-      // TODO the xfem_flags should be something like this:
-      // xfem_exec_flags = {item, EXEC_NONLINEAR, EXEC_TIMESTEP_END};
-      // but the item=XFEM_MARK flag causes xfem tests to diverge
-      xfem_exec_flags = {EXEC_INITIAL, EXEC_NONLINEAR, EXEC_TIMESTEP_END};
-    }
-  }
+  std::vector<std::string> xfem_exec_flags = {EXEC_XFEM_MARK, EXEC_TIMESTEP_END};
 
   std::string ad_prepend = "";
   if (_use_ad)
@@ -381,7 +370,7 @@ DomainIntegralAction::act()
     const std::string uo_type_name("CrackFrontDefinition");
 
     InputParameters params = _factory.getValidParams(uo_type_name);
-    if (_use_crack_front_points_provider && !xfem_exec_flags.empty())
+    if (_use_crack_front_points_provider)
     {
       // The CrackFrontDefinition updates the vpps and MUST execute before them
       params.set<int>("execution_order_group") = -1;
@@ -746,7 +735,7 @@ DomainIntegralAction::act()
       if (!getParam<bool>("output_vpp"))
         params.set<std::vector<OutputName>>("outputs") = {"none"};
 
-      if (_use_crack_front_points_provider && !xfem_exec_flags.empty())
+      if (_use_crack_front_points_provider)
         params.set<ExecFlagEnum>("execute_on") = xfem_exec_flags;
       else
         params.set<ExecFlagEnum>("execute_on") = {EXEC_TIMESTEP_END};

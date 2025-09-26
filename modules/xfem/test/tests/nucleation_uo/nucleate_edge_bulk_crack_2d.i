@@ -1,3 +1,7 @@
+# Nucleate cracks in the bulk and then on the edges
+# checking that the domain integral fracture integrals
+# are being computed at every crack tip (6 crack tips)
+
 [GlobalParams]
   displacements = 'disp_x disp_y'
   volumetric_locking_correction = true

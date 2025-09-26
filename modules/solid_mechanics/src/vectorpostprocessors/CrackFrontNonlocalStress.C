@@ -9,6 +9,7 @@
 
 #include "CrackFrontNonlocalStress.h"
 #include "RankTwoScalarTools.h"
+#include "SolidMechanicsAppTypes.h"
 
 registerMooseObject("SolidMechanicsApp", CrackFrontNonlocalStress);
 
@@ -19,6 +20,10 @@ CrackFrontNonlocalStress::validParams()
   params.addClassDescription("Computes the average stress normal to the crack face.");
   params.addRequiredParam<MaterialPropertyName>(
       "stress_name", "Get name of stress tensor to compute at crack front");
+  ExecFlagEnum & exec = params.set<ExecFlagEnum>("execute_on");
+  exec.addAvailableFlags(EXEC_XFEM_MARK);
+  params.setDocString("execute_on", exec.getDocString());
+  params.set<ExecFlagEnum>("execute_on") = {EXEC_XFEM_MARK, EXEC_TIMESTEP_END};
   return params;
 }
 

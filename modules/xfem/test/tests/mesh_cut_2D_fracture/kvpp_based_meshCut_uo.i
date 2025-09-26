@@ -5,7 +5,6 @@
     crack_front_definition = crackFrontDefinition
     box_length = 0.05
     box_height = 0.1
-    execute_on = NONLINEAR
   []
 []
 [UserObjects]
