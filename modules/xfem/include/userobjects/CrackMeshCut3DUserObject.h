@@ -57,12 +57,7 @@ public:
     Get crack front points in the active segment
     -1 means inactive; positive is the point's index in the Crack Front Definition starting from 0
    */
-  std::vector<int> getFrontPointsIndex();
-
-  /**
-    Return growth size at the active boundary to the mesh cutter
-   */
-  void setSubCriticalGrowthSize(std::vector<Real> & growth_size);
+  std::vector<int> getFrontPointsIndex() const;
 
   /**
     Return the total number of crack front points.
@@ -265,8 +260,10 @@ protected:
   const Function * _func_z;
   const Function * _func_v;
 
-  /// Pointer fracture integral ki if available
+  /// Pointer to fracture integral ki if available
   const std::vector<Real> * const _ki_vpp;
-  /// Pointer fracture integral kii if available
+  /// Pointer to fracture integral kii if available
   const std::vector<Real> * const _kii_vpp;
+  /// Pointer to fatigue growth if available
+  const std::vector<Real> * const _fatigue_growth_inc_vpp;
 };

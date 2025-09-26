@@ -56,6 +56,7 @@
     requirement = 'The XFEM module shall represent a propagating crack in a 3D mechanics model with XFEM, where the crack is defined using a topological surface cutting mesh by CrackMeshCut3DUserObject and allowed to propagate with'
     design = 'CrackMeshCut3DUserObject.md'
     [fatigue]
+      design = 'CrackMeshCut3DUserObject.md ParisLaw.md'
       type = Exodiff
       input = edge_crack_3d_fatigue.i
       exodiff = 'edge_crack_3d_fatigue_out.e edge_crack_3d_fatigue_out.e-s002'
