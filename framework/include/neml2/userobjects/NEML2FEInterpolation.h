@@ -49,7 +49,7 @@ public:
    *
    * @warning The tensor value is only available after finalize() is called.
    */
-  const neml2::Tensor & getValue(const std::string & var_name) const;
+  const neml2::Tensor & getValue(const std::string & var_name);
 
   /**
    * @brief Get the variable gradient of a MOOSE nonlinear variable converted to a NEML2 tensor.
@@ -60,7 +60,7 @@ public:
    *
    * @warning The tensor value is only available after finalize() is called.
    */
-  const neml2::Tensor & getGradient(const std::string & var_name) const;
+  const neml2::Tensor & getGradient(const std::string & var_name);
 
   /**
    * @brief Get the shape function associated with a MOOSE variable.
@@ -71,7 +71,7 @@ public:
    *
    * @warning The tensor value is only available after finalize() is called.
    */
-  const neml2::Tensor & getPhi(const std::string & var_name) const;
+  const neml2::Tensor & getPhi(const std::string & var_name);
 
   /**
    * @brief Get the shape function gradient associated with a MOOSE variable.
@@ -82,7 +82,7 @@ public:
    *
    * @warning The tensor value is only available after finalize() is called.
    */
-  const neml2::Tensor & getPhiGradient(const std::string & var_name) const;
+  const neml2::Tensor & getPhiGradient(const std::string & var_name);
 
   /**
    * @brief Get the local dof map associated with a MOOSE variable.
@@ -93,10 +93,10 @@ public:
    *
    * @warning The tensor value is only available after finalize() is called.
    */
-  const neml2::Tensor & getDofMap(const std::string & var_name) const;
+  const neml2::Tensor & getDofMap(const std::string & var_name);
 
   /// Similar to getDofMap, but returns the global dof map (as a flattened vector of dof_id_type)
-  const std::vector<dof_id_type> & getGlobalDofMap(const std::string & var_name) const;
+  const std::vector<dof_id_type> & getGlobalDofMap(const std::string & var_name);
 
   int64_t local_ndof() const;
 
@@ -104,10 +104,10 @@ public:
   bool contextUpToDate() const { return _fem_context_up_to_date; }
 
   /// Invalidate the cached FEM context such as dof map, shape functions, etc.
-  void invalidateFEMContext() const;
+  void invalidateFEMContext();
 
   /// Invalidate the cached interpolations
-  void invalidateInterpolations() const;
+  void invalidateInterpolations();
 
   void initialSetup() override;
   void meshChanged() override;
@@ -129,34 +129,34 @@ protected:
   const NEML2Assembly & _neml2_assembly;
 
   /// Whether the current FEM context is up to date
-  mutable bool _fem_context_up_to_date = false;
+  bool _fem_context_up_to_date = false;
 
   /// Whether the current interpolations are up to date
-  mutable bool _interp_up_to_date = false;
+  bool _interp_up_to_date = false;
 
   /// coupled variables (by value) requested by other objects
-  mutable std::unordered_map<std::string, neml2::Tensor> _vars;
+  std::unordered_map<std::string, neml2::Tensor> _vars;
 
   /// coupled variables (by gradient) requested by other objects
-  mutable std::unordered_map<std::string, neml2::Tensor> _grad_vars;
+  std::unordered_map<std::string, neml2::Tensor> _grad_vars;
 
   /// moose variables that have been coupled
-  mutable std::unordered_map<std::string, const MooseVariableFE<Real> *> _moose_vars;
+  std::unordered_map<std::string, const MooseVariableFE<Real> *> _moose_vars;
 
   /// cached information on the requested function spaces
   ///@{
-  mutable std::unordered_map<FEType, int64_t> _ndofe;
-  mutable std::unordered_map<FEType, const VariablePhiValue *> _phis;
-  mutable std::unordered_map<FEType, const VariablePhiGradient *> _grad_phis;
+  std::unordered_map<FEType, int64_t> _ndofe;
+  std::unordered_map<FEType, const VariablePhiValue *> _phis;
+  std::unordered_map<FEType, const VariablePhiGradient *> _grad_phis;
 
   std::unordered_map<std::string, std::vector<int64_t>> _moose_dof_map;
   std::unordered_map<std::string, std::vector<dof_id_type>> _moose_dof_map_global;
   std::unordered_map<FEType, std::vector<Real>> _moose_phi;
   std::unordered_map<FEType, std::vector<Real>> _moose_grad_phi;
 
-  mutable std::unordered_map<std::string, neml2::Tensor> _neml2_dof_map;
-  mutable std::unordered_map<FEType, neml2::Tensor> _neml2_phi;
-  mutable std::unordered_map<FEType, neml2::Tensor> _neml2_grad_phi;
+  std::unordered_map<std::string, neml2::Tensor> _neml2_dof_map;
+  std::unordered_map<FEType, neml2::Tensor> _neml2_phi;
+  std::unordered_map<FEType, neml2::Tensor> _neml2_grad_phi;
   ///@}
 
   /// PETSc solution vector
