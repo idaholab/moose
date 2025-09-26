@@ -937,6 +937,12 @@ public:
                                   const std::string & name,
                                   InputParameters & parameters);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  virtual void addKokkosAuxKernel(const std::string & kernel_name,
+                                  const std::string & name,
+                                  InputParameters & parameters);
+#endif
+
   AuxiliarySystem & getAuxiliarySystem() { return *_aux; }
 
   // Dirac /////

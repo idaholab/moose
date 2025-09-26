@@ -158,6 +158,9 @@ addActionTypes(Syntax & syntax)
   registerMooseObjectTask("add_aux_kernel",               AuxKernel,                 false);
   appendMooseObjectTask  ("add_aux_kernel",               VectorAuxKernel);
   appendMooseObjectTask  ("add_aux_kernel",               ArrayAuxKernel);
+#ifdef MOOSE_KOKKOS_ENABLED
+  appendMooseObjectTask  ("add_aux_kernel",               KokkosAuxKernel); 
+#endif
   registerMooseObjectTask("add_bound",                    Bounds,                    false);
 
   registerMooseObjectTask("add_scalar_kernel",            ScalarKernel,              false);
@@ -557,6 +560,8 @@ associateSyntaxInner(Syntax & syntax, ActionFactory & /*action_factory*/)
 #ifdef MOOSE_KOKKOS_ENABLED
   registerSyntaxTask("AddKokkosKernelAction", "KokkosKernels/*", "add_kernel");
   registerSyntaxTask("AddKokkosNodalKernelAction", "KokkosNodalKernels/*", "add_nodal_kernel");
+  registerSyntaxTask("AddKokkosKernelAction", "KokkosAuxKernels/*", "add_aux_kernel");
+
   registerSyntaxTask("AddKokkosBCAction", "KokkosBCs/*", "add_bc");
 #endif
 
