@@ -119,13 +119,13 @@ rho=1
     type = INSFVInletVelocityBC
     boundary = 'left'
     variable = u
-    function = '1'
+    functor = '1'
   []
   [inlet-v]
     type = INSFVInletVelocityBC
     boundary = 'left'
     variable = v
-    function = 0
+    functor = 0
   []
   [walls-u]
     type = INSFVNoSlipWallBC

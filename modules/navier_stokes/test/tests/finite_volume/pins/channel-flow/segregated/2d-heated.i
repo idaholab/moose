@@ -186,13 +186,13 @@ pressure_tag = "pressure_grad"
     type = INSFVInletVelocityBC
     boundary = 'left'
     variable = superficial_vel_x
-    function = ${u_inlet}
+    functor = ${u_inlet}
   []
   [inlet-v]
     type = INSFVInletVelocityBC
     boundary = 'left'
     variable = superficial_vel_y
-    function = 0
+    functor = 0
   []
   [inlet-T]
     type = FVDirichletBC

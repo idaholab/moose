@@ -257,7 +257,7 @@
   [./C]
     type = CompositeElasticityTensor
     block = 0
-    args = c
+    coupled_variables = c
     tensors = 'Ca Cb'
     weights = 'Fa Fb'
   [../]

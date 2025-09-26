@@ -40,17 +40,17 @@ h_fs = 0.01
 
     inlet_boundaries = 'left'
     momentum_inlet_types = 'fixed-velocity'
-    momentum_inlet_function = '${u_inlet} 0'
+    momentum_inlet_functors = '${u_inlet} 0'
     energy_inlet_types = 'heatflux'
-    energy_inlet_function = '${fparse u_inlet * rho * cp * T_inlet}'
+    energy_inlet_functors = '${fparse u_inlet * rho * cp * T_inlet}'
     wall_boundaries = 'bottom top'
     momentum_wall_types = 'symmetry noslip'
     energy_wall_types = 'heatflux heatflux'
-    energy_wall_function = '0 0'
+    energy_wall_functors = '0 0'
 
     outlet_boundaries = 'right'
     momentum_outlet_types = 'fixed-pressure-zero-gradient'
-    pressure_function = '${p_outlet}'
+    pressure_functors = '${p_outlet}'
 
     ambient_convection_alpha = 'h_cv'
     ambient_temperature = 'T_solid'

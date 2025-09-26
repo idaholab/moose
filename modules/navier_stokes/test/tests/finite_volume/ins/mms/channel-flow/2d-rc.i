@@ -117,13 +117,13 @@ velocity_interp_method = 'rc'
     type = INSFVInletVelocityBC
     boundary = 'left'
     variable = u
-    function = 'exact_u'
+    functor = 'exact_u'
   []
   [inlet-v]
     type = INSFVInletVelocityBC
     boundary = 'left'
     variable = v
-    function = 'exact_v'
+    functor = 'exact_v'
   []
   [walls-u]
     type = INSFVNoSlipWallBC

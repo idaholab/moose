@@ -18,8 +18,7 @@ ParsedPostprocessor::validParams()
   params += FunctionParserUtils<false>::validParams();
 
   params.addRequiredCustomTypeParam<std::string>(
-      "function", "FunctionExpression", "function expression");
-  params.deprecateParam("function", "expression", "05/01/2025");
+      "expression", "FunctionExpression", "function expression");
 
   params.addParam<std::vector<PostprocessorName>>("pp_names", {}, "Post-processors arguments");
   params.addParam<std::vector<std::string>>(

@@ -101,13 +101,13 @@ velocity_interp_method = 'average'
     type = INSFVInletVelocityBC
     boundary = 'bottom'
     variable = u
-    function = 0
+    functor = 0
   []
   [inlet-v]
     type = INSFVInletVelocityBC
     boundary = 'bottom'
     variable = v
-    function = 1
+    functor = 1
   []
   [no-slip-wall-u]
     type = INSFVNoSlipWallBC
