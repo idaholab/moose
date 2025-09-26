@@ -47,16 +47,16 @@
 
 [Functions]
   [ic_func_etaa0]
-    type = ADParsedFunction
-    value = '0.9*0.5*(1.0-tanh((x)/sqrt(2.0)))'
+    type = ParsedFunction
+    expression = '0.9*0.5*(1.0-tanh((x)/sqrt(2.0)))'
   []
   [ic_func_etab0]
-    type = ADParsedFunction
-    value = '0.9*0.5*(1.0+tanh((x)/sqrt(2.0)))'
+    type = ParsedFunction
+    expression = '0.9*0.5*(1.0+tanh((x)/sqrt(2.0)))'
   []
   [ic_func_w]
-    type = ADParsedFunction
-    value = 0
+    type = ParsedFunction
+    expression = 0
   []
 []
 

@@ -52,11 +52,11 @@ air_effective_k = 0.5 # W/(m K)
 [Functions]
   [temp_env]
     type = ParsedFunction
-    value = '15.0*sin(t/86400.0*pi) + 273.0'
+    expression = '15.0*sin(t/86400.0*pi) + 273.0'
   []
   [design_function]
     type = ParsedFunction
-    value = '297'
+    expression = '297'
   []
   [reward_function]
     type = ScaledAbsDifferenceDRLRewardFunction
