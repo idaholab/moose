@@ -29,7 +29,7 @@ protected:
     {
       const std::string class_name = "ParsedFunction";
       InputParameters params = _factory.getValidParams(class_name);
-      params.set<std::string>("value") = "1 + x";
+      params.set<std::string>("expression") = "1 + x";
       _fe_problem->addFunction(class_name, A_name, params);
     }
 
