@@ -13,7 +13,7 @@ import os
 import vtk
 sys.path.append(os.path.abspath('../../../python'))
 
-import lsutils
+from moose_level_set import lsutils
 
 camera = vtk.vtkCamera()
 camera.SetViewUp(0.0000, 1.0000, 0.0000)

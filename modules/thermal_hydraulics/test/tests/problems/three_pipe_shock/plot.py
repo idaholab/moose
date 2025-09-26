@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from thm_utilities import readCSVFile
+from moose_thm.thm_utilities import readCSVFile
 
 data = readCSVFile('three_pipe_shock.csv')
 
