@@ -1,0 +1,39 @@
+[Tests]
+  design = 'FVSP3ThermalRadiationBC.md FVSP3TemperatureBC.md FVSP3ThermalRadiationDiffusion.md FVSP3ThermalRadiationSourceSink.md FVSP3TemperatureSourceSink.md'
+  issues = '#31346'
+
+  [glass_1D_thick]
+    type = CSVDiff
+    input = 'adaptive1D_e1.i'
+    csvdiff = 'adaptive1D_e1_csv_y0_0005.csv'
+    requirement = 'The system shall run a short simulation with SP3 kernels and BCs in 1D optically thick cooling'
+  []
+
+  [glass_1D_thin]
+    type = CSVDiff
+    input = 'adaptive1D_e10.i'
+    csvdiff = 'adaptive1D_e10_csv_y0_0005.csv'
+    requirement = 'The system shall run a short simulation with SP3 kernels and BCs in 1D optically thin cooling'
+  []
+
+  [single_frequency]
+    type = CSVDiff
+    input = 'single_frequency.i'
+    csvdiff = 'single_frequency_csv_y0_0005.csv'
+    requirement = 'The system shall run a short simulation with SP3 kernels and BCs with single frequency band'
+  []
+
+  [segregated_solve]
+    type = CSVDiff
+    input = 'adaptive1D_e1_segregated.i'
+    csvdiff = 'adaptive1D_e1_segregated_csv_y0_0005.csv'
+    requirement = 'The system shall run a short simulation with SP3 kernels and BCs in 1D optically thick cooling with segregated solves'
+  []
+
+  [with_dirichlet_BC]
+    type = CSVDiff
+    input = 'adaptive1D_e1_dirichletBC.i'
+    csvdiff = 'adaptive1D_e1_dirichletBC_csv_y0_0006.csv'
+    requirement = 'The system shall run a short simulation with SP3 kernels with Dirichlet BC in 1D optically thick cooling'
+  []
+[]
