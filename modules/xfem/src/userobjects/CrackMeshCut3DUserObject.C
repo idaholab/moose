@@ -45,6 +45,8 @@ CrackMeshCut3DUserObject::validParams()
   params.addParam<VectorPostprocessorName>("kii_vectorpostprocessor",
                                            "II_KII_1",
                                            "The name of the vectorpostprocessor that contains KII");
+  params.addParam<ReporterName>("fatigue_reporter",
+                                "The name of the reporter that contains fatigue growth rate");
   params.addParam<FunctionName>("growth_rate", "Function defining crack growth rate");
   params.addParam<Real>(
       "size_control", 0, "Criterion for refining elements while growing the crack");
@@ -80,7 +82,12 @@ CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & param
                  ? &getVectorPostprocessorValue(
                        "kii_vectorpostprocessor",
                        getParam<VectorPostprocessorName>("kii_vectorpostprocessor"))
-                 : nullptr)
+                 : nullptr),
+    _fatigue_growth_inc_vpp(
+        (_growth_rate_method == GrowthRateEnum::FATIGUE)
+            ? &getReporterValueByName<std::vector<Real>>(getParam<ReporterName>("fatigue_reporter"),
+                                                         REPORTER_MODE_ROOT)
+            : nullptr)
 {
   _grow = (_n_step_growth == 0 ? 0 : 1);
 
@@ -94,13 +101,6 @@ CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & param
     if (_growth_dir_method == GrowthDirectionEnum::FUNCTION &&
         (_func_x == nullptr || _func_y == nullptr || _func_z == nullptr))
       mooseError("function is not specified for the function method that defines growth direction");
-
-    if (_growth_dir_method == GrowthDirectionEnum::FUNCTION && _func_v == nullptr)
-      mooseError("function is not specified for the function method that defines growth rate");
-
-    if (_growth_dir_method == GrowthDirectionEnum::FUNCTION && _func_v == nullptr)
-      mooseError("function with a variable is not specified for the fatigue method that defines "
-                 "growth rate");
 
     if (isParamValid("crack_front_nodes"))
     {
@@ -849,7 +849,9 @@ CrackMeshCut3DUserObject::growFront()
         }
       else if (_growth_rate_method == GrowthRateEnum::FATIGUE)
       {
-        Real growth_size = _growth_size[j];
+        std::vector<int> index = getFrontPointsIndex();
+        int ind = index[j];
+        Real growth_size = _fatigue_growth_inc_vpp->at(ind);
         for (unsigned int k = 0; k < 3; ++k)
           x(k) = this_point(k) + dir(k) * growth_size;
       }
@@ -1291,7 +1293,7 @@ CrackMeshCut3DUserObject::getCrackPlaneNormals(unsigned int number_crack_front_p
 }
 
 std::vector<int>
-CrackMeshCut3DUserObject::getFrontPointsIndex()
+CrackMeshCut3DUserObject::getFrontPointsIndex() const
 {
   // Crack front definition using the cutter mesh currently only supports one active crack front
   // segment
@@ -1313,12 +1315,6 @@ CrackMeshCut3DUserObject::getFrontPointsIndex()
   }
 
   return index;
-}
-
-void
-CrackMeshCut3DUserObject::setSubCriticalGrowthSize(std::vector<Real> & growth_size)
-{
-  _growth_size = growth_size;
 }
 
 unsigned int
