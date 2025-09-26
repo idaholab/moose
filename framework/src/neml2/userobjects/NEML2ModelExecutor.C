@@ -227,6 +227,10 @@ NEML2ModelExecutor::execute()
   if (!NEML2Utils::shouldCompute(_fe_problem))
     return;
 
+  // If the batch is empty, we do not need to do anything
+  if (_batch_index_generator.isEmpty())
+    return;
+
   fillInputs();
 
   if (_t_step > 0)

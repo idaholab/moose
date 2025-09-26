@@ -56,6 +56,17 @@
       valgrind = heavy
     []
   []
+  [empty]
+    requirement = "The framework shall be capable of running custom NEML2 models and handling empty "
+                  "input batches without errors."
+    type = Exodiff
+    input = 'blocks_empty_neml2.i'
+    exodiff = 'blocks_empty_neml2_out.e'
+    capabilities = 'neml2'
+    valgrind = heavy
+    min_parallel = 2
+    max_parallel = 2
+  []
   [multiple_inputs]
     requirement = 'The framework shall be capable of running custom NEML2 models defined in different NEML2 input files.'
     type = Exodiff
