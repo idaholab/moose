@@ -32,9 +32,9 @@
   []
 []
 
-[AuxKernels]
+[KokkosAuxKernels]
   [active_right]
-    type = ConstantAux
+    type = KokkosConstantAux
     variable = active
     value = 0.5
     boundary = 1
