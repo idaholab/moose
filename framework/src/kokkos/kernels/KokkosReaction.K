@@ -9,7 +9,7 @@
 
 #include "KokkosReaction.h"
 
-registerMooseObject("MooseApp", KokkosReaction);
+registerKokkosResidualObject("MooseApp", KokkosReaction);
 
 InputParameters
 KokkosReaction::validParams()

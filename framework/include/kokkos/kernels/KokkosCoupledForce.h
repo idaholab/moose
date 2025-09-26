@@ -15,7 +15,7 @@
  * Implements a source term proportional to the value of a coupled variable. Weak form: $(\\psi_i,
  * -\\sigma v)$.
  */
-class KokkosCoupledForce final : public Moose::Kokkos::Kernel<KokkosCoupledForce>
+class KokkosCoupledForce : public Moose::Kokkos::Kernel
 {
 public:
   static InputParameters validParams();

@@ -1229,7 +1229,6 @@ class FunctorCopy
   friend class IntegratedBCBase;
   friend class NodalBCBase;
   friend class MaterialBase;
-  template <typename Derived>
   friend class Material;
 
   FunctorCopy() = default;

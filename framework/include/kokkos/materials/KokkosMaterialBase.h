@@ -11,6 +11,7 @@
 
 #include "KokkosTypes.h"
 #include "KokkosMaterialPropertyValue.h"
+#include "KokkosDispatcher.h"
 
 #include "MaterialBase.h"
 
@@ -128,6 +129,14 @@ protected:
    * @returns The contiguous element ID - side index pair
    */
   KOKKOS_FUNCTION auto kokkosElementSideID(ThreadID tid) const { return _element_side_ids[tid]; }
+
+  /**
+   * Kokkos functor dispatchers
+   */
+  ///@{
+  std::unique_ptr<DispatcherBase> _init_dispatcher;
+  std::unique_ptr<DispatcherBase> _compute_dispatcher;
+  ///@}
 
   /**
    * TODO: Move to TransientInterface

@@ -231,6 +231,9 @@ RestartableEquationSystems::load(std::istream & stream)
   // Order objects (elements and then node) by ID for storing
   _loaded_ordered_objects = orderDofObjects();
 
+  // Clear previously loaded variables to ensure a clean state
+  _loaded_variables.clear();
+
   // Sanity check on if we're loading the same thing
   {
     std::vector<dof_id_type> from_ordered_objects_ids;
@@ -309,6 +312,15 @@ RestartableEquationSystems::load(std::istream & stream)
   stream.seekg(_loaded_stream_data_begin + _loaded_header.data_size);
 }
 
+bool
+RestartableEquationSystems::isVariableRestored(const std::string & system_name,
+                                               const std::string & vector_name,
+                                               const std::string & variable_name) const
+{
+  std::tuple<std::string, std::string, std::string> key(system_name, vector_name, variable_name);
+  return _loaded_variables.count(key);
+}
+
 void
 RestartableEquationSystems::restore(const SystemHeader & from_sys_header,
                                     const VectorHeader & from_vec_header,
@@ -331,6 +343,8 @@ RestartableEquationSystems::restore(const SystemHeader & from_sys_header,
   mooseAssert(var_it != sys_header.variables.end(), "Variable does not exist");
   const auto & var_header = var_it->second;
   mooseAssert(var_header == from_var_header, "Not my variable");
+  mooseAssert(!isVariableRestored(from_sys_header.name, from_vec_header.name, from_var_header.name),
+              "Variable already restored");
 #endif
 
   const auto error =
@@ -380,6 +394,15 @@ RestartableEquationSystems::restore(const SystemHeader & from_sys_header,
       to_vec.set(dof, val);
     }
   }
+
+  // insert into the member variable
+  std::tuple<std::string, std::string, std::string> _loaded_variable = {
+      from_sys_header.name, from_vec_header.name, from_var_header.name};
+
+  _loaded_variables.insert(_loaded_variable);
+
+  mooseAssert(isVariableRestored(from_sys_header.name, from_vec_header.name, from_var_header.name),
+              "Variable not marked as restored");
 }
 
 void
@@ -454,4 +477,18 @@ dataLoad(std::istream & stream, RestartableEquationSystems::VectorHeader & heade
   dataLoad(stream, header.projections, nullptr);
   dataLoad(stream, header.type, nullptr);
   dataLoad(stream, header.variable_offset, nullptr);
+}
+
+void
+to_json(nlohmann::json & json, const RestartableEquationSystems & res)
+{
+
+  nlohmann::json loaded_vars = nlohmann::json::array();
+
+  for (const auto & [system, vector, variable] : res.getLoadedVariables())
+  {
+    loaded_vars.push_back({{"system", system}, {"vector", vector}, {"variable", variable}});
+  }
+
+  json["loaded_variables"] = loaded_vars;
 }

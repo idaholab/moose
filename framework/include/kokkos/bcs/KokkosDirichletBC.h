@@ -44,16 +44,10 @@ KokkosDirichletBC<DirichletBC>::KokkosDirichletBC(const InputParameters & parame
 {
 }
 
-class KokkosDirichletBCKernel final : public KokkosDirichletBC<KokkosDirichletBCKernel>
+class KokkosDirichletBCWrapper final : public KokkosDirichletBC<KokkosDirichletBCWrapper>
 {
 public:
   static InputParameters validParams();
 
-  KokkosDirichletBCKernel(const InputParameters & parameters);
+  KokkosDirichletBCWrapper(const InputParameters & parameters);
 };
-
-#define usingKokkosDirichletBCMembers(T)                                                           \
-  usingKokkosDirichletBCBaseMembers(T);                                                            \
-                                                                                                   \
-protected:                                                                                         \
-  using KokkosDirichletBC<T>::_value

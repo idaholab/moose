@@ -9,7 +9,7 @@
 
 #include "KokkosRadiativeHeatFluxBC.h"
 
-registerMooseObject("ThermalHydraulicsApp", KokkosRadiativeHeatFluxBC);
+registerKokkosResidualObject("ThermalHydraulicsApp", KokkosRadiativeHeatFluxBC);
 
 InputParameters
 KokkosRadiativeHeatFluxBC::validParams()

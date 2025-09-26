@@ -12,10 +12,8 @@
 #include "KokkosNodalKernel.h"
 
 template <typename Derived>
-class KokkosBoundNodalKernel : public Moose::Kokkos::NodalKernel<Derived>
+class KokkosBoundNodalKernel : public Moose::Kokkos::NodalKernel
 {
-  usingKokkosNodalKernelMembers(Derived);
-
 public:
   static InputParameters validParams();
 
@@ -44,7 +42,7 @@ template <typename Derived>
 InputParameters
 KokkosBoundNodalKernel<Derived>::validParams()
 {
-  InputParameters params = Moose::Kokkos::NodalKernel<Derived>::validParams();
+  InputParameters params = NodalKernel::validParams();
   params.addRequiredCoupledVar(
       "v", "The coupled variable we require to be greater than the lower bound");
   params.addParam<std::vector<BoundaryName>>(
@@ -58,18 +56,16 @@ KokkosBoundNodalKernel<Derived>::validParams()
 
 template <typename Derived>
 KokkosBoundNodalKernel<Derived>::KokkosBoundNodalKernel(const InputParameters & parameters)
-  : Moose::Kokkos::NodalKernel<Derived>(parameters),
-    _v_var(this->coupled("v")),
-    _v(this->kokkosCoupledNodalValue("v"))
+  : NodalKernel(parameters), _v_var(coupled("v")), _v(kokkosCoupledNodalValue("v"))
 {
   if (_var.number() == _v_var)
-    this->paramError("v", "Coupled variable needs to be different from 'variable'");
+    paramError("v", "Coupled variable needs to be different from 'variable'");
 
   std::set<ContiguousBoundaryID> bnd_ids;
 
-  const auto & bnd_names = this->template getParam<std::vector<BoundaryName>>("exclude_boundaries");
-  for (const auto & bnd_id : this->_mesh.getBoundaryIDs(bnd_names))
-    bnd_ids.insert(this->kokkosMesh().getContiguousBoundaryID(bnd_id));
+  const auto & bnd_names = getParam<std::vector<BoundaryName>>("exclude_boundaries");
+  for (const auto & bnd_id : _mesh.getBoundaryIDs(bnd_names))
+    bnd_ids.insert(kokkosMesh().getContiguousBoundaryID(bnd_id));
 
   _bnd_ids = bnd_ids;
 }
@@ -79,7 +75,7 @@ KOKKOS_FUNCTION bool
 KokkosBoundNodalKernel<Derived>::skipOnBoundary(const ContiguousNodeID node) const
 {
   for (dof_id_type b = 0; b < _bnd_ids.size(); ++b)
-    if (this->kokkosMesh().isBoundaryNode(node, _bnd_ids[b]))
+    if (kokkosMesh().isBoundaryNode(node, _bnd_ids[b]))
       return true;
 
   return false;

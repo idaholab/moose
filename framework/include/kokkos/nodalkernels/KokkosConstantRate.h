@@ -11,7 +11,7 @@
 
 #include "KokkosNodalKernel.h"
 
-class KokkosConstantRate final : public Moose::Kokkos::NodalKernel<KokkosConstantRate>
+class KokkosConstantRate : public Moose::Kokkos::NodalKernel
 {
 public:
   static InputParameters validParams();

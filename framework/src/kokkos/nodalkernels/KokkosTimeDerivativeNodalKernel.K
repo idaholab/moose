@@ -9,7 +9,7 @@
 
 #include "KokkosTimeDerivativeNodalKernel.h"
 
-registerMooseObject("MooseApp", KokkosTimeDerivativeNodalKernel);
+registerKokkosResidualObject("MooseApp", KokkosTimeDerivativeNodalKernel);
 
 InputParameters
 KokkosTimeDerivativeNodalKernel::validParams()

@@ -11,10 +11,13 @@
 
 #include <functional>
 #include <map>
+#include <typeinfo>
+#include <typeindex>
 
 #include "libmesh/parameters.h"
 
 #include "MooseError.h"
+#include "MooseUtils.h"
 
 #ifdef MOOSE_UNIT_TEST
 #include "gtest/gtest.h"
@@ -71,7 +74,8 @@ private:
 #endif
 
   /// Registration map of type -> function to fill each type
-  std::map<std::string, std::function<void(libMesh::Parameters::Value & value, const hit::Field &)>>
+  std::unordered_map<std::type_index,
+                     std::function<void(libMesh::Parameters::Value & value, const hit::Field &)>>
       _registry;
 };
 
@@ -93,11 +97,13 @@ ParameterRegistry::add(F && f)
     f(cast_param_value->set(), field);
   };
 
-  const auto key = demangle(typeid(T).name());
+  const std::type_index key(typeid(T));
   const auto it_inserted_pair = _registry.emplace(key, std::move(setter));
 
   if (!it_inserted_pair.second)
-    mooseError("ParameterRegistry: Parameter with type '", key, "' is already registered");
+    mooseError("ParameterRegistry: Parameter with type '",
+               MooseUtils::prettyCppType<T>(),
+               "' is already registered");
 
   return 0;
 }

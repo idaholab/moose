@@ -9,7 +9,7 @@
 
 #include "KokkosMatDiffusionTest.h"
 
-registerMooseObject("MooseTestApp", KokkosMatDiffusionTest);
+registerKokkosResidualObject("MooseTestApp", KokkosMatDiffusionTest);
 
 InputParameters
 KokkosMatDiffusionTest::validParams()

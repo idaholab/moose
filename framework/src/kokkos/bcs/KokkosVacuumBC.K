@@ -9,7 +9,7 @@
 
 #include "KokkosVacuumBC.h"
 
-registerMooseObject("MooseApp", KokkosVacuumBC);
+registerKokkosResidualObject("MooseApp", KokkosVacuumBC);
 
 InputParameters
 KokkosVacuumBC::validParams()

@@ -11,7 +11,7 @@
 
 #include "KokkosDiffusion.h"
 
-class KokkosHeatConduction final : public KokkosDiffusion<KokkosHeatConduction>
+class KokkosHeatConduction : public KokkosDiffusion
 {
 public:
   static InputParameters validParams();
