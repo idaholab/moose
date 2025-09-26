@@ -54,7 +54,7 @@ NEML2FEInterpolation::NEML2FEInterpolation(const InputParameters & parameters)
 }
 
 const neml2::Tensor &
-NEML2FEInterpolation::getValue(const std::string & var_name) const
+NEML2FEInterpolation::getValue(const std::string & var_name)
 {
   auto [it, success] = _vars.emplace(var_name, neml2::Tensor());
 
@@ -69,7 +69,7 @@ NEML2FEInterpolation::getValue(const std::string & var_name) const
 }
 
 const neml2::Tensor &
-NEML2FEInterpolation::getGradient(const std::string & var_name) const
+NEML2FEInterpolation::getGradient(const std::string & var_name)
 {
   auto [it, success] = _grad_vars.emplace(var_name, neml2::Tensor());
 
@@ -84,7 +84,7 @@ NEML2FEInterpolation::getGradient(const std::string & var_name) const
 }
 
 const neml2::Tensor &
-NEML2FEInterpolation::getPhi(const std::string & var_name) const
+NEML2FEInterpolation::getPhi(const std::string & var_name)
 {
   const auto * var = getMOOSEVariable(var_name);
 
@@ -98,7 +98,7 @@ NEML2FEInterpolation::getPhi(const std::string & var_name) const
 }
 
 const neml2::Tensor &
-NEML2FEInterpolation::getPhiGradient(const std::string & var_name) const
+NEML2FEInterpolation::getPhiGradient(const std::string & var_name)
 {
   const auto * var = getMOOSEVariable(var_name);
 
@@ -112,15 +112,15 @@ NEML2FEInterpolation::getPhiGradient(const std::string & var_name) const
 }
 
 const neml2::Tensor &
-NEML2FEInterpolation::getDofMap(const std::string & var_name) const
+NEML2FEInterpolation::getDofMap(const std::string & var_name)
 {
   return _neml2_dof_map[var_name];
 }
 
 const std::vector<dof_id_type> &
-NEML2FEInterpolation::getGlobalDofMap(const std::string & var_name) const
+NEML2FEInterpolation::getGlobalDofMap(const std::string & var_name)
 {
-  return _moose_dof_map_global.at(var_name);
+  return _moose_dof_map_global[var_name];
 }
 
 int64_t
@@ -159,14 +159,14 @@ NEML2FEInterpolation::initialSetup()
 }
 
 void
-NEML2FEInterpolation::invalidateFEMContext() const
+NEML2FEInterpolation::invalidateFEMContext()
 {
   _fem_context_up_to_date = false;
   invalidateInterpolations();
 }
 
 void
-NEML2FEInterpolation::invalidateInterpolations() const
+NEML2FEInterpolation::invalidateInterpolations()
 {
   _interp_up_to_date = false;
 }

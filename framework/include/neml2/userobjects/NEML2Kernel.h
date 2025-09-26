@@ -46,10 +46,10 @@ protected:
   virtual void forward() = 0;
 
   /// The assembly object with cached assembly information
-  const NEML2Assembly & _neml2_assembly;
+  NEML2Assembly & _neml2_assembly;
 
   /// The FEM interface for getting variable values/gradients interpolated onto the finite element space
-  const NEML2FEInterpolation & _fe;
+  NEML2FEInterpolation & _fe;
 
   /// The output of the forward operator
   neml2::Tensor _output;
