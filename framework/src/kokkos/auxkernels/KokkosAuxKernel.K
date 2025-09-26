@@ -101,5 +101,19 @@ AuxKernel::uOlder() const
   return VariableValue(_var, Moose::OLDER_SOLUTION_TAG, isNodal());
 }
 
+void
+AuxKernel::getKokkosMaterialPropertyHook(const std::string & prop_name_in,
+                                         const unsigned int /* state */)
+{
+  if (isNodal())
+    mooseError("Nodal KokkosAuxKernel '",
+               name(),
+               "' attempted to reference material property '",
+               prop_name_in,
+               "'\nConsider using an elemental auxiliary variable for '",
+               _var.name(),
+               "'.");
+}
+
 } // namespace Kokkos
 } // namespace Moose
