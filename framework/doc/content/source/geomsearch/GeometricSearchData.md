@@ -1,6 +1,6 @@
 # GeometricSearchData
 
-- Sometimes information needs to be exchanged between disconnected pieces of mesh.
+- Sometimes information needs to be exchanged between topologically-disconnected pieces of mesh which are in or near contact with each other.
 - Examples include:
     - Mechanical Contact
     - Gap Heat Conduction

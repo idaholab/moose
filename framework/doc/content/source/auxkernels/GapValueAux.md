@@ -2,10 +2,12 @@
 
 !syntax description /AuxKernels/GapValueAux
 
-This object is typically used in mechanical contact problems to get information about the variable
-on the other side of the boundary.
+This object is typically used in mechanical contact and in gap
+(near-contact) heat transfer problems to get information about the
+variable on the other side of the boundary.
 
-See [GeometricSearchData.md] for more information on the treatment of gap problems.
+See [GeometricSearchData.md] for more information on the treatment of
+geometric pairing between boundaries across a gap.
 
 ## Example syntax
 

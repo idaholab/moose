@@ -7,7 +7,8 @@ has not been specified by the user. It captures both conduction across the gap a
 This material takes care of computing both the conductance and the derivative of conductance with
 regards to temperature.
 
-See [GeometricSearchData.md] for more information on the treatment of gap problems.
+See [GeometricSearchData.md] for more information on the treatment of
+geometric pairing between boundaries across a gap.
 
 ## Radiative term
 
