@@ -11,21 +11,21 @@
 
 #include "IPHDGPrescribedFluxBC.h"
 
-class DiffusionIPHDGAssemblyHelper;
+class NavierStokesStressIPHDGAssemblyHelper;
 
 /**
- * Implements a fixed normal gradient boundary condition for use with a hybridized discretization of
- * the diffusion equation
+ * Implements a prescribed stress boundary condition for use with a hybridized discretization of
+ * the Navier-Stokes equation
  */
-class DiffusionIPHDGPrescribedFluxBC : public IPHDGPrescribedFluxBC
+class NavierStokesStressIPHDGPrescribedFluxBC : public IPHDGPrescribedFluxBC
 {
 public:
   static InputParameters validParams();
-  DiffusionIPHDGPrescribedFluxBC(const InputParameters & parameters);
+  NavierStokesStressIPHDGPrescribedFluxBC(const InputParameters & parameters);
 
 protected:
-  virtual IPHDGAssemblyHelper & iphdgHelper() override;
+  virtual IPHDGAssemblyHelper & iphdgHelper() override { return *_iphdg_helper; }
 
   /// The assembly helper providing the required IP-HDG method implementations
-  std::unique_ptr<DiffusionIPHDGAssemblyHelper> _iphdg_helper;
+  std::unique_ptr<NavierStokesStressIPHDGAssemblyHelper> _iphdg_helper;
 };
