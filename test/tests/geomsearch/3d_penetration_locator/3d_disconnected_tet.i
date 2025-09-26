@@ -46,7 +46,7 @@
   [../]
 []
 
-[VectorPostprocessors] 
+[VectorPostprocessors]
   [gap_sampler]
     type = SideValueSampler
     boundary = 'leftright'
