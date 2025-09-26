@@ -9,7 +9,7 @@
 
 #include "ParsedScalarReporter.h"
 
-registerMooseObject("OptimizationApp", ParsedScalarReporter);
+registerMooseObject("MooseApp", ParsedScalarReporter);
 
 InputParameters
 ParsedScalarReporter::validParams()

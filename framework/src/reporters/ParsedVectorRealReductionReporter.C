@@ -9,7 +9,7 @@
 
 #include "ParsedVectorRealReductionReporter.h"
 
-registerMooseObject("OptimizationApp", ParsedVectorRealReductionReporter);
+registerMooseObject("MooseApp", ParsedVectorRealReductionReporter);
 
 InputParameters
 ParsedVectorRealReductionReporter::validParams()

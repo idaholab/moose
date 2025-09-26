@@ -8,16 +8,16 @@
 
 Different initial conditions and [parsed function expressions](MooseParsedFunction.md) will provide a vector sum, vector multiplication, vector sum of squares, and max as shown in [vectorMath].
 
-!listing modules/optimization/test/tests/reporters/vector_math/vectorMath.i id=vectorMath block=Reporters/vec_d Reporters/vector_sum Reporters/vector_sqsum Reporters/vector_multiply Reporters/vector_max
+!listing parsed_reporters/vectorMath.i id=vectorMath block=Reporters/vec_d Reporters/vector_sum Reporters/vector_sqsum Reporters/vector_multiply Reporters/vector_max
 
 ## Optimization use case
 
-`ParsedVectorRealReductionReporter` and [ParsedVectorVectorRealReductionReporter.md] were created to process data cloned into a `StochasticReporter` from a `SamplerReporterTransfer` as shown in [sampler].
-In this case, A `ParsedVectorRealReductionReporter` is needed to sum each samplers objective function returned to the `StochasticReporter`.
-This set-up allows us to optimize parameters that combine multiple forward problems created and run in parallel using the sampler system.
-The scalar reporter computed by `ParsedVectorRealReductionReporter` is then be transferred as the objective value into [GeneralOptimization.md].
+`ParsedVectorRealReductionReporter` and [ParsedVectorVectorRealReductionReporter.md] were created to combine data from multiple subapps as shown in [sampler].
+In this case, a `ParsedVectorRealReductionReporter` is needed to sum each subapp's parameter objective function returned by the `MultiAppReporterTransfer` into the `ConstantReporter` as a vector of vectors named `rec_vec`.
+This set-up allows us to optimize parameters that combine multiple forward problems created and run in parallel using the `FullSolveMultiApp` system.
+The scalar reporter computed by `ParsedVectorRealReductionReporter` is then be transferred as the objective value into [GeneralOptimization](source/optimizationreporters/GeneralOptimization.md optional=True).
 
-!listing test/tests/reporters/multiExperiment/sampler_subapp.i id=sampler block=Transfers Reporters
+!listing modules/optimization/test/tests/reporters/multiExperiment/sampler_subapp.i id=sampler block=Transfers Reporters
 
 !syntax parameters /Reporters/ParsedVectorRealReductionReporter
 
