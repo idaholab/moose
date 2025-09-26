@@ -211,7 +211,7 @@ NonlinearThread::onInterface(const Elem * elem, unsigned int side, BoundaryID bn
       _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
 
       SwapBackSentinel neighbor_sentinel(_fe_problem, &FEProblem::swapBackMaterialsNeighbor, _tid);
-      _fe_problem.reinitMaterialsNeighbor(neighbor->subdomain_id(), _tid);
+      _fe_problem.reinitMaterialsNeighborOnBoundary(bnd_id, neighbor->subdomain_id(), _tid);
 
       // Has to happen after face and neighbor properties have been computed. Note that we don't use
       // a sentinel here because FEProblem::swapBackMaterialsFace is going to handle face materials,
@@ -439,6 +439,7 @@ NonlinearThread::prepareFace(const Elem * const elem,
     _fe_problem.reinitMaterialsFaceOnBoundary(bnd_id, elem->subdomain_id(), _tid);
     _fe_problem.reinitMaterialsBoundary(bnd_id, _tid);
   }
+  // Currently only used by HDG
   else
     _fe_problem.reinitMaterialsFace(elem->subdomain_id(), _tid);
 }

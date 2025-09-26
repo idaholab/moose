@@ -1076,9 +1076,8 @@ public:
    * @param tid The thread id
    * @param swap_stateful Whether to swap stateful material properties between \p MaterialData and
    * \p MaterialPropertyStorage
-   * @param execute_stateful Whether to execute material objects that have stateful properties. This
-   * should be \p false when for example executing material objects for mortar contexts in which
-   * stateful properties don't make sense
+   * @param reinit_mats specific list of materials to reinit. Used notably in the context of mortar
+   * with stateful elements
    */
   void reinitMaterialsFace(SubdomainID blk_id,
                            const THREAD_ID tid,
@@ -1089,12 +1088,12 @@ public:
    * reinit materials on element faces on a boundary (internal or external)
    * This specific routine helps us not reinit when don't need to
    * @param boundary_id The boundary on which the face belongs
+   * @param blk_id The block id to which the element (who owns the face) belong
    * @param tid The thread id
    * @param swap_stateful Whether to swap stateful material properties between \p MaterialData and
    * \p MaterialPropertyStorage
-   * @param execute_stateful Whether to execute material objects that have stateful properties. This
-   * should be \p false when for example executing material objects for mortar contexts in which
-   * stateful properties don't make sense
+   * @param reinit_mats specific list of materials to reinit. Used notably in the context of mortar
+   * with stateful elements
    */
   void
   reinitMaterialsFaceOnBoundary(const BoundaryID boundary_id,
@@ -1104,14 +1103,31 @@ public:
                                 const std::deque<MaterialBase *> * const reinit_mats = nullptr);
 
   /**
+   * reinit materials on neighbor element (usually faces) on a boundary (internal or external)
+   * This specific routine helps us not reinit when don't need to
+   * @param boundary_id The boundary on which the face belongs
+   * @param blk_id The block id to which the element (who owns the face) belong
+   * @param tid The thread id
+   * @param swap_stateful Whether to swap stateful material properties between \p MaterialData and
+   * \p MaterialPropertyStorage
+   * @param reinit_mats specific list of materials to reinit. Used notably in the context of mortar
+   * with stateful elements
+   */
+  void
+  reinitMaterialsNeighborOnBoundary(const BoundaryID boundary_id,
+                                    const SubdomainID blk_id,
+                                    const THREAD_ID tid,
+                                    const bool swap_stateful = true,
+                                    const std::deque<MaterialBase *> * const reinit_mats = nullptr);
+
+  /**
    * reinit materials on the neighboring element face
    * @param blk_id The subdomain on which the neighbor element lives
    * @param tid The thread id
    * @param swap_stateful Whether to swap stateful material properties between \p MaterialData and
    * \p MaterialPropertyStorage
-   * @param execute_stateful Whether to execute material objects that have stateful properties. This
-   * should be \p false when for example executing material objects for mortar contexts in which
-   * stateful properties don't make sense
+   * @param reinit_mats specific list of materials to reinit. Used notably in the context of mortar
+   * with stateful elements
    */
   void reinitMaterialsNeighbor(SubdomainID blk_id,
                                const THREAD_ID tid,
@@ -1127,6 +1143,8 @@ public:
    * @param execute_stateful Whether to execute material objects that have stateful properties.
    * This should be \p false when for example executing material objects for mortar contexts in
    * which stateful properties don't make sense
+   * @param reinit_mats specific list of materials to reinit. Used notably in the context of mortar
+   * with stateful elements
    */
   void reinitMaterialsBoundary(BoundaryID boundary_id,
                                const THREAD_ID tid,
