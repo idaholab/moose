@@ -48,6 +48,11 @@ AuxiliarySystem::AuxiliarySystem(FEProblemBase & subproblem, const std::string &
     _elemental_vec_aux_storage(_app.getExecuteOnEnum()),
     _nodal_array_aux_storage(_app.getExecuteOnEnum()),
     _elemental_array_aux_storage(_app.getExecuteOnEnum())
+#ifdef MOOSE_KOKKOS_ENABLED
+    ,
+    _kokkos_nodal_aux_storage(_app.getExecuteOnEnum()),
+    _kokkos_elemental_aux_storage(_app.getExecuteOnEnum())
+#endif
 {
   _nodal_vars.resize(libMesh::n_threads());
   _elem_vars.resize(libMesh::n_threads());
@@ -95,6 +100,14 @@ AuxiliarySystem::initialSetup()
     _elemental_array_aux_storage.sort(tid);
     _elemental_array_aux_storage.initialSetup(tid);
   }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  _kokkos_nodal_aux_storage.sort(0);
+  _kokkos_nodal_aux_storage.initialSetup(0);
+
+  _kokkos_elemental_aux_storage.sort(0);
+  _kokkos_elemental_aux_storage.initialSetup(0);
+#endif
 }
 
 void
@@ -113,6 +126,11 @@ AuxiliarySystem::timestepSetup()
     _elemental_vec_aux_storage.timestepSetup(tid);
     _elemental_array_aux_storage.timestepSetup(tid);
   }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  _kokkos_nodal_aux_storage.timestepSetup(0);
+  _kokkos_elemental_aux_storage.timestepSetup(0);
+#endif
 }
 
 void
@@ -131,6 +149,11 @@ AuxiliarySystem::customSetup(const ExecFlagType & exec_type)
     _elemental_vec_aux_storage.customSetup(exec_type, tid);
     _elemental_array_aux_storage.customSetup(exec_type, tid);
   }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  _kokkos_nodal_aux_storage.customSetup(exec_type, 0);
+  _kokkos_elemental_aux_storage.customSetup(exec_type, 0);
+#endif
 }
 
 void
@@ -167,6 +190,11 @@ AuxiliarySystem::jacobianSetup()
     _elemental_vec_aux_storage.jacobianSetup(tid);
     _elemental_array_aux_storage.jacobianSetup(tid);
   }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  _kokkos_nodal_aux_storage.jacobianSetup(0);
+  _kokkos_elemental_aux_storage.jacobianSetup(0);
+#endif
 }
 
 void
@@ -185,6 +213,11 @@ AuxiliarySystem::residualSetup()
     _elemental_vec_aux_storage.residualSetup(tid);
     _elemental_array_aux_storage.residualSetup(tid);
   }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  _kokkos_nodal_aux_storage.residualSetup(0);
+  _kokkos_elemental_aux_storage.residualSetup(0);
+#endif
 }
 
 void
@@ -198,6 +231,14 @@ AuxiliarySystem::updateActive(THREAD_ID tid)
   _elemental_aux_storage.updateActive(tid);
   _elemental_vec_aux_storage.updateActive(tid);
   _elemental_array_aux_storage.updateActive(tid);
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  if (tid == 0)
+  {
+    _kokkos_nodal_aux_storage.updateActive(0);
+    _kokkos_elemental_aux_storage.updateActive(0);
+  }
+#endif
 }
 
 void
@@ -402,6 +443,10 @@ AuxiliarySystem::compute(ExecFlagType type)
     computeElementalVecVars(type);
     computeElementalVars(type);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+    kokkosCompute(type);
+#endif
+
     // compute time derivatives of nodal aux variables _after_ the values were updated
     if (_fe_problem.dt() > 0.)
       for (auto & ti : _time_integrators)
@@ -494,6 +539,30 @@ AuxiliarySystem::getDependObjects(ExecFlagType type)
     }
   }
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  // Nodal KokkosAuxKernels
+  {
+    const std::vector<std::shared_ptr<AuxKernelBase>> & auxs =
+        _kokkos_nodal_aux_storage[type].getActiveObjects();
+    for (const auto & aux : auxs)
+    {
+      const std::set<UserObjectName> & uo = aux->getDependObjects();
+      depend_objects.insert(uo.begin(), uo.end());
+    }
+  }
+
+  // Nodal ElementalAuxKernels
+  {
+    const std::vector<std::shared_ptr<AuxKernelBase>> & auxs =
+        _kokkos_elemental_aux_storage[type].getActiveObjects();
+    for (const auto & aux : auxs)
+    {
+      const std::set<UserObjectName> & uo = aux->getDependObjects();
+      depend_objects.insert(uo.begin(), uo.end());
+    }
+  }
+#endif
+
   return depend_objects;
 }
 
@@ -577,6 +646,30 @@ AuxiliarySystem::getDependObjects()
       depend_objects.insert(uo.begin(), uo.end());
     }
   }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  // Nodal KokkosAuxKernels
+  {
+    const std::vector<std::shared_ptr<AuxKernelBase>> & auxs =
+        _kokkos_nodal_aux_storage.getActiveObjects();
+    for (const auto & aux : auxs)
+    {
+      const std::set<UserObjectName> & uo = aux->getDependObjects();
+      depend_objects.insert(uo.begin(), uo.end());
+    }
+  }
+
+  // Nodal ElementalAuxKernels
+  {
+    const std::vector<std::shared_ptr<AuxKernelBase>> & auxs =
+        _kokkos_elemental_aux_storage.getActiveObjects();
+    for (const auto & aux : auxs)
+    {
+      const std::set<UserObjectName> & uo = aux->getDependObjects();
+      depend_objects.insert(uo.begin(), uo.end());
+    }
+  }
+#endif
 
   return depend_objects;
 }

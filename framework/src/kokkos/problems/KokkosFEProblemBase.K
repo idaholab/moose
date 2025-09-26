@@ -10,6 +10,7 @@
 #include "KokkosTypes.h"
 
 #include "FEProblemBase.h"
+#include "DisplacedProblem.h"
 #include "NonlinearSystemBase.h"
 #include "AuxiliarySystem.h"
 #include "MaterialBase.h"
@@ -44,6 +45,7 @@ FEProblemBase::addKokkosKernel(const std::string & kernel_name,
   _nl[nl_sys_num]->addKokkosKernel(kernel_name, name, parameters);
 
   _has_kokkos_objects = true;
+  _has_kokkos_residual_objects = true;
 }
 
 void
@@ -61,6 +63,7 @@ FEProblemBase::addKokkosNodalKernel(const std::string & kernel_name,
   _nl[nl_sys_num]->addKokkosNodalKernel(kernel_name, name, parameters);
 
   _has_kokkos_objects = true;
+  _has_kokkos_residual_objects = true;
 }
 
 void
@@ -82,6 +85,7 @@ FEProblemBase::addKokkosBoundaryCondition(const std::string & bc_name,
   _nl[nl_sys_num]->addKokkosBoundaryCondition(bc_name, name, parameters);
 
   _has_kokkos_objects = true;
+  _has_kokkos_residual_objects = true;
 }
 
 void
@@ -90,6 +94,8 @@ FEProblemBase::addKokkosMaterial(const std::string & mat_name,
                                  InputParameters & parameters)
 {
   addMaterialHelper({&_kokkos_materials}, mat_name, name, parameters);
+
+  _has_kokkos_objects = true;
 }
 
 MaterialData &
@@ -114,6 +120,46 @@ FEProblemBase::getKokkosMaterialData(Moose::MaterialDataType type, const MooseOb
   }
 
   mooseError("FEProblemBase::getKokkosMaterialData(): Invalid MaterialDataType ", type);
+}
+
+void
+FEProblemBase::addKokkosAuxKernel(const std::string & kernel_name,
+                                  const std::string & name,
+                                  InputParameters & parameters)
+{
+  parallel_object_only();
+
+  if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
+  {
+    parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->auxSys();
+    parameters.set<SystemBase *>("_nl_sys") = &_displaced_problem->solverSys(0);
+    if (!parameters.get<std::vector<BoundaryName>>("boundary").empty())
+      _reinit_displaced_face = true;
+    else
+      _reinit_displaced_elem = true;
+  }
+  else
+  {
+    if (_displaced_problem == nullptr && parameters.get<bool>("use_displaced_mesh"))
+    {
+      // We allow AuxKernels to request that they use_displaced_mesh,
+      // but then be overridden when no displacements variables are
+      // provided in the Mesh block.  If that happened, update the value
+      // of use_displaced_mesh appropriately for this AuxKernel.
+      if (parameters.have_parameter<bool>("use_displaced_mesh"))
+        parameters.set<bool>("use_displaced_mesh") = false;
+    }
+
+    parameters.set<SubProblem *>("_subproblem") = this;
+    parameters.set<SystemBase *>("_sys") = _aux.get();
+    parameters.set<SystemBase *>("_nl_sys") = _solver_systems[0].get();
+  }
+
+  logAdd("KokkosAuxKernel", name, kernel_name, parameters);
+  _aux->addKokkosKernel(kernel_name, name, parameters);
+
+  _has_kokkos_objects = true;
 }
 
 const std::set<const MooseObject *> &
