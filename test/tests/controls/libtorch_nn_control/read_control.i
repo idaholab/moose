@@ -6,7 +6,7 @@ cp = 1.0
 [Functions]
   [src_func]
     type = ParsedFunction
-    value = "sin(${pi}/${period}*t)"
+    expression = "sin(${pi}/${period}*t)"
   []
 []
 

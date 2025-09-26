@@ -71,7 +71,7 @@
 [Functions]
   [analytical]
     type = ParsedFunction
-    value = '100*sin(pi*x/80)*exp(-0.95/(0.092*8.92)*pi^2/80^2*t)'
+    expression = '100*sin(pi*x/80)*exp(-0.95/(0.092*8.92)*pi^2/80^2*t)'
   []
 []
 

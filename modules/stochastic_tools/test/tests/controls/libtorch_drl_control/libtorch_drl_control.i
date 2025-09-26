@@ -45,7 +45,7 @@
 [Functions]
   [temp_env]
     type = ParsedFunction
-    value = '15.0*sin(t/86400.0 *pi) + 273.0'
+    expression = '15.0*sin(t/86400.0 *pi) + 273.0'
   []
 []
 

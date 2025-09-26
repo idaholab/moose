@@ -44,7 +44,7 @@ pressure action could have instead been written as
 [Functions]
   [applied_pressure_function]
     type = ParsedFunction
-    value = 1e7*t
+    expression = 1e7*t
   []
 []
 

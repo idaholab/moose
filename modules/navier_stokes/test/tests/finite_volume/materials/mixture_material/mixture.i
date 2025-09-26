@@ -68,19 +68,19 @@
 
 [Functions]
   [cp_solid]
-    type = ADParsedFunction
+    type = ParsedFunction
     expression = '1 - x'
   []
   [cp_liquid]
-    type = ADParsedFunction
+    type = ParsedFunction
     expression = 'x'
   []
   [k_solid]
-    type = ADParsedFunction
+    type = ParsedFunction
     expression = '2 - 3*x'
   []
   [k_liquid]
-    type = ADParsedFunction
+    type = ParsedFunction
     expression = '3*x'
   []
 []
