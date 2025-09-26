@@ -17,6 +17,7 @@
 #include "libmesh/enum_order.h"
 #include "libmesh/fe_type.h"
 #include "libmesh/equation_systems.h"
+#include "nlohmann/json.h"
 
 namespace libMesh
 {
@@ -142,6 +143,17 @@ public:
    */
   void setLoadAllVectors(const bool load_all_vectors) { _load_all_vectors = load_all_vectors; }
 
+  /// Checks whether variable was successfully restored from a restart file
+  bool isVariableRestored(const std::string & system_name,
+                          const std::string & vector_name,
+                          const std::string & variable_name) const;
+
+  /// Returns the set of variables that were loaded during the `load()` function. Each set of variables contain; [system name, vector name, variable name]
+  const std::set<std::tuple<std::string, std::string, std::string>> & getLoadedVariables() const
+  {
+    return _loaded_variables;
+  }
+
 private:
   /// Internal method for building the header struct
   EquationSystemsHeader
@@ -169,6 +181,9 @@ private:
   std::vector<const libMesh::DofObject *> _loaded_ordered_objects;
   /// The loaded header
   EquationSystemsHeader _loaded_header;
+
+  /// The variables that were loaded in load(); [system name, vector name, variable name]
+  std::set<std::tuple<std::string, std::string, std::string>> _loaded_variables;
 };
 
 void dataStore(std::ostream & stream, RestartableEquationSystems & res, void *);
@@ -188,3 +203,5 @@ void dataLoad(std::istream & stream, RestartableEquationSystems::VariableHeader 
 
 void dataStore(std::ostream & stream, RestartableEquationSystems::VectorHeader & header, void *);
 void dataLoad(std::istream & stream, RestartableEquationSystems::VectorHeader & header, void *);
+
+void to_json(nlohmann::json & json, const RestartableEquationSystems & res);

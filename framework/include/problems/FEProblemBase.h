@@ -244,6 +244,9 @@ public:
                                                   const std::string & var_name) override;
   virtual libMesh::System & getSystem(const std::string & var_name) override;
 
+  /// Get the RestartableEquationSystems object
+  const RestartableEquationSystems & getRestartableEquationSystems() const;
+
   /**
    * Set the MOOSE variables to be reinited on each element.
    * @param moose_vars A set of variables that need to be reinited each time reinit() is called.

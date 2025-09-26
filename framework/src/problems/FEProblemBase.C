@@ -5966,6 +5966,12 @@ FEProblemBase::getSystem(const std::string & var_name)
     mooseError("Unable to find a system containing the variable " + var_name);
 }
 
+const RestartableEquationSystems &
+FEProblemBase::getRestartableEquationSystems() const
+{
+  return _req.get();
+}
+
 void
 FEProblemBase::setActiveFEVariableCoupleableMatrixTags(std::set<TagID> & mtags, const THREAD_ID tid)
 {

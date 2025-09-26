@@ -117,12 +117,23 @@
   num_steps = 3
 []
 
+[Reporters/data]
+  type = RestartableDataReporter
+  include = 'FEProblemBase/*/equation_systems'
+  execute_on = initial
+[]
+
 [Outputs]
   [./out]
     type = Exodus
     elemental_as_nodal = true
     execute_elemental_on = none
   [../]
+  [json]
+    type = JSON
+    execute_system_information_on = none
+    execute_on = INITIAL
+  []
 []
 
 [Problem]
