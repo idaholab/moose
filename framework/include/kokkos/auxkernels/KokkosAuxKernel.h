@@ -193,6 +193,14 @@ protected:
    */
   Scalar<Real> _dt_old;
   ///@}
+
+private:
+  /**
+   * Override of the MaterialPropertyInterface function to throw on material property request for
+   * nodal kernels
+   */
+  void getKokkosMaterialPropertyHook(const std::string & prop_name_in,
+                                     const unsigned int state) override final;
 };
 
 template <typename Derived>

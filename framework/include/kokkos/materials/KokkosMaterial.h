@@ -114,76 +114,11 @@ public:
 
 protected:
   /**
-   * Get a material property by property name for any state
-   * @tparam T The property data type
-   * @tparam dimension The property dimension
-   * @tparam state The property state
-   * @param prop_name_in The property name
-   * @returns The material property
+   * Override of the MaterialPropertyInterface function to perform additional checks and add
+   * dependencies
    */
-  template <typename T, unsigned int dimension = 0, unsigned int state = 0>
-  MaterialProperty<T, dimension> getKokkosMaterialPropertyByName(const std::string & prop_name_in);
-  /**
-   * Get an old material property by property name
-   * @tparam T The property data type
-   * @tparam dimension The property dimension
-   * @param prop_name The property name
-   * @returns The material property
-   */
-  template <typename T, unsigned int dimension = 0>
-  MaterialProperty<T, dimension> getKokkosMaterialPropertyOldByName(const std::string & prop_name)
-  {
-    return getKokkosMaterialPropertyByName<T, dimension, 1>(prop_name);
-  }
-  /**
-   * Get an older material property by property name
-   * @tparam T The property data type
-   * @tparam dimension The property dimension
-   * @param prop_name The property name
-   * @returns The material property
-   */
-  template <typename T, unsigned int dimension = 0>
-  MaterialProperty<T, dimension> getKokkosMaterialPropertyOlderByName(const std::string & prop_name)
-  {
-    return getKokkosMaterialPropertyByName<T, dimension, 2>(prop_name);
-  }
-  /**
-   * Get a material property for any state
-   * @tparam T The property data type
-   * @tparam dimension The property dimension
-   * @tparam state The property state
-   * @param name The property name or the parameter name containing the property name
-   * @returns The material property
-   */
-  template <typename T, unsigned int dimension = 0, unsigned int state = 0>
-  MaterialProperty<T, dimension> getKokkosMaterialProperty(const std::string & name)
-  {
-    return getKokkosMaterialPropertyByName<T, dimension, state>(getMaterialPropertyName(name));
-  }
-  /**
-   * Get an old material property
-   * @tparam T The property data type
-   * @tparam dimension The property dimension
-   * @param name The property name or the parameter name containing the property name
-   * @returns The material property
-   */
-  template <typename T, unsigned int dimension = 0>
-  MaterialProperty<T, dimension> getKokkosMaterialPropertyOld(const std::string & name)
-  {
-    return getKokkosMaterialPropertyByName<T, dimension, 1>(getMaterialPropertyName(name));
-  }
-  /**
-   * Get an older material property
-   * @tparam T The property data type
-   * @tparam dimension The property dimension
-   * @param name The property name or the parameter name containing the property name
-   * @returns The material property
-   */
-  template <typename T, unsigned int dimension = 0>
-  MaterialProperty<T, dimension> getKokkosMaterialPropertyOlder(const std::string & name)
-  {
-    return getKokkosMaterialPropertyByName<T, dimension, 2>(getMaterialPropertyName(name));
-  }
+  void getKokkosMaterialPropertyHook(const std::string & prop_name_in,
+                                     const unsigned int state) override final;
 
   virtual void checkMaterialProperty(const std::string & name, const unsigned int state) override
   {
@@ -310,28 +245,6 @@ Material::operator()(NeighborCompute, const ThreadID tid, const Derived & materi
     datum.reinit();
     material.computeQpProperties(qp, datum);
   }
-}
-
-template <typename T, unsigned int dimension, unsigned int state>
-MaterialProperty<T, dimension>
-Material::getKokkosMaterialPropertyByName(const std::string & prop_name_in)
-{
-  MaterialBase::checkExecutionStage();
-
-  const auto prop_name =
-      _get_suffix.empty()
-          ? prop_name_in
-          : MooseUtils::join(std::vector<std::string>({prop_name_in, _get_suffix}), "_");
-
-  if constexpr (state == 0)
-    _requested_props.insert(prop_name);
-
-  auto prop =
-      MaterialPropertyInterface::getKokkosMaterialPropertyByName<T, dimension, state>(prop_name);
-
-  registerPropName(prop_name, true, state);
-
-  return prop;
 }
 
 } // namespace Kokkos
