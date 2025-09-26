@@ -608,6 +608,40 @@ class MooseControl:
 
         return value
 
+    def getTime(self) -> float:
+        """Gets a time value
+
+        Returns:
+            float: The MOOSE simulation time
+        """
+        logger.debug(f'Getting the MOOSE simulation time')
+        self._requireWaiting()
+
+        status, r = self._get('get/time')
+
+        if status != 200:
+            raise self.ControlException(f'Unexpected status {status} from getting time value')
+        self._checkResponse(['time'], r)
+        assert isinstance(r['time'], (int, float))
+        return r['time']
+
+    def getTimeStepSize(self) -> float:
+        """Gets a time step size value
+
+        Returns:
+            float: The current time step size value of MOOSE simulation
+        """
+        logger.debug(f'Getting the MOOSE simulation time step size value')
+        self._requireWaiting()
+
+        status, r = self._get('get/timestepsize')
+
+        if status != 200:
+            raise self.ControlException(f'Unexpected status {status} from getting time step size value')
+        self._checkResponse(['timestepsize'], r)
+        assert isinstance(r['timestepsize'], (int, float))
+        return r['timestepsize']
+
     @staticmethod
     def spawnMoose(cmd: list[str], inherit_environment: bool = True) -> subprocess.Popen:
         """Helper for spawning a MOOSE process that will be cleanly killed"""
