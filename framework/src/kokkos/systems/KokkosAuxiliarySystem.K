@@ -10,6 +10,7 @@
 #include "KokkosAuxKernel.h"
 
 #include "AuxiliarySystem.h"
+#include "MaterialBase.h"
 
 void
 AuxiliarySystem::addKokkosKernel(const std::string & kernel_name,
