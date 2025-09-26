@@ -36,8 +36,8 @@ void
 NEML2CentralDifference::initialSetup()
 {
   ExplicitMixedOrder::initialSetup();
-  _neml2_assembly = &_fe_problem.getUserObject<NEML2Assembly>("assembly");
-  _fe = &_fe_problem.getUserObject<NEML2FEInterpolation>("fe");
+  _neml2_assembly = &_fe_problem.getUserObject<NEML2Assembly>("assembly", /*tid=*/0);
+  _fe = &_fe_problem.getUserObject<NEML2FEInterpolation>("fe", /*tid=*/0);
 }
 
 void
