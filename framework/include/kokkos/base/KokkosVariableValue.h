@@ -121,28 +121,26 @@ class VariableValue
 {
 public:
   /**
+   * Default constructor
+   */
+  VariableValue() = default;
+  /**
    * Constructor
    * @param var The Kokkos variable
-   * @param nodal Whether to get nodal values
+   * @param dof Whether to get DOF values
    */
-  VariableValue(Variable var, bool nodal = false) : _var(var), _nodal(nodal)
-  {
-    if (nodal && !var.nodal())
-      mooseError("Cannot get nodal values of a non-nodal variable.");
-  }
+  VariableValue(Variable var, bool dof = false) : _var(var), _dof(dof) {}
   /**
    * Constructor
    * @param var The MOOSE variable
    * @param tag The vector tag name
-   * @param nodal Whether to get nodal values
+   * @param dof Whether to get DOF values
    */
   VariableValue(const MooseVariableBase & var,
                 const TagName & tag = Moose::SOLUTION_TAG,
-                bool nodal = false)
-    : _var(var, tag), _nodal(nodal)
+                bool dof = false)
+    : _var(var, tag), _dof(dof)
   {
-    if (nodal && !var.isNodal())
-      mooseError("Cannot get nodal values of a non-nodal variable.");
   }
 
   /**
@@ -158,37 +156,7 @@ public:
    * @param comp The variable component
    * @returns The variable value
    */
-  KOKKOS_FUNCTION Real operator()(Datum & datum, unsigned int qp, unsigned int comp = 0) const
-  {
-    if (_var.coupled())
-    {
-      if (_nodal)
-      {
-        KOKKOS_ASSERT(datum.isNodal());
-
-        auto node = datum.node();
-        auto dof = datum.system(_var.sys(comp)).getNodeLocalDofIndex(node, _var.var(comp));
-
-        return datum.system(_var.sys(comp)).getVectorDofValue(dof, _var.tag());
-      }
-      else
-      {
-        KOKKOS_ASSERT(!datum.isNodal());
-
-        auto & elem = datum.elem();
-        auto side = datum.side();
-        auto qp_offset = datum.qpOffset();
-
-        return side == libMesh::invalid_uint
-                   ? datum.system(_var.sys(comp))
-                         .getVectorQpValue(elem, qp_offset + qp, _var.var(comp), _var.tag())
-                   : datum.system(_var.sys(comp))
-                         .getVectorQpValueFace(elem, side, qp, _var.var(comp), _var.tag());
-      }
-    }
-    else
-      return _var.value(comp);
-  }
+  KOKKOS_FUNCTION Real operator()(Datum & datum, unsigned int qp, unsigned int comp = 0) const;
 
 private:
   /**
@@ -196,14 +164,18 @@ private:
    */
   Variable _var;
   /**
-   * Flag whether nodal values are requested
+   * Flag whether DOF values are requested
    */
-  const bool _nodal;
+  bool _dof = false;
 };
 
 class VariableGradient
 {
 public:
+  /**
+   * Default constructor
+   */
+  VariableGradient() = default;
   /**
    * Constructor
    * @param var The Kokkos variable
@@ -228,28 +200,11 @@ public:
   /**
    * Get the current variable gradient
    * @param datum The Datum object of the current thread
-   * @param qp The local quadrature-point index
+   * @param idx The local quadrature point or DOF index
    * @param comp The variable component
    * @returns The variable gradient
    */
-  KOKKOS_FUNCTION Real3 operator()(Datum & datum, unsigned int qp, unsigned int comp = 0) const
-  {
-    if (_var.coupled())
-    {
-      auto & elem = datum.elem();
-      auto side = datum.side();
-      auto qp_offset = datum.qpOffset();
-
-      return side == libMesh::invalid_uint
-                 ? datum.system(_var.sys(comp))
-                       .getVectorQpGrad(elem, qp_offset + qp, _var.var(comp), _var.tag())
-                 : datum.system(_var.sys(comp))
-                       .getVectorQpGradFace(
-                           elem, side, datum.J(qp), qp, _var.var(comp), _var.tag());
-    }
-    else
-      return Real3(0);
-  }
+  KOKKOS_FUNCTION Real3 operator()(Datum & datum, unsigned int idx, unsigned int comp = 0) const;
 
 private:
   /**
@@ -258,6 +213,71 @@ private:
   Variable _var;
 };
 ///@}
+
+KOKKOS_FUNCTION inline Real
+VariableValue::operator()(Datum & datum, unsigned int idx, unsigned int comp) const
+{
+  KOKKOS_ASSERT(_var.initialized());
+
+  if (_var.coupled())
+  {
+    auto & sys = datum.system(_var.sys(comp));
+    auto var = _var.var(comp);
+    auto tag = _var.tag();
+
+    if (_dof)
+    {
+      unsigned int dof;
+
+      if (datum.isNodal())
+      {
+        auto node = datum.node();
+        dof = sys.getNodeLocalDofIndex(node, var);
+      }
+      else
+      {
+        auto elem = datum.elem().id;
+        dof = sys.getElemLocalDofIndex(elem, idx, var);
+      }
+
+      return sys.getVectorDofValue(dof, tag);
+    }
+    else
+    {
+      auto & elem = datum.elem();
+      auto side = datum.side();
+      auto offset = datum.qpOffset();
+
+      return side == libMesh::invalid_uint ? sys.getVectorQpValue(elem, offset + idx, var, tag)
+                                           : sys.getVectorQpValueFace(elem, side, idx, var, tag);
+    }
+  }
+  else
+    return _var.value(comp);
+}
+
+KOKKOS_FUNCTION inline Real3
+VariableGradient::operator()(Datum & datum, unsigned int qp, unsigned int comp) const
+{
+  KOKKOS_ASSERT(_var.initialized());
+
+  if (_var.coupled())
+  {
+    KOKKOS_ASSERT(!datum.isNodal());
+
+    auto & elem = datum.elem();
+    auto side = datum.side();
+    auto offset = datum.qpOffset();
+
+    return side == libMesh::invalid_uint
+               ? datum.system(_var.sys(comp))
+                     .getVectorQpGrad(elem, offset + qp, _var.var(comp), _var.tag())
+               : datum.system(_var.sys(comp))
+                     .getVectorQpGradFace(elem, side, datum.J(qp), qp, _var.var(comp), _var.tag());
+  }
+  else
+    return Real3(0);
+}
 
 } // namespace Kokkos
 } // namespace Moose
