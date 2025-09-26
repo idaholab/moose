@@ -266,4 +266,6 @@ protected:
   const std::vector<Real> * const _kii_vpp;
   /// Pointer to fatigue growth if available
   const std::vector<Real> * const _fatigue_growth_inc_vpp;
+  /// Pointer to scc growth if available
+  const std::vector<Real> * const _scc_growth_inc_vpp;
 };
