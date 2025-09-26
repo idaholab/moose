@@ -947,6 +947,12 @@ public:
                                   const std::string & name,
                                   InputParameters & parameters);
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  virtual void addKokkosAuxKernel(const std::string & kernel_name,
+                                  const std::string & name,
+                                  InputParameters & parameters);
+#endif
+
   AuxiliarySystem & getAuxiliarySystem() { return *_aux; }
 
   // Dirac /////
@@ -2704,10 +2710,16 @@ public:
 
   void createTagMatrices(CreateTaggedMatrixKey);
 
+#ifdef MOOSE_KOKKOS_ENABLED
   /**
    * @returns whether any Kokkos object was added in the problem
    */
   bool hasKokkosObjects() const { return _has_kokkos_objects; }
+  /**
+   * @returns whether any Kokkos residual object was added in the problem
+   */
+  bool hasKokkosResidualObjects() const { return _has_kokkos_residual_objects; }
+#endif
 
 protected:
   /**
@@ -3314,8 +3326,13 @@ private:
   /// nonlocal coupling requirement flag
   bool _requires_nonlocal_coupling;
 
+#ifdef MOOSE_KOKKOS_ENABLED
   /// Whether we have any Kokkos objects
   bool _has_kokkos_objects = false;
+
+  /// Whether we have any Kokkos residual objects
+  bool _has_kokkos_residual_objects = false;
+#endif
 
   friend void Moose::PetscSupport::setSinglePetscOption(const std::string & name,
                                                         const std::string & value,

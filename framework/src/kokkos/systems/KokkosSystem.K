@@ -338,6 +338,14 @@ System::sync(const MemcpyKind dir)
       _vectors[tag].copyToDevice();
     }
 
+    for (auto tag : _active_solution_tags)
+    {
+      auto & vector = _system.getVector(tag);
+
+      _vectors[tag].create(vector, *this, false);
+      _vectors[tag].copyToDevice();
+    }
+
     for (auto tag : _active_residual_tags)
     {
       auto & vector = _system.getVector(tag);
@@ -361,6 +369,12 @@ System::sync(const MemcpyKind dir)
   {
     for (auto tag : _active_variable_tags)
       _vectors[tag].restore();
+
+    for (auto tag : _active_solution_tags)
+    {
+      _vectors[tag].copyToHost();
+      _vectors[tag].restore();
+    }
 
     for (auto tag : _active_residual_tags)
       _vectors[tag].close();
@@ -427,6 +441,18 @@ System::setActiveVariableTags(const std::set<TagID> & tags)
       active_variable_tags.insert(tag);
 
   _active_variable_tags = active_variable_tags;
+}
+
+void
+System::setActiveSolutionTags(const std::set<TagID> & tags)
+{
+  std::set<TagID> active_solution_tags;
+
+  for (auto tag : tags)
+    if (_system.hasVector(tag))
+      active_solution_tags.insert(tag);
+
+  _active_solution_tags = active_solution_tags;
 }
 
 void

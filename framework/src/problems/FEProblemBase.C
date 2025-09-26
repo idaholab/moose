@@ -1463,13 +1463,25 @@ FEProblemBase::initialSetup()
   // this happen during restart.  I honestly have no idea why this has to happen after initial user
   // object computation.
   // THAT is something we should fix... so I've opened this ticket: #5804
-  if (!_app.isRecovering() && !_app.isRestarting() &&
-      (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
-       _neighbor_material_props.hasStatefulProperties()))
+  if (!_app.isRecovering() && !_app.isRestarting())
   {
-    TIME_SECTION("computeMaterials", 2, "Computing Initial Material Properties");
+    if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
+        _neighbor_material_props.hasStatefulProperties())
+    {
+      TIME_SECTION("computeMaterials", 2, "Computing Initial Material Properties");
 
-    initElementStatefulProps(*_mesh.getActiveLocalElementRange(), true);
+      initElementStatefulProps(*_mesh.getActiveLocalElementRange(), true);
+    }
+#ifdef MOOSE_KOKKOS_ENABLED
+    else if (_kokkos_material_props.hasStatefulProperties() ||
+             _kokkos_bnd_material_props.hasStatefulProperties() ||
+             _kokkos_neighbor_material_props.hasStatefulProperties())
+    {
+      TIME_SECTION("computeMaterials", 2, "Computing Initial Material Properties");
+
+      initElementStatefulProps(*_mesh.getActiveLocalElementRange(), true);
+    }
+#endif
   }
 
   // Control Logic
