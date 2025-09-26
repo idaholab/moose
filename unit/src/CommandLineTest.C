@@ -170,6 +170,7 @@ TEST(CommandLineTest, parseHIT)
 TEST(CommandLineTest, parseMultiAppDashedOption)
 {
 #define test_dash(arg)                                                                             \
+  do                                                                                               \
   {                                                                                                \
     CommandLine cl;                                                                                \
     cl.addArgument(arg);                                                                           \
@@ -178,8 +179,7 @@ TEST(CommandLineTest, parseMultiAppDashedOption)
                         "The MultiApp command line argument '" + std::string(arg) +                \
                             "' sets a command line option.\nMultiApp command line arguments "      \
                             "can only be used for setting HIT parameters.");                       \
-  }                                                                                                \
-  while (0)
+  } while (0)
 
   test_dash("sub:-foo=val");
   test_dash("baz0:--foo=val");
