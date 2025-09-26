@@ -8265,7 +8265,10 @@ FEProblemBase::updateMeshXFEM()
           /*intermediate_change=*/false, /*contract_mesh=*/true, /*clean_refinement_flags=*/false);
       _xfem->initSolution(_nl, *_aux);
       restoreSolutions();
+      _console << "\nXFEM update complete: Mesh modified" << std::endl;
     }
+    else
+      _console << "\nXFEM update complete: Mesh not modified" << std::endl;
   }
   return updated;
 }
