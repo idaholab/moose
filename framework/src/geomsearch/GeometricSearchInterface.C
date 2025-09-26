@@ -22,16 +22,24 @@ GeometricSearchInterface::validParams()
 {
   InputParameters params = emptyInputParameters();
 
-  params.addParam<bool>(
-      "search_using_point_locator",
-      false,
-      "Whether to use the mesh point locator (typically an octree search) to find "
-      "elements around closest points of near-contact, contact, or penetration.  "
-      "This is less efficient than the default search via node-element connectivity, but "
-      "may be necessary to accurately detect gaps, contact, or penetration on any "
-      "boundaries whose elements are not connected via shared nodes. ");
+  MooseEnum search_methods("nearest_node_connected_sides all_proximate_sides",
+                           "nearest_node_connected_sides");
 
-  params.addParamNamesToGroup("search_using_point_locator", "Advanced");
+  params.addParam<MooseEnum>(
+      "search_method",
+      search_methods,
+      "Choice of search algorithm.  All options begin by finding the nearest node in the "
+      "primary boundary to a query point in the secondary boundary.  In the default "
+      "nearest_node_connected_sides algorithm, primary boundary elements are searched iff "
+      "that nearest node is one of their nodes.  This is fast to determine via a "
+      "pregenerated node-to-elem map and is robust on conforming meshes.  In the optional "
+      "all_proximate_sides algorithm, primary boundary elements are searched iff they touch "
+      "that nearest node, even if they are not topologically connected to it.  This is "
+      "more CPU-intensive but is necessary for robustness on any boundary surfaces which "
+      "has disconnections (such as Flex IGA meshes) or non-conformity (such as hanging nodes "
+      "in adaptively h-refined meshes).");
+
+  params.addParamNamesToGroup("search_method", "Advanced");
 
   return params;
 }
@@ -42,7 +50,7 @@ GeometricSearchInterface::GeometricSearchInterface(const MooseObject * moose_obj
                                ->geomSearchData()),
     _requires_geometric_search(false)
 {
-  if (moose_object->getParam<bool>("search_using_point_locator"))
+  if (moose_object->getParam<MooseEnum>("search_method") == "all_proximate_sides")
     _geometric_search_data.setSearchUsingPointLocator(true);
 }
 

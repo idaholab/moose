@@ -191,7 +191,7 @@ ThermalContactAction::addAuxKernels()
                                       "normal_smoothing_method",
                                       "order",
                                       "warnings",
-                                      "search_using_point_locator",
+                                      "search_method",
                                       "check_boundary_restricted"});
       params.set<AuxVariableName>("variable") = _gap_value_name;
       params.set<ExecFlagEnum>("execute_on", true) = {EXEC_INITIAL, EXEC_LINEAR};
@@ -225,7 +225,7 @@ ThermalContactAction::addAuxKernels()
                                       "normal_smoothing_distance",
                                       "normal_smoothing_method",
                                       "order",
-                                      "search_using_point_locator",
+                                      "search_method",
                                       "check_boundary_restricted"});
       params.set<AuxVariableName>("variable") = _penetration_var_name;
       if (isParamValid("secondary_gap_offset"))
@@ -335,7 +335,7 @@ ThermalContactAction::addDiracKernels()
                                     "normal_smoothing_distance",
                                     "normal_smoothing_method",
                                     "order",
-                                    "search_using_point_locator",
+                                    "search_method",
                                     "variable"});
     params.set<BoundaryName>("boundary") = contact_pair.first;
     params.set<BoundaryName>("secondary") = contact_pair.second;

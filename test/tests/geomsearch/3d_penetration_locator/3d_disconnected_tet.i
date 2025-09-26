@@ -42,7 +42,7 @@
     variable = gap_distance
     boundary = 'leftright'
     paired_boundary = 'rightleft'
-    search_using_point_locator = true
+    search_method = all_proximate_sides
   [../]
 []
 

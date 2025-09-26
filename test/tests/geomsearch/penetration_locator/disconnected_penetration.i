@@ -51,7 +51,7 @@
     variable = penetration
     boundary = 2
     paired_boundary = 3
-    search_using_point_locator = true
+    search_method = all_proximate_sides
   [../]
 []
 
