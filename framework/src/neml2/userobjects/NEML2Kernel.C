@@ -27,8 +27,8 @@ NEML2Kernel::validParams()
 
 NEML2Kernel::NEML2Kernel(const InputParameters & parameters)
   : GeneralUserObject(parameters),
-    _neml2_assembly(getUserObject<NEML2Assembly>("assembly")),
-    _fe(getUserObject<NEML2FEInterpolation>("fe"))
+    _neml2_assembly(_fe_problem.getUserObject<NEML2Assembly>("assembly", /*tid=*/0)),
+    _fe(_fe_problem.getUserObject<NEML2FEInterpolation>("fe", /*tid=*/0))
 {
 }
 
