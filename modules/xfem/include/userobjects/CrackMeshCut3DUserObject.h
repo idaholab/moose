@@ -99,8 +99,7 @@ protected:
   /// Enum to for crack growth rate
   enum class GrowthRateEnum
   {
-    FATIGUE,
-    SCC,
+    REPORTER,
     FUNCTION
   };
   /// The rate method for growing mesh at the front
@@ -264,8 +263,6 @@ protected:
   const std::vector<Real> * const _ki_vpp;
   /// Pointer to fracture integral kii if available
   const std::vector<Real> * const _kii_vpp;
-  /// Pointer to fatigue growth if available
-  const std::vector<Real> * const _fatigue_growth_inc_vpp;
-  /// Pointer to scc growth if available
-  const std::vector<Real> * const _scc_growth_inc_vpp;
+  /// Pointer to reporter with growth increment if available
+  const std::vector<Real> * const _growth_inc_reporter;
 };

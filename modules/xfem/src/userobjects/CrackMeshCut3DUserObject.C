@@ -30,9 +30,8 @@ CrackMeshCut3DUserObject::validParams()
   MooseEnum growthDirection("MAX_HOOP_STRESS FUNCTION", "FUNCTION");
   params.addParam<MooseEnum>(
       "growth_dir_method", growthDirection, "choose from FUNCTION, MAX_HOOP_STRESS");
-  MooseEnum growthRate("FATIGUE SCC FUNCTION", "FUNCTION");
-  params.addParam<MooseEnum>(
-      "growth_rate_method", growthRate, "choose from FUNCTION, SCC, FATIGUE");
+  MooseEnum growthRate("REPORTER FUNCTION", "FUNCTION");
+  params.addParam<MooseEnum>("growth_rate_method", growthRate, "choose from FUNCTION, REPORTER");
   params.addParam<FunctionName>("growth_direction_x",
                                 "Function defining x-component of crack growth direction");
   params.addParam<FunctionName>("growth_direction_y",
@@ -45,11 +44,8 @@ CrackMeshCut3DUserObject::validParams()
   params.addParam<VectorPostprocessorName>("kii_vectorpostprocessor",
                                            "II_KII_1",
                                            "The name of the vectorpostprocessor that contains KII");
-  params.addParam<ReporterName>("fatigue_reporter",
-                                "The name of the reporter that contains fatigue growth increment");
-  params.addParam<ReporterName>(
-      "scc_reporter",
-      "The name of the reporter that contains stress corrosion cracking growth increment");
+  params.addParam<ReporterName>("growth_reporter",
+                                "The name of the reporter that contains growth increment");
   params.addParam<FunctionName>("growth_rate", "Function defining crack growth rate");
   params.addParam<Real>(
       "size_control", 0, "Criterion for refining elements while growing the crack");
@@ -86,15 +82,10 @@ CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & param
                        "kii_vectorpostprocessor",
                        getParam<VectorPostprocessorName>("kii_vectorpostprocessor"))
                  : nullptr),
-    _fatigue_growth_inc_vpp(
-        (_growth_rate_method == GrowthRateEnum::FATIGUE)
-            ? &getReporterValueByName<std::vector<Real>>(getParam<ReporterName>("fatigue_reporter"),
-                                                         REPORTER_MODE_ROOT)
-            : nullptr),
-    _scc_growth_inc_vpp((_growth_rate_method == GrowthRateEnum::SCC)
-                            ? &getReporterValueByName<std::vector<Real>>(
-                                  getParam<ReporterName>("scc_reporter"), REPORTER_MODE_ROOT)
-                            : nullptr)
+    _growth_inc_reporter((_growth_rate_method == GrowthRateEnum::REPORTER)
+                             ? &getReporterValueByName<std::vector<Real>>(
+                                   getParam<ReporterName>("growth_reporter"), REPORTER_MODE_ROOT)
+                             : nullptr)
 {
   _grow = (_n_step_growth == 0 ? 0 : 1);
 
@@ -121,8 +112,7 @@ CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & param
   }
 
   if ((_growth_dir_method == GrowthDirectionEnum::MAX_HOOP_STRESS ||
-       _growth_rate_method == GrowthRateEnum::FATIGUE ||
-       _growth_rate_method == GrowthRateEnum::SCC) &&
+       _growth_rate_method == GrowthRateEnum::REPORTER) &&
       !_cfd)
     paramError(
         "crack_front_nodes",
@@ -853,14 +843,11 @@ CrackMeshCut3DUserObject::growFront()
         case GrowthRateEnum::FUNCTION:
           growth_size = _func_v->value(0, Point(0, 0, 0));
           break;
-        case GrowthRateEnum::FATIGUE:
-          // fixme, why does _fatigue_growth_inc_vpp use the node ordering from the domain integral
+        case GrowthRateEnum::REPORTER:
+          // fixme, why does _growth_inc_reporter use the node ordering from the domain integral
           // that kii has. this is weird because kii has to be properly indexed when commputing max
           // hoop stress direction.  Same for scc vpp
-          growth_size = _fatigue_growth_inc_vpp->at(j);
-          break;
-        case GrowthRateEnum::SCC:
-          growth_size = _scc_growth_inc_vpp->at(j);
+          growth_size = _growth_inc_reporter->at(j);
           break;
         default:
           mooseError("This growth_rate_method is not pre-defined!");

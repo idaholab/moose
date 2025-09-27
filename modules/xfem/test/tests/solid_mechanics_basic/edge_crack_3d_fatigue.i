@@ -17,11 +17,11 @@
     growth_dir_method = FUNCTION
     size_control = 1
     n_step_growth = 1
-    growth_rate_method = FATIGUE
+    growth_rate_method = REPORTER
     growth_direction_x = growth_func_x
     growth_direction_y = growth_func_y
     growth_direction_z = growth_func_z
-    fatigue_reporter = "fatigue/growth_increment"
+    growth_reporter = "fatigue/growth_increment"
     crack_front_nodes = '7 6 5 4'
   []
 []
