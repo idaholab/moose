@@ -118,8 +118,9 @@ ParisLaw::execute()
   {
     int ind = index[i];
     if (ind == -1)
-      _growth_increment[ind] = 0.0;
+      // fixme lynn, why write to index -1 in a vector,  that is wrong!
+      _growth_increment[i] = 0.0;
     else
-      _growth_increment[ind] = _max_growth_size * std::pow(effective_k[i] / _max_k, _paris_law_m);
+      _growth_increment[i] = _max_growth_size * std::pow(effective_k[i] / _max_k, _paris_law_m);
   }
 }
