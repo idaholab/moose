@@ -847,31 +847,27 @@ CrackMeshCut3DUserObject::growFront()
       Point dir = _active_direction[i][j];
 
       Point x;
-
-      if (_growth_rate_method == GrowthRateEnum::FUNCTION)
-        for (unsigned int k = 0; k < 3; ++k)
-        {
-          Real velo = _func_v->value(0, Point(0, 0, 0));
-          x(k) = this_point(k) + dir(k) * velo;
-        }
-      else if (_growth_rate_method == GrowthRateEnum::FATIGUE)
+      Real growth_size = 0;
+      switch (_growth_rate_method)
       {
-        std::vector<int> index = getFrontPointsIndex();
-        int ind = index[j];
-        Real growth_size = _fatigue_growth_inc_vpp->at(ind);
-        for (unsigned int k = 0; k < 3; ++k)
-          x(k) = this_point(k) + dir(k) * growth_size;
+        case GrowthRateEnum::FUNCTION:
+          growth_size = _func_v->value(0, Point(0, 0, 0));
+          break;
+        case GrowthRateEnum::FATIGUE:
+          // fixme, why does _fatigue_growth_inc_vpp use the node ordering from the domain integral
+          // that kii has. this is weird because kii has to be properly indexed when commputing max
+          // hoop stress direction.  Same for scc vpp
+          growth_size = _fatigue_growth_inc_vpp->at(j);
+          break;
+        case GrowthRateEnum::SCC:
+          growth_size = _scc_growth_inc_vpp->at(j);
+          break;
+        default:
+          mooseError("This growth_rate_method is not pre-defined!");
+          break;
       }
-      else if (_growth_rate_method == GrowthRateEnum::SCC)
-      {
-        std::vector<int> index = getFrontPointsIndex();
-        int ind = index[j];
-        Real growth_size = _scc_growth_inc_vpp->at(ind);
-        for (unsigned int k = 0; k < 3; ++k)
-          x(k) = this_point(k) + dir(k) * growth_size;
-      }
-      else
-        mooseError("This growth_rate_method is not pre-defined!");
+      for (unsigned int k = 0; k < 3; ++k)
+        x(k) = this_point(k) + dir(k) * growth_size;
 
       this_node = Node::build(x, _cutter_mesh->n_nodes()).release();
       _cutter_mesh->add_node(this_node);

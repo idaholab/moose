@@ -10,61 +10,26 @@
 []
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 3
-  nx = 5
-  ny = 5
-  nz = 2
-  xmin = 0.0
-  xmax = 1.0
-  ymin = 0.0
-  ymax = 1.0
-  zmin = 0.0
-  zmax = 0.2
-  elem_type = HEX8
-[]
-
-[Reporters]
-  [fatigue]
-    type = ParisLaw
-    growth_increment_name = "growth_increment"
-    cycles_to_max_growth_size_name = "fatigue"
-    crackMeshCut3DUserObject_name = cut_mesh
-    max_growth_size = 0.1
-    paris_law_c = 1e-13
-    paris_law_m = 2.5
+  [read_in_cutter_mesh]
+    type = FileMeshGenerator
+    file = mesh_edge_crack.xda
+    save_with_name = mesh_cutter
   []
-[]
-
-[UserObjects]
-  [cut_mesh]
-    type = CrackMeshCut3DUserObject
-    mesh_file = mesh_edge_crack.xda
-    growth_dir_method = FUNCTION
-    size_control = 1
-    n_step_growth = 1
-    growth_rate_method = FATIGUE
-    growth_direction_x = growth_func_x
-    growth_direction_y = growth_func_y
-    growth_direction_z = growth_func_z
-    fatigue_reporter = "fatigue/growth_increment"
-    crack_front_nodes = '7 6 5 4'
+  [FEM_mesh]
+    type = GeneratedMeshGenerator
+    dim = 3
+    nx = 5
+    ny = 5
+    nz = 2
+    xmin = 0.0
+    xmax = 1.0
+    ymin = 0.0
+    ymax = 1.0
+    zmin = 0.0
+    zmax = 0.2
+    elem_type = HEX8
   []
-[]
-
-[Functions]
-  [growth_func_x]
-    type = ParsedFunction
-    expression = 1
-  []
-  [growth_func_y]
-    type = ParsedFunction
-    expression = 0
-  []
-  [growth_func_z]
-    type = ParsedFunction
-    expression = 0
-  []
+  final_generator = FEM_mesh
 []
 
 [DomainIntegral]
@@ -89,14 +54,13 @@
   []
 []
 
-[Functions]
-  [top_trac_y]
-    type = ConstantFunction
-    value = 10
-  []
-[]
-
 [BCs]
+  [top_x]
+    type = FunctionNeumannBC
+    boundary = top
+    variable = disp_x
+    function = top_trac_x
+  []
   [top_y]
     type = FunctionNeumannBC
     boundary = top
@@ -167,7 +131,6 @@
 []
 
 [Outputs]
-  file_base = edge_crack_3d_fatigue_out
   execute_on = 'timestep_end'
   exodus = true
   [console]
