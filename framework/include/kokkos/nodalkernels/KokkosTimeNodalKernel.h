@@ -33,7 +33,7 @@ protected:
   /**
    * Time derivative of the current solution at nodes
    */
-  const VariableNodalValue _u_dot;
+  const VariableValue _u_dot;
   /**
    * Derivative of u_dot with respect to u
    */

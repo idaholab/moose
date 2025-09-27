@@ -1230,6 +1230,7 @@ class FunctorCopy
   friend class NodalBCBase;
   friend class MaterialBase;
   friend class Material;
+  friend class AuxKernel;
 
   FunctorCopy() = default;
   FunctorCopy(const FunctorCopy &) = delete;

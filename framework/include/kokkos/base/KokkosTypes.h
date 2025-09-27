@@ -55,6 +55,13 @@ struct Real33
       for (unsigned int j = 0; j < 3; ++j)
         a[i][j] += tensor.a[i][j];
   }
+  KOKKOS_INLINE_FUNCTION void identity(const unsigned int dim = 3)
+  {
+    *this = 0;
+
+    for (unsigned int i = 0; i < dim; ++i)
+      a[i][i] = 1;
+  }
   KOKKOS_INLINE_FUNCTION Real determinant(const unsigned int dim = 3)
   {
     Real det = 0;
