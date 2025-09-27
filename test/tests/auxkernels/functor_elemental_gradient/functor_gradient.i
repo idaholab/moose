@@ -40,7 +40,7 @@
 [Functions]
   [parsed_function]
     type = ParsedFunction
-    value = 'sin(x)-cos(y/2)'
+    expression = 'sin(x)-cos(y/2)'
   []
   [parsed_grad_function]
     type = ParsedVectorFunction
@@ -49,7 +49,7 @@
   []
   [parsed_gradx_function]
     type = ParsedFunction
-    value = 'cos(x)'
+    expression = 'cos(x)'
   []
 []
 

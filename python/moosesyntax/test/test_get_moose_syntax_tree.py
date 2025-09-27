@@ -63,7 +63,7 @@ class TestSyntaxTree(unittest.TestCase):
         self.assertTrue(node.source.endswith('framework/src/functions/MooseParsedFunction.C'))
         self.assertTrue(node.header.endswith('framework/include/functions/MooseParsedFunction.h'))
         self.assertIsInstance(node.parameters, dict)
-        self.assertIn('value', node.parameters)
+        self.assertIn('expression', node.parameters)
 
         # ActionNode
         node = moosetree.find(root, lambda n: n.fullpath() == '/Outputs/CommonOutputAction')
