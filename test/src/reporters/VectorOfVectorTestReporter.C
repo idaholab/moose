@@ -9,7 +9,7 @@
 
 #include "VectorOfVectorTestReporter.h"
 
-registerMooseObject("OptimizationTestApp", VectorOfVectorTestReporter);
+registerMooseObject("MooseTestApp", VectorOfVectorTestReporter);
 
 InputParameters
 VectorOfVectorTestReporter::validParams()

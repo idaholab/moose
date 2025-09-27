@@ -9,8 +9,6 @@
 
 #include "ParsedReporterBase.h"
 
-// registerMooseObject("OptimizationApp", ParsedReporterBase);
-
 InputParameters
 ParsedReporterBase::validParams()
 {

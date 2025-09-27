@@ -8,16 +8,16 @@
 
 Different initial conditions and [parsed function expressions](MooseParsedFunction.md) will provide different row operations on the matrix.  Examples are shown in [vectorMath] for a matrix row sum, matrix row multiplication, matrix row sum of squares, and max across the rows of a matrix.
 
-!listing modules/optimization/test/tests/reporters/vector_math/vectorMath.i id=vectorMath block=Reporters/vec_d Reporters/vecvec_sum Reporters/vecvec_sqsum Reporters/vecvec_multiply Reporters/vecvec_max
+!listing parsed_reporters/vectorMath.i id=vectorMath block=Reporters/vec_d Reporters/vecvec_sum Reporters/vecvec_sqsum Reporters/vecvec_multiply Reporters/vecvec_max
 
 ## Optimization use case
 
-`ParsedVectorVectorRealReductionReporter` and [ParsedVectorRealReductionReporter.md] were created to process data cloned into a `StochasticReporter` from a `SamplerReporterTransfer` as shown in [sampler].
-In this case, a `ParsedVectorVectorRealReductionReporter` is needed to sum each sampler's parameter gradient vector returned to the `StochasticReporter` as a vector of vectors.
-This set-up allows us to optimize parameters that combine multiple forward problems created and run in parallel using the sampler system.
-The scalar reporter computed by `ParsedVectorVectorRealReductionReporter` is then be transferred as the objective value into [GeneralOptimization.md].
+`ParsedVectorVectorRealReductionReporter` and [ParsedVectorRealReductionReporter.md] were created to combine data from multiple subapps as shown in [sampler].
+In this case, a `ParsedVectorVectorRealReductionReporter` is needed to sum each subapp's parameter gradient vector returned by the `MultiAppReporterTransfer` into the `ConstantReporter` as a vector of vectors named `rec_vec_vec`.
+This set-up allows us to optimize parameters that combine multiple forward problems created and run in parallel using the `FullSolveMultiApp` system.
+The scalar reporter computed by `ParsedVectorVectorRealReductionReporter` is then be transferred as the gradient vector into [GeneralOptimization](source/optimizationreporters/GeneralOptimization.md optional=True).
 
-!listing test/tests/reporters/multiExperiment/sampler_subapp.i id=sampler block=Transfers Reporters
+!listing modules/optimization/test/tests/reporters/multiExperiment/sampler_subapp.i id=sampler block=Transfers Reporters
 
 !syntax parameters /Reporters/ParsedVectorVectorRealReductionReporter
 
