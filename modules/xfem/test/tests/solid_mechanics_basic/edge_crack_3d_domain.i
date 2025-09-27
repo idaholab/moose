@@ -32,20 +32,6 @@
   final_generator = FEM_mesh
 []
 
-[DomainIntegral]
-  integrals = 'Jintegral InteractionIntegralKI InteractionIntegralKII'
-  displacements = 'disp_x disp_y disp_z'
-  crack_front_points_provider = cut_mesh
-  number_points_from_provider = 4
-  crack_direction_method = CurvedCrackFront
-  radius_inner = '0.15'
-  radius_outer = '0.45'
-  poissons_ratio = 0.3
-  youngs_modulus = 207000
-  block = 0
-  incremental = true
-[]
-
 [Physics/SolidMechanics/QuasiStatic]
   [all]
     strain = FINITE
