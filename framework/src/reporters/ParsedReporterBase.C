@@ -20,6 +20,10 @@ ParsedReporterBase::validParams()
   params.addRequiredParam<std::vector<std::string>>("reporter_symbols",
                                                     "Expression symbol for each reporter");
   params.addParam<std::vector<std::string>>(
+      "scalar_reporter_symbols",
+      {},
+      "Expression symbol for each scalar reporter, i.e. postprocessors");
+  params.addParam<std::vector<std::string>>(
       "constant_names",
       {},
       "Vector of constants used in the parsed function (use this for kB etc.)");
@@ -36,16 +40,21 @@ ParsedReporterBase::ParsedReporterBase(const InputParameters & parameters)
   : GeneralReporter(parameters),
     FunctionParserUtils(parameters),
     _use_t(getParam<bool>("use_t")),
-    _reporter_symbols(getParam<std::vector<std::string>>("reporter_symbols"))
+    _reporter_symbols(getParam<std::vector<std::string>>("reporter_symbols")),
+    _scalar_reporter_symbols(getParam<std::vector<std::string>>("scalar_reporter_symbols"))
 {
-  // build reporters argument
+  // build reporters argument; order in derived classes must use this order
+  // first add vector reporter symbols
   std::string symbol_str;
   for (const auto i : index_range(_reporter_symbols))
     symbol_str += (i == 0 ? "" : ",") + _reporter_symbols[i];
+  // next add scalar reporter symbols
+  for (const auto i : index_range(_scalar_reporter_symbols))
+    symbol_str += "," + _scalar_reporter_symbols[i];
 
   // add time if required
   if (_use_t)
-    symbol_str += (symbol_str.empty() ? "" : ",") + std::string("t");
+    symbol_str += "," + std::string("t");
 
   // Create parsed function
   _func_F = std::make_shared<SymFunction>();
@@ -57,5 +66,5 @@ ParsedReporterBase::ParsedReporterBase(const InputParameters & parameters)
                       comm());
 
   // reserve storage for parameter passing buffer
-  _func_params.resize(_reporter_symbols.size() + _use_t);
+  _func_params.resize(_reporter_symbols.size() + _scalar_reporter_symbols.size() + _use_t);
 }

@@ -1,13 +1,20 @@
 [Tests]
-  issues = '#21885'
+  issues = '#21885 #31621'
   design = 'ParsedVectorRealReductionReporter.md ParsedVectorVectorRealReductionReporter.md ParsedVectorReporter.md ParsedScalarReporter.md'
   [vectorMath]
     type = CSVDiff
     input = vectorMath.i
     csvdiff = "vectorMath_out.csv vectorMath_out_vecvec_max_0001.csv vectorMath_out_vecvec_multiply_0001.csv
-               vectorMath_out_vecvec_sum_0001.csv vectorMath_out_vecvec_sqsum_0001.csv"
+               vectorMath_out_vecvec_sum_0001.csv vectorMath_out_vecvec_sqsum_0001.csv vectorMath_out_vectorOperation_0001.csv"
     allow_test_objects = true
-    requirement = "The system shall be able to row sum a vector of vectors into a single vector, perform a dot product between two vectors and sum all of the entries of a single vector."
+    requirement = "The system shall be able to row sum a vector of vectors into a single vector,
+                   perform a dot product between two vectors and sum all of the entries of a single vector."
+  []
+  [transientParsedVec]
+    type = CSVDiff
+    input = transientParsedVec.i
+    csvdiff = "transientParsedVec_out_vectorOperation_0003.csv"
+    requirement = "The system shall be able to consume postprocessors that change with time and use them in the parsed function."
   []
   [errorRowSum]
     type = RunException
@@ -15,7 +22,9 @@
     cli_args = "Reporters/dataFromVofV/vector_of_vectors='101 201; 102 202; 103'"
     allow_test_objects = true
     expect_err = "Every vector in 'reporter_name=dataFromVofV/v_of_v' must be the same size."
-    requirement = "The system shall throw a reasonable error when reducing a vectors of vectors into a single vector and the input vectors contained in the vector of vectors do not have the same size."
+    requirement = "The system shall throw a reasonable error when reducing a vectors of vectors "
+                  "into a single vector and the input vectors contained in the vector of vectors do "
+                  "not have the same size."
   []
   [errorDotProduct]
     type = RunException
@@ -24,5 +33,21 @@
     allow_test_objects = true
     expect_err = "All vectors being operated on must be the same size."
     requirement = "The system shall throw a reasonable error when the vectors being combined into a single vector using arithmetic operations are not the same size."
+  []
+  [errorScalarReporter]
+    type = RunException
+    input = vectorMath.i
+    cli_args = "Reporters/vectorOperation/scalar_reporter_names='scalar_pp/value scalar_pp/value'"
+    allow_test_objects = true
+    expect_err = "scalar_reporter_names and scalar_reporter_symbols must be the same size"
+    requirement = "The system shall throw a reasonable error when the scalar_reporter_names is a different size than the scalar_reporter_symbols."
+  []
+  [errorVectorReporter]
+    type = RunException
+    input = vectorMath.i
+    cli_args = "Reporters/vectorOperation/reporter_names='scalar_pp/value scalar_pp/value'"
+    allow_test_objects = true
+    expect_err = "reporter_names and reporter_symbols must be the same size"
+    requirement = "The system shall throw a reasonable error when the reporter_names is a different size than the reporter_symbols."
   []
 []

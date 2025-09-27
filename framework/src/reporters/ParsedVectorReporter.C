@@ -16,7 +16,10 @@ ParsedVectorReporter::validParams()
 {
   InputParameters params = ParsedReporterBase::validParams();
   params.addClassDescription("Apply parsed functions to vector entries held in reporters.");
-  params.addRequiredParam<std::vector<ReporterName>>("reporter_names", "Reporter names ");
+  params.addRequiredParam<std::vector<ReporterName>>("reporter_names",
+                                                     "Reporter names to apply function to.");
+  params.addParam<std::vector<ReporterName>>("scalar_reporter_names",
+                                             "Scalar reporter names to apply function to.");
   return params;
 }
 
@@ -26,6 +29,24 @@ ParsedVectorReporter::ParsedVectorReporter(const InputParameters & parameters)
         declareValueByName<std::vector<Real>>(getParam<std::string>("name"), REPORTER_MODE_ROOT))
 {
   // get reporters to operate on
+  if (parameters.isParamValid("scalar_reporter_names"))
+  {
+    const std::vector<ReporterName> scalar_reporter_names(
+        getParam<std::vector<ReporterName>>("scalar_reporter_names"));
+
+    if (scalar_reporter_names.size() != _scalar_reporter_symbols.size())
+      paramError("scalar_reporter_names",
+                 "scalar_reporter_names and scalar_reporter_symbols must be the same size:  Number "
+                 "of scalar_reporter_names=",
+                 scalar_reporter_names.size(),
+                 ";  Number of scalar_reporter_symbols=",
+                 _scalar_reporter_symbols.size());
+    _scalar_reporter_data.resize(scalar_reporter_names.size());
+    for (const auto rep_index : index_range(_scalar_reporter_data))
+      _scalar_reporter_data[rep_index] =
+          &getReporterValueByName<Real>(scalar_reporter_names[rep_index], REPORTER_MODE_ROOT);
+  }
+
   const std::vector<ReporterName> reporter_names(
       getParam<std::vector<ReporterName>>("reporter_names"));
   if (reporter_names.size() != _reporter_symbols.size())
@@ -66,11 +87,16 @@ ParsedVectorReporter::finalize()
   _output_reporter.resize(entries, 0.0);
   for (const auto i : make_range(entries))
   {
+    // this is the same order they are added to the symbol string in ParsedReporterBase
+    // first get vector data
     for (const auto rep_index : index_range(_reporter_data))
       _func_params[rep_index] = _reporter_data[rep_index]->at(i);
+    // next get scalar data
+    for (const auto rep_index : index_range(_scalar_reporter_data))
+      _func_params[_reporter_data.size() + rep_index] = *(_scalar_reporter_data[rep_index]);
 
     if (_use_t)
-      _func_params[_reporter_data.size()] = _t;
+      _func_params[_reporter_data.size() + _scalar_reporter_data.size()] = _t;
 
     _output_reporter[i] = evaluate(_func_F);
   }
