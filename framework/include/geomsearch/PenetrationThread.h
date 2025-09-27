@@ -24,23 +24,22 @@ typedef MooseVariableFE<libMesh::VectorValue<Real>> VectorMooseVariable;
 class PenetrationThread
 {
 public:
-  PenetrationThread(
-      SubProblem & subproblem,
-      const MooseMesh & mesh,
-      BoundaryID primary_boundary,
-      BoundaryID secondary_boundary,
-      std::map<dof_id_type, PenetrationInfo *> & penetration_info,
-      bool check_whether_reasonable,
-      bool update_location,
-      Real tangential_tolerance,
-      bool do_normal_smoothing,
-      Real normal_smoothing_distance,
-      PenetrationLocator::NORMAL_SMOOTHING_METHOD normal_smoothing_method,
-      std::vector<std::vector<libMesh::FEBase *>> & fes,
-      libMesh::FEType & fe_type,
-      NearestNodeLocator & nearest_node,
-      const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map,
-      const std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> & bc_tuples);
+  PenetrationThread(SubProblem & subproblem,
+                    const MooseMesh & mesh,
+                    BoundaryID primary_boundary,
+                    BoundaryID secondary_boundary,
+                    std::map<dof_id_type, PenetrationInfo *> & penetration_info,
+                    bool check_whether_reasonable,
+                    bool update_location,
+                    Real tangential_tolerance,
+                    bool do_normal_smoothing,
+                    Real normal_smoothing_distance,
+                    PenetrationLocator::NORMAL_SMOOTHING_METHOD normal_smoothing_method,
+                    bool use_point_locator,
+                    std::vector<std::vector<libMesh::FEBase *>> & fes,
+                    libMesh::FEType & fe_type,
+                    NearestNodeLocator & nearest_node,
+                    const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map);
 
   // Splitting Constructor
   PenetrationThread(PenetrationThread & x, Threads::split split);
@@ -68,6 +67,7 @@ protected:
   bool _do_normal_smoothing;
   Real _normal_smoothing_distance;
   PenetrationLocator::NORMAL_SMOOTHING_METHOD _normal_smoothing_method;
+  bool _use_point_locator;
   MooseVariable * _nodal_normal_x;
   MooseVariable * _nodal_normal_y;
   MooseVariable * _nodal_normal_z;
@@ -79,9 +79,6 @@ protected:
   NearestNodeLocator & _nearest_node;
 
   const std::map<dof_id_type, std::vector<dof_id_type>> & _node_to_elem_map;
-
-  // Each boundary condition tuple has three entries, (0=elem-id, 1=side-id, 2=bc-id)
-  const std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>> & _bc_tuples;
 
   THREAD_ID _tid;
 

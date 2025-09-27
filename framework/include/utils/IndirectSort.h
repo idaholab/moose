@@ -79,7 +79,11 @@ indirectSort(RandomAccessIterator beg, RandomAccessIterator end, std::vector<siz
   indirect_comparator<RandomAccessIterator, LessThanComparator> ic(beg, LessThanComparator());
 
   // Sort the indices, based on the data
-  std::sort(b.begin(), b.end(), ic);
+  //
+  // Many use cases pass in a partial order, not a total order; use
+  // stable_sort to make the results of that as reproduceable as
+  // possible.
+  std::stable_sort(b.begin(), b.end(), ic);
 }
 
 // A generic indirect sort function templated on the iterator type *and* the comparison functor
@@ -98,7 +102,11 @@ indirectSort(RandomAccessIterator beg,
   indirect_comparator<RandomAccessIterator, UserComparisonFunctor> ic(beg, user_comp);
 
   // Sort the indices, based on the data
-  std::sort(b.begin(), b.end(), ic);
+  //
+  // Many use cases pass in a partial order, not a total order; use
+  // stable_sort to make the results of that as reproduceable as
+  // possible.
+  std::stable_sort(b.begin(), b.end(), ic);
 }
 
 /// Uses indices created by the indirectSort function to sort the given

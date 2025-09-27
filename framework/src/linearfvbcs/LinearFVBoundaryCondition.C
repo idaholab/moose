@@ -18,6 +18,7 @@ LinearFVBoundaryCondition::validParams()
   InputParameters params = MooseObject::validParams();
   params += TransientInterface::validParams();
   params += BoundaryRestrictableRequired::validParams();
+  params += GeometricSearchInterface::validParams();
   params += TaggingInterface::validParams();
   params += NonADFunctorInterface::validParams();
 

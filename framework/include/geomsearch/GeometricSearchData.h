@@ -66,6 +66,8 @@ public:
 
   void addElementPairLocator(BoundaryID interface_id, std::shared_ptr<ElementPairLocator> epl);
 
+  void setSearchUsingPointLocator(bool state);
+
   /**
    * Update all of the search objects.
    */
@@ -136,4 +138,11 @@ private:
    * Denotes whether this is the first time the geometric search objects have been updated.
    */
   bool _first;
+
+  /**
+   * Denotes whether the PenetrationLocator objects should use a point
+   * locator rather than cheaper node-to-element connectivity searches once
+   * the nearest nodes have been identified.
+   */
+  bool _search_using_point_locator;
 };
