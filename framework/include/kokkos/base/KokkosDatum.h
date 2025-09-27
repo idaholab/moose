@@ -26,7 +26,7 @@ class Datum
 {
 public:
   /**
-   * Constructor
+   * Constructor for element and side data
    * @param elem The contiguous element ID of the current thread
    * @param side The side index of the current thread
    * @param assembly The Kokkos assembly
@@ -41,8 +41,8 @@ public:
       _systems(systems),
       _elem(assembly.kokkosMesh().getElementInfo(elem)),
       _side(side),
-      _neighbor(_side != libMesh::invalid_uint ? assembly.kokkosMesh().getNeighbor(_elem.id, side)
-                                               : libMesh::DofObject::invalid_id),
+      _neighbor(_side == libMesh::invalid_uint ? libMesh::DofObject::invalid_id
+                                               : assembly.kokkosMesh().getNeighbor(_elem.id, side)),
       _n_qps(side == libMesh::invalid_uint ? assembly.getNumQps(_elem)
                                            : assembly.getNumFaceQps(_elem, side)),
       _qp_offset(side == libMesh::invalid_uint ? assembly.getQpOffset(_elem)
@@ -50,14 +50,14 @@ public:
   {
   }
   /**
-   * Constructor for elemental data
-   * @param elem The contiguous element ID of the current thread
+   * Constructor for node data
+   * @param node The contiguous node ID of the current thread
    * @param assembly The Kokkos assembly
    * @param systems The Kokkos systems
    */
   KOKKOS_FUNCTION
-  Datum(const ContiguousElementID elem, const Assembly & assembly, const Array<System> & systems)
-    : Datum(elem, libMesh::invalid_uint, assembly, systems)
+  Datum(const ContiguousNodeID node, const Assembly & assembly, const Array<System> & systems)
+    : _assembly(assembly), _systems(systems), _node(node)
   {
   }
 
@@ -89,6 +89,11 @@ public:
    */
   KOKKOS_FUNCTION unsigned int side() const { return _side; }
   /**
+   * Get the contiguous node ID
+   * @returns The contiguous node ID
+   */
+  KOKKOS_FUNCTION ContiguousNodeID node() const { return _node; }
+  /**
    * Get the number of local quadrature points
    * @returns The number of local quadrature points
    */
@@ -103,6 +108,11 @@ public:
    * @returns Whether the current side has a neighbor
    */
   KOKKOS_FUNCTION bool hasNeighbor() const { return _neighbor != libMesh::DofObject::invalid_id; }
+  /**
+   * Get whether the current datum is on a node
+   * @returns Whether the current datum is on a node
+   */
+  KOKKOS_FUNCTION bool isNodal() const { return _node != libMesh::DofObject::invalid_id; }
 
   /**
    * Get the inverse of Jacobian matrix
@@ -114,7 +124,10 @@ public:
    */
   KOKKOS_FUNCTION const Real33 & J(const unsigned int qp)
   {
-    reinitTransform(qp);
+    if (!isNodal())
+      reinitTransform(qp);
+    else
+      _J.identity(_assembly.getDimension());
 
     return _J;
   }
@@ -125,7 +138,10 @@ public:
    */
   KOKKOS_FUNCTION Real JxW(const unsigned int qp)
   {
-    reinitTransform(qp);
+    if (!isNodal())
+      reinitTransform(qp);
+    else
+      _JxW = 1;
 
     return _JxW;
   }
@@ -136,7 +152,10 @@ public:
    */
   KOKKOS_FUNCTION Real3 q_point(const unsigned int qp)
   {
-    reinitTransform(qp);
+    if (!isNodal())
+      reinitTransform(qp);
+    else
+      _xyz = _assembly.kokkosMesh().getNodePoint(_node);
 
     return _xyz;
   }
@@ -162,19 +181,23 @@ protected:
   /**
    * Current side index
    */
-  const unsigned int _side;
+  const unsigned int _side = libMesh::invalid_uint;
+  /**
+   * Current contiguous node ID
+   */
+  const ContiguousNodeID _node = libMesh::DofObject::invalid_id;
   /**
    * Current contiguous element ID of neighbor
    */
-  const ContiguousElementID _neighbor;
+  const ContiguousElementID _neighbor = libMesh::DofObject::invalid_id;
   /**
    * Number of local quadrature points
    */
-  const unsigned int _n_qps;
+  const unsigned int _n_qps = 1;
   /**
    * Starting offset into the global quadrature point index
    */
-  const dof_id_type _qp_offset;
+  const dof_id_type _qp_offset = libMesh::DofObject::invalid_id;
 
 private:
   /**
@@ -223,7 +246,7 @@ class ResidualDatum : public Datum
 {
 public:
   /**
-   * Constructor
+   * Constructor for element and side data
    * @param elem The contiguous element ID of the current thread
    * @param side The side index of the current thread
    * @param assembly The Kokkos assembly
@@ -251,7 +274,7 @@ public:
   {
   }
   /**
-   * Constructor for elemental data
+   * Constructor for node data
    * @param elem The contiguous element ID of the current thread
    * @param assembly The Kokkos assembly
    * @param systems The Kokkos systems
@@ -260,13 +283,18 @@ public:
    * @param comp The variable component
    */
   KOKKOS_FUNCTION
-  ResidualDatum(const ContiguousElementID elem,
+  ResidualDatum(const ContiguousNodeID node,
                 const Assembly & assembly,
                 const Array<System> & systems,
                 const Variable & ivar,
                 const unsigned int jvar,
                 const unsigned int comp = 0)
-    : ResidualDatum(elem, libMesh::invalid_uint, assembly, systems, ivar, jvar, comp)
+    : Datum(node, assembly, systems),
+      _tag(ivar.tag()),
+      _ivar(ivar.var(comp)),
+      _jvar(jvar),
+      _ife(systems[ivar.sys(comp)].getFETypeID(_ivar)),
+      _jfe(systems[ivar.sys(comp)].getFETypeID(_jvar))
   {
   }
 
@@ -332,7 +360,7 @@ protected:
   /**
    * Number of local DOFs
    */
-  const unsigned int _n_idofs, _n_jdofs;
+  const unsigned int _n_idofs = 1, _n_jdofs = 1;
 };
 
 } // namespace Kokkos

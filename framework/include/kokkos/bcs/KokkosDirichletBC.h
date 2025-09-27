@@ -21,7 +21,10 @@ public:
 
   KokkosDirichletBC(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeValue(const ContiguousNodeID /* node */) const { return _value; }
+  KOKKOS_FUNCTION Real computeValue(const unsigned int /* qp */, ResidualDatum & /* datum */) const
+  {
+    return _value;
+  }
 
 protected:
   const Moose::Kokkos::Scalar<const Real> _value;

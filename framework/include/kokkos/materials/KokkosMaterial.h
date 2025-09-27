@@ -228,7 +228,7 @@ Material::operator()(ElementInit, const ThreadID tid, const Derived & material) 
 {
   auto elem = kokkosElementID(tid);
 
-  Datum datum(elem, kokkosAssembly(), kokkosSystems());
+  Datum datum(elem, libMesh::invalid_uint, kokkosAssembly(), kokkosSystems());
 
   for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
   {
@@ -273,7 +273,7 @@ Material::operator()(ElementCompute, const ThreadID tid, const Derived & materia
 {
   auto elem = kokkosElementID(tid);
 
-  Datum datum(elem, kokkosAssembly(), kokkosSystems());
+  Datum datum(elem, libMesh::invalid_uint, kokkosAssembly(), kokkosSystems());
 
   for (unsigned int qp = 0; qp < datum.n_qps(); qp++)
   {

@@ -19,17 +19,18 @@ public:
 
   KokkosBoundNodalKernel(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeQpResidual(const ContiguousNodeID node) const;
-  KOKKOS_FUNCTION Real computeQpJacobian(const ContiguousNodeID node) const;
+  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int qp, ResidualDatum & datum) const;
   KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int jvar,
-                                                const ContiguousNodeID node) const;
+                                                const unsigned int qp,
+                                                ResidualDatum & datum) const;
 
 protected:
   /// The number of the coupled variable
   const unsigned int _v_var;
 
   /// The value of the coupled variable
-  const Moose::Kokkos::VariableNodalValue _v;
+  const Moose::Kokkos::VariableValue _v;
 
 private:
   KOKKOS_FUNCTION bool skipOnBoundary(const ContiguousNodeID node) const;
@@ -83,31 +84,34 @@ KokkosBoundNodalKernel<Derived>::skipOnBoundary(const ContiguousNodeID node) con
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosBoundNodalKernel<Derived>::computeQpResidual(const ContiguousNodeID node) const
+KokkosBoundNodalKernel<Derived>::computeQpResidual(const unsigned int qp,
+                                                   ResidualDatum & datum) const
 {
-  if (skipOnBoundary(node))
-    return _u(node);
+  if (skipOnBoundary(datum.node()))
+    return _u(datum, qp);
 
-  return static_cast<const Derived *>(this)->getResidual(node);
+  return static_cast<const Derived *>(this)->getResidual(qp, datum);
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-KokkosBoundNodalKernel<Derived>::computeQpJacobian(const ContiguousNodeID node) const
+KokkosBoundNodalKernel<Derived>::computeQpJacobian(const unsigned int qp,
+                                                   ResidualDatum & datum) const
 {
-  if (skipOnBoundary(node))
+  if (skipOnBoundary(datum.node()))
     return 1;
 
-  return static_cast<const Derived *>(this)->getJacobian(node);
+  return static_cast<const Derived *>(this)->getJacobian(qp, datum);
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
 KokkosBoundNodalKernel<Derived>::computeQpOffDiagJacobian(const unsigned int jvar,
-                                                          const ContiguousNodeID node) const
+                                                          const unsigned int qp,
+                                                          ResidualDatum & datum) const
 {
-  if (skipOnBoundary(node))
+  if (skipOnBoundary(datum.node()))
     return 0;
 
-  return static_cast<const Derived *>(this)->getOffDiagJacobian(jvar, node);
+  return static_cast<const Derived *>(this)->getOffDiagJacobian(jvar, qp, datum);
 }

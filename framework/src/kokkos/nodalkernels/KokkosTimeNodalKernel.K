@@ -27,7 +27,7 @@ TimeNodalKernel::validParams()
 
 TimeNodalKernel::TimeNodalKernel(const InputParameters & parameters)
   : NodalKernel(parameters),
-    _u_dot(kokkosSystems(), _var, Moose::SOLUTION_DOT_TAG),
+    _u_dot(_var, Moose::SOLUTION_DOT_TAG, true),
     _du_dot_du(_var.sys().duDotDu(_var.number()))
 {
 }
