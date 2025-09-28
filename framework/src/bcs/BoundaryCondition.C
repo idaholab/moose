@@ -14,6 +14,7 @@ BoundaryCondition::validParams()
 {
   InputParameters params = ResidualObject::validParams();
   params += BoundaryRestrictableRequired::validParams();
+  params += GeometricSearchInterface::validParams();
 
   params.addParam<bool>("use_displaced_mesh",
                         false,

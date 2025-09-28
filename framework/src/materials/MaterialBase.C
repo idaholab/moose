@@ -26,6 +26,7 @@ MaterialBase::validParams()
   params += BoundaryRestrictable::validParams();
   params += TransientInterface::validParams();
   params += RandomInterface::validParams();
+  params += GeometricSearchInterface::validParams();
   params += ADFunctorInterface::validParams();
 
   params.addParam<bool>("use_displaced_mesh",

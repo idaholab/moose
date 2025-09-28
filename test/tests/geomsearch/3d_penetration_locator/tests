@@ -24,6 +24,37 @@
                   "disjoint surfaces in 2D with tetrahedron elements."
   []
 
+  [3d_tet_reverse]
+    type = 'Exodiff'
+    input = '3d_tet.i'
+    cli_args = 'Outputs/file_base=3d_tet_reverse_out AuxKernels/distance/boundary=rightleft AuxKernels/distance/paired_boundary=leftright'
+    exodiff = '3d_tet_reverse_out.e'
+    group = 'geometric'
+    scale_refine = 1
+    requirement = "The system shall be capable of computing the distance, tangential "
+                  "distance, normal, closest point, side id, and element id from the larger to the smaller of parallel, "
+                  "disjoint surfaces in 3D with tetrahedron elements."
+  []
+
+  [3d_disconnected_tet]
+    type = 'CSVDiff'
+    input = '3d_disconnected_tet.i'
+    csvdiff = '3d_disconnected_tet_out_gap_sampler_0001.csv'
+    group = 'geometric'
+    requirement = "The system shall be able to compute the signed distance between "
+                  "disjoint boundaries in disconnected tet meshes."
+  []
+
+  [3d_disconnected_tet_reverse]
+    type = 'CSVDiff'
+    input = '3d_disconnected_tet.i'
+    cli_args = 'Outputs/file_base=3d_disconnected_tet_reverse_out AuxKernels/distance/boundary=rightleft AuxKernels/distance/paired_boundary=leftright VectorPostprocessors/gap_sampler/boundary=rightleft'
+    csvdiff = '3d_disconnected_tet_reverse_out_gap_sampler_0001.csv'
+    group = 'geometric'
+    requirement = "The system shall be able to compute the signed distance from the larger to the smaller of "
+                  "disjoint boundaries in disconnected tet meshes."
+  []
+
   [rings_facing_each_other]
     type = CSVDiff
     input = '3d_rings.i'

@@ -447,7 +447,7 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
 
   if (_problem.haveXFEM() && (_xfem_update_count < _max_xfem_update) && _problem.updateMeshXFEM())
   {
-    _console << "\nXFEM modified mesh, repeating step" << std::endl;
+    _console << "\nRepeating step due to XFEM mesh modification" << std::endl;
     _xfem_repeat_step = true;
     ++_xfem_update_count;
   }
@@ -457,7 +457,6 @@ FixedPointSolve::solveStep(const std::set<dof_id_type> & transformed_dofs)
     {
       _xfem_repeat_step = false;
       _xfem_update_count = 0;
-      _console << "\nXFEM did not modify mesh, continuing" << std::endl;
     }
 
     _problem.onTimestepEnd();

@@ -113,6 +113,8 @@ ThermalContactAction::validParams()
   params += GapConductance::actionParameters();
   params += GapConductanceConstant::actionParameters();
 
+  params += GeometricSearchInterface::validParams();
+
   params.addParamNamesToGroup("primary secondary", "Gap surface definition");
   params.addParamNamesToGroup(
       "tangential_tolerance normal_smoothing_distance normal_smoothing_method",
@@ -189,6 +191,7 @@ ThermalContactAction::addAuxKernels()
                                       "normal_smoothing_method",
                                       "order",
                                       "warnings",
+                                      "search_method",
                                       "check_boundary_restricted"});
       params.set<AuxVariableName>("variable") = _gap_value_name;
       params.set<ExecFlagEnum>("execute_on", true) = {EXEC_INITIAL, EXEC_LINEAR};
@@ -222,6 +225,7 @@ ThermalContactAction::addAuxKernels()
                                       "normal_smoothing_distance",
                                       "normal_smoothing_method",
                                       "order",
+                                      "search_method",
                                       "check_boundary_restricted"});
       params.set<AuxVariableName>("variable") = _penetration_var_name;
       if (isParamValid("secondary_gap_offset"))
@@ -331,6 +335,7 @@ ThermalContactAction::addDiracKernels()
                                     "normal_smoothing_distance",
                                     "normal_smoothing_method",
                                     "order",
+                                    "search_method",
                                     "variable"});
     params.set<BoundaryName>("boundary") = contact_pair.first;
     params.set<BoundaryName>("secondary") = contact_pair.second;
