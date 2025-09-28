@@ -10,63 +10,50 @@
 #pragma once
 
 #include "IPHDGAssemblyHelper.h"
+#include "ADFunctorInterface.h"
+
+class MooseMesh;
 
 /**
  * Implements all the methods for assembling a hybridized interior penalty discontinuous Galerkin
  * (IPDG-H), which is a type of HDG method, discretization of the advection equation. These routines
  * may be called by both HDG kernels and integrated boundary conditions.
  */
-class AdvectionIPHDGAssemblyHelper : public IPHDGAssemblyHelper
+class MassContinuityAssemblyHelper : public IPHDGAssemblyHelper, public ADFunctorInterface
 {
 public:
   static InputParameters validParams();
 
-  AdvectionIPHDGAssemblyHelper(const MooseObject * const moose_obj,
+  MassContinuityAssemblyHelper(const MooseObject * const moose_obj,
                                MooseVariableDependencyInterface * const mvdi,
                                const TransientInterface * const ti,
+                               const MooseMesh & mesh,
                                SystemBase & sys,
                                const Assembly & assembly,
                                const THREAD_ID tid,
                                const std::set<SubdomainID> & block_ids,
                                const std::set<BoundaryID> & boundary_ids);
 
-  /**
-   * Computes a local residual vector for the weak form:
-   * (Dq, grad(w)) - (f, w)
-   * where D is the diffusivity, w are the test functions associated with the scalar field, and f is
-   * a forcing function
-   */
   virtual void scalarVolume() override;
-
-  /**
-   * Computes a local residual vector for the weak form:
-   * -<Dq*n, w> + <\tau * (u - \hat{u}) * n * n, w>
-   */
   virtual void scalarFace() override;
-
-  /**
-   * Computes a local residual vector for the weak form:
-   * -<Dq*n, \mu> + <\tau * (u - \hat{u}) * n * n, \mu>
-   */
   virtual void lmFace() override;
+  virtual void scalarDirichlet(const Moose::Functor<Real> &) override
+  {
+    mooseError("We do not assign Dirichlet values for pressure");
+  }
 
-  /**
-   * Weakly imposes a Dirichlet condition for the scalar field in the scalar field equation
-   */
-  virtual void scalarDirichlet(const Moose::Functor<Real> & dirichlet_value) override;
+  /// The coordinate system
+  const Moose::CoordinateSystemType & _coord_sys;
 
-  /**
-   * prescribes an outflow condition
-   */
-  void lmOutflow();
+  /// The radial coordinate index for RZ coordinate systems
+  const unsigned int _rz_radial_coord;
 
-  /// The velocity in the element interior
-  const ADMaterialProperty<RealVectorValue> & _velocity;
+  /// The velocities on the element interior
+  std::vector<const ADVariableValue *> _interior_vels;
 
-  /// The velocity on the element faces
-  const ADMaterialProperty<RealVectorValue> & _face_velocity;
+  /// The velocity gradients on the element interior
+  std::vector<const ADVariableGradient *> _interior_vel_grads;
 
-  /// The advected quantity value is this \p _coeff value multipled by the
-  /// variable/side_variable pair (for element upwind/downwind of the face respectively)
-  const Real _coeff;
+  /// The velocities on the element faces
+  std::vector<const Moose::Functor<ADReal> *> _face_vels;
 };

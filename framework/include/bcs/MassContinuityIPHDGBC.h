@@ -9,23 +9,22 @@
 
 #pragma once
 
-#include "IPHDGPrescribedFluxBC.h"
-
-class DiffusionIPHDGAssemblyHelper;
+#include "IPHDGBC.h"
+#include "MassContinuityAssemblyHelper.h"
 
 /**
- * Implements a fixed normal gradient boundary condition for use with a hybridized discretization of
- * the diffusion equation
+ * Applies a Dirichlet value for velocity to mass conservation terms on boundary faces
  */
-class DiffusionIPHDGPrescribedFluxBC : public IPHDGPrescribedFluxBC
+class MassContinuityIPHDGBC : public IPHDGBC
 {
 public:
   static InputParameters validParams();
-  DiffusionIPHDGPrescribedFluxBC(const InputParameters & parameters);
+  MassContinuityIPHDGBC(const InputParameters & parameters);
 
 protected:
-  virtual IPHDGAssemblyHelper & iphdgHelper() override;
+  virtual void compute() override;
+  virtual IPHDGAssemblyHelper & iphdgHelper() override { return *_iphdg_helper; }
 
   /// The assembly helper providing the required IP-HDG method implementations
-  std::unique_ptr<DiffusionIPHDGAssemblyHelper> _iphdg_helper;
+  std::unique_ptr<MassContinuityAssemblyHelper> _iphdg_helper;
 };

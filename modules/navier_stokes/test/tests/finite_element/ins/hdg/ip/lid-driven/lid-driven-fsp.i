@@ -88,13 +88,12 @@ gamma = 1e5
     pressure_face_variable = pressure_bar
     component = 1
   []
-  [pressure_convection]
-    type = AdvectionIPHDGKernel
+  [pressure]
+    type = MassContinuityIPHDGKernel
     variable = pressure
     face_variable = pressure_bar
-    velocity = 'velocity'
-    coeff = '${fparse -rho}'
-    self_advection = false
+    interior_velocity_vars = 'vel_x vel_y'
+    face_velocity_functors = 'vel_bar_x vel_bar_y'
   []
 []
 
@@ -188,15 +187,21 @@ gamma = 1e5
     component = 1
   []
 
-  [mass_convection]
-    type = AdvectionIPHDGPrescribedFluxBC
+  [pressure_walls]
+    type = MassContinuityIPHDGBC
     face_variable = pressure_bar
     variable = pressure
-    velocity = 'velocity'
-    coeff = '${fparse -rho}'
-    self_advection = false
-    boundary = 'left bottom top right'
-    prescribed_normal_flux = 0
+    boundary = 'left bottom right'
+    face_velocity_functors = '0 0'
+    interior_velocity_vars = 'vel_x vel_y'
+  []
+  [pressure_lid]
+    type = MassContinuityIPHDGBC
+    face_variable = pressure_bar
+    variable = pressure
+    boundary = 'top'
+    face_velocity_functors = '${U} 0'
+    interior_velocity_vars = 'vel_x vel_y'
   []
 
   [pb_mass]
@@ -215,7 +220,7 @@ gamma = 1e5
     component = 0
     boundary = 'left right bottom'
     gamma = ${gamma}
-    dirichlet_value = 'walls'
+    face_functor = 'walls'
   []
   [v_jump_walls]
     type = MassFluxPenaltyBC
@@ -225,7 +230,7 @@ gamma = 1e5
     component = 1
     boundary = 'left right bottom'
     gamma = ${gamma}
-    dirichlet_value = 'walls'
+    face_functor = 'walls'
   []
   [u_jump_top]
     type = MassFluxPenaltyBC
@@ -235,7 +240,7 @@ gamma = 1e5
     component = 0
     boundary = 'top'
     gamma = ${gamma}
-    dirichlet_value = 'top'
+    face_functor = 'top'
   []
   [v_jump_top]
     type = MassFluxPenaltyBC
@@ -245,20 +250,20 @@ gamma = 1e5
     component = 1
     boundary = 'top'
     gamma = ${gamma}
-    dirichlet_value = 'top'
+    face_functor = 'top'
   []
 []
 
-[Functions]
+[FunctorMaterials]
   [top]
-    type = ParsedVectorFunction
-    value_x = ${U}
-    value_y = 0
+    type = GenericConstantVectorFunctorMaterial
+    prop_names = top
+    prop_values = '${U} 0 0'
   []
   [walls]
-    type = ParsedVectorFunction
-    value_x = 0
-    value_y = 0
+    type = GenericConstantVectorFunctorMaterial
+    prop_names = walls
+    prop_values = '0 0 0'
   []
 []
 
