@@ -20,7 +20,7 @@ LinearFVRobinCHTBC::validParams()
   params.addRequiredParam<MooseFunctorName>("h", "The convective heat transfer coefficient.");
   params.addRequiredParam<MooseFunctorName>("incoming_flux",
                                             "The incoming diffusive flux on the intervace.");
-  params.addRequiredParam<MooseFunctorName>("prescribed_temperature",
+  params.addRequiredParam<MooseFunctorName>("surface_temperature",
                                             "The prescribed temperature on the interface.");
 
   params.addClassDescription(
@@ -33,7 +33,7 @@ LinearFVRobinCHTBC::LinearFVRobinCHTBC(const InputParameters & parameters)
     LinearFVCHTBCInterface(),
     _htc(getFunctor<Real>("h")),
     _incoming_flux(getFunctor<Real>("incoming_flux")),
-    _prescribed_temperature(getFunctor<Real>("prescribed_temperature"))
+    _surface_temperature(getFunctor<Real>("surface_temperature"))
 {
 }
 
@@ -93,5 +93,5 @@ LinearFVRobinCHTBC::computeBoundaryGradientRHSContribution() const
   auto face = singleSidedFaceArg(_current_face_info);
   face.face_side = elem_info->elem();
 
-  return _htc(face, state) * _prescribed_temperature(face, state) + _incoming_flux(face, state);
+  return _htc(face, state) * _surface_temperature(face, state) + _incoming_flux(face, state);
 }

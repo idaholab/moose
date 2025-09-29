@@ -51,5 +51,5 @@ protected:
   const Moose::Functor<Real> & _incoming_flux;
 
   /// The prescribed temperature on the interface
-  const Moose::Functor<Real> & _prescribed_temperature;
+  const Moose::Functor<Real> & _surface_temperature;
 };
