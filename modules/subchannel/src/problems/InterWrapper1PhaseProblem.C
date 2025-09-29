@@ -352,7 +352,7 @@ PetscErrorCode
 InterWrapper1PhaseProblem::createPetscVector(Vec & v, PetscInt n)
 {
   PetscFunctionBegin;
-  LibmeshPetscCall(VecCreate(PETSC_COMM_WORLD, &v));
+  LibmeshPetscCall(VecCreate(PETSC_COMM_SELF, &v));
   LibmeshPetscCall(PetscObjectSetName((PetscObject)v, "Solution"));
   LibmeshPetscCall(VecSetSizes(v, PETSC_DECIDE, n));
   LibmeshPetscCall(VecSetFromOptions(v));
@@ -364,7 +364,7 @@ PetscErrorCode
 InterWrapper1PhaseProblem::createPetscMatrix(Mat & M, PetscInt n, PetscInt m)
 {
   PetscFunctionBegin;
-  LibmeshPetscCall(MatCreate(PETSC_COMM_WORLD, &M));
+  LibmeshPetscCall(MatCreate(PETSC_COMM_SELF, &M));
   LibmeshPetscCall(MatSetSizes(M, PETSC_DECIDE, PETSC_DECIDE, n, m));
   LibmeshPetscCall(MatSetFromOptions(M));
   LibmeshPetscCall(MatSetUp(M));
@@ -657,7 +657,7 @@ InterWrapper1PhaseProblem::computeMdot(int iblock)
       PC pc;
       Vec sol;
       LibmeshPetscCall(VecDuplicate(_mc_axial_convection_rhs, &sol));
-      LibmeshPetscCall(KSPCreate(PETSC_COMM_WORLD, &ksploc));
+      LibmeshPetscCall(KSPCreate(PETSC_COMM_SELF, &ksploc));
       LibmeshPetscCall(KSPSetOperators(ksploc, _mc_axial_convection_mat, _mc_axial_convection_mat));
       LibmeshPetscCall(KSPGetPC(ksploc, &pc));
       LibmeshPetscCall(PCSetType(pc, PCJACOBI));
@@ -1349,7 +1349,7 @@ InterWrapper1PhaseProblem::computeP(int iblock)
         PC pc;
         Vec sol;
         LibmeshPetscCall(VecDuplicate(_amc_pressure_force_rhs, &sol));
-        LibmeshPetscCall(KSPCreate(PETSC_COMM_WORLD, &ksploc));
+        LibmeshPetscCall(KSPCreate(PETSC_COMM_SELF, &ksploc));
         LibmeshPetscCall(KSPSetOperators(ksploc, _amc_pressure_force_mat, _amc_pressure_force_mat));
         LibmeshPetscCall(KSPGetPC(ksploc, &pc));
         LibmeshPetscCall(PCSetType(pc, PCJACOBI));
@@ -1444,7 +1444,7 @@ InterWrapper1PhaseProblem::computeP(int iblock)
         PC pc;
         Vec sol;
         LibmeshPetscCall(VecDuplicate(_amc_pressure_force_rhs, &sol));
-        LibmeshPetscCall(KSPCreate(PETSC_COMM_WORLD, &ksploc));
+        LibmeshPetscCall(KSPCreate(PETSC_COMM_SELF, &ksploc));
         LibmeshPetscCall(KSPSetOperators(ksploc, _amc_pressure_force_mat, _amc_pressure_force_mat));
         LibmeshPetscCall(KSPGetPC(ksploc, &pc));
         LibmeshPetscCall(PCSetType(pc, PCJACOBI));
@@ -1861,7 +1861,7 @@ InterWrapper1PhaseProblem::computeh(int iblock)
       PC pc;
       Vec sol;
       LibmeshPetscCall(VecDuplicate(_hc_sys_h_rhs, &sol));
-      LibmeshPetscCall(KSPCreate(PETSC_COMM_WORLD, &ksploc));
+      LibmeshPetscCall(KSPCreate(PETSC_COMM_SELF, &ksploc));
       LibmeshPetscCall(KSPSetOperators(ksploc, _hc_sys_h_mat, _hc_sys_h_mat));
       LibmeshPetscCall(KSPGetPC(ksploc, &pc));
       LibmeshPetscCall(PCSetType(pc, PCJACOBI));
@@ -2346,11 +2346,11 @@ InterWrapper1PhaseProblem::petscSnesSolver(int iblock,
   PetscScalar * xx;
 
   PetscFunctionBegin;
-  PetscCallMPI(MPI_Comm_size(PETSC_COMM_WORLD, &size));
+  PetscCallMPI(MPI_Comm_size(PETSC_COMM_SELF, &size));
   if (size > 1)
-    SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_SUP, "Example is only for sequential runs");
-  LibmeshPetscCall(SNESCreate(PETSC_COMM_WORLD, &snes));
-  LibmeshPetscCall(VecCreate(PETSC_COMM_WORLD, &x));
+    SETERRQ(PETSC_COMM_SELF, PETSC_ERR_SUP, "Example is only for sequential runs");
+  LibmeshPetscCall(SNESCreate(PETSC_COMM_SELF, &snes));
+  LibmeshPetscCall(VecCreate(PETSC_COMM_SELF, &x));
   LibmeshPetscCall(VecSetSizes(x, PETSC_DECIDE, _block_size * _n_gaps));
   LibmeshPetscCall(VecSetFromOptions(x));
   LibmeshPetscCall(VecDuplicate(x, &r));
@@ -2761,13 +2761,13 @@ InterWrapper1PhaseProblem::implicitPetscSolve(int iblock)
   _console << "Linear solver relaxed." << std::endl;
 
   // Creating nested matrices
-  LibmeshPetscCall(MatCreateNest(PETSC_COMM_WORLD, Q, NULL, Q, NULL, mat_array.data(), &A_nest));
-  LibmeshPetscCall(VecCreateNest(PETSC_COMM_WORLD, Q, NULL, vec_array.data(), &b_nest));
+  LibmeshPetscCall(MatCreateNest(PETSC_COMM_SELF, Q, NULL, Q, NULL, mat_array.data(), &A_nest));
+  LibmeshPetscCall(VecCreateNest(PETSC_COMM_SELF, Q, NULL, vec_array.data(), &b_nest));
   _console << "Nested system created." << std::endl;
 
   /// Setting up linear solver
   // Creating linear solver
-  LibmeshPetscCall(KSPCreate(PETSC_COMM_WORLD, &ksp));
+  LibmeshPetscCall(KSPCreate(PETSC_COMM_SELF, &ksp));
   LibmeshPetscCall(KSPSetType(ksp, KSPFGMRES));
   // Setting KSP operators
   LibmeshPetscCall(KSPSetOperators(ksp, A_nest, A_nest));
@@ -2969,6 +2969,8 @@ InterWrapper1PhaseProblem::externalSolve()
           _converged = false;
         }
         auto T_L2norm_old_block = _T_soln->L2norm();
+        if (processor_id() > 0)
+          goto aux_close;
 
         if (_segregated_bool)
         {
@@ -3014,6 +3016,7 @@ InterWrapper1PhaseProblem::externalSolve()
 
         // We must do a global assembly to make sure data is parallel consistent before we do things
         // like compute L2 norms
+      aux_close:
         _aux->solution().close();
 
         auto T_L2norm_new = _T_soln->L2norm();

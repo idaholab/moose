@@ -33,9 +33,18 @@ public:
     return _pin_nodes[i_pin][iz];
   }
 
-  virtual unsigned int getNumOfChannels() const override { return _n_channels; }
-  virtual unsigned int getNumOfGapsPerLayer() const override { return _n_gaps; }
-  virtual unsigned int getNumOfAssemblies() const override { return _n_assemblies; }
+  virtual unsigned int getNumOfChannels() const override
+  {
+    return processor_id() == 0 ? _n_channels : 0;
+  }
+  virtual unsigned int getNumOfGapsPerLayer() const override
+  {
+    return processor_id() == 0 ? _n_gaps : 0;
+  }
+  virtual unsigned int getNumOfAssemblies() const override
+  {
+    return processor_id() == 0 ? _n_assemblies : 0;
+  }
   virtual bool pinMeshExist() const override { return false; }
   virtual bool ductMeshExist() const override { return false; }
   virtual const std::pair<unsigned int, unsigned int> &
