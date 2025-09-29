@@ -7,7 +7,7 @@ alpha = '${fparse 10 * degree^2}'
 [Mesh]
   [file]
     type = FileMeshGenerator
-    file = coarse12.msh
+    file = coarse06.msh
   []
   second_order = true
 []
@@ -21,27 +21,27 @@ alpha = '${fparse 10 * degree^2}'
 
 [Variables]
   [vel_x]
-    family = L2_HIERARCHIC
+    family = L2_LAGRANGE
     order = SECOND
   []
   [vel_y]
-    family = L2_HIERARCHIC
+    family = L2_LAGRANGE
     order = SECOND
   []
   [pressure]
-    family = L2_HIERARCHIC
+    family = L2_LAGRANGE
     order = FIRST
   []
   [vel_bar_x]
-    family = SIDE_HIERARCHIC
+    family = LAGRANGE
     order = SECOND
   []
   [vel_bar_y]
-    family = SIDE_HIERARCHIC
+    family = LAGRANGE
     order = SECOND
   []
   [pressure_bar]
-    family = SIDE_HIERARCHIC
+    family = LAGRANGE
     order = SECOND
   []
 []
@@ -383,19 +383,23 @@ alpha = '${fparse 10 * degree^2}'
       splitting_type = schur
       petsc_options = '-ksp_monitor'
       petsc_options_iname = '-pc_fieldsplit_schur_fact_type  -pc_fieldsplit_schur_precondition -ksp_gmres_restart -ksp_type -ksp_pc_side -ksp_rtol -ksp_max_it -ksp_atol'
-      petsc_options_value = 'full                            self                              300                fgmres    right        1e-4      30          1e-9'
+      petsc_options_value = 'full                            self                              300                fgmres    right        1e-4      300         1e-9'
     []
     [u]
       vars = 'vel_bar_x vel_bar_y'
       # petsc_options = '-ksp_converged_reason'
-      petsc_options_iname = '-pc_type -ksp_type -ksp_rtol -ksp_gmres_restart -ksp_pc_side -pc_factor_mat_solver_type -ksp_max_it -ksp_atol -ksp_norm_type'
-      petsc_options_value = 'ilu      gmres     1e-2      300                right        strumpack                  30          1e-8      unpreconditioned'
+      # petsc_options_iname = '-pc_type -ksp_type -ksp_rtol -ksp_gmres_restart -ksp_pc_side -pc_factor_mat_solver_type -ksp_max_it -ksp_atol -ksp_norm_type'
+      # petsc_options_value = 'ilu      gmres     1e-2      300                right        strumpack                  30          1e-8      unpreconditioned'
+      petsc_options_iname = '-pc_type -ksp_type -pc_factor_mat_solver_type'
+      petsc_options_value = 'ilu      preonly   strumpack'
     []
     [p]
       vars = 'pressure_bar'
-      petsc_options = '-ksp_converged_reason'
-      petsc_options_iname = '-pc_type -ksp_type -ksp_rtol -ksp_gmres_restart -ksp_pc_side -pc_factor_mat_solver_type -ksp_max_it -ksp_atol -ksp_norm_type'
-      petsc_options_value = 'ilu      gmres     1e-2      300                right        strumpack                  30          1e-8      unpreconditioned'
+      # petsc_options = '-ksp_converged_reason'
+      # petsc_options_iname = '-pc_type -ksp_type -ksp_rtol -ksp_gmres_restart -ksp_pc_side -pc_factor_mat_solver_type -ksp_max_it -ksp_atol -ksp_norm_type'
+      # petsc_options_value = 'ilu      gmres     1e-2      300                right        strumpack                  30          1e-8      unpreconditioned'
+      petsc_options_iname = '-pc_type -pc_jacobi_type -ksp_type'
+      petsc_options_value = 'jacobi   rowsum          preonly'
     []
   []
 []
