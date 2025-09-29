@@ -94,7 +94,11 @@ class TestHarnessResults:
         """
         Get the CIVET schema version
         """
-        return self.civet.get('version', 0)
+        # Version was first added to ['civet']['version'], and
+        # was then moved to ['civet_version']
+        version = self.civet.get('version', self.data.get('civet_version', 0))
+        assert isinstance(version, int)
+        return version
 
     @property
     def civet_job_url(self) -> str:
