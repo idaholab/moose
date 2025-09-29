@@ -1,8 +1,7 @@
-mu = 1e-2
-rho = 1
 gamma = 1e4
 degree = 2
 alpha = '${fparse 10 * degree^2}'
+rho = 1
 
 [Mesh]
   [file]
@@ -336,16 +335,18 @@ alpha = '${fparse 10 * degree^2}'
 []
 
 [Materials]
-  [const]
-    type = ADGenericConstantMaterial
-    prop_names = 'rho mu'
-    prop_values = '${rho} ${mu}'
-  []
   [vel]
     type = ADVectorFromComponentVariablesMaterial
     vector_prop_name = 'velocity'
     u = vel_x
     v = vel_y
+  []
+  [mu]
+    type = ADParsedMaterial
+    functor_names = 'reynolds'
+    functor_symbols = 'reynolds'
+    property_name = 'mu'
+    expression = '1 / reynolds'
   []
 []
 
@@ -353,6 +354,10 @@ alpha = '${fparse 10 * degree^2}'
   [u_inlet]
     type = ParsedFunction
     expression = '4*(2-y)*(y-1)'
+  []
+  [reynolds]
+    type = ParsedFunction
+    expression = 't'
   []
 []
 
@@ -404,18 +409,32 @@ alpha = '${fparse 10 * degree^2}'
   []
 []
 
+[Postprocessors]
+  [reynolds]
+    type = FunctionValuePostprocessor
+    function = reynolds
+  []
+  [dofs]
+    type = NumDOFs
+  []
+  [elems]
+    type = NumElements
+  []
+[]
+
 [Executioner]
-  type = Steady
+  type = Transient
   solve_type = 'PJFNK'
   petsc_options_iname = '-ksp_type'
   petsc_options_value = 'preonly'
-  nl_rel_tol = 1e-12
+  end_time = 1e4
+  dt = 250
+  nl_abs_tol = 1e-7
 []
 
 [Outputs]
   print_linear_residuals = false
-  [out]
-    type = Exodus
-    hide = 'pressure_bar vel_bar_x vel_bar_y'
-  []
+  exodus = true
+  checkpoint = true
+  perf_graph = true
 []
