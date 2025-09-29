@@ -13,7 +13,7 @@
   [transientParsedVec]
     type = CSVDiff
     input = transientParsedVec.i
-    csvdiff = "transientParsedVec_out_vectorOperation_0003.csv"
+    csvdiff = "transientParsedVec_out_vectorOperation_0003.csv transientParsedVec_out.csv"
     requirement = "The system shall be able to consume postprocessors that change with time and use them in the parsed function."
   []
   [errorRowSum]

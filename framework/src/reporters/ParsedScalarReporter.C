@@ -15,11 +15,10 @@ InputParameters
 ParsedScalarReporter::validParams()
 {
   InputParameters params = ParsedReporterBase::validParams();
-  params.addRequiredParam<std::vector<ReporterName>>("vector_reporter_names",
-                                                     "The input vector reporter names");
-  // make reporter symbols specific to this classes type
-  params.renameParam(
-      "reporter_symbols", "vector_reporter_symbols", "Expression symbol for each vector reporter");
+  params.addRequiredParam<std::vector<ReporterName>>("scalar_reporter_names",
+                                                     "Scalar reporter names to apply function to.");
+  params.set<std::vector<std::string>>("reporter_symbols") = {};
+  params.suppressParameter<std::vector<std::string>>("reporter_symbols");
   params.addClassDescription("Applies parsed functions to scalar entries held in reporters.");
   return params;
 }
@@ -29,30 +28,30 @@ ParsedScalarReporter::ParsedScalarReporter(const InputParameters & parameters)
     _output_reporter(declareValueByName<Real>(getParam<std::string>("name"), REPORTER_MODE_ROOT))
 {
   // get reporters to operate on
-  const std::vector<ReporterName> reporter_names(
-      getParam<std::vector<ReporterName>>("vector_reporter_names"));
-  if (reporter_names.size() != _reporter_symbols.size())
-    paramError("vector_reporter_names",
-               "vector_reporter_names and vector_reporter_symbols must be the same size:  Number "
-               "of vector_reporter_names=",
-               reporter_names.size(),
-               ";  Number of vector_reporter_symbols=",
-               _reporter_symbols.size());
+  const std::vector<ReporterName> scalar_reporter_names(
+      getParam<std::vector<ReporterName>>("scalar_reporter_names"));
 
-  _reporter_data.resize(reporter_names.size());
-  for (const auto rep_index : index_range(_reporter_data))
-    _reporter_data[rep_index] =
-        &getReporterValueByName<Real>(reporter_names[rep_index], REPORTER_MODE_ROOT);
+  if (scalar_reporter_names.size() != _scalar_reporter_symbols.size())
+    paramError("scalar_reporter_names",
+               "scalar_reporter_names and scalar_reporter_symbols must be the same size:  Number "
+               "of scalar_reporter_names=",
+               scalar_reporter_names.size(),
+               ";  Number of scalar_reporter_symbols=",
+               _scalar_reporter_symbols.size());
+  _scalar_reporter_data.resize(scalar_reporter_names.size());
+  for (const auto rep_index : index_range(_scalar_reporter_data))
+    _scalar_reporter_data[rep_index] =
+        &getReporterValueByName<Real>(scalar_reporter_names[rep_index], REPORTER_MODE_ROOT);
 }
 
 void
 ParsedScalarReporter::finalize()
 {
-  for (const auto i : index_range(_reporter_data))
-    _func_params[i] = *(_reporter_data[i]);
+  for (const auto i : index_range(_scalar_reporter_data))
+    _func_params[i] = *(_scalar_reporter_data[i]);
 
   if (_use_t)
-    _func_params[_reporter_data.size()] = _t;
+    _func_params[_scalar_reporter_data.size()] = _t;
 
   _output_reporter = evaluate(_func_F);
 }

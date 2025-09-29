@@ -17,8 +17,8 @@ ParsedReporterBase::validParams()
   params.addRequiredCustomTypeParam<std::string>(
       "expression", "FunctionExpression", "function expression");
   params.addParam<std::string>("name", "result", "Name of output reporter.");
-  params.addParam<std::vector<std::string>>("reporter_symbols",
-                                            "Expression symbol for each reporter");
+  params.addParam<std::vector<std::string>>(
+      "reporter_symbols", {}, "Expression symbol for each reporter");
   params.addParam<std::vector<std::string>>(
       "scalar_reporter_symbols",
       {},
@@ -47,14 +47,14 @@ ParsedReporterBase::ParsedReporterBase(const InputParameters & parameters)
   // first add vector reporter symbols
   std::string symbol_str;
   for (const auto i : index_range(_reporter_symbols))
-    symbol_str += (i == 0 ? "" : ",") + _reporter_symbols[i];
+    symbol_str += (symbol_str.empty() ? "" : ",") + _reporter_symbols[i];
   // next add scalar reporter symbols
   for (const auto i : index_range(_scalar_reporter_symbols))
-    symbol_str += "," + _scalar_reporter_symbols[i];
+    symbol_str += (symbol_str.empty() ? "" : ",") + _scalar_reporter_symbols[i];
 
   // add time if required
   if (_use_t)
-    symbol_str += "," + std::string("t");
+    symbol_str += (symbol_str.empty() ? "" : ",") + std::string("t");
 
   // Create parsed function
   _func_F = std::make_shared<SymFunction>();

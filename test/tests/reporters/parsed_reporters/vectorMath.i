@@ -71,8 +71,8 @@
   [scalarOperation]
     type = ParsedScalarReporter
     name = inner
-    vector_reporter_names = 'vecs/a vecs/b vecs/c'
-    vector_reporter_symbols = 'a b c'
+    scalar_reporter_names = 'vecs/a vecs/b vecs/c'
+    scalar_reporter_symbols = 'a b c'
     constant_names = 'constant1 constant2'
     constant_expressions = '10 20'
     expression = '(a+b)*c+constant1+constant2'

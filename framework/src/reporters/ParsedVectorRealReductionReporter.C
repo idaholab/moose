@@ -25,7 +25,8 @@ ParsedVectorRealReductionReporter::validParams()
   // operation, these symbols are enforced in the constructor with a mooseError
   params.set<std::vector<std::string>>("reporter_symbols") = {"reduction_value", "indexed_value"};
   params.suppressParameter<std::vector<std::string>>("reporter_symbols");
-
+  params.set<std::vector<std::string>>("scalar_reporter_symbols") = {};
+  params.suppressParameter<std::vector<std::string>>("scalar_reporter_symbols");
   // This reporter is for postprocessing optimization results and should be exectuted at the end of
   // execution
   params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;

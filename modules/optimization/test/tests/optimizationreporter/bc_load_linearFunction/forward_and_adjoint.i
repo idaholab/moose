@@ -163,8 +163,8 @@
   [obj_sum]
     type = ParsedScalarReporter
     name = value
-    vector_reporter_names = 'vector_sqsum/sqsum'
-    vector_reporter_symbols = 'a'
+    scalar_reporter_names = 'vector_sqsum/sqsum'
+    scalar_reporter_symbols = 'a'
     expression = '0.5*a'
   []
 []

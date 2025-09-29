@@ -46,6 +46,14 @@
     constant_expressions = '10 20'
     expression = 'vec_a+vec_b+vec_c+constant1+constant2+a+dt'
   []
+  [transientScalar]
+    type = ParsedScalarReporter
+    name = inner
+    scalar_reporter_names = 'vecs/c dt/value'
+    scalar_reporter_symbols = 'c dt'
+    expression = 'c+t+dt'
+    use_t = true
+  []
 []
 
 [Postprocessors]

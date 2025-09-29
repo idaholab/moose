@@ -12,7 +12,7 @@
 #include "ParsedReporterBase.h"
 
 /**
- * Reporter containing operation between vectors from another Reporter
+ * Reporter containing operation between scalars from another Reporter
  */
 class ParsedScalarReporter : public ParsedReporterBase
 {
@@ -26,8 +26,8 @@ public:
   virtual void finalize() override;
 
 private:
+  /// input scalar reporter vectors
+  std::vector<const Real *> _scalar_reporter_data;
   /// output scalar
   Real & _output_reporter;
-  /// Input reporter values
-  std::vector<const Real *> _reporter_data;
 };
