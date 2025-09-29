@@ -1,5 +1,5 @@
 //* This file is part of the MOOSE framework
-//* https://mooseframework.inl.gov
+//* https://www.mooseframework.org
 //*
 //* All rights reserved, see COPYRIGHT for full restrictions
 //* https://github.com/idaholab/moose/blob/master/COPYRIGHT
@@ -8,62 +8,45 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MassFluxPenaltyBC.h"
-#include "Function.h"
+#include "MassFluxPenaltyIPHDGAssemblyHelper.h"
 
 registerMooseObject("NavierStokesApp", MassFluxPenaltyBC);
 
 InputParameters
 MassFluxPenaltyBC::validParams()
 {
-  InputParameters params = ADIntegratedBC::validParams();
-  params.addRequiredCoupledVar("u", "The x-velocity");
-  params.addRequiredCoupledVar("v", "The y-velocity");
-  params.addRequiredParam<unsigned short>("component",
-                                          "The velocity component this object is being applied to");
-  params.addParam<Real>("gamma", 1, "The penalty to multiply the jump with");
-  params.addClassDescription("Adds the exterior boundary contribution of penalized jumps in the "
-                             "velocity variable in one component of the momentum equations.");
-  params.addRequiredParam<MooseFunctorName>(
-      "face_functor",
-      "The velocity value on the boundary. For a Dirichlet boundary this should be the Dirichlet "
-      "value. For a Neumann boundary this should be the trace velocity");
+  InputParameters params = IPHDGBC::validParams();
+  params += MassFluxPenaltyIPHDGAssemblyHelper::validParams();
+  params.addClassDescription("introduces a jump correction on exterior faces for grad-div "
+                             "stabilization for discontinuous Galerkin methods.");
+  params.addRequiredParam<bool>("dirichlet_boundary",
+                                "Whether this is a Dirichlet boundary for the velocity. If it is, "
+                                "then we will not compute the trace residuals");
   return params;
 }
 
-MassFluxPenaltyBC::MassFluxPenaltyBC(const InputParameters & parameters)
-  : ADIntegratedBC(parameters),
-    _vel_x(adCoupledValue("u")),
-    _vel_y(adCoupledValue("v")),
-    _comp(getParam<unsigned short>("component")),
-    _matrix_only(getParam<bool>("matrix_only")),
-    _gamma(getParam<Real>("gamma")),
-    _face_functor(getFunctor<ADRealVectorValue>("face_functor")),
-    _hmax(0)
+MassFluxPenaltyBC::MassFluxPenaltyBC(const InputParameters & params)
+  : IPHDGBC(params),
+    _iphdg_helper(std::make_unique<MassFluxPenaltyIPHDGAssemblyHelper>(
+        this, this, this, _sys, _assembly, _tid, std::set<SubdomainID>{}, boundaryIDs())),
+    _dirichlet_boundary(getParam<bool>("dirichlet_boundary"))
 {
-  if (_mesh.dimension() > 2)
-    mooseError("This class only supports 2D simulations at this time");
 }
 
 void
-MassFluxPenaltyBC::precalculateResidual()
+MassFluxPenaltyBC::compute()
 {
-  _hmax = _current_side_elem->hmax();
+  auto & iphdg_helper = iphdgHelper();
+  iphdg_helper.resizeResiduals();
+
+  // u, lm_u
+  iphdg_helper.scalarFace();
+  if (!_dirichlet_boundary)
+    iphdg_helper.lmFace();
 }
 
-void
-MassFluxPenaltyBC::computeResidual()
+IPHDGAssemblyHelper &
+MassFluxPenaltyBC::iphdgHelper()
 {
-  if (!_matrix_only)
-    ADIntegratedBC::computeResidual();
-}
-
-ADReal
-MassFluxPenaltyBC::computeQpResidual()
-{
-  ADRealVectorValue soln_jump(_vel_x[_qp], _vel_y[_qp], 0);
-  soln_jump -=
-      _face_functor(Moose::ElemSideQpArg{_current_elem, _current_side, _qp, _qrule, _q_point[_qp]},
-                    determineState());
-
-  return _gamma / _hmax * soln_jump * _normals[_qp] * _test[_i][_qp] * _normals[_qp](_comp);
+  return *_iphdg_helper;
 }

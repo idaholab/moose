@@ -23,7 +23,7 @@ gamma = 1e5
   type = NavierStokesProblem
   extra_tag_matrices = 'mass'
   mass_matrix = 'mass'
-  use_pressure_mass_matrix = true
+  set_schur_pre = mass
 []
 
 [Variables]
@@ -215,42 +215,50 @@ gamma = 1e5
   [u_jump_walls]
     type = MassFluxPenaltyBC
     variable = vel_x
+    face_variable = vel_bar_x
     u = vel_x
     v = vel_y
     component = 0
     boundary = 'left right bottom'
     gamma = ${gamma}
-    face_functor = 'walls'
+    face_velocity = 'walls'
+    dirichlet_boundary = true
   []
   [v_jump_walls]
     type = MassFluxPenaltyBC
     variable = vel_y
+    face_variable = vel_bar_y
     u = vel_x
     v = vel_y
     component = 1
     boundary = 'left right bottom'
     gamma = ${gamma}
-    face_functor = 'walls'
+    face_velocity = 'walls'
+    dirichlet_boundary = true
   []
   [u_jump_top]
     type = MassFluxPenaltyBC
     variable = vel_x
+    face_variable = vel_bar_x
     u = vel_x
     v = vel_y
     component = 0
     boundary = 'top'
     gamma = ${gamma}
-    face_functor = 'top'
+    face_velocity = 'top'
+    dirichlet_boundary = true
   []
   [v_jump_top]
     type = MassFluxPenaltyBC
     variable = vel_y
+    face_variable = vel_bar_y
     u = vel_x
     v = vel_y
     component = 1
     boundary = 'top'
     gamma = ${gamma}
-    face_functor = 'top'
+    face_velocity = 'top'
+    dirichlet_boundary = true
   []
 []
 

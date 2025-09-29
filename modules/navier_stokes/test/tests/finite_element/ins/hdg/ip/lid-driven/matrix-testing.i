@@ -4,6 +4,10 @@ U = 1
 n = 5
 l = 1
 
+[GlobalParams]
+  gamma = 1
+[]
+
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
@@ -243,49 +247,57 @@ l = 1
     type = MassFluxPenaltyBC
     matrix_only = true
     variable = vel_x
+    face_variable = vel_bar_x
     u = vel_x
     v = vel_y
     component = 0
     vector_tags = ''
     matrix_tags = 'jump combined'
     boundary = 'left right bottom'
-    face_functor = 'walls'
+    face_velocity = 'walls'
+    dirichlet_boundary = true
   []
   [v_jump_walls]
     type = MassFluxPenaltyBC
     matrix_only = true
     variable = vel_y
+    face_variable = vel_bar_y
     u = vel_x
     v = vel_y
     component = 1
     vector_tags = ''
     matrix_tags = 'jump combined'
     boundary = 'left right bottom'
-    face_functor = 'walls'
+    face_velocity = 'walls'
+    dirichlet_boundary = true
   []
   [u_jump_top]
     type = MassFluxPenaltyBC
     matrix_only = true
     variable = vel_x
+    face_variable = vel_bar_x
     u = vel_x
     v = vel_y
     component = 0
     vector_tags = ''
     matrix_tags = 'jump combined'
     boundary = 'top'
-    face_functor = 'top'
+    face_velocity = 'top'
+    dirichlet_boundary = true
   []
   [v_jump_top]
     type = MassFluxPenaltyBC
     matrix_only = true
     variable = vel_y
+    face_variable = vel_bar_y
     u = vel_x
     v = vel_y
     component = 1
     vector_tags = ''
     matrix_tags = 'jump combined'
     boundary = 'top'
-    face_functor = 'top'
+    face_velocity = 'top'
+    dirichlet_boundary = true
   []
 []
 
