@@ -92,20 +92,20 @@ alpha = '${fparse 10 * degree^2}'
   [u_jump]
     type = MassFluxPenaltyIPHDG
     variable = vel_x
+    face_variable = vel_bar_x
+    face_velocity = face_velocity
     u = vel_x
     v = vel_y
-    u_face = vel_bar_x
-    v_face = vel_bar_y
     component = 0
     gamma = ${gamma}
   []
   [v_jump]
     type = MassFluxPenaltyIPHDG
     variable = vel_y
+    face_variable = vel_bar_y
+    face_velocity = face_velocity
     u = vel_x
     v = vel_y
-    u_face = vel_bar_x
-    v_face = vel_bar_y
     component = 1
     gamma = ${gamma}
   []
@@ -230,6 +230,7 @@ alpha = '${fparse 10 * degree^2}'
     pressure_face_variable = pressure_bar
     pressure_variable = pressure
     variable = vel_x
+    alpha = ${alpha}
   []
   [momentum_y_diffusion_neumann]
     type = NavierStokesStressIPHDGPrescribedFluxBC
@@ -241,6 +242,7 @@ alpha = '${fparse 10 * degree^2}'
     pressure_face_variable = pressure_bar
     pressure_variable = pressure
     variable = vel_y
+    alpha = ${alpha}
   []
   [mass_neumann]
     type = MassContinuityIPHDGBC
@@ -262,62 +264,74 @@ alpha = '${fparse 10 * degree^2}'
   [u_jump_walls]
     type = MassFluxPenaltyBC
     variable = vel_x
+    face_variable = vel_bar_x
     u = vel_x
     v = vel_y
     component = 0
     boundary = '2'
     gamma = ${gamma}
-    face_functor = vel_walls
+    face_velocity = vel_walls
+    dirichlet_boundary = true
   []
   [v_jump_walls]
     type = MassFluxPenaltyBC
     variable = vel_y
+    face_variable = vel_bar_y
     u = vel_x
     v = vel_y
     component = 1
     boundary = '2'
     gamma = ${gamma}
-    face_functor = vel_walls
+    face_velocity = vel_walls
+    dirichlet_boundary = true
   []
   [u_jump_inlet]
     type = MassFluxPenaltyBC
     variable = vel_x
+    face_variable = vel_bar_x
     u = vel_x
     v = vel_y
     component = 0
     boundary = '1'
     gamma = ${gamma}
-    face_functor = vel_inlet
+    face_velocity = vel_inlet
+    dirichlet_boundary = true
   []
   [v_jump_inlet]
     type = MassFluxPenaltyBC
     variable = vel_y
+    face_variable = vel_bar_y
     u = vel_x
     v = vel_y
     component = 1
     boundary = '1'
     gamma = ${gamma}
-    face_functor = vel_inlet
+    face_velocity = vel_inlet
+    dirichlet_boundary = true
   []
   [u_jump_outlet]
     type = MassFluxPenaltyBC
     variable = vel_x
+    face_variable = vel_bar_x
     u = vel_x
     v = vel_y
     component = 0
     boundary = '3'
     gamma = ${gamma}
-    face_functor = face_velocity
+    face_velocity = face_velocity
+    dirichlet_boundary = false
   []
   [v_jump_outlet]
     type = MassFluxPenaltyBC
     variable = vel_y
+    face_variable = vel_bar_y
     u = vel_x
     v = vel_y
     component = 1
     boundary = '3'
     gamma = ${gamma}
-    face_functor = face_velocity
+    face_velocity = face_velocity
+    dirichlet_boundary = false
   []
 []
 
@@ -379,7 +393,7 @@ alpha = '${fparse 10 * degree^2}'
     []
     [p]
       vars = 'pressure_bar'
-      petsc_options = '-ksp_converged_reason -ksp_monitor'
+      petsc_options = '-ksp_converged_reason'
       petsc_options_iname = '-pc_type -ksp_type -ksp_rtol -ksp_gmres_restart -ksp_pc_side -pc_factor_mat_solver_type -ksp_max_it -ksp_atol -ksp_norm_type'
       petsc_options_value = 'ilu      gmres     1e-2      300                right        strumpack                  30          1e-8      unpreconditioned'
     []
@@ -395,6 +409,7 @@ alpha = '${fparse 10 * degree^2}'
 []
 
 [Outputs]
+  print_linear_residuals = false
   [out]
     type = Exodus
     hide = 'pressure_bar vel_bar_x vel_bar_y'
