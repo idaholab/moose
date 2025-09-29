@@ -41,5 +41,5 @@ protected:
   const MooseArray<Point> & _normals;
 
   /// Current side element
-  const Elem *& _current_side_elem;
+  const Elem * const & _current_side_elem;
 };

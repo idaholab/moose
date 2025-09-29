@@ -1,6 +1,10 @@
 mu = 2
 rho = 2
 
+[GlobalParams]
+  alpha = 6
+[]
+
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
@@ -55,7 +59,6 @@ rho = 2
     variable = vel_x
     face_variable = vel_bar_x
     diffusivity = 'mu'
-    alpha = 6
     pressure_variable = pressure
     pressure_face_variable = pressure_bar
     component = 0
@@ -72,7 +75,6 @@ rho = 2
     variable = vel_y
     face_variable = vel_bar_y
     diffusivity = 'mu'
-    alpha = 6
     pressure_variable = pressure
     pressure_face_variable = pressure_bar
     component = 1
@@ -133,7 +135,6 @@ rho = 2
     face_variable = vel_bar_x
     pressure_variable = pressure
     pressure_face_variable = pressure_bar
-    alpha = 6
     functor = 'exact_u'
     diffusivity = 'mu'
     component = 0
@@ -145,7 +146,6 @@ rho = 2
     face_variable = vel_bar_y
     pressure_variable = pressure
     pressure_face_variable = pressure_bar
-    alpha = 6
     functor = 'exact_v'
     diffusivity = 'mu'
     component = 1

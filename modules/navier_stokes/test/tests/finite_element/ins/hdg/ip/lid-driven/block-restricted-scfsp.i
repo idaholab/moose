@@ -248,42 +248,50 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
   [u_jump_walls]
     type = MassFluxPenaltyBC
     variable = vel_x
+    face_variable = vel_bar_x
     u = vel_x
     v = vel_y
     component = 0
     boundary = 'left right_v2 bottom_v2'
     gamma = ${gamma}
-    face_functor = walls
+    face_velocity = walls
+    dirichlet_boundary = true
   []
   [v_jump_walls]
     type = MassFluxPenaltyBC
     variable = vel_y
+    face_variable = vel_bar_y
     u = vel_x
     v = vel_y
     component = 1
     boundary = 'left right_v2 bottom_v2'
     gamma = ${gamma}
-    face_functor = walls
+    face_velocity = walls
+    dirichlet_boundary = true
   []
   [u_jump_top]
     type = MassFluxPenaltyBC
     variable = vel_x
+    face_variable = vel_bar_x
     u = vel_x
     v = vel_y
     component = 0
     boundary = 'top_v2'
     gamma = ${gamma}
-    face_functor = top_vel
+    face_velocity = top_vel
+    dirichlet_boundary = true
   []
   [v_jump_top]
     type = MassFluxPenaltyBC
     variable = vel_y
+    face_variable = vel_bar_y
     u = vel_x
     v = vel_y
     component = 1
     boundary = 'top_v2'
     gamma = ${gamma}
-    face_functor = top_vel
+    face_velocity = top_vel
+    dirichlet_boundary = true
   []
 []
 
