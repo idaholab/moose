@@ -11,10 +11,13 @@
 import unittest
 import json
 import zlib
+from bson.objectid import ObjectId
 from datetime import datetime
 from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
 from TestHarness.resultsreader.results import TestHarnessResults, TestHarnessTestResult
 
+FAKE_RESULT_ID = ObjectId('626bccb9697a12204fb22ea3')
+FAKE_TEST_ID = ObjectId('626bccb9697a12204fb22ea4')
 FAKE_CIVET_VERSION = 3
 FAKE_CIVET_JOB_ID = 12345
 FAKE_CIVET_JOB_URL = f'civet.inl.gov/job/{FAKE_CIVET_JOB_ID}'
@@ -50,6 +53,8 @@ class TestResultsReaderResults(TestHarnessTestCase):
         # Perform fixups that CIVET would do
         for folder_name, folder_values in values['tests'].items():
             for test_name, test_values in folder_values['tests'].items():
+                test_values['_id'] = FAKE_TEST_ID
+
                 # Remove output entires, as they're removed when storing
                 for key in ['output', 'output_files']:
                     if key in test_values:
@@ -73,7 +78,8 @@ class TestResultsReaderResults(TestHarnessTestCase):
 
         # Setup main results entry
         results = values.copy()
-        del results['tests']
+        results['_id'] = FAKE_RESULT_ID
+        results['tests'] = {}
         results['civet'] = {'job_url': FAKE_CIVET_JOB_URL,
                             'job_id': FAKE_CIVET_JOB_ID,
                             'version': civet_version}
@@ -86,6 +92,7 @@ class TestResultsReaderResults(TestHarnessTestCase):
         result = TestHarnessResults(results)
 
         self.assertEqual(result.data, results)
+        self.assertEqual(result.id, FAKE_RESULT_ID)
         self.assertEqual(result.testharness, results['testharness'])
         self.assertEqual(result.version, results['testharness']['version'])
         self.assertEqual(result.validation_version, results['testharness']['validation_version'])
@@ -119,6 +126,7 @@ class TestResultsReaderResults(TestHarnessTestCase):
 
             # Base properties
             self.assertEqual(test_result.data, entry)
+            self.assertEqual(test_result.id, FAKE_TEST_ID)
             self.assertEqual(test_result.results, test_harness_results)
             self.assertEqual(test_result.folder_name, folder_name)
             self.assertEqual(test_result.test_name, test_name)
