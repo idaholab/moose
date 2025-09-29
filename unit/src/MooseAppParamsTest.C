@@ -21,7 +21,7 @@ std::unique_ptr<MooseApp>
 createApp(const std::vector<std::string> & cli_args)
 {
   return AppFactory::create("MooseUnitApp", cli_args);
-};
+}
 
 TEST(MooseAppParamsTest, checkExclusiveParams)
 {
