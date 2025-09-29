@@ -23,10 +23,9 @@ DiffusionIPHDGAssemblyHelper::validParams()
 {
   auto params = IPHDGAssemblyHelper::validParams();
   params.addRequiredParam<MaterialPropertyName>("diffusivity", "The diffusivity");
-  params.addParam<Real>("alpha",
-                        1,
-                        "The stabilization coefficient required for discontinuous Galerkin "
-                        "schemes.");
+  params.addRequiredParam<Real>("alpha",
+                                "The stabilization coefficient required for discontinuous Galerkin "
+                                "schemes.");
   return params;
 }
 
