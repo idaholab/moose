@@ -46,6 +46,8 @@ SCMQuadPowerIC::SCMQuadPowerIC(const InputParameters & params)
   auto nx = _mesh.getNx();
   auto ny = _mesh.getNy();
   auto heated_length = _mesh.getHeatedLength();
+  if (processor_id() > 0)
+    return;
 
   _power_dis.resize((ny - 1) * (nx - 1), 1);
   _power_dis.setZero();
@@ -91,6 +93,8 @@ SCMQuadPowerIC::SCMQuadPowerIC(const InputParameters & params)
 void
 SCMQuadPowerIC::initialSetup()
 {
+  if (processor_id() > 0)
+    return;
   auto nx = _mesh.getNx();
   auto ny = _mesh.getNy();
   auto n_pins = (nx - 1) * (ny - 1);

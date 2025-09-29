@@ -41,6 +41,8 @@ SCMTriPowerIC::SCMTriPowerIC(const InputParameters & params)
 {
   auto n_pins = _mesh.getNumOfPins();
   auto heated_length = _mesh.getHeatedLength();
+  if (processor_id() > 0)
+    return;
 
   _power_dis.resize(n_pins, 1);
   _power_dis.setZero();
@@ -85,6 +87,8 @@ SCMTriPowerIC::SCMTriPowerIC(const InputParameters & params)
 void
 SCMTriPowerIC::initialSetup()
 {
+  if (processor_id() > 0)
+    return;
   auto n_pins = _mesh.getNumOfPins();
   auto nz = _mesh.getNumOfAxialCells();
   auto z_grid = _mesh.getZGrid();
