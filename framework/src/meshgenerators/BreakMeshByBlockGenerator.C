@@ -522,17 +522,28 @@ BreakMeshByBlockGenerator::syncConnectedBlocks(
   // Phase 0: Each rank computes its local connected blocks for nodes it holds
   for (const auto & map_entry : node_to_elem_map)
   {
+    std::set<subdomain_id_type> connected_blocks;
+
     const auto & elem_ids = map_entry.second;
     for (const dof_id_type elem_id : elem_ids)
     {
-      const Elem * elem = mesh.elem_ptr(elem_id);
-      if (elem)
+      const Elem * current_elem = mesh.elem_ptr(elem_id);
+      if (!current_elem)
+        continue;
+
+      subdomain_id_type block_id = blockRestrictedElementSubdomainID(current_elem);
+
+      if (!_block_pairs_restricted)
+        connected_blocks.insert(block_id);
+      else
       {
-        const subdomain_id_type bid = blockRestrictedElementSubdomainID(elem);
-        if (!_block_pairs_restricted || bid != Elem::invalid_subdomain_id)
-          _nodeid_to_connected_blocks[map_entry.first].insert(bid);
+        if (block_id != Elem::invalid_subdomain_id)
+          connected_blocks.insert(block_id);
       }
     }
+
+    // Key: Even if connected_blocks is empty, still create an entry
+    _nodeid_to_connected_blocks[map_entry.first] = std::move(connected_blocks);
   }
 
   if (mesh.is_replicated())
