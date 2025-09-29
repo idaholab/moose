@@ -46,13 +46,13 @@ alpha = '${fparse 10*degree^2}'
 []
 
 [HDGKernels]
-  # [momentum_x_advection]
-  #   type = AdvectionIPHDGKernel
-  #   variable = vel_x
-  #   face_variable = vel_bar_x
-  #   velocity = 'velocity'
-  #   coeff = ${rho}
-  # []
+  [momentum_x_advection]
+    type = AdvectionIPHDGKernel
+    variable = vel_x
+    face_variable = vel_bar_x
+    velocity = 'velocity'
+    coeff = ${rho}
+  []
   [momentum_x_diffusion]
     type = NavierStokesStressIPHDGKernel
     variable = vel_x
@@ -63,13 +63,13 @@ alpha = '${fparse 10*degree^2}'
     pressure_face_variable = pressure_bar
     component = 0
   []
-  # [momentum_y_advection]
-  #   type = AdvectionIPHDGKernel
-  #   variable = vel_y
-  #   face_variable = vel_bar_y
-  #   velocity = 'velocity'
-  #   coeff = ${rho}
-  # []
+  [momentum_y_advection]
+    type = AdvectionIPHDGKernel
+    variable = vel_y
+    face_variable = vel_bar_y
+    velocity = 'velocity'
+    coeff = ${rho}
+  []
   [momentum_y_diffusion]
     type = NavierStokesStressIPHDGKernel
     variable = vel_y
@@ -93,24 +93,33 @@ alpha = '${fparse 10*degree^2}'
   #
   # dirichlet
   #
-  # [momentum_x_advection_dirichlet]
-  #   type = AdvectionIPHDGDirichletBC
-  #   boundary = 'top bottom left'
-  #   face_variable = vel_bar_x
-  #   functor = exact_u
-  #   variable = vel_x
-  #   velocity = velocity
-  #   coeff = ${rho}
-  # []
-  # [momentum_y_advection_dirichlet]
-  #   type = AdvectionIPHDGDirichletBC
-  #   boundary = 'top bottom left'
-  #   face_variable = vel_bar_y
-  #   functor = exact_v
-  #   variable = vel_y
-  #   velocity = velocity
-  #   coeff = ${rho}
-  # []
+  [momentum_x_advection_dirichlet_inlet]
+    type = AdvectionIPHDGDirichletBC
+    boundary = 'left'
+    face_variable = vel_bar_x
+    functor = '1'
+    variable = vel_x
+    velocity = velocity
+    coeff = ${rho}
+  []
+  [momentum_x_advection_dirichlet_walls]
+    type = AdvectionIPHDGDirichletBC
+    boundary = 'top bottom'
+    face_variable = vel_bar_x
+    functor = '0'
+    variable = vel_x
+    velocity = velocity
+    coeff = ${rho}
+  []
+  [momentum_y_advection_dirichlet]
+    type = AdvectionIPHDGDirichletBC
+    boundary = 'top bottom left'
+    face_variable = vel_bar_y
+    functor = '0'
+    variable = vel_y
+    velocity = velocity
+    coeff = ${rho}
+  []
   [momentum_x_diffusion_dirichlet_inlet]
     type = NavierStokesStressIPHDGDirichletBC
     boundary = 'left'
@@ -167,24 +176,24 @@ alpha = '${fparse 10*degree^2}'
   #
   # Neumann
   #
-  # [momentum_x_advection_neumann]
-  #   type = AdvectionIPHDGOutflowBC
-  #   boundary = 'right'
-  #   constrain_lm = false
-  #   face_variable = vel_bar_x
-  #   variable = vel_x
-  #   velocity = velocity
-  #   coeff = ${rho}
-  # []
-  # [momentum_y_advection_neumann]
-  #   type = AdvectionIPHDGOutflowBC
-  #   boundary = 'right'
-  #   constrain_lm = false
-  #   face_variable = vel_bar_y
-  #   variable = vel_y
-  #   velocity = velocity
-  #   coeff = ${rho}
-  # []
+  [momentum_x_advection_neumann]
+    type = AdvectionIPHDGOutflowBC
+    boundary = 'right'
+    constrain_lm = false
+    face_variable = vel_bar_x
+    variable = vel_x
+    velocity = velocity
+    coeff = ${rho}
+  []
+  [momentum_y_advection_neumann]
+    type = AdvectionIPHDGOutflowBC
+    boundary = 'right'
+    constrain_lm = false
+    face_variable = vel_bar_y
+    variable = vel_y
+    velocity = velocity
+    coeff = ${rho}
+  []
   [momentum_x_diffusion_neumann]
     type = NavierStokesStressIPHDGPrescribedFluxBC
     boundary = 'right'
@@ -219,6 +228,37 @@ alpha = '${fparse 10*degree^2}'
   []
 []
 
+[Functions]
+  [testfunc]
+    type = ParsedFunction
+    expression = 'x*y'
+  []
+[]
+
+[ICs]
+  [testu]
+    type = FunctionIC
+    variable = testu
+    function = testfunc
+  []
+  [testv]
+    type = FunctionIC
+    variable = testv
+    function = testfunc
+  []
+[]
+
+[AuxVariables]
+  [testu]
+    family = L2_LAGRANGE
+    order = FIRST
+  []
+  [testv]
+    family = L2_LAGRANGE
+    order = FIRST
+  []
+[]
+
 [Materials]
   [const]
     type = ADGenericConstantMaterial
@@ -230,18 +270,23 @@ alpha = '${fparse 10*degree^2}'
     vector_prop_name = 'velocity'
     u = vel_x
     v = vel_y
+    # u = testu
+    # v = testv
   []
 []
 
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
+  petsc_options = '-snes_monitor'
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
   petsc_options_value = 'lu       mumps'
   nl_rel_tol = 1e-12
+  line_search = none
 []
 
 [Outputs]
   csv = true
   exodus = true
+  print_nonlinear_residuals = false
 []
