@@ -215,11 +215,13 @@ heated_length = 1.0
     execute_on = 'timestep_end'
     positions = '0   0   0 '
     bounding_box_padding = '0 0 0.01'
+    max_procs_per_app = 1
   []
   [viz]
     type = FullSolveMultiApp
     input_files = '3d.i'
     execute_on = 'timestep_end'
+    max_procs_per_app = 1
   []
 []
 
