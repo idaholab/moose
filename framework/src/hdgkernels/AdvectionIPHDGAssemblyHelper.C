@@ -19,8 +19,8 @@ AdvectionIPHDGAssemblyHelper::validParams()
 {
   auto params = IPHDGAssemblyHelper::validParams();
   params.addRequiredParam<MaterialPropertyName>("velocity", "Velocity vector");
-  params.addParam<Real>(
-      "coeff", 1, "A constant coefficient. This could be something like a density");
+  params.addRequiredParam<Real>("coeff",
+                                "A constant coefficient. This could be something like a density");
   return params;
 }
 
@@ -52,15 +52,21 @@ AdvectionIPHDGAssemblyHelper::scalarVolume()
   }
 }
 
+ADReal
+AdvectionIPHDGAssemblyHelper::computeFlux(const unsigned int qp, const ADReal & face_value)
+{
+  const auto vdotn = _face_velocity[qp] * _ip_normals[qp];
+  const auto face_phi = _coeff * face_value;
+  const auto internal_phi = _coeff * _u_sol[qp];
+  return 0.5 * vdotn * (internal_phi + face_phi) + 0.5 * abs(vdotn) * (internal_phi - face_phi);
+}
+
 void
 AdvectionIPHDGAssemblyHelper::scalarFace()
 {
   for (const auto qp : make_range(_ip_qrule_face->n_points()))
   {
-    const auto vdotn = _face_velocity[qp] * _ip_normals[qp];
-    const auto adv_quant =
-        _coeff * (MetaPhysicL::raw_value(vdotn) >= 0 ? _u_sol[qp] : _lm_u_sol[qp]);
-    const auto qp_term = _ip_JxW_face[qp] * vdotn * adv_quant;
+    const auto qp_term = _ip_JxW_face[qp] * computeFlux(qp, _lm_u_sol[qp]);
     for (const auto i : index_range(_scalar_re))
       _scalar_re(i) += _scalar_phi_face[i][qp] * qp_term;
   }
@@ -71,10 +77,7 @@ AdvectionIPHDGAssemblyHelper::lmFace()
 {
   for (const auto qp : make_range(_ip_qrule_face->n_points()))
   {
-    const auto vdotn = _face_velocity[qp] * _ip_normals[qp];
-    const auto adv_quant =
-        _coeff * (MetaPhysicL::raw_value(vdotn) >= 0 ? _u_sol[qp] : _lm_u_sol[qp]);
-    const auto qp_term = _ip_JxW_face[qp] * vdotn * adv_quant;
+    const auto qp_term = _ip_JxW_face[qp] * computeFlux(qp, _lm_u_sol[qp]);
     for (const auto i : index_range(_lm_re))
       _lm_re(i) -= _lm_phi_face[i][qp] * qp_term;
   }
@@ -85,14 +88,11 @@ AdvectionIPHDGAssemblyHelper::scalarDirichlet(const Moose::Functor<Real> & diric
 {
   for (const auto qp : make_range(_ip_qrule_face->n_points()))
   {
-    const auto vdotn = _face_velocity[qp] * _ip_normals[qp];
     const auto dirichlet_value = dirichlet_functor(
         Moose::ElemSideQpArg{
             _ip_current_elem, _ip_current_side, qp, _ip_qrule_face, _ip_q_point_face[qp]},
         _ti.determineState());
-    const auto adv_quant =
-        _coeff * (MetaPhysicL::raw_value(vdotn) >= 0 ? _u_sol[qp] : dirichlet_value);
-    const auto qp_term = _ip_JxW_face[qp] * vdotn * adv_quant;
+    const auto qp_term = _ip_JxW_face[qp] * computeFlux(qp, dirichlet_value);
     for (const auto i : index_range(_scalar_re))
       _scalar_re(i) += _scalar_phi_face[i][qp] * qp_term;
   }

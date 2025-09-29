@@ -60,6 +60,15 @@ public:
    */
   void lmOutflow();
 
+protected:
+  /**
+   * compute the face flux, e.g. the advected quantity times the velocity dotted with the normal
+   * @param qp The quadrature point index
+   * @param face_value The advected quantity evaluated right on the face, so either the trace
+   * unknown or a Dirichlet value
+   */
+  ADReal computeFlux(const unsigned int qp, const ADReal & face_value);
+
   /// The velocity in the element interior
   const ADMaterialProperty<RealVectorValue> & _velocity;
 
