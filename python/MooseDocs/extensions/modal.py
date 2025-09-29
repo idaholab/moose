@@ -27,7 +27,7 @@ def make_extension(**kwargs):
     return ModalExtension(**kwargs)
 
 ModalLink = tokens.newToken('ModalLink', content=None, title=None)
-ModalSourceLink = tokens.newToken('ModalSourceLink', src=None, title=None, language=None, link_prefix=None)
+ModalSourceLink = tokens.newToken('ModalSourceLink', src=None, title=None, language=None, link_prefix=None, src_alt=None)
 
 class ModalExtension(command.CommandExtension):
     """
@@ -121,6 +121,8 @@ class RenderSourceLinkToken(components.RenderComponent):
     def linkText(token):
         prefix = (token['link_prefix'] + ' ') if token['link_prefix'] else ''
         path = os.path.relpath(token["src"], MooseDocs.ROOT_DIR)
+        if token['src_alt'] is not None:
+            path = os.path.join(token['src_alt'], os.path.basename(path))
         return f'({prefix}{path})' if not token.children else None
 
     def createHTML(self, parent, token, page):
