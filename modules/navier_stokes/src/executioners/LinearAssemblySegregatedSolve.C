@@ -15,6 +15,7 @@
 #include "LinearFVDiffusion.h"
 #include "LinearFVAnisotropicDiffusion.h"
 #include "LinearFVBoundaryCondition.h"
+#include "LinearFVCHTBCInterface.h"
 
 using namespace libMesh;
 
@@ -91,31 +92,29 @@ LinearAssemblySegregatedSolve::validParams()
 
   params.addRangeCheckedParam<Real>(
       "cht_heat_flux_tolerance", 1e-8, "cht_heat_flux_tolerance > 0", "Bazinga.");
-  params.addRangeCheckedParam<Real>(
-      "cht_temperature_tolerance", 1e-8, "cht_temperature_tolerance > 0", "Bazinga.");
 
-  params.addRangeCheckedParam<Real>(
-      "cht_fluid_temperature_relaxation_factor",
+  params.addRangeCheckedParam<std::vector<Real>>(
+      "cht_fluid_temperature_relaxation",
       {},
       "The relaxation factors for the boundary temperature when being updated on the fluid side.");
-  params.addRangeCheckedParam<Real>(
-      "cht_solid_temperature_relaxation_factor",
+  params.addRangeCheckedParam<std::vector<Real>>(
+      "cht_solid_temperature_relaxation",
       {},
       "The relaxation factors for the boundary temperature when being updated on the solid side.");
 
-  params.addRangeCheckedParam<Real>(
-      "cht_fluid_flux_relaxation_factor",
+  params.addRangeCheckedParam<std::vector<Real>>(
+      "cht_fluid_flux_relaxation",
       {},
       "The relaxation factors for the boundary flux when being updated on the fluid side.");
-  params.addRangeCheckedParam<Real>(
-      "cht_solid_flux_relaxation_factor",
+  params.addRangeCheckedParam<std::vector<Real>>(
+      "cht_solid_flux_relaxation",
       {},
       "The relaxation factors for the boundary flux when being updated on the solid side.");
 
   params.addParamNamesToGroup(
-      "cht_interfaces num_cht_fpi cht_heat_flux_tolerance cht_fluid_temperature_relaxation_factor "
-      "cht_solid_temperature_relaxation_factor cht_fluid_flux_relaxation_factor "
-      "cht_solid_flux_relaxation_factor",
+      "cht_interfaces num_cht_fpi cht_heat_flux_tolerance cht_fluid_temperature_relaxation "
+      "cht_solid_temperature_relaxation cht_fluid_flux_relaxation "
+      "cht_solid_flux_relaxation",
       "Conjugate Heat Transfer");
 
   return params;
@@ -145,8 +144,7 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
     _cht_boundary_names(getParam<std::vector<BoundaryName>>("cht_interfaces")),
     _cht_boundary_ids(_problem.mesh().getBoundaryIDs(_cht_boundary_names)),
     _num_cht_fpi(getParam<unsigned int>("num_cht_fpi")),
-    _cht_heat_flux_tolerance(getParam<Real>("cht_heat_flux_tolerance")),
-    _cht_temperature_tolerance(getParam<Real>("cht_temperature_tolerance"))
+    _cht_heat_flux_tolerance(getParam<Real>("cht_heat_flux_tolerance"))
 {
   // We fetch the systems and their numbers for the momentum equations.
   for (auto system_i : index_range(_momentum_system_names))
@@ -618,10 +616,10 @@ LinearAssemblySegregatedSolve::deduceCHTBoundaryCoupling()
   _cht_boundary_conditions.clear();
   _cht_boundary_conditions.resize(_cht_boundary_names.size(), {nullptr, nullptr});
 
-  const auto flux_relaxation_param_names = std::vector<std::string>(
-      {"cht_solid_flux_relaxation_factor ", "cht_fluid_flux_relaxation_factor"});
+  const auto flux_relaxation_param_names =
+      std::vector<std::string>({"cht_solid_flux_relaxation", "cht_fluid_flux_relaxation"});
   const auto temperature_relaxation_param_names = std::vector<std::string>(
-      {"cht_solid_temperature_relaxation_factor", "cht_fluid_temperature_relaxation_factor"});
+      {"cht_solid_temperature_relaxation", "cht_fluid_temperature_relaxation"});
   _cht_flux_relaxation_factor.clear();
   _cht_flux_relaxation_factor.resize(2, std::vector<Real>(_cht_boundary_names.size(), 1.0));
   _cht_temperature_relaxation_factor.clear();
@@ -632,27 +630,27 @@ LinearAssemblySegregatedSolve::deduceCHTBoundaryCoupling()
     // First thing, we fetch the relaxation parameter values
     const auto & flux_param_value =
         getParam<std::vector<Real>>(flux_relaxation_param_names[region_index]);
-    if (!flux_param_value.empty() && (flux_param_value.size() != _cht_boundary_names.size()))
+    if (flux_param_value.empty() || (flux_param_value.size() != _cht_boundary_names.size()))
       paramError(flux_relaxation_param_names[region_index],
                  "The number of relaxation factors is not the same as the number of interfaces!");
-    else
-      _cht_flux_relaxation_factor[region_index] = flux_param_value;
+
+    _cht_flux_relaxation_factor[region_index] = flux_param_value;
 
     const auto & temperature_param_value =
         getParam<std::vector<Real>>(temperature_relaxation_param_names[region_index]);
-    if (!temperature_param_value.empty() &&
+    if (temperature_param_value.empty() ||
         (temperature_param_value.size() != _cht_boundary_names.size()))
       paramError(temperature_relaxation_param_names[region_index],
                  "The number of relaxation factors is not the same as the number of interfaces!");
-    else
-      _cht_temperature_relaxation_factor[region_index] = temperature_param_value;
+
+    _cht_temperature_relaxation_factor[region_index] = temperature_param_value;
 
     // We then fetch the conduction kernels
     std::vector<LinearFVFluxKernel *> flux_kernels;
     _problem.getMooseApp()
         .theWarehouse()
         .query()
-        .template condition<AttribSystem>("LinearFVfluxKernel")
+        .template condition<AttribSystem>("LinearFVFluxKernel")
         .template condition<AttribVar>(0)
         .template condition<AttribSysNum>(_cht_system_numbers[region_index])
         .queryInto(flux_kernels);
@@ -698,8 +696,11 @@ LinearAssemblySegregatedSolve::deduceCHTBoundaryCoupling()
                    boundary_name,
                    " (ID: ",
                    boundary_id,
-                   "). Make sure you define exactly one!");
+                   "). Make sure you define exactly one for conjugate heat transfer applications!");
       _cht_boundary_conditions[bd_index][region_index] = bcs[0];
+
+      if (!dynamic_cast<LinearFVCHTBCInterface *>(_cht_boundary_conditions[bd_index][region_index]))
+        mooseError("Nah you cant do diz man");
     }
   }
 }
@@ -707,6 +708,7 @@ LinearAssemblySegregatedSolve::deduceCHTBoundaryCoupling()
 void
 LinearAssemblySegregatedSolve::setupConjugateHeatTransferContainers()
 {
+  // We already error in initialSetup if we have more variables
   const auto * fluid_variable =
       dynamic_cast<const MooseLinearVariableFVReal *>(&_energy_system->getVariable(0, 0));
   const auto * solid_variable =
@@ -715,11 +717,8 @@ LinearAssemblySegregatedSolve::setupConjugateHeatTransferContainers()
   _cht_face_info.clear();
   _cht_face_info.resize(_cht_boundary_ids.size());
   _boundary_heat_flux.clear();
-  _boundary_heat_flux.resize(_cht_boundary_ids.size());
   _boundary_temperature.clear();
-  _boundary_temperature.resize(_cht_boundary_ids.size());
   _integrated_boundary_heat_flux.clear();
-  _integrated_boundary_heat_flux.resize(_cht_boundary_ids.size());
 
   for (const auto bd_index : index_range(_cht_boundary_ids))
   {
@@ -732,10 +731,11 @@ LinearAssemblySegregatedSolve::setupConjugateHeatTransferContainers()
       if (fi->boundaryIDs().count(bd_id))
         bd_fi_container.push_back(fi);
 
+    // We instantiate the coupling fuctors for heat flux and temperature
     FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> solid_bd_flux(
-        _problem.mesh(), solid_variable->blockIDs(), "heat_flux_solid_" + bd_name);
+        _problem.mesh(), solid_variable->blockIDs(), "heat_flux_from_solid_to_fluid_" + bd_name);
     FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> fluid_bd_flux(
-        _problem.mesh(), fluid_variable->blockIDs(), "heat_flux_fluid_" + bd_name);
+        _problem.mesh(), fluid_variable->blockIDs(), "heat_flux_from_fluid_to_solid_" + bd_name);
 
     _boundary_heat_flux.push_back(
         std::vector<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>>(
@@ -745,28 +745,30 @@ LinearAssemblySegregatedSolve::setupConjugateHeatTransferContainers()
     _integrated_boundary_heat_flux.push_back(std::vector<Real>({0.0, 0.0}));
 
     FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> solid_bd_temperature(
-        _problem.mesh(), solid_variable->blockIDs(), "bd_temperature_solid_" + bd_name);
+        _problem.mesh(), solid_variable->blockIDs(), "interface_temperature_solid_" + bd_name);
     FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> fluid_bd_temperature(
-        _problem.mesh(), fluid_variable->blockIDs(), "bd_temperature_fluid_" + bd_name);
+        _problem.mesh(), fluid_variable->blockIDs(), "interface_temperature_fluid_" + bd_name);
 
-    // We do this ugliness to save an extra line, considering emplace already gives a reference to
-    // the freshly emplaced object
     _boundary_temperature.push_back(
         std::vector<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>>(
             {std::move(solid_bd_temperature), std::move(fluid_bd_temperature)}));
     auto & temperature_container = _boundary_temperature.back();
 
+    // Time to register the functors on all of the threads
     for (const auto tid : make_range(libMesh::n_threads()))
     {
-      _problem.addFunctor("heat_flux_solid_" + bd_name, flux_container[NS::CHTSide::SOLID], tid);
-      _problem.addFunctor("heat_flux_fluid_" + bd_name, flux_container[NS::CHTSide::FLUID], tid);
       _problem.addFunctor(
-          "bd_temperature_solid_" + bd_name, temperature_container[NS::CHTSide::SOLID], tid);
+          "heat_flux_from_solid_to_fluid_" + bd_name, flux_container[NS::CHTSide::SOLID], tid);
       _problem.addFunctor(
-          "bd_temperature_fluid_" + bd_name, temperature_container[NS::CHTSide::FLUID], tid);
+          "heat_flux_from_fluid_to_solid_" + bd_name, flux_container[NS::CHTSide::FLUID], tid);
+      _problem.addFunctor(
+          "interface_temperature_solid_" + bd_name, temperature_container[NS::CHTSide::SOLID], tid);
+      _problem.addFunctor(
+          "interface_temperature_fluid_" + bd_name, temperature_container[NS::CHTSide::FLUID], tid);
     }
 
-    // Initialize the containers, they will be filled with correct values soon
+    // Initialize the containers, they will be filled with correct values soon.
+    // Before any solve happens.
     for (const auto region_index : make_range(2))
       for (auto & fi : bd_fi_container)
       {
@@ -786,6 +788,7 @@ LinearAssemblySegregatedSolve::initializeCHTCouplingFields()
 
     for (const auto region_index : make_range(2))
     {
+      // Can't be const considering we will updat emembers from here
       auto bc = _cht_boundary_conditions[bd_index][region_index];
       for (const auto & fi : bd_fi_container)
       {
@@ -799,6 +802,8 @@ LinearAssemblySegregatedSolve::initializeCHTCouplingFields()
 void
 LinearAssemblySegregatedSolve::updateCHTBoundaryCouplingFields(const NS::CHTSide side)
 {
+  // Well we can just use the face that this enum casts into int very nicely
+  // we can use it to get the index of the other side
   const NS::CHTSide other_side = static_cast<NS::CHTSide>(1 - side);
 
   for (const auto bd_index : index_range(_cht_boundary_ids))
@@ -809,6 +814,7 @@ LinearAssemblySegregatedSolve::updateCHTBoundaryCouplingFields(const NS::CHTSide
     const auto temperature_relaxation = _cht_flux_relaxation_factor[side][bd_index];
     const auto flux_relaxation = _cht_temperature_relaxation_factor[side][bd_index];
 
+    // Fetching container ahead of time
     auto & flux_container = _boundary_heat_flux[bd_index][side];
     auto & temperature_container = _boundary_temperature[bd_index][side];
     auto & integrated_flux = _integrated_boundary_heat_flux[bd_index][side];
@@ -818,17 +824,20 @@ LinearAssemblySegregatedSolve::updateCHTBoundaryCouplingFields(const NS::CHTSide
     for (const auto & fi : bd_fi_container)
     {
       other_kernel->setupFaceData(fi);
+      other_kernel->setCurrentFaceArea(fi->faceArea() * fi->faceCoord());
       other_bc->setupFaceData(fi, fi->faceType(std::make_pair(0, _cht_system_numbers[other_side])));
 
+      // T_new = relaxation * T_boundary + (1-relaxation) * T_old
       temperature_container[fi->id()] =
           temperature_relaxation * other_bc->computeBoundaryValue() +
           (1 - temperature_relaxation) * temperature_container[fi->id()];
 
+      // Flux_new = relaxation * Flux_boundary + (1-relaxation) * Flux_old
       const auto flux = flux_relaxation * other_kernel->computeBoundaryFlux(*other_bc) +
                         (1 - flux_relaxation) * flux_container[fi->id()];
 
       flux_container[fi->id()] = flux;
-      integrated_flux += flux * fi->faceArea() * fi->faceCoord();
+      integrated_flux += flux;
     }
   }
 }
@@ -935,7 +944,7 @@ LinearAssemblySegregatedSolve::solve()
 
         for (const auto i : index_range(_integrated_boundary_heat_flux))
         {
-          auto & integrated_fluxes = _integrated_boundary_heat_flux[_cht_boundary_ids[i]];
+          auto & integrated_fluxes = _integrated_boundary_heat_flux[i];
           _communicator.sum(integrated_fluxes[NS::CHTSide::SOLID]);
           _communicator.sum(integrated_fluxes[NS::CHTSide::FLUID]);
           _console << " Boundary " << _cht_boundary_names[i] << " flux on solid side "

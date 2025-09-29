@@ -15,7 +15,8 @@ registerMooseObject("NavierStokesApp", LinearFVRobinCHTBC);
 InputParameters
 LinearFVRobinCHTBC::validParams()
 {
-  InputParameters params = LinearFVCHTBCBase::validParams();
+  InputParameters params = LinearFVCHTBCInterface::validParams();
+  params += LinearFVAdvectionDiffusionBC::validParams();
   params.addRequiredParam<MooseFunctorName>("h", "The convective heat transfer coefficient.");
   params.addRequiredParam<MooseFunctorName>("incoming_flux",
                                             "The incoming diffusive flux on the intervace.");
@@ -28,27 +29,12 @@ LinearFVRobinCHTBC::validParams()
 }
 
 LinearFVRobinCHTBC::LinearFVRobinCHTBC(const InputParameters & parameters)
-  : LinearFVCHTBCBase(parameters),
+  : LinearFVAdvectionDiffusionBC(parameters),
+    LinearFVCHTBCInterface(),
     _htc(getFunctor<Real>("h")),
     _incoming_flux(getFunctor<Real>("incoming_flux")),
     _prescribed_temperature(getFunctor<Real>("prescribed_temperature"))
 {
-}
-
-Real
-LinearFVRobinCHTBC::computeBoundaryConductionFlux() const
-{
-  const auto * elem_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
-                               ? _current_face_info->elemInfo()
-                               : _current_face_info->neighborInfo();
-
-  const auto state = determineState();
-  auto face = singleSidedFaceArg(_current_face_info);
-  face.face_side = elem_info->elem();
-
-  return _htc(face, state) *
-             (_var.getElemValue(*elem_info, state) - _prescribed_temperature(face, state)) -
-         _incoming_flux(face, state);
 }
 
 Real
@@ -64,6 +50,7 @@ LinearFVRobinCHTBC::computeBoundaryValue() const
 Real
 LinearFVRobinCHTBC::computeBoundaryNormalGradient() const
 {
+  // FIXME
   return 0.0;
 }
 

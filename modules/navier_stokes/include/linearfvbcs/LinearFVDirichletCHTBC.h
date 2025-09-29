@@ -9,14 +9,15 @@
 
 #pragma once
 
-#include "LinearFVCHTBCBase.h"
+#include "LinearFVCHTBCInterface.h"
+#include "LinearFVAdvectionDiffusionFunctorDirichletBC.h"
 
 /**
  * Conjugate heat transfer BC for Dirichlet boundary condition-based
- * coupling. Differs from regular BCs due to the need of error checking
- * and the ability to compute the diffusive flux on a boundary.
+ * coupling. Differs from regular BCs due to the need of error checking.
  */
-class LinearFVDirichletCHTBC : public LinearFVCHTBCBase
+class LinearFVDirichletCHTBC : public LinearFVAdvectionDiffusionFunctorDirichletBC,
+                               public LinearFVCHTBCInterface
 {
 public:
   /**
@@ -26,30 +27,4 @@ public:
   LinearFVDirichletCHTBC(const InputParameters & parameters);
 
   static InputParameters validParams();
-
-  virtual Real computeBoundaryConductionFlux() const override;
-
-protected:
-  virtual Real computeBoundaryValue() const override;
-
-  virtual Real computeBoundaryNormalGradient() const override;
-
-  virtual Real computeBoundaryValueMatrixContribution() const override;
-
-  virtual Real computeBoundaryValueRHSContribution() const override;
-
-  virtual Real computeBoundaryGradientMatrixContribution() const override;
-
-  virtual Real computeBoundaryGradientRHSContribution() const override;
-
-  /**
-   * Thermal conductivity, mainly used for the computation of the heat flux.
-   */
-  const Moose::Functor<Real> & _thermal_conductivity;
-
-  /**
-   * Functor describing the temperature which is being prescibed on the
-   * boundary.
-   */
-  const Moose::Functor<Real> & _prescribed_temperature;
 };

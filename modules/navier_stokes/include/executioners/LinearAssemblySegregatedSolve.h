@@ -174,9 +174,6 @@ protected:
   /// Tolerance for heat flux at the CHT interfaces
   const Real _cht_heat_flux_tolerance;
 
-  /// Tolerance for surface temperatures at the CHT interfaces
-  const Real _cht_temperature_tolerance;
-
   /// The relaxation factors for temperature fields for the CHT boundaries
   /// first index is solid/fluid second is the interface
   std::vector<std::vector<Real>> _cht_flux_relaxation_factor;
@@ -196,7 +193,6 @@ protected:
   std::vector<LinearFVFluxKernel *> _cht_conduction_kernels;
 
   /// Vector of boundary conditions that describe the conjugate heat transfer from each side.
-  /// This can't be const considering we need to update the underlying structures for each face
   std::vector<std::vector<LinearFVBoundaryCondition *>> _cht_boundary_conditions;
 
   /// Functors describing the heat flux on the conjugate heat transfer interfaces.

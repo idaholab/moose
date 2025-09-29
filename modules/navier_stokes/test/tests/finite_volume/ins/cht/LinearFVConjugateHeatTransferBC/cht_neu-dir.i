@@ -5,10 +5,10 @@
 b = 0.01 # plate thickness
 l = 0.2 # plate length
 
-nxi = 320 # 100  # 20 # 100 # nx in the inlet/entrance region
-nyf = 160 # 80   # 10 # 80 # ny in fluid
-nxf = 320 # 100 # 20 # 100 # nx in the main fluid region
-nys = 160 # 30   # 10 # 30 # ny in the fluid domain
+nxi = 100  # 20 # 100 # nx in the inlet/entrance region
+nyf = 80   # 10 # 80 # ny in fluid
+nxf = 100 # 20 # 100 # nx in the main fluid region
+nys = 30   # 10 # 30 # ny in the fluid domain
 
 fx1_bias = 1.00 # 1.15 # bdry layer bias - fluid
 fx2_bias = '${fparse 1.0/1.00}' # 0.85 # bdry layer bias - solid
@@ -322,20 +322,15 @@ advected_interp_method = 'upwind'
     type = LinearFVDirichletCHTBC
     variable = T_fluid
     boundary = interface
-    prescribed_temperature = bd_temperature_fluid_interface
-    thermal_conductivity = ${k}
-    temperature_relaxation = 0.05
-    flux_relaxation = 0.05
+    functor = interface_temperature_fluid_interface
   []
   [solid_fluid]
     type = LinearFVRobinCHTBC
     variable = T_solid
     boundary = interface
     h = ${h_s}
-    incoming_flux = heat_flux_solid_interface
-    prescribed_temperature = bd_temperature_solid_interface
-    flux_relaxation = 0.05
-    temperature_relaxation = 0.05
+    incoming_flux = heat_flux_from_solid_to_fluid_interface
+    prescribed_temperature = interface_temperature_solid_interface
   []
 []
 
@@ -371,31 +366,31 @@ advected_interp_method = 'upwind'
 []
 
 [VectorPostprocessors]
-  [y_vs_ts]
-    type = LineValueSampler
-    variable = 'T_solid'
-    start_point = '0.05 ${fparse -b} 0'
-    end_point = '0.05 0 0'
-    num_points = 10
-    sort_by = y
-  []
-  [y_vs_tf]
-    type = LineValueSampler
-    variable = 'T_fluid'
-    start_point = '0.05  0 0'
-    end_point = '0.05 ${fparse 2.0*b} 0'
-    num_points = 11
-    sort_by = y
-  []
-  [t_s_interface]
-    type = LineValueSampler
-    variable = 'T_solid'
-    start_point = '0.0 -0.0001 0'
-    end_point = '${l} -0.0001 0'
-    num_points = 11
-    sort_by = y
-    execute_on = 'final'
-  []
+  # [y_vs_ts]
+  #   type = LineValueSampler
+  #   variable = 'T_solid'
+  #   start_point = '0.05 ${fparse -b} 0'
+  #   end_point = '0.05 0 0'
+  #   num_points = 10
+  #   sort_by = y
+  # []
+  # [y_vs_tf]
+  #   type = LineValueSampler
+  #   variable = 'T_fluid'
+  #   start_point = '0.05  0 0'
+  #   end_point = '0.05 ${fparse 2.0*b} 0'
+  #   num_points = 11
+  #   sort_by = y
+  # []
+  # [t_s_interface]
+  #   type = LineValueSampler
+  #   variable = 'T_solid'
+  #   start_point = '0.0 -0.0001 0'
+  #   end_point = '${l} -0.0001 0'
+  #   num_points = 11
+  #   sort_by = y
+  #   execute_on = 'final'
+  # []
   #  [t_f_interface]
   #    type = SideValueSampler
   #    variable = T_solid
@@ -411,11 +406,11 @@ advected_interp_method = 'upwind'
 
 [Executioner]
   type = SIMPLE
-  # cht_boundaries = 'interface'
-  # cht_solid_flux_relaxation = 0.3
-  # cht_fluid_flux_relaxation = 0.3
-  # cht_solid_temperature_relaxation = 0.3
-  # cht_fluid_temperature_relaxation = 0.3
+  cht_interfaces = 'interface'
+  cht_solid_flux_relaxation = 0.3
+  cht_fluid_flux_relaxation = 0.3
+  cht_solid_temperature_relaxation = 0.3
+  cht_fluid_temperature_relaxation = 0.3
   momentum_l_abs_tol = 1e-13
   pressure_l_abs_tol = 1e-13
   energy_l_abs_tol = 1e-13
@@ -447,7 +442,6 @@ advected_interp_method = 'upwind'
   print_fields = false
   continue_on_max_its = true
   num_cht_fpi = 3
-  # cht_fpi_tolerance = 1e-6
 []
 
 [Outputs]

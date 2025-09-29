@@ -9,14 +9,15 @@
 
 #pragma once
 
-#include "LinearFVCHTBCBase.h"
+#include "LinearFVCHTBCInterface.h"
+#include "LinearFVAdvectionDiffusionBC.h"
 
 /**
  * Conjugate heat transfer BC for Robin boundary condition-based
  * coupling. Differs from regular BCs due to the need of error checking
- * and the ability to compute the diffusive flux on a boundary.
+ * and direct computation of the fluxes.
  */
-class LinearFVRobinCHTBC : public LinearFVCHTBCBase
+class LinearFVRobinCHTBC : public LinearFVAdvectionDiffusionBC, public LinearFVCHTBCInterface
 {
 public:
   /**
@@ -26,8 +27,6 @@ public:
   LinearFVRobinCHTBC(const InputParameters & parameters);
 
   static InputParameters validParams();
-
-  virtual Real computeBoundaryConductionFlux() const override;
 
 protected:
   virtual Real computeBoundaryValue() const override;
