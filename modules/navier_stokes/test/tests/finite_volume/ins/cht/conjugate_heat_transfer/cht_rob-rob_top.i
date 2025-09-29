@@ -3,38 +3,31 @@
 ### https://doi.org/10.1016/0017-9310(74)90087-8
 
 b = 0.01 # plate thickness
-l = 0.2  # plate length
+l = 0.2 # plate length
 
-nxi =  40 # nx in the inlet/entrance region (N_fluidinlet in paper)
-#NOTE: increase the above since our entrance length is larger
+nxi = 24 # nx in the inlet/entrance region
+nyf = 18 # ny in fluid
+nxf = 24 # nx in the main fluid region
+nys = 8 # ny in the solid domain
 
-nxf =  20 # nx in the main fluid region (N_fluidplate in paper)
-nyf =  25 # ny in fluid (N_fluidheight in paper)
-nys =  10 # ny in the fluid domain (N_solidheight in paper)
+fx1_bias = 1.00 # bdry layer bias - fluid
+fx2_bias = '${fparse 1.0/1.00}' # bdry layer bias - solid
+fy_bias = 1.20 # bdry layer bias - fluid
+sy_bias = '${fparse 1.0/1.05}' # bdry layer bias - solid
 
-fx1_bias = 1.05 # bdry layer bias - fluid
-fx2_bias = 0.95 # bdry layer bias - entrance
-fy_bias  = 1.05 # bdry layer bias - fluid, entrance
-sy_bias  = 0.95 # bdry layer bias - solid
-
-# TODO: add bias in x for fluid entrance/cht internal boundary if needed
-
-k_s = 0.2876 #${fparse 287.0 * l}
+k_s = 0.2876
 rho = 0.3525
 mu = 3.95e-5
-k   = 0.06808
-cp  = 1142.6
+k = 0.06808
+cp = 1142.6
 
 vin = 12.0
 Tin = 1000.0
 T_s_bottom = 600.0
 P_out = 1.03e5
 
-h_test = ${fparse k_s/l} # test value
-h_s = 100
-#h_f = 0 # unstable at 750, fluid massively undershoots at 20, vertical at 10, exceeds 1000K in fluid at h_f = 5
-
-ent_fac = 2.0 # controls length of entrance region as ent_fac * L_ref (L_ref = l)
+h_s = 1.0
+h_f = 1.0
 
 advected_interp_method = 'upwind'
 
@@ -47,11 +40,11 @@ advected_interp_method = 'upwind'
     xmin = 0
     xmax = ${l}
     ymin = 0
-    ymax = ${fparse 2.0*b}
-    subdomain_ids  = '1'
+    ymax = '${fparse 10.0*b}'
+    subdomain_ids = '1'
     subdomain_name = 'fluid'
-    bias_x = ${fx1_bias}
-    bias_y = ${fy_bias}
+    bias_x = '${fx1_bias}'
+    bias_y = '${fparse 1.0/fy_bias}'
     boundary_name_prefix = 'fluid'
   []
   [solid_base]
@@ -61,28 +54,28 @@ advected_interp_method = 'upwind'
     ny = ${nys}
     xmin = 0
     xmax = ${l}
-    ymin = ${fparse -b}
-    ymax = 0
-    subdomain_ids  = '2'
+    ymin = '${fparse 10*b}'
+    ymax = '${fparse 11*b}'
+    subdomain_ids = '2'
     subdomain_name = 'solid'
     bias_x = ${fx1_bias}
-    bias_y = ${sy_bias}
+    bias_y = '${fparse 1.0/sy_bias}'
     boundary_id_offset = 10
     boundary_name_prefix = 'solid'
   []
   [entrance]
     type = GeneratedMeshGenerator
     dim = 2
-    nx = ${nxi}
+    nx = '${fparse 2.0*nxi}'
     ny = ${nyf}
-    xmin = ${fparse -ent_fac*l}
+    xmin = '${fparse -2.0*l}'
     xmax = 0
     ymin = 0
-    ymax = ${fparse 2.0*b}
-    subdomain_ids  = '0'
+    ymax = '${fparse 10.0*b}'
+    subdomain_ids = '0'
     subdomain_name = 'entrance'
     bias_x = ${fx2_bias}
-    bias_y = ${fy_bias}
+    bias_y = '${fparse 1.0/fy_bias}'
     boundary_id_offset = 20
     boundary_name_prefix = 'ent'
   []
@@ -90,15 +83,14 @@ advected_interp_method = 'upwind'
     type = StitchedMeshGenerator
     inputs = 'entrance fluid_channel solid_base'
     stitch_boundaries_pairs = 'ent_right fluid_left;
-                               fluid_bottom solid_top'
-    show_info = true
+                              fluid_top solid_bottom'
     prevent_boundary_ids_overlap = false
   []
   [interface]
     type = SideSetsBetweenSubdomainsGenerator
     input = 'smg'
     primary_block = 'fluid'
-    paired_block  = 'solid'
+    paired_block = 'solid'
     new_boundary = interface
   []
 []
@@ -130,7 +122,7 @@ advected_interp_method = 'upwind'
   [vel_y]
     type = MooseLinearVariableFVReal
     solver_sys = v_system
-    initial_condition = 0.001
+    initial_condition = 0.0
     block = '0 1'
   []
   [pressure]
@@ -226,7 +218,7 @@ advected_interp_method = 'upwind'
 []
 
 [LinearFVBCs]
-# velocity BCs
+  # velocity BCs
   [inlet-u]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     boundary = 'ent_left'
@@ -237,17 +229,17 @@ advected_interp_method = 'upwind'
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     boundary = 'ent_left'
     variable = vel_y
-    functor = '0.001'
+    functor = '0.000'
   []
   [walls-u]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'ent_bottom interface'
+    boundary = 'ent_top interface'
     variable = vel_x
     functor = 0.0
   []
   [walls-v]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'ent_bottom interface'
+    boundary = 'ent_top interface'
     variable = vel_y
     functor = 0.0
   []
@@ -270,33 +262,27 @@ advected_interp_method = 'upwind'
     use_two_term_expansion = false
   []
 
-# freestream BCs for top of fluid domain
+  # freestream BCs for top of fluid domain
   [freestream_u]
     type = LinearFVAdvectionDiffusionOutflowBC
-    boundary = 'fluid_top ent_top'
+    boundary = 'fluid_bottom ent_bottom'
     variable = vel_x
     use_two_term_expansion = false
   []
   [freestream_v]
     type = LinearFVAdvectionDiffusionOutflowBC
-    boundary = 'fluid_top ent_top'
+    boundary = 'fluid_bottom ent_bottom'
     variable = vel_y
     use_two_term_expansion = false
   []
-#  [outlet_p_top]
-#    type = LinearFVAdvectionDiffusionFunctorDirichletBC
-#    boundary = 'fluid_top ent_top'
-#    variable = pressure
-#    functor = ${P_out}
-#  []
   [freestream_p]
     type = LinearFVAdvectionDiffusionFunctorNeumannBC
-    boundary = 'fluid_top ent_top'
+    boundary = 'fluid_bottom ent_bottom'
     variable = pressure
     functor = 0
   []
 
-# temperature BCs
+  # temperature BCs
   [inlet_T]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = T_fluid
@@ -307,13 +293,13 @@ advected_interp_method = 'upwind'
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
     variable = T_solid
     functor = ${T_s_bottom}
-    boundary = 'solid_bottom'
+    boundary = 'solid_top'
   []
   [insulated_fluid]
     type = LinearFVAdvectionDiffusionFunctorNeumannBC
     variable = T_fluid
     functor = 0
-    boundary = 'ent_top ent_bottom fluid_top'
+    boundary = 'ent_bottom ent_top fluid_bottom'
   []
   [insulated_solid]
     type = LinearFVAdvectionDiffusionFunctorNeumannBC
@@ -321,49 +307,28 @@ advected_interp_method = 'upwind'
     functor = 0
     boundary = 'solid_left solid_right'
   []
-
-# interface bcs
-# pg bc
-#  [fluid_solid]
-#    type = LinearFVConvectiveHeatTransferBC
-#    variable = T_fluid
-#    T_solid = T_solid
-#    T_fluid = T_fluid
-#    boundary = interface
-#    h = ${h_test}
-#  []
-#  [solid_fluid]
-#    type = LinearFVConvectiveHeatTransferBC
-#    variable = T_solid
-#    T_solid = T_solid
-#    T_fluid = T_fluid
-#    boundary = interface
-#    h = ${h_test}
-#  []
-
-# Robin(S)-Dirichlet(F) coupling
-  [fluid_solid]
-    type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    variable = T_fluid
-    boundary = interface
-    functor = T_solid
-  []
-  [solid_fluid]
-    type = LinearFVConjugateHeatTransferBC
-    variable = T_solid
-    T_solid = T_solid
-    T_fluid = T_fluid
-    boundary = interface
-    h = ${h_s}
-    solid_conductivity = ${k_s}
-    fluid_conductivity = ${k}
-  []
-
   [outlet_T]
     type = LinearFVAdvectionDiffusionOutflowBC
     variable = T_fluid
     use_two_term_expansion = false
     boundary = 'fluid_right'
+  []
+
+  [fluid_solid]
+    type = LinearFVRobinCHTBC
+    variable = T_fluid
+    boundary = interface
+    h = ${h_f}
+    incoming_flux = heat_flux_to_fluid_interface
+    prescribed_temperature = interface_temperature_solid_interface
+  []
+  [solid_fluid]
+    type = LinearFVRobinCHTBC
+    variable = T_solid
+    boundary = interface
+    h = ${h_s}
+    incoming_flux = heat_flux_to_solid_interface
+    prescribed_temperature = interface_temperature_fluid_interface
   []
 []
 
@@ -388,7 +353,7 @@ advected_interp_method = 'upwind'
   []
   [h_out]
     type = VolumetricFlowRate
-    boundary = 'fluid_right fluid_top ent_top interface'
+    boundary = 'fluid_right fluid_bottom ent_bottom interface'
     vel_x = vel_x
     vel_y = vel_y
     rhie_chow_user_object = rc
@@ -402,27 +367,34 @@ advected_interp_method = 'upwind'
   [y_vs_ts]
     type = LineValueSampler
     variable = 'T_solid'
-    start_point = '0.05 ${fparse -b} 0'
-    end_point = '0.05 0 0'
-    num_points = 30
-    sort_by = y
+    start_point = '0.05 ${fparse 10*b+1e-9} 0' # making sure we are always in the domain
+    end_point = '0.05 ${fparse 11*b-1e-9} 0'
+    num_points = 8
+    sort_by = id
+    warn_discontinuous_face_values = false
   []
   [y_vs_tf]
     type = LineValueSampler
     variable = 'T_fluid'
-    start_point = '0.05  0 0'
-    end_point = '0.05 ${fparse 2.0*b} 0'
-    num_points = 100
-    sort_by = y
+    start_point = '0.05  ${fparse 10*b-1e-9} 0' # making sure we are always in the domain
+    end_point = '0.05 ${fparse 9*b+1e-9} 0'
+    num_points = 12
+    sort_by = id
+    warn_discontinuous_face_values = false
   []
 []
 
 [Executioner]
   type = SIMPLE
-  momentum_l_abs_tol     = 1e-7
-  pressure_l_abs_tol     = 1e-7
-  energy_l_abs_tol       = 1e-7
-  solid_energy_l_abs_tol = 1e-7
+  cht_interfaces = 'interface'
+  cht_solid_flux_relaxation = 1.0
+  cht_fluid_flux_relaxation = 1.0
+  cht_solid_temperature_relaxation = 1.0
+  cht_fluid_temperature_relaxation = 1.0
+  momentum_l_abs_tol = 1e-10
+  pressure_l_abs_tol = 1e-10
+  energy_l_abs_tol = 1e-10
+  solid_energy_l_abs_tol = 1e-10
   momentum_l_tol = 0
   pressure_l_tol = 0
   energy_l_tol = 0
@@ -432,14 +404,13 @@ advected_interp_method = 'upwind'
   pressure_system = 'pressure_system'
   energy_system = 'energy_system'
   solid_energy_system = 'solid_energy_system'
-  momentum_equation_relaxation = 0.8
-  energy_equation_relaxation   = 0.3
+  momentum_equation_relaxation = 0.9
+  energy_equation_relaxation = 1.0
   pressure_variable_relaxation = 0.3
   num_iterations = 1000
-  pressure_absolute_tolerance     = 1e-5
-  momentum_absolute_tolerance     = 1e-5
-  energy_absolute_tolerance       = 1e-5
-  solid_energy_absolute_tolerance = 1e-5
+  momentum_absolute_tolerance = 1e-7
+  energy_absolute_tolerance = 1e-7
+  solid_energy_absolute_tolerance = 1e-7
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
@@ -449,13 +420,11 @@ advected_interp_method = 'upwind'
   solid_energy_petsc_options_iname = '-pc_type -pc_hypre_type'
   solid_energy_petsc_options_value = 'hypre boomeramg'
   print_fields = false
-  continue_on_max_its = true
-  num_cht_fpi = 10
-  cht_fpi_tolerance = 1e-6 #inactive at this time
+  num_cht_fpi = 3
 []
 
 [Outputs]
   exodus = true
   csv = true
-#  execute_on = linear
+  execute_on = timestep_end
 []

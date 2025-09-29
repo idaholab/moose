@@ -5,19 +5,17 @@
 b = 0.01 # plate thickness
 l = 0.2 # plate length
 
-nxi = 160 # 10 # 100 # nx in the inlet/entrance region
-nyf = 80 # 10 # 80 # ny in fluid
-nxf = 160 # 10 # 100 # nx in the main fluid region
-nys = 80 # 5 # 30 # ny in the fluid domain
+nxi = 24 # nx in the inlet/entrance region
+nyf = 18 # ny in fluid
+nxf = 24 # nx in the main fluid region
+nys = 8 # ny in the solid domain
 
-fx1_bias = 1.00 # 1.15 # bdry layer bias - fluid
-fx2_bias = '${fparse 1.0/1.00}' # 0.85 # bdry layer bias - solid
-fy_bias = 1.05 # 1.15 # bdry layer bias - fluid
-sy_bias = '${fparse 1.0/1.05}' # 0.85 # bdry layer bias - solid
+fx1_bias = 1.00 # bdry layer bias - fluid
+fx2_bias = '${fparse 1.0/1.00}' # bdry layer bias - solid
+fy_bias = 1.20 # bdry layer bias - fluid
+sy_bias = '${fparse 1.0/1.05}' # bdry layer bias - solid
 
-# TODO: add bias in x for fluid entrance/cht internal boundary if needed
-
-k_s = 0.2876 #${fparse 287.0 * l}
+k_s = 0.2876
 rho = 0.3525
 mu = 3.95e-5
 k = 0.06808
@@ -28,9 +26,8 @@ Tin = 1000.0
 T_s_bottom = 600.0
 P_out = 1.03e5
 
-#h_test = ${fparse k_s/l} # test value
-h_s = 0.1
-h_f = 0.1
+h_s = 1.0
+h_f = 1.0
 
 advected_interp_method = 'upwind'
 
@@ -46,8 +43,8 @@ advected_interp_method = 'upwind'
     ymax = '${fparse 10.0*b}'
     subdomain_ids = '1'
     subdomain_name = 'fluid'
-    bias_x = ${fx1_bias}
-    bias_y = ${fy_bias}
+    bias_x = '${fx1_bias}'
+    bias_y = '${fparse fy_bias}'
     boundary_name_prefix = 'fluid'
   []
   [solid_base]
@@ -62,7 +59,7 @@ advected_interp_method = 'upwind'
     subdomain_ids = '2'
     subdomain_name = 'solid'
     bias_x = ${fx1_bias}
-    bias_y = ${sy_bias}
+    bias_y = '${fparse sy_bias}'
     boundary_id_offset = 10
     boundary_name_prefix = 'solid'
   []
@@ -78,7 +75,7 @@ advected_interp_method = 'upwind'
     subdomain_ids = '0'
     subdomain_name = 'entrance'
     bias_x = ${fx2_bias}
-    bias_y = ${fy_bias}
+    bias_y = '${fparse fy_bias}'
     boundary_id_offset = 20
     boundary_name_prefix = 'ent'
   []
@@ -87,7 +84,6 @@ advected_interp_method = 'upwind'
     inputs = 'entrance fluid_channel solid_base'
     stitch_boundaries_pairs = 'ent_right fluid_left;
                               fluid_bottom solid_top'
-    # show_info = true
     prevent_boundary_ids_overlap = false
   []
   [interface]
@@ -323,20 +319,16 @@ advected_interp_method = 'upwind'
     variable = T_fluid
     boundary = interface
     h = ${h_f}
-    incoming_flux = heat_flux_fluid_interface
-    prescribed_temperature = bd_temperature_fluid_interface
-    # flux_relaxation = 0.05
-    # temperature_relaxation = 0.05
+    incoming_flux = heat_flux_to_fluid_interface
+    prescribed_temperature = interface_temperature_solid_interface
   []
   [solid_fluid]
     type = LinearFVRobinCHTBC
     variable = T_solid
     boundary = interface
     h = ${h_s}
-    incoming_flux = heat_flux_solid_interface
-    prescribed_temperature = bd_temperature_solid_interface
-    # flux_relaxation = 0.05
-    # temperature_relaxation = 0.05
+    incoming_flux = heat_flux_to_solid_interface
+    prescribed_temperature = interface_temperature_fluid_interface
   []
 []
 
@@ -375,52 +367,34 @@ advected_interp_method = 'upwind'
   [y_vs_ts]
     type = LineValueSampler
     variable = 'T_solid'
-    start_point = '0.05 ${fparse -b} 0'
-    end_point = '0.05 0 0'
-    num_points = 10
-    sort_by = y
+    start_point = '0.05 -1e-9 0' # making sure we are always in the domain
+    end_point = '0.05 ${fparse -b+1e-9} 0'
+    num_points = 8
+    sort_by = id
+    warn_discontinuous_face_values = false
   []
   [y_vs_tf]
     type = LineValueSampler
     variable = 'T_fluid'
-    start_point = '0.05  0 0'
-    end_point = '0.05 ${fparse 2.0*b} 0'
-    num_points = 11
-    sort_by = y
+    start_point = '0.05 1e-9 0' # making sure we are always in the domain
+    end_point = '0.05 ${fparse b+1e-9} 0'
+    num_points = 12
+    sort_by = id
+    warn_discontinuous_face_values = false
   []
-  [t_s_interface]
-    type = LineValueSampler
-    variable = 'T_solid'
-    start_point = '0.0 -0.0001 0'
-    end_point = '${l} -0.0001 0'
-    num_points = 11
-    sort_by = y
-    execute_on = 'final'
-  []
-  #  [t_f_interface]
-  #    type = SideValueSampler
-  #    variable = T_solid
-  #    sort_by = x
-  #    execute_on = final
-  #    boundary = interface
-  #  []
 []
-
-# [Debug]
-#   show_functors = true
-# []
 
 [Executioner]
   type = SIMPLE
-  # cht_boundaries = 'interface'
-  # cht_solid_flux_relaxation = 1.0
-  # cht_fluid_flux_relaxation = 1.0
-  # cht_solid_temperature_relaxation = 1.0
-  # cht_fluid_temperature_relaxation = 1.0
-  momentum_l_abs_tol = 1e-13
-  pressure_l_abs_tol = 1e-13
-  energy_l_abs_tol = 1e-13
-  solid_energy_l_abs_tol = 1e-13
+  cht_interfaces = 'interface'
+  cht_solid_flux_relaxation = 1.0
+  cht_fluid_flux_relaxation = 1.0
+  cht_solid_temperature_relaxation = 1.0
+  cht_fluid_temperature_relaxation = 1.0
+  momentum_l_abs_tol = 1e-10
+  pressure_l_abs_tol = 1e-10
+  energy_l_abs_tol = 1e-10
+  solid_energy_l_abs_tol = 1e-10
   momentum_l_tol = 0
   pressure_l_tol = 0
   energy_l_tol = 0
@@ -430,13 +404,13 @@ advected_interp_method = 'upwind'
   pressure_system = 'pressure_system'
   energy_system = 'energy_system'
   solid_energy_system = 'solid_energy_system'
-  momentum_equation_relaxation = 0.7
-  energy_equation_relaxation = 0.7
+  momentum_equation_relaxation = 0.9
+  energy_equation_relaxation = 1.0
   pressure_variable_relaxation = 0.3
   num_iterations = 1000
-  momentum_absolute_tolerance = 1e-10
-  energy_absolute_tolerance = 1e-10
-  solid_energy_absolute_tolerance = 1e-10
+  momentum_absolute_tolerance = 1e-7
+  energy_absolute_tolerance = 1e-7
+  solid_energy_absolute_tolerance = 1e-7
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'
@@ -447,8 +421,7 @@ advected_interp_method = 'upwind'
   solid_energy_petsc_options_value = 'hypre boomeramg'
   print_fields = false
   continue_on_max_its = true
-  num_cht_fpi = 10
-  # cht_fpi_tolerance = 1e-6
+  num_cht_fpi = 2
 []
 
 [Outputs]

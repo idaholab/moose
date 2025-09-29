@@ -1,0 +1,38 @@
+[Tests]
+  [neumann_dirichlet]
+    design = 'LinearFVRobinCHTBC.md LinearFVDirichletCHTBC.md'
+    issue = '#31203'
+    requirement = 'The system shall be able to solve conjugate heat transfer problems using a Neumann-Dirichlet boundary conditions pair '
+    [bottom]
+      type = CSVDiff
+      input = cht_neu-dir_bot.i
+      csvdiff = 'cht_neu-dir_bot_out_y_vs_tf_0001.csv cht_neu-dir_bot_out_y_vs_ts_0001.csv'
+      detail = 'with the heat transfer interface normals matching the principal normal directions.'
+    []
+    [top]
+      type = CSVDiff
+      input = cht_neu-dir_top.i
+      csvdiff = 'cht_neu-dir_top_out_y_vs_tf_0001.csv cht_neu-dir_top_out_y_vs_ts_0001.csv'
+      detail = 'with the heat transfer interface normals pointing in the opposite directions as the principal normal direction.'
+      ignore_columns = 'x y z'
+    []
+  []
+  [robin_robin]
+    design = 'LinearFVRobinCHTBC.md'
+    issue = '#31203'
+    requirement = 'The system shall be able to solve conjugate heat transfer problems using a Robin-Robin boundary conditions pair '
+    [bottom]
+      type = CSVDiff
+      input = cht_rob-rob_bot.i
+      csvdiff = 'cht_rob-rob_bot_out_y_vs_tf_0001.csv cht_rob-rob_bot_out_y_vs_ts_0001.csv'
+      detail = 'with the heat transfer interface normals matching the principal normal directions.'
+    []
+    [top]
+      type = CSVDiff
+      input = cht_rob-rob_top.i
+      csvdiff = 'cht_rob-rob_top_out_y_vs_tf_0001.csv cht_rob-rob_top_out_y_vs_ts_0001.csv'
+      detail = 'with the heat transfer interface normals pointing in the opposite directions as the principal normal direction.'
+      ignore_columns = 'x y z'
+    []
+  []
+[]

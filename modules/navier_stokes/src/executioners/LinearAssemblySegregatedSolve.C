@@ -733,9 +733,9 @@ LinearAssemblySegregatedSolve::setupConjugateHeatTransferContainers()
 
     // We instantiate the coupling fuctors for heat flux and temperature
     FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> solid_bd_flux(
-        _problem.mesh(), solid_variable->blockIDs(), "heat_flux_from_solid_to_fluid_" + bd_name);
+        _problem.mesh(), solid_variable->blockIDs(), "heat_flux_to_solid_" + bd_name);
     FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> fluid_bd_flux(
-        _problem.mesh(), fluid_variable->blockIDs(), "heat_flux_from_fluid_to_solid_" + bd_name);
+        _problem.mesh(), fluid_variable->blockIDs(), "heat_flux_to_fluid_" + bd_name);
 
     _boundary_heat_flux.push_back(
         std::vector<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>>(
@@ -757,10 +757,8 @@ LinearAssemblySegregatedSolve::setupConjugateHeatTransferContainers()
     // Time to register the functors on all of the threads
     for (const auto tid : make_range(libMesh::n_threads()))
     {
-      _problem.addFunctor(
-          "heat_flux_from_solid_to_fluid_" + bd_name, flux_container[NS::CHTSide::SOLID], tid);
-      _problem.addFunctor(
-          "heat_flux_from_fluid_to_solid_" + bd_name, flux_container[NS::CHTSide::FLUID], tid);
+      _problem.addFunctor("heat_flux_to_solid_" + bd_name, flux_container[NS::CHTSide::SOLID], tid);
+      _problem.addFunctor("heat_flux_to_fluid_" + bd_name, flux_container[NS::CHTSide::FLUID], tid);
       _problem.addFunctor(
           "interface_temperature_solid_" + bd_name, temperature_container[NS::CHTSide::SOLID], tid);
       _problem.addFunctor(
@@ -811,20 +809,30 @@ LinearAssemblySegregatedSolve::updateCHTBoundaryCouplingFields(const NS::CHTSide
     auto & other_bc = _cht_boundary_conditions[bd_index][other_side];
     auto & other_kernel = _cht_conduction_kernels[other_side];
 
-    const auto temperature_relaxation = _cht_flux_relaxation_factor[side][bd_index];
-    const auto flux_relaxation = _cht_temperature_relaxation_factor[side][bd_index];
+    // We get the relaxation from the other side, so if we are fluid side we get the solid
+    // relaxation
+    const auto temperature_relaxation = _cht_flux_relaxation_factor[other_side][bd_index];
+    const auto flux_relaxation = _cht_temperature_relaxation_factor[other_side][bd_index];
 
-    // Fetching container ahead of time
+    // Fetching the right container here, if side is fluid we fetch "heat_flux_to_fluid"
     auto & flux_container = _boundary_heat_flux[bd_index][side];
-    auto & temperature_container = _boundary_temperature[bd_index][side];
+    // Fetching the other side's contaienr here, if side is fluid we fetch the solid temperature
+    auto & temperature_container = _boundary_temperature[bd_index][other_side];
+    // We will also update the integrated flux for output info
     auto & integrated_flux = _integrated_boundary_heat_flux[bd_index][side];
+
     const auto & bd_fi_container = _cht_face_info[bd_index];
 
     // We enter the face loop to update the coupling fields
     for (const auto & fi : bd_fi_container)
     {
       other_kernel->setupFaceData(fi);
-      other_kernel->setCurrentFaceArea(fi->faceArea() * fi->faceCoord());
+      // We will want the flux in W/m2 for the coupling so no face integral for now,
+      // this can cause issues if we start using face area in the kernels
+      // for more than just face integral multipliers.
+      // Also, if we decide to no require overlapping meshes on the boundary
+      // this will probably have to change.
+      other_kernel->setCurrentFaceArea(1.0);
       other_bc->setupFaceData(fi, fi->faceType(std::make_pair(0, _cht_system_numbers[other_side])));
 
       // T_new = relaxation * T_boundary + (1-relaxation) * T_old
@@ -832,12 +840,15 @@ LinearAssemblySegregatedSolve::updateCHTBoundaryCouplingFields(const NS::CHTSide
           temperature_relaxation * other_bc->computeBoundaryValue() +
           (1 - temperature_relaxation) * temperature_container[fi->id()];
 
-      // Flux_new = relaxation * Flux_boundary + (1-relaxation) * Flux_old
+      // Flux_new = relaxation * Flux_boundary + (1-relaxation) * Flux_old,
+      // minus sign is due to the normal differences
       const auto flux = flux_relaxation * other_kernel->computeBoundaryFlux(*other_bc) +
                         (1 - flux_relaxation) * flux_container[fi->id()];
 
       flux_container[fi->id()] = flux;
-      integrated_flux += flux;
+
+      // We do the integral here
+      integrated_flux += flux * fi->faceArea() * fi->faceCoord();
     }
   }
 }
