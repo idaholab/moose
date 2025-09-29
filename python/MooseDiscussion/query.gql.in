@@ -1,0 +1,59 @@
+query {{
+  rateLimit {{
+    limit
+    cost
+    remaining
+    resetAt
+  }}
+  repository(owner: "idaholab", name: "moose") {{
+    discussions(after: {}, first: {}) {{
+      pageInfo {{
+        hasNextPage
+        endCursor
+      }}
+      edges {{
+        node {{
+          title
+          author {{
+            login
+          }}
+          bodyText
+          url
+          updatedAt
+          publishedAt
+          category {{
+            name
+          }}
+          comments(first: {}) {{
+            edges {{
+              node {{
+                author {{
+                  login
+                }}
+                bodyText
+                url
+                updatedAt
+                publishedAt
+                isAnswer
+                replies(first: {}) {{
+                  edges {{
+                    node {{
+                      author {{
+                        login
+                      }}
+                      bodyText
+                      url
+                      updatedAt
+                      publishedAt
+                      isAnswer
+                    }}
+                  }}
+                }}
+              }}
+            }}
+          }}
+        }}
+      }}
+    }}
+  }}
+}}
