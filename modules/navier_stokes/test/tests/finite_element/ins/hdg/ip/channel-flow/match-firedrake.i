@@ -27,10 +27,10 @@ alpha = '${fparse 10*degree^2}'
     family = L2_LAGRANGE
     order = FIRST
   []
-  # [pressure]
-  #   family = MONOMIAL
-  #   order = CONSTANT
-  # []
+  [pressure]
+    family = MONOMIAL
+    order = CONSTANT
+  []
   [vel_bar_x]
     family = LAGRANGE
     order = FIRST
@@ -39,10 +39,10 @@ alpha = '${fparse 10*degree^2}'
     family = LAGRANGE
     order = FIRST
   []
-  # [pressure_bar]
-  #   family = LAGRANGE
-  #   order = FIRST
-  # []
+  [pressure_bar]
+    family = LAGRANGE
+    order = FIRST
+  []
 []
 
 [HDGKernels]
@@ -54,14 +54,14 @@ alpha = '${fparse 10*degree^2}'
   #   coeff = ${rho}
   # []
   [momentum_x_diffusion]
-    type = DiffusionIPHDGKernel
+    type = NavierStokesStressIPHDGKernel
     variable = vel_x
     face_variable = vel_bar_x
     diffusivity = 'mu'
     alpha = ${alpha}
-    # pressure_variable = pressure
-    # pressure_face_variable = pressure_bar
-    # component = 0
+    pressure_variable = pressure
+    pressure_face_variable = pressure_bar
+    component = 0
   []
   # [momentum_y_advection]
   #   type = AdvectionIPHDGKernel
@@ -71,22 +71,22 @@ alpha = '${fparse 10*degree^2}'
   #   coeff = ${rho}
   # []
   [momentum_y_diffusion]
-    type = DiffusionIPHDGKernel
+    type = NavierStokesStressIPHDGKernel
     variable = vel_y
     face_variable = vel_bar_y
     diffusivity = 'mu'
     alpha = ${alpha}
-    # pressure_variable = pressure
-    # pressure_face_variable = pressure_bar
-    # component = 1
+    pressure_variable = pressure
+    pressure_face_variable = pressure_bar
+    component = 1
   []
-  # [pressure]
-  #   type = MassContinuityIPHDGKernel
-  #   variable = pressure
-  #   face_variable = pressure_bar
-  #   interior_velocity_vars = 'vel_x vel_y'
-  #   face_velocity_functors = 'vel_bar_x vel_bar_y'
-  # []
+  [pressure]
+    type = MassContinuityIPHDGKernel
+    variable = pressure
+    face_variable = pressure_bar
+    interior_velocity_vars = 'vel_x vel_y'
+    face_velocity_functors = 'vel_bar_x vel_bar_y'
+  []
 []
 
 [BCs]
@@ -112,57 +112,57 @@ alpha = '${fparse 10*degree^2}'
   #   coeff = ${rho}
   # []
   [momentum_x_diffusion_dirichlet_inlet]
-    type = DiffusionIPHDGDirichletBC
+    type = NavierStokesStressIPHDGDirichletBC
     boundary = 'left'
     variable = vel_x
     face_variable = vel_bar_x
-    # pressure_variable = pressure
-    # pressure_face_variable = pressure_bar
+    pressure_variable = pressure
+    pressure_face_variable = pressure_bar
     alpha = ${alpha}
     functor = '1'
     diffusivity = 'mu'
-    # component = 0
+    component = 0
   []
   [momentum_x_diffusion_dirichlet_walls]
-    type = DiffusionIPHDGDirichletBC
+    type = NavierStokesStressIPHDGDirichletBC
     boundary = 'top bottom'
     variable = vel_x
     face_variable = vel_bar_x
-    # pressure_variable = pressure
-    # pressure_face_variable = pressure_bar
+    pressure_variable = pressure
+    pressure_face_variable = pressure_bar
     alpha = ${alpha}
     functor = '0'
     diffusivity = 'mu'
-    # component = 0
+    component = 0
   []
   [momentum_y_diffusion_dirichlet]
-    type = DiffusionIPHDGDirichletBC
+    type = NavierStokesStressIPHDGDirichletBC
     boundary = 'left top bottom'
     variable = vel_y
     face_variable = vel_bar_y
-    # pressure_variable = pressure
-    # pressure_face_variable = pressure_bar
+    pressure_variable = pressure
+    pressure_face_variable = pressure_bar
     alpha = ${alpha}
     functor = '0'
     diffusivity = 'mu'
-    # component = 1
+    component = 1
   []
-  # [mass_dirichlet_inlet]
-  #   type = MassContinuityIPHDGBC
-  #   face_variable = pressure_bar
-  #   variable = pressure
-  #   boundary = 'left'
-  #   face_velocity_functors = '1 0'
-  #   interior_velocity_vars = 'vel_x vel_y'
-  # []
-  # [mass_dirichlet_walls]
-  #   type = MassContinuityIPHDGBC
-  #   face_variable = pressure_bar
-  #   variable = pressure
-  #   boundary = 'top bottom'
-  #   face_velocity_functors = '0 0'
-  #   interior_velocity_vars = 'vel_x vel_y'
-  # []
+  [mass_dirichlet_inlet]
+    type = MassContinuityIPHDGBC
+    face_variable = pressure_bar
+    variable = pressure
+    boundary = 'left'
+    face_velocity_functors = '1 0'
+    interior_velocity_vars = 'vel_x vel_y'
+  []
+  [mass_dirichlet_walls]
+    type = MassContinuityIPHDGBC
+    face_variable = pressure_bar
+    variable = pressure
+    boundary = 'top bottom'
+    face_velocity_functors = '0 0'
+    interior_velocity_vars = 'vel_x vel_y'
+  []
 
   #
   # Neumann
@@ -186,37 +186,37 @@ alpha = '${fparse 10*degree^2}'
   #   coeff = ${rho}
   # []
   [momentum_x_diffusion_neumann]
-    type = DiffusionIPHDGPrescribedFluxBC
+    type = NavierStokesStressIPHDGPrescribedFluxBC
     boundary = 'right'
-    # component = 0
+    component = 0
     diffusivity = 'mu'
     face_variable = vel_bar_x
     prescribed_normal_flux = 0
-    # pressure_face_variable = pressure_bar
-    # pressure_variable = pressure
+    pressure_face_variable = pressure_bar
+    pressure_variable = pressure
     variable = vel_x
     alpha = ${alpha}
   []
   [momentum_y_diffusion_neumann]
-    type = DiffusionIPHDGPrescribedFluxBC
+    type = NavierStokesStressIPHDGPrescribedFluxBC
     boundary = 'right'
-    # component = 1
+    component = 1
     diffusivity = 'mu'
     face_variable = vel_bar_y
     prescribed_normal_flux = 0
-    # pressure_face_variable = pressure_bar
-    # pressure_variable = pressure
+    pressure_face_variable = pressure_bar
+    pressure_variable = pressure
     variable = vel_y
     alpha = ${alpha}
   []
-  # [mass_neumann]
-  #   type = MassContinuityIPHDGBC
-  #   face_variable = pressure_bar
-  #   variable = pressure
-  #   boundary = 'right'
-  #   face_velocity_functors = 'vel_bar_x vel_bar_y'
-  #   interior_velocity_vars = 'vel_x vel_y'
-  # []
+  [mass_neumann]
+    type = MassContinuityIPHDGBC
+    face_variable = pressure_bar
+    variable = pressure
+    boundary = 'right'
+    face_velocity_functors = 'vel_bar_x vel_bar_y'
+    interior_velocity_vars = 'vel_x vel_y'
+  []
 []
 
 [Materials]
