@@ -162,53 +162,75 @@ BreakMeshByBlockGenerator::generate()
     if (!current_node)
       continue;
 
+    // If the node is not connected to any blocks, skip it
+    if (_nodeid_to_connected_blocks.find(current_node_id) == _nodeid_to_connected_blocks.end())
+      continue;
     const auto & connected_blocks = _nodeid_to_connected_blocks.at(current_node_id);
     const unsigned int node_multiplicity = connected_blocks.size();
 
+    // check if current_node need to be duplicated
     if (node_multiplicity > 1)
     {
+      // retrieve connected elements from the map
       const std::vector<dof_id_type> & connected_elems = map_entry.second;
-      subdomain_id_type reference_subdomain_id = connected_blocks.count(Elem::invalid_subdomain_id)
-                                                     ? Elem::invalid_subdomain_id
-                                                     : *connected_blocks.begin();
 
+      // find reference_subdomain_id (e.g. the subdomain with lower id or the
+      // Elem::invalid_subdomain_id)
+      auto subdomain_it = connected_blocks.begin();
+      subdomain_id_type reference_subdomain_id =
+          connected_blocks.find(Elem::invalid_subdomain_id) != connected_blocks.end()
+              ? Elem::invalid_subdomain_id
+              : *subdomain_it;
+
+      // For the block_pairs option, the node that is only shared by specific block pairs will be
+      // newly created.
       bool should_create_new_node = true;
       if (_block_pairs_restricted)
       {
-        if (connected_blocks.size() == 2)
+        auto elems = node_to_elem_map[current_node->id()];
+        should_create_new_node = false;
+        std::set<subdomain_id_type> sets_blocks_for_this_node;
+        for (auto elem_id = elems.begin(); elem_id != elems.end(); elem_id++)
+          sets_blocks_for_this_node.insert(
+              blockRestrictedElementSubdomainID(mesh->elem_ptr(*elem_id)));
+        if (sets_blocks_for_this_node.size() == 2)
         {
-          auto it = connected_blocks.begin();
-          should_create_new_node = findBlockPairs(*it, *std::next(it, 1));
+          auto setIt = sets_blocks_for_this_node.begin();
+          if (findBlockPairs(*setIt, *std::next(setIt, 1)))
+            should_create_new_node = true;
         }
-        else
-          should_create_new_node = false;
       }
 
+      // multiplicity counter to keep track of how many nodes we added
       unsigned int multiplicity_counter = node_multiplicity;
       for (auto elem_id : connected_elems)
       {
+        // all the duplicate nodes are added and assigned
         if (multiplicity_counter == 0)
           break;
 
         Elem * current_elem = mesh->elem_ptr(elem_id);
-
-        if (!current_elem)
-          continue;
-
         subdomain_id_type block_id = blockRestrictedElementSubdomainID(current_elem);
 
         if ((block_id != reference_subdomain_id) ||
             (_block_pairs_restricted && findBlockPairs(reference_subdomain_id, block_id)))
         {
+          // assign the newly added node to current_elem
           Node * new_node = nullptr;
+
           std::vector<boundary_id_type> node_boundary_ids;
 
-          for (unsigned int n_idx = 0; n_idx < current_elem->n_nodes(); ++n_idx)
-          {
-            if (current_elem->node_id(n_idx) == current_node->id())
+          for (unsigned int node_id = 0; node_id < current_elem->n_nodes(); ++node_id)
+            if (current_elem->node_id(node_id) ==
+                current_node->id()) // if current node == node on element
             {
               if (should_create_new_node)
               {
+                // The maximum number of duplications per subdomain will not exceed the original
+                // number of nodes. Since max_node_id is always greater than the original node
+                // count, it is safe to use max_node_id as a stride to generate new unique node ID
+                // values.
+                // max_node_id > original node count > number of duplications per subdomain
                 new_node = Node::build(*current_node,
                                        mesh->is_replicated()
                                            ? mesh->n_nodes()
@@ -217,29 +239,33 @@ BreakMeshByBlockGenerator::generate()
                                .release();
                 new_node->processor_id() = current_elem->processor_id();
                 mesh->add_node(new_node);
-                current_elem->set_node(n_idx, new_node);
+                current_elem->set_node(node_id, new_node);
 
                 boundary_info.boundary_ids(current_node, node_boundary_ids);
                 boundary_info.add_node(new_node, node_boundary_ids);
               }
-              multiplicity_counter--;
-              break;
+              multiplicity_counter--; // node created, update multiplicity counter
+              break; // ones the proper node has been fixed in one element we can break the
+                     // loop
             }
-          }
 
-          if (should_create_new_node && new_node)
+          if (should_create_new_node)
           {
             for (auto connected_elem_id : connected_elems)
             {
               Elem * connected_elem = mesh->elem_ptr(connected_elem_id);
+
+              // Assign the newly added node to other connected elements with the same
+              // block_id
               if (connected_elem &&
                   connected_elem->subdomain_id() == current_elem->subdomain_id() &&
                   connected_elem != current_elem)
               {
-                for (unsigned int n_idx = 0; n_idx < connected_elem->n_nodes(); ++n_idx)
-                  if (connected_elem->node_id(n_idx) == current_node->id())
+                for (unsigned int node_id = 0; node_id < connected_elem->n_nodes(); ++node_id)
+                  if (connected_elem->node_id(node_id) ==
+                      current_node->id()) // if current node == node on element
                   {
-                    connected_elem->set_node(n_idx, new_node);
+                    connected_elem->set_node(node_id, new_node);
                     break;
                   }
               }
@@ -346,6 +372,7 @@ BreakMeshByBlockGenerator::generate()
   addInterfaceBoundary(*mesh);
   Partitioner::set_node_processor_ids(*mesh);
 
+  // create the ghosted information for the fake neighbor elements
   {
     InputParameters rm_params = _factory.getValidParams("FakeNeighborRM");
 
@@ -416,7 +443,12 @@ BreakMeshByBlockGenerator::addInterfaceBoundary(MeshBase & mesh)
   mesh.comm().max(new_boundaryID);
 
   // loop over boundary sides
-  for (auto & boundary_side : _new_boundary_sides_list)
+  // All ranks will process the pairs in exactly the same order.
+  std::vector<std::pair<subdomain_id_type, subdomain_id_type>> sorted_pairs(
+      _new_boundary_sides_list.begin(), _new_boundary_sides_list.end());
+  std::sort(sorted_pairs.begin(), sorted_pairs.end());
+
+  for (auto & boundary_side : sorted_pairs)
   {
     if (!(_block_pairs_restricted || _surrounding_blocks_restricted) ||
         ((_block_pairs_restricted || _surrounding_blocks_restricted) && !_add_transition_interface))
@@ -534,16 +566,13 @@ BreakMeshByBlockGenerator::syncConnectedBlocks(
       subdomain_id_type block_id = blockRestrictedElementSubdomainID(current_elem);
 
       if (!_block_pairs_restricted)
-        connected_blocks.insert(block_id);
+        _nodeid_to_connected_blocks[map_entry.first].insert(block_id);
       else
       {
         if (block_id != Elem::invalid_subdomain_id)
-          connected_blocks.insert(block_id);
+          _nodeid_to_connected_blocks[map_entry.first].insert(block_id);
       }
     }
-
-    // Key: Even if connected_blocks is empty, still create an entry
-    _nodeid_to_connected_blocks[map_entry.first] = std::move(connected_blocks);
   }
 
   if (mesh.is_replicated())
