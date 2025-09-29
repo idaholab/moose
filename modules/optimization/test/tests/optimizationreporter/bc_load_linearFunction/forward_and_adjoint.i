@@ -141,7 +141,7 @@
     variable = temperature
     measurement_file = 'measurementData.csv'
     file_xcoord = 'coordx'
-    file_ycoord ='y'
+    file_ycoord = 'y'
     file_zcoord = 'z'
     file_value = 'weightedMeasurement'
     file_variable_weights = 'weight'
@@ -155,16 +155,16 @@
   [vector_sqsum]
     type = ParsedVectorRealReductionReporter
     name = sqsum
-    reporter_name= 'measure_data/misfit_values'
+    vector_reporter_name = 'measure_data/misfit_values'
     initial_value = 0
     expression = 'reduction_value+indexed_value*indexed_value'
-    outputs=none
+    outputs = none
   []
   [obj_sum]
     type = ParsedScalarReporter
     name = value
-    reporter_names = 'vector_sqsum/sqsum'
-    reporter_symbols = 'a'
+    vector_reporter_names = 'vector_sqsum/sqsum'
+    vector_reporter_symbols = 'a'
     expression = '0.5*a'
   []
 []

@@ -18,8 +18,9 @@ ParsedVectorVectorRealReductionReporter::validParams()
   InputParameters params = ParsedReporterBase::validParams();
   params.addClassDescription("Use a parsed function to iterate through a rows of a vector of "
                              "vector and reduce it to a vector.");
-  params.addRequiredParam<ReporterName>("reporter_name",
+  params.addRequiredParam<ReporterName>("vector_of_vector_reporter_name",
                                         "Reporter name with vector of vectors to reduce.");
+
   params.addRequiredParam<Real>("initial_value", "Value to intialize the reduction with.");
 
   // reporter_symbols are the two symbols for reduction value and current value for the reduction
@@ -37,11 +38,11 @@ ParsedVectorVectorRealReductionReporter::ParsedVectorVectorRealReductionReporter
     const InputParameters & parameters)
   : ParsedReporterBase(parameters),
     _initial_value(getParam<Real>("initial_value")),
-    _vec_of_vec_name(getParam<ReporterName>("reporter_name")),
+    _vec_of_vec_name(getParam<ReporterName>("vector_of_vector_reporter_name")),
     _output_reporter(
         declareValueByName<std::vector<Real>>(getParam<std::string>("name"), REPORTER_MODE_ROOT)),
     _reporter_data(getReporterValueByName<std::vector<std::vector<Real>>>(
-        getParam<ReporterName>("reporter_name")))
+        getParam<ReporterName>("vector_of_vector_reporter_name")))
 {
   // parse function
   std::string function = getParam<std::string>("expression");
@@ -64,7 +65,7 @@ ParsedVectorVectorRealReductionReporter::finalize()
   for (auto & reporter_vector : _reporter_data)
   {
     if (reporter_vector.size() != nrows)
-      mooseError("Every vector in 'reporter_name=",
+      mooseError("Every vector in 'vector_of_vector_reporter_name=",
                  _vec_of_vec_name,
                  "' must be the same size.",
                  "\nFirst Vector size = ",

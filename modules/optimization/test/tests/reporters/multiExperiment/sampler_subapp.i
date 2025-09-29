@@ -42,14 +42,14 @@
   [obj_sum]
     type = ParsedVectorRealReductionReporter
     name = value
-    reporter_name = from_sub_rep/rec_vec
+    vector_reporter_name = from_sub_rep/rec_vec
     initial_value = 0
     expression = 'reduction_value+indexed_value'
   []
   [grad_sum]
     type = ParsedVectorVectorRealReductionReporter
     name = row_sum
-    reporter_name = "from_sub_rep/rec_vec_vec"
+    vector_of_vector_reporter_name = "from_sub_rep/rec_vec_vec"
     initial_value = 0
     expression = 'reduction_value+indexed_value'
   []

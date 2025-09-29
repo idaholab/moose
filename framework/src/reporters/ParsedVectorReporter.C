@@ -16,10 +16,13 @@ ParsedVectorReporter::validParams()
 {
   InputParameters params = ParsedReporterBase::validParams();
   params.addClassDescription("Apply parsed functions to vector entries held in reporters.");
-  params.addRequiredParam<std::vector<ReporterName>>("reporter_names",
+  params.addRequiredParam<std::vector<ReporterName>>("vector_reporter_names",
                                                      "Reporter names to apply function to.");
   params.addParam<std::vector<ReporterName>>("scalar_reporter_names",
                                              "Scalar reporter names to apply function to.");
+  // make reporter symbols specific to this classes type
+  params.renameParam(
+      "reporter_symbols", "vector_reporter_symbols", "Expression symbol for each vector reporter");
   return params;
 }
 
@@ -48,14 +51,14 @@ ParsedVectorReporter::ParsedVectorReporter(const InputParameters & parameters)
   }
 
   const std::vector<ReporterName> reporter_names(
-      getParam<std::vector<ReporterName>>("reporter_names"));
+      getParam<std::vector<ReporterName>>("vector_reporter_names"));
   if (reporter_names.size() != _reporter_symbols.size())
-    paramError(
-        "reporter_names",
-        "reporter_names and reporter_symbols must be the same size:  Number of reporter_names=",
-        reporter_names.size(),
-        ";  Number of reporter_symbols=",
-        _reporter_symbols.size());
+    paramError("vector_reporter_names",
+               "vector_reporter_names and vector_reporter_symbols must be the same size:  Number "
+               "of vector_reporter_names=",
+               reporter_names.size(),
+               ";  Number of vector_reporter_symbols=",
+               _reporter_symbols.size());
 
   _reporter_data.resize(reporter_names.size());
   for (const auto rep_index : index_range(_reporter_data))
@@ -72,7 +75,7 @@ ParsedVectorReporter::finalize()
     if (entries != _reporter_data[rep_index]->size())
     {
       const std::vector<ReporterName> reporter_names(
-          getParam<std::vector<ReporterName>>("reporter_names"));
+          getParam<std::vector<ReporterName>>("vector_reporter_names"));
       mooseError("All vectors being operated on must be the same size.",
                  "\nsize of ",
                  reporter_names[0].getCombinedName(),

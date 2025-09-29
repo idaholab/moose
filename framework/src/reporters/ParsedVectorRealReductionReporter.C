@@ -17,7 +17,8 @@ ParsedVectorRealReductionReporter::validParams()
   InputParameters params = ParsedReporterBase::validParams();
   params.addClassDescription(
       "Use a parsed function to iterate through a vector and reduce it to a scalar.");
-  params.addRequiredParam<ReporterName>("reporter_name", "Reporter name with vector to reduce.");
+  params.addRequiredParam<ReporterName>("vector_reporter_name",
+                                        "Reporter name with vector to reduce.");
   params.addRequiredParam<Real>("initial_value", "Value to intialize the reduction with.");
 
   // reporter_symbols are the two symbols for reduction value and current value for the reduction
@@ -36,7 +37,7 @@ ParsedVectorRealReductionReporter::ParsedVectorRealReductionReporter(
   : ParsedReporterBase(parameters),
     _initial_value(getParam<Real>("initial_value")),
     _reporter_data(
-        getReporterValueByName<std::vector<Real>>(getParam<ReporterName>("reporter_name"))),
+        getReporterValueByName<std::vector<Real>>(getParam<ReporterName>("vector_reporter_name"))),
     _output_reporter(declareValueByName<Real>(getParam<std::string>("name"), REPORTER_MODE_ROOT))
 {
   // parse function

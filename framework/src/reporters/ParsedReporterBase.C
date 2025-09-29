@@ -17,8 +17,8 @@ ParsedReporterBase::validParams()
   params.addRequiredCustomTypeParam<std::string>(
       "expression", "FunctionExpression", "function expression");
   params.addParam<std::string>("name", "result", "Name of output reporter.");
-  params.addRequiredParam<std::vector<std::string>>("reporter_symbols",
-                                                    "Expression symbol for each reporter");
+  params.addParam<std::vector<std::string>>("reporter_symbols",
+                                            "Expression symbol for each reporter");
   params.addParam<std::vector<std::string>>(
       "scalar_reporter_symbols",
       {},

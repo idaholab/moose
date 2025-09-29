@@ -4,7 +4,7 @@
 
 ## Overview
 
-`ParsedScalarReporter` operates on scalars contained in series of scalar reporters using a [parsed function expression](MooseParsedFunction.md) as shown in [vectorMath].  This reporter allows several scalar reporters to be combined into scalar.  Variables in the [parsed function expression](MooseParsedFunction.md) are given by the [!param](/Reporters/ParsedScalarReporter/reporter_symbols).  There is one [!param](/Reporters/ParsedScalarReporter/reporter_names) for each [!param](/Reporters/ParsedScalarReporter/reporter_symbols).
+`ParsedScalarReporter` operates on scalars contained in series of scalar reporters using a [parsed function expression](MooseParsedFunction.md) as shown in [vectorMath].  This reporter allows several scalar reporters to be combined into scalar.  Variables in the [parsed function expression](MooseParsedFunction.md) are given by the [!param](/Reporters/ParsedScalarReporter/vector_reporter_symbols).  There is one [!param](/Reporters/ParsedScalarReporter/vector_reporter_names) for each [!param](/Reporters/ParsedScalarReporter/vector_reporter_symbols).
 This is a scalar version of the [ParsedVectorReporter.md] reporter.
 
 !listing parsed_reporters/vectorMath.i id=vectorMath

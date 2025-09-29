@@ -38,8 +38,8 @@
   [vectorOperation]
     type = ParsedVectorReporter
     name = inner
-    reporter_names = 'vecs/vec_a vecs/vec_b vecs/vec_c'
-    reporter_symbols = 'vec_a vec_b vec_c'
+    vector_reporter_names = 'vecs/vec_a vecs/vec_b vecs/vec_c'
+    vector_reporter_symbols = 'vec_a vec_b vec_c'
     scalar_reporter_names = 'vecs/a dt/value'
     scalar_reporter_symbols = 'a dt'
     constant_names = 'constant1 constant2'
