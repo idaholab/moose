@@ -16,7 +16,6 @@
       input = 'ray_data_value_errors.i'
       expect_err = 'LotsOfRaysRayStudy "lots" does not support Ray registration'
       cli_args = 'UserObjects/active=lots Postprocessors/active=no_registration'
-      allow_test_objects = true
 
       detail = 'the RayTracingStudy does not support accessing rays by name,'
     []
@@ -25,7 +24,6 @@
       input = 'ray_data_value_errors.i'
       expect_err = "DisableRayBankingStudy \"no_banking_study\" does not bank Rays on completion."
       cli_args = 'UserObjects/active=no_banking_study Postprocessors/active=no_banking'
-      allow_test_objects = true
 
       detail = 'the RayTracingStudy does not support the banking of rays on completion,'
     []
@@ -34,7 +32,6 @@
       input = 'ray_data_value_errors.i'
       expect_err = "Could not find a registered Ray with the name 'dummy'"
       cli_args = 'UserObjects/active=repeatable Postprocessors/active=ray_name_not_found'
-      allow_test_objects = true
 
       detail = 'the named ray was not found,'
     []
@@ -43,7 +40,6 @@
       input = 'ray_data_value_errors.i'
       expect_err = "The RepeatableRayStudy \"repeatable\" does not have Ray data associated with the name 'dummy'"
       cli_args = 'UserObjects/active=repeatable Postprocessors/active=data_name_not_found'
-      allow_test_objects = true
 
       detail = 'the named ray data was not found,'
     []
@@ -52,7 +48,6 @@
       input = 'ray_data_value_errors.i'
       expect_err = "The RepeatableRayStudy \"repeatable\" does not have Ray aux data associated with the name 'dummy'"
       cli_args = 'UserObjects/active=repeatable Postprocessors/active=aux_data_name_not_found'
-      allow_test_objects = true
 
       detail = 'the named ray aux data was not found,'
     []
@@ -61,7 +56,6 @@
       input = 'ray_data_value_errors.i'
       expect_err = "Could not find a Ray with the ID 1 in the Ray banks."
       cli_args = 'UserObjects/active=repeatable Postprocessors/active=id_not_found RayBCs/active=kill'
-      allow_test_objects = true
 
       detail = 'the ray with the given id was not found,'
     []
@@ -70,7 +64,6 @@
       input = 'ray_data_value_errors.i'
       expect_err = "Must have either the 'ray_id' or the 'ray_name' param set."
       cli_args = 'UserObjects/active=repeatable Postprocessors/active=neither_provided RayBCs/active=kill'
-      allow_test_objects = true
 
       detail = 'neither an ID or name was provided, and'
     []
@@ -79,7 +72,6 @@
       input = 'ray_data_value_errors.i'
       expect_err = "Either 'ray_id' or 'ray_name' must be set, but not both"
       cli_args = 'UserObjects/active=repeatable Postprocessors/active=both_provided RayBCs/active=kill'
-      allow_test_objects = true
 
       detail = 'both an ID and name was provided.'
     []

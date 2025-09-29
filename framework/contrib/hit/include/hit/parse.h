@@ -129,7 +129,7 @@ struct ErrorMessage
   };
 
   /// The associated node (if any)
-  const hit::Node * node;
+  const hit::Node * node = nullptr;
   /// The associated filename (if any)
   std::optional<std::string> filename;
   /// The associated file line information (if any)

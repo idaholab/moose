@@ -60,6 +60,8 @@ public:
   {
     /// The description (doc string) for the parameter
     std::string description;
+    /// The group the parameter is in (if any)
+    std::optional<std::string> group;
     /// The command line metadata for the parameter
     InputParameters::CommandLineMetadata metadata;
   };
@@ -136,8 +138,19 @@ public:
    *
    * Will throw errors when conversions fail and may combine entires in
    * _entries if some are found that can be combined.
+   *
+   * Optionally, the root node for the command line parameters can be
+   * added via \p command_line_root. This is useful as it will allow
+   * the prefix for all errors associated with a command line parameter
+   * to be attributed with "CLI_ARGS". This should be done for the
+   * command line population for MooseApps.
+   *
+   * The \p filter_names option allows for populating only the given
+   * parameter names in the set (defaults to no filtering).
    */
-  void populateCommandLineParams(InputParameters & params);
+  void populateCommandLineParams(InputParameters & params,
+                                 const hit::Node * const command_line_root = nullptr,
+                                 const std::optional<std::set<std::string>> & filter_names = {});
 
   /**
    * @return An iterator to the beginning of the options

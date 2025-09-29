@@ -141,7 +141,8 @@ MooseBase::messagePrefix(const InputParameters & params, const bool hit_prefix)
 
   if (hit_prefix)
     if (const auto node = MooseBase::getHitNode(params))
-      prefix += Moose::hitMessagePrefix(*node);
+      if (const auto hit_message_prefix = Moose::hitMessagePrefix(*node, /* fullpath = */ true))
+        prefix += *hit_message_prefix + "\n";
 
   // Don't have context without type and name
   if (!params.isMooseBaseObject())
