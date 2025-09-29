@@ -137,9 +137,6 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _duct_heat_flux_soln(nullptr),
     _Tduct_soln(nullptr)
 {
-  // Require only one process
-  if (n_processors() > 1)
-    mooseError("Cannot use more than one MPI process.");
   _n_cells = _subchannel_mesh.getNumOfAxialCells();
   _n_gaps = _subchannel_mesh.getNumOfGapsPerLayer();
   _n_pins = _subchannel_mesh.getNumOfPins();
@@ -159,6 +156,14 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
   _Wij_residual_matrix.resize(_n_gaps, _block_size);
   _Wij_residual_matrix.zero();
   _converged = true;
+
+  if (processor_id() > 0)
+  {
+    _n_cells = 0;
+    _n_gaps = 0;
+    _n_pins = 0;
+    _n_channels = 0;
+  }
 
   // Mass conservation components
   LibmeshPetscCall(
@@ -238,6 +243,7 @@ void
 SubChannel1PhaseProblem::initialSetup()
 {
   ExternalProblem::initialSetup();
+
   _fp = &getUserObject<SinglePhaseFluidProperties>(getParam<UserObjectName>("fp"));
   _mdot_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::MASS_FLOW_RATE));
   _SumWij_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::SUM_CROSSFLOW));
@@ -555,7 +561,7 @@ SubChannel1PhaseProblem::computeMdot(int iblock)
       PC pc;
       Vec sol;
       LibmeshPetscCall(VecDuplicate(_mc_axial_convection_rhs, &sol));
-      LibmeshPetscCall(KSPCreate(PETSC_COMM_WORLD, &ksploc));
+      LibmeshPetscCall(KSPCreate(PETSC_COMM_SELF, &ksploc));
       LibmeshPetscCall(KSPSetOperators(ksploc, _mc_axial_convection_mat, _mc_axial_convection_mat));
       LibmeshPetscCall(KSPGetPC(ksploc, &pc));
       LibmeshPetscCall(PCSetType(pc, PCJACOBI));
@@ -1182,7 +1188,7 @@ SubChannel1PhaseProblem::computeP(int iblock)
         PC pc;
         Vec sol;
         LibmeshPetscCall(VecDuplicate(_amc_pressure_force_rhs, &sol));
-        LibmeshPetscCall(KSPCreate(PETSC_COMM_WORLD, &ksploc));
+        LibmeshPetscCall(KSPCreate(PETSC_COMM_SELF, &ksploc));
         LibmeshPetscCall(KSPSetOperators(ksploc, _amc_pressure_force_mat, _amc_pressure_force_mat));
         LibmeshPetscCall(KSPGetPC(ksploc, &pc));
         LibmeshPetscCall(PCSetType(pc, PCJACOBI));
@@ -1277,7 +1283,7 @@ SubChannel1PhaseProblem::computeP(int iblock)
         PC pc;
         Vec sol;
         LibmeshPetscCall(VecDuplicate(_amc_pressure_force_rhs, &sol));
-        LibmeshPetscCall(KSPCreate(PETSC_COMM_WORLD, &ksploc));
+        LibmeshPetscCall(KSPCreate(PETSC_COMM_SELF, &ksploc));
         LibmeshPetscCall(KSPSetOperators(ksploc, _amc_pressure_force_mat, _amc_pressure_force_mat));
         LibmeshPetscCall(KSPGetPC(ksploc, &pc));
         LibmeshPetscCall(PCSetType(pc, PCJACOBI));
@@ -1831,15 +1837,11 @@ SubChannel1PhaseProblem::petscSnesSolver(int iblock,
   KSP ksp;
   PC pc;
   Vec x, r;
-  PetscMPIInt size;
   PetscScalar * xx;
 
   PetscFunctionBegin;
-  PetscCallMPI(MPI_Comm_size(PETSC_COMM_WORLD, &size));
-  if (size > 1)
-    SETERRQ(PETSC_COMM_WORLD, PETSC_ERR_SUP, "Example is only for sequential runs");
-  LibmeshPetscCall(SNESCreate(PETSC_COMM_WORLD, &snes));
-  LibmeshPetscCall(VecCreate(PETSC_COMM_WORLD, &x));
+  LibmeshPetscCall(SNESCreate(PETSC_COMM_SELF, &snes));
+  LibmeshPetscCall(VecCreate(PETSC_COMM_SELF, &x));
   LibmeshPetscCall(VecSetSizes(x, PETSC_DECIDE, _block_size * _n_gaps));
   LibmeshPetscCall(VecSetFromOptions(x));
   LibmeshPetscCall(VecDuplicate(x, &r));
@@ -2312,14 +2314,14 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     _console << "Linear solver relaxed." << std::endl;
 
   // Creating nested matrices
-  LibmeshPetscCall(MatCreateNest(PETSC_COMM_WORLD, Q, NULL, Q, NULL, mat_array.data(), &A_nest));
-  LibmeshPetscCall(VecCreateNest(PETSC_COMM_WORLD, Q, NULL, vec_array.data(), &b_nest));
+  LibmeshPetscCall(MatCreateNest(PETSC_COMM_SELF, Q, NULL, Q, NULL, mat_array.data(), &A_nest));
+  LibmeshPetscCall(VecCreateNest(PETSC_COMM_SELF, Q, NULL, vec_array.data(), &b_nest));
   if (_verbose_subchannel)
     _console << "Nested system created." << std::endl;
 
   /// Setting up linear solver
   // Creating linear solver
-  LibmeshPetscCall(KSPCreate(PETSC_COMM_WORLD, &ksp));
+  LibmeshPetscCall(KSPCreate(PETSC_COMM_SELF, &ksp));
   LibmeshPetscCall(KSPSetType(ksp, KSPFGMRES));
   // Setting KSP operators
   LibmeshPetscCall(KSPSetOperators(ksp, A_nest, A_nest));
@@ -2416,7 +2418,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
       PC pc;
       Vec sol;
       LibmeshPetscCall(VecDuplicate(_hc_sys_h_rhs, &sol));
-      LibmeshPetscCall(KSPCreate(PETSC_COMM_WORLD, &ksploc));
+      LibmeshPetscCall(KSPCreate(PETSC_COMM_SELF, &ksploc));
       LibmeshPetscCall(KSPSetOperators(ksploc, _hc_sys_h_mat, _hc_sys_h_mat));
       LibmeshPetscCall(KSPGetPC(ksploc, &pc));
       LibmeshPetscCall(PCSetType(pc, PCJACOBI));
@@ -2556,6 +2558,9 @@ SubChannel1PhaseProblem::externalSolve()
           _converged = false;
         }
         auto T_L2norm_old_block = _T_soln->L2norm();
+        // We are only computing quantities on rank 0
+        if (processor_id() > 0)
+          goto aux_close;
 
         if (_segregated_bool)
         {
@@ -2606,12 +2611,16 @@ SubChannel1PhaseProblem::externalSolve()
 
         // We must do a global assembly to make sure data is parallel consistent before we do things
         // like compute L2 norms
+      aux_close:
         _aux->solution().close();
 
         auto T_L2norm_new = _T_soln->L2norm();
         T_block_error =
             std::abs((T_L2norm_new - T_L2norm_old_block) / (T_L2norm_old_block + 1E-14));
         _console << "T_block_error: " << T_block_error << std::endl;
+
+        // All processes must have the same iteration count
+        comm().max(T_block_error);
       }
     }
     auto P_L2norm_new_axial = _P_soln->L2norm();
@@ -2669,7 +2678,7 @@ SubChannel1PhaseProblem::externalSolve()
   }
 
   /// Assigning temperatures to duct
-  if (_duct_mesh_exist)
+  if (_duct_mesh_exist && processor_id() == 0)
   {
     _console << "Commencing calculation of duct surface temperature " << std::endl;
     auto duct_nodes = _subchannel_mesh.getDuctNodes();
@@ -2694,6 +2703,8 @@ SubChannel1PhaseProblem::externalSolve()
   _aux->solution().close();
   _aux->update();
 
+  if (processor_id() != 0)
+    return;
   Real power_in = 0.0;
   Real power_out = 0.0;
   Real Total_surface_area = 0.0;
