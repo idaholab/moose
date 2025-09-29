@@ -12,10 +12,10 @@ consistent with the Poisson equation solved for pressure:
 -\nabla \cdot (\rho A^{-1} \nabla p )_{bf} = \nabla \cdot (-\rho A^{-1} H + \rho A^{-1} F_b)_{bf},
 \end{equation}
 
-where $A^{-1}$ and $H$ are built for the SIMPLE segregated solver, subscript $bf$ denotes boundary face,
+where $A^{-1}$ and $H$ operators are built for the SIMPLE segregated solver, subscript $bf$ denotes boundary face,
 and $F_b$ is the body force.
 
-The computeBoundaryValue function in this class ensures that the pressure at the face is obtained
+The `computeBoundaryValue` function in this class ensures that the pressure at the face is obtained
 taking into account the Dirichlet boundary condition for velocity and the body forces.
 
 !syntax parameters /LinearFVBCs/LinearFVPressureFluxBC

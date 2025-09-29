@@ -49,7 +49,7 @@ walls = 'right left top bottom'
     u = superficial_vel_x
     v = superficial_vel_y
     pressure = pressure
-    rho = 'rho' #'rho' # 'rho'
+    rho = 'rho'
     p_diffusion_kernel = p_diffusion
     body_force_kernels_name = 'u_buoyancy; v_buoyancy'
   []
@@ -149,7 +149,6 @@ walls = 'right left top bottom'
   []
 []
 
-
 [LinearFVBCs]
   [no-slip-u]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
@@ -229,7 +228,6 @@ walls = 'right left top bottom'
   pressure_pin_value = 0.0
   pressure_pin_point = '1.5 1.5 0.0' #'0.5 0 0'
 
-  # momentum_petsc_options = '-ksp_monitor'
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'
 

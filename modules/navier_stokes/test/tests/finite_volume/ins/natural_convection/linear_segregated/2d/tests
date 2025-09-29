@@ -17,6 +17,6 @@
     abs_zero = 1e-5
     rel_err = 1e-3
     max_threads = 1
-    requirement = 'The system shall be able to solve for arbitrary densities to solve buoyant flow in a differentially heated 2D cavity.'
+    requirement = 'The system shall be able to use arbitrary densities to solve buoyant flow in a differentially heated 2D cavity.'
   []
 []

@@ -72,7 +72,6 @@ Real
 LinearFVPressureFluxBC::computeBoundaryValueRHSContribution() const
 {
   const auto face_arg = makeCDFace(*_current_face_info);
-  // Fetch the boundary value from the provided functor.
   const Real distance = computeCellToFaceDistance();
 
   if (_Ainv(face_arg, determineState())(0) != 0.0)

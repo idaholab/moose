@@ -44,8 +44,8 @@ RhieChowMassFlux::validParams()
   params.addRequiredParam<std::string>("p_diffusion_kernel",
                                        "The diffusion kernel acting on the pressure.");
   params.addParam<std::vector<std::vector<std::string>>>(
-      "body_force_kernels_name",
-      {}, // REMEMBER TO MAKE THIS A VECTOR OF VECTOR of STRINGS BEFORE MERGE
+      "body_force_kernel_names",
+      {},
       "The body force kernel names."
       "this double vector would have size index_x_dim: 'f1x f2x; f1y f2y; f1z f2z'");
 
@@ -80,8 +80,8 @@ RhieChowMassFlux::RhieChowMassFlux(const InputParameters & params)
     _face_mass_flux(
         declareRestartableData<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>>(
             "face_flux", _moose_mesh, blockIDs(), "face_values")),
-    _body_force_kernels_name(
-        getParam<std::vector<std::vector<std::string>>>("body_force_kernels_name")),
+    _body_force_kernel_names(
+        getParam<std::vector<std::vector<std::string>>>("body_force_kernel_names")),
     _rho(getFunctor<Real>(NS::density)),
     _pressure_projection_method(getParam<MooseEnum>("pressure_projection_method"))
 {
@@ -170,17 +170,16 @@ RhieChowMassFlux::initialSetup()
 
   // Check if components match the dimension.
 
-  if (!_body_force_kernels_name.empty())
+  if (!_body_force_kernel_names.empty())
   {
-    if (_body_force_kernels_name.size() != _dim)
-      paramError("body_force_kernels_name",
+    if (_body_force_kernel_names.size() != _dim)
+      paramError("body_force_kernel_names",
                  "The dimension of the body force vector does not match the problem dimension.");
 
     _body_force_kernels.resize(_dim);
 
     for (const auto dim_i : make_range(_dim))
-    {
-      for (const auto & force_name : _body_force_kernels_name[dim_i])
+      for (const auto & force_name : _body_force_kernel_names[dim_i])
       {
         std::vector<LinearFVElementalKernel *> temp_storage;
         auto base_query_force = _fe_problem.theWarehouse()
@@ -196,7 +195,6 @@ RhieChowMassFlux::initialSetup()
                          " could not be found or multiple instances were identified.");
         _body_force_kernels[dim_i].push_back(temp_storage[0]);
       }
-    }
   }
 }
 
@@ -387,7 +385,6 @@ RhieChowMassFlux::computeFaceMassFlux()
       p_grad_flux = (p_elem_value * matrix_contribution - rhs_contribution);
     }
     // Compute the new face flux
-
     _face_mass_flux[fi->id()] = -_HbyA_flux[fi->id()] + p_grad_flux;
   }
 }
@@ -511,7 +508,6 @@ RhieChowMassFlux::populateCouplingFunctors(
               -MetaPhysicL::raw_value((*_vel[dim_i])(boundary_face, Moose::currentState()));
 
           if (!_body_force_kernels_name.empty())
-          {
             for (const auto & force_kernel : _body_force_kernels[dim_i])
             {
               force_kernel->setCurrentElemInfo(&elem_info);
@@ -519,7 +515,6 @@ RhieChowMassFlux::populateCouplingFunctors(
                                   ainv_reader[dim_i](elem_dof) /
                                   elem_info.volume(); // zero-term expansion
             }
-          }
           face_hbya(dim_i) *= boundary_normal_multiplier;
         }
       }

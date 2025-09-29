@@ -12,8 +12,9 @@
 #include "LinearFVAdvectionDiffusionBC.h"
 
 /**
- * Class implementing a Neumann boundary condition for linear finite
- * volume variables. This is only applicable for advection-diffusion problems.
+ * Class implementing a flux boundary condition for linear finite
+ * volume pressure variables used in the pressure corrector equation which is consistent with the H/A flux. 
+ * This is only applicable for advection-diffusion problems.
  */
 class LinearFVPressureFluxBC : public LinearFVAdvectionDiffusionBC
 {
@@ -41,9 +42,9 @@ public:
   virtual bool includesMaterialPropertyMultiplier() const override { return true; }
 
 protected:
-  /// The functor for this BC (can be variable, function, etc)
+  /// The H/A flux functor for this BC (can be variable, function, etc)
   const Moose::Functor<Real> & _HbyA_flux;
 
-  /// The functor for the diffusion coefficient
+  /// The functor for the 1/A tensor serving as a diffusion coefficient
   const Moose::Functor<RealVectorValue> & _Ainv;
 };
