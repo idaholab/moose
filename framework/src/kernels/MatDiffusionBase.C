@@ -82,7 +82,7 @@ template <typename T>
 RealGradient
 MatDiffusionBase<T>::precomputeQpJacobian()
 {
-  auto sum = _ddiffusivity_dc[_qp] * _phi[_j][_qp] * _grad_v[_qp];
+  auto sum = _phi[_j][_qp] * _ddiffusivity_dc[_qp] * _grad_v[_qp];
   if (!_is_coupled)
     sum += precomputeQpCJacobian();
 
@@ -96,11 +96,11 @@ MatDiffusionBase<T>::computeQpOffDiagJacobian(unsigned int jvar)
   // get the coupled variable jvar is referring to
   const auto cvar = this->mapJvarToCvar(jvar);
 
-  auto sum = (*_ddiffusivity_darg[cvar])[_qp] * _phi[_j][_qp] * _grad_v[_qp];
+  auto sum = (*_ddiffusivity_darg[cvar])[_qp] * _phi[_j][_qp] * _grad_v[_qp] * _grad_test[_i][_qp];
   if (_v_var == jvar)
-    sum += precomputeQpCJacobian();
+    sum += precomputeQpCJacobian() * _grad_test[_i][_qp];
 
-  return sum * _grad_test[_i][_qp];
+  return sum;
 }
 
 template class MatDiffusionBase<Real>;
