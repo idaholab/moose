@@ -71,7 +71,9 @@ class TestResultsReaderReader(unittest.TestCase):
                       GoldTest(id='6857a572bbcb03d9dccfb1a7', civet_version=None),
                       GoldTest(id='685c623b4022db39df9590c3', civet_version=None),
                       # bump to civet_version=2
-                      GoldTest(id='6865744be52cb57c4742666d', civet_version=2)]
+                      GoldTest(id='6865744be52cb57c4742666d', civet_version=2),
+                      # bump to civet_version=3 (added event_id)
+                      GoldTest(id='68dac86a57e68e67a2888a73', civet_version=3)]
 
         # This can be set to true once to overwrite the gold file
         rewrite_gold = False
@@ -169,6 +171,12 @@ class TestResultsReaderReader(unittest.TestCase):
             # Test basic state for results header
             self.assertRegex(test_harness_results.civet_job_url, r'civet.inl.gov/job/\d+')
             self.assertEqual(test_harness_results.event_cause, 'push')
+
+            # Event ID as of civet version 3
+            if result.results.civet_version > 2:
+                self.assertTrue(isinstance(test_harness_results.event_id, int))
+            else:
+                self.assertIsNone(test_harness_results.event_id)
 
             # Should have CIVET state
             self.assertEqual(result.event_cause, 'push')
@@ -274,6 +282,10 @@ class TestResultsReaderReader(unittest.TestCase):
         is_pr = event_cause.startswith('Pull')
         pr_num = None
 
+        event_id = os.environ.get('CIVET_EVENT_ID')
+        self.assertIsNotNone(event_id)
+        event_id = int(event_id)
+
         job_id = os.environ.get('CIVET_JOB_ID')
         self.assertIsNotNone(job_id)
         job_id = int(job_id)
@@ -287,14 +299,15 @@ class TestResultsReaderReader(unittest.TestCase):
         results = reader.getTestResults(**TEST_GET_TEST_RESULTS_ARGS, pr_num=pr_num)
         self.assertGreater(len(results), 0)
 
+        result = results[0]
+        self.assertEqual(result.event_id, event_id)
         if is_pr:
-            result = results[0]
             self.assertEqual(result.pr_num, pr_num)
             self.assertEqual(result.event_sha, head_sha)
             self.assertEqual(result.event_cause, 'pr')
         else:
-            self.assertIsNone(results[0].pr_num)
-            self.assertEqual(results[0].event_cause, 'push')
+            self.assertIsNone(result.pr_num)
+            self.assertEqual(result.event_cause, 'push')
 
             event_results = [r for r in results if r.event_sha == head_sha]
             self.assertEqual(len(event_results), 1)

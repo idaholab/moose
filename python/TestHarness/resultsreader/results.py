@@ -46,6 +46,7 @@ class TestHarnessResults:
         assert isinstance(self.event_sha, str)
         assert len(self.event_sha) == 40
         assert isinstance(self.event_cause, str)
+        assert isinstance(self.event_id, (int, NoneType))
         assert isinstance(self.pr_num, (int, NoneType))
         assert isinstance(self.base_sha, (str, NoneType))
         if self.base_sha:
@@ -130,6 +131,17 @@ class TestHarnessResults:
         Get the cause for these tests that were ran
         """
         return self.data['event_cause']
+
+    @property
+    def event_id(self) -> int:
+        """
+        Get the ID of the civet event that ran this test
+        """
+        if self.civet_version > 2:
+            id = self.data['event_id']
+            assert isinstance(id, int)
+            return id
+        return None
 
     @property
     def pr_num(self) -> Union[int, None]:
@@ -274,6 +286,16 @@ class TestHarnessTestResult:
         """
         assert(self.data['event_cause'] == self.results.event_cause)
         return self.data['event_cause']
+
+    @property
+    def event_id(self) -> int:
+        """
+        Get the ID of the event that this job was ran on
+        """
+        if self.results.civet_version > 2:
+            assert(self.data['event_id'] == self.results.event_id)
+            return self.data['event_id']
+        return None
 
     @property
     def pr_num(self) -> Union[int, None]:

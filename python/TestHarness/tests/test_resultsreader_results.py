@@ -15,12 +15,13 @@ from datetime import datetime
 from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
 from TestHarness.resultsreader.results import TestHarnessResults, TestHarnessTestResult
 
-FAKE_CIVET_VERSION = 2
+FAKE_CIVET_VERSION = 3
 FAKE_CIVET_JOB_ID = 12345
 FAKE_CIVET_JOB_URL = f'civet.inl.gov/job/{FAKE_CIVET_JOB_ID}'
 FAKE_EVENT_SHA = 'abcd1234ababcd1234ababcd1234ababcd1234ab'
 FAKE_BASE_SHA = '1234abcdab1234abcdab1234abcdab1234abcdab'
 FAKE_EVENT_CAUSE = 'pr'
+FAKE_EVENT_ID = 5678
 FAKE_PR_NUM = 1234
 FAKE_HPC_QUEUED_TIME = 1.234
 FAKE_TIME = datetime.now()
@@ -39,6 +40,7 @@ class TestResultsReaderResults(TestHarnessTestCase):
         # Faked values that CIVET would add
         civet_values = {'event_sha': FAKE_EVENT_SHA,
                         'event_cause': FAKE_EVENT_CAUSE,
+                        'event_id': FAKE_EVENT_ID,
                         'pr_num': FAKE_PR_NUM,
                         'base_sha': FAKE_BASE_SHA,
                         'time': FAKE_TIME}
@@ -94,6 +96,7 @@ class TestResultsReaderResults(TestHarnessTestCase):
         self.assertEqual(result.civet_version, FAKE_CIVET_VERSION)
         self.assertEqual(result.event_sha, FAKE_EVENT_SHA)
         self.assertEqual(result.event_cause, FAKE_EVENT_CAUSE)
+        self.assertEqual(result.event_id, FAKE_EVENT_ID)
         self.assertEqual(result.pr_num, FAKE_PR_NUM)
         self.assertEqual(result.base_sha, FAKE_BASE_SHA)
         self.assertEqual(result.time, FAKE_TIME)
@@ -123,6 +126,7 @@ class TestResultsReaderResults(TestHarnessTestCase):
             # Faked CIVET properties
             self.assertEqual(test_result.event_sha, FAKE_EVENT_SHA)
             self.assertEqual(test_result.event_cause, FAKE_EVENT_CAUSE)
+            self.assertEqual(test_result.event_id, FAKE_EVENT_ID)
             self.assertEqual(test_result.pr_num, FAKE_PR_NUM)
             self.assertEqual(test_result.base_sha, FAKE_BASE_SHA)
             self.assertEqual(test_result.time, FAKE_TIME)
@@ -169,6 +173,22 @@ class TestResultsReaderResults(TestHarnessTestCase):
         for entry in tests:
             test_result = TestHarnessTestResult(entry, test_harness_results)
             self.assertIsNone(test_result.base_sha)
+
+    def testNoEventID(self):
+        """
+        Tests when event_id didn't exist in the database (civet_version < 3)
+        """
+
+        civet_version = 2
+        results, tests = self.captureResult(remove_civet_keys=['event_id'],
+                                            civet_version=civet_version)
+
+        test_harness_results = TestHarnessResults(results)
+        self.assertEqual(test_harness_results.civet_version, civet_version)
+        self.assertIsNone(test_harness_results.event_id)
+        for entry in tests:
+            test_result = TestHarnessTestResult(entry, test_harness_results)
+            self.assertIsNone(test_result.event_id)
 
 if __name__ == '__main__':
     unittest.main()
