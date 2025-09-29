@@ -137,10 +137,12 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _duct_heat_flux_soln(nullptr),
     _Tduct_soln(nullptr)
 {
+  // NOTE: The four quantities below are 0 for processor_id != 0
   _n_cells = _subchannel_mesh.getNumOfAxialCells();
   _n_gaps = _subchannel_mesh.getNumOfGapsPerLayer();
   _n_pins = _subchannel_mesh.getNumOfPins();
   _n_channels = _subchannel_mesh.getNumOfChannels();
+  // NOTE: The four quantities above are 0 for processor_id != 0
   _z_grid = _subchannel_mesh.getZGrid();
   _block_size = _n_cells / _n_blocks;
   // Turbulent crossflow (stuff that live on the gaps)
@@ -156,14 +158,6 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
   _Wij_residual_matrix.resize(_n_gaps, _block_size);
   _Wij_residual_matrix.zero();
   _converged = true;
-
-  if (processor_id() > 0)
-  {
-    _n_cells = 0;
-    _n_gaps = 0;
-    _n_pins = 0;
-    _n_channels = 0;
-  }
 
   // Mass conservation components
   LibmeshPetscCall(

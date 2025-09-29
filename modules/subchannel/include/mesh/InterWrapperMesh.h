@@ -45,7 +45,7 @@ public:
   /**
    * Return the number of axial cells
    */
-  virtual const unsigned int & getNumOfAxialCells() const { return _n_cells; }
+  virtual unsigned int getNumOfAxialCells() const { return _n_cells; }
 
   /**
    * Get the inter-wrapper mesh node for a given channel index and elevation index
@@ -60,7 +60,7 @@ public:
   /**
    * Return the number of channels per layer
    */
-  virtual const unsigned int & getNumOfChannels() const = 0;
+  virtual unsigned int getNumOfChannels() const = 0;
 
   /**
    * Return if Pin Mesh exists or not
@@ -75,12 +75,12 @@ public:
   /**
    * Return the number of gaps per layer
    */
-  virtual const unsigned int & getNumOfGapsPerLayer() const = 0;
+  virtual unsigned int getNumOfGapsPerLayer() const = 0;
 
   /**
    * Return the number of assemblies
    */
-  virtual const unsigned int & getNumOfAssemblies() const = 0;
+  virtual unsigned int getNumOfAssemblies() const = 0;
 
   /**
    * Return a pair of inter-wrapper indices for a given gap index
