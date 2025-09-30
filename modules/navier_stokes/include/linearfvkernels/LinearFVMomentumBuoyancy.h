@@ -13,7 +13,8 @@
 
 /**
  * Kernel that adds the the gravity term in the momentum
- * equations with variable density (assuming we are solving for the corrected pressure) to the right hand side.
+ * equations with variable density (assuming we are solving for the corrected pressure) to the right
+ * hand side.
  */
 class LinearFVMomentumBuoyancy : public LinearFVElementalKernel
 {

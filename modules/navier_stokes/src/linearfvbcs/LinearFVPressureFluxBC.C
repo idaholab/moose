@@ -36,15 +36,16 @@ LinearFVPressureFluxBC::computeBoundaryValue() const
 {
   const auto face_arg = makeCDFace(*_current_face_info);
   const auto elem_info = _current_face_type == FaceInfo::VarFaceNeighbors::ELEM
-                            ? _current_face_info->elemInfo()
-                            : _current_face_info->neighborInfo();
+                             ? _current_face_info->elemInfo()
+                             : _current_face_info->neighborInfo();
   const Real distance = computeCellToFaceDistance();
 
   if (_Ainv(face_arg, determineState())(0) != 0.0)
     return _var.getElemValue(*elem_info, determineState()) -
            _HbyA_flux(singleSidedFaceArg(_current_face_info), determineState()) /
-               _Ainv(face_arg, determineState())(0) * distance; //We use the 0th component of Ainv. Components of Ainv are
-  else                                                          //equal for most applications, and Ainv(0) has a value for 1D,2D,3D.
+               _Ainv(face_arg, determineState())(0) *
+               distance; // We use the 0th component of Ainv. Components of Ainv are
+  else                   // equal for most applications, and Ainv(0) has a value for 1D,2D,3D.
     return _var.getElemValue(*elem_info, determineState()); // zero-term expansion
 }
 

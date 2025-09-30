@@ -13,8 +13,8 @@
 
 /**
  * Class implementing a flux boundary condition for linear finite
- * volume pressure variables used in the pressure corrector equation which is consistent with the H/A flux. 
- * This is only applicable for advection-diffusion problems.
+ * volume pressure variables used in the pressure corrector equation which is consistent with the
+ * H/A flux. This is only applicable for advection-diffusion problems.
  */
 class LinearFVPressureFluxBC : public LinearFVAdvectionDiffusionBC
 {
