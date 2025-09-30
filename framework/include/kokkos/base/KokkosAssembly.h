@@ -48,6 +48,11 @@ public:
    */
   unsigned int getFETypeID(FEType type) const { return libmesh_map_find(_fe_type_map, type); }
   /**
+   * Get the mesh dimension
+   * @returns The mesh dimension
+   */
+  KOKKOS_FUNCTION unsigned int getDimension() const { return _dimension; }
+  /**
    * Get the maximum number of quadrature points per element in the current partition
    * @returns The maximum number of quadrature points per element
    */
