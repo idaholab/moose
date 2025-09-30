@@ -97,6 +97,9 @@ heated_length = 1.0
   compute_viscosity = true
   compute_power = true
   P_out = ${P_out}
+
+  # Heat Transfer Correlations
+  pin_htc_correlation = 'dittus-boelter'
 []
 
 [ICs]
