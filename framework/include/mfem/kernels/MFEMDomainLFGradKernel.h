@@ -25,15 +25,10 @@ public:
   MFEMDomainLFGardKernel(const InputParameters & parameters);
 
   virtual mfem::LinearFormIntegrator * createNLActionIntegrator() override;
-    
-  virtual mfem::BilinearFormIntegrator * createBFIntegrator() override;
 
 protected:
   mfem::Coefficient & _coef;
-  mfem::Coefficient * _dcoef;
   mfem::ScalarVectorProductCoefficient * _product_coeff;
-  mfem::ScalarVectorProductCoefficient * _dproduct_coeff;
-  mfem::SumIntegrator * _sum;
 };
 
 #endif

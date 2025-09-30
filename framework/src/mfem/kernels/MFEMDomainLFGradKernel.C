@@ -42,16 +42,5 @@ MFEMDomainLFGardKernel::createNLActionIntegrator()
   return new mfem::DomainLFGradIntegrator(*_product_coeff);
 }
 
-mfem::BilinearFormIntegrator *
-MFEMDomainLFGardKernel::createBFIntegrator()
-{
-  mfem::VectorCoefficient & vec_coef = getMFEMProblem().getCoefficients().getVectorCoefficient(name());
-  _dcoef = new mfem::ConstantCoefficient(0.0);
-  _dproduct_coeff = new mfem::ScalarVectorProductCoefficient(*_dcoef, vec_coef);
-  _sum = new mfem::SumIntegrator;
-  _sum->AddIntegrator(new mfem::DiffusionIntegrator(_coef));
-  _sum->AddIntegrator(new mfem::MixedDirectionalDerivativeIntegrator(*_dproduct_coeff));
-  return _sum;
-}
 
 #endif
