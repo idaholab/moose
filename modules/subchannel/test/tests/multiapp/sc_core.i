@@ -145,6 +145,10 @@ duct_inside = '${fparse 11.43*2*scale_factor}'
   compute_density = false
   compute_viscosity = false
   compute_power = false
+
+  # Heat Transfer Correlations
+  pin_htc_correlation = 'gnielinski'
+  duct_htc_correlation = 'gnielinski'
 []
 
 [ICs]

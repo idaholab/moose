@@ -113,7 +113,6 @@ SubChannel1PhaseProblem::validParams()
 SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
   : ExternalProblem(params),
     PostprocessorInterface(this),
-    SolutionInvalidInterface(this),
     _subchannel_mesh(SCM::getMesh<SubChannelMesh>(_mesh)),
     _n_blocks(getParam<unsigned int>("n_blocks")),
     _Wij(declareRestartableData<libMesh::DenseMatrix<Real>>("Wij")),
@@ -386,8 +385,16 @@ SubChannel1PhaseProblem::computeNusseltNumber(NusseltStruct nusselt_args)
 
   // Geometry Specific Parameters
   const auto pitch = _subchannel_mesh.getPitch();
-  const auto * pin_node = _subchannel_mesh.getPinNode(nusselt_args.i_pin, nusselt_args.iz);
-  const auto D = (*_Dpin_soln)(pin_node);
+  Real D;
+  bool valid_pin_indices = (nusselt_args.i_pin >= std::numeric_limits<unsigned int>::max() -1 
+                            || nusselt_args.iz <= std::numeric_limits<unsigned int>::max() -1);
+  if (!valid_pin_indices)
+  {
+    const auto * pin_node = _subchannel_mesh.getPinNode(nusselt_args.i_pin, nusselt_args.iz);
+    D = (*_Dpin_soln)(pin_node);
+  }
+  else
+    D = _subchannel_mesh.getPinDiameter();
   const auto poD = pitch / D;
   auto subch_type = _subchannel_mesh.getSubchannelType(nusselt_args.i_ch);
 
@@ -426,12 +433,8 @@ SubChannel1PhaseProblem::computeNusseltNumber(NusseltStruct nusselt_args)
     case 0: // dittus-boelter
     {
       if (Pr < 0.7 || Pr > 1.6e2)
-      {
         mooseDoOnce(mooseWarning("Pr number out of range in the Dittus Bolter correlation for "
                                  "pin or duct surface temperture calculation."));
-        flagInvalidSolution("Pr number is out of range for the Dittus Boelter correlation "
-                            "in the pin or duct surface temperature calculation.");
-      }
 
       const auto NuT = 0.023 * std::pow(Re, 0.8) * std::pow(Pr, 0.4);
       return blended_Nu(NuT);
@@ -440,12 +443,8 @@ SubChannel1PhaseProblem::computeNusseltNumber(NusseltStruct nusselt_args)
     case 1: // gnielinski
     {
       if (Pr < 1e-5 || Pr > 2e3)
-      {
         mooseDoOnce(mooseWarning("Pr number out of range in the Gnielinski correlation for "
                                  "pin or duct surface temperture calculation."));
-        flagInvalidSolution("Pr number is out of range for the Gnielinski correlation "
-                            "in the pin or duct surface temperature calculation.");
-      }
 
       const auto iz = nusselt_args.iz;
       const auto i_ch = nusselt_args.i_ch;
@@ -468,12 +467,8 @@ SubChannel1PhaseProblem::computeNusseltNumber(NusseltStruct nusselt_args)
       const auto Pe = Re * Pr;
 
       if (Pe < 1.5 || Pe > 1e4)
-      {
         mooseDoOnce(mooseWarning("Pr number out of range in the Kazimi Carelli correlation for "
                                  "pin or duct surface temperture calculation."));
-        flagInvalidSolution("Pr number is out of range for the Kazimi Carelli correlation "
-                            "in the pin or duct surface temperature calculation.");
-      }
 
       const auto NuT =
           4.0 + 0.33 * std::pow(poD, 3.8) * std::pow((Pe / 1e2), 0.86) + 0.16 * std::pow(poD, 5);
@@ -2835,7 +2830,7 @@ SubChannel1PhaseProblem::externalSolve()
       NusseltStruct nusselt_struct;
       nusselt_struct.Re = Re;
       nusselt_struct.Pr = Pr;
-      nusselt_struct.i_pin = 0; // don't care about this one at the moment
+      nusselt_struct.i_pin = std::numeric_limits<unsigned int>::max(); // don't care about this - large value
       const auto channel_node = _subchannel_mesh.getChannelNodeFromDuct(dn);
       const libMesh::Point & node_point = *channel_node;
       nusselt_struct.iz = _subchannel_mesh.getZIndex(node_point);

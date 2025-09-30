@@ -90,6 +90,9 @@ P_out = 2.0e5 # Pa
   implicit = true
   segregated = false
   monolithic_thermal = true
+
+  # Heat Transfer Correlations
+  duct_htc_correlation = 'gnielinski'
 []
 
 [ICs]
