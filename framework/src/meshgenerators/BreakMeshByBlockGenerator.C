@@ -166,7 +166,14 @@ BreakMeshByBlockGenerator::generate()
     // If the node is not connected to any blocks, skip it
     if (_nodeid_to_connected_blocks.find(current_node_id) == _nodeid_to_connected_blocks.end())
       continue;
-    const auto & connected_blocks = _nodeid_to_connected_blocks.at(current_node_id);
+
+    // Get the set of blocks connected to the current node (we do not want to use reference because
+    // we need to modify it)
+    auto connected_blocks = _nodeid_to_connected_blocks.at(current_node_id);
+    // Remove invalid subdomain if block pairs restriction is active
+    if (_block_pairs_restricted)
+      connected_blocks.erase(Elem::invalid_subdomain_id);
+
     const unsigned int node_multiplicity = connected_blocks.size();
 
     // check if current_node need to be duplicated
@@ -192,9 +199,16 @@ BreakMeshByBlockGenerator::generate()
         should_create_new_node = false;
 
         // Directly use the global info synchronized earlier by syncConnectedBlocks
-        const auto & sets_blocks_for_this_node = _nodeid_to_connected_blocks.at(current_node->id());
+        const auto & sets_blocks_for_this_node = _nodeid_to_connected_blocks.at(
+            current_node->id()); // invalid subdomain is included for correct logic
+
+        std::cout << " connected block  = ";
+        for (auto b : sets_blocks_for_this_node)
+          std::cout << b << ", ";
+        std::cout << std::endl;
 
         // Check if this node is exactly at the boundary between two blocks
+        // If it is junction between more than two blocks, we do not split it
         if (sets_blocks_for_this_node.size() == 2)
         {
           // Get the two block IDs from the set
@@ -204,9 +218,10 @@ BreakMeshByBlockGenerator::generate()
 
           // Check if this block pair is one of the user-specified pairs to split
           if (findBlockPairs(block1, block2))
-          {
             should_create_new_node = true;
-          }
+
+          if (should_create_new_node)
+            std::cout << "block pairs = " << block1 << ", " << block2 << std::endl;
         }
       }
 
@@ -538,7 +553,7 @@ BreakMeshByBlockGenerator::addInterfaceBoundary(MeshBase & mesh)
 }
 
 subdomain_id_type
-BreakMeshByBlockGenerator::blockRestrictedElementSubdomainID(const Elem * elem) const
+BreakMeshByBlockGenerator::blockRestrictedElementSubdomainID(const Elem * elem)
 {
   subdomain_id_type elem_subdomain_id = elem->subdomain_id();
   if ((_block_pairs_restricted || _surrounding_blocks_restricted) &&
@@ -571,18 +586,10 @@ BreakMeshByBlockGenerator::syncConnectedBlocks(
     for (const dof_id_type elem_id : elem_ids)
     {
       const Elem * current_elem = mesh.elem_ptr(elem_id);
-      if (!current_elem)
-        continue;
 
       subdomain_id_type block_id = blockRestrictedElementSubdomainID(current_elem);
 
-      if (!_block_pairs_restricted)
-        _nodeid_to_connected_blocks[map_entry.first].insert(block_id);
-      else
-      {
-        if (block_id != Elem::invalid_subdomain_id)
-          _nodeid_to_connected_blocks[map_entry.first].insert(block_id);
-      }
+      _nodeid_to_connected_blocks[map_entry.first].insert(block_id);
     }
   }
 
