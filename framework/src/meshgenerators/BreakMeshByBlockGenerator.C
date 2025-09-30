@@ -121,6 +121,7 @@ BreakMeshByBlockGenerator::generate()
           std::min(block_pair[0], block_pair[1]), std::max(block_pair[0], block_pair[1]));
 
       _block_pairs.insert(pair);
+      // Insert all SubdomainIDs from block_pair into _block_set (duplicates automatically ignored)
       std::copy(block_pair.begin(), block_pair.end(), std::inserter(_block_set, _block_set.end()));
     }
   }
@@ -187,17 +188,25 @@ BreakMeshByBlockGenerator::generate()
       bool should_create_new_node = true;
       if (_block_pairs_restricted)
       {
-        auto elems = node_to_elem_map[current_node->id()];
+        // Default to false; only set to true if this is exactly the pair boundary we want
         should_create_new_node = false;
-        std::set<subdomain_id_type> sets_blocks_for_this_node;
-        for (auto elem_id = elems.begin(); elem_id != elems.end(); elem_id++)
-          sets_blocks_for_this_node.insert(
-              blockRestrictedElementSubdomainID(mesh->elem_ptr(*elem_id)));
+
+        // Directly use the global info synchronized earlier by syncConnectedBlocks
+        const auto & sets_blocks_for_this_node = _nodeid_to_connected_blocks.at(current_node->id());
+
+        // Check if this node is exactly at the boundary between two blocks
         if (sets_blocks_for_this_node.size() == 2)
         {
-          auto setIt = sets_blocks_for_this_node.begin();
-          if (findBlockPairs(*setIt, *std::next(setIt, 1)))
+          // Get the two block IDs from the set
+          auto it = sets_blocks_for_this_node.begin();
+          subdomain_id_type block1 = *it;
+          subdomain_id_type block2 = *std::next(it);
+
+          // Check if this block pair is one of the user-specified pairs to split
+          if (findBlockPairs(block1, block2))
+          {
             should_create_new_node = true;
+          }
         }
       }
 
@@ -237,10 +246,13 @@ BreakMeshByBlockGenerator::generate()
                                            : (current_elem->subdomain_id() + 1) * max_node_id +
                                                  current_node->id())
                                .release();
+                // We're duplicating nodes so that each subdomain elem has its own copy, so it
+                // seems natural to assign this new node the same proc id as corresponding
+                // subdomain elem
                 new_node->processor_id() = current_elem->processor_id();
                 mesh->add_node(new_node);
                 current_elem->set_node(node_id, new_node);
-
+                // Add boundary info to the new node
                 boundary_info.boundary_ids(current_node, node_boundary_ids);
                 boundary_info.add_node(new_node, node_boundary_ids);
               }
@@ -257,8 +269,7 @@ BreakMeshByBlockGenerator::generate()
 
               // Assign the newly added node to other connected elements with the same
               // block_id
-              if (connected_elem &&
-                  connected_elem->subdomain_id() == current_elem->subdomain_id() &&
+              if (connected_elem->subdomain_id() == current_elem->subdomain_id() &&
                   connected_elem != current_elem)
               {
                 for (unsigned int node_id = 0; node_id < connected_elem->n_nodes(); ++node_id)
@@ -582,8 +593,10 @@ BreakMeshByBlockGenerator::syncConnectedBlocks(
   const auto mesh_pid = mesh.processor_id();
 
   // Phase 1: Ghost nodes push their connected blocks to the owner
-  using NodeConnectedBlocksTuple =
-      std::tuple<dof_id_type, std::vector<subdomain_id_type>, processor_id_type>;
+  using NodeConnectedBlocksTuple = std::
+      tuple<dof_id_type, std::vector<subdomain_id_type>, processor_id_type>; // (node_id,
+                                                                             // connected_blocks,
+                                                                             // ghost_pid)
   std::map<processor_id_type, std::vector<NodeConnectedBlocksTuple>> to_owner;
   for (const auto & map_entry : _nodeid_to_connected_blocks)
   {
@@ -612,7 +625,9 @@ BreakMeshByBlockGenerator::syncConnectedBlocks(
       });
 
   // Phase 2: Node owners broadcast complete connected blocks back to subscribers
-  using NodeConnectedBlocksPair = std::pair<dof_id_type, std::vector<subdomain_id_type>>;
+  using NodeConnectedBlocksPair =
+      std::pair<dof_id_type, std::vector<subdomain_id_type>>; // (node_id,
+                                                              // connected_blocks)
   std::map<processor_id_type, std::vector<NodeConnectedBlocksPair>> from_owner;
   for (const auto & [node_id, sub_pids] : subscribers)
   {
