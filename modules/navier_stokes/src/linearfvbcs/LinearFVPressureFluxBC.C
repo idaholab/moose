@@ -41,10 +41,10 @@ LinearFVPressureFluxBC::computeBoundaryValue() const
   const Real distance = computeCellToFaceDistance();
 
   return _var.getElemValue(*elem_info, determineState()) -
-          _HbyA_flux(singleSidedFaceArg(_current_face_info), determineState()) /
-            std::max(_Ainv(face_arg, determineState())(0), 1e-8)  *
-            distance; // We use the 0th component of Ainv. Components of Ainv are
-                      // equal for most applications, and Ainv(0) has a value for 1D,2D,3D.
+         _HbyA_flux(singleSidedFaceArg(_current_face_info), determineState()) /
+             std::max(_Ainv(face_arg, determineState())(0), 1e-8) *
+             distance; // We use the 0th component of Ainv. Components of Ainv are
+                       // equal for most applications, and Ainv(0) has a value for 1D,2D,3D.
 }
 
 Real
@@ -55,7 +55,7 @@ LinearFVPressureFluxBC::computeBoundaryNormalGradient() const
   const Real distance = computeCellToFaceDistance();
 
   return -_HbyA_flux(singleSidedFaceArg(_current_face_info), determineState()) /
-          std::max(_Ainv(face_arg, determineState())(0), 1e-8) * distance;
+         std::max(_Ainv(face_arg, determineState())(0), 1e-8) * distance;
 }
 
 Real
@@ -71,7 +71,7 @@ LinearFVPressureFluxBC::computeBoundaryValueRHSContribution() const
   const Real distance = computeCellToFaceDistance();
 
   return -_HbyA_flux(singleSidedFaceArg(_current_face_info), determineState()) /
-          std::max(_Ainv(face_arg, determineState())(0), 1e-8) * distance;
+         std::max(_Ainv(face_arg, determineState())(0), 1e-8) * distance;
 }
 
 Real
