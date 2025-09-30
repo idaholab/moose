@@ -78,21 +78,21 @@ As Navier-Stokes Finite Volume solvers continue to evolve in MOOSE, many new sol
 | Turbulence         | Mixing length             | Yes        | Yes                                                          | Yes                                                          |                        |
 |                    | $k-\epsilon$              |            | Yes                                                          | Yes                                                          | Yes                    |
 |                    | $k-\omega$ SST            |            |                                                              | in [PR #28151](https://github.com/idaholab/moose/pull/28151) |                        |
-| Two-phase          | Mixture model             | Yes        | Yes                                                          | Yes                                                          | in [PR #29614](https://github.com/idaholab/moose/pull/29614) |
+| Two-phase          | Mixture model             | Yes        | Yes                                                          | Yes                                                          | Yes |
 |                    | Eulerian-Eulerian         |            |                                                              | Yes                                                          |                        |
 | Porous Flow        |       --                  | Yes        | Yes                                                          | Yes                                                          |                        |
 | Compressibility    | Incompressible            | Yes        | Yes                                                          | Yes                                                          | Yes                    |
 |                    | Weakly compressible       |            | Yes                                                          | Yes                                                          | Yes                    |
 |                    | Compressible              |            | Yes                                                          |                                                              |                        |
 | Coupling           | Domain overlapping (SAM)  |            | Yes                                                          | Yes                                                          |                        |
-|                    | Direct to THM             |            | in [PR #28528](https://github.com/idaholab/moose/pull/28528) |                                                              |                        |
-|                    | MultiApp w/ Subchannel    |            | Yes                                                          |                                                              |                        |
+|                    | Domain decomposition (THM)     |       | in [PR #28528](https://github.com/idaholab/moose/pull/28528) |                                                              |                        |
+|                    | Domain decomp. MultiApp w/ SCM |       | Yes                                                          |                                                              |                        |
 | Scalar Transport   |       --                  |            | Yes                                                          | Yes                                                          | Yes                    |
 | Physics Syntax     | Flow                      |            | Yes                                                          |                                                              | Yes                    |
 |                    | Fluid heat transfer       |            | Yes                                                          |                                                              | Yes                    |
 |                    | Solid phase heat transfer |            | Yes                                                          |                                                              |                        |
-|                    | Two phase                 |            | Yes                                                          |                                                              | in [PR #29614](https://github.com/idaholab/moose/pull/29614) |
-|                    | Turbulence                |            | Yes                                                          |                                                              |                        |
+|                    | Two phase                 |            | Yes                                                          |                                                              | Yes |
+|                    | Turbulence                |            | Yes                                                          |                                                              |      Yes             |
 |                    | Scalar transport          |            | Yes                                                          |                                                              | Yes                    |
 
 
