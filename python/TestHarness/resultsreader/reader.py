@@ -10,7 +10,7 @@
 import os
 import yaml
 from dataclasses import dataclass
-from typing import Optional, Union, Generator
+from typing import Optional, Union, Iterator
 
 import pymongo
 from pymongo.cursor import Cursor
@@ -205,7 +205,7 @@ class TestHarnessResultsReader:
         """
         return self.db.results.find(*args, **kwargs, sort=self.mongo_sort_id)
 
-    def getLatestEventResults(self) -> Generator[TestHarnessResults]:
+    def getLatestEventResults(self) -> Iterator[TestHarnessResults]:
         """
         Iterate through the latest unique event results
         """

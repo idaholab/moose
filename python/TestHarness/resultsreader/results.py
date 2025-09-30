@@ -9,7 +9,7 @@
 
 from datetime import datetime
 import importlib
-from typing import Optional, Union, Generator
+from typing import Optional, Union, Iterator
 from dataclasses import dataclass
 from TestHarness.validation.dataclasses import ValidationResult, ValidationData, ValidationDataTypesStr
 from pymongo.database import Database
@@ -529,7 +529,7 @@ class TestHarnessResults:
 
         return test_result
 
-    def get_tests(self) -> Generator[TestHarnessTestResult]:
+    def get_tests(self) -> Iterator[TestHarnessTestResult]:
         """
         Get all of the test results
         """
