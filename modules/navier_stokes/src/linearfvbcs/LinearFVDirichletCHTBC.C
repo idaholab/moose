@@ -15,8 +15,7 @@ registerMooseObject("NavierStokesApp", LinearFVDirichletCHTBC);
 InputParameters
 LinearFVDirichletCHTBC::validParams()
 {
-  InputParameters params = LinearFVCHTBCInterface::validParams();
-  params += LinearFVAdvectionDiffusionFunctorDirichletBC::validParams();
+  InputParameters params = LinearFVAdvectionDiffusionFunctorDirichletBC::validParams();
   params.addClassDescription(
       "Conjugate heat transfer BC for Dirichlet boundary condition-based coupling.");
   return params;

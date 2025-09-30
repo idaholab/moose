@@ -630,6 +630,7 @@ LinearAssemblySegregatedSolve::solve()
     // outside of the velocity-pressure loop
     if (_has_energy_system)
     {
+      // If there is no CHT specified this will just do go once through this block
       _cht.resetCHTConvergence();
       while (!_cht.converged())
       {
@@ -638,7 +639,6 @@ LinearAssemblySegregatedSolve::solve()
 
         // We set the preconditioner/controllable parameters through petsc options. Linear
         // tolerances will be overridden within the solver.
-
         Moose::PetscSupport::petscSetOptions(_energy_petsc_options, solver_params);
         ns_residuals[momentum_residual.size() + _has_energy_system] =
             solveAdvectedSystem(_energy_sys_number,
@@ -655,6 +655,7 @@ LinearAssemblySegregatedSolve::solve()
             _energy_system->computeGradients();
             _cht.updateCHTBoundaryCouplingFields(NS::CHTSide::SOLID);
           }
+
           // We set the preconditioner/controllable parameters through petsc options. Linear
           // tolerances will be overridden within the solver.
           Moose::PetscSupport::petscSetOptions(_solid_energy_petsc_options, solver_params);

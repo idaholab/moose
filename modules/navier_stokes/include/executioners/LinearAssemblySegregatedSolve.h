@@ -12,11 +12,7 @@
 // Moose includes
 #include "RhieChowMassFlux.h"
 #include "SIMPLESolveBase.h"
-#include "NS.h"
 #include "CHTHandler.h"
-
-class LinearFVFluxKernel;
-class LinearFVBoundaryCondition;
 
 /**
  * Common base class for segregated solvers for the Navier-Stokes
@@ -45,9 +41,6 @@ public:
   const std::vector<LinearSystem *> systemsToSolve() const { return _systems_to_solve; }
 
 protected:
-  //  std::vector<unsigned int> generateBoundaryMask(const BoundaryID bid, const
-  //  MooseVariableScalar);
-
   virtual std::vector<std::pair<unsigned int, Real>> solveMomentumPredictor() override;
   virtual std::pair<unsigned int, Real> solvePressureCorrector() override;
 

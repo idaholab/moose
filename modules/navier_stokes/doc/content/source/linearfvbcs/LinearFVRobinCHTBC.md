@@ -2,10 +2,10 @@
 
 ## Description
 
-This object is a boundary condition used in Navier-Stokes module that can be used for conjugate heat transfer (CHT) problems.
+This object is a boundary condition used in the Navier-Stokes module that can be used for conjugate heat transfer (CHT) problems.
 Its role is to enforce a Robin-type boundary condition at an interface where heat is exchanged between solid and fluid regions.
 It is similar in behavior to [LinearFVAdvectionDiffusionFunctorRobinBC.md] with the
-coefficients in the expression alignes with the thermal-hydraulics fields.
+coefficients in the expression aligned with the thermal-hydraulics fields.
 For more information on the design of CHT, click [here](linear_fv_cht.md).
 
 This boundary condition needs an incoming flux which is typically provided by the

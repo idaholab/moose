@@ -7,12 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#pragma once
-
-#include "LinearFVAdvectionDiffusionBC.h"
-
 /**
- * Base class that allows us for error checking and BC fetching in an efficient way.
+ * Base class that allows error checking for CHT applications.
  */
 class LinearFVCHTBCInterface
 {
@@ -21,6 +17,4 @@ public:
    * Class constructor.
    */
   LinearFVCHTBCInterface() {}
-
-  static InputParameters validParams();
 };

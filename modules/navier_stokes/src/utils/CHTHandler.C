@@ -89,7 +89,7 @@ CHTHandler::linkEnergySystems(SystemBase * solid_energy_system, SystemBase * flu
   _energy_system = fluid_energy_system;
   _solid_energy_system = solid_energy_system;
 
-  if (!_energy_system && !_solid_energy_system)
+  if (!_energy_system || !_solid_energy_system)
     paramError("cht_interfaces",
                "You selected to do conjugate heat transfer treatment, but it needs two energy "
                "systems: a solid and a fluid. One of these systems is missing.");

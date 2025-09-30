@@ -1,8 +1,16 @@
-# Conjugate Heat Transfer Capability
+# Conjugate Heat Transfer (CHT) Capability
 
 This summarizes the design and details of the conjugate heat transfer capabilities
-with the linear finite volume system through the [SIMPLE.md] execitoner. For the coupling
-purposes several new functors are created within [SIMPLE.md]:
+with the linear finite volume system through the [SIMPLE.md] execitoner.
+
+This capability is activate by specifying a boundary on the [!param](/Executioner/SIMPLE/bcht_interfaces)
+parameter. Other cht-related parameters can control the iteration between the solid and fluid
+energy equations. Once the capability is activated it will check if the
+used boundary conditions are compatible or not. In general, we introduced CHT versions of
+common boundary conditions such as [LinearFVRobinCHTBC.md] and [LinearFVDirichletCHTBC.md]
+that are dedicated for CHT applications.
+
+For coupling purposes several new functors are created under the hood:
 
 - +heat_flux_to_solid_*+ (where * is the interface boudary name),
 - +heat_flux_to_fluid_*+ (where * is the interface boudary name),
