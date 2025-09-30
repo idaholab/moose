@@ -15,7 +15,7 @@ if test -f "${HOME}/.bashrc_apptainer" ; then
         ;;
     exec)
         export BASH_ENV="${user_override}"
-        set -- /bin/bash --noprofile --rcfile "${user_override}" -c "$*"
+        set -- /bin/bash --noprofile --rcfile "${user_override}" -c "$@"
         ;;
     run)
         set -- /bin/bash --noprofile --rcfile "${user_override}"
