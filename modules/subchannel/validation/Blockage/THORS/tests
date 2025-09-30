@@ -9,7 +9,6 @@
     abs_zero = 1e-5
     valgrind = NONE
     recover = false
-    max_parallel = 1
     requirement = 'The system will examine the subchannel solver for the FFM-5B low flow case'
   []
   [FFM-5B_high]
@@ -20,7 +19,6 @@
     abs_zero = 1e-5
     valgrind = NONE
     recover = false
-    max_parallel = 1
     requirement = 'The system will examine the subchannel solver for the FFM-5B high flow case'
   []
   [FFM-3A]
@@ -32,7 +30,6 @@
     rel_err = 3e-5
     valgrind = NONE
     recover = false
-    max_parallel = 1
     requirement = 'The system will examine the subchannel solver for the FFM-3A case'
   []
 []

@@ -10,7 +10,6 @@
     abs_zero = 1e-5
     valgrind = NONE
     recover = false
-    max_parallel = 1
     requirement = 'The system will examine the subchannel solver for the EBR-II steady state SHRT-17 case'
   []
   [EBR-II_SHRT-45R_SS_test]
@@ -22,7 +21,6 @@
     abs_zero = 1e-5
     valgrind = NONE
     recover = false
-    max_parallel = 1
     requirement = 'The system will examine the subchannel solver for the EBR-II steady state SHRT-45R case'
   []
     [EBR-II_SHRT-45R_SS_test_corrected]
@@ -34,7 +32,6 @@
     abs_zero = 1e-5
     valgrind = NONE
     recover = false
-    max_parallel = 1
     requirement = 'The system will examine the subchannel solver for the EBR-II steady state SHRT-45R case using a corrected power profile'
   []
   [EBR-II_SHRT-17_SS_test_corrected]
@@ -46,7 +43,6 @@
     abs_zero = 1e-5
     valgrind = NONE
     recover = false
-    max_parallel = 1
     requirement = 'The system will examine the subchannel solver for the EBR-II steady state SHRT-17 case using a corrected power profile'
   []
   [EBR-II_SHRT-17_TR_test]
@@ -60,7 +56,6 @@
     rel_err = 1e-4
     valgrind = NONE
     recover = false
-    max_parallel = 1
     requirement = 'The system will examine the subchannel solver for the EBR-II transient SHRT-17 case'
   []
   [EBR-II_SHRT-45R_TR_test]
@@ -74,7 +69,6 @@
     rel_err = 1e-4
     valgrind = NONE
     recover = false
-    max_parallel = 1
     requirement = 'The system will examine the subchannel solver for the EBR-II transient SHRT-45R case'
   []
 []
