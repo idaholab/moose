@@ -202,11 +202,6 @@ BreakMeshByBlockGenerator::generate()
         const auto & sets_blocks_for_this_node = _nodeid_to_connected_blocks.at(
             current_node->id()); // invalid subdomain is included for correct logic
 
-        std::cout << " connected block  = ";
-        for (auto b : sets_blocks_for_this_node)
-          std::cout << b << ", ";
-        std::cout << std::endl;
-
         // Check if this node is exactly at the boundary between two blocks
         // If it is junction between more than two blocks, we do not split it
         if (sets_blocks_for_this_node.size() == 2)
@@ -219,9 +214,6 @@ BreakMeshByBlockGenerator::generate()
           // Check if this block pair is one of the user-specified pairs to split
           if (findBlockPairs(block1, block2))
             should_create_new_node = true;
-
-          if (should_create_new_node)
-            std::cout << "block pairs = " << block1 << ", " << block2 << std::endl;
         }
       }
 
