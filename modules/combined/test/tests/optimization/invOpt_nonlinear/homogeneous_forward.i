@@ -59,13 +59,13 @@
     type = ADParsedMaterial
     f_name = 'linearized_conductivity'
     function = '10+500*forwardT'
-    args = 'forwardT'
+    coupled_variables = 'forwardT'
   []
   [_dDdT]
     type = ADParsedMaterial
     f_name = '_dDdT' # "_" represents negation
     function = '-500'
-    args = 'forwardT'
+    coupled_variables = 'forwardT'
   []
   [volumetric_heat]
     type = ADGenericFunctionMaterial

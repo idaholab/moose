@@ -19,9 +19,9 @@
 [AuxKernels]
   [TT]
     type = ParsedAux
-    args = 'temperature temperature_forward'
+    coupled_variables = 'temperature temperature_forward'
     variable = T2
-    function = 'temperature*(100-temperature_forward)'
+    expression = 'temperature*(100-temperature_forward)'
   []
 []
 

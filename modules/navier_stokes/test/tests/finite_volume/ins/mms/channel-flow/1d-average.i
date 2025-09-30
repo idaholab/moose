@@ -84,7 +84,7 @@ velocity_interp_method = 'average'
     type = INSFVInletVelocityBC
     boundary = 'left'
     variable = u
-    function = 'exact_u'
+    functor = 'exact_u'
   []
   [outlet_p]
     type = INSFVOutletPressureBC

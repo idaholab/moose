@@ -107,14 +107,14 @@ ny = 5
 
     inlet_boundaries = 'bottom_left top_right'
     momentum_inlet_types = 'fixed-velocity fixed-velocity'
-    momentum_inlet_function = '1 0; -1 0'
+    momentum_inlet_functors = '1 0; -1 0'
 
     wall_boundaries = 'top bottom walls'
     momentum_wall_types = 'noslip noslip noslip'
 
     outlet_boundaries = 'bottom_right top_left'
     momentum_outlet_types = 'fixed-pressure fixed-pressure'
-    pressure_function = '1 1'
+    pressure_functors = '1 1'
 
     friction_blocks = 'fluid; diode'
     friction_types = 'darcy forchheimer; darcy forchheimer'

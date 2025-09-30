@@ -31,14 +31,14 @@ cp = 1
 
     inlet_boundaries = 'top'
     momentum_inlet_types = 'fixed-velocity'
-    momentum_inlet_function = 'lid_function 0'
+    momentum_inlet_functors = 'lid_function 0'
     energy_inlet_types = 'fixed-temperature'
-    energy_inlet_function = '0'
+    energy_inlet_functors = '0'
 
     wall_boundaries = 'left right bottom'
     momentum_wall_types = 'noslip noslip noslip'
     energy_wall_types = 'heatflux heatflux fixed-temperature'
-    energy_wall_function = '0 0 1'
+    energy_wall_functors = '0 0 1'
 
     pin_pressure = true
     pinned_pressure_type = average

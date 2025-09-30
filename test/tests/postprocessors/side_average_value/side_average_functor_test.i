@@ -131,7 +131,7 @@
   [ext_u_diff]
     type = ParsedPostprocessor
     pp_names = 'ext_u ext_u_int ext_u_area'
-    function = 'ext_u - ext_u_int/ext_u_area'
+    expression = 'ext_u - ext_u_int/ext_u_area'
   []
   [ext_v1]
     type = SideAverageFunctorPostprocessor

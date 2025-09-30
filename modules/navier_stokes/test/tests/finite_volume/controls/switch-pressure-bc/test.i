@@ -118,26 +118,26 @@ inlet_v = 1
     type = INSFVInletVelocityBC
     variable = vel_x
     boundary = 'left'
-    function = ${inlet_v}
+    functor = ${inlet_v}
   []
   [inlet_u_later]
     type = INSFVInletVelocityBC
     variable = vel_x
     boundary = 'right'
-    function = ${fparse -1 * inlet_v}
+    functor = ${fparse -1 * inlet_v}
     enable = false
   []
   [inlet_v]
     type = INSFVInletVelocityBC
     variable = vel_y
     boundary = 'left'
-    function = 0
+    functor = 0
   []
   [inlet_v_later]
     type = INSFVInletVelocityBC
     variable = vel_y
     boundary = 'right'
-    function = 0
+    functor = 0
     enable = false
   []
   [outlet_p]
