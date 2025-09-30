@@ -173,7 +173,7 @@
       cli_args = "Mesh/split/block_pairs='0 2' --mesh-only block_pairs_restricted_3blocks_one_new_node_in.e"
       exodiff = 'block_pairs_restricted_3blocks_one_new_node_in.e'
       exodiff_opts = '-pedantic'
-      mesh_mode = 'REPLICATED'
+      # mesh_mode = 'REPLICATED'
       recover = false
       detail = 'by creating one new node.'
     []
@@ -183,7 +183,7 @@
       cli_args = "Mesh/split/block_pairs='0 1' --mesh-only block_pairs_restricted_3blocks_two_new_nodes_in.e"
       exodiff = 'block_pairs_restricted_3blocks_two_new_nodes_in.e'
       exodiff_opts = '-pedantic'
-      mesh_mode = 'REPLICATED'
+      # mesh_mode = 'REPLICATED'
       recover = false
       detail = 'by creating two new nodes.'
     []
@@ -193,7 +193,7 @@
       cli_args = "Mesh/split/block_pairs='0 2;0 1' --mesh-only block_pairs_restricted_3blocks_three_new_nodes_in.e"
       exodiff = 'block_pairs_restricted_3blocks_three_new_nodes_in.e'
       exodiff_opts = '-pedantic'
-      mesh_mode = 'REPLICATED'
+      # mesh_mode = 'REPLICATED'
       recover = false
       detail = 'by creating three new nodes.'
     []
