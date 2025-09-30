@@ -2,7 +2,7 @@
 
 This kernel adds the contributions of the buoyancy force due to density differences through a force/source term to the right hand side of the momentum equation system for the finite volume SIMPLE segregated solver [SIMPLE.md].
 
-This term is described by $(\rho-\rho_{ref}) \vec{g}$ present in the momentum equation conservation when describing an incompressible fluid, where $\rho_{ref}$ is the reference density, and $\vec{g}$ is the gravity vector. The Boussinesq buoyancy model accepts arbitrary temperature-dependent functions for density. The LinearFVMomentumBuoyancy kernel allows for modeling natural convection.
+This term is described by $(\rho-\rho_{ref}) \vec{g}$ present in the momentum equation conservation when describing an incompressible fluid, where $\rho_{ref}$ is the reference density, and $\vec{g}$ is the gravity vector. The Buoyancy model accepts arbitrary temperature-dependent functions for density. The LinearFVMomentumBuoyancy kernel allows for modeling natural convection.
 
 This term deals only with the force due to the variation in density $\Delta \rho \vec{g}$, with the fluid density being $\rho = \rho_{ref}+\Delta\rho$. Thus, with no extra added terms to the conventional incompressible Navier Stokes equations, the system will solve for the total pressure minus the hydrostatic pressure.
 

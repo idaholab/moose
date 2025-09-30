@@ -190,7 +190,7 @@ RhieChowMassFlux::initialSetup()
                                     .template condition<AttribName>(force_name)
                                     .queryInto(temp_storage);
         if (temp_storage.size() != 1)
-          paramError("body_force_kernels_name",
+          paramError("body_force_kernel_names",
                      "The kernel with the given name: " + force_name +
                          " could not be found or multiple instances were identified.");
         _body_force_kernels[dim_i].push_back(temp_storage[0]);
@@ -492,7 +492,6 @@ RhieChowMassFlux::populateCouplingFunctors(
       const ElemInfo & elem_info = elem_is_fluid ? *fi->elemInfo() : *fi->neighborInfo();
       const auto elem_dof = elem_info.dofIndices()[_global_momentum_system_numbers[0]][0];
 
-      const Real elem_rho = _rho(makeElemArg(elem_info.elem()), time_arg);
       // If it is a Dirichlet BC, we use the dirichlet value the make sure the face flux
       // is consistent
       if (_vel[0]->isDirichletBoundaryFace(*fi))
@@ -507,7 +506,7 @@ RhieChowMassFlux::populateCouplingFunctors(
           face_hbya(dim_i) =
               -MetaPhysicL::raw_value((*_vel[dim_i])(boundary_face, Moose::currentState()));
 
-          if (!_body_force_kernels_name.empty())
+          if (!_body_force_kernel_names.empty())
             for (const auto & force_kernel : _body_force_kernels[dim_i])
             {
               force_kernel->setCurrentElemInfo(&elem_info);
@@ -529,6 +528,7 @@ RhieChowMassFlux::populateCouplingFunctors(
       }
 
       // We just do a one-term expansion for 1/A no matter what
+      const Real elem_rho = _rho(makeElemArg(elem_info.elem()), time_arg);
       for (const auto dim_i : index_range(raw_Ainv))
         Ainv(dim_i) = elem_rho * ainv_reader[dim_i](elem_dof);
     }

@@ -157,7 +157,7 @@ protected:
   /// Pointer to the body force terms
   std::vector<std::vector<LinearFVElementalKernel *>> _body_force_kernels;
   /// Vector of body force term names
-  std::vector<std::vector<std::string>> _body_force_kernels_name;
+  std::vector<std::vector<std::string>> _body_force_kernel_names;
 
   /**
    * for a PISO iteration we need to hold on to the original pressure gradient field.
