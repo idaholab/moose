@@ -328,4 +328,10 @@
     requirement = 'The system shall provide the ability to filter tests based on whether or not they are dependent on certain capabilities.'
     issues = '#31310'
   []
+  [prarameter_propagation]
+    type = PythonUnitTest
+    input = test_ParameterPropagation.py
+    requirement = 'The system shall propagate parameters specified at higher levels as default into lower level blocks.'
+    issues = '#31322'
+  []
 []
