@@ -32,14 +32,17 @@ CHTHandler::validParams()
 
   params.addRangeCheckedParam<unsigned int>(
       "max_cht_fpi",
-      0,
-      "max_cht_fpi >= 0",
+      1,
+      "max_cht_fpi >= 1",
       "Number of maximum fixed point iterations (FPI). Currently only applied to"
       " conjugate heat transfer simulations. The default value of 1 essentially keeps"
       " the FPI feature turned off.");
 
   params.addRangeCheckedParam<Real>(
-      "cht_heat_flux_tolerance", 1e-8, "cht_heat_flux_tolerance > 0", "Bazinga.");
+      "cht_heat_flux_tolerance",
+      1e-5,
+      "cht_heat_flux_tolerance > 0",
+      "The relative tolerance for terminating conjugate heat transfer iteration.");
 
   params.addRangeCheckedParam<std::vector<Real>>(
       "cht_fluid_temperature_relaxation",
@@ -318,6 +321,8 @@ CHTHandler::updateCHTBoundaryCouplingFields(const NS::CHTSide side)
     auto & temperature_container = _boundary_temperature[bd_index][other_side];
     // We will also update the integrated flux for output info
     auto & integrated_flux = _integrated_boundary_heat_flux[bd_index][side];
+    // We are recomputing this so, time to zero this out
+    integrated_flux = 0.0;
 
     const auto & bd_fi_container = _cht_face_info[bd_index];
 
@@ -368,8 +373,8 @@ CHTHandler::printIntegratedFluxes() const
   for (const auto i : index_range(_integrated_boundary_heat_flux))
   {
     auto & integrated_fluxes = _integrated_boundary_heat_flux[i];
-    _console << " Boundary " << _cht_boundary_names[i] << " flux on solid side "
-             << integrated_fluxes[NS::CHTSide::SOLID]
+    _console << " Iteration " << _fpi_it << " Boundary " << _cht_boundary_names[i]
+             << " flux on solid side " << integrated_fluxes[NS::CHTSide::SOLID]
              << " flux on fluid side: " << integrated_fluxes[NS::CHTSide::FLUID] << std::endl;
   }
 }
@@ -384,7 +389,7 @@ CHTHandler::resetIntegratedFluxes()
 bool
 CHTHandler::converged() const
 {
-  if (_fpi_it > _max_cht_fpi)
+  if (_fpi_it >= _max_cht_fpi)
     return true;
 
   for (const auto & boundary_flux : _integrated_boundary_heat_flux)
@@ -393,10 +398,11 @@ CHTHandler::converged() const
     const Real f2 = boundary_flux[1];
 
     // Special case: both are zero at startup → not converged yet
-    if (f1 == 0.0 && f2 == 0.0)
+    if (_fpi_it != 0 && (f1 == 0.0 && f2 == 0.0))
       return true;
 
-    const Real diff = std::abs(f1 - f2);
+    // These fluxes should be of opposite sign
+    const Real diff = std::abs(f1 + f2);
     const Real denom = std::max({std::fabs(f1), std::fabs(f2), Real(1e-14)});
     const Real rel_diff = diff / denom;
 
@@ -404,7 +410,7 @@ CHTHandler::converged() const
       return false;
   }
 
-  return true;
+  return _fpi_it;
 }
 
 } // End FV namespace

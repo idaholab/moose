@@ -176,7 +176,7 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
   for (auto & system : _systems_to_solve)
     system->system().prefix_with_name(false);
 
-  // Link CHT object
+  // Link CHT objects, this will also do some error checking
   if (_cht.enabled())
     _cht.linkEnergySystems(_solid_energy_system, _energy_system);
 }
@@ -297,8 +297,11 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
 void
 LinearAssemblySegregatedSolve::initialSetup()
 {
-  _cht.deduceCHTBoundaryCoupling();
-  _cht.setupConjugateHeatTransferContainers();
+  if (_cht.enabled())
+  {
+    _cht.deduceCHTBoundaryCoupling();
+    _cht.setupConjugateHeatTransferContainers();
+  }
 }
 
 std::pair<unsigned int, Real>
@@ -667,10 +670,12 @@ LinearAssemblySegregatedSolve::solve()
         {
           _cht.sumIntegratedFluxes();
           _cht.printIntegratedFluxes();
-          _cht.resetIntegratedFluxes();
-          _cht.incrementCHTIterators();
         }
+
+        _cht.incrementCHTIterators();
       }
+      if (_cht.enabled())
+        _cht.resetIntegratedFluxes();
     }
 
     // If we have active scalar equations, solve them here in case they depend on temperature
