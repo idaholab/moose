@@ -421,7 +421,7 @@ advected_interp_method = 'upwind'
   solid_energy_petsc_options_value = 'hypre boomeramg'
   print_fields = false
   continue_on_max_its = true
-  num_cht_fpi = 2
+  max_cht_fpi = 2
 []
 
 [Outputs]

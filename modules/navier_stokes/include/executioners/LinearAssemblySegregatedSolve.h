@@ -12,8 +12,8 @@
 // Moose includes
 #include "RhieChowMassFlux.h"
 #include "SIMPLESolveBase.h"
-#include "FaceCenteredMapFunctor.h"
 #include "NS.h"
+#include "CHTHandler.h"
 
 class LinearFVFluxKernel;
 class LinearFVBoundaryCondition;
@@ -43,18 +43,6 @@ public:
 
   /// Return pointers to the systems which are solved for within this object
   const std::vector<LinearSystem *> systemsToSolve() const { return _systems_to_solve; }
-
-  /// Set up the boundary condition pairs, functor maps, and every other necessary
-  /// structure for the conjugate heat transfer routines
-  void setupConjugateHeatTransferContainers();
-
-  void deduceCHTBoundaryCoupling();
-
-  /// Update the coupling fields for the sol
-  void updateCHTBoundaryCouplingFields(const NS::CHTSide side);
-
-  /// Initialize the voupling fields for the conjugate heat transfer routines
-  void initializeCHTCouplingFields();
 
 protected:
   //  std::vector<unsigned int> generateBoundaryMask(const BoundaryID bid, const
@@ -103,19 +91,19 @@ protected:
   /// The number of the system corresponding to the pressure equation
   const unsigned int _pressure_sys_number;
 
-  /// Reference to the nonlinear system corresponding to the pressure equation
+  /// Reference to the linear system corresponding to the pressure equation
   LinearSystem & _pressure_system;
 
   /// The number of the system corresponding to the energy equation
   const unsigned int _energy_sys_number;
 
-  /// Pointer to the nonlinear system corresponding to the fluid energy equation
+  /// Pointer to the linear system corresponding to the fluid energy equation
   LinearSystem * _energy_system;
 
   /// The number of the system corresponding to the solid energy equation
   const unsigned int _solid_energy_sys_number;
 
-  /// Pointer to the nonlinear system corresponding to the solid energy equation
+  /// Pointer to the linear system corresponding to the solid energy equation
   LinearSystem * _solid_energy_system;
 
   /// Pointer(s) to the system(s) corresponding to the passive scalar equation(s)
@@ -162,49 +150,6 @@ protected:
 
   /// ********************** Conjugate heat transfer variables ************** //
 
-  /// The names of the CHT boundaries
-  std::vector<BoundaryName> _cht_boundary_names;
-
-  /// The IDs of the CHT boundaries
-  std::vector<BoundaryID> _cht_boundary_ids;
-
-  /// number of CHT fixed point iterations.
-  const unsigned int _num_cht_fpi;
-
-  /// Tolerance for heat flux at the CHT interfaces
-  const Real _cht_heat_flux_tolerance;
-
-  /// The relaxation factors for temperature fields for the CHT boundaries
-  /// first index is solid/fluid second is the interface
-  std::vector<std::vector<Real>> _cht_flux_relaxation_factor;
-
-  /// The relaxation factors for temperature fields for the CHT boundaries
-  /// first index is solid/fluid second is the interface
-  std::vector<std::vector<Real>> _cht_temperature_relaxation_factor;
-
-  /// The relaxation factors for flux fields for the CHT boundaries
-  /// first index is the boundary, the second solid/fluid.
-  std::vector<unsigned int> _cht_system_numbers;
-
-  /// The subset of the FaceInfo objects that belong to the given boundaries.
-  std::vector<std::vector<const FaceInfo *>> _cht_face_info;
-
-  /// The conduction kernels from the solid/fluid domains. Can't be const, considering we are updating the inner structures for every face.
-  std::vector<LinearFVFluxKernel *> _cht_conduction_kernels;
-
-  /// Vector of boundary conditions that describe the conjugate heat transfer from each side.
-  std::vector<std::vector<LinearFVBoundaryCondition *>> _cht_boundary_conditions;
-
-  /// Functors describing the heat flux on the conjugate heat transfer interfaces.
-  /// Two functors per sideset, first is solid second is fluid.
-  std::vector<std::vector<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>>>
-      _boundary_heat_flux;
-
-  /// Integrated flux for the boundaries, first index is the boundary second is solid/fluid.
-  std::vector<std::vector<Real>> _integrated_boundary_heat_flux;
-
-  /// Functors describing the heat flux on the conjugate heat transfer interfaces.
-  /// Two functors per sideset, first is solid second is fluid.
-  std::vector<std::vector<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>>>
-      _boundary_temperature;
+  // Handler object for CHT problems
+  NS::FV::CHTHandler _cht;
 };
