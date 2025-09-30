@@ -146,45 +146,35 @@ class TestHarnessTestResult:
         """
         Get the commit that this test was ran on
         """
-        assert(self.data['event_sha'] == self.results.event_sha)
-        return self.data['event_sha']
+        return self.results.event_sha
 
     @property
     def event_cause(self) -> str:
         """
         Get the cause for the test that was ran
         """
-        assert(self.data['event_cause'] == self.results.event_cause)
-        return self.data['event_cause']
+        return self.results.event_cause
 
     @property
     def event_id(self) -> int:
         """
         Get the ID of the event that this job was ran on
         """
-        if self.results.civet_version > 2:
-            assert(self.data['event_id'] == self.results.event_id)
-            return self.data['event_id']
-        return None
+        return self.results.event_id
 
     @property
     def pr_num(self) -> Union[int, None]:
         """
         Get the PR number associated with the test (if any)
         """
-        assert(self.data['pr_num'] == self.results.pr_num)
-        return self.data['pr_num']
+        return self.results.pr_num
 
     @property
     def base_sha(self) -> Union[str, None]:
         """
         Get the base commit that these tests were ran on
         """
-        value = None
-        if self.results.civet_version > 1:
-            value = self.data['base_sha']
-        assert(value == self.results.base_sha)
-        return value
+        return self.results.base_sha
 
     @property
     def time(self) -> datetime:
