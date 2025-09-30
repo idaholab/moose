@@ -115,6 +115,9 @@ SCMSolutionTransferBase::transferNodalVars(unsigned int app_idx)
 
   for (auto & node : mesh->getMesh().local_node_ptr_range())
   {
+    // No local data to send
+    if (processor_id() != 0)
+      continue;
     Node * from_node = getFromNode(from_mesh, *node);
 
     for (auto & var_name : _var_names)
