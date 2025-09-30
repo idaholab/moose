@@ -35,7 +35,7 @@ protected:
   /// Notice that in block restricted mode, the invalid_subdomain_id is used
   /// to lump toghether all the non-listed blocks to avoid splitting the mesh
   /// where not necessary.
-  subdomain_id_type blockRestrictedElementSubdomainID(const Elem * elem) const;
+  subdomain_id_type blockRestrictedElementSubdomainID(const Elem * elem);
 
   /// Return true if block_one and block_two are found in users' provided block_pairs list
   bool findBlockPairs(subdomain_id_type block_one, subdomain_id_type block_two);
