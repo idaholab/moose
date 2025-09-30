@@ -36,6 +36,10 @@ InterWrapperSolutionTransferBase::initialSetup()
   MultiAppTransfer::initialSetup();
   for (std::size_t var_index = 0; var_index < _var_names.size(); ++var_index)
   {
+    // No local app, we cannot examine the target variable
+    if (_to_problems.empty())
+      continue;
+
     // Check source variable on regular subchannel problem
     MooseVariableFieldBase & from_var = _subproblem.getVariable(
         0, _var_names[var_index], Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
