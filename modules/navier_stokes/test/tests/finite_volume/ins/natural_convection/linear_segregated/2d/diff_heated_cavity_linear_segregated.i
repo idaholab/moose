@@ -6,15 +6,15 @@ T_0 = 875.0
 mu = 1.
 k_cond = 38.0
 cp = 640.
-alpha = 3.26e-4
+alpha = 3.26e-5
 
 walls = 'right left top bottom'
 
 [GlobalParams]
   rhie_chow_user_object = 'ins_rhie_chow_interpolator'
   advected_interp_method = 'upwind'
-  u = superficial_vel_x
-  v = superficial_vel_y
+  u = vel_x
+  v = vel_y
 []
 
 [Problem]
@@ -34,8 +34,8 @@ walls = 'right left top bottom'
     xmax = 1
     ymin = 0
     ymax = 1
-    nx = 30
-    ny = 30
+    nx = 15
+    ny = 15
   []
 []
 
@@ -46,21 +46,21 @@ walls = 'right left top bottom'
 [UserObjects]
   [ins_rhie_chow_interpolator]
     type = RhieChowMassFlux
-    u = superficial_vel_x
-    v = superficial_vel_y
+    u = vel_x
+    v = vel_y
     pressure = pressure
     rho = ${rho}
     p_diffusion_kernel = p_diffusion
-    body_force_kernels_name = "u_buoyancy; v_buoyancy"
+    body_force_kernel_names = "u_buoyancy; v_buoyancy"
   []
 []
 
 [Variables]
-  [superficial_vel_x]
+  [vel_x]
     type = MooseLinearVariableFVReal
     solver_sys = u_system
   []
-  [superficial_vel_y]
+  [vel_y]
     type = MooseLinearVariableFVReal
     solver_sys = v_system
   []
@@ -79,20 +79,20 @@ walls = 'right left top bottom'
 [LinearFVKernels]
   [u_advection_stress]
     type = LinearWCNSFVMomentumFlux
-    variable = superficial_vel_x
+    variable = vel_x
     mu = ${mu}
     momentum_component = 'x'
     use_nonorthogonal_correction = false
   []
   [u_pressure]
     type = LinearFVMomentumPressure
-    variable = superficial_vel_x
+    variable = vel_x
     pressure = pressure
     momentum_component = 'x'
   []
   [u_buoyancy]
     type = LinearFVMomentumBoussinesq
-    variable = superficial_vel_x
+    variable = vel_x
     T_fluid = T_fluid
     gravity = '0 -9.8 0'
     rho = ${rho}
@@ -103,20 +103,20 @@ walls = 'right left top bottom'
 
   [v_advection_stress]
     type = LinearWCNSFVMomentumFlux
-    variable = superficial_vel_y
+    variable = vel_y
     mu = ${mu}
     momentum_component = 'y'
     use_nonorthogonal_correction = false
   []
   [v_pressure]
     type = LinearFVMomentumPressure
-    variable = superficial_vel_y
+    variable = vel_y
     pressure = pressure
     momentum_component = 'y'
   []
   [v_buoyancy]
     type = LinearFVMomentumBoussinesq
-    variable = superficial_vel_y
+    variable = vel_y
     T_fluid = T_fluid
     gravity = '0 -9.81 0'
     rho = ${rho}
@@ -157,13 +157,13 @@ walls = 'right left top bottom'
 [LinearFVBCs]
   [no-slip-u]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    variable = superficial_vel_x
+    variable = vel_x
     boundary = ${walls}
     functor = 0
   []
   [no-slip-v]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    variable = superficial_vel_y
+    variable = vel_y
     boundary = ${walls}
     functor = 0
   []
@@ -218,7 +218,7 @@ walls = 'right left top bottom'
   momentum_systems = 'u_system v_system'
   pressure_system = 'pressure_system'
   energy_system = 'energy_system'
-  momentum_equation_relaxation = 0.5
+  momentum_equation_relaxation = 0.7
   pressure_variable_relaxation = 0.3
   energy_equation_relaxation = 0.9
   num_iterations = 1500
@@ -250,5 +250,9 @@ walls = 'right left top bottom'
 ################################################################################
 
 [Outputs]
-  exodus = true
+  #exodus = true
+  [out]
+    type = Exodus
+    file_base = 'diff_heated_cavity_linear_segregated_out'
+  []
 []
