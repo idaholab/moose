@@ -37,10 +37,9 @@ DiracKernelBase::validParams()
       "has been added before. If this option is set to false duplicate points are retained"
       "and contribute to residual and Jacobian.");
 
-  MooseEnum point_not_found_behavior("ERROR WARNING IGNORE", "IGNORE");
   params.addParam<MooseEnum>(
       "point_not_found_behavior",
-      point_not_found_behavior,
+      MooseEnum(getPointNotFoundBehaviorOptions(), "IGNORE"),
       "By default (IGNORE), it is ignored if an added point cannot be located in the "
       "specified subdomains. If this option is set to ERROR, this situation will result in an "
       "error. If this option is set to WARNING, then a warning will be issued.");

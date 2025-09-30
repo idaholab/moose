@@ -18,6 +18,7 @@
 #include "MooseVariableField.h"
 #include "MooseVariableInterface.h"
 #include "BlockRestrictable.h"
+#include "MooseEnum.h"
 
 /**
  * DiracKernelBase is the base class for all DiracKernel type classes.
@@ -134,12 +135,7 @@ protected:
   const bool _drop_duplicate_points;
 
   // @{ Point-not-found behavior
-  enum class PointNotFoundBehavior
-  {
-    ERROR,
-    WARNING,
-    IGNORE
-  };
+  CreateMooseEnumClass(PointNotFoundBehavior, ERROR, WARNING, IGNORE);
   const PointNotFoundBehavior _point_not_found_behavior;
   // @}
 
