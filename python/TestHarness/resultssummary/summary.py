@@ -53,7 +53,6 @@ class TestHarnessResultsSummary:
                 added_table.append([str(test_name), test_result.run_time])
         else:
             added_table = None
-        
         return removed_table, added_table
     
     def pr_test_names(self, **kwargs):
@@ -64,15 +63,17 @@ class TestHarnessResultsSummary:
         test_names = set(results.test_names)
         
         base_sha = results.base_sha
+        assert isinstance(base_sha, str)
+        
         base_results = self.reader.getCommitResults(base_sha)
+        if not isinstance(base_results, TestHarnessResults):         
+            print(f"Comparison not available: no baseline results found for base SHA {base_sha}")
+            return results, test_names, set()
         base_test_names = set(base_results.test_names)
-
         return results, test_names, base_test_names
-    
 
     def build_summary(self, removed_table: list, added_table: list) -> str:
         summary = []
-
         summary.append("\nRemoved Tests:")
         if removed_table:
             table = [[str(test_name)] for test_name in removed_table]
@@ -85,18 +86,21 @@ class TestHarnessResultsSummary:
             summary.append(tabulate(added_table, headers=["Test Name", "Run Time"], tablefmt="github"))
         else:
             summary.append("No New Tests")
-
         return "\n".join(summary)
 
 
     def pr(self, **kwargs) -> str:
         results, head_names, base_names = self.pr_test_names(**kwargs)
+        if not base_names:
+            print("No baseline test names provided. Skipping diff.")
+            return 
         removed_table, added_table = self.diff_table(results, base_names, head_names)
         print(self.build_summary(removed_table, added_table))
 
     def main(self, **kwargs):
         action = kwargs['action']
         getattr(self, action)(**kwargs)
+
         
 if __name__ == '__main__':
     args = TestHarnessResultsSummary.parseArgs()
