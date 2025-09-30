@@ -57,20 +57,25 @@
     type = ParsedFunction
     expression = 1.0
   []
+  [source]
+    type = ParsedFunction
+    expression = 100
+  []
 []
 
 [BCs]
+ 
   [bottom]
     type = MFEMScalarDirichletBC
     variable = concentration
     boundary = 'bottom'
-    coefficient = 1.0
+    coefficient = 0.0
   []
   [top]
     type = MFEMScalarDirichletBC
     variable = concentration
     boundary = 'top'
-    coefficient = 2.0
+    coefficient = 0.0
   []
 []
 
@@ -84,7 +89,7 @@
 []
 
 [Kernels]
-  active = 'residual_diff'
+  active = 'jacobian_diff residual_diff force'
   [jacobian_diff]
     type = MFEMDiffusionKernel
     variable = concentration
@@ -92,6 +97,11 @@
   []
   [residual_diff]
     type = MFEMDomainLFGardKernel
+    variable = concentration
+    coefficient = one
+  []
+  [force]
+    type = MFEMDomainLFKernel
     variable = concentration
     coefficient = one
   []
