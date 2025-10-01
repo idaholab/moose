@@ -23,17 +23,12 @@ StressCorrosionCracking::validParams()
 
   params.addRequiredParam<Real>(
       "k_low", "K1 integral below this value has constant growth rate of growth_rate_low");
-  params.addRequiredParam<Real>(
-      "growth_rate_low",
-      "growth rate when K1 is below k_low");
+  params.addRequiredParam<Real>("growth_rate_low", "growth rate when K1 is below k_low");
   params.addRequiredParam<Real>(
       "k_high", "K1 integral above this value has constant growth rate of growth_rate_high");
-  params.addRequiredParam<Real>(
-      "growth_rate_high",
-      "growth rate when K1 is above k_high");
-  params.addRequiredParam<Real>(
-      "growth_rate_mid_multiplier",
-      "Growth rate multiplier when K1 is between k_low and k_high");
+  params.addRequiredParam<Real>("growth_rate_high", "growth rate when K1 is above k_high");
+  params.addRequiredParam<Real>("growth_rate_mid_multiplier",
+                                "Growth rate multiplier when K1 is between k_low and k_high");
   params.addRequiredParam<Real>(
       "growth_rate_mid_exp_factor",
       "Growth rate exponential factor when K1 is between k_low and k_high");
