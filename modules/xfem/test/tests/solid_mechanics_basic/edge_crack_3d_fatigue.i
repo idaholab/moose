@@ -70,4 +70,5 @@
 
 [Outputs]
   file_base = edge_crack_3d_fatigue_out
+  json = true
 []

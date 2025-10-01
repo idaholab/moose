@@ -1,3 +1,6 @@
+# This takes 1 step of max_growth_size and back computes a time of 11s which
+# is the amount of time edge_crack_3d_scc.i takes to grow a crack of similar length.
+
 [Reporters]
   [scc_crack_growth]
     type = StressCorrosionCracking
@@ -40,7 +43,7 @@
   incremental = true
 []
 
-#functino for BC on top surface
+#function for BC on top surface
 [Functions]
   [top_trac_y]
     type = ConstantFunction
@@ -54,5 +57,9 @@
 
 [Outputs]
   file_base = edge_crack_3d_scc_crit_out
-  json = true
+  execute_on = 'FINAL'
+  [json_out]
+    type = JSON
+    execute_system_information_on = none
+  []
 []
