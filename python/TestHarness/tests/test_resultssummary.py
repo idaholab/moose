@@ -124,13 +124,14 @@ class TestResultsSummary(unittest.TestCase):
     def testPRNoBase(self):
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
         def mock_pr_test_names(**kwargs):
+            print("Comparison not available")
             return [], ['head_test1'], []
         summary.pr_test_names = mock_pr_test_names
 
         stdout = StringIO()
         with redirect_stdout(stdout):
             summary.pr(event_id=EVENT_ID)
-        self.assertIn('Skipping', stdout.getvalue())
+        self.assertIn('Comparison not available', stdout.getvalue())
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testMain(self):
