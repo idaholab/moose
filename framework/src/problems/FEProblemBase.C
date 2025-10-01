@@ -1847,8 +1847,10 @@ FEProblemBase::setCurrentSubdomainID(const Elem * elem, const THREAD_ID tid)
 void
 FEProblemBase::setNeighborSubdomainID(const Elem * elem, unsigned int side, const THREAD_ID tid)
 {
-  const auto * neighbor =
-      elem->neighbor_ptr(side) ? elem->neighbor_ptr(side) : _mesh.fake_neighbor_ptr(elem, side);
+  const auto disconnected_neighbor = _mesh.disconnectedNeighbor(elem, side);
+  const auto * neighbor = elem->neighbor_ptr(side)
+                              ? elem->neighbor_ptr(side)
+                              : (disconnected_neighbor ? disconnected_neighbor->elem : nullptr);
 
   if (!neighbor)
     mooseError("No neighbor (real or fake) found for elem ", elem->id(), " side ", side);
@@ -2388,11 +2390,13 @@ FEProblemBase::reinitNeighbor(const Elem * elem, unsigned int side, const THREAD
 {
   setNeighborSubdomainID(elem, side, tid);
 
-  const auto * neighbor =
-      elem->neighbor_ptr(side) ? elem->neighbor_ptr(side) : _mesh.fake_neighbor_ptr(elem, side);
+  const auto disconnected_neighbor = _mesh.disconnectedNeighbor(elem, side);
+  const auto * neighbor = elem->neighbor_ptr(side)
+                              ? elem->neighbor_ptr(side)
+                              : (disconnected_neighbor ? disconnected_neighbor->elem : nullptr);
 
-  unsigned int neighbor_side = elem->neighbor_ptr(side) ? neighbor->which_neighbor_am_i(elem)
-                                                        : _mesh.fake_neighbor_side(elem, side);
+  unsigned int neighbor_side =
+      elem->neighbor_ptr(side) ? neighbor->which_neighbor_am_i(elem) : disconnected_neighbor->side;
 
   for (const auto i : index_range(_nl))
   {
@@ -4301,18 +4305,17 @@ FEProblemBase::reinitMaterialsNeighbor(const SubdomainID blk_id,
       neighbor_side = neighbor->which_neighbor_am_i(_assembly[tid][0]->elem());
     else
     {
-      const Elem * fake_neighbor =
-          _mesh.fake_neighbor_ptr(_assembly[tid][0]->elem(), _assembly[tid][0]->side());
+      const auto disconnected_neighbor =
+          _mesh.disconnectedNeighbor(_assembly[tid][0]->elem(), _assembly[tid][0]->side());
 
-      if (!fake_neighbor)
+      if (!disconnected_neighbor)
         mooseError("No neighbor (real or fake) found for elem ",
                    _assembly[tid][0]->elem()->id(),
                    " side ",
                    _assembly[tid][0]->side());
 
-      neighbor = fake_neighbor;
-      neighbor_side =
-          _mesh.fake_neighbor_side(_assembly[tid][0]->elem(), _assembly[tid][0]->side());
+      neighbor = (disconnected_neighbor ? disconnected_neighbor->elem : nullptr);
+      neighbor_side = disconnected_neighbor->side;
     }
 
     mooseAssert(neighbor, "neighbor should be non-null");
@@ -4422,11 +4425,12 @@ FEProblemBase::swapBackMaterialsNeighbor(const THREAD_ID tid)
   else
   {
     // fake neighbor
-    neighbor = _mesh.fake_neighbor_ptr(elem, side);
-    if (!neighbor)
+    const auto disconnected_neighbor = _mesh.disconnectedNeighbor(elem, side);
+    if (!disconnected_neighbor)
       mooseError("No neighbor (real or fake) found for elem ", elem->id(), " side ", side);
 
-    neighbor_side = _mesh.fake_neighbor_side(elem, side);
+    neighbor = (disconnected_neighbor ? disconnected_neighbor->elem : nullptr);
+    neighbor_side = disconnected_neighbor->side;
   }
 
   if (!neighbor)

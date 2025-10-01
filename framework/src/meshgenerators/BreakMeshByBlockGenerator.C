@@ -157,6 +157,8 @@ BreakMeshByBlockGenerator::generate()
   std::map<dof_id_type, std::set<subdomain_id_type>> nodeid_to_connected_blocks;
   syncConnectedBlocks(node_to_elem_map, *mesh, nodeid_to_connected_blocks);
 
+  std::unordered_map<std::pair<const Elem *, unsigned int>, std::pair<const Elem *, unsigned int>>
+      elem_side_to_fake_neighbor_elem_side;
   // Main loop to duplicate nodes
   for (const auto & map_entry : node_to_elem_map)
   {
@@ -313,7 +315,7 @@ BreakMeshByBlockGenerator::generate()
               unsigned int connected_elem_side = connected_elem->which_neighbor_am_i(current_elem);
 
               if (_generate_boundary_pairs)
-                _elem_side_to_fake_neighbor_elem_side.emplace(
+                elem_side_to_fake_neighbor_elem_side.emplace(
                     std::make_pair(current_elem, side),
                     std::make_pair(connected_elem, connected_elem_side));
 
@@ -409,7 +411,7 @@ BreakMeshByBlockGenerator::generate()
     if (auto fake_neighbor_rm = std::dynamic_pointer_cast<FakeNeighborRM>(rm))
     {
       // Call the set method to pass the map data. The RM will make a safe copy.
-      fake_neighbor_rm->setFakeNeighborMap(_elem_side_to_fake_neighbor_elem_side);
+      fake_neighbor_rm->setFakeNeighborMap(elem_side_to_fake_neighbor_elem_side);
     }
     else
       mooseError("Failed to cast to FakeNeighborRM.");
@@ -420,22 +422,7 @@ BreakMeshByBlockGenerator::generate()
 
   mesh->prepare_for_use();
 
-  // After the mesh is prepared, we can now set the elem side to fake neighbor elem side map based
-  // on element IDs, since IDs may change after prepare_for_use.
-  if (_generate_boundary_pairs)
-  {
-    for (const auto & [pair1, pair2] : _elem_side_to_fake_neighbor_elem_side)
-    {
-      const auto elem_id = pair1.first->id();
-      unsigned int side = pair1.second;
-      const auto neighbor_elem_id = pair2.first->id();
-      unsigned int neighbor_side = pair2.second;
-
-      _mesh->addFakeNeighbor(elem_id, side, neighbor_elem_id, neighbor_side);
-      if (_add_interface_on_two_sides)
-        _mesh->addFakeNeighbor(neighbor_elem_id, neighbor_side, elem_id, side);
-    }
-  }
+  addDisconnectedNeighborsFromMap(elem_side_to_fake_neighbor_elem_side, *mesh);
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
@@ -645,4 +632,41 @@ BreakMeshByBlockGenerator::syncConnectedBlocks(
         for (const auto & [node_id, blocks_vec] : recv_data)
           nodeid_to_connected_blocks[node_id].insert(blocks_vec.begin(), blocks_vec.end());
       });
+}
+
+void
+BreakMeshByBlockGenerator::addDisconnectedNeighborsFromMap(
+    const std::unordered_map<std::pair<const Elem *, unsigned int>,
+                             std::pair<const Elem *, unsigned int>> &
+        elem_side_to_fake_neighbor_elem_side,
+    MeshBase & mesh)
+{
+  BoundaryInfo & boundary_info = mesh.get_boundary_info();
+
+  // Loop over elem_side_to_fake_neighbor_elem_side to add disconnected neighbors to the MOOSE mesh
+  for (const auto & entry : elem_side_to_fake_neighbor_elem_side)
+  {
+    const auto elem = entry.first.first;
+    const auto side = entry.first.second;
+    const auto connected_elem = entry.second.first;
+    const auto connected_side = entry.second.second;
+
+    // Extract boundary IDs for both sides
+    std::vector<boundary_id_type> ids;
+    boundary_info.boundary_ids(elem, side, ids);
+    boundary_id_type boundary_id = libMesh::BoundaryInfo::invalid_id;
+    if (!ids.empty())
+      boundary_id = ids.front();
+
+    std::vector<boundary_id_type> connected_ids;
+    boundary_info.boundary_ids(connected_elem, connected_side, connected_ids);
+    boundary_id_type connected_boundary_id = libMesh::BoundaryInfo::invalid_id;
+    if (!connected_ids.empty())
+      connected_boundary_id = connected_ids.front();
+
+    // Register as disconnected neighbors in MooseMesh
+    _mesh->addDisconnectedNeighbors(
+        ConstBndElement(elem, side, boundary_id),
+        ConstBndElement(connected_elem, connected_side, connected_boundary_id));
+  }
 }

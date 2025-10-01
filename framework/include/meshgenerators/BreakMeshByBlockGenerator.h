@@ -80,12 +80,26 @@ private:
   /// generate the new boundary interface
   void addInterface(MeshBase & mesh);
 
-  /// @brief Synchronizes connected blocks across all MPI ranks.
-  /// This process consists of two phases:
-  /// Phase 0: Each rank computes the locally connected blocks for the nodes it owns and sends this information to the owner of each node.
-  /// Phase 1: The owner of each node aggregates all received connected block information and broadcasts the global set of connected blocks for each node to all ranks.
+  /**
+   * @brief Synchronizes connected blocks across all MPI ranks.
+   *
+   * This process consists of two phases:
+   * Phase 0: Each rank computes the locally connected blocks for the nodes it owns and sends
+   *          this information to the owner of each node.
+   * Phase 1: The owner of each node aggregates all received connected block information and
+   *          broadcasts the global set of connected blocks for each node to all ranks.
+   */
   void syncConnectedBlocks(
       const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map,
       MeshBase & mesh,
       std::map<dof_id_type, std::set<subdomain_id_type>> & nodeid_to_connected_blocks);
+
+  /**
+   * @brief Add disconnected neighbors to the MooseMesh from a map of element-side pairs.
+   */
+  void
+  addDisconnectedNeighborsFromMap(const std::unordered_map<std::pair<const Elem *, unsigned int>,
+                                                           std::pair<const Elem *, unsigned int>> &
+                                      elem_side_to_fake_neighbor_elem_side,
+                                  MeshBase & mesh);
 };
