@@ -212,6 +212,24 @@
     issues = '#18768'
   []
 
+  [iga_constraint_matrix_hdf5]
+    type = Exodiff
+    input = 'iga_constraint_matrix_1d.i'
+    cli_args = 'Mesh/iga_file/constraint_matrix=linear_iga.h5 Outputs/file_base=iga_constraint_hdf5_out'
+    expect_out = 'Solve Converged'
+    recover = false
+    capabilities = 'exodus>=8.0' # This also ensures HDF5 support
+    exodiff = 'iga_constraint_hdf5_out.e' # Symlink; this should match the .m based test
+
+    # Penalty method boundary conditions
+    abs_zero = 1e-08
+
+    requirement = 'The system shall have the ability to load externally defined constraint matrices in CSR format from HDF5 files.'
+    design = 'meshgenerators/FileMeshGenerator.md'
+    issues = '#18768'
+  []
+
+
   [./exodus_discontinuous_iga_2d_test]
     # Make this an XMLDiff once #21449 is resolved
     type = Exodiff
