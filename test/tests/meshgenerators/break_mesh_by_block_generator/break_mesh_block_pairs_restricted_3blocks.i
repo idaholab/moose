@@ -13,7 +13,6 @@
   []
 []
 
-
 [AuxVariables]
   [proc]
     [AuxKernel]

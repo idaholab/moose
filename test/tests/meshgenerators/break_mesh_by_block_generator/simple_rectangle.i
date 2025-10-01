@@ -1,4 +1,3 @@
-
 # nx = 1024
 nx = 16
 nx_half = '${fparse nx/2}'

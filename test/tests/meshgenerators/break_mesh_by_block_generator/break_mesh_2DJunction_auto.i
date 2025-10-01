@@ -4,12 +4,12 @@
 []
 
 [Mesh]
-  [./fmg]
+  [fmg]
     type = FileMeshGenerator
     file = 4ElementJunction.e
   []
 
-  [./breakmesh]
+  [breakmesh]
     type = BreakMeshByBlockGenerator
     input = fmg
     split_interface = true
@@ -21,7 +21,6 @@
   exodus = true
 []
 
-
 [Variables]
   [diffused]
     order = FIRST
@@ -31,7 +30,6 @@
 [Executioner]
   type = Steady
 []
-
 
 [AuxVariables]
   [proc]
