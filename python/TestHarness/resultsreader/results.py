@@ -181,7 +181,7 @@ class TestHarnessTestResult:
         """
         Get the time this test was added to the database
         """
-        return self.data['time']
+        return self.results.time
 
     @property
     def tester(self) -> str:
