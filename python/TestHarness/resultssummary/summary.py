@@ -59,7 +59,9 @@ class TestHarnessResultsSummary:
         event_id = kwargs['event_id']
         assert isinstance(event_id, int)
 
-        results = self.reader.getEventResults(kwargs['event_id'])
+        results = self.reader.getEventResults(event_id)
+        if results is None:
+            raise SystemExit(f'ERROR: Results do not exist for event {event_id}')
         test_names = set(results.test_names)
         base_sha = results.base_sha
         assert isinstance(base_sha, str)
@@ -87,11 +89,10 @@ class TestHarnessResultsSummary:
             summary.append("No New Tests")
         return "\n".join(summary)
 
-
     def pr(self, **kwargs) -> str:
         results, head_names, base_names = self.pr_test_names(**kwargs)
         if not base_names:
-            print("Skipping Test Summary Report")
+            print("Skipping Test Summary Results")
             return 
         removed_table, added_table = self.diff_table(results, base_names, head_names)
         print(self.build_summary(removed_table, added_table))
@@ -100,7 +101,6 @@ class TestHarnessResultsSummary:
         action = kwargs['action']
         getattr(self, action)(**kwargs)
 
-        
 if __name__ == '__main__':
     args = TestHarnessResultsSummary.parseArgs()
     TestHarnessResultsSummary(args.database).main(**vars(args))
