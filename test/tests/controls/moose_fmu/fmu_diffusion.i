@@ -68,7 +68,7 @@ l = 2
 [Controls]
   [web_server]
     type = WebServerControl
-    execute_on = 'INITIAL TIMESTEP_BEGIN TIMESTEP_END'
+    execute_on = 'initial multiapp_fixed_point_end'
   []
 []
 
@@ -91,3 +91,4 @@ l = 2
 [Outputs]
   exodus = false
 []
+
