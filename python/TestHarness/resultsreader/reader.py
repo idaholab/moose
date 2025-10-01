@@ -142,31 +142,6 @@ class TestHarnessResultsReader:
         """
         return {"folder_name": {"$eq": folder_name}, "test_name": {"$eq": test_name}}
 
-    def _getTestsPREntry(self, folder_name: str, test_name: str, pr_num: int,
-                         filter: Optional[dict] = {}) -> dict | None:
-        """
-        Internal method for getting the pull request entry for a given test
-
-        Args:
-            folder_name: The folder name for the test
-            test_name: The test name for the test
-            pr_num: The pull request number
-        Keyword args:
-            filter: Additional filters to pass to the query
-        """
-        assert isinstance(folder_name, str)
-        assert isinstance(test_name, str)
-        assert isinstance(pr_num, int)
-
-        find = {"pr_num": {"$eq": pr_num}}
-        find.update(self._testFilter(folder_name, test_name))
-        find.update(filter)
-
-        entry = self.db.tests.find_one(find, sort=self.mongo_sort_id)
-        if entry:
-            return dict(entry)
-        return None
-
     def getTestResults(self, folder_name: str, test_name: str, limit: int = 50,
                        pr_num: Optional[int] = None) -> list[TestHarnessTestResult]:
         """
