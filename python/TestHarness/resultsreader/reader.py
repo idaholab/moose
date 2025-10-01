@@ -201,14 +201,14 @@ class TestHarnessResultsReader:
                     # (the latest version of it), skip this one
                     event_id = data.get('event_id')
                     if event_id is not None and \
-                        [r for r in self._latest_event_results if r.event_id == event_id]:
+                        any(r.event_id == event_id for r in self._latest_event_results):
                         continue
 
                     # Build/get the result and store it for future use
                     result = self._buildResults(data)
                     self._latest_event_results.append(result)
 
-            if i != len(self._latest_event_results):
+            if i < len(self._latest_event_results):
                 yield self._latest_event_results[i]
                 i += 1
             else:
