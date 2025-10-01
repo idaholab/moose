@@ -79,7 +79,7 @@ SideSetsBetweenSubdomainsGenerator::generate()
     for (const auto & side : make_range(elem->n_sides()))
     {
       const auto * neighbor = elem->neighbor_ptr(side) ? elem->neighbor_ptr(side)
-                                                       : _mesh->neighbor_fake_ptr(elem, side);
+                                                       : _mesh->fake_neighbor_ptr(elem, side);
 
       // On a replicated mesh, we add all subdomain sides ourselves.
       // On a distributed mesh, we may have missed sides which
@@ -143,7 +143,7 @@ SideSetsBetweenSubdomainsGenerator::generate()
         const Elem * elem = mesh->elem_ptr(q.first);
         const unsigned int side = q.second;
         const auto * neighbor = elem->neighbor_ptr(side) ? elem->neighbor_ptr(side)
-                                                         : _mesh->neighbor_fake_ptr(elem, side);
+                                                         : _mesh->fake_neighbor_ptr(elem, side);
 
         if (neighbor != NULL)
         {

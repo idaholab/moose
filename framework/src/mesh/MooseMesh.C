@@ -1388,7 +1388,7 @@ MooseMesh::getBoundaryActiveNeighborElemIds(BoundaryID bid) const
     {
       const auto * neighbor = elem_ptr->neighbor_ptr(elem_side)
                                   ? elem_ptr->neighbor_ptr(elem_side)
-                                  : neighbor_fake_ptr(elem_ptr, elem_side);
+                                  : fake_neighbor_ptr(elem_ptr, elem_side);
 
       // Dont add fully remote elements, ghosted is fine
       if (neighbor && neighbor != libMesh::remote_elem)
@@ -1427,7 +1427,7 @@ MooseMesh::isBoundaryFullyExternalToSubdomains(BoundaryID bid,
       {
         const auto * neighbor = elem_ptr->neighbor_ptr(elem_side)
                                     ? elem_ptr->neighbor_ptr(elem_side)
-                                    : neighbor_fake_ptr(elem_ptr, elem_side);
+                                    : fake_neighbor_ptr(elem_ptr, elem_side);
 
         // If we did not ghost the neighbor, we cannot decide
         if (neighbor == libMesh::remote_elem)
@@ -3817,7 +3817,7 @@ MooseMesh::buildFiniteVolumeInfo() const
     {
       // get the neighbor element
       const auto * neighbor =
-          elem->neighbor_ptr(side) ? elem->neighbor_ptr(side) : neighbor_fake_ptr(elem, side);
+          elem->neighbor_ptr(side) ? elem->neighbor_ptr(side) : fake_neighbor_ptr(elem, side);
 
       // Check if the FaceInfo shall belong to the element. If yes,
       // create and initialize the FaceInfo. We need this to ensure that
