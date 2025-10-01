@@ -96,7 +96,6 @@ StressCorrosionCracking::StressCorrosionCracking(const InputParameters & paramet
 void
 StressCorrosionCracking::execute()
 {
-  std::cout << "StressCorrosionCracking::execute()" << std::endl;
   _x.resize(_ki_x.size());
   _y.resize(_ki_y.size());
   _z.resize(_ki_z.size());
@@ -125,23 +124,13 @@ StressCorrosionCracking::execute()
     else
     {
       if (_ki_vpp[ind] < _k_low)
-      {
-        std::cout << "LOW:  " << _ki_vpp[ind] << std::endl;
         growth_rate[i] = _growth_rate_low;
-      }
       else if ((_ki_vpp[ind] >= _k_low) && (_ki_vpp[ind] < _k_high))
-      {
-        std::cout << "MID:  " << _ki_vpp[ind] << std::endl;
-        growth_rate[i] = _growth_rate_mid_multiplier *
-                         std::pow(_ki_vpp[ind], _growth_rate_mid_exp_factor);
-      }
+        growth_rate[i] =
+            _growth_rate_mid_multiplier * std::pow(_ki_vpp[ind], _growth_rate_mid_exp_factor);
       else
-      {
-        std::cout << "HIGH:  " << _ki_vpp[ind] << std::endl;
         growth_rate[i] = _growth_rate_high;
-      }
     }
-    std::cout << "growthrate[" << i << "]= " << growth_rate[i] << std::endl;
   }
 
   Real max_growth_rate = *std::max_element(growth_rate.begin(), growth_rate.end());

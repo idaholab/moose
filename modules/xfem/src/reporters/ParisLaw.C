@@ -20,8 +20,8 @@ ParisLaw::validParams()
   InputParameters params = GeneralReporter::validParams();
   params.addClassDescription(
       "This reporter computes the crack extension size at all active crack front points "
-      "in the CrackMeshCut3DUserObject.  This reporter is in the same order as the fracture "
-      "integral vpps it gets data from.");
+      "in the CrackMeshCut3DUserObject.  This reporter has been sorted by the activeBoundaryNodes "
+      "from the CrackMeshCut3DUserObject");
   params.addRequiredParam<UserObjectName>("crackMeshCut3DUserObject_name",
                                           "The CrackMeshCut3DUserObject user object name");
   params.addRequiredParam<Real>(
@@ -118,7 +118,6 @@ ParisLaw::execute()
   {
     int ind = index[i];
     if (ind == -1)
-      // fixme lynn, why write to index -1 in a vector,  that is wrong!
       _growth_increment[i] = 0.0;
     else
       _growth_increment[i] = _max_growth_size * std::pow(effective_k[i] / _max_k, _paris_law_m);
