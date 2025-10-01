@@ -78,8 +78,7 @@
     [split_transition_only]
       type = 'Exodiff'
       input = 'break_mesh_block_restricted.i'
-      cli_args = 'Mesh/split/split_interface=false Mesh/split/split_transition_interface=true '
-                 '--mesh-only block_restricted_split_transition_only_in.e'
+      cli_args = 'Mesh/split/split_interface=false Mesh/split/split_transition_interface=true --mesh-only block_restricted_split_transition_only_in.e'
       exodiff = 'block_restricted_split_transition_only_in.e'
       exodiff_opts = '-pedantic'
       recover = false
@@ -90,8 +89,7 @@
     [split_interface_only]
       type = 'Exodiff'
       input = 'break_mesh_block_restricted.i'
-      cli_args = 'Mesh/split/split_interface=true --mesh-only '
-                 'block_restricted_split_interface_only_in.e'
+      cli_args = 'Mesh/split/split_interface=true --mesh-only block_restricted_split_interface_only_in.e'
       exodiff = 'block_restricted_split_interface_only_in.e'
       exodiff_opts = '-pedantic'
       recover = false
@@ -102,8 +100,7 @@
     [split_all]
       type = 'Exodiff'
       input = 'break_mesh_block_restricted.i'
-      cli_args = 'Mesh/split/split_interface=true Mesh/split/split_transition_interface=true '
-                 '--mesh-only block_restricted_split_all_in.e'
+      cli_args = 'Mesh/split/split_interface=true Mesh/split/split_transition_interface=true --mesh-only block_restricted_split_all_in.e'
       exodiff = 'block_restricted_split_all_in.e'
       exodiff_opts = '-pedantic'
       recover = false
@@ -114,28 +111,24 @@
     [no_transition]
       type = 'Exodiff'
       input = 'break_mesh_block_restricted.i'
-      cli_args = 'Mesh/split/add_transition_interface=false --mesh-only '
-                 'block_restricted_no_transition_in.e'
+      cli_args = 'Mesh/split/add_transition_interface=false --mesh-only block_restricted_no_transition_in.e'
       exodiff = 'block_restricted_no_transition_in.e'
       exodiff_opts = '-pedantic'
       recover = false
 
-      detail = 'with a split interface, without splitting the transition interface, and without a '
-               'transition interface;'
+      detail = 'with a split interface, without splitting the transition interface, and without a transition interface;'
 
     []
 
     [transition_split]
       type = 'Exodiff'
       input = 'break_mesh_block_restricted.i'
-      cli_args = 'Mesh/split/add_transition_interface=false Mesh/split/split_interface=true '
-                 '--mesh-only block_restricted_no_transition_split_in.e'
+      cli_args = 'Mesh/split/add_transition_interface=false Mesh/split/split_interface=true --mesh-only block_restricted_no_transition_split_in.e'
       exodiff = 'block_restricted_no_transition_split_in.e'
       exodiff_opts = '-pedantic'
       recover = false
 
-      detail = 'without a split interface, splitting the transition interface, or a transition '
-               'interface;'
+      detail = 'without a split interface, splitting the transition interface, or a transition interface;'
     []
   []
 
@@ -158,7 +151,8 @@
     [one_new_node]
       type = 'Exodiff'
       input = 'break_mesh_block_pairs_restricted_3blocks.i'
-      cli_args = "Mesh/split/block_pairs='0 2' --mesh-only block_pairs_restricted_3blocks_one_new_node_in.e"
+      cli_args = "Mesh/split/block_pairs='0 2' --mesh-only "
+                 "block_pairs_restricted_3blocks_one_new_node_in.e"
       exodiff = 'block_pairs_restricted_3blocks_one_new_node_in.e'
       exodiff_opts = '-pedantic'
       recover = false
@@ -167,7 +161,8 @@
     [two_new_nodes]
       type = 'Exodiff'
       input = 'break_mesh_block_pairs_restricted_3blocks.i'
-      cli_args = "Mesh/split/block_pairs='0 1' --mesh-only block_pairs_restricted_3blocks_two_new_nodes_in.e"
+      cli_args = "Mesh/split/block_pairs='0 1' --mesh-only "
+                 "block_pairs_restricted_3blocks_two_new_nodes_in.e"
       exodiff = 'block_pairs_restricted_3blocks_two_new_nodes_in.e'
       exodiff_opts = '-pedantic'
       recover = false
@@ -176,7 +171,8 @@
     [three_new_nodes]
       type = 'Exodiff'
       input = 'break_mesh_block_pairs_restricted_3blocks.i'
-      cli_args = "Mesh/split/block_pairs='0 2;0 1' --mesh-only block_pairs_restricted_3blocks_three_new_nodes_in.e"
+      cli_args = "Mesh/split/block_pairs='0 2;0 1' --mesh-only "
+                 "block_pairs_restricted_3blocks_three_new_nodes_in.e"
       exodiff = 'block_pairs_restricted_3blocks_three_new_nodes_in.e'
       exodiff_opts = '-pedantic'
       recover = false
@@ -213,7 +209,8 @@
     input = break_mesh_block_pairs_restricted.i
     cli_args = 'Mesh/split/block_pairs="0 missing;2 3"'
     expect_err = "The block 'missing' was not found in the mesh"
-    requirement = "The system shall report an error if the mesh does not contain the specified block pair"
+    requirement = "The system shall report an error if the mesh does not contain the specified block "
+                  "pair"
     design = 'meshgenerators/BreakMeshByBlockGenerator.md'
     issues = '#22117'
   []
@@ -223,7 +220,8 @@
     input = break_mesh_block_restricted.i
     cli_args = 'Mesh/split/surrounding_blocks="missing"'
     expect_err = "The block 'missing' was not found in the mesh"
-    requirement = "The system shall report an error if the mesh does not contain the specified surrounding block"
+    requirement = "The system shall report an error if the mesh does not contain the specified "
+                  "surrounding block"
     design = 'meshgenerators/BreakMeshByBlockGenerator.md'
     issues = '#22117'
   []
