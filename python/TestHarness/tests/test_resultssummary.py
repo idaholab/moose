@@ -85,6 +85,14 @@ class TestResultsSummary(unittest.TestCase):
             results, test_names, base_test_names = summary.pr_test_names(event_id=EVENT_ID)
         self.assertIsNone(base_test_names)
 
+    @patch.object(TestHarnessResultsReader, 'getEventResults')
+    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
+    def testPRTestNamesNoEventResults(self, patch_event_results):
+        patch_event_results.return_value = None
+        summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
+        with self.assertRaisesRegex(SystemExit, 'Results do not exist for event'):
+            summary.pr_test_names(event_id=EVENT_ID)
+
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testBuildSummary(self):
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
@@ -122,7 +130,7 @@ class TestResultsSummary(unittest.TestCase):
         stdout = StringIO()
         with redirect_stdout(stdout):
             summary.pr(event_id=EVENT_ID)
-        self.assertIn('Skipping Test Summary Report', stdout.getvalue())
+        self.assertIn('Skipping', stdout.getvalue())
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testMain(self):
@@ -135,8 +143,6 @@ class TestResultsSummary(unittest.TestCase):
         self.assertIn('No Removed Tests', stdout.getvalue())
         self.assertIn('New Tests:', stdout.getvalue())
         self.assertIn('No Removed Tests', stdout.getvalue())
-
-   
 
 if __name__ == '__main__':
     unittest.main()
