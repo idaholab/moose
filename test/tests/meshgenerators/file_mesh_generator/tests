@@ -221,6 +221,9 @@
     capabilities = 'exodus>=8.0' # This also ensures HDF5 support
     exodiff = 'iga_constraint_hdf5_out.e' # Symlink; this should match the .m based test
 
+    # Workaround for bug at libMesh level
+    max_parallel = 2
+
     # Penalty method boundary conditions
     abs_zero = 1e-08
 
