@@ -214,8 +214,8 @@ void
 ComputeUserObjectsThread::onInternalSide(const Elem * elem, unsigned int side)
 {
   // Pointer to the neighbor we are currently working on.
-  const Elem * neighbor_ptr = elem->neighbor_ptr(side);
-  const Elem * neighbor = (neighbor_ptr) ? neighbor_ptr : _mesh.neighbor_fake_ptr(elem, side);
+  const auto * neighbor =
+      elem->neighbor_ptr(side) ? elem->neighbor_ptr(side) : _mesh.neighbor_fake_ptr(elem, side);
 
   // Get the global id of the element and the neighbor
   const dof_id_type elem_id = elem->id(), neighbor_id = neighbor->id();
@@ -263,8 +263,8 @@ void
 ComputeUserObjectsThread::onInterface(const Elem * elem, unsigned int side, BoundaryID bnd_id)
 {
   // Pointer to the neighbor we are currently working on.
-  const Elem * neighbor_ptr = elem->neighbor_ptr(side);
-  const Elem * neighbor = (neighbor_ptr) ? neighbor_ptr : _mesh.neighbor_fake_ptr(elem, side);
+  const auto * neighbor =
+      elem->neighbor_ptr(side) ? elem->neighbor_ptr(side) : _mesh.neighbor_fake_ptr(elem, side);
 
   if (!(neighbor->active()))
     return;

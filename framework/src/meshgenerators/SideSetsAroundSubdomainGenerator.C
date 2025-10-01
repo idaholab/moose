@@ -80,8 +80,8 @@ SideSetsAroundSubdomainGenerator::generate()
 
     for (const auto side : make_range(elem->n_sides()))
     {
-      const Elem * neighbor_ptr = elem->neighbor_ptr(side);
-      const Elem * neighbor = (neighbor_ptr) ? neighbor_ptr : _mesh->neighbor_fake_ptr(elem, side);
+      const auto * neighbor = elem->neighbor_ptr(side) ? elem->neighbor_ptr(side)
+                                                       : _mesh->neighbor_fake_ptr(elem, side);
 
       // On a replicated mesh, we add all subdomain sides ourselves.
       // On a distributed mesh, we may have missed sides which

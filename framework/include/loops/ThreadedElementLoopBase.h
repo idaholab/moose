@@ -279,9 +279,9 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
               onBoundary(elem, side, *it, lower_d_elem);
             }
 
-          const Elem * neighbor_ptr = elem->neighbor_ptr(side);
-          const Elem * neighbor =
-              (neighbor_ptr) ? neighbor_ptr : _mesh.neighbor_fake_ptr(elem, side);
+          const auto * neighbor = elem->neighbor_ptr(side) ? elem->neighbor_ptr(side)
+                                                           : _mesh.neighbor_fake_ptr(elem, side);
+
           if (neighbor)
           {
             preInternalSide(elem, side);
