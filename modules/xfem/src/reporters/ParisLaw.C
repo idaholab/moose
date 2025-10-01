@@ -20,8 +20,8 @@ ParisLaw::validParams()
   InputParameters params = GeneralReporter::validParams();
   params.addClassDescription(
       "This reporter computes the crack extension size at all active crack front points "
-      "in the CrackMeshCut3DUserObject.  This reporter has been sorted by the activeBoundaryNodes "
-      "from the CrackMeshCut3DUserObject");
+      "in the CrackMeshCut3DUserObject.  This reporter is in the same order as "
+      "kii_ and ki_vectorpostprocessor.");
   params.addRequiredParam<UserObjectName>("crackMeshCut3DUserObject_name",
                                           "The CrackMeshCut3DUserObject user object name");
   params.addRequiredParam<Real>(
@@ -90,7 +90,7 @@ ParisLaw::execute()
   std::copy(_ki_z.begin(), _ki_z.end(), _z.begin());
   std::copy(_ki_id.begin(), _ki_id.end(), _id.begin());
 
-  _growth_increment.resize(_ki_x.size());
+  _growth_increment.resize(_ki_x.size(), 0.0);
 
   // Generate _active_boundary and _inactive_boundary_pos;
   // This is a duplicated call before the one in CrackMeshCut3DUserObject;
@@ -100,26 +100,15 @@ ParisLaw::execute()
   _3Dcutter->findActiveBoundaryNodes();
   std::vector<int> index = _3Dcutter->getFrontPointsIndex();
 
-  std::vector<Real> effective_k(_ki_x.size());
+  std::vector<Real> effective_k(_ki_x.size(), 0.0);
   for (std::size_t i = 0; i < _ki_vpp.size(); ++i)
-  {
-    int ind = index[i];
-    if (ind == -1)
-      effective_k[i] = 0;
-    else
-      effective_k[i] =
-          std::sqrt(Utility::pow<2>(_ki_vpp[ind]) + 2 * Utility::pow<2>(_kii_vpp[ind]));
-  }
+    if (index[i] != -1)
+      effective_k[i] = std::sqrt(Utility::pow<2>(_ki_vpp[i]) + 2 * Utility::pow<2>(_kii_vpp[i]));
 
   Real _max_k = *std::max_element(effective_k.begin(), effective_k.end());
   _dn = _max_growth_size / (_paris_law_c * std::pow(_max_k, _paris_law_m));
 
   for (std::size_t i = 0; i < _ki_vpp.size(); ++i)
-  {
-    int ind = index[i];
-    if (ind == -1)
-      _growth_increment[i] = 0.0;
-    else
+    if (index[i] != -1)
       _growth_increment[i] = _max_growth_size * std::pow(effective_k[i] / _max_k, _paris_law_m);
-  }
 }

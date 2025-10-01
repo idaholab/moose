@@ -20,8 +20,8 @@ StressCorrosionCracking::validParams()
   InputParameters params = GeneralReporter::validParams();
   params.addClassDescription(
       "This reporter computes the crack extension size at all active crack front points "
-      "in the CrackMeshCut3DUserObject.  This reporter has been sorted by the activeBoundaryNodes "
-      "from the CrackMeshCut3DUserObject");
+      "in the CrackMeshCut3DUserObject.  This reporter is in the same order as "
+      "ki_vectorpostprocessor.");
   params.addRequiredParam<UserObjectName>("crackMeshCut3DUserObject_name",
                                           "The CrackMeshCut3DUserObject user object name");
   params.addRequiredParam<Real>(
@@ -105,7 +105,7 @@ StressCorrosionCracking::execute()
   std::copy(_ki_z.begin(), _ki_z.end(), _z.begin());
   std::copy(_ki_id.begin(), _ki_id.end(), _id.begin());
 
-  _growth_increment.resize(_ki_x.size());
+  _growth_increment.resize(_ki_x.size(), 0.0);
 
   // Generate _active_boundary and _inactive_boundary_pos;
   // This is a duplicated call before the one in CrackMeshCut3DUserObject;
@@ -118,16 +118,13 @@ StressCorrosionCracking::execute()
   std::vector<Real> growth_rate(_ki_x.size(), 0.0);
   for (std::size_t i = 0; i < _ki_vpp.size(); ++i)
   {
-    int ind = index[i];
-    if (ind == -1)
-      growth_rate[i] = 0;
-    else
+    if (index[i] != -1)
     {
-      if (_ki_vpp[ind] < _k_low)
+      if (_ki_vpp[i] < _k_low)
         growth_rate[i] = _growth_rate_low;
-      else if ((_ki_vpp[ind] >= _k_low) && (_ki_vpp[ind] < _k_high))
+      else if ((_ki_vpp[i] >= _k_low) && (_ki_vpp[i] < _k_high))
         growth_rate[i] =
-            _growth_rate_mid_multiplier * std::pow(_ki_vpp[ind], _growth_rate_mid_exp_factor);
+            _growth_rate_mid_multiplier * std::pow(_ki_vpp[i], _growth_rate_mid_exp_factor);
       else
         growth_rate[i] = _growth_rate_high;
     }
@@ -138,10 +135,7 @@ StressCorrosionCracking::execute()
 
   for (std::size_t i = 0; i < _ki_vpp.size(); ++i)
   {
-    int ind = index[i];
-    if (ind == -1)
-      _growth_increment[i] = 0.0;
-    else
+    if (index[i] != -1)
       _growth_increment[i] = growth_rate[i] * _corrosion_time_step;
   }
 }
