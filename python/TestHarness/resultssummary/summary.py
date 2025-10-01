@@ -92,7 +92,6 @@ class TestHarnessResultsSummary:
     def pr(self, **kwargs) -> str:
         results, head_names, base_names = self.pr_test_names(**kwargs)
         if not base_names:
-            print("Skipping Test Summary Results")
             return
         removed_table, added_table = self.diff_table(results, base_names, head_names)
         print(self.build_summary(removed_table, added_table))
