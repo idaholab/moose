@@ -10,7 +10,9 @@
     # XFEM requires --enable-unique-ids in libmesh
     capabilities = 'unique_id'
     restep = false # Issue #31054
-    requirement = 'The XFEM module shall represent a propagating crack in a 2D mechanics problem in which crack growth occurs when the average stress in the element at the crack tip exceeds a critical value.'
+    requirement = 'The XFEM module shall represent a propagating crack in a 2D mechanics problem '
+                  'in which crack growth occurs when the average stress in the element at the crack '
+                  'tip exceeds a critical value.'
     design = 'XFEMRankTwoTensorMarkerUserObject.md'
   []
   [crack_propagation_var]
@@ -24,7 +26,9 @@
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     capabilities = 'unique_id'
-    requirement = 'The XFEM module shall represent a propagating crack in a 2D mechanics problem in which crack growth occurs when the average stress in the element at the crack tip exceeds a critical value defined by the value of a field variable.'
+    requirement = 'The XFEM module shall represent a propagating crack in a 2D mechanics problem in '
+                  'which crack growth occurs when the average stress in the element at the crack tip '
+                  'exceeds a critical value defined by the value of a field variable.'
     design = 'XFEMRankTwoTensorMarkerUserObject.md'
   []
   [crack_propagation_single_point]
@@ -38,7 +42,9 @@
     # XFEM requires --enable-unique-ids in libmesh
     capabilities = 'unique_id'
     restep = false # Issue #31054
-    requirement = 'The XFEM module shall represent a propagating crack in a 2D mechanics problem in which crack growth occurs when the stress at any of the quadrature points in the element at the crack tip exceeds a critical value defined by the value of a field variable.'
+    requirement = 'The XFEM module shall represent a propagating crack in a 2D mechanics problem in '
+                  'which crack growth occurs when the stress at any of the quadrature points in the '
+                  'element at the crack tip exceeds a critical value defined by the value of a field variable.'
     design = 'XFEMRankTwoTensorMarkerUserObject.md'
   []
   [edge_crack_3d]
@@ -49,12 +55,14 @@
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     capabilities = 'unique_id'
-    requirement = 'The XFEM module shall permit definition of a stationary crack in a 3D mechanics model with XFEM, where the crack is defined using a rectangular cutting plane by RectangleCutUserObject'
+    requirement = 'The XFEM module shall permit definition of a stationary crack in a 3D mechanics '
+                  'model with XFEM, where the crack is defined using a rectangular cutting plane by RectangleCutUserObject'
     design = 'RectangleCutUserObject.md'
   []
   [mesh_cutter_3d]
-    requirement = 'The XFEM module shall represent a propagating crack in a 3D mechanics model with XFEM, where the crack is defined using a topological surface cutting mesh by CrackMeshCut3DUserObject and allowed to propagate with'
-    design = 'CrackMeshCut3DUserObject.md'
+    requirement = 'The XFEM module shall represent a propagating crack in a 3D mechanics model with XFEM, '
+                  'where the crack is defined using a topological surface cutting mesh by '
+                  'CrackMeshCut3DUserObject and allowed to propagate with'
     [fatigue]
       design = 'CrackMeshCut3DUserObject.md ParisLaw.md'
       type = Exodiff
@@ -87,6 +95,7 @@
       detail = ' growth speeds determined by the stress corrosion cracking maximum growth length, or'
     []
     [mhs]
+      design = 'CrackMeshCut3DUserObject.md'
       type = Exodiff
       input = 'edge_crack_3d_domain.i edge_crack_3d_mhs.i'
       exodiff = 'edge_crack_3d_mhs_out.e edge_crack_3d_mhs_out.e-s002 edge_crack_3d_mhs_out.e-s003 edge_crack_3d_mhs_out_XFEMCutMeshOutput.e-s0004'
@@ -98,6 +107,7 @@
       detail = ' growth directions determined by computing the maximum hoop stress law using interaction integrals, or'
     []
     [function]
+      design = 'CrackMeshCut3DUserObject.md'
       type = Exodiff
       input = 'edge_crack_3d_domain.i edge_crack_3d_propagation.i'
       exodiff = 'edge_crack_3d_propagation_out.e edge_crack_3d_propagation_out.e-s002'
@@ -109,7 +119,9 @@
     []
   []
   [penny_crack]
-    requirement ='The XFEM system shall permit computation of fracture domain integrals in 3D mechanics problems where a stationary embedded circular crack is defined by a cutting plane geometry and points along the crack front for the  the domain integral'
+    requirement ='The XFEM system shall permit computation of fracture domain integrals in 3D mechanics '
+                'problems where a stationary embedded circular crack is defined by a cutting plane '
+                 'geometry and points along the crack front for the  the domain integral'
     design = 'DomainIntegral/index.md CircleCutUserObject.md'
     [explicit_points]
       type = Exodiff
@@ -137,7 +149,8 @@
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     capabilities = 'unique_id'
-    requirement = 'The XFEM module shall permit definition of a stationary crack in a 3D mechanics model with XFEM, where the crack is defined using an elliptical cutting plane by EllipseCutUserObject'
+    requirement = 'The XFEM module shall permit definition of a stationary crack in a 3D mechanics '
+                  'model with XFEM, where the crack is defined using an elliptical cutting plane by EllipseCutUserObject'
     design = 'EllipseCutUserObject.md'
   []
   [square_branch_quad_2d]
@@ -147,7 +160,8 @@
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     capabilities = 'unique_id'
-    requirement = 'The XFEM system shall permit branched cracks to be represented in 2D by sequentially cutting a 4-noded quadrilateral element by two prescribed evolving cutting planes'
+    requirement = 'The XFEM system shall permit branched cracks to be represented in 2D by sequentially cutting a '
+                  '4-noded quadrilateral element by two prescribed evolving cutting planes'
   []
   [square_branch_tri_2d]
     type = Exodiff
@@ -156,7 +170,8 @@
     map = false
     # XFEM requires --enable-unique-ids in libmesh
     capabilities = 'unique_id'
-    requirement = 'The XFEM system shall permit branched cracks to be represented in 2D by sequentially cutting a 3-noded triangle element by two prescribed evolving cutting planes'
+    requirement = 'The XFEM system shall permit branched cracks to be represented in 2D by sequentially cutting a '
+                  '3-noded triangle element by two prescribed evolving cutting planes'
   []
   [test_crack_counter]
     type = CSVDiff
