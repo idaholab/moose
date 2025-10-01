@@ -135,13 +135,6 @@ class TestHarnessResultsReader:
         """
         return TestHarnessResultsReader.loadEnvironmentAuthentication() is not None
 
-    @staticmethod
-    def _testFilter(folder_name: str, test_name: str) -> dict:
-        """
-        Helper for getting the mongo filter for a given test
-        """
-        return {"folder_name": {"$eq": folder_name}, "test_name": {"$eq": test_name}}
-
     def getTestResults(self, folder_name: str, test_name: str, limit: int = 50,
                        pr_num: Optional[int] = None) -> list[TestHarnessTestResult]:
         """
