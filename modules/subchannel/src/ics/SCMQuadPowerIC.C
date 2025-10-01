@@ -43,11 +43,12 @@ SCMQuadPowerIC::SCMQuadPowerIC(const InputParameters & params)
     _filename(getParam<std::string>("filename")),
     _axial_heat_rate(getFunction("axial_heat_rate"))
 {
+  if (processor_id() > 0)
+    return;
+
   auto nx = _mesh.getNx();
   auto ny = _mesh.getNy();
   auto heated_length = _mesh.getHeatedLength();
-  if (processor_id() > 0)
-    return;
 
   _power_dis.resize((ny - 1) * (nx - 1), 1);
   _power_dis.setZero();

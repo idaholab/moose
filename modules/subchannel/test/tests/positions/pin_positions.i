@@ -80,6 +80,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   []
   [P]
     block = subchannel
+    initial_condition = 0
   []
   [DP]
     block = subchannel

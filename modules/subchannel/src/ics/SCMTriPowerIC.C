@@ -39,10 +39,11 @@ SCMTriPowerIC::SCMTriPowerIC(const InputParameters & params)
     _filename(getParam<std::string>("filename")),
     _axial_heat_rate(getFunction("axial_heat_rate"))
 {
-  auto n_pins = _mesh.getNumOfPins();
-  auto heated_length = _mesh.getHeatedLength();
   if (processor_id() > 0)
     return;
+
+  auto n_pins = _mesh.getNumOfPins();
+  auto heated_length = _mesh.getHeatedLength();
 
   _power_dis.resize(n_pins, 1);
   _power_dis.setZero();
