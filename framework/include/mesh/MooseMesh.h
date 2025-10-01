@@ -1431,30 +1431,19 @@ public:
   bool getDisplaceNodeListBySideList() { return _displace_node_list_by_side_list; }
 
   /// Add a pair of disconnected neighbors
-  void addDisconnectedNeighbors(const ConstBndElement & bndelem1, const ConstBndElement & bndelem2)
-  {
-    _disconnected_neighbors.emplace(bndelem1, bndelem2);
-  }
+  void addDisconnectedNeighbors(const ConstBndElement & bndelem1, const ConstBndElement & bndelem2);
 
   /**
    * @brief Check if there is a disconnected neighbor for the given element and side
    *
    * @return nullptr if no disconnected neighbor exists
    */
-  const ConstBndElement * disconnectedNeighbor(const Elem * elem, unsigned int side) const
-  {
-    if (_disconnected_neighbors.empty())
-      return nullptr;
+  std::optional<ConstBndElement> disconnectedNeighbor(const Elem * elem, unsigned int side) const;
 
-    for (const auto & [bndelem1, bndelem2] : _disconnected_neighbors)
-    {
-      if (bndelem1.elem == elem && bndelem1.side == side)
-        return &bndelem2;
-      if (bndelem2.elem == elem && bndelem2.side == side)
-        return &bndelem1;
-    }
-    return nullptr;
-  }
+  /**
+   * perform unions across processors for disconnected neighbors
+   */
+  void unionDisconnectedNeighbors();
 
 protected:
   /// Deprecated (DO NOT USE)
@@ -1647,7 +1636,11 @@ protected:
    * traction-separation models) may be applied across the "interfaces" defined by these neighbor
    * pairs.
    */
-  std::unordered_set<std::pair<ConstBndElement, ConstBndElement>> _disconnected_neighbors;
+  // std::map<ConstBndElement, ConstBndElement, CompareConstBndElementByElemAndSide>
+  //     _disconnected_neighbors;
+  std::unordered_map<std::pair<dof_id_type, unsigned int>,
+                     std::tuple<dof_id_type, unsigned int, BoundaryID>>
+      _disconnected_neighbors_by_id;
 
   void cacheInfo();
   void freeBndNodes();

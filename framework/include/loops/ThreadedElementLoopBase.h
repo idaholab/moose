@@ -279,8 +279,11 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
               onBoundary(elem, side, *it, lower_d_elem);
             }
 
-          const auto * neighbor = elem->neighbor_ptr(side) ? elem->neighbor_ptr(side)
-                                                           : _mesh.fake_neighbor_ptr(elem, side);
+          const auto disconnected_neighbor = _mesh.disconnectedNeighbor(elem, side);
+          const auto * neighbor =
+              elem->neighbor_ptr(side)
+                  ? elem->neighbor_ptr(side)
+                  : (disconnected_neighbor ? disconnected_neighbor->elem : nullptr);
 
           if (neighbor)
           {
