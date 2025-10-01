@@ -12,6 +12,15 @@ class TestHarnessResultsSummary:
 
     @staticmethod
     def parseArgs() -> argparse.Namespace:
+        """
+        Parse command-line arguments for generating a test summary.
+        - database : str
+            The name of the database.
+        - action : str
+            The action to perform (e.g., 'pr').
+        - event_id : int
+            The event ID (required for the 'pr' action).
+        """
         parser = argparse.ArgumentParser(description='Produces a summary from test harness results')
         parent = argparse.ArgumentParser(add_help=False)
 
@@ -39,6 +48,28 @@ class TestHarnessResultsSummary:
     @staticmethod
     def diff_table(results: TestHarnessResults, base_names: set[TestName],
                    head_names: set[TestName]) -> Tuple[list, list]:
+        """
+        Compare test names between the base and current head, and return
+        the difference
+
+        Parameters
+        ----------
+        results : TestHarnessResults
+            An object that provides access to test results.
+        base_names : set of TestName
+            The set of test names from the base commit or version.
+        head_names : set of TestName
+            The set of test names from the current head commit or version.
+
+        Returns
+        -------
+        removed_table : list or None
+            A list of test names that were present in the base but not in the head.
+        added_table : list or None
+            A list of newly added test names along with their runtime.
+
+            Returns `None` if no new tests were removed or added.
+        """
         removed_names = base_names - head_names
         if removed_names:
             removed_table = list(removed_names)
@@ -56,6 +87,35 @@ class TestHarnessResultsSummary:
         return removed_table, added_table
 
     def pr_test_names(self, **kwargs):
+        """
+        Retrieve test names and base test names for a pull request event.
+
+        This method fetches the test results for a given pull request event ID,
+        extracts the test names and base SHA, and retrieves the corresponding
+        base test names from the base.
+
+        Parameters
+        ----------
+        **kwargs : dict
+            Keyword arguments. Must include:
+            - event_id : int
+                The ID of the pull request event.
+
+        Returns
+        -------
+        results : TestHarnessResults
+            The test results object for the given event.
+        test_names : set of str
+            A set of test names associated with the pull request event.
+        base_test_names : set of str or None
+            A set of test names from the base commit. Returns `None` if no
+            baseline results are found for the base SHA.
+
+        Raises
+        ------
+        SystemExit
+            If no results exist for the given event ID.
+        """
         event_id = kwargs['event_id']
         assert isinstance(event_id, int)
 
@@ -74,6 +134,25 @@ class TestHarnessResultsSummary:
         return results, test_names, base_test_names
 
     def build_summary(self, removed_table: list, added_table: list) -> str:
+        """
+        Build a summary report of removed and newly added tests.
+
+        This method generates a formatted string summary that lists tests
+        removed from the base and tests newly added in the head, including
+        their runtime.
+
+        Parameters
+        ----------
+        removed_table : list
+            A list of removed test names.
+        added_table : list
+            A list of newly added testnames and its runtime
+
+        Returns
+        -------
+        summary : str
+            A formatted string summarizing removed and new tests using GitHub-style format
+        """
         summary = []
         summary.append("\nRemoved Tests:")
         if removed_table:

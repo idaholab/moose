@@ -37,6 +37,9 @@ class TestResultsSummary(unittest.TestCase):
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testDiffTableNoChanges(self):
+        """
+        Tests diff_table when there are no changes between base and head test names.
+        """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
         results, head_names, base_names = summary.pr_test_names(event_id=EVENT_ID)
         removed_table, added_table = summary.diff_table(results, base_names, head_names)
@@ -45,6 +48,9 @@ class TestResultsSummary(unittest.TestCase):
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testDiffTableRemovedTest(self):
+        """
+        Tests diff_table() when test is removed from base.
+        """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
         results, _, base_names = summary.pr_test_names(event_id=EVENT_ID)
         removed_table, added_table = summary.diff_table(results, base_names, set())
@@ -54,6 +60,9 @@ class TestResultsSummary(unittest.TestCase):
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testDiffTableAddedTest(self):
+        """
+        Tests diff_table() when test is newly added.
+        """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
         results, head_names , _ = summary.pr_test_names(event_id=EVENT_ID)
         removed_table, added_table = summary.diff_table(results, set(), head_names)
@@ -69,6 +78,9 @@ class TestResultsSummary(unittest.TestCase):
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testPRTestNamesNoChanges(self):
+        """
+        Tests pr_test_names() when there are no changes between base and head test names.
+        """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
         _, head_names, base_names = summary.pr_test_names(event_id=EVENT_ID)
         self.assertEqual(head_names, base_names)
@@ -78,6 +90,9 @@ class TestResultsSummary(unittest.TestCase):
     @patch.object(TestHarnessResultsReader, 'getCommitResults')
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testPRTestNamesNoBaseResults(self, patch_commit_results):
+        """
+        Tests pr_test_names() when no base is available to compare.
+        """
         patch_commit_results.return_value = None
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
         stdout = StringIO()
@@ -109,7 +124,10 @@ class TestResultsSummary(unittest.TestCase):
         self.assertIsNone(removed_table)
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
-    def testPR(self):
+    def testPRNoChange(self):
+        """
+        Tests pr() when there are no changes between base and head test names.
+        """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
 
         stdout = StringIO()
@@ -122,6 +140,9 @@ class TestResultsSummary(unittest.TestCase):
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testPRNoBase(self):
+        """
+        Tests pr() when no base is available to compare.
+        """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
         def mock_pr_test_names(**kwargs):
             print("Comparison not available")
@@ -135,6 +156,9 @@ class TestResultsSummary(unittest.TestCase):
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testMain(self):
+        """
+        Tests main() output for a PR event, verifying summary messages are printed.
+        """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
 
         stdout = StringIO()
