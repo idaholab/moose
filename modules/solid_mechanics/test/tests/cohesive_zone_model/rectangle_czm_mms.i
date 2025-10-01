@@ -11,7 +11,6 @@ x_domain = 1
 a = '${fparse (pi * cos(pi * x0) * (1 - E1 / E2)) / (2 * x0)}'
 b = '${fparse -pi * cos(pi * x0) * (E1 + (x0 / 2) * (1 - E1 / E2))}'
 
-
 [GlobalParams]
   displacements = 'disp_x disp_y'
   use_displaced_mesh = false
@@ -177,7 +176,6 @@ b = '${fparse -pi * cos(pi * x0) * (E1 + (x0 / 2) * (1 - E1 / E2))}'
     block = 2
   []
 []
-
 
 [BCs]
   [y_anchor]
