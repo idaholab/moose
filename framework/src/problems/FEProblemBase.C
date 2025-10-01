@@ -4220,6 +4220,23 @@ FEProblemBase::reinitMaterialsFaceOnBoundary(const BoundaryID boundary_id,
 }
 
 void
+FEProblemBase::reinitMaterialsNeighborOnBoundary(
+    const BoundaryID boundary_id,
+    const SubdomainID blk_id,
+    const THREAD_ID tid,
+    const bool swap_stateful,
+    const std::deque<MaterialBase *> * const reinit_mats)
+{
+  // Since objects don't declare whether they need the face or neighbor (side) material properties,
+  // we use the same criteria for skipping material property computations as for face material
+  // properties This could be a future optimization.
+  if (hasActiveMaterialProperties(tid) && (needBoundaryMaterialOnSide(boundary_id, tid) ||
+                                           needInterfaceMaterialOnSide(boundary_id, tid) ||
+                                           needInternalNeighborSideMaterial(blk_id, tid)))
+    reinitMaterialsNeighbor(blk_id, tid, swap_stateful, reinit_mats);
+}
+
+void
 FEProblemBase::reinitMaterialsNeighbor(const SubdomainID blk_id,
                                        const THREAD_ID tid,
                                        const bool swap_stateful,
