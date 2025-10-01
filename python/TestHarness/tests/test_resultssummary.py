@@ -61,7 +61,7 @@ class TestResultsSummary(unittest.TestCase):
         reader = TestHarnessResultsReader(TEST_DATABASE_NAME)
         results = reader.getEventResults(event_id=EVENT_ID)
         test_result = results.get_test(TEST_NAME.folder, TEST_NAME.name)
-        
+
         self.assertEqual(len(added_table), 1)
         self.assertEqual(added_table[0][0], str(TEST_NAME))
         self.assertEqual(added_table[0][1], test_result.run_time)
@@ -102,7 +102,7 @@ class TestResultsSummary(unittest.TestCase):
         reader = TestHarnessResultsReader(TEST_DATABASE_NAME)
         results = reader.getEventResults(event_id=EVENT_ID)
         test_result = results.get_test(TEST_NAME.folder, TEST_NAME.name)
-        
+
         self.assertEqual(len(added_table), 1)
         self.assertEqual(added_table[0][0], str(TEST_NAME))
         self.assertEqual(added_table[0][1], test_result.run_time)
@@ -111,7 +111,7 @@ class TestResultsSummary(unittest.TestCase):
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testPR(self):
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
-        
+
         stdout = StringIO()
         with redirect_stdout(stdout):
             summary.pr(event_id=EVENT_ID)
