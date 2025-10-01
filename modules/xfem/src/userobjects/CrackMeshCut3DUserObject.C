@@ -829,6 +829,7 @@ CrackMeshCut3DUserObject::growFront()
       i2 = _active_boundary[i].size();
     }
 
+    std::vector<int> index = getFrontPointsIndex();
     for (unsigned int j = i1; j < i2; ++j)
     {
       Node * this_node = _cutter_mesh->node_ptr(_active_boundary[i][j]);
@@ -841,17 +842,24 @@ CrackMeshCut3DUserObject::growFront()
       switch (_growth_rate_method)
       {
         case GrowthRateEnum::FUNCTION:
+        {
           growth_size = _func_v->value(0, Point(0, 0, 0));
           break;
+        }
         case GrowthRateEnum::REPORTER:
-          // fixme, why does _growth_inc_reporter use the node ordering from the domain integral
-          // that kii has. this is weird because kii has to be properly indexed when commputing max
-          // hoop stress direction.  Same for scc vpp
-          growth_size = _growth_inc_reporter->at(j);
+        {
+          int ind = index[j];
+          if (index[j] == -1)
+            growth_size = 0;
+          else
+            growth_size = _growth_inc_reporter->at(ind);
           break;
+        }
         default:
+        {
           mooseError("This growth_rate_method is not pre-defined!");
           break;
+        }
       }
       for (unsigned int k = 0; k < 3; ++k)
         x(k) = this_point(k) + dir(k) * growth_size;
