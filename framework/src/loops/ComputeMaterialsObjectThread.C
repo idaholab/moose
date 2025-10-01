@@ -158,8 +158,8 @@ ComputeMaterialsObjectThread::onInternalSide(const Elem * elem, unsigned int sid
 {
   if (_need_internal_side_material)
   {
-    const Elem * neighbor_ptr = elem->neighbor_ptr(side);
-    const Elem * neighbor = (neighbor_ptr) ? neighbor_ptr : _mesh.neighbor_fake_ptr(elem, side);
+    const auto * neighbor =
+        elem->neighbor_ptr(side) ? elem->neighbor_ptr(side) : _mesh.neighbor_fake_ptr(elem, side);
 
     _fe_problem.reinitElemNeighborAndLowerD(elem, side, _tid);
     unsigned int face_n_points = _assembly[_tid][0]->qRuleFace()->n_points();
@@ -184,7 +184,7 @@ ComputeMaterialsObjectThread::onInternalSide(const Elem * elem, unsigned int sid
             side);
     }
 
-    unsigned int neighbor_side = neighbor_ptr
+    unsigned int neighbor_side = elem->neighbor_ptr(side)
                                      ? neighbor->which_neighbor_am_i(_assembly[_tid][0]->elem())
                                      : _mesh.neighbor_fake_side(elem, side);
 
@@ -254,9 +254,9 @@ ComputeMaterialsObjectThread::onInterface(const Elem * elem, unsigned int side, 
           _tid, _materials.getActiveBoundaryObjects(bnd_id, _tid), face_n_points, *elem, side);
   }
 
-  const Elem * neighbor_ptr = elem->neighbor_ptr(side);
-  const Elem * neighbor = (neighbor_ptr) ? neighbor_ptr : _mesh.neighbor_fake_ptr(elem, side);
-  unsigned int neighbor_side = neighbor_ptr
+  const auto * neighbor =
+      elem->neighbor_ptr(side) ? elem->neighbor_ptr(side) : _mesh.neighbor_fake_ptr(elem, side);
+  unsigned int neighbor_side = elem->neighbor_ptr(side)
                                    ? neighbor->which_neighbor_am_i(_assembly[_tid][0]->elem())
                                    : _mesh.neighbor_fake_side(elem, side);
 

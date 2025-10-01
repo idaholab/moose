@@ -197,8 +197,8 @@ NonlinearThread::onInterface(const Elem * elem, unsigned int side, BoundaryID bn
   {
 
     // Pointer to the neighbor we are currently working on.
-    const Elem * neighbor_ptr = elem->neighbor_ptr(side);
-    const Elem * neighbor = (neighbor_ptr) ? neighbor_ptr : _mesh.neighbor_fake_ptr(elem, side);
+    const auto * neighbor =
+        elem->neighbor_ptr(side) ? elem->neighbor_ptr(side) : _mesh.neighbor_fake_ptr(elem, side);
 
     if (neighbor->active())
     {
@@ -248,8 +248,8 @@ NonlinearThread::onInternalSide(const Elem * elem, unsigned int side)
   if (_should_execute_dg)
   {
     // Pointer to the neighbor we are currently working on.
-    const Elem * neighbor_ptr = elem->neighbor_ptr(side);
-    const Elem * neighbor = (neighbor_ptr) ? neighbor_ptr : _mesh.neighbor_fake_ptr(elem, side);
+    const auto * neighbor =
+        elem->neighbor_ptr(side) ? elem->neighbor_ptr(side) : _mesh.neighbor_fake_ptr(elem, side);
 
     if (!neighbor)
       mooseError("We should always have a neighbor here");
