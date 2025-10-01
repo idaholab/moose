@@ -330,6 +330,7 @@ advected_interp_method = 'upwind'
     variable = T_solid
     boundary = interface
     h = ${h_s}
+    thermal_conductivity = ${k_s}
     incoming_flux = heat_flux_to_solid_interface
     surface_temperature = interface_temperature_fluid_interface
   []

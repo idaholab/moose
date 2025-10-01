@@ -47,26 +47,21 @@ CHTHandler::validParams()
       "number of CHT iterations. Relative tolerance is ignore if the maximum number of CHT "
       "iterations is reached.");
 
-  params.addRangeCheckedParam<std::vector<Real>>(
+  params.addParam<std::vector<Real>>(
       "cht_fluid_temperature_relaxation",
       {},
-      "cht_fluid_temperature_relaxation > 0 & cht_fluid_temperature_relaxation <= 1.0",
       "The relaxation factors for the boundary temperature when being updated on the fluid side.");
-  params.addRangeCheckedParam<std::vector<Real>>(
+  params.addParam<std::vector<Real>>(
       "cht_solid_temperature_relaxation",
       {},
-      "cht_solid_temperature_relaxation > 0 & cht_solid_temperature_relaxation <= 1.0",
       "The relaxation factors for the boundary temperature when being updated on the solid side.");
-
-  params.addRangeCheckedParam<std::vector<Real>>(
+  params.addParam<std::vector<Real>>(
       "cht_fluid_flux_relaxation",
       {},
-      "cht_fluid_flux_relaxation > 0 & cht_fluid_flux_relaxation <= 1.0",
       "The relaxation factors for the boundary flux when being updated on the fluid side.");
-  params.addRangeCheckedParam<std::vector<Real>>(
+  params.addParam<std::vector<Real>>(
       "cht_solid_flux_relaxation",
       {},
-      "cht_solid_flux_relaxation > 0 & cht_solid_flux_relaxation <= 1.0",
       "The relaxation factors for the boundary flux when being updated on the solid side.");
 
   params.addParamNamesToGroup(
@@ -88,6 +83,8 @@ CHTHandler::CHTHandler(const InputParameters & params)
     _max_cht_fpi(getParam<unsigned int>("max_cht_fpi")),
     _cht_heat_flux_tolerance(getParam<Real>("cht_heat_flux_tolerance"))
 {
+  if (isParamSetByUser("cht_interfaces") && !_cht_boundary_names.size())
+    paramError("cht_interfaces", "You must declare at least one interface!");
 }
 
 void
@@ -143,6 +140,12 @@ CHTHandler::deduceCHTBoundaryCoupling()
                  "The number of relaxation factors is not the same as the number of interfaces!");
 
     _cht_flux_relaxation_factor[region_index] = flux_param_value;
+    // We have to do the range check here because the intput parameter check errors if the vector is
+    // empty
+    for (const auto param : _cht_flux_relaxation_factor[region_index])
+      if (param <= 0 || param > 1.0)
+        paramError(flux_relaxation_param_names[region_index],
+                   "The relaxation parameter should be between 0 and 1!");
 
     const auto & temperature_param_value =
         getParam<std::vector<Real>>(temperature_relaxation_param_names[region_index]);
@@ -152,6 +155,12 @@ CHTHandler::deduceCHTBoundaryCoupling()
                  "The number of relaxation factors is not the same as the number of interfaces!");
 
     _cht_temperature_relaxation_factor[region_index] = temperature_param_value;
+    // We have to do the range check here because the intput parameter check errors if the vector is
+    // empty
+    for (const auto param : _cht_temperature_relaxation_factor[region_index])
+      if (param <= 0 || param > 1.0)
+        paramError(temperature_relaxation_param_names[region_index],
+                   "The relaxation parameter should be between 0 and 1!");
 
     // We then fetch the conduction kernels
     std::vector<LinearFVFluxKernel *> flux_kernels;
@@ -404,7 +413,7 @@ CHTHandler::converged() const
     const Real f1 = boundary_flux[0];
     const Real f2 = boundary_flux[1];
 
-    // Special case: both are zero at startup → not converged yet
+    // Special case: both are zero at startup not converged yet
     if (_fpi_it != 0 && (f1 == 0.0 && f2 == 0.0))
       return true;
 

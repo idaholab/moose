@@ -21,6 +21,10 @@ LinearFVRobinCHTBC::validParams()
                                             "The incoming diffusive flux on the interface.");
   params.addRequiredParam<MooseFunctorName>("surface_temperature",
                                             "The prescribed temperature on the interface.");
+  params.addRequiredParam<MooseFunctorName>(
+      "thermal_conductivity",
+      "The thermal conductivity of the material. Only used to compute the pure normal gradient of "
+      "the variable on the boundary.");
 
   params.addClassDescription(
       "Conjugate heat transfer BC for Robin boundary condition-based coupling.");
@@ -31,6 +35,7 @@ LinearFVRobinCHTBC::LinearFVRobinCHTBC(const InputParameters & parameters)
   : LinearFVAdvectionDiffusionBC(parameters),
     LinearFVCHTBCInterface(),
     _htc(getFunctor<Real>("h")),
+    _k(getFunctor<Real>("thermal_conductivity")),
     _incoming_flux(getFunctor<Real>("incoming_flux")),
     _surface_temperature(getFunctor<Real>("surface_temperature"))
 {
@@ -56,9 +61,10 @@ LinearFVRobinCHTBC::computeBoundaryNormalGradient() const
   auto face = singleSidedFaceArg(_current_face_info);
   face.face_side = elem_info->elem();
 
-  return _htc(face, state) *
-             (_var.getElemValue(*elem_info, determineState()) - _surface_temperature(face, state)) +
-         _incoming_flux(face, state);
+  return (_htc(face, state) * (_var.getElemValue(*elem_info, determineState()) -
+                               _surface_temperature(face, state)) +
+          _incoming_flux(face, state)) /
+         _k(face, state);
 }
 
 Real

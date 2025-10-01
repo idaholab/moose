@@ -328,6 +328,7 @@ advected_interp_method = 'upwind'
     h = ${h_f}
     incoming_flux = heat_flux_to_fluid_interface
     surface_temperature = interface_temperature_solid_interface
+    thermal_conductivity = ${k}
   []
   [solid_fluid]
     type = LinearFVRobinCHTBC
@@ -336,6 +337,7 @@ advected_interp_method = 'upwind'
     h = ${h_s}
     incoming_flux = heat_flux_to_solid_interface
     surface_temperature = interface_temperature_fluid_interface
+    thermal_conductivity = ${k_s}
   []
 []
 

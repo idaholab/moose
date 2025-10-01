@@ -47,6 +47,9 @@ protected:
   /// The virtual convective heat transfer coefficient
   const Moose::Functor<Real> & _htc;
 
+  /// The thermal conductivity of the material
+  const Moose::Functor<Real> & _k;
+
   /// The incoming diffusive flux on the intervace
   const Moose::Functor<Real> & _incoming_flux;
 
