@@ -13,7 +13,7 @@ import unittest
 import mock
 
 from MooseDocs import ROOT_DIR
-from MooseDocs.common.get_content import _build_regex, _find_files, _doc_import, get_content
+from MooseDocs.common.get_content import _build_regex, _find_files, _doc_import, get_content, create_file_page
 from MooseDocs.tree import pages
 
 class TestBuildRegex(unittest.TestCase):
@@ -161,6 +161,32 @@ class TestDocTree(unittest.TestCase):
                 self.assertEqual(p.local, 'getting_started')
                 self.assertEqual(p.source,
                                  os.path.join(ROOT_DIR, 'framework/doc/content/getting_started'))
+
+class TestCreateFilePage(unittest.TestCase):
+    def testCreateFile(self):
+        file = "foo.txt"
+        page = create_file_page("foo", file, [".md"])
+        self.assertIsInstance(page, pages.File)
+        self.assertEqual(page.name, "foo")
+        self.assertEqual(page.source, file)
+        self.assertEqual(page.attributes.get("write", True), True)
+
+    def testCreateInFile(self):
+        file = "foo.md"
+        page = create_file_page("foo", file, [".md"])
+        self.assertIsInstance(page, pages.Source)
+        self.assertEqual(page.name, "foo")
+        self.assertEqual(page.source, file)
+        self.assertEqual(page.attributes.get("write", True), True)
+
+    def testCreatePythonFile(self):
+        file = "foo.py"
+        page = create_file_page("foo", file, [".md"])
+        self.assertIsInstance(page, pages.File)
+        self.assertEqual(page.name, "foo")
+        self.assertEqual(page.source, file)
+        self.assertEqual(page.attributes.get("write", True), False)
+
 
 if __name__ == '__main__':
     import logging

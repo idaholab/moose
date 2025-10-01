@@ -131,7 +131,7 @@ def create_file_page(name, filename, in_ext):
     if ext in in_ext:
         return pages.Source(name, source=filename)
     else:
-        return pages.File(name, source=filename)
+        return pages.File(name, source=filename, write=ext != ".py")
 
 def get_files(items, in_ext):
     """
