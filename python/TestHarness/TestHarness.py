@@ -356,7 +356,7 @@ class TestHarness:
         # If we have an executable and there is python directory next to it,
         # append that directory to PYTHONPATH
         if self.executable is not None:
-            exe_python_dir = os.path.join(os.path.dirname(self.executable), 'python')
+            exe_python_dir = os.path.join(os.path.dirname(os.path.abspath(self.executable)), 'python')
             if os.path.isdir(exe_python_dir) and exe_python_dir not in sys.path:
                 sys.path.append(exe_python_dir)
 
