@@ -1848,7 +1848,7 @@ void
 FEProblemBase::setNeighborSubdomainID(const Elem * elem, unsigned int side, const THREAD_ID tid)
 {
   const auto * neighbor =
-      elem->neighbor_ptr(side) ? elem->neighbor_ptr(side) : _mesh.neighbor_fake_ptr(elem, side);
+      elem->neighbor_ptr(side) ? elem->neighbor_ptr(side) : _mesh.fake_neighbor_ptr(elem, side);
 
   if (!neighbor)
     mooseError("No neighbor (real or fake) found for elem ", elem->id(), " side ", side);
@@ -2389,10 +2389,10 @@ FEProblemBase::reinitNeighbor(const Elem * elem, unsigned int side, const THREAD
   setNeighborSubdomainID(elem, side, tid);
 
   const auto * neighbor =
-      elem->neighbor_ptr(side) ? elem->neighbor_ptr(side) : _mesh.neighbor_fake_ptr(elem, side);
+      elem->neighbor_ptr(side) ? elem->neighbor_ptr(side) : _mesh.fake_neighbor_ptr(elem, side);
 
   unsigned int neighbor_side = elem->neighbor_ptr(side) ? neighbor->which_neighbor_am_i(elem)
-                                                        : _mesh.neighbor_fake_side(elem, side);
+                                                        : _mesh.fake_neighbor_side(elem, side);
 
   for (const auto i : index_range(_nl))
   {
@@ -4302,7 +4302,7 @@ FEProblemBase::reinitMaterialsNeighbor(const SubdomainID blk_id,
     else
     {
       const Elem * fake_neighbor =
-          _mesh.neighbor_fake_ptr(_assembly[tid][0]->elem(), _assembly[tid][0]->side());
+          _mesh.fake_neighbor_ptr(_assembly[tid][0]->elem(), _assembly[tid][0]->side());
 
       if (!fake_neighbor)
         mooseError("No neighbor (real or fake) found for elem ",
@@ -4312,7 +4312,7 @@ FEProblemBase::reinitMaterialsNeighbor(const SubdomainID blk_id,
 
       neighbor = fake_neighbor;
       neighbor_side =
-          _mesh.neighbor_fake_side(_assembly[tid][0]->elem(), _assembly[tid][0]->side());
+          _mesh.fake_neighbor_side(_assembly[tid][0]->elem(), _assembly[tid][0]->side());
     }
 
     mooseAssert(neighbor, "neighbor should be non-null");
@@ -4422,11 +4422,11 @@ FEProblemBase::swapBackMaterialsNeighbor(const THREAD_ID tid)
   else
   {
     // fake neighbor
-    neighbor = _mesh.neighbor_fake_ptr(elem, side);
+    neighbor = _mesh.fake_neighbor_ptr(elem, side);
     if (!neighbor)
       mooseError("No neighbor (real or fake) found for elem ", elem->id(), " side ", side);
 
-    neighbor_side = _mesh.neighbor_fake_side(elem, side);
+    neighbor_side = _mesh.fake_neighbor_side(elem, side);
   }
 
   if (!neighbor)

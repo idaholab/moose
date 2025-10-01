@@ -22,9 +22,9 @@ namespace MooseMeshUtils
 
 // Used to temporarily store information about which lower-dimensional
 // sides to add and what subdomain id to use for the added sides.
-struct ElemIDSidePair
+struct ElemSidePair
 {
-  ElemIDSidePair(Elem * elem_in, unsigned short int side_in) : elem(elem_in), side(side_in) {}
+  ElemSidePair(Elem * elem_in, unsigned short int side_in) : elem(elem_in), side(side_in) {}
 
   Elem * elem;
   unsigned short int side;

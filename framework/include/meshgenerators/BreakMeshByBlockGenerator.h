@@ -65,13 +65,8 @@ private:
   // Typedef for a single message entry: (node_id, vector of connected block_ids)
   typedef std::pair<dof_id_type, std::vector<subdomain_id_type>> NodeConnectedBlocksPair;
 
-  typedef std::pair<dof_id_type, unsigned int> ElemIDSidePair;
-
-  // a map from a node id to the set of connected block ids
-  std::map<dof_id_type, std::set<subdomain_id_type>> _nodeid_to_connected_blocks;
-
   /// @brief a set of pairs of block ids between which new boundary sides are created
-  std::set<std::pair<subdomain_id_type, subdomain_id_type>> _new_boundary_sides_list;
+  std::set<std::pair<subdomain_id_type, subdomain_id_type>> _neighboring_block_list;
 
   /// @brief a map from a pair of block ids to a set of element and side pairs
   std::map<std::pair<subdomain_id_type, subdomain_id_type>,
@@ -82,16 +77,15 @@ private:
   std::unordered_map<std::pair<const Elem *, unsigned int>, std::pair<const Elem *, unsigned int>>
       _elem_side_to_fake_neighbor_elem_side;
 
-  /// @brief Maps an element ID and side pair to its corresponding fake neighbor element ID and side pair.
-  std::unordered_map<ElemIDSidePair, ElemIDSidePair> _elemid_side_to_fake_neighbor_elemid_side;
-
   /// generate the new boundary interface
-  void addInterfaceBoundary(MeshBase & mesh);
+  void addInterface(MeshBase & mesh);
 
   /// @brief Synchronizes connected blocks across all MPI ranks.
   /// This process consists of two phases:
   /// Phase 0: Each rank computes the locally connected blocks for the nodes it owns and sends this information to the owner of each node.
   /// Phase 1: The owner of each node aggregates all received connected block information and broadcasts the global set of connected blocks for each node to all ranks.
-  void syncConnectedBlocks(const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map,
-                           MeshBase & mesh);
+  void syncConnectedBlocks(
+      const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map,
+      MeshBase & mesh,
+      std::map<dof_id_type, std::set<subdomain_id_type>> & nodeid_to_connected_blocks);
 };

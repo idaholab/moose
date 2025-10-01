@@ -1430,19 +1430,43 @@ public:
   /// Return displace node list by side list boolean
   bool getDisplaceNodeListBySideList() { return _displace_node_list_by_side_list; }
 
-  void
-  setElemSideToFakeNeighborElemSideMap(std::unordered_map<std::pair<dof_id_type, unsigned int>,
-                                                          std::pair<dof_id_type, unsigned int>> map)
+  /// Replace the whole map
+  void setFakeNeighborMap(std::unordered_map<std::pair<dof_id_type, unsigned int>,
+                                             std::pair<dof_id_type, unsigned int>> map)
   {
     _elemid_side_to_fake_neighbor_elemid_side = std::move(map);
   }
 
-  void clearElemSideToFakeNeighborElemSideMap()
+  /// Accessor to read the entire map
+  const std::unordered_map<std::pair<dof_id_type, unsigned int>,
+                           std::pair<dof_id_type, unsigned int>> &
+  getFakeNeighborMap() const
   {
-    _elemid_side_to_fake_neighbor_elemid_side.clear();
+    return _elemid_side_to_fake_neighbor_elemid_side;
   }
 
-  const Elem * neighbor_fake_ptr(const Elem * elem, unsigned int side) const
+  /// Check whether a fake neighbor mapping exists
+  bool hasFakeNeighbor(dof_id_type elem_id, unsigned int side) const
+  {
+    return _elemid_side_to_fake_neighbor_elemid_side.count({elem_id, side}) > 0;
+  }
+
+  /// Remove a fake neighbor mapping if it exists
+  bool removeFakeNeighbor(dof_id_type elem_id, unsigned int side)
+  {
+    return _elemid_side_to_fake_neighbor_elemid_side.erase({elem_id, side}) > 0;
+  }
+
+  /// Add or update a fake neighbor mapping for (elem_id, side)
+  void addFakeNeighbor(dof_id_type elem_id,
+                       unsigned int side,
+                       dof_id_type neighbor_elem_id,
+                       unsigned int neighbor_side)
+  {
+    _elemid_side_to_fake_neighbor_elemid_side[{elem_id, side}] = {neighbor_elem_id, neighbor_side};
+  }
+
+  const Elem * fake_neighbor_ptr(const Elem * elem, unsigned int side) const
   {
     // if the unordered_map is empty, just return nullptr
     if (_elemid_side_to_fake_neighbor_elemid_side.empty())
@@ -1455,7 +1479,7 @@ public:
       return nullptr;
   }
 
-  int neighbor_fake_side(const Elem * elem, unsigned int side) const
+  int fake_neighbor_side(const Elem * elem, unsigned int side) const
   {
     // if the unordered_map is empty, show error
     if (_elemid_side_to_fake_neighbor_elemid_side.empty())
@@ -1650,7 +1674,11 @@ protected:
   /// Whether or not we are using a (pre-)split mesh (automatically DistributedMesh)
   const bool _is_split;
 
-  /// Map from elem-side pair to Fake Neighbor Element Side
+  /// Map from elem-side pair to fake neighbor element-side pair.
+  /// A fake neighbor is an element that does not share nodes with the current element,
+  /// yet there is no other element between them in the mesh. The interface between the element
+  /// and its fake neighbor is discontinuous. In certain cases, constraints or weak forms
+  /// (e.g., cohesive zone traction-separation models) may be applied across this interface.
   mutable std::unordered_map<std::pair<dof_id_type, unsigned int>,
                              std::pair<dof_id_type, unsigned int>>
       _elemid_side_to_fake_neighbor_elemid_side;

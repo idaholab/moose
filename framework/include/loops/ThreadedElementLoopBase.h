@@ -280,7 +280,7 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
             }
 
           const auto * neighbor = elem->neighbor_ptr(side) ? elem->neighbor_ptr(side)
-                                                           : _mesh.neighbor_fake_ptr(elem, side);
+                                                           : _mesh.fake_neighbor_ptr(elem, side);
 
           if (neighbor)
           {
