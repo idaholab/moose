@@ -7,25 +7,25 @@
   # [scc_crack_growth]
   #   type = ParsedVectorReporter
   #   name = crack_growth
-  #   reporter_names = 'II_KI_1/II_KI_1'
-  #   reporter_symbols = 'ki'
+  #   vector_reporter_names = 'II_KI_1/II_KI_1'
+  #   vector_reporter_symbols = 'ki'
   #   scalar_reporter_names = 'dt/value'
   #   scalar_reporter_symbols = 'dt'
   #   constant_names = 'constant1 constant2'
   #   constant_expressions = '10 20'
-  #   expression = 'if(ki<6.7e6,2e-9,if(ki>59e6,2.01e-7,3.33e-11*ki^2.161 ))'
+  #   expression = 'if(ki<15,0.1*dt,if(ki>20,0.15*dt,(0.01*ki-0.05)*dt ))'
   #   execute_on = 'XFEM_MARK TIMESTEP_END'
   # []
   [scc_crack_growth]
     type = ParsedVectorReporter
     name = crack_growth
-    reporter_names = 'II_KI_1/II_KI_1'
-    reporter_symbols = 'ki'
+    vector_reporter_names = 'II_KI_1/II_KI_1'
+    vector_reporter_symbols = 'ki'
     scalar_reporter_names = 'dt/value'
     scalar_reporter_symbols = 'dt'
     constant_names = 'constant1 constant2'
     constant_expressions = '10 20'
-    expression = 'if(ki<6.7e6,2e-9*dt,if(ki>59e6,2.01e-7*dt,(3.33e-11*ki^2.161)*dt ))'
+    expression = 'if(ki<10,0.0075*dt,if(ki>20,0.015*dt,(0.00075*ki)*dt ))'
     execute_on = 'XFEM_MARK TIMESTEP_END'
   []
 []
@@ -71,6 +71,7 @@
 [Outputs]
   file_base = edge_crack_3d_scc_out
   json = true
+  csv = true
   [xfemcutter]
     type = XFEMCutMeshOutput
     xfem_cutter_uo = cut_mesh
