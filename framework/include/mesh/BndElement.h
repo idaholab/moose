@@ -45,3 +45,17 @@ struct ConstBndElement
   /// boundary id for the node
   BoundaryID bnd_id;
 };
+
+// A comparator for ConstBndElement that only uses `elem` and `side` for comparison.
+struct CompareConstBndElementByElemAndSide
+{
+  bool operator()(const ConstBndElement & lhs, const ConstBndElement & rhs) const
+  {
+    // Order first by `elem`, then by `side`.
+    if (lhs.elem != rhs.elem)
+    {
+      return lhs.elem < rhs.elem;
+    }
+    return lhs.side < rhs.side;
+  }
+};
