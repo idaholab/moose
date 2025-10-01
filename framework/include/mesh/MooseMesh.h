@@ -1430,66 +1430,30 @@ public:
   /// Return displace node list by side list boolean
   bool getDisplaceNodeListBySideList() { return _displace_node_list_by_side_list; }
 
-  /// Replace the whole map
-  void setFakeNeighborMap(std::unordered_map<std::pair<dof_id_type, unsigned int>,
-                                             std::pair<dof_id_type, unsigned int>> map)
+  /// Add a pair of disconnected neighbors
+  void addDisconnectedNeighbors(const ConstBndElement & bndelem1, const ConstBndElement & bndelem2)
   {
-    _elemid_side_to_fake_neighbor_elemid_side = std::move(map);
+    _disconnected_neighbors.emplace(bndelem1, bndelem2);
   }
 
-  /// Accessor to read the entire map
-  const std::unordered_map<std::pair<dof_id_type, unsigned int>,
-                           std::pair<dof_id_type, unsigned int>> &
-  getFakeNeighborMap() const
+  /**
+   * @brief Check if there is a disconnected neighbor for the given element and side
+   *
+   * @return nullptr if no disconnected neighbor exists
+   */
+  const ConstBndElement * disconnectedNeighbor(const Elem * elem, unsigned int side) const
   {
-    return _elemid_side_to_fake_neighbor_elemid_side;
-  }
-
-  /// Check whether a fake neighbor mapping exists
-  bool hasFakeNeighbor(dof_id_type elem_id, unsigned int side) const
-  {
-    return _elemid_side_to_fake_neighbor_elemid_side.count({elem_id, side}) > 0;
-  }
-
-  /// Remove a fake neighbor mapping if it exists
-  bool removeFakeNeighbor(dof_id_type elem_id, unsigned int side)
-  {
-    return _elemid_side_to_fake_neighbor_elemid_side.erase({elem_id, side}) > 0;
-  }
-
-  /// Add or update a fake neighbor mapping for (elem_id, side)
-  void addFakeNeighbor(dof_id_type elem_id,
-                       unsigned int side,
-                       dof_id_type neighbor_elem_id,
-                       unsigned int neighbor_side)
-  {
-    _elemid_side_to_fake_neighbor_elemid_side[{elem_id, side}] = {neighbor_elem_id, neighbor_side};
-  }
-
-  const Elem * fake_neighbor_ptr(const Elem * elem, unsigned int side) const
-  {
-    // if the unordered_map is empty, just return nullptr
-    if (_elemid_side_to_fake_neighbor_elemid_side.empty())
+    if (_disconnected_neighbors.empty())
       return nullptr;
 
-    auto it = _elemid_side_to_fake_neighbor_elemid_side.find(std::make_pair(elem->id(), side));
-    if (it != _elemid_side_to_fake_neighbor_elemid_side.end())
-      return getMesh().elem_ptr(it->second.first);
-    else
-      return nullptr;
-  }
-
-  int fake_neighbor_side(const Elem * elem, unsigned int side) const
-  {
-    // if the unordered_map is empty, show error
-    if (_elemid_side_to_fake_neighbor_elemid_side.empty())
-      mooseError("The fake neighbor map is empty!");
-
-    auto it = _elemid_side_to_fake_neighbor_elemid_side.find(std::make_pair(elem->id(), side));
-    if (it != _elemid_side_to_fake_neighbor_elemid_side.end())
-      return it->second.second;
-    else
-      mooseError("The fake neighbor side is not found!");
+    for (const auto & [bndelem1, bndelem2] : _disconnected_neighbors)
+    {
+      if (bndelem1.elem == elem && bndelem1.side == side)
+        return &bndelem2;
+      if (bndelem2.elem == elem && bndelem2.side == side)
+        return &bndelem1;
+    }
+    return nullptr;
   }
 
 protected:
@@ -1674,14 +1638,16 @@ protected:
   /// Whether or not we are using a (pre-)split mesh (automatically DistributedMesh)
   const bool _is_split;
 
-  /// Map from elem-side pair to fake neighbor element-side pair.
-  /// A fake neighbor is an element that does not share nodes with the current element,
-  /// yet there is no other element between them in the mesh. The interface between the element
-  /// and its fake neighbor is discontinuous. In certain cases, constraints or weak forms
-  /// (e.g., cohesive zone traction-separation models) may be applied across this interface.
-  mutable std::unordered_map<std::pair<dof_id_type, unsigned int>,
-                             std::pair<dof_id_type, unsigned int>>
-      _elemid_side_to_fake_neighbor_elemid_side;
+  /**
+   * @brief List of neighbor pairs that are not topologically connected
+   *
+   * libmesh keeps track of element point/edge/face neighbors that are topologically connected. This
+   * data structure maintains additional element neighbors that are potentially topologically
+   * disconnected. In certain cases, constraints or weak forms (e.g., cohesive zone
+   * traction-separation models) may be applied across the "interfaces" defined by these neighbor
+   * pairs.
+   */
+  std::unordered_set<std::pair<ConstBndElement, ConstBndElement>> _disconnected_neighbors;
 
   void cacheInfo();
   void freeBndNodes();
