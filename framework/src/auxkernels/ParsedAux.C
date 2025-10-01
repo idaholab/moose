@@ -49,7 +49,13 @@ ParsedAux::validParams()
       {},
       "Symbolic name to use for each functor in 'functor_names' in the parsed expression. If not "
       "provided, then the actual functor names will be used in the parsed expression.");
-
+  params.addParam<bool>(
+      "evaluate_functors_on_qp",
+      true,
+      "Whether to evaluate functors using the ElemQpArg/ElemSideQpArg or the ElemArg/FaceArg "
+      "functor arguments. The behavior of a functor for each argument is implementation-defined by "
+      "the functor. But for most functors, the former two use the quadrature rule points as "
+      "evaluation locations, while the latter two use the element centroid/face centroid.");
   return params;
 }
 
@@ -67,7 +73,8 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
     _xyzt({"x", "y", "z", "t"}),
     _functor_names(getParam<std::vector<MooseFunctorName>>("functor_names")),
     _n_functors(_functor_names.size()),
-    _functor_symbols(getParam<std::vector<std::string>>("functor_symbols"))
+    _functor_symbols(getParam<std::vector<std::string>>("functor_symbols")),
+    _use_qp_functor_arguments(getParam<bool>("evaluate_functors_on_qp"))
 {
 
   for (const auto i : make_range(_nargs))
@@ -76,9 +83,14 @@ ParsedAux::ParsedAux(const InputParameters & parameters)
   // sanity checks
   if (!_functor_symbols.empty() && (_functor_symbols.size() != _n_functors))
     paramError("functor_symbols", "functor_symbols must be the same length as functor_names.");
+  if (isNodal() && _use_qp_functor_arguments && isParamSetByUser("evaluate_functors_on_qp"))
+    paramError("evaluate_functors_on_qp", "QPs are not used for computing variable nodal values.");
 
   validateFunctorSymbols();
   validateFunctorNames();
+  // We need the FaceInfo generated
+  if (_bnd && !_use_qp_functor_arguments)
+    _subproblem.needFV();
 
   // build variables argument
   std::string variables;
@@ -148,11 +160,35 @@ ParsedAux::computeValue()
     for (const auto i : index_range(_functors))
       _func_params[_nargs + i] = (*_functors[i])(node_arg, state);
   }
-  else
+  else if (_bnd && _use_qp_functor_arguments)
+  {
+    const Moose::ElemSideQpArg side_qp_arg = {
+        _current_elem, _current_side, _qp, _qrule, _q_point[_qp]};
+    for (const auto i : index_range(_functors))
+      _func_params[_nargs + i] = (*_functors[i])(side_qp_arg, state);
+  }
+  else if (_bnd)
+  {
+    const Moose::FaceArg face_arg = {_mesh.faceInfo(_current_elem, _current_side),
+                                     Moose::FV::LimiterType::CentralDifference,
+                                     /*elem_is_upwind*/ true,
+                                     /*correct skewness*/ true,
+                                     /*face_side*/ nullptr,
+                                     /*state_limiter*/ nullptr};
+    for (const auto i : index_range(_functors))
+      _func_params[_nargs + i] = (*_functors[i])(face_arg, state);
+  }
+  else if (_use_qp_functor_arguments)
   {
     const Moose::ElemQpArg qp_arg = {_current_elem, _qp, _qrule, _q_point[_qp]};
     for (const auto i : index_range(_functors))
       _func_params[_nargs + i] = (*_functors[i])(qp_arg, state);
+  }
+  else
+  {
+    const Moose::ElemArg elem_arg = {_current_elem, /*correct skewness*/ true};
+    for (const auto i : index_range(_functors))
+      _func_params[_nargs + i] = (*_functors[i])(elem_arg, state);
   }
 
   // Material properties
