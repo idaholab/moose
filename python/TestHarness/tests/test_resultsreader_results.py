@@ -186,7 +186,6 @@ class TestResultsReaderResults(TestHarnessTestCase):
         """
         Tests when event_id didn't exist in the database (civet_version < 3)
         """
-
         civet_version = 2
         results, tests = self.captureResult(remove_civet_keys=['event_id'],
                                             civet_version=civet_version)
@@ -197,6 +196,65 @@ class TestResultsReaderResults(TestHarnessTestCase):
         for entry in tests:
             test_result = TestHarnessTestResult(entry, test_harness_results)
             self.assertIsNone(test_result.event_id)
+
+    def testNoTiming(self):
+        """
+        Tests timing not being available in a test result
+        """
+        results, tests = self.captureResult()
+        test_harness_results = TestHarnessResults(results)
+        for entry in tests:
+            del entry['timing']
+            test_result = TestHarnessTestResult(entry, test_harness_results)
+            self.assertIsNone(test_result.timing)
+            self.assertIsNone(test_result.run_time)
+            self.assertIsNone(test_result.hpc_queued_time)
+
+    def testNoRunTime(self):
+        """
+        Tests run_time not being available in timing in a test result
+        """
+        results, tests = self.captureResult()
+        test_harness_results = TestHarnessResults(results)
+        for entry in tests:
+            del entry['timing']['runner_run']
+            test_result = TestHarnessTestResult(entry, test_harness_results)
+            self.assertIsNone(test_result.run_time)
+
+    def testNoHPCQueuedTime(self):
+        """
+        Tests hpc_queued_time not being available in timing in a test result
+        """
+        results, tests = self.captureResult()
+        test_harness_results = TestHarnessResults(results)
+        for entry in tests:
+            del entry['timing']['hpc_queued']
+            test_result = TestHarnessTestResult(entry, test_harness_results)
+            self.assertIsNone(test_result.hpc_queued_time)
+
+    def testNoTester(self):
+        """
+        Tests tester not being available in a test result
+        """
+        results, tests = self.captureResult()
+        test_harness_results = TestHarnessResults(results)
+        for entry in tests:
+            del entry['tester']
+            test_result = TestHarnessTestResult(entry, test_harness_results)
+            self.assertIsNone(test_result.tester)
+            self.assertIsNone(test_result.json_metadata)
+
+    def testNoStatus(self):
+        """
+        Tests status not being available in a test result
+        """
+        results, tests = self.captureResult()
+        test_harness_results = TestHarnessResults(results)
+        for entry in tests:
+            del entry['status']
+            test_result = TestHarnessTestResult(entry, test_harness_results)
+            self.assertIsNone(test_result.status)
+            self.assertIsNone(test_result.status_value)
 
 if __name__ == '__main__':
     unittest.main()
