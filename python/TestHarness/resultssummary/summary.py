@@ -19,7 +19,7 @@ class TestHarnessResultsSummary:
             'database',
             type=str,
             help='The name of the database')
-        
+
         action_parser = parser.add_subparsers(dest='action', help='Action to perform')
         action_parser.required = True
 
@@ -28,14 +28,14 @@ class TestHarnessResultsSummary:
             parents=[parent],
             help='Performs a summary for a pull request'
         )
-        
+
         pr_parser.add_argument(
             'event_id',
             type=int,
             help='The event ID')
-        
+
         return parser.parse_args()
-  
+
     @staticmethod
     def diff_table(results: TestHarnessResults, base_names: set[TestName],
                    head_names: set[TestName]) -> Tuple[list, list]:
@@ -54,7 +54,7 @@ class TestHarnessResultsSummary:
         else:
             added_table = None
         return removed_table, added_table
-    
+
     def pr_test_names(self, **kwargs):
         event_id = kwargs['event_id']
         assert isinstance(event_id, int)
@@ -65,9 +65,9 @@ class TestHarnessResultsSummary:
         test_names = set(results.test_names)
         base_sha = results.base_sha
         assert isinstance(base_sha, str)
-        
+
         base_results = self.reader.getCommitResults(base_sha)
-        if not isinstance(base_results, TestHarnessResults):         
+        if not isinstance(base_results, TestHarnessResults):
             print(f"\nComparison not available: no baseline results found for base SHA {base_sha}")
             return results, test_names, None
         base_test_names = set(base_results.test_names)
@@ -93,7 +93,7 @@ class TestHarnessResultsSummary:
         results, head_names, base_names = self.pr_test_names(**kwargs)
         if not base_names:
             print("Skipping Test Summary Results")
-            return 
+            return
         removed_table, added_table = self.diff_table(results, base_names, head_names)
         print(self.build_summary(removed_table, added_table))
 
