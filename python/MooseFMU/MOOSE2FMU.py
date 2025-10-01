@@ -22,6 +22,7 @@ logging.basicConfig(
     ]
 )
 
+
 class Moose2FMU(Fmi2Slave):
     """
     Base FMU slave for MOOSE simulations. Handles registration of FMU variables,
@@ -54,8 +55,10 @@ class Moose2FMU(Fmi2Slave):
         self.max_retries: int = max_retries
         self.dt_tolerance: Real = dt_tolerance
         self.moose_time: Real = 0.0
-        # self.begin_time: Real = 0.0
-        # self.end_time: Real = float("inf")
+        self.start_time: Real = 0.0,
+        self.stop_time: Real = 0.0,
+        self.tolerance: Real = 1.0e-3,
+
 
         # Find moose executable
         exec = shutil.which("moose-opt") or mooseutils.find_moose_executable_recursive()
@@ -77,7 +80,6 @@ class Moose2FMU(Fmi2Slave):
         # Register outputs
         self.register_variable(Real("moose_time", causality=Fmi2Causality.output, variability=Fmi2Variability.continuous))
 
-
         # Setup MooseControl
         self.cmd = self._build_moose_command()
 
@@ -93,13 +95,16 @@ class Moose2FMU(Fmi2Slave):
 
         return True
 
-    # def setup_experiment(self, start_time: float, stop_time: Optional[float], tolerance: Optional[float]):
-    #     self.begin_time = start_time
-    #     if stop_time:
-    #         self.end_time = stop_time
-    #     else:
-    #         self.end_time = float("inf")
-    #     pass
+    def setup_experiment(self, start_time: float,
+                         stop_time: Optional[float],
+                         tolerance: Optional[float]) -> bool:
+        """
+        Save an local copy of start_time, stop_time and tolerance.
+        """
+        self.start_time = start_time
+        self.stop_time = stop_time
+        self.tolerance = tolerance
+        return True
 
     def do_step(
         self,
@@ -127,7 +132,7 @@ class Moose2FMU(Fmi2Slave):
             Target FMU time to synchronize with.
         allowed_flags
             Subset of flags that require additional handling. Defaults to
-            synchronizing on the ``INITIAL`` and ``TIMESTEP_BEGIN`` signals
+            synchronizing on the ``INITIAL`` and ``MULTIAPP_FIXED_POINT_BEGIN`` signals
             when omitted.
         Returns
         -------
@@ -136,7 +141,7 @@ class Moose2FMU(Fmi2Slave):
             triggered the synchronization (if any).
         """
 
-        parsed_allowed_flags = {"INITIAL", "TIMESTEP_BEGIN"}
+        parsed_allowed_flags = {"INITIAL","MULTIAPP_FIXED_POINT_BEGIN", "MULTIAPP_FIXED_POINT_END"}
         if allowed_flags:
             parsed_allowed_flags |= self._parse_flags(allowed_flags)
 
@@ -147,7 +152,7 @@ class Moose2FMU(Fmi2Slave):
 
         signal: Optional[str] = None
 
-        while True:
+        while self.control.isProcessRunning():
             flag = self.get_flag_with_retries(parsed_allowed_flags, self.max_retries)
             if not flag:
                 self.logger.error(f"Failed to fast-forward to {current_time}")
@@ -332,20 +337,28 @@ class Moose2FMU(Fmi2Slave):
         return True
 
     def get_flag_with_retries(
-        self, allowed_flags: Optional[Set[str]], max_retries: int, wait_seconds: float = 0.5
+        self,
+        allowed_flags: Optional[Union[str, Iterable[str]]],
+        max_retries: int,
+        wait_seconds: float = 0.5,
     ) -> Optional[str]:
         """Poll ``getWaitingFlag`` and retry before giving up.
 
         Parameters
         ----------
         allowed_flags
-            Optional set of flags expected from ``MooseControl``. Used for logging and
-            normalizing the responses.
+            Optional collection (or delimited string) of flags expected from
+            ``MooseControl``. Used for logging and normalizing the responses.
         max_retries
             Number of times to attempt retrieving the flag.
         wait_seconds
             Delay between retries in seconds.
         """
+
+        normalized_allowed: Optional[Set[str]] = None
+        if allowed_flags:
+            normalized_allowed = self._parse_flags(allowed_flags)
+
         retries = 0
         result: Optional[str] = None
         while retries < max_retries:
@@ -353,11 +366,11 @@ class Moose2FMU(Fmi2Slave):
                 result = self.control.getWaitingFlag()
                 if result:
                     normalized = result.strip().upper()
-                    if allowed_flags and normalized not in allowed_flags:
+                    if normalized_allowed and normalized not in normalized_allowed:
                         self.logger.debug(
                             "Received flag '%s' not present in allowed set %s",
                             result,
-                            sorted(allowed_flags),
+                            sorted(normalized_allowed),
                         )
                         try:
                             self._skip_flag(result)
@@ -385,9 +398,11 @@ class Moose2FMU(Fmi2Slave):
             time.sleep(wait_seconds)
 
         allowed_desc = (
-            f"one of {sorted(allowed_flags)}" if allowed_flags else "any flag")
+            f"one of {sorted(normalized_allowed)}" if normalized_allowed else "any flag"
+        )
         self.logger.error(
-             "Failed to get %s after %s retries.", allowed_desc, max_retries)
+            "Failed to get %s after %s retries.", allowed_desc, max_retries
+        )
         return None
 
     def get_postprocessor_value(
@@ -411,8 +426,7 @@ class Moose2FMU(Fmi2Slave):
 
         self.control.wait(flag_value)
         postprocessor_value = self.control.getPostprocessor(postprocessor_name)
-        self.control.setContinue()
-        self.logger.info(
+        self.logger.debug(
             f"Retrieved Postprocessor value {postprocessor_value} from MOOSE at flag {flag_value}"
         )
 
@@ -440,8 +454,7 @@ class Moose2FMU(Fmi2Slave):
 
         self.control.wait(flag_value)
         reporter_value = self.control.getReporterValue(reporter_name)
-        self.control.setContinue()
-        self.logger.info(
+        self.logger.debug(
             f"Retrieved Reporter value {reporter_value} from MOOSE at flag {flag_value}"
         )
 
