@@ -36,14 +36,6 @@ class TestResultsSummary(unittest.TestCase):
         super().__init__(*args, **kwargs)
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
-    def testPRTestNamesNoChanges(self):
-        summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
-        _, head_names, base_names = summary.pr_test_names(event_id=EVENT_ID)
-        self.assertEqual(head_names, base_names)
-        self.assertEqual(head_names, set([TEST_NAME]))
-        self.assertEqual(base_names, set([TEST_NAME]))
-
-    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testDiffTableNoChanges(self):
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
         results, head_names, base_names = summary.pr_test_names(event_id=EVENT_ID)
@@ -76,7 +68,64 @@ class TestResultsSummary(unittest.TestCase):
         self.assertIsNone(removed_table)
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
-    def testmainTest(self):
+    def testPRTestNamesNoChanges(self):
+        summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
+        _, head_names, base_names = summary.pr_test_names(event_id=EVENT_ID)
+        self.assertEqual(head_names, base_names)
+        self.assertEqual(head_names, set([TEST_NAME]))
+        self.assertEqual(base_names, set([TEST_NAME]))
+
+    @patch.object(TestHarnessResultsReader, 'getCommitResults')
+    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
+    def testPRTestNamesNoBaseResults(self, patch_commit_results):
+        patch_commit_results.return_value = None
+        summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
+        stdout = StringIO()
+        with redirect_stdout(stdout):
+            results, test_names, base_test_names = summary.pr_test_names(event_id=EVENT_ID)
+        self.assertIsNone(base_test_names)
+
+    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
+    def testBuildSummary(self):
+        summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
+        results, head_names , _ = summary.pr_test_names(event_id=EVENT_ID)
+        removed_table, added_table = summary.diff_table(results, set(), head_names)
+
+        reader = TestHarnessResultsReader(TEST_DATABASE_NAME)
+        results = reader.getEventResults(event_id=EVENT_ID)
+        test_result = results.get_test(TEST_NAME.folder, TEST_NAME.name)
+        
+        self.assertEqual(len(added_table), 1)
+        self.assertEqual(added_table[0][0], str(TEST_NAME))
+        self.assertEqual(added_table[0][1], test_result.run_time)
+        self.assertIsNone(removed_table)
+
+    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
+    def testPR(self):
+        summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
+        
+        stdout = StringIO()
+        with redirect_stdout(stdout):
+            summary.pr(event_id=EVENT_ID)
+        self.assertIn('Removed Tests:', stdout.getvalue())
+        self.assertIn('No Removed Tests', stdout.getvalue())
+        self.assertIn('New Tests:', stdout.getvalue())
+        self.assertIn('No Removed Tests', stdout.getvalue())
+
+    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
+    def testPRNoBase(self):
+        summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
+        def mock_pr_test_names(**kwargs):
+            return [], ['head_test1'], []
+        summary.pr_test_names = mock_pr_test_names
+
+        stdout = StringIO()
+        with redirect_stdout(stdout):
+            summary.pr(event_id=EVENT_ID)
+        self.assertIn('Skipping Test Summary Report', stdout.getvalue())
+
+    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
+    def testMain(self):
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
 
         stdout = StringIO()
@@ -87,11 +136,7 @@ class TestResultsSummary(unittest.TestCase):
         self.assertIn('New Tests:', stdout.getvalue())
         self.assertIn('No Removed Tests', stdout.getvalue())
 
-    # @patch.object(TestHarnessResultsReader, 'getEventResults')
-    # @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
-    # def testPRRemovedTests(self, patch_get_event_results):
-    #     patch_get_event_results.return_value = 
-
+   
 
 if __name__ == '__main__':
     unittest.main()
