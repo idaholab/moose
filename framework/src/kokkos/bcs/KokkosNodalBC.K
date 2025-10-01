@@ -22,7 +22,8 @@ NodalBC::validParams()
 }
 
 NodalBC::NodalBC(const InputParameters & parameters)
-  : NodalBCBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD), _u(kokkosSystems(), _var)
+  : NodalBCBase(parameters, Moose::VarFieldType::VAR_FIELD_STANDARD),
+    _u(_var, Moose::SOLUTION_TAG, true)
 {
   addMooseVariableDependency(&_var);
 }

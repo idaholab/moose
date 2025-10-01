@@ -37,15 +37,15 @@ struct ElementInfo
   /**
    * Element type ID
    */
-  unsigned int type;
+  unsigned int type = libMesh::invalid_uint;
   /**
    * Contiguous element ID
    */
-  ContiguousElementID id;
+  ContiguousElementID id = libMesh::DofObject::invalid_id;
   /**
    * Contiguous subdomain ID
    */
-  ContiguousSubdomainID subdomain;
+  ContiguousSubdomainID subdomain = std::numeric_limits<ContiguousSubdomainID>::max();
 };
 
 /**

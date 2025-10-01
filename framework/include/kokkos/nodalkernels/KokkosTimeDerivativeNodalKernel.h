@@ -18,18 +18,20 @@ public:
 
   KokkosTimeDerivativeNodalKernel(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeQpResidual(const ContiguousNodeID node) const;
-  KOKKOS_FUNCTION Real computeQpJacobian(const ContiguousNodeID node) const;
+  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int qp, ResidualDatum & datum) const;
 };
 
 KOKKOS_FUNCTION inline Real
-KokkosTimeDerivativeNodalKernel::computeQpResidual(const ContiguousNodeID node) const
+KokkosTimeDerivativeNodalKernel::computeQpResidual(const unsigned int qp,
+                                                   ResidualDatum & datum) const
 {
-  return _u_dot(node);
+  return _u_dot(datum, qp);
 }
 
 KOKKOS_FUNCTION inline Real
-KokkosTimeDerivativeNodalKernel::computeQpJacobian(const ContiguousNodeID /* node */) const
+KokkosTimeDerivativeNodalKernel::computeQpJacobian(const unsigned int /* qp */,
+                                                   ResidualDatum & /* datum */) const
 {
   return _du_dot_du;
 }

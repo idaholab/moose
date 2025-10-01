@@ -26,16 +26,19 @@ On the other hand, nodal boundary conditions have slightly different interfaces.
 The hook methods for a nodal boundary condition have the following signatures:
 
 ```cpp
-KOKKOS_FUNCTION Real computeQpResidual(const ContiguousNodeID node) const;
-KOKKOS_FUNCTION Real computeQpJacobian(const ContiguousNodeID node) const;
+KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, ResidualDatum & datum) const;
+KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int qp, ResidualDatum & datum) const;
 KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int jvar,
-                                              const ContiguousNodeID node) const;
+                                              const unsigned int qp,
+                                              ResidualDatum & datum) const;
 ```
 
-There is no `datum` object for a node; instead, only a single node index is passed as the argument.
-Instead of `_current_node` which is a pointer to the current libMesh node object, the node index can be used to retrieve mesh data from the Kokkos mesh object.
-Also, the dummy `_qp` indexing in the original MOOSE was dropped, although the functions still contain "Qp" in their names.
-The nodal variable values are accessed by the node index instead of the dummy `_qp`.
+The test and trial function indices, `i` and `j`, are no longer passed as arguments.
+`qp` corresponds to the dummy `_qp` index in the original MOOSE and is always zero.
+To keep the consistency between interfaces, however, it is still passed as an argument and used for getting solution values.
+`_current_node`, which is a pointer to the current libMesh node object, does not have a direct replacement.
+Instead, the node index can be queried by `datum.node()` and used to retrieve mesh data from the Kokkos mesh object.
+The node coordinate can also be obtained by `datum.q_point(qp)`.
 As a result, the following residual function in `DirichletBCBase`:
 
 ```cpp
@@ -51,11 +54,11 @@ becomes the following in `Moose::Kokkos::DirichletBCBase`:
 ```cpp
 template <typename Derived>
 KOKKOS_FUNCTION Real
-DirichletBCBase<Derived>::computeQpResidual(const ContiguousNodeID node) const
+DirichletBCBase<Derived>::computeQpResidual(const unsigned int qp, ResidualDatum & datum) const
 {
   auto bc = static_cast<const Derived *>(this);
 
-  return _u(node) - bc->computeValue(node);
+  return _u(datum, qp) - bc->computeValue(qp, datum);
 }
 ```
 
