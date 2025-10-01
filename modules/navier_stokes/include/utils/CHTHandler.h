@@ -96,7 +96,7 @@ protected:
   /// Tolerance for heat flux at the CHT interfaces
   const Real _cht_heat_flux_tolerance;
 
-  /// The relaxation factors for temperature fields for the CHT boundaries
+  /// The relaxation factors for flux fields for the CHT boundaries
   /// first index is solid/fluid second is the interface
   std::vector<std::vector<Real>> _cht_flux_relaxation_factor;
 
@@ -104,8 +104,7 @@ protected:
   /// first index is solid/fluid second is the interface
   std::vector<std::vector<Real>> _cht_temperature_relaxation_factor;
 
-  /// The relaxation factors for flux fields for the CHT boundaries
-  /// first index is the boundary, the second solid/fluid.
+  /// The solid (0) and fluid (1) system numbers.
   std::vector<unsigned int> _cht_system_numbers;
 
   /// The subset of the FaceInfo objects that belong to the given boundaries.

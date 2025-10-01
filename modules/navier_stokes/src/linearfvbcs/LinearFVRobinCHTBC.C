@@ -18,7 +18,7 @@ LinearFVRobinCHTBC::validParams()
   InputParameters params = LinearFVAdvectionDiffusionBC::validParams();
   params.addRequiredParam<MooseFunctorName>("h", "The convective heat transfer coefficient.");
   params.addRequiredParam<MooseFunctorName>("incoming_flux",
-                                            "The incoming diffusive flux on the intervace.");
+                                            "The incoming diffusive flux on the interface.");
   params.addRequiredParam<MooseFunctorName>("surface_temperature",
                                             "The prescribed temperature on the interface.");
 

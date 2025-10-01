@@ -36,30 +36,37 @@ CHTHandler::validParams()
       "max_cht_fpi >= 1",
       "Number of maximum fixed point iterations (FPI). Currently only applied to"
       " conjugate heat transfer simulations. The default value of 1 essentially keeps"
-      " the FPI feature turned off.");
+      " the FPI feature turned off. CHT iteration ends after this number of iteration even if the "
+      "tolerance is not met.");
 
   params.addRangeCheckedParam<Real>(
       "cht_heat_flux_tolerance",
       1e-5,
-      "cht_heat_flux_tolerance > 0",
-      "The relative tolerance for terminating conjugate heat transfer iteration.");
+      "cht_heat_flux_tolerance > 0 & cht_heat_flux_tolerance <= 1.0",
+      "The relative tolerance for terminating conjugate heat transfer iteration before the maximum "
+      "number of CHT iterations. Relative tolerance is ignore if the maximum number of CHT "
+      "iterations is reached.");
 
   params.addRangeCheckedParam<std::vector<Real>>(
       "cht_fluid_temperature_relaxation",
       {},
+      "cht_fluid_temperature_relaxation > 0 & cht_fluid_temperature_relaxation <= 1.0",
       "The relaxation factors for the boundary temperature when being updated on the fluid side.");
   params.addRangeCheckedParam<std::vector<Real>>(
       "cht_solid_temperature_relaxation",
       {},
+      "cht_solid_temperature_relaxation > 0 & cht_solid_temperature_relaxation <= 1.0",
       "The relaxation factors for the boundary temperature when being updated on the solid side.");
 
   params.addRangeCheckedParam<std::vector<Real>>(
       "cht_fluid_flux_relaxation",
       {},
+      "cht_fluid_flux_relaxation > 0 & cht_fluid_flux_relaxation <= 1.0",
       "The relaxation factors for the boundary flux when being updated on the fluid side.");
   params.addRangeCheckedParam<std::vector<Real>>(
       "cht_solid_flux_relaxation",
       {},
+      "cht_solid_flux_relaxation > 0 & cht_solid_flux_relaxation <= 1.0",
       "The relaxation factors for the boundary flux when being updated on the solid side.");
 
   params.addParamNamesToGroup(
@@ -200,7 +207,7 @@ CHTHandler::deduceCHTBoundaryCoupling()
       _cht_boundary_conditions[bd_index][region_index] = bcs[0];
 
       if (!dynamic_cast<LinearFVCHTBCInterface *>(_cht_boundary_conditions[bd_index][region_index]))
-        mooseError("The celected boundary condition cannot be used with CHT problems! Make sure it "
+        mooseError("The selected boundary condition cannot be used with CHT problems! Make sure it "
                    "inherits from LinearFVCHTBCInterface!");
     }
   }
@@ -287,7 +294,7 @@ CHTHandler::initializeCHTCouplingFields()
 
     for (const auto region_index : make_range(2))
     {
-      // Can't be const considering we will updat emembers from here
+      // Can't be const considering we will update members from here
       auto bc = _cht_boundary_conditions[bd_index][region_index];
       for (const auto & fi : bd_fi_container)
       {
@@ -333,7 +340,7 @@ CHTHandler::updateCHTBoundaryCouplingFields(const NS::CHTSide side)
       // We will want the flux in W/m2 for the coupling so no face integral for now,
       // this can cause issues if we start using face area in the kernels
       // for more than just face integral multipliers.
-      // Also, if we decide to no require overlapping meshes on the boundary
+      // Also, if we decide to not require overlapping meshes on the boundary
       // this will probably have to change.
       other_kernel->setCurrentFaceArea(1.0);
       other_bc->setupFaceData(fi, fi->faceType(std::make_pair(0, _cht_system_numbers[other_side])));
