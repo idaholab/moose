@@ -226,7 +226,7 @@ walls = 'right left top bottom'
 
   pin_pressure = true
   pressure_pin_value = 0.0
-  pressure_pin_point = '1.5 1.5 0.0' #'0.5 0 0'
+  pressure_pin_point = '1.5 1.5 0.0'
 
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'

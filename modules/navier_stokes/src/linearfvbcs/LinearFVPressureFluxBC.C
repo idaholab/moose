@@ -18,9 +18,11 @@ LinearFVPressureFluxBC::validParams()
   params.addClassDescription(
       "Adds a fixed diffusive flux BC which can be used for the assembly of linear "
       "finite volume system and whose normal face gradient values are determined "
-      "using a functor. This kernel is only designed to work with advection-diffusion problems.");
+      "using the H/A flux. This kernel is only designed to work with advection-diffusion "
+      "problems.");
   params.addRequiredParam<MooseFunctorName>("HbyA_flux", "The total HbyA face flux value.");
-  params.addRequiredParam<MooseFunctorName>("Ainv", "The 1/A momentum system diagonal vector.");
+  params.addRequiredParam<MooseFunctorName>(
+      "Ainv", "The 1/A where A is the momentum system diagonal vector.");
   return params;
 }
 
@@ -50,11 +52,11 @@ LinearFVPressureFluxBC::computeBoundaryValue() const
 Real
 LinearFVPressureFluxBC::computeBoundaryNormalGradient() const
 {
-  const auto face_arg = makeCDFace(*_current_face_info);
+  const auto face_arg = singleSidedFaceArg(_current_face_info);
 
   const Real distance = computeCellToFaceDistance();
 
-  return -_HbyA_flux(singleSidedFaceArg(_current_face_info), determineState()) /
+  return -_HbyA_flux(face_arg, determineState()) /
          std::max(_Ainv(face_arg, determineState())(0), 1e-8) * distance;
 }
 
@@ -67,10 +69,10 @@ LinearFVPressureFluxBC::computeBoundaryValueMatrixContribution() const
 Real
 LinearFVPressureFluxBC::computeBoundaryValueRHSContribution() const
 {
-  const auto face_arg = makeCDFace(*_current_face_info);
+  const auto face_arg = singleSidedFaceArg(_current_face_info);
   const Real distance = computeCellToFaceDistance();
 
-  return -_HbyA_flux(singleSidedFaceArg(_current_face_info), determineState()) /
+  return -_HbyA_flux(face_arg, determineState()) /
          std::max(_Ainv(face_arg, determineState())(0), 1e-8) * distance;
 }
 
