@@ -45,7 +45,7 @@ class TestHarnessResultsReader:
         # The password
         password: str
         # The port
-        port: int | None = None
+        port: Optional[int] = None
 
     def __init__(self, database: str, client: Optional[pymongo.MongoClient | Authentication] = None):
         self.client: pymongo.MongoClient = None
@@ -70,18 +70,18 @@ class TestHarnessResultsReader:
         self.db = self.client.get_database(database)
 
         # Cached results, by ID
-        self._results: dict[ObjectId, TestHarnessResults | None] = {}
+        self._results: dict[ObjectId, Optional[TestHarnessResults]] = {}
         # Cached results by PR number
-        self._pr_num_results: dict[int, TestHarnessResults] = {}
+        self._pr_num_results: dict[int, Optional[TestHarnessResults]] = {}
         # Cached results by event ID
-        self._event_id_results: dict[int, TestHarnessResults] = {}
+        self._event_id_results: dict[int, Optional[TestHarnessResults]] = {}
         # Cached results by commit
-        self._event_sha_results: dict[str, TestHarnessResults] = {}
+        self._event_sha_results: dict[str, Optional[TestHarnessResults]] = {}
 
         # Cached TestHarnessResults objects for events, in order from latest
         self._latest_event_results: list[TestHarnessResults] = []
         # The last event that we searched
-        self._last_latest_event_id: ObjectId | None = None
+        self._last_latest_event_id: Optional[ObjectId] = None
 
     def __del__(self):
         # Clean up the client if it is loaded
