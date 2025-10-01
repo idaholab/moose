@@ -1,6 +1,7 @@
 import time
 import matplotlib.pyplot as plt
 from fmpy import extract, instantiate_fmu
+from fmpy.simulation import apply_start_values
 from MooseFMU import (
     fmu_info,
     get_real,
@@ -44,6 +45,19 @@ def main():
     # Initialize moose FMU for reference run
     moose_instance.setupExperiment()
     moose_instance.enterInitializationMode()
+
+    apply_start_values(
+            fmu=moose_instance,
+            model_description=moose_description,
+            start_values={
+                "flag":             "INITIAL TIMESTEP_END",
+                "moose_executable": "../../../moose_test-opt",
+                "moose_inputfile":  "fmu_diffusion.i",
+                "server_name":      "web_server",
+                "max_retries":      10,
+            },
+        )
+
     moose_instance.exitInitializationMode()
 
     fmu_instance.setupExperiment()
@@ -75,6 +89,19 @@ def main():
 
     moose_instance.setupExperiment()
     moose_instance.enterInitializationMode()
+
+    apply_start_values(
+            fmu=moose_instance,
+            model_description=moose_description,
+            start_values={
+                "flag":             "INITIAL TIMESTEP_END",
+                "moose_executable": "../../../moose_test-opt",
+                "moose_inputfile":  "fmu_diffusion.i",
+                "server_name":      "web_server",
+                "max_retries":      10,
+            },
+        )
+
     moose_instance.exitInitializationMode()
 
     # Coupled run data
