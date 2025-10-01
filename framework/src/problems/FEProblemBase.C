@@ -1847,9 +1847,8 @@ FEProblemBase::setCurrentSubdomainID(const Elem * elem, const THREAD_ID tid)
 void
 FEProblemBase::setNeighborSubdomainID(const Elem * elem, unsigned int side, const THREAD_ID tid)
 {
-  const Elem * neighbor = elem->neighbor_ptr(side);
-  if (!neighbor)
-    neighbor = _mesh.neighbor_fake_ptr(elem, side);
+  const auto * neighbor =
+      elem->neighbor_ptr(side) ? elem->neighbor_ptr(side) : _mesh.neighbor_fake_ptr(elem, side);
 
   if (!neighbor)
     mooseError("No neighbor (real or fake) found for elem ", elem->id(), " side ", side);
@@ -2389,11 +2388,11 @@ FEProblemBase::reinitNeighbor(const Elem * elem, unsigned int side, const THREAD
 {
   setNeighborSubdomainID(elem, side, tid);
 
-  const Elem * neighbor_ptr = elem->neighbor_ptr(side);
-  const Elem * neighbor = (neighbor_ptr) ? neighbor_ptr : _mesh.neighbor_fake_ptr(elem, side);
+  const auto * neighbor =
+      elem->neighbor_ptr(side) ? elem->neighbor_ptr(side) : _mesh.neighbor_fake_ptr(elem, side);
 
-  unsigned int neighbor_side = (neighbor_ptr) ? neighbor_ptr->which_neighbor_am_i(elem)
-                                              : _mesh.neighbor_fake_side(elem, side);
+  unsigned int neighbor_side = elem->neighbor_ptr(side) ? neighbor->which_neighbor_am_i(elem)
+                                                        : _mesh.neighbor_fake_side(elem, side);
 
   for (const auto i : index_range(_nl))
   {
