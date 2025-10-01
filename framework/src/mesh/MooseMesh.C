@@ -2511,34 +2511,6 @@ MooseMesh::buildPRefinementAndCoarseningMaps(Assembly * const assembly)
   }
 }
 
-// void
-// MooseMesh::addDisconnectedNeighbors(const ConstBndElement & bndelem1,
-//                                     const ConstBndElement & bndelem2)
-// {
-//   _disconnected_neighbors.emplace(bndelem1, bndelem2);
-//   _disconnected_neighbors.emplace(bndelem2, bndelem1);
-// }
-
-// // Ensure all disconnected neighbors are available across processors.
-// // Even if an element is ghosted locally, its ConstBndElement info may reside on another
-// // processor so we get the missing ghosted element pointer here.
-// const ConstBndElement *
-// MooseMesh::disconnectedNeighbor(const Elem * elem, unsigned int side) const
-// {
-//   BoundaryID dummy_bnd_id = BoundaryInfo::invalid_id;
-//   ConstBndElement key(elem, side, dummy_bnd_id);
-
-//   // map::find uses CompareConstBndElementByElemAndSide for comparison, so bnd_id will be ignored
-//   auto it = _disconnected_neighbors.find(key);
-
-//   if (it != _disconnected_neighbors.end())
-//     // Check if the element exists in the mesh (especially important for distributed meshes)
-//     if (it->second.elem)
-//       return &(it->second);
-
-//   return nullptr;
-// }
-
 void
 MooseMesh::addDisconnectedNeighbors(const ConstBndElement & bndelem1,
                                     const ConstBndElement & bndelem2)
@@ -3584,17 +3556,9 @@ MooseMesh::getInflatedProcessorBoundingBox(Real inflation_multiplier) const
   return bbox;
 }
 
-MooseMesh::
-operator libMesh::MeshBase &()
-{
-  return getMesh();
-}
+MooseMesh::operator libMesh::MeshBase &() { return getMesh(); }
 
-MooseMesh::
-operator const libMesh::MeshBase &() const
-{
-  return getMesh();
-}
+MooseMesh::operator const libMesh::MeshBase &() const { return getMesh(); }
 
 const MeshBase *
 MooseMesh::getMeshPtr() const

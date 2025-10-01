@@ -1636,8 +1636,6 @@ protected:
    * traction-separation models) may be applied across the "interfaces" defined by these neighbor
    * pairs.
    */
-  // std::map<ConstBndElement, ConstBndElement, CompareConstBndElementByElemAndSide>
-  //     _disconnected_neighbors;
   std::unordered_map<std::pair<dof_id_type, unsigned int>,
                      std::tuple<dof_id_type, unsigned int, BoundaryID>>
       _disconnected_neighbors_by_id;
