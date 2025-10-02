@@ -34,7 +34,7 @@ InputParameters
 DomainIntegralAction::validParams()
 {
   InputParameters params = Action::validParams();
-  addCrackFrontDefinitionParams(params);
+  CrackFrontDefinition::includeCrackFrontDefinitionParams(params);
   MultiMooseEnum integral_vec(
       "JIntegral CIntegral KFromJIntegral InteractionIntegralKI InteractionIntegralKII "
       "InteractionIntegralKIII InteractionIntegralT");
