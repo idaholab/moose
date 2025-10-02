@@ -245,6 +245,107 @@ class TestMoose2FMU(unittest.TestCase):
         # Explicit type should allow empty sequences
         self.assertTrue(slave.set_controllable_vector("empty", [], value_type="real"))
 
+    def test_set_controllable_real_waits_for_flag(self):
+        slave = _DummyMoose(instance_name="test", guid="1234")
+
+        class Control:
+            def __init__(self):
+                self.waited = []
+                self.set_calls = []
+                self.continue_calls = 0
+
+            def wait(self, flag):
+                self.waited.append(flag)
+
+            def setControllableReal(self, path, value):
+                self.set_calls.append((path, value))
+
+            def setContinue(self):
+                self.continue_calls += 1
+
+        slave.control = Control()
+
+        captured = {}
+
+        def fake_get_flag(self, allowed_flags, max_retries, wait_seconds=0.5):
+            captured["allowed"] = set(allowed_flags)
+            return "CUSTOM"
+
+        slave.get_flag_with_retries = MethodType(fake_get_flag, slave)
+
+        self.assertTrue(slave.set_controllable_real("alpha", 2.0, flag="custom"))
+        self.assertEqual(slave.control.waited, ["CUSTOM"])
+        self.assertEqual(slave.control.set_calls, [("alpha", 2.0)])
+        self.assertEqual(slave.control.continue_calls, 1)
+        self.assertEqual(captured["allowed"], {"CUSTOM"})
+
+    def test_set_controllable_real_uses_user_defined_flag(self):
+        slave = _DummyMoose(instance_name="test", guid="1234")
+        slave.flag = "user_flag"
+
+        class Control:
+            def __init__(self):
+                self.waited = []
+                self.set_calls = []
+
+            def wait(self, flag):
+                self.waited.append(flag)
+
+            def setControllableReal(self, path, value):
+                self.set_calls.append((path, value))
+
+            def setContinue(self):
+                pass
+
+        slave.control = Control()
+
+        def fake_get_flag(self, allowed_flags, max_retries, wait_seconds=0.5):
+            self.assertEqual(set(allowed_flags), {"USER_FLAG"})
+            return "USER_FLAG"
+
+        slave.get_flag_with_retries = MethodType(fake_get_flag, slave)
+
+        self.assertTrue(slave.set_controllable_real("beta", 5.0))
+        self.assertEqual(slave.control.waited, ["USER_FLAG"])
+        self.assertEqual(slave.control.set_calls, [("beta", 5.0)])
+
+    def test_get_postprocessor_value_merges_flags(self):
+        slave = _DummyMoose(instance_name="test", guid="1234")
+        slave.flag = "additional"
+
+        class Control:
+            def __init__(self):
+                self.waited = []
+
+            def wait(self, flag):
+                self.waited.append(flag)
+
+            def getPostprocessor(self, name):
+                return 7.0
+
+            def finalize(self):
+                raise AssertionError("finalize should not be called")
+
+        slave.control = Control()
+
+        captured = {}
+
+        def fake_get_flag(self, allowed_flags, max_retries, wait_seconds=0.5):
+            captured["allowed"] = set(allowed_flags)
+            return "CUSTOM"
+
+        slave.get_flag_with_retries = MethodType(fake_get_flag, slave)
+
+        value = slave.get_postprocessor_value("energy", 3.0, flag="custom")
+
+        self.assertEqual(value, 7.0)
+        self.assertEqual(slave.control.waited, ["CUSTOM"])
+        self.assertEqual(
+            captured["allowed"],
+            {"MULTIAPP_FIXED_POINT_END", "CUSTOM", "ADDITIONAL"},
+        )
+
+
     def test_parse_flags_handles_strings_and_iterables(self):
         slave = _DummyMoose(instance_name="test", guid="1234")
 
