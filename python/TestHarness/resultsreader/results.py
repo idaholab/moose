@@ -48,9 +48,9 @@ class TestHarnessTestResult:
         assert isinstance(self.results, TestHarnessResults)
         assert isinstance(self.test_name, str)
         assert isinstance(self.folder_name, str)
-        assert isinstance(self.status, dict)
-        assert isinstance(self.status_value, str)
-        assert isinstance(self.timing, dict)
+        assert isinstance(self.status, (dict, NoneType))
+        assert isinstance(self.status_value, (str, NoneType))
+        assert isinstance(self.timing, (dict, NoneType))
         assert isinstance(self.run_time, (float, NoneType))
         assert isinstance(self.hpc_queued_time, (float, NoneType))
         assert isinstance(self.event_sha, str)
@@ -61,17 +61,17 @@ class TestHarnessTestResult:
         if self.base_sha:
             assert len(self.base_sha) == 40
         assert isinstance(self.time, datetime)
-        assert isinstance(self.tester, dict)
-        assert isinstance(self.json_metadata, dict)
-        assert isinstance(self.hpc, dict)
+        assert isinstance(self.tester, (dict, NoneType))
+        assert isinstance(self.json_metadata, (dict, NoneType))
+        assert isinstance(self.hpc, (dict, NoneType))
         assert isinstance(self.hpc_id, (str, NoneType))
         assert isinstance(self.validation, (dict, NoneType))
 
         # Load the validation results and data
-        self._validation_results: list[ValidationResult] = self._buildValidationResults()
-        self._validation_data: dict[str, ValidationData] = self._buildValidationData()
-        assert isinstance(self.validation_results, list)
-        assert isinstance(self.validation_data, dict)
+        self._validation_results: Optional[list[ValidationResult]] = self._buildValidationResults()
+        self._validation_data: Optional[dict[str, ValidationData]] = self._buildValidationData()
+        assert isinstance(self.validation_results, (list, NoneType))
+        assert isinstance(self.validation_data, (dict, NoneType))
 
     @property
     def data(self) -> dict:
@@ -82,6 +82,9 @@ class TestHarnessTestResult:
 
     @property
     def id(self) -> ObjectId:
+        """
+        Get the mongo database ID for these results
+        """
         return self.data['_id']
 
     @property
@@ -106,40 +109,40 @@ class TestHarnessTestResult:
         return self.data['folder_name']
 
     @property
-    def status(self) -> dict:
+    def status(self) -> Optional[dict]:
         """
         Get the status entry for the test
         """
-        return self.data['status']
+        return self.data.get('status')
 
     @property
-    def status_value(self) -> str:
+    def status_value(self) -> Optional[str]:
         """
         Get the status value for the test (OK, ERROR, etc)
         """
-        return self.status['status']
+        return self.status['status'] if self.status is not None else None
 
     @property
-    def timing(self) -> dict:
+    def timing(self) -> Optional[dict]:
         """
         Get the timing entry for the test
         """
-        return self.data['timing']
+        return self.data.get('timing')
 
     @property
-    def run_time(self) -> Union[float, None]:
+    def run_time(self) -> Optional[float]:
         """
         Get the run time for this test (if available)
         """
-        return self.timing.get('runner_run')
+        return self.timing.get('runner_run') if self.timing is not None else None
 
     @property
-    def hpc_queued_time(self) -> Union[float, None]:
+    def hpc_queued_time(self) -> Optional[float]:
         """
         Get the time that this test was queued on HPC, if
         it was ran on HPC (otherwise None)
         """
-        return self.timing.get('hpc_queued')
+        return self.timing.get('hpc_queued') if self.timing is not None else None
 
     @property
     def event_sha(self) -> str:
@@ -163,14 +166,14 @@ class TestHarnessTestResult:
         return self.results.event_id
 
     @property
-    def pr_num(self) -> Union[int, None]:
+    def pr_num(self) -> Optional[int]:
         """
         Get the PR number associated with the test (if any)
         """
         return self.results.pr_num
 
     @property
-    def base_sha(self) -> Union[str, None]:
+    def base_sha(self) -> Optional[str]:
         """
         Get the base commit that these tests were ran on
         """
@@ -184,71 +187,74 @@ class TestHarnessTestResult:
         return self.results.time
 
     @property
-    def tester(self) -> str:
+    def tester(self) -> Optional[dict]:
         """
         Get the Tester entry in the data
         """
-        return self.data['tester']
+        return self.data.get('tester')
 
     @property
-    def json_metadata(self) -> dict:
+    def json_metadata(self) -> Optional[dict]:
         """
         Get the 'json_metadata' entry from the Tester entry
         """
-        return self.tester.get('json_metadata', {})
+        return self.tester.get('json_metadata') if self.tester is not None else None
 
     @property
-    def hpc(self) -> dict:
+    def hpc(self) -> Optional[dict]:
         """
-        Get the 'hpc' entry if it exists (otherwise, empty dict)
+        Get the 'hpc' entry if it exists
         """
-        return self.data.get('hpc', {})
+        return self.data.get('hpc')
 
     @property
-    def hpc_id(self) -> Union[int, None]:
+    def hpc_id(self) -> Optional[int]:
         """
         Get the HPC job ID that ran this this test, if any
         """
-        return self.hpc.get('id')
+        return self.hpc.get('id') if self.hpc is not None else None
 
     @property
-    def validation(self) -> dict:
+    def validation(self) -> Optional[dict]:
         """
         Get the 'validation' entry for the test, if any
-        (otherwise, empty dict)
 
         Contains the validation data and results
         """
-        return self.data.get('validation', {})
+        return self.data.get('validation')
 
     @property
-    def validation_data(self) -> dict[str, ValidationData]:
+    def validation_data(self) -> Optional[dict[str, ValidationData]]:
         """
         Get the 'data' entry in 'validation' for this test, if any
-        (otherwise, empty dict)
         """
         return self._validation_data
 
     @property
-    def validation_results(self) -> list[ValidationResult]:
+    def validation_results(self) -> Optional[list[ValidationResult]]:
         """
         Get the 'data' entry in 'validation' for this test, if any
         (otherwise, empty dict)
         """
         return self._validation_results
 
-    def _buildValidationResults(self) -> list[ValidationResult]:
+    def _buildValidationResults(self) -> Optional[list[ValidationResult]]:
         """
         Internal method (use on construction) for converting validation
         results in JSON to the underlying ValidationResult objects
         """
-        return [ValidationResult(**v) for v in self.validation.get('results', [])]
+        if self.validation is not None:
+            return [ValidationResult(**v) for v in self.validation.get('results', [])]
+        return None
 
-    def _buildValidationData(self) -> dict[str, ValidationData]:
+    def _buildValidationData(self) -> Optional[dict[str, ValidationData]]:
         """
         Internal method (use on construction) for converting validation
         data in JSON to the underlying ValidationData objects
         """
+        if self.validation is None:
+            return None
+
         input = self.validation.get('data', {})
         data = {}
 
@@ -342,6 +348,9 @@ class TestHarnessResults:
 
     @property
     def id(self) -> ObjectId:
+        """
+        Get the mongo database ID for these results
+        """
         return self.data['_id']
 
     @property
@@ -432,14 +441,14 @@ class TestHarnessResults:
         return None
 
     @property
-    def pr_num(self) -> Union[int, None]:
+    def pr_num(self) -> Optional[int]:
         """
         Get the PR number associated with these tests (if any)
         """
         return self.data['pr_num']
 
     @property
-    def base_sha(self) -> Union[str, None]:
+    def base_sha(self) -> Optional[str]:
         """
         Get the base commit that these tests were ran on
         """
