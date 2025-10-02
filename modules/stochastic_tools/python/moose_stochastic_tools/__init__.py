@@ -10,3 +10,4 @@
 from moose_stochastic_tools.make_histogram import make_histogram, MakeHistogramOptions
 from moose_stochastic_tools.visualize_sobol import visualize_sobol, VisualizeSobolOptions
 from moose_stochastic_tools.visualize_statistics import visualize_statistics, VisualizeStatisticsOptions
+from moose_stochastic_tools.StochasticControl import StochasticControl, StochasticRunOptions
