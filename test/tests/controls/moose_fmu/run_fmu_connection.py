@@ -11,6 +11,36 @@ from MooseFMU import (
 import logging
 import math
 import pandas as pd
+import moose_fmu_tester
+
+"""
+Couple a toy FMU (Dahlquist test equation y'(t) = k * y) with a MOOSE FMU and
+compare a reference run (MOOSE-only) against a coupled run (FMU → MOOSE BC).
+
+Workflow
+--------
+1) Reference run:
+   - Run the MOOSE FMU by itself from start_time to stop_time with step_size.
+   - Record 'moose_time' and the averaged 'diffused' temperature for plotting.
+
+2) Coupled run:
+   - Step the Dahlquist FMU each step to obtain an external signal (val).
+   - At 'change_time', update MOOSE's left boundary condition:
+       - Set 'BC_info' to "BCs/left/value"
+       - Set 'BC_value' based on the Dahlquist output (val * 10 here)
+     (A short sleep is used to allow the server-side BC update to take effect.)
+   - Step the MOOSE FMU and record outputs for comparison.
+
+Notes
+-----
+- Both FMUs are unpacked via fmpy.extract and instantiated via instantiate_fmu.
+- MOOSE FMU start values include 'flag', 'moose_command', 'server_name',
+  and 'max_retries'. Adjust these to your environment and launcher.
+- Choose step_size so (stop_time - start_time) is an integer multiple of step_size
+  to avoid end-time alignment surprises.
+- The Dahlquist FMU output is accessed by index (modelVariables[1]); consider
+  mapping by name in production code to avoid brittle indexing.
+"""
 
 # Configure root logger
 logging.basicConfig(
@@ -20,7 +50,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def main():
+if __name__ == '__main__':
     # Filenames and simulation parameters
     fmu_filename = 'Dahlquist.fmu'  # dahlquist test equation y'(t) = k * y(t)
     moose_filename = 'MooseTest.fmu'
@@ -48,12 +78,15 @@ def main():
     moose_instance.setupExperiment()
     moose_instance.enterInitializationMode()
 
+   # Provide your own MOOSE command for non testing senarios
+    moose_command = moose_fmu_tester.test_controller()
+
     apply_start_values(
             fmu=moose_instance,
             model_description=moose_description,
             start_values={
                 "flag":             flag,
-                'moose_command': "../../../moose_test-opt -i fmu_diffusion.i",
+                'moose_command':    moose_command,
                 "server_name":      "web_server",
                 "max_retries":      10,
             },
@@ -159,6 +192,3 @@ def main():
     plt.savefig('temp_comparison.png', dpi=300, bbox_inches='tight')
     plt.close()
 
-
-if __name__ == '__main__':
-    main()
