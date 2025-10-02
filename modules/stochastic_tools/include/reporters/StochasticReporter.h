@@ -103,13 +103,44 @@ StochasticReporterContext<T>::storeInfo(nlohmann::json & json) const
   }
 }
 
+/**
+ * This is a non-typed base class of the stochastic vector value, used to update
+ * reporter values during StochasticReporter::initialize() call.
+ */
+class StochasticReporterValueBase
+{
+public:
+  StochasticReporterValueBase(const Sampler & sampler) : _sampler(sampler) {}
+  virtual ~StochasticReporterValueBase() = default;
+
+  virtual void initialize() {}
+
+protected:
+  const Sampler & _sampler;
+};
+
+template <typename T>
+class StochasticReporterValue : public StochasticReporterValueBase
+{
+public:
+  StochasticReporterValue(std::vector<T> & value, const Sampler & sampler)
+    : StochasticReporterValueBase(sampler), _value(value)
+  {
+  }
+
+  virtual void initialize() { this->_value.resize(this->_sampler.getNumberOfLocalRows()); }
+
+private:
+  std::vector<T> & _value;
+};
+
 class StochasticReporter : public GeneralReporter
 {
 public:
   static InputParameters validParams();
 
   StochasticReporter(const InputParameters & parameters);
-  virtual void initialize() override {}
+  virtual void initialize() override final;
   virtual void execute() override {}
   virtual void finalize() override {}
 
@@ -124,6 +155,8 @@ protected:
 
 private:
   const unsigned int _parallel_type;
+  /// Container for declared values that we may need to resize at initialize
+  std::deque<std::unique_ptr<StochasticReporterValueBase>> _vectors;
 };
 
 template <typename T>
@@ -132,6 +165,10 @@ StochasticReporter::declareStochasticReporter(std::string value_name, const Samp
 {
   const ReporterMode mode =
       this->_parallel_type == 0 ? REPORTER_MODE_DISTRIBUTED : REPORTER_MODE_ROOT;
-  return this->template declareValueByName<std::vector<T>, StochasticReporterContext<T>>(
-      value_name, mode, sampler);
+  std::vector<T> & vector =
+      this->template declareValueByName<std::vector<T>, StochasticReporterContext<T>>(
+          value_name, mode, sampler);
+
+  _vectors.push_back(std::make_unique<StochasticReporterValue<T>>(vector, sampler));
+  return vector;
 }
