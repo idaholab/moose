@@ -6,6 +6,8 @@ from TestHarness.resultsreader.reader import TestHarnessResultsReader
 from TestHarness.resultsreader.results import TestHarnessResults, TestName
 from tabulate import tabulate
 
+NoneType = type(None)
+
 class TestHarnessResultsSummary:
     def __init__(self, database: str):
         self.reader = TestHarnessResultsReader(database)
@@ -70,6 +72,10 @@ class TestHarnessResultsSummary:
 
             Returns `None` if no new tests were removed or added.
         """
+        assert isinstance(results, TestHarnessResults)
+        assert isinstance(head_names,(set, NoneType))
+        assert isinstance(base_names,(set, NoneType))
+
         removed_names = base_names - head_names
         if removed_names:
             removed_table = list(removed_names)
@@ -153,6 +159,9 @@ class TestHarnessResultsSummary:
         summary : str
             A formatted string summarizing removed and new tests using GitHub-style format
         """
+        assert isinstance(removed_table,(list,NoneType))
+        assert isinstance(added_table,(list,NoneType))
+
         summary = []
         summary.append("\nRemoved Tests:")
         if removed_table:
@@ -170,6 +179,8 @@ class TestHarnessResultsSummary:
 
     def pr(self, **kwargs) -> str:
         results, head_names, base_names = self.pr_test_names(**kwargs)
+        assert isinstance(head_names,set)
+        assert isinstance(base_names,(set,NoneType))
         if not base_names:
             return
         removed_table, added_table = self.diff_table(results, base_names, head_names)
