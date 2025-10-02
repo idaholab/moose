@@ -15,6 +15,7 @@
 #include "MooseMesh.h"
 #include "MortarData.h"
 #include "Assembly.h"
+#include "AutomaticMortarGeneration.h"
 #include "libmesh/quadrature.h"
 
 #include <algorithm>
