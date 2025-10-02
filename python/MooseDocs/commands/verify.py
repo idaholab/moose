@@ -135,7 +135,18 @@ def main(options):
     for root, _, files in os.walk(out_dir):
         for fname in files:
             _, ext = os.path.splitext(fname)
-            if ext in extensions:
+
+            # Ensure there are no python files
+            if ext == ".py":
+                print(
+                    mooseutils.colorText(
+                        f"There should not be python files in output, but {fname} exists.",
+                        'RED',
+                    )
+                )
+                errno += 1
+
+            elif ext in extensions:
                 errno += compare(os.path.join(root, fname), out_dir, gold_dir, options.update_gold)
 
     return errno
