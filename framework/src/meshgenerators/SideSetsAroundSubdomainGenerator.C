@@ -81,8 +81,6 @@ SideSetsAroundSubdomainGenerator::generate()
     for (const auto side : make_range(elem->n_sides()))
     {
       const auto * neighbor = elem->neighbor_ptr(side);
-      if (!neighbor)
-        neighbor = _mesh->disconnectedNeighborPtr(elem->id(), side);
 
       // On a replicated mesh, we add all subdomain sides ourselves.
       // On a distributed mesh, we may have missed sides which
