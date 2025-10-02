@@ -66,6 +66,7 @@ requirements:
     - uncertainties
     - xmltodict <0.14
     - yaml
+    - fmpy
 test:
   commands:
     - clang-format --version
@@ -97,6 +98,7 @@ test:
     - tabulate
     - xmltodict
     - yaml
+    - fmpy
 
 about:
   home: https://mooseframework.inl.gov/
