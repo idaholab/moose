@@ -17,7 +17,9 @@ from TestHarness.resultsreader.results import TestHarnessResults, TestName
 from tabulate import tabulate
 
 NoneType = type(None)
-RUNTIME_VIEW_RATE = 0
+HEAD_RUNTIME_THREADSHOLD = 1
+RELATIVE_RUNTIME_RATE = 0.5
+
 
 class TestHarnessResultsSummary:
     def __init__(self, database: str):
@@ -42,6 +44,11 @@ class TestHarnessResultsSummary:
             type=str,
             help='The name of the database')
 
+        # parser.add_argument(
+        #     'out',
+        #     type=str,
+        #     help='path to output the summary to')
+
         action_parser = parser.add_subparsers(dest='action', help='Action to perform')
         action_parser.required = True
 
@@ -59,7 +66,7 @@ class TestHarnessResultsSummary:
         return parser.parse_args()
 
     @staticmethod
-    def diff_table(results: TestHarnessResults, base_names: set[TestName],
+    def diff_table(base_results: TestHarnessResults, head_results: TestHarnessResults, base_names: set[TestName],
                    head_names: set[TestName]) -> Tuple[Optional[list], Optional[list]]:
         """
         Compare test names between the base and current head, and return
@@ -67,7 +74,9 @@ class TestHarnessResultsSummary:
 
         Parameters
         ----------
-        results : TestHarnessResults
+        base_results : TestHarnessResults
+            An object that provides access to test results for the head
+        head_results : TestHarnessResults
             An object that provides access to test results for the head
         base_names : set of TestName
             The set of test names from the base commit or version.
@@ -80,10 +89,12 @@ class TestHarnessResultsSummary:
             A list of test names that were present in the base but not in the head.
         added_table : list or None
             A list of newly added test names along with their runtime.
+        same_table : list or None
+            A list of same test names which above head runtime threadshold limit and > relative runtime rate
 
-            Returns `None` if no new tests were removed or added.
         """
-        assert isinstance(results, TestHarnessResults)
+        assert isinstance(base_results, TestHarnessResults)
+        assert isinstance(head_results, TestHarnessResults)
         assert isinstance(head_names,(set, NoneType))
         assert isinstance(base_names,(set, NoneType))
 
@@ -97,11 +108,28 @@ class TestHarnessResultsSummary:
         if add_names:
             added_table = []
             for test_name in add_names:
-                test_result = results.get_test(test_name.folder, test_name.name)
+                test_result = head_results.get_test(test_name.folder, test_name.name)
                 added_table.append([str(test_name), test_result.run_time])
         else:
             added_table = None
-        return removed_table, added_table
+
+        same_names = base_names & head_names
+        if same_names:
+            same_table = []
+            for test_name in same_names:
+                base_result = base_results.get_test(test_name.folder, test_name.name)
+                head_result = head_results.get_test(test_name.folder, test_name.name)
+                if (head_result.run_time is None or base_result.run_time is None or head_result.run_time < HEAD_RUNTIME_THREADSHOLD):
+                    continue
+                else:
+                    relative_runtime = (head_result.run_time - base_result.run_time)/ base_result.run_time
+                    if relative_runtime > RELATIVE_RUNTIME_RATE:
+                        same_table.append([str(test_name), base_result.run_time, head_result.run_time, f'{relative_runtime:.2%}'])
+            if not same_table:
+                same_table = None
+        else:
+            same_table = None
+        return removed_table, added_table, same_table
 
     def pr_test_names(self, **kwargs):
         """
@@ -120,7 +148,9 @@ class TestHarnessResultsSummary:
 
         Returns
         -------
-        results : TestHarnessResults
+        base_results : TestHarnessResults
+            The test results object for base related to the given event.
+        head_results : TestHarnessResults
             The test results object for the given event.
         test_names : set of str
             A set of test names associated with the pull request event.
@@ -136,21 +166,21 @@ class TestHarnessResultsSummary:
         event_id = kwargs['event_id']
         assert isinstance(event_id, int)
 
-        results = self.reader.getEventResults(event_id)
-        if results is None:
+        head_results = self.reader.getEventResults(event_id)
+        if head_results is None:
             raise SystemExit(f'ERROR: Results do not exist for event {event_id}')
-        test_names = set(results.test_names)
-        base_sha = results.base_sha
+        test_names = set(head_results.test_names)
+        base_sha = head_results.base_sha
         assert isinstance(base_sha, str)
 
         base_results = self.reader.getCommitResults(base_sha)
         if not isinstance(base_results, TestHarnessResults):
             print(f"\nComparison not available: no baseline results found for base SHA {base_sha}")
-            return results, test_names, None
+            return None, head_results, None, test_names
         base_test_names = set(base_results.test_names)
-        return results, test_names, base_test_names
+        return base_results, head_results, base_test_names, test_names
 
-    def build_summary(self, removed_table: list, added_table: list) -> str:
+    def build_summary(self, removed_table: list, added_table: list, same_table: list) -> str:
         """
         Build a summary report of removed and newly added tests.
 
@@ -164,14 +194,17 @@ class TestHarnessResultsSummary:
             A list of removed test names.
         added_table : list
             A list of newly added testnames and its runtime
+        same_table : list
+            A list of same testnames xxxxxx
 
         Returns
         -------
         summary : str
-            A formatted string summarizing removed and new tests using GitHub-style format
+            A formatted string summarizing removed and new tests, same tests with xxxx using GitHub-style format
         """
         assert isinstance(removed_table,(list,NoneType))
         assert isinstance(added_table,(list,NoneType))
+        assert isinstance(same_table,(list,NoneType))
 
         summary = []
         summary.append("### Removed Tests:")
@@ -186,95 +219,41 @@ class TestHarnessResultsSummary:
             summary.append(tabulate(added_table, headers=["Test Name", "Run Time"], tablefmt="github"))
         else:
             summary.append("No New Tests")
-        return "\n".join(summary)
 
-    def WIP_pr_test_names(self, **kwargs):
-
-        event_id = kwargs['event_id']
-        assert isinstance(event_id, int)
-
-        results = self.reader.getEventResults(event_id)
-        if results is None:
-            raise SystemExit(f'ERROR: Results do not exist for event {event_id}')
-        test_names = set(results.test_names)
-        base_sha = results.base_sha
-        print(base_sha)
-        assert isinstance(base_sha, str)
-
-        base_results = self.reader.getCommitResults(base_sha)
-        print(base_results)
-        if not isinstance(base_results, TestHarnessResults):
-            print(f"\nComparison not available: no baseline results found for base SHA {base_sha}")
-            return results, test_names, None
-        base_test_names = set(base_results.test_names)
-        return results, base_results, test_names, base_test_names
-
-    @staticmethod
-    def WIP_same_table(results: TestHarnessResults,base_results: TestHarnessResults, base_names: set[TestName],
-                   head_names: set[TestName]) -> Tuple[Optional[list], Optional[list]]:
-        assert isinstance(results, TestHarnessResults)
-        assert isinstance(base_results, TestHarnessResults)
-        assert isinstance(head_names,(set, NoneType))
-        assert isinstance(base_names,(set, NoneType))
-        same_table = []
-        same_names = base_names & head_names
-
-        for test_name in same_names:
-                base_result = base_results.get_test(test_name.folder, test_name.name)
-                head_result = results.get_test(test_name.folder, test_name.name)
-                relative_runtime = (head_result.run_time - base_result.run_time)/ base_result.run_time
-                if relative_runtime > RUNTIME_VIEW_RATE:
-                    same_table.append([str(test_name), base_result.run_time, head_result.run_time, f'{relative_runtime:.2%}'])
-                #print(same_table)
-                return same_table
-
-    def WIP_build_summary(self, same_table: list) -> str:
-
-        assert isinstance(same_table,(list,NoneType))
-
-        summary = []
-        # summary.append("### Removed Tests:")
-        # if removed_table:
-        #     table = [[str(test_name)] for test_name in removed_table]
-        #     summary.append(tabulate(table, headers=["Test Name"], tablefmt="github"))
-        # else:
-        #     summary.append("No Removed Tests")
-
-        # summary.append("### New Tests:")
-        # if added_table:
-        #     summary.append(tabulate(added_table, headers=["Test Name", "Run Time"], tablefmt="github"))
-        # else:
-        #     summary.append("No New Tests")
-
-        summary.append(f"### Same Tests but high relative runtime > {RUNTIME_VIEW_RATE}'")
+        summary.append(f"### Same Tests but head runtime limit > {HEAD_RUNTIME_THREADSHOLD} and relative runtime rate > {RELATIVE_RUNTIME_RATE:.2%}")
         if same_table:
             summary.append(tabulate(same_table, headers=["Test Name", "Base Run Time", "Head Run Time", "Relative Run Time Rate"], tablefmt="github"))
         else:
             summary.append("No Tests")
-
         return "\n".join(summary)
 
-    #temporary
-    # def pr(self, **kwargs) -> str:
-    #     results, head_names, base_names = self.pr_test_names(**kwargs)
-    #     assert isinstance(head_names,set)
-    #     assert isinstance(base_names,(set,NoneType))
-    #     if base_names is None:
-    #         return
-    #     removed_table, added_table = self.diff_table(results, base_names, head_names)
-
-    #     print(self.build_summary(removed_table, added_table))
-
     def pr(self, **kwargs) -> str:
-        results, base_results, head_names, base_names = self.WIP_pr_test_names(**kwargs)
+        base_results,head_results, base_names, head_names = self.pr_test_names(**kwargs)
         assert isinstance(head_names,set)
         assert isinstance(base_names,(set,NoneType))
         if base_names is None:
             return
-        same_table = self.WIP_same_table(results, base_results, base_names, head_names)
+        removed_table, added_table, same_table = self.diff_table(base_results,head_results, base_names, head_names)
 
-        print(self.WIP_build_summary(same_table))
+        print(self.build_summary(removed_table, added_table, same_table))
 
+    # def pr(self, **kwargs) -> str:
+    #     results, base_results, head_names, base_names = self.WIP_pr_test_names(**kwargs)
+    #     assert isinstance(head_names,set)
+    #     assert isinstance(base_names,(set,NoneType))
+    #     if base_names is None:
+    #         return
+    #     same_table = self.WIP_same_table(results, base_results, base_names, head_names)
+
+    #     print(self.WIP_build_summary(same_table))
+    #     # summary = self.WIP_build_summary(same_table)
+    #     # output_file = kwargs.get('out')
+
+    #     # try:
+    #     #     with open(output_file, 'w') as f:
+    #     #         f.write(summary)
+    #     # except Exception as e:
+    #         # print(f"Failed to write to {output_file}: {e}")
 
     def main(self, **kwargs):
         action = kwargs['action']
