@@ -36,7 +36,8 @@ MFEMSumAux::MFEMSumAux(const InputParameters & parameters)
                        : std::vector<mfem::real_t>(_var_names.size(), 1.0))
 {
   if (_var_names.size() != _scale_factors.size())
-    mooseError("Number of MFEM variables to sum over is different from the number of provided "
+    paramError("scale_factors",
+               "Number of MFEM variables to sum over is different from the number of provided "
                "scale factors.");
   for (const auto & var_name : _var_names)
   {
@@ -45,7 +46,8 @@ MFEMSumAux::MFEMSumAux(const InputParameters & parameters)
     if (gf->ParFESpace() == _result_var.ParFESpace())
       _summed_vars.push_back(gf);
     else
-      mooseError("The MFEM variable ",
+      paramError("source_variables",
+                 "The MFEM variable ",
                  var_name,
                  " being summed has a different FESpace from ",
                  _result_var_name);
