@@ -82,13 +82,6 @@ protected:
   // Function pointer to the dynamically loaded function
   umat_t _umat;
 
-  /// specific elastic strain energy
-  Real _aqSSE;
-  /// plastic dissipation
-  Real _aqSPD;
-  /// creep dissipation
-  Real _aqSCD;
-
   /**
    * Volumetric heat generation per unit time at the end of the increment caused by mechanical
    * working of the material.
@@ -215,9 +208,13 @@ protected:
   MaterialProperty<std::vector<Real>> & _state_var;
   const MaterialProperty<std::vector<Real>> & _state_var_old;
 
+  // energy quantities
   MaterialProperty<Real> & _elastic_strain_energy;
+  const MaterialProperty<Real> & _elastic_strain_energy_old;
   MaterialProperty<Real> & _plastic_dissipation;
+  const MaterialProperty<Real> & _plastic_dissipation_old;
   MaterialProperty<Real> & _creep_dissipation;
+  const MaterialProperty<Real> & _creep_dissipation_old;
 
   /// recommended maximum timestep for this model under the current conditions
   MaterialProperty<Real> & _material_timestep;
