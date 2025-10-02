@@ -178,13 +178,13 @@ class TestHarnessResultsSummary:
             table = [[str(test_name)] for test_name in removed_table]
             summary.append(tabulate(table, headers=["Test Name"], tablefmt="github"))
         else:
-            summary.append("#### No Removed Tests")
+            summary.append("No Removed Tests")
 
         summary.append("### New Tests:")
         if added_table:
             summary.append(tabulate(added_table, headers=["Test Name", "Run Time"], tablefmt="github"))
         else:
-            summary.append("#### No New Tests")
+            summary.append("No New Tests")
         return "\n".join(summary)
 
     def pr(self, **kwargs) -> str:
