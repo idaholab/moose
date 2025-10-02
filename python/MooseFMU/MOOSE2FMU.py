@@ -1,26 +1,14 @@
 from pythonfmu import Fmi2Slave
 from pythonfmu.enums import Fmi2Causality, Fmi2Variability
 from pythonfmu.variables import Integer, Real, String
-from pythonfmu.default_experiment import DefaultExperiment
 from MooseControl import MooseControl
 from typing import List, Dict, Optional
 import logging
 import time
-from . import fmu_utils
 from typing import Iterable, Union, Set, Tuple
 import re
-import shutil
-import mooseutils
 import numbers
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
-    handlers=[
-        logging.FileHandler("moose_simulation.log"),
-        logging.StreamHandler()
-    ]
-)
+import shlex
 
 
 class Moose2FMU(Fmi2Slave):
@@ -32,10 +20,7 @@ class Moose2FMU(Fmi2Slave):
         self,
         *args,
         flag: str = "",
-        moose_mpi: str = "",
-        mpi_num: str = 1,
-        moose_executable: str = "",
-        moose_inputfile: str = "",
+        moose_command: str = "",
         server_name: str = "web_server",
         max_retries: int = 5,
         dt_tolerance: Real = 1e-3,
@@ -48,9 +33,7 @@ class Moose2FMU(Fmi2Slave):
 
         # Configuration parameters
         self.flag: str = flag
-        self.moose_mpi: str = moose_mpi
-        self.mpi_num: str = mpi_num
-        self.moose_inputfile: str = moose_inputfile
+        self.moose_command: str = moose_command
         self.server_name: str = server_name
         self.max_retries: int = max_retries
         self.dt_tolerance: Real = dt_tolerance
@@ -59,20 +42,13 @@ class Moose2FMU(Fmi2Slave):
         self.stop_time: Real = 0.0,
         self.tolerance: Real = 1.0e-3,
 
-
-        # Find moose executable
-        exec = shutil.which("moose-opt") or mooseutils.find_moose_executable_recursive()
-        if not exec and moose_executable:
-            raise AssertionError("Cannot find a valid MOOSE executable.")
-
-        self.moose_executable: str = exec
+        # Default synchronization and data retrieval flags
+        self._default_sync_flags: Set[str] = {"INITIAL", "MULTIAPP_FIXED_POINT_BEGIN"}
+        self._default_data_flags: Set[str] = {"MULTIAPP_FIXED_POINT_END"}
 
         # Register tunable parameters
         self.register_variable(String("flag", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
-        self.register_variable(String("moose_mpi", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
-        self.register_variable(String("mpi_num", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
-        self.register_variable(String("moose_executable", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
-        self.register_variable(String("moose_inputfile", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
+        self.register_variable(String("moose_command", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
         self.register_variable(String("server_name", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
         self.register_variable(Integer("max_retries", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
         self.register_variable(Real("dt_tolerance", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
@@ -80,17 +56,15 @@ class Moose2FMU(Fmi2Slave):
         # Register outputs
         self.register_variable(Real("moose_time", causality=Fmi2Causality.output, variability=Fmi2Variability.continuous))
 
-        # Setup MooseControl
-        self.cmd = self._build_moose_command()
-
         # Track previously applied controllable values so repeated requests can be skipped
         self._controllable_real_cache: Dict[str, float] = {}
         self._controllable_vector_cache: Dict[Tuple[str, str], Tuple[Union[float, int, str], ...]] = {}
 
     def exit_initialization_mode(self) -> bool:
 
-        self.cmd = self._build_moose_command()
-        self.control = MooseControl(moose_command=self.cmd, moose_control_name=self.server_name)
+        # Setup MooseControl
+        cmd = shlex.split(self.moose_command)
+        self.control = MooseControl(moose_command=cmd, moose_control_name=self.server_name)
         self.control.initialize()
 
         return True
@@ -141,9 +115,12 @@ class Moose2FMU(Fmi2Slave):
             triggered the synchronization (if any).
         """
 
-        parsed_allowed_flags = {"INITIAL","MULTIAPP_FIXED_POINT_BEGIN", "MULTIAPP_FIXED_POINT_END"}
-        if allowed_flags:
-            parsed_allowed_flags |= self._parse_flags(allowed_flags)
+        parsed_allowed_flags = self._combine_flags(
+            self._default_sync_flags,
+            self._default_data_flags,
+            allowed_flags,
+            self._user_defined_flags(),
+        )
 
         if parsed_allowed_flags:
             self.logger.info(
@@ -186,7 +163,14 @@ class Moose2FMU(Fmi2Slave):
         self.control.finalize()
         return False
 
-    def set_controllable_real(self, path: str, value: float, *, force: bool = False) -> bool:
+    def set_controllable_real(
+        self,
+        path: str,
+        value: float,
+        *,
+        force: bool = False,
+        flag: Optional[Union[str, Iterable[str]]] = None,
+    ) -> bool:
         """Set a controllable ``Real`` parameter, skipping redundant updates.
 
         Parameters
@@ -198,6 +182,11 @@ class Moose2FMU(Fmi2Slave):
         force
             When ``True`` the value will be pushed even if it matches the last
             applied value.
+        flag
+            Optional flag (or collection of flags) that must be received from
+            ``MooseControl`` before sending the update. When omitted the
+            user-defined flag configured through ``self.flag`` is used. If no
+            flag is available the value is sent immediately.
 
         Returns
         -------
@@ -215,6 +204,15 @@ class Moose2FMU(Fmi2Slave):
             )
             return False
 
+        wait_flags = self._combine_flags(flag, self._user_defined_flags())
+        if wait_flags:
+            awaited = self._wait_for_flags(
+                wait_flags,
+                context=f"Failed to receive flag before updating controllable '{path}'",
+            )
+            if awaited is None:
+                return False
+
         self.control.setControllableReal(path, value)
         self.control.setContinue()
         self._controllable_real_cache[path] = value
@@ -230,6 +228,7 @@ class Moose2FMU(Fmi2Slave):
         *,
         value_type: Optional[str] = None,
         force: bool = False,
+        flag: Optional[Union[str, Iterable[str]]] = None,
     ) -> bool:
         """Set a controllable vector parameter using the appropriate MooseControl API.
 
@@ -246,6 +245,12 @@ class Moose2FMU(Fmi2Slave):
         force
             When ``True`` the value will be pushed even if it matches the last
             applied value.
+        flag
+            Optional flag (or collection of flags) that must be received from
+            ``MooseControl`` before sending the update. When omitted the
+            user-defined flag configured through ``self.flag`` is used. If no
+            flag is available the value is sent immediately.
+
 
         Returns
         -------
@@ -324,6 +329,15 @@ class Moose2FMU(Fmi2Slave):
                 list(converted),
             )
             return False
+
+        wait_flags = self._combine_flags(flag, self._user_defined_flags())
+        if wait_flags:
+            awaited = self._wait_for_flags(
+                wait_flags,
+                context=f"Failed to receive flag before updating controllable '{path}'",
+            )
+            if awaited is None:
+                return False
 
         setter(path, list(converted))
         self.control.setContinue()
@@ -406,9 +420,12 @@ class Moose2FMU(Fmi2Slave):
         return None
 
     def get_postprocessor_value(
-        self, flag: str, postprocessor_name: str, current_time: float
+        self,
+        postprocessor_name: str,
+        current_time: float,
+        flag: Optional[Union[str, Iterable[str]]] = None,
     ) -> Optional[float]:
-        """Wait for ``flag`` and fetch ``postprocessor_name`` from the control server.
+        """Wait for a synchronization flag and fetch a postprocessor value.
 
         Returns
         -------
@@ -417,14 +434,19 @@ class Moose2FMU(Fmi2Slave):
             value.
         """
 
-        flag_value = self.get_flag_with_retries(flag, self.max_retries)
+        wait_flags = self._combine_flags(
+            self._default_data_flags,
+            flag,
+            self._user_defined_flags(),
+        )
+        flag_value = self._wait_for_flags(
+            wait_flags,
+            context=f"Failed to fast-forward to {current_time}",
+        )
 
-        if not flag_value:
-            self.logger.error(f"Failed to fast-forward to {current_time}")
-            self.control.finalize()
+        if flag_value is None:
             return None
 
-        self.control.wait(flag_value)
         postprocessor_value = self.control.getPostprocessor(postprocessor_name)
         self.logger.debug(
             f"Retrieved Postprocessor value {postprocessor_value} from MOOSE at flag {flag_value}"
@@ -434,9 +456,12 @@ class Moose2FMU(Fmi2Slave):
 
 
     def get_reporter_value(
-        self, flag: str, reporter_name: str, current_time: float
+        self,
+        reporter_name: str,
+        current_time: float,
+        flag: Optional[Union[str, Iterable[str]]] = None,
     ) -> Optional[float]:
-        """Wait for ``flag`` and fetch ``reporter_name`` from the control server.
+        """Wait for a synchronization flag and fetch a reporter value.
 
         Returns
         -------
@@ -445,14 +470,19 @@ class Moose2FMU(Fmi2Slave):
             value.
         """
 
-        flag_value = self.get_flag_with_retries(flag, self.max_retries)
+        wait_flags = self._combine_flags(
+            self._default_data_flags,
+            flag,
+            self._user_defined_flags(),
+        )
+        flag_value = self._wait_for_flags(
+            wait_flags,
+            context=f"Failed to fast-forward to {current_time}",
+        )
 
-        if not flag_value:
-            self.logger.error(f"Failed to fast-forward to {current_time}")
-            self.control.finalize()
+        if flag_value is None:
             return None
 
-        self.control.wait(flag_value)
         reporter_value = self.control.getReporterValue(reporter_name)
         self.logger.debug(
             f"Retrieved Reporter value {reporter_value} from MOOSE at flag {flag_value}"
@@ -476,6 +506,50 @@ class Moose2FMU(Fmi2Slave):
 
         self.control.wait(flag)
         self.control.setContinue()
+
+    def _combine_flags(
+        self,
+        *flag_groups: Optional[Union[str, Iterable[str]]],
+    ) -> Set[str]:
+        combined: Set[str] = set()
+        for group in flag_groups:
+            if not group:
+                continue
+            combined |= self._parse_flags(group)
+        return combined
+
+    def _user_defined_flags(self) -> Set[str]:
+        if not self.flag:
+            return set()
+        return self._parse_flags(self.flag)
+
+    def _wait_for_flags(
+        self,
+        flags: Set[str],
+        *,
+        context: Optional[str] = None,
+    ) -> Optional[str]:
+        if not flags:
+            return ""
+
+        self.logger.debug("Waiting for one of the flags: %s", sorted(flags))
+        flag_value = self.get_flag_with_retries(flags, self.max_retries)
+
+        if not flag_value:
+            if context:
+                self.logger.error(context)
+            else:
+                self.logger.error(
+                    "Failed to receive any of the expected flags: %s",
+                    sorted(flags),
+                )
+            self.control.finalize()
+            return None
+
+        self.control.wait(flag_value)
+        normalized_flag = flag_value.strip().upper()
+        self.logger.debug("Received flag '%s'", normalized_flag or flag_value)
+        return normalized_flag or flag_value
 
     def _build_moose_command(self) -> List[str]:
         if self.moose_mpi:

@@ -5,6 +5,7 @@ import pandas as pd
 import logging
 import time
 import shutil
+import test.tests.controls.moose_fmu.moose_fmu_controller as moose_fmu_controller
 
 # Toggle this flag to switch between INFO and DEBUG logging for the script and FMU
 FMU_DEBUG_LOGGING = True
@@ -26,7 +27,7 @@ if FMU_DEBUG_LOGGING:
 else:
     logging.getLogger("Moose2FMU").setLevel(logging.INFO)
 
-def simulate_moose_fmu(moose_filename, t0, t1, dt, flag, *, debug_logging=True):
+def simulate_moose_fmu(moose_filename, t0, t1, dt, flag, cmd,*, debug_logging=True):
 
 # time step size is set during fmu build process and can't not be adjusted during run time,
 # use step by step approach if different time step size is needed
@@ -40,8 +41,7 @@ def simulate_moose_fmu(moose_filename, t0, t1, dt, flag, *, debug_logging=True):
         step_size=dt,
         start_values={
         'flag':             flag,
-        'moose_executable': '../../../moose_test-opt',
-        'moose_inputfile':  'fmu_diffusion.i',
+        'moose_command': cmd,
         'server_name':      'web_server',
         'max_retries':      10},
         debug_logging=debug_logging,
@@ -61,6 +61,7 @@ def moose_fmu_step_by_step(
     t1: float,
     dt: float,
     flag: str,
+    cmd:str,
     *,
     rtol: float = 1e-6,
     atol: float = 1e-9,
@@ -90,8 +91,7 @@ def moose_fmu_step_by_step(
             model_description=md,
             start_values={
                 "flag":             flag,
-                "moose_executable": "../../../moose_test-opt",
-                "moose_inputfile":  "fmu_diffusion.i",
+                'moose_command':    cmd,
                 "server_name":      "web_server",
                 "max_retries":      10,
             },
@@ -153,16 +153,19 @@ def main():
     if FMU_DEBUG_LOGGING:
         logger.debug("FMU debug logging is enabled")
 
+    # Provide your own MOOSE command for non testing senarios
+    cmd = moose_fmu_controller.test_controller()
+
     t0, t1, dt = 0, 1, 0.5
     moose_filename = 'MooseTest.fmu'
     flag = "MULTIAPP_FIXED_POINT_END"
-    result1 = simulate_moose_fmu(moose_filename, t0, t1, dt, flag, debug_logging=FMU_DEBUG_LOGGING)
+    result1 = simulate_moose_fmu(moose_filename, t0, t1, dt, flag, cmd, debug_logging=FMU_DEBUG_LOGGING)
     logger.info("Results from simulate_fmu:")
     print_result(result1)
 
     time.sleep(2)
     logger.info("Start the second moose run after 2s")
-    result2 = moose_fmu_step_by_step(moose_filename, t0, t1, dt, flag)
+    result2 = moose_fmu_step_by_step(moose_filename, t0, t1, dt, flag, cmd)
     logger.info("Results from fmu step by step:")
     print_result(result2)
 
