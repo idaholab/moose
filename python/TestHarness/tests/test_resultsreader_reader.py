@@ -129,15 +129,27 @@ class TestResultsReaderReader(unittest.TestCase):
         with open(PROD_GET_TEST_RESULTS_GOLD_PATH, 'r') as f:
             gold = json.load(f)
 
-        # Convert datetime strings to objects
+        # Conversion for results documents
         results = gold['results']
         for result in results.values():
+            # Convert times to datetime
             result['time'] = datetime.fromisoformat(result['time'])
+            # Convert ID to an ObjectID
             result['_id'] = ObjectId(result['_id'])
+            # Convert test IDs to ObjectIDs
+            for folder_entry in result['tests'].values():
+                folder_tests = folder_entry['tests']
+                for test_name in list(folder_tests.keys()):
+                    if isinstance(folder_tests[test_name], str):
+                        folder_tests[test_name] = ObjectId(folder_tests[test_name])
+
+        # Conversions for tests documents
         tests = gold['tests']
         for test in tests.values():
-            test['time'] = datetime.fromisoformat(test['time'])
+            # Convert ID to an ObjectID
             test['_id'] = ObjectId(test['_id'])
+            # Convert result_id to an ObjectID
+            test['result_id'] = ObjectId(test['result_id'])
 
         return results, tests
 
@@ -211,7 +223,7 @@ class TestResultsReaderReader(unittest.TestCase):
         gold_results, gold_tests = self.getGetTestResultsGold()
         # Mock getting the test results from mongodb
         def get_test_data(id):
-            return gold_tests[id]
+            return gold_tests[str(id)]
         patch_find_test_data.side_effect = get_test_data
         # Mock getting the results from mongodb
         def get_results_data(*args, **kwargs):

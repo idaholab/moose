@@ -279,7 +279,7 @@ class TestHarnessResultsReader:
             try:
                 result = TestHarnessResults(data, self.db)
             except Exception as e:
-                raise Exception(f'Failed to build result _id={id}') from e
+                raise ValueError(f'Failed to build result _id={id}') from e
             self._results[id] = result
 
         return result

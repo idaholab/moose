@@ -75,6 +75,9 @@ class TestResultsReaderResults(TestHarnessTestCase):
                 test_values.update(civet_values)
                 # Fake values from HPC
                 test_values['timing']['hpc_queued'] = FAKE_HPC_QUEUED_TIME
+                # Fake result ID
+                test_values['result_id'] = FAKE_RESULT_ID
+
                 tests.append(test_values)
 
         # Setup main results entry
