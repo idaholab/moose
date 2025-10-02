@@ -313,10 +313,11 @@ class TestResultsReaderReader(unittest.TestCase):
         results = reader.getTestResults(TEST_FOLDER_NAME, TEST_TEST_NAME, pr_num=pr_num)
         self.assertGreater(len(results), 0)
 
+        for result in results:
+            self.assertIsInstance(result, TestHarnessTestResult)
+
         result = results[0]
         self.assertEqual(result.event_id, event_id)
-        self.assertEqual(result.folder_name, TEST_FOLDER_NAME)
-        self.assertEqual(result.test_name, TEST_TEST_NAME)
         if is_pr:
             self.assertEqual(result.pr_num, pr_num)
             self.assertEqual(result.event_sha, head_sha)
@@ -328,13 +329,15 @@ class TestResultsReaderReader(unittest.TestCase):
             event_results = [r for r in results if r.event_sha == head_sha]
             self.assertEqual(len(event_results), 1)
 
-            result = event_results[0]
-
         start_index = 0
         if is_pr:
             start_index = 1
         for result in results[start_index:]:
             self.assertNotEqual(result.event_cause, 'pr')
+
+        for result in results:
+            self.assertEqual(result.folder_name, TEST_FOLDER_NAME)
+            self.assertEqual(result.test_name, TEST_TEST_NAME)
 
     @unittest.skipUnless(os.environ.get('TEST_RESULTSREADER_READER'), f"Skipping because TEST_RESULTSREADER_READER not set")
     def testGetEventResultsLive(self):
