@@ -24,28 +24,28 @@
     type = ParsedVectorVectorRealReductionReporter
     name = sum
     vector_of_vector_reporter_name = 'dataFromVofV/v_of_v'
-    initial_value = 0
+    initial_reduction_value = 0
     expression = 'reduction_value+indexed_value'
   []
   [vecvec_sqsum]
     type = ParsedVectorVectorRealReductionReporter
     name = sqsum
     vector_of_vector_reporter_name = 'dataFromVofV/v_of_v'
-    initial_value = 0
+    initial_reduction_value = 0
     expression = 'reduction_value+indexed_value*indexed_value'
   []
   [vecvec_multiply]
     type = ParsedVectorVectorRealReductionReporter
     name = multiply
     vector_of_vector_reporter_name = 'dataFromVofV/v_of_v'
-    initial_value = 1
+    initial_reduction_value = 1
     expression = 'reduction_value*indexed_value'
   []
   [vecvec_max]
     type = ParsedVectorVectorRealReductionReporter
     name = max
     vector_of_vector_reporter_name = 'dataFromVofV/v_of_v'
-    initial_value = -100000
+    initial_reduction_value = -100000
     expression = 'max(reduction_value,indexed_value)'
   []
 
@@ -88,28 +88,28 @@
     type = ParsedVectorRealReductionReporter
     name = sum
     vector_reporter_name = vec_d/vec_d
-    initial_value = 0
+    initial_reduction_value = 0
     expression = 'reduction_value+indexed_value'
   []
   [vector_sqsum]
     type = ParsedVectorRealReductionReporter
     name = sqsum
     vector_reporter_name = vec_d/vec_d
-    initial_value = 0
+    initial_reduction_value = 0
     expression = 'reduction_value+indexed_value*indexed_value'
   []
   [vector_multiply]
     type = ParsedVectorRealReductionReporter
     name = multiply
     vector_reporter_name = vec_d/vec_d
-    initial_value = 1
+    initial_reduction_value = 1
     expression = 'reduction_value*indexed_value'
   []
   [vector_max]
     type = ParsedVectorRealReductionReporter
     name = max
     vector_reporter_name = vec_d/vec_d
-    initial_value = -100000
+    initial_reduction_value = -100000
     expression = 'max(reduction_value,indexed_value)'
   []
 []

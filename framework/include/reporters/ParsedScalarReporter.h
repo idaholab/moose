@@ -26,8 +26,6 @@ public:
   virtual void finalize() override;
 
 private:
-  /// input scalar reporter vectors
-  std::vector<const Real *> _scalar_reporter_data;
   /// output scalar
   Real & _output_reporter;
 };

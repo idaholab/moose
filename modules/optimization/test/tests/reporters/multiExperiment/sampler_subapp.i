@@ -43,14 +43,14 @@
     type = ParsedVectorRealReductionReporter
     name = value
     vector_reporter_name = from_sub_rep/rec_vec
-    initial_value = 0
+    initial_reduction_value = 0
     expression = 'reduction_value+indexed_value'
   []
   [grad_sum]
     type = ParsedVectorVectorRealReductionReporter
     name = row_sum
     vector_of_vector_reporter_name = "from_sub_rep/rec_vec_vec"
-    initial_value = 0
+    initial_reduction_value = 0
     expression = 'reduction_value+indexed_value'
   []
 []

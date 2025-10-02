@@ -33,9 +33,12 @@ protected:
   /// Get symbols to corresponding reporter names
   /// need symbols because reporter names have a "/" and that will not feed into fparser
   ///@{
-  const std::vector<std::string> _reporter_symbols;
+  const std::vector<std::string> _vector_reporter_symbols;
   const std::vector<std::string> _scalar_reporter_symbols;
   ///@}
+
+  /// input scalar reporter vectors
+  std::vector<const Real *> _scalar_reporter_data;
 
   /// function parser object
   SymFunctionPtr _func_F;

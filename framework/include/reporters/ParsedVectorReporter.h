@@ -26,9 +26,7 @@ public:
 
 private:
   /// input reporter vectors
-  std::vector<const std::vector<Real> *> _reporter_data;
-  /// input scalar reporter vectors
-  std::vector<const Real *> _scalar_reporter_data;
+  std::vector<const std::vector<Real> *> _vector_reporter_data;
   /// output vector
   std::vector<double> & _output_reporter;
 };

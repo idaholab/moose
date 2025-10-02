@@ -27,7 +27,7 @@ public:
 
 private:
   // initial value of element-wise reduction
-  const Real _initial_value;
+  const Real _initial_reduction_value;
 
   // reporter vector of vector w/ data
   const ReporterName _vec_of_vec_name;

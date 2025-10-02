@@ -27,10 +27,10 @@ public:
 
 private:
   // initial value of element-wise reduction
-  const Real _initial_value;
+  const Real _initial_reduction_value;
 
   /// Vector being operated on
-  const std::vector<Real> & _reporter_data;
+  const std::vector<Real> & _vector_reporter_data;
 
   /// output containing reduction of vector into a scalar
   Real & _output_reporter;

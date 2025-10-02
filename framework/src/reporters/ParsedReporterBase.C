@@ -18,7 +18,7 @@ ParsedReporterBase::validParams()
       "expression", "FunctionExpression", "function expression");
   params.addParam<std::string>("name", "result", "Name of output reporter.");
   params.addParam<std::vector<std::string>>(
-      "reporter_symbols", {}, "Expression symbol for each reporter");
+      "vector_reporter_symbols", {}, "Expression symbol for each reporter");
   params.addParam<std::vector<std::string>>(
       "scalar_reporter_symbols",
       {},
@@ -27,6 +27,8 @@ ParsedReporterBase::validParams()
       "constant_names",
       {},
       "Vector of constants used in the parsed function (use this for kB etc.)");
+  params.addParam<std::vector<ReporterName>>("scalar_reporter_names",
+                                             "Scalar reporter names to apply function to.");
   params.addParam<std::vector<std::string>>(
       "constant_expressions",
       {},
@@ -40,14 +42,35 @@ ParsedReporterBase::ParsedReporterBase(const InputParameters & parameters)
   : GeneralReporter(parameters),
     FunctionParserUtils(parameters),
     _use_t(getParam<bool>("use_t")),
-    _reporter_symbols(getParam<std::vector<std::string>>("reporter_symbols")),
+    _vector_reporter_symbols(getParam<std::vector<std::string>>("vector_reporter_symbols")),
     _scalar_reporter_symbols(getParam<std::vector<std::string>>("scalar_reporter_symbols"))
 {
+  // checking that symbols and names vectors are the same size
+  if (parameters.isParamValid("scalar_reporter_names"))
+  {
+    // get scalar reporter can be checked and gotten here if input
+    // Vector reporters must be handled differently by each derived class
+    const std::vector<ReporterName> scalar_reporter_names(
+        getParam<std::vector<ReporterName>>("scalar_reporter_names"));
+
+    if (scalar_reporter_names.size() != _scalar_reporter_symbols.size())
+      paramError("scalar_reporter_names",
+                 "scalar_reporter_names and scalar_reporter_symbols must be the same size:  Number "
+                 "of scalar_reporter_names=",
+                 scalar_reporter_names.size(),
+                 ";  Number of scalar_reporter_symbols=",
+                 _scalar_reporter_symbols.size());
+    _scalar_reporter_data.resize(scalar_reporter_names.size());
+    for (const auto rep_index : index_range(_scalar_reporter_data))
+      _scalar_reporter_data[rep_index] =
+          &getReporterValueByName<Real>(scalar_reporter_names[rep_index], REPORTER_MODE_ROOT);
+  }
+
   // build reporters argument; order in derived classes must use this order
   // first add vector reporter symbols
   std::string symbol_str;
-  for (const auto i : index_range(_reporter_symbols))
-    symbol_str += (symbol_str.empty() ? "" : ",") + _reporter_symbols[i];
+  for (const auto i : index_range(_vector_reporter_symbols))
+    symbol_str += (symbol_str.empty() ? "" : ",") + _vector_reporter_symbols[i];
   // next add scalar reporter symbols
   for (const auto i : index_range(_scalar_reporter_symbols))
     symbol_str += (symbol_str.empty() ? "" : ",") + _scalar_reporter_symbols[i];
@@ -66,5 +89,5 @@ ParsedReporterBase::ParsedReporterBase(const InputParameters & parameters)
                       comm());
 
   // reserve storage for parameter passing buffer
-  _func_params.resize(_reporter_symbols.size() + _scalar_reporter_symbols.size() + _use_t);
+  _func_params.resize(_vector_reporter_symbols.size() + _scalar_reporter_symbols.size() + _use_t);
 }

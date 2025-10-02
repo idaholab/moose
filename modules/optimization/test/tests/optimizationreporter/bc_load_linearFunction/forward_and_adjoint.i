@@ -156,7 +156,7 @@
     type = ParsedVectorRealReductionReporter
     name = sqsum
     vector_reporter_name = 'measure_data/misfit_values'
-    initial_value = 0
+    initial_reduction_value = 0
     expression = 'reduction_value+indexed_value*indexed_value'
     outputs = none
   []

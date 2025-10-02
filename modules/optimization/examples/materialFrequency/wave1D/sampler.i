@@ -46,14 +46,14 @@
     type = ParsedVectorRealReductionReporter
     name = objective
     vector_reporter_name = from_sub_rep/rec_vec
-    initial_value = 0
+    initial_reduction_value = 0
     expression = 'reduction_value+indexed_value'
   []
   [gradient]
     type = ParsedVectorVectorRealReductionReporter
     name = gradient
     vector_of_vector_reporter_name = "from_sub_rep/rec_vec_vec"
-    initial_value = 0
+    initial_reduction_value = 0
     expression = 'reduction_value+indexed_value'
   []
 []
