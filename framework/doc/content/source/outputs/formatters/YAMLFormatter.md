@@ -14,15 +14,16 @@ block and the [MooseParsedFunction.md]. We can see metadata about each parameter
 C++ type, their default, or their description.
 
 ```
-- name: /Functions/ADParsedFunction
+- name: /Functions/ParsedFunction
   description: |
 
   parameters:
   - name: control_tags
     required: No
     default: !!str
-    cpp_type: std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > >
+    cpp_type: std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >
     group_name: 'Advanced'
+    doc_unit:
     description: |
       Adds user-defined labels for accessing object parameters via control logic.
   - name: enable
@@ -30,41 +31,55 @@ C++ type, their default, or their description.
     default: !!str 1
     cpp_type: bool
     group_name: 'Advanced'
+    doc_unit:
     description: |
       Set the enabled status of the MooseObject.
-  - name: execute_on
-    required: No
-    default: !!str LINEAR
-    cpp_type: ExecFlagEnum
+  - name: expression
+    required: Yes
+    default: !!str
+    cpp_type: FunctionExpression
     group_name:
+    doc_unit:
     description: |
-      The list of flag(s) indicating when this object should be executed, the available options include NONE, INITIAL, LINEAR, NONLINEAR, TIMESTEP_END, TIMESTEP_BEGIN, FINAL, CUSTOM, ALWAYS.
+      The user defined function.
+  - name: symbol_names
+    required: No
+    default: !!str
+    cpp_type: std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >
+    group_name:
+    doc_unit:
+    description: |
+      Symbols (excluding t,x,y,z) that are bound to the values provided by the corresponding items in the vals vector.
+  - name: symbol_values
+    required: No
+    default: !!str
+    cpp_type: std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >
+    group_name:
+    doc_unit:
+    description: |
+      Constant numeric values, postprocessor names, function names, and scalar variables corresponding to the symbols in symbol_names.
   - name: type
     required: No
-    default: !!str ADParsedFunction
-    cpp_type: std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >
+    default: !!str ParsedFunction
+    cpp_type: std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >
     group_name:
+    doc_unit:
     description: |
 
   - name: vals
     required: No
     default: !!str
-    cpp_type: std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > >
+    cpp_type: std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >
     group_name:
+    doc_unit:
     description: |
-      Constant numeric values, postprocessor names, or function names for vars.
-  - name: value
-    required: Yes
-    default: !!str
-    cpp_type: FunctionExpression
-    group_name:
-    description: |
-      The user defined function.
+      Constant numeric values, postprocessor names, function names, and scalar variables for vars.
   - name: vars
     required: No
     default: !!str
-    cpp_type: std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > >
+    cpp_type: std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >
     group_name:
+    doc_unit:
     description: |
       Variables (excluding t,x,y,z) that are bound to the values provided by the corresponding items in the vals vector.
   subblocks:
