@@ -33,6 +33,7 @@ class TestName:
 
     def __str__(self):
         return f'{self.folder}.{self.name}'
+
 class TestHarnessTestResult:
     """
     Structure holding the information about a single test result
