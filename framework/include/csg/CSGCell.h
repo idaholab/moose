@@ -9,7 +9,9 @@
 
 #pragma once
 
+#ifdef MOOSE_UNIT_TEST
 #include "gtest/gtest.h"
+#endif
 
 #include "CSGRegion.h"
 
@@ -139,10 +141,12 @@ protected:
   friend class CSGCellList; // needed for setName() access
   friend class CSGBase;     // needed for updateRegion() access
 
+#ifdef MOOSE_UNIT_TEST
   /// Friends for unit testing
   ///@{
   FRIEND_TEST(CSGCellTest, testSetName);
   FRIEND_TEST(CSGCellTest, testUpdateRegion);
   ///@}
+#endif
 };
 } // namespace CSG

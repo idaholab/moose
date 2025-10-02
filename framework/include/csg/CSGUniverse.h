@@ -11,7 +11,9 @@
 
 #include "CSGCellList.h"
 
+#ifdef MOOSE_UNIT_TEST
 #include "gtest/gtest.h"
+#endif
 
 namespace CSG
 {
@@ -128,6 +130,7 @@ protected:
   // CSGUniverseList needs to be friend to access addCell()
   friend class CSGBase;
 
+#ifdef MOOSE_UNIT_TEST
   /// Friends for unit testing
   ///@{
   FRIEND_TEST(CSGUniverseTest, testGetCell);
@@ -136,5 +139,6 @@ protected:
   FRIEND_TEST(CSGUniverseTest, testRemoveAllCells);
   FRIEND_TEST(CSGUniverseTest, testSetName);
   ///@}
+#endif
 };
 } // namespace CSG
