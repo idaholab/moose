@@ -20,8 +20,6 @@
 /**
  * Macros
  */
-#define stringifyName(name) #name
-
 #define registerSyntax(action, action_syntax)                                                      \
   syntax.registerActionSyntax(action, action_syntax, "", __FILE__, __LINE__)
 #define registerSyntaxTask(action, action_syntax, task)                                            \
