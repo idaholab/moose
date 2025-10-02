@@ -1,0 +1,43 @@
+name: moose_hit
+
+on: [pull_request]
+
+jobs:
+  build_wheels:
+    name: Build wheels on ${{ matrix.cibuild.os }} with CPython-${{ matrix.python }}
+    runs-on: ${{ matrix.cibuild.os }}
+    strategy:
+      matrix:
+        cibuild:
+          - {os: 'ubuntu-latest', platform: 'manylinux', arch: 'x86_64'}
+          - {os: 'macos-13', platform: 'macosx', arch: 'x86_64'}
+          - {os: 'macos-14', platform: 'macosx', arch: 'arm64'}
+        python: ['310', '311', '312', '313']
+
+
+    steps:
+      - name: Checkout MOOSE
+        uses: actions/checkout@v5
+
+      - name: Checkout WASP
+        run: git submodule update --init --checkout --recursive framework/contrib/wasp/
+
+      - uses: actions/setup-python@v5
+
+      - name: Install cibuildwheel
+        run: python -m pip install cibuildwheel==3.1.4
+
+      - name: Build wheels
+        run: python -m cibuildwheel framework/contrib/hit/ --output-dir wheelhouse
+        env:
+          MOOSE_DIR: ${{ github.workspace }}
+          CIBW_BUILD: cp${{ matrix.python }}-${{ matrix.cibuild.platform }}_${{ matrix.cibuild.arch }}
+
+      - name: Store wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: cibw-wheels-cp${{ matrix.python }}-${{ matrix.cibuild.platform }}_${{ matrix.cibuild.arch }}
+          path: wheelhouse/*.whl
+
+
+
