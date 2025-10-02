@@ -23,6 +23,9 @@ public:
   static InputParameters validParams();
   ParameterMeshOptimization(const InputParameters & parameters);
 
+  virtual Real computeObjective() override;
+  virtual void computeGradient(libMesh::PetscVector<Number> & gradient) const override;
+
 protected:
   virtual void setICsandBounds() override;
 
@@ -31,8 +34,17 @@ private:
    * Read initialization data off of parameter mesh and error check.
    * @return values read from mesh
    */
-  std::vector<Real> parseExodusData(const std::vector<unsigned int> & exodus_timestep,
-                                    const ParameterMesh & pmesh,
-                                    const std::string & mesh_var_name,
-                                    unsigned int ntimes) const;
+  std::vector<Real> parseExodusData(const FEType fetype,
+                                    const FileName mesh_file_name,
+                                    const std::vector<unsigned int> & exodus_timestep,
+                                    const std::string & mesh_var_name) const;
+
+  /// Store parameter meshes for regularization computation
+  std::vector<std::unique_ptr<ParameterMesh>> _parameter_meshes;
+
+  /// Regularization types to apply
+  const MultiMooseEnum & _regularization_types;
+
+  /// Vector of regularization coefficients corresponding to each type
+  const std::vector<Real> _regularization_coeffs;
 };
