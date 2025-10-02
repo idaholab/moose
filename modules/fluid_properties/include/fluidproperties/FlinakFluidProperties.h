@@ -88,6 +88,7 @@ public:
    * @param[out] T      temperature (K)
    */
   virtual Real T_from_p_h(Real p, Real h) const override;
+  virtual ADReal T_from_p_h(const ADReal & /* p */, const ADReal & h) const override;
 
   /**
    * Temperature from pressure and density

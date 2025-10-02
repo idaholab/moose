@@ -33,7 +33,6 @@ cp = 1
   []
   [T_fluid]
     type = 'INSFVEnergyVariable'
-    initial_condition = 0
   []
   [scalar]
     type = MooseVariableFVReal
@@ -47,6 +46,8 @@ cp = 1
     add_energy_equation = true
     add_scalar_equation = true
     passive_scalar_names = 'scalar'
+
+    initial_temperature = 0
 
     density = ${rho}
     dynamic_viscosity = ${mu}
