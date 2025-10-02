@@ -35,10 +35,15 @@ class TestHarnessTestResult:
     """
     Structure holding the information about a single test result
     """
-    def __init__(self, data: dict, result: 'TestHarnessResults'):
+    def __init__(self, data: dict, folder_name: str, test_name: str,
+                 result: 'TestHarnessResults'):
         # The underlying data for this test, which comes from
         # "tests/*/tests" in the TestHarness results file
         self._data: dict = data
+        # The name of the folder this test is in
+        self._folder_name: str = folder_name
+        # The name of this test
+        self._test_name: str = test_name
         # The combined results that this test comes from
         self._results: 'TestHarnessResults' = result
 
@@ -99,14 +104,14 @@ class TestHarnessTestResult:
         """
         Get the name of the test
         """
-        return self.data['test_name']
+        return self._test_name
 
     @property
     def folder_name(self) -> str:
         """
-        Get the name of the test
+        Get the name of the folder the test is in
         """
-        return self.data['folder_name']
+        return self._folder_name
 
     @property
     def status(self) -> Optional[dict]:
@@ -519,7 +524,7 @@ class TestHarnessResults:
 
         # Build the true object from the data
         try:
-            test_result = TestHarnessTestResult(data, self)
+            test_result = TestHarnessTestResult(data, folder_name, test_name, self)
         except Exception as e:
             raise Exception(f'Failed to build result: _id={value}') from e
 

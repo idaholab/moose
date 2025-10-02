@@ -180,6 +180,8 @@ class TestResultsReaderReader(unittest.TestCase):
             # Test that result is the correct one
             test_harness_results = result.results
             self.assertEqual(test_harness_results, result.results)
+            self.assertEqual(PROD_FOLDER_NAME, result.folder_name)
+            self.assertEqual(PROD_TEST_NAME, result.test_name)
             self.assertIsInstance(test_harness_results, TestHarnessResults)
 
             # Test basic state for results header
@@ -313,6 +315,8 @@ class TestResultsReaderReader(unittest.TestCase):
 
         result = results[0]
         self.assertEqual(result.event_id, event_id)
+        self.assertEqual(result.folder_name, TEST_FOLDER_NAME)
+        self.assertEqual(result.test_name, TEST_TEST_NAME)
         if is_pr:
             self.assertEqual(result.pr_num, pr_num)
             self.assertEqual(result.event_sha, head_sha)
@@ -354,6 +358,8 @@ class TestResultsReaderReader(unittest.TestCase):
         self.assertEqual(len(results.test_names), 1)
         test_results = results.get_test(TEST_FOLDER_NAME, TEST_TEST_NAME)
         self.assertIsNotNone(test_results)
+        self.assertEqual(test_results.folder_name, TEST_FOLDER_NAME)
+        self.assertEqual(test_results.test_name, TEST_TEST_NAME)
 
     @unittest.skipUnless(os.environ.get('TEST_RESULTSREADER_READER'), f"Skipping because TEST_RESULTSREADER_READER not set")
     def testGetCommitResultsLive(self):
@@ -376,6 +382,8 @@ class TestResultsReaderReader(unittest.TestCase):
         self.assertEqual(len(results.test_names), 1)
         test_results = results.get_test(TEST_FOLDER_NAME, TEST_TEST_NAME)
         self.assertIsNotNone(test_results)
+        self.assertEqual(test_results.folder_name, TEST_FOLDER_NAME)
+        self.assertEqual(test_results.test_name, TEST_TEST_NAME)
 
 if __name__ == '__main__':
     unittest.main()
