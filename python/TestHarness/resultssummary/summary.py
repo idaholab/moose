@@ -1,6 +1,16 @@
 #!/usr/bin/env python3
+
+#* This file is part of the MOOSE framework
+#* https://mooseframework.inl.gov
+#*
+#* All rights reserved, see COPYRIGHT for full restrictions
+#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#*
+#* Licensed under LGPL 2.1, please see LICENSE for details
+#* https://www.gnu.org/licenses/lgpl-2.1.html
+
 import argparse
-from typing import Tuple
+from typing import Tuple, Optional
 
 from TestHarness.resultsreader.reader import TestHarnessResultsReader
 from TestHarness.resultsreader.results import TestHarnessResults, TestName
@@ -49,7 +59,7 @@ class TestHarnessResultsSummary:
 
     @staticmethod
     def diff_table(results: TestHarnessResults, base_names: set[TestName],
-                   head_names: set[TestName]) -> Tuple[list, list]:
+                   head_names: set[TestName]) -> Tuple[Optional[list], Optional[list]]:
         """
         Compare test names between the base and current head, and return
         the difference
@@ -57,7 +67,7 @@ class TestHarnessResultsSummary:
         Parameters
         ----------
         results : TestHarnessResults
-            An object that provides access to test results.
+            An object that provides access to test results for the head
         base_names : set of TestName
             The set of test names from the base commit or version.
         head_names : set of TestName
@@ -163,25 +173,25 @@ class TestHarnessResultsSummary:
         assert isinstance(added_table,(list,NoneType))
 
         summary = []
-        summary.append("\nRemoved Tests:")
+        summary.append("### Removed Tests:")
         if removed_table:
             table = [[str(test_name)] for test_name in removed_table]
             summary.append(tabulate(table, headers=["Test Name"], tablefmt="github"))
         else:
-            summary.append("No Removed Tests")
+            summary.append("#### No Removed Tests")
 
-        summary.append("\nNew Tests:")
+        summary.append("### New Tests:")
         if added_table:
             summary.append(tabulate(added_table, headers=["Test Name", "Run Time"], tablefmt="github"))
         else:
-            summary.append("No New Tests")
+            summary.append("#### No New Tests")
         return "\n".join(summary)
 
     def pr(self, **kwargs) -> str:
         results, head_names, base_names = self.pr_test_names(**kwargs)
         assert isinstance(head_names,set)
         assert isinstance(base_names,(set,NoneType))
-        if not base_names:
+        if base_names is None:
             return
         removed_table, added_table = self.diff_table(results, base_names, head_names)
         print(self.build_summary(removed_table, added_table))
