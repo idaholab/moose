@@ -12,3 +12,21 @@
     split_interface = true
   []
 []
+
+[AuxVariables]
+  [proc]
+    [AuxKernel]
+      type = ProcessorIDAux
+      execute_on = initial
+    []
+  []
+  [proc_elem]
+    family = MONOMIAL
+    order = CONSTANT
+    [AuxKernel]
+      type = ProcessorIDAux
+      execute_on = initial
+    []
+  []
+[]
+
