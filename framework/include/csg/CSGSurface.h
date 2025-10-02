@@ -9,7 +9,9 @@
 
 #pragma once
 
+#ifdef MOOSE_UNIT_TEST
 #include "gtest/gtest.h"
+#endif
 
 #include "MooseApp.h"
 #include "MooseEnum.h"
@@ -113,9 +115,11 @@ protected:
   // CSGSurfaceList needs to be friend to access setName()
   friend class CSGSurfaceList;
 
+#ifdef MOOSE_UNIT_TEST
   /// Friends for unit testing
   ///@{
   FRIEND_TEST(CSGSurfaceTest, testSetName);
   ///@}
+#endif
 };
 } // namespace CSG

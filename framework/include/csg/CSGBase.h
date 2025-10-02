@@ -14,7 +14,10 @@
 #include "CSGCellList.h"
 #include "CSGUniverseList.h"
 #include "nlohmann/json.h"
+
+#ifdef MOOSE_UNIT_TEST
 #include "gtest/gtest.h"
+#endif
 
 namespace CSG
 {
@@ -418,11 +421,13 @@ private:
   /// List of universes associated with CSG object
   CSGUniverseList _universe_list;
 
+#ifdef MOOSE_UNIT_TEST
   /// Friends for unit testing
   ///@{
   FRIEND_TEST(CSGBaseTest, testCheckRegionSurfaces);
   FRIEND_TEST(CSGBaseTest, testAddGetSurface);
   FRIEND_TEST(CSGBaseTest, testUniverseLinking);
   ///@}
+#endif
 };
 } // namespace CSG
