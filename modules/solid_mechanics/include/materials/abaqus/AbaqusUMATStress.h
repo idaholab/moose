@@ -82,13 +82,6 @@ protected:
   // Function pointer to the dynamically loaded function
   umat_t _umat;
 
-  /// specific elastic strain energy
-  Real _aqSSE;
-  /// plastic dissipation
-  Real _aqSPD;
-  /// creep dissipation
-  Real _aqSCD;
-
   /**
    * Volumetric heat generation per unit time at the end of the increment caused by mechanical
    * working of the material.

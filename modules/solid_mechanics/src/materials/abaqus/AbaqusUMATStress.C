@@ -174,11 +174,6 @@ AbaqusUMATStress::initQpStatefulProperties()
 
   // Initialize total rotation tensor
   _total_rotation[_qp] = _R;
-
-  // Initialize energy quantities
-  _elastic_strain_energy[_qp] = 0.0;
-  _plastic_dissipation[_qp] = 0.0;
-  _creep_dissipation[_qp] = 0.0;
 }
 
 void
@@ -277,10 +272,10 @@ AbaqusUMATStress::computeQpStress()
   for (const auto i : make_range(_aqNSTATV))
     _aqSTATEV[i] = _state_var_old[_qp][i];
 
-  // Recvoer "old" energy quantities
-  _aqSSE = _elastic_strain_energy_old[_qp];
-  _aqSPD = _plastic_dissipation_old[_qp];
-  _aqSCD = _creep_dissipation_old[_qp];
+  // Recover "old" energy quantities
+  _elastic_strain_energy[_qp] = _elastic_strain_energy_old[_qp];
+  _plastic_dissipation[_qp] = _plastic_dissipation_old[_qp];
+  _creep_dissipation[_qp] = _creep_dissipation_old[_qp];
 
   // Pass through updated stress, total strain, and strain increment arrays
   static const std::array<Real, 6> strain_factor{{1, 1, 1, 2, 2, 2}};
@@ -351,9 +346,9 @@ AbaqusUMATStress::computeQpStress()
   _umat(_aqSTRESS.data(),
         _aqSTATEV.data(),
         _aqDDSDDE.data(),
-        &_aqSSE,
-        &_aqSPD,
-        &_aqSCD,
+        &_elastic_strain_energy[_qp],
+        &_plastic_dissipation[_qp],
+        &_creep_dissipation[_qp],
         &_aqRPL,
         _aqDDSDDT.data(),
         _aqDRPLDE.data(),
@@ -389,11 +384,6 @@ AbaqusUMATStress::computeQpStress()
   // Update state variables
   for (int i = 0; i < _aqNSTATV; ++i)
     _state_var[_qp][i] = _aqSTATEV[i];
-
-  // Update energy quantities
-  _elastic_strain_energy[_qp] = _aqSSE;
-  _plastic_dissipation[_qp] = _aqSPD;
-  _creep_dissipation[_qp] = _aqSCD;
 
   // Here, we apply UMAT convention: Always multiply _dt by PNEWDT to determine the material time
   // step MOOSE time stepper will choose the most limiting of all material time step increments
