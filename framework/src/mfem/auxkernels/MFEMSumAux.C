@@ -60,9 +60,7 @@ MFEMSumAux::execute()
   // result = sum_i (_scale_factor_i * _summed_var_i)
   _result_var = 0.0;
   for (const auto i : index_range(_summed_vars))
-  {
     _result_var.Add(_scale_factors[i], *_summed_vars[i]);
-  }
 }
 
 #endif

@@ -35,7 +35,7 @@ protected:
   const std::vector<VariableName> & _var_names;
   // Scalar factors to multiply the input variables by.
   const std::vector<mfem::real_t> _scale_factors;
-  // References to input variable gridfunctions.
+  /// Pointers to input variable gridfunctions.
   std::vector<const mfem::ParGridFunction *> _summed_vars;
 };
 
