@@ -31,6 +31,7 @@
 // libMesh
 #include "libmesh/bounding_box.h"
 #include "libmesh/boundary_info.h"
+#include "libmesh/id_types.h"
 #include "libmesh/mesh_tools.h"
 #include "libmesh/parallel.h"
 #include "libmesh/mesh_communication.h"
@@ -2512,37 +2513,32 @@ MooseMesh::buildPRefinementAndCoarseningMaps(Assembly * const assembly)
 }
 
 void
-MooseMesh::addDisconnectedNeighbors(const ConstBndElement & bndelem1,
-                                    const ConstBndElement & bndelem2)
+MooseMesh::addDisconnectedNeighbors(const ElemSide & side1, const ElemSide & side2)
 {
-  // Store the relationships using globally-unique element IDs
-  auto key1 = std::make_pair(bndelem1.elem->id(), bndelem1.side);
-  auto val1 = std::make_tuple(bndelem2.elem->id(), bndelem2.side, bndelem2.bnd_id);
-  _disconnected_neighbors_by_id.emplace(key1, val1);
-
-  auto key2 = std::make_pair(bndelem2.elem->id(), bndelem2.side);
-  auto val2 = std::make_tuple(bndelem1.elem->id(), bndelem1.side, bndelem1.bnd_id);
-  _disconnected_neighbors_by_id.emplace(key2, val2);
+  _disconnected_neighbors.insert(std::make_pair(side1, side2));
 }
 
-std::optional<ConstBndElement>
-MooseMesh::disconnectedNeighbor(const Elem * elem, unsigned int side) const
+std::optional<MooseMesh::ElemSide>
+MooseMesh::disconnectedNeighbor(dof_id_type elem, unsigned int side) const
 {
-  auto key = std::make_pair(elem->id(), side);
-  auto it = _disconnected_neighbors_by_id.find(key);
-
-  if (it != _disconnected_neighbors_by_id.end())
+  for (const auto & [elemside1, elemside2] : _disconnected_neighbors)
   {
-    const auto neighbor_id = std::get<0>(it->second);
-    const auto neighbor_side = std::get<1>(it->second);
-    const auto neighbor_bnd_id = std::get<2>(it->second);
-
-    const auto * neighbor_elem = this->elemPtr(neighbor_id);
-    if (neighbor_elem)
-      return ConstBndElement(neighbor_elem, neighbor_side, neighbor_bnd_id);
+    const auto [elem1, side1] = elemside1;
+    const auto [elem2, side2] = elemside2;
+    if (elem1 == elem && side1 == side)
+      return elemside2;
+    else if (elem2 == elem && side2 == side)
+      return elemside1;
   }
 
   return std::nullopt;
+}
+
+Elem *
+MooseMesh::disconnectedNeighborPtr(dof_id_type elem, unsigned int side) const
+{
+  auto neigh = disconnectedNeighbor(elem, side);
+  return neigh ? _mesh->elem_ptr(neigh->first) : nullptr;
 }
 
 void
