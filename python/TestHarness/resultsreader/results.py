@@ -37,15 +37,12 @@ class TestHarnessTestResult:
     """
     Structure holding the information about a single test result
     """
-    def __init__(self, data: dict, folder_name: str, test_name: str,
-                 result: 'TestHarnessResults'):
+    def __init__(self, data: dict, name: TestName, result: 'TestHarnessResults'):
         # The underlying data for this test, which comes from
         # "tests/*/tests" in the TestHarness results file
         self._data: dict = data
-        # The name of the folder this test is in
-        self._folder_name: str = folder_name
-        # The name of this test
-        self._test_name: str = test_name
+        # The combined name for this test (folder + name)
+        self._name: TestName = name
         # The combined results that this test comes from
         self._results: 'TestHarnessResults' = result
 
@@ -53,6 +50,7 @@ class TestHarnessTestResult:
         assert isinstance(self.data, dict)
         assert isinstance(self.id, ObjectId)
         assert isinstance(self.results, TestHarnessResults)
+        assert isinstance(self.name, TestName)
         assert isinstance(self.test_name, str)
         assert isinstance(self.folder_name, str)
         assert isinstance(self.status, (dict, NoneType))
@@ -102,18 +100,25 @@ class TestHarnessTestResult:
         return self._results
 
     @property
-    def test_name(self) -> str:
+    def name(self) -> TestName:
         """
-        Get the name of the test
+        Get the combined name for this test (folder + name)
         """
-        return self._test_name
+        return self._name
 
     @property
     def folder_name(self) -> str:
         """
         Get the name of the folder the test is in
         """
-        return self._folder_name
+        return self.name.folder
+
+    @property
+    def test_name(self) -> str:
+        """
+        Get the name of the test
+        """
+        return self.name.name
 
     @property
     def status(self) -> Optional[dict]:
@@ -508,12 +513,12 @@ class TestHarnessResults:
         assert isinstance(test_name, str)
 
         # Search for the data in the cache
-        key = TestName(folder_name, test_name)
-        value = self._tests.get(key)
+        name = TestName(folder_name, test_name)
+        value = self._tests.get(name)
 
         # Doesn't exist
         if value is None:
-            raise KeyError(f'No test named {key}')
+            raise KeyError(f'No test named {name}')
 
         # Is already built
         if isinstance(value, TestHarnessTestResult):
@@ -526,12 +531,12 @@ class TestHarnessResults:
 
         # Build the true object from the data
         try:
-            test_result = TestHarnessTestResult(data, folder_name, test_name, self)
+            test_result = TestHarnessTestResult(data, name, self)
         except Exception as e:
             raise Exception(f'Failed to build result: _id={value}') from e
 
         # And store in the cache
-        self._tests[key] = test_result
+        self._tests[name] = test_result
 
         return test_result
 

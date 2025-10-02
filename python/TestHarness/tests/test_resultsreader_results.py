@@ -14,7 +14,7 @@ import zlib
 from bson.objectid import ObjectId
 from datetime import datetime
 from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
-from TestHarness.resultsreader.results import TestHarnessResults, TestHarnessTestResult
+from TestHarness.resultsreader.results import TestHarnessResults, TestHarnessTestResult, TestName
 
 FAKE_RESULT_ID = ObjectId('626bccb9697a12204fb22ea3')
 FAKE_TEST_ID = ObjectId('626bccb9697a12204fb22ea4')
@@ -28,10 +28,11 @@ FAKE_EVENT_ID = 5678
 FAKE_PR_NUM = 1234
 FAKE_HPC_QUEUED_TIME = 1.234
 FAKE_TIME = datetime.now()
+FAKE_TEST_NAME = TestName('folder', 'name')
 
 class TestResultsReaderResults(TestHarnessTestCase):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def setUp(self):
+        super().setUp()
 
         self.run_tests_result = self.runTests('-i', 'validation', '--capture-perf-graph', exit_code=132)
 
@@ -122,11 +123,15 @@ class TestResultsReaderResults(TestHarnessTestCase):
             self.assertEqual(len(jobs), 1)
             job = jobs[0]
 
-            test_result = TestHarnessTestResult(entry, folder_name, test_name, test_harness_results)
+            name = TestName(folder_name, test_name)
+            test_result = TestHarnessTestResult(entry, name, test_harness_results)
 
             # Base properties
             self.assertEqual(test_result.data, entry)
             self.assertEqual(test_result.id, FAKE_TEST_ID)
+            self.assertEqual(test_result.name, name)
+            self.assertEqual(test_result.folder_name, test_result.name.folder)
+            self.assertEqual(test_result.test_name, test_result.name.name)
             self.assertEqual(test_result.results, test_harness_results)
             self.assertEqual(test_result.folder_name, folder_name)
             self.assertEqual(test_result.test_name, test_name)
@@ -179,7 +184,7 @@ class TestResultsReaderResults(TestHarnessTestCase):
         self.assertIsNone(test_harness_results.base_sha)
 
         for entry in tests:
-            test_result = TestHarnessTestResult(entry, 'folder', 'name', test_harness_results)
+            test_result = TestHarnessTestResult(entry, FAKE_TEST_NAME, test_harness_results)
             self.assertIsNone(test_result.base_sha)
 
     def testNoEventID(self):
@@ -194,7 +199,7 @@ class TestResultsReaderResults(TestHarnessTestCase):
         self.assertEqual(test_harness_results.civet_version, civet_version)
         self.assertIsNone(test_harness_results.event_id)
         for entry in tests:
-            test_result = TestHarnessTestResult(entry, 'folder', 'name', test_harness_results)
+            test_result = TestHarnessTestResult(entry, FAKE_TEST_NAME, test_harness_results)
             self.assertIsNone(test_result.event_id)
 
     def testNoTiming(self):
@@ -205,7 +210,7 @@ class TestResultsReaderResults(TestHarnessTestCase):
         test_harness_results = TestHarnessResults(results)
         for entry in tests:
             del entry['timing']
-            test_result = TestHarnessTestResult(entry, 'folder', 'name', test_harness_results)
+            test_result = TestHarnessTestResult(entry, FAKE_TEST_NAME, test_harness_results)
             self.assertIsNone(test_result.timing)
             self.assertIsNone(test_result.run_time)
             self.assertIsNone(test_result.hpc_queued_time)
@@ -218,7 +223,7 @@ class TestResultsReaderResults(TestHarnessTestCase):
         test_harness_results = TestHarnessResults(results)
         for entry in tests:
             del entry['timing']['runner_run']
-            test_result = TestHarnessTestResult(entry, 'folder', 'name', test_harness_results)
+            test_result = TestHarnessTestResult(entry, FAKE_TEST_NAME, test_harness_results)
             self.assertIsNone(test_result.run_time)
 
     def testNoHPCQueuedTime(self):
@@ -229,7 +234,7 @@ class TestResultsReaderResults(TestHarnessTestCase):
         test_harness_results = TestHarnessResults(results)
         for entry in tests:
             del entry['timing']['hpc_queued']
-            test_result = TestHarnessTestResult(entry, 'folder', 'name', test_harness_results)
+            test_result = TestHarnessTestResult(entry, FAKE_TEST_NAME, test_harness_results)
             self.assertIsNone(test_result.hpc_queued_time)
 
     def testNoTester(self):
@@ -240,7 +245,7 @@ class TestResultsReaderResults(TestHarnessTestCase):
         test_harness_results = TestHarnessResults(results)
         for entry in tests:
             del entry['tester']
-            test_result = TestHarnessTestResult(entry, 'folder', 'name', test_harness_results)
+            test_result = TestHarnessTestResult(entry, FAKE_TEST_NAME, test_harness_results)
             self.assertIsNone(test_result.tester)
             self.assertIsNone(test_result.json_metadata)
 
@@ -252,7 +257,7 @@ class TestResultsReaderResults(TestHarnessTestCase):
         test_harness_results = TestHarnessResults(results)
         for entry in tests:
             del entry['status']
-            test_result = TestHarnessTestResult(entry, 'folder', 'name', test_harness_results)
+            test_result = TestHarnessTestResult(entry, FAKE_TEST_NAME, test_harness_results)
             self.assertIsNone(test_result.status)
             self.assertIsNone(test_result.status_value)
 
