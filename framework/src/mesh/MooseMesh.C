@@ -3561,17 +3561,9 @@ MooseMesh::getInflatedProcessorBoundingBox(Real inflation_multiplier) const
   return bbox;
 }
 
-MooseMesh::
-operator libMesh::MeshBase &()
-{
-  return getMesh();
-}
+MooseMesh::operator libMesh::MeshBase &() { return getMesh(); }
 
-MooseMesh::
-operator const libMesh::MeshBase &() const
-{
-  return getMesh();
-}
+MooseMesh::operator const libMesh::MeshBase &() const { return getMesh(); }
 
 const MeshBase *
 MooseMesh::getMeshPtr() const
