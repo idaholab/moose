@@ -103,13 +103,44 @@ class TestResultsSummary(unittest.TestCase):
     @patch.object(TestHarnessResultsReader, 'getEventResults')
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testPRTestNamesNoEventResults(self, patch_event_results):
+        """
+        Tests pr_test_names() when no event results are available.
+        """
         patch_event_results.return_value = None
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
         with self.assertRaisesRegex(SystemExit, 'Results do not exist for event'):
             summary.pr_test_names(event_id=EVENT_ID)
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
-    def testBuildSummary(self):
+    def testBuildSummaryNoChange(self):
+        """
+        Tests building a summary when there are no changes between base and head test names.
+        """
+        summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
+        results, head_names , base_names = summary.pr_test_names(event_id=EVENT_ID)
+        removed_table, added_table = summary.diff_table(results,base_names,head_names)
+
+        self.assertIsNone(added_table)
+        self.assertIsNone(removed_table)
+
+    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
+    def testBuildSummaryRemovedTest(self):
+        """
+        Tests building a summary when a test is removed from base
+        """
+        summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
+        results, _ , base_names = summary.pr_test_names(event_id=EVENT_ID)
+        removed_table, added_table = summary.diff_table(results,base_names,set())
+
+        self.assertEqual(len(removed_table), 1)
+        self.assertEqual(removed_table[0], TEST_NAME)
+        self.assertIsNone(added_table)
+
+    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
+    def testBuildSummaryAddedTest(self):
+        """
+        Tests building a summary when a test is newly added in the head test names.
+        """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
         results, head_names , _ = summary.pr_test_names(event_id=EVENT_ID)
         removed_table, added_table = summary.diff_table(results, set(), head_names)
