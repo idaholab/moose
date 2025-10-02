@@ -197,10 +197,9 @@ NonlinearThread::onInterface(const Elem * elem, unsigned int side, BoundaryID bn
   {
 
     // Pointer to the neighbor we are currently working on.
-    const auto disconnected_neighbor = _mesh.disconnectedNeighbor(elem, side);
-    const auto * neighbor = elem->neighbor_ptr(side)
-                                ? elem->neighbor_ptr(side)
-                                : (disconnected_neighbor ? disconnected_neighbor->elem : nullptr);
+    const auto * neighbor = elem->neighbor_ptr(side);
+    if (!neighbor)
+      neighbor = _mesh.disconnectedNeighborPtr(elem->id(), side);
 
     if (neighbor->active())
     {
@@ -250,10 +249,9 @@ NonlinearThread::onInternalSide(const Elem * elem, unsigned int side)
   if (_should_execute_dg)
   {
     // Pointer to the neighbor we are currently working on.
-    const auto disconnected_neighbor = _mesh.disconnectedNeighbor(elem, side);
-    const auto * neighbor = elem->neighbor_ptr(side)
-                                ? elem->neighbor_ptr(side)
-                                : (disconnected_neighbor ? disconnected_neighbor->elem : nullptr);
+    const auto * neighbor = elem->neighbor_ptr(side);
+    if (!neighbor)
+      neighbor = _mesh.disconnectedNeighborPtr(elem->id(), side);
 
     if (!neighbor)
       mooseError("We should always have a neighbor here");
