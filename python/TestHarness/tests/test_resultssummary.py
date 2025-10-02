@@ -177,7 +177,7 @@ class TestResultsSummary(unittest.TestCase):
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
         def mock_pr_test_names(**kwargs):
             print("Comparison not available")
-            return [], {'head_test1'}, set()
+            return [], {'head_test1'}, None
         summary.pr_test_names = mock_pr_test_names
 
         stdout = StringIO()
