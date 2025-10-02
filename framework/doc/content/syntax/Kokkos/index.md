@@ -24,7 +24,7 @@ Except for a very few rare cases that provide physically unified memory space fo
 Therefore, the you need to take a special care to properly identify which data are accessible and not accessible on either CPU or GPU and whether the data on CPU and GPU are properly synchronized.
 Standard containers such as `std::vector`, `std::set`, `std::map` and others are not usable on GPU, and managed pointers are also inaccessible on GPU.
 Basically, it is safe to assume that any dynamically-allocated data on CPU cannot be accessed on GPU.
-Therefore, we provide alternative data containers to be used on GPU: `Moose::Kokkos::Array` and `Moose::Kokkos::Map`.
+Therefore, we provide alternative data containers to be used on GPU: `Moose::Kokkos::Array`, `Moose::Kokkos::JaggedArray`, and `Moose::Kokkos::Map`.
 
 `Moose::Kokkos::Array` is a template class and designed to hold arbitrary type of data.
 It receives two template arguments: data type and dimension.
@@ -127,6 +127,54 @@ data.copyToDeviceNested();
          id=kokkos_array_source
          caption=The `Moose::Kokkos::Array` source code.
 
+`Moose::Kokkos::JaggedArray` is a special array object that aids in treating jagged arrays conveniently and efficiently by using a sequential data storage while still providing multi-dimensional indexing.
+Jagged arrays appear commonly in many applications, but expressing jagged arrays as nested arrays like `Array<Array<...>>` can be inefficient on GPU because of memory fragmentation.
+Therefore, `Moose::Kokkos::JaggedArray` stores the data of a jagged array sequentially and defines dope vectors internally to identify the location and size of each inner array.
+It is divided into inner and outer arrays.
+The outer array is the regular part of a jagged array.
+Each entry of the outer array is the inner array, whose size can vary with each other.
+As a result, it is defined with three template arguments: the data type, inner array dimension size, and outer array dimension size.
+Both inner and outer arrays can be up to three-dimensional.
+However, it is not possible to have inner arrays with different dimensions in a single jagged array.
+
+The accessors of a jagged array, `operator()` (dimensional) or `operator[]` (dimensionless), receive the indices for the outer array.
+They return a temporary object that wraps the inner array at the given index, which provides its own accessors that work with the local indices for the inner array.
+It will be therefore preferred to store the temporary object locally to avoid the potential overhead of repeated temporary object creation.
+
+Constructing a jagged array is split into two phases: setting up the array structure and populating data.
+First, the outer array of a jagged array is created by calling `create()`.
+Then, the size of inner arrays should be set one-by-one through `reserve()`.
+Once the array structure is set, `finalize()` should be called to construct the dope vectors and allocate data storage.
+After finalizing, the jagged array is now ready to be populated.
+The following example illustrates the construction sequence of a jagged array:
+
+```cpp
+JaggedArray<Real, 2, 2> array;
+
+array.create(n1, n2);
+
+for (unsigned int i = 0; i < n1; ++i)
+  for (unsigned int j = 0; j < n2; ++j)
+    array.reserve({n1, n2}, {nx[i], ny[j]});
+
+data.finalize();
+
+for (unsigned int i = 0; i < n1; ++i)
+  for (unsigned int j = 0; j < n2; ++j)
+  {
+    auto inner = array(i, j);
+    for (unsigned int x = 0; x < nx[i]; ++x)
+      for (unsigned int y = 0; y < ny[j]; ++j)
+        inner(x, y) = ... // Populating data
+  }
+
+data.copyToDevice();
+```
+
+!listing framework/include/kokkos/base/KokkosJaggedArray.h
+         id=kokkos_jagged_array_source
+         caption=The `Moose::Kokkos::JaggedArray` source code.
+
 `Moose::Kokkos::Map` is designed to be used for certain classes of data whose index-based storage using `Moose::Kokkos::Array` is difficult.
 It contains a CPU `std::map` and two GPU arrays for storing the keys and values, along with an offset array to store the starting location of each bucket.
 It uses the 32-bit FNV-1a hash algorithm on GPU to implement a hash table.
@@ -151,7 +199,7 @@ If you need to use keys of a custom data type, a specialization of the template 
 Beware of the performance impact from using it.
 
 !alert note
-All the creation and copy APIs of `Moose::Kokkos::Array` and `Moose::Kokkos::Map` can only be called by CPU.
+All the creation and copy APIs of `Moose::Kokkos::Array`, `Moose::Kokkos::JaggedArray`, and `Moose::Kokkos::Map` can only be called by CPU.
 
 ### Separate Execution Space id=kokkos_execution_space
 
