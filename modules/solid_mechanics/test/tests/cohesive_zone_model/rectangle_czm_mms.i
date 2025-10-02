@@ -4,7 +4,7 @@ nx_quad = '${fparse nx/4}'
 nx_quad_triple = '${fparse 3*nx_quad}'
 E1 = 1e3
 E2 = 1e3
-poi = 0.3
+poi = 0
 x0 = 0.25
 x0_triple = '${fparse 3*x0}'
 x_domain = 1
@@ -81,7 +81,7 @@ b = '${fparse -pi * cos(pi * x0) * (E1 + (x0 / 2) * (1 - E1 / E2))}'
   [interface_traction]
     type = ADPureElasticTractionSeparation
     normal_stiffness = 1
-    tangent_stiffness = 0
+    tangent_stiffness = 1
     boundary = 'Block1_Block2'
   []
   [global_traction]

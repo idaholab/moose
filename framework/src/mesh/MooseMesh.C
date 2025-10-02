@@ -1394,10 +1394,7 @@ MooseMesh::getBoundaryActiveNeighborElemIds(BoundaryID bid) const
     const auto & [elem_ptr, elem_side, elem_bid] = *bnd_elem;
     if (elem_bid == bid)
     {
-      const auto disconnected_neighbor = disconnectedNeighbor(elem_ptr, elem_side);
-      const auto * neighbor = elem_ptr->neighbor_ptr(elem_side)
-                                  ? elem_ptr->neighbor_ptr(elem_side)
-                                  : (disconnected_neighbor ? disconnected_neighbor->elem : nullptr);
+      const auto * neighbor = elem_ptr->neighbor_ptr(elem_side);
 
       // Dont add fully remote elements, ghosted is fine
       if (neighbor && neighbor != libMesh::remote_elem)
@@ -1434,11 +1431,7 @@ MooseMesh::isBoundaryFullyExternalToSubdomains(BoundaryID bid,
       // If an element is internal to the group of subdomain, check the neighbor
       if (blk_group.find(elem_ptr->subdomain_id()) != blk_group.end())
       {
-        const auto disconnected_neighbor = disconnectedNeighbor(elem_ptr, elem_side);
-        const auto * neighbor =
-            elem_ptr->neighbor_ptr(elem_side)
-                ? elem_ptr->neighbor_ptr(elem_side)
-                : (disconnected_neighbor ? disconnected_neighbor->elem : nullptr);
+        const auto * neighbor = elem_ptr->neighbor_ptr(elem_side);
 
         // If we did not ghost the neighbor, we cannot decide
         if (neighbor == libMesh::remote_elem)
@@ -2519,25 +2512,41 @@ MooseMesh::addDisconnectedNeighbors(const ElemSide & side1, const ElemSide & sid
 }
 
 std::optional<MooseMesh::ElemSide>
-MooseMesh::disconnectedNeighbor(dof_id_type elem, unsigned int side) const
+MooseMesh::disconnectedNeighbor(dof_id_type elem_id, unsigned int side) const
 {
+  // Quick return if we have no disconnected neighbors
+  if (!_disconnected_neighbors.size())
+    return std::nullopt;
+
+  // Check the cache first
+  auto it = _cached_disconnected_neighbors.find({elem_id, side});
+  if (it != _cached_disconnected_neighbors.end())
+    return it->second;
+
   for (const auto & [elemside1, elemside2] : _disconnected_neighbors)
   {
     const auto [elem1, side1] = elemside1;
     const auto [elem2, side2] = elemside2;
-    if (elem1 == elem && side1 == side)
+
+    if (elem1 == elem_id && side1 == side)
+    {
+      _cached_disconnected_neighbors.emplace(elemside1, elemside2);
       return elemside2;
-    else if (elem2 == elem && side2 == side)
+    }
+    else if (elem2 == elem_id && side2 == side)
+    {
+      _cached_disconnected_neighbors.emplace(elemside2, elemside1);
       return elemside1;
+    }
   }
 
   return std::nullopt;
 }
 
 Elem *
-MooseMesh::disconnectedNeighborPtr(dof_id_type elem, unsigned int side) const
+MooseMesh::disconnectedNeighborPtr(dof_id_type elem_id, unsigned int side) const
 {
-  auto neigh = disconnectedNeighbor(elem, side);
+  auto neigh = disconnectedNeighbor(elem_id, side);
   return neigh ? _mesh->elem_ptr(neigh->first) : nullptr;
 }
 
@@ -3552,9 +3561,17 @@ MooseMesh::getInflatedProcessorBoundingBox(Real inflation_multiplier) const
   return bbox;
 }
 
-MooseMesh::operator libMesh::MeshBase &() { return getMesh(); }
+MooseMesh::
+operator libMesh::MeshBase &()
+{
+  return getMesh();
+}
 
-MooseMesh::operator const libMesh::MeshBase &() const { return getMesh(); }
+MooseMesh::
+operator const libMesh::MeshBase &() const
+{
+  return getMesh();
+}
 
 const MeshBase *
 MooseMesh::getMeshPtr() const
@@ -3904,13 +3921,7 @@ MooseMesh::buildFiniteVolumeInfo() const
     for (unsigned int side = 0; side < elem->n_sides(); ++side)
     {
       // get the neighbor element
-      const auto disconnected_neighbor = disconnectedNeighbor(elem, side);
-      const auto * neighbor =
-          elem->neighbor_ptr(side)
-              ? elem->neighbor_ptr(side)
-              : (disconnected_neighbor
-                     ? (disconnected_neighbor ? disconnected_neighbor->elem : nullptr)
-                     : nullptr);
+      const auto * neighbor = elem->neighbor_ptr(side);
 
       // Check if the FaceInfo shall belong to the element. If yes,
       // create and initialize the FaceInfo. We need this to ensure that

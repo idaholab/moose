@@ -264,10 +264,9 @@ void
 ComputeUserObjectsThread::onInterface(const Elem * elem, unsigned int side, BoundaryID bnd_id)
 {
   // Pointer to the neighbor we are currently working on.
-  const auto disconnected_neighbor = _mesh.disconnectedNeighbor(elem, side);
-  const auto * neighbor = elem->neighbor_ptr(side)
-                              ? elem->neighbor_ptr(side)
-                              : (disconnected_neighbor ? disconnected_neighbor->elem : nullptr);
+  const auto * neighbor = elem->neighbor_ptr(side);
+  if (!neighbor)
+    neighbor = _mesh.disconnectedNeighborPtr(elem->id(), side);
 
   if (!(neighbor->active()))
     return;

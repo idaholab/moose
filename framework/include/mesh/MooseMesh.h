@@ -1436,10 +1436,10 @@ public:
   void addDisconnectedNeighbors(const ElemSide & side1, const ElemSide & side2);
 
   /// Find the disconnected neighbor for the given element and side
-  std::optional<ElemSide> disconnectedNeighbor(dof_id_type elem, unsigned int side) const;
+  std::optional<ElemSide> disconnectedNeighbor(dof_id_type elem_id, unsigned int side) const;
 
   /// Find the disconnected neighbor pointer for the given element and side
-  Elem * disconnectedNeighborPtr(dof_id_type elem, unsigned int side) const;
+  Elem * disconnectedNeighborPtr(dof_id_type elem_id, unsigned int side) const;
 
 protected:
   /// Deprecated (DO NOT USE)
@@ -1633,6 +1633,9 @@ protected:
    * pairs.
    */
   std::unordered_set<std::pair<ElemSide, ElemSide>> _disconnected_neighbors;
+
+  /// Cache for quick lookup of disconnected neighbors
+  mutable std::unordered_map<ElemSide, ElemSide> _cached_disconnected_neighbors;
 
   void cacheInfo();
   void freeBndNodes();

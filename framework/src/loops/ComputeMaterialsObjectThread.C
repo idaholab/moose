@@ -159,8 +159,18 @@ ComputeMaterialsObjectThread::onInternalSide(const Elem * elem, unsigned int sid
   if (_need_internal_side_material)
   {
     const auto * neighbor = elem->neighbor_ptr(side);
+    unsigned int neighbor_side = libMesh::invalid_uint;
+
     if (!neighbor)
+    {
       neighbor = _mesh.disconnectedNeighborPtr(elem->id(), side);
+      const auto disconnected_neighbor_elem_side =
+          _mesh.disconnectedNeighbor(_assembly[_tid][0]->elem()->id(), side);
+      if (disconnected_neighbor_elem_side)
+        neighbor_side = disconnected_neighbor_elem_side->second;
+    }
+    else
+      neighbor_side = neighbor->which_neighbor_am_i(_assembly[_tid][0]->elem());
 
     _fe_problem.reinitElemNeighborAndLowerD(elem, side, _tid);
     unsigned int face_n_points = _assembly[_tid][0]->qRuleFace()->n_points();
@@ -184,10 +194,6 @@ ComputeMaterialsObjectThread::onInternalSide(const Elem * elem, unsigned int sid
             *elem,
             side);
     }
-
-    unsigned int neighbor_side = elem->neighbor_ptr(side)
-                                     ? neighbor->which_neighbor_am_i(_assembly[_tid][0]->elem())
-                                     : disconnected_neighbor->side;
 
     if (_has_neighbor_stateful_props)
     {
@@ -255,13 +261,19 @@ ComputeMaterialsObjectThread::onInterface(const Elem * elem, unsigned int side, 
           _tid, _materials.getActiveBoundaryObjects(bnd_id, _tid), face_n_points, *elem, side);
   }
 
-  const auto disconnected_neighbor = _mesh.disconnectedNeighbor(elem, side);
-  const auto * neighbor = elem->neighbor_ptr(side)
-                              ? elem->neighbor_ptr(side)
-                              : (disconnected_neighbor ? disconnected_neighbor->elem : nullptr);
-  unsigned int neighbor_side = elem->neighbor_ptr(side)
-                                   ? neighbor->which_neighbor_am_i(_assembly[_tid][0]->elem())
-                                   : disconnected_neighbor->side;
+  const auto * neighbor = elem->neighbor_ptr(side);
+  unsigned int neighbor_side = libMesh::invalid_uint;
+
+  if (!neighbor)
+  {
+    neighbor = _mesh.disconnectedNeighborPtr(elem->id(), side);
+    const auto disconnected_neighbor_elem_side =
+        _mesh.disconnectedNeighbor(_assembly[_tid][0]->elem()->id(), side);
+    if (disconnected_neighbor_elem_side)
+      neighbor_side = disconnected_neighbor_elem_side->second;
+  }
+  else
+    neighbor_side = neighbor->which_neighbor_am_i(_assembly[_tid][0]->elem());
 
   // Do we have neighbor stateful properties or do we have stateful interface material properties?
   // If either then we need to reinit the neighbor, so at least at a minimum _neighbor_elem isn't
