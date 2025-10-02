@@ -157,8 +157,8 @@ packages:
     templates:
       conda/python/conda_build_config.yaml.template: conda/python/conda_build_config.yaml
       conda/python/meta.yaml.template: conda/python/meta.yaml
+      conda/python/pyproject.toml.template: conda/python/pyproject.toml
     influential:
-      - conda/python/setup.py
       - python/mooseutils
       - python/MooseControl
       - python/mms
