@@ -6,9 +6,9 @@ def base_controller(control_name, run_control, use_port=False):
     # Get the command we should run
     # You'll hit this if you don't run a RunApp-derived Tester or
     # don't run it with the "command_proxy" option
-    RUNAPP_COMMAND = os.environ.get('RUNAPP_COMMAND')
-    if RUNAPP_COMMAND is None:
-        sys.exit('Missing expected command variable RUNAPP_COMMAND')
+    TESTHARNESS_RUNAPP_COMMAND = os.environ.get('TESTHARNESS_RUNAPP_COMMAND')
+    if TESTHARNESS_RUNAPP_COMMAND is None:
+        sys.exit('Missing expected command variable TESTHARNESS_RUNAPP_COMMAND')
 
     # Determine a port to run on
     if use_port:
@@ -22,7 +22,7 @@ def base_controller(control_name, run_control, use_port=False):
         moose_port = None
 
     # Build the MooseControl for the test to use
-    moose_command = shlex.split(RUNAPP_COMMAND)
+    moose_command = shlex.split(TESTHARNESS_RUNAPP_COMMAND)
     control = MooseControl(moose_command=moose_command,
                            moose_control_name=control_name,
                            moose_port=moose_port)
