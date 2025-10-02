@@ -18,7 +18,7 @@ from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
 from TestHarness.resultsreader.results import TestHarnessResults, TestHarnessTestResult, TestName, DatabaseException
 
 FAKE_RESULT_ID = ObjectId()
-FAKE_CIVET_VERSION = 3
+FAKE_CIVET_VERSION = 4
 FAKE_CIVET_JOB_ID = 12345
 FAKE_CIVET_JOB_URL = f'civet.inl.gov/job/{FAKE_CIVET_JOB_ID}'
 FAKE_EVENT_SHA = 'abcd1234ababcd1234ababcd1234ababcd1234ab'

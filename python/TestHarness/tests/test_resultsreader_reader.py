@@ -82,7 +82,11 @@ class TestResultsReaderReader(unittest.TestCase):
                       # bump to civet_version=3 (added event_id)
                       GoldTest(event_sha=None,
                                event_id=258481,
-                               civet_version=3)]
+                               civet_version=3),
+                      # bump to civet_version=4 (remove indices from tests)
+                      GoldTest(event_sha=None,
+                               event_id=259309,
+                               civet_version=4)]
 
         # This can be set to true once to overwrite the gold file
         rewrite_gold = False

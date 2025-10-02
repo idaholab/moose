@@ -403,6 +403,89 @@
         }
       },
       "time": "2025-09-29 11:56:58.467000"
+    },
+    "68dedf7cbe5697c197720bae": {
+      "_id": "68dedf7cbe5697c197720bae",
+      "apptainer": {
+        "generator_library": "app",
+        "generator_name": "moose-openmpi-x86_64",
+        "generator_tag": "296c9e8",
+        "generator_version": "296c9e8",
+        "path": "/scratch/romebuild14-service/build/container/moose-openmpi-x86_64_296c9e8.sif"
+      },
+      "base_sha": "e353a7cacb94c988483cfa0b1f074f4fb4edbec8",
+      "civet": {
+        "event_url": "github.com/idaholab/moose/commit/296c9e817d13b35624be2423775b309a34d9336c",
+        "job_id": 3273777,
+        "job_url": "civet.inl.gov/job/3273777",
+        "push_branch": "master",
+        "recipe_name": "Performance",
+        "repo_url": "github.com/idaholab/moose",
+        "step": 2,
+        "step_name": "Store results"
+      },
+      "civet_version": 4,
+      "environment": {
+        "hostname": "romebuild14.headbuild.hpc.inl.gov",
+        "user": "romebuild14-service"
+      },
+      "event_cause": "push",
+      "event_id": 259309,
+      "event_sha": "296c9e817d13b35624be2423775b309a34d9336c",
+      "hpc": {
+        "hosts": [
+          "windriver2.hpc.inl.gov",
+          "windriver1.hpc.inl.gov"
+        ],
+        "scheduler": "slurm"
+      },
+      "pr_num": null,
+      "stats": {
+        "hpc_num_resubmitted": 0,
+        "hpc_time_queue_average": 0.0,
+        "hpc_time_wait_output_average": 0.18645310401916504,
+        "num_failed": 0,
+        "num_passed": 1,
+        "num_skipped": 0,
+        "num_total": 1,
+        "time_average": 248.0199999809265,
+        "time_max": 248.0199999809265,
+        "time_total": 258.781593
+      },
+      "testharness": {
+        "args": [
+          "-i",
+          "performance",
+          "--capture-perf-graph",
+          "-t",
+          "--hpc-host",
+          "windriver2.hpc.inl.gov",
+          "windriver1.hpc.inl.gov",
+          "--hpc-project",
+          "civet_moose",
+          "--hpc-apptainer-no-home",
+          "--hpc-apptainer-bindpath",
+          "/scratch/romebuild14-service/build/copied_tests,/ibmstor/scratch/romebuild14-service/build/copied_tests"
+        ],
+        "end_time": "2025-10-02 14:24:15",
+        "input_file_name": "performance",
+        "moose_dir": "/opt/moose",
+        "root_dir": "/scratch/romebuild14-service/build/copied_tests/moose/performance",
+        "scheduler": "RunSlurm",
+        "sep_files": false,
+        "start_time": "2025-10-02 14:19:56",
+        "validation_version": 2,
+        "version": 7
+      },
+      "tests": {
+        "simple_transient_diffusion": {
+          "spec_file": "/scratch/romebuild14-service/build/copied_tests/moose/performance/simple_transient_diffusion/performance",
+          "tests": {
+            "test": "68dedf7cbe5697c197720bad"
+          }
+        }
+      },
+      "time": "2025-10-02 14:24:28.557000"
     }
   },
   "tests": {
@@ -636,6 +719,44 @@
         "tester_post_spawn": 4.0531158447265625e-06,
         "tester_prepare": 0.00048041343688964844,
         "tester_run": 0.050879478454589844
+      }
+    },
+    "68dedf7cbe5697c197720bad": {
+      "_id": "68dedf7cbe5697c197720bad",
+      "folder_name": "simple_transient_diffusion",
+      "hpc": {
+        "id": "820039",
+        "submission_script": "/scratch/romebuild14-service/build/copied_tests/moose/performance/simple_transient_diffusion/test.hpc_submit"
+      },
+      "result_id": "68dedf7cbe5697c197720bae",
+      "status": {
+        "caveats": [
+          "min_cpus=28",
+          "job=820039"
+        ],
+        "fail": false,
+        "status": "OK",
+        "status_message": ""
+      },
+      "test_name": "test",
+      "tester": {
+        "command": "mpiexec -n 28 /opt/moose/share/moose/python/TestHarness/../../../../bin/combined-opt -i simple_transient_diffusion.i --disable-perf-graph-live --error --error-override --timing Outputs/perf_graph=true Outputs/perf_graph_json_file=/scratch/romebuild14-service/build/copied_tests/moose/performance/simple_transient_diffusion/metadata_perf_graph_test.json --compute-device=cpu",
+        "input_file": "/scratch/romebuild14-service/build/copied_tests/moose/performance/simple_transient_diffusion/simple_transient_diffusion.i",
+        "json_metadata": {},
+        "name": "CSVDiff"
+      },
+      "timing": {
+        "hpc_queued": 0.0,
+        "hpc_wait_output": 0.18645310401916504,
+        "job_cleanup": 8.344650268554688e-06,
+        "main": 258.7358503341675,
+        "runner_finalize": 2.0265579223632812e-05,
+        "runner_run": 248.0199999809265,
+        "runner_spawn": 0.45885252952575684,
+        "runner_wait": 258.22213673591614,
+        "tester_post_spawn": 4.291534423828125e-06,
+        "tester_prepare": 0.0009164810180664062,
+        "tester_run": 0.05202984809875488
       }
     }
   }
