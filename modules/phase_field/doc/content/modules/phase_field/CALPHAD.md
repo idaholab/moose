@@ -38,6 +38,18 @@ mamba activate pycalphad
 
 `jupyterlab` is optional for viewing the example notebook under `moose/modules/phase_field/examples/slkks`.
 
+Then you can install pycalphad and fparser from conda-forge:
+
+```
+conda install -c conda-forge pycalphad
+conda install -c conda-forge fparser
+```
+Make sure you put the `free_energy.py` and the `*.tdb` in the same directory, and then you can run this code and get the results:
+
+```
+python free_energy.py *.tdb
+```
+
 ### pip Installation
 
 To install and/or upgrade these prerequisites using pip:
@@ -46,6 +58,7 @@ To install and/or upgrade these prerequisites using pip:
 pip install --upgrade sympy
 pip install --upgrade pycalphad
 ```
+
 
 ## Thermodynamic databases
 
