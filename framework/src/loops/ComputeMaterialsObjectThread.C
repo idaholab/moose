@@ -158,10 +158,9 @@ ComputeMaterialsObjectThread::onInternalSide(const Elem * elem, unsigned int sid
 {
   if (_need_internal_side_material)
   {
-    const auto disconnected_neighbor = _mesh.disconnectedNeighbor(elem, side);
-    const auto * neighbor = elem->neighbor_ptr(side)
-                                ? elem->neighbor_ptr(side)
-                                : (disconnected_neighbor ? disconnected_neighbor->elem : nullptr);
+    const auto * neighbor = elem->neighbor_ptr(side);
+    if (!neighbor)
+      neighbor = _mesh.disconnectedNeighborPtr(elem->id(), side);
 
     _fe_problem.reinitElemNeighborAndLowerD(elem, side, _tid);
     unsigned int face_n_points = _assembly[_tid][0]->qRuleFace()->n_points();
