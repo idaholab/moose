@@ -17,6 +17,7 @@ from TestHarness.resultsreader.results import TestHarnessResults, TestName
 from tabulate import tabulate
 
 NoneType = type(None)
+RUNTIME_VIEW_RATE = 0
 
 class TestHarnessResultsSummary:
     def __init__(self, database: str):
@@ -178,23 +179,102 @@ class TestHarnessResultsSummary:
             table = [[str(test_name)] for test_name in removed_table]
             summary.append(tabulate(table, headers=["Test Name"], tablefmt="github"))
         else:
-            summary.append("#### No Removed Tests")
+            summary.append("No Removed Tests")
 
         summary.append("### New Tests:")
         if added_table:
             summary.append(tabulate(added_table, headers=["Test Name", "Run Time"], tablefmt="github"))
         else:
-            summary.append("#### No New Tests")
+            summary.append("No New Tests")
         return "\n".join(summary)
 
+    def WIP_pr_test_names(self, **kwargs):
+
+        event_id = kwargs['event_id']
+        assert isinstance(event_id, int)
+
+        results = self.reader.getEventResults(event_id)
+        if results is None:
+            raise SystemExit(f'ERROR: Results do not exist for event {event_id}')
+        test_names = set(results.test_names)
+        base_sha = results.base_sha
+        print(base_sha)
+        assert isinstance(base_sha, str)
+
+        base_results = self.reader.getCommitResults(base_sha)
+        print(base_results)
+        if not isinstance(base_results, TestHarnessResults):
+            print(f"\nComparison not available: no baseline results found for base SHA {base_sha}")
+            return results, test_names, None
+        base_test_names = set(base_results.test_names)
+        return results, base_results, test_names, base_test_names
+
+    @staticmethod
+    def WIP_same_table(results: TestHarnessResults,base_results: TestHarnessResults, base_names: set[TestName],
+                   head_names: set[TestName]) -> Tuple[Optional[list], Optional[list]]:
+        assert isinstance(results, TestHarnessResults)
+        assert isinstance(base_results, TestHarnessResults)
+        assert isinstance(head_names,(set, NoneType))
+        assert isinstance(base_names,(set, NoneType))
+        same_table = []
+        same_names = base_names & head_names
+
+        for test_name in same_names:
+                base_result = base_results.get_test(test_name.folder, test_name.name)
+                head_result = results.get_test(test_name.folder, test_name.name)
+                relative_runtime = (head_result.run_time - base_result.run_time)/ base_result.run_time
+                if relative_runtime > RUNTIME_VIEW_RATE:
+                    same_table.append([str(test_name), base_result.run_time, head_result.run_time, f'{relative_runtime:.2%}'])
+                #print(same_table)
+                return same_table
+
+    def WIP_build_summary(self, same_table: list) -> str:
+
+        assert isinstance(same_table,(list,NoneType))
+
+        summary = []
+        # summary.append("### Removed Tests:")
+        # if removed_table:
+        #     table = [[str(test_name)] for test_name in removed_table]
+        #     summary.append(tabulate(table, headers=["Test Name"], tablefmt="github"))
+        # else:
+        #     summary.append("No Removed Tests")
+
+        # summary.append("### New Tests:")
+        # if added_table:
+        #     summary.append(tabulate(added_table, headers=["Test Name", "Run Time"], tablefmt="github"))
+        # else:
+        #     summary.append("No New Tests")
+
+        summary.append(f"### Same Tests but high relative runtime > {RUNTIME_VIEW_RATE}'")
+        if same_table:
+            summary.append(tabulate(same_table, headers=["Test Name", "Base Run Time", "Head Run Time", "Relative Run Time Rate"], tablefmt="github"))
+        else:
+            summary.append("No Tests")
+
+        return "\n".join(summary)
+
+    #temporary
+    # def pr(self, **kwargs) -> str:
+    #     results, head_names, base_names = self.pr_test_names(**kwargs)
+    #     assert isinstance(head_names,set)
+    #     assert isinstance(base_names,(set,NoneType))
+    #     if base_names is None:
+    #         return
+    #     removed_table, added_table = self.diff_table(results, base_names, head_names)
+
+    #     print(self.build_summary(removed_table, added_table))
+
     def pr(self, **kwargs) -> str:
-        results, head_names, base_names = self.pr_test_names(**kwargs)
+        results, base_results, head_names, base_names = self.WIP_pr_test_names(**kwargs)
         assert isinstance(head_names,set)
         assert isinstance(base_names,(set,NoneType))
         if base_names is None:
             return
-        removed_table, added_table = self.diff_table(results, base_names, head_names)
-        print(self.build_summary(removed_table, added_table))
+        same_table = self.WIP_same_table(results, base_results, base_names, head_names)
+
+        print(self.WIP_build_summary(same_table))
+
 
     def main(self, **kwargs):
         action = kwargs['action']
