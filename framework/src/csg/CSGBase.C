@@ -323,9 +323,9 @@ CSGBase::generateOutput() const
 
   nlohmann::json csg_json;
 
-  csg_json["SURFACES"] = {};
-  csg_json["CELLS"] = {};
-  csg_json["UNIVERSES"] = {};
+  csg_json["surfaces"] = {};
+  csg_json["cells"] = {};
+  csg_json["universes"] = {};
 
   // get all surfaces information
   auto all_surfs = getAllSurfaces();
@@ -333,9 +333,9 @@ CSGBase::generateOutput() const
   {
     const auto & surf_name = s.getName();
     const auto & coeffs = s.getCoeffs();
-    csg_json["SURFACES"][surf_name] = {{"TYPE", s.getSurfaceType()}, {"COEFFICIENTS", {}}};
+    csg_json["surfaces"][surf_name] = {{"type", s.getSurfaceType()}, {"coefficients", {}}};
     for (const auto & c : coeffs)
-      csg_json["SURFACES"][surf_name]["COEFFICIENTS"][c.first] = c.second;
+      csg_json["surfaces"][surf_name]["coefficients"][c.first] = c.second;
   }
 
   // Print out cell information
@@ -346,9 +346,9 @@ CSGBase::generateOutput() const
     const auto & cell_region = c.getRegionAsString();
     const auto & cell_filltype = c.getFillType();
     const auto & fill_name = c.getFillName();
-    csg_json["CELLS"][cell_name]["FILLTYPE"] = cell_filltype;
-    csg_json["CELLS"][cell_name]["REGION"] = cell_region;
-    csg_json["CELLS"][cell_name]["FILL"] = fill_name;
+    csg_json["cells"][cell_name]["filltype"] = cell_filltype;
+    csg_json["cells"][cell_name]["region"] = cell_region;
+    csg_json["cells"][cell_name]["fill"] = fill_name;
   }
 
   // Print out universe information
@@ -357,11 +357,11 @@ CSGBase::generateOutput() const
   {
     const auto & univ_name = u.getName();
     const auto & univ_cells = u.getAllCells();
-    csg_json["UNIVERSES"][univ_name]["CELLS"] = {};
+    csg_json["universes"][univ_name]["cells"] = {};
     for (const CSGCell & c : univ_cells)
-      csg_json["UNIVERSES"][univ_name]["CELLS"].push_back(c.getName());
+      csg_json["universes"][univ_name]["cells"].push_back(c.getName());
     if (u.isRoot())
-      csg_json["UNIVERSES"][univ_name]["ROOT"] = u.isRoot();
+      csg_json["universes"][univ_name]["root"] = u.isRoot();
   }
 
   return csg_json;

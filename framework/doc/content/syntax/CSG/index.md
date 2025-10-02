@@ -50,9 +50,9 @@ This process is run as a [data-only mode](source/meshgenerators/MeshGenerator.md
 Calling `--csg-only` will produce a [!ac](JSON) file containing the complete geometric description of the mesh generator input.
 There are three main sections in the file:
 
-- [`SURFACES`](#surfaces)
-- [`CELLS`](#cells)
-- [`UNIVERSES`](#universes)
+- [`surfaces`](#surfaces)
+- [`cells`](#cells)
+- [`universes`](#universes)
 
 Each item within each section is keyed (a [!ac](JSON) is a dictionary) by its unique name identifier, and the value is the corresponding definition for that item.
 Detailed description of each type of item in the section follows.
@@ -61,10 +61,10 @@ Detailed description of each type of item in the section follows.
 
 Surfaces contain the following information:
 
-- `TYPE`: the type of surface as defined by the class name that was used to create the surface
-- `COEFFICIENTS`: the values for each coefficient in the equation defining the surface type (shown in the table below)
+- `type`: the type of surface as defined by the class name that was used to create the surface
+- `coefficients`: the values for each coefficient in the equation defining the surface type (shown in the table below)
 
-| `TYPE`      | Equation                                        | COEFFICIENTS          |
+| `type`      | Equation                                        | `coefficients`          |
 |-------------|-------------------------------------------------|-----------------------|
 | `CSG::CSGPlane`     | $ax + by + cz = d$                              | `a`, `b`, `c`, `d`    |
 | `CSG::CSGSphere`    | $(x - x_0)^2 + (y - y_0)^2 + (z - z_0)^2 = r^2$ | `x0`, `y0`, `z0`, `r` |
@@ -74,15 +74,15 @@ Surfaces contain the following information:
 
 Below is an example [!ac](JSON) surface output for a model with a `CSG::CSGPlane` at $x=-2.0$ and a `CSG::CSGPlane` at $y=-2.0$.
 
-!listing csg_only_inf_planes_out_csg.json start="SURFACES" end="inf_square_surf_plus_x"
+!listing csg_only_inf_planes_out_csg.json start="surfaces" end="inf_square_surf_plus_x"
 
 ### Cells
 
 The cells output contains the following information:
 
-- `REGION`: the string representation of the equation of boolean operators (listed below) and surface names that defines the cell region
-- `FILLTYPE`: type of fill in the cell (`"VOID"`, `"CSG_MATERIAL"`, or `"UNIVERSE"`)
-- `FILL`: for `"CSG_MATERIAL"` or `"UNIVERSE"` `"FILLTYPE"`, the name of the fill (if `"VOID"` type, then name is an empty string `""`)
+- `region`: the string representation of the equation of boolean operators (listed below) and surface names that defines the cell region
+- `filltype`: type of fill in the cell (`"VOID"`, `"CSG_MATERIAL"`, or `"UNIVERSE"`)
+- `fill`: for `"CSG_MATERIAL"` or `"UNIVERSE"` `filltype`, the name of the fill (if `"VOID"` type, then name is an empty string `""`)
 
 | Boolean Operator   | String Representation |
 |--------------------|-----------------------|
@@ -94,13 +94,13 @@ The cells output contains the following information:
 
 An example of a cell defined as the space inside a box made of six planes and filled with a solid material is below:
 
-!listing csg_only_chained_out_csg.json start="CELLS" end="SURFACES"
+!listing csg_only_chained_out_csg.json start="cells" end="surfaces"
 
 ### Universes
 
-Universes are simply defined by the list of the names of the `CELLS` that are contained in that universe.
-If the universe is also the root universe, it will have the designator `"ROOT": true`.
+Universes are simply defined by the list of the names of the `cells` that are contained in that universe.
+If the universe is also the root universe, it will have the designator `"root": true`.
 An example of universe output for multiple universes containing various concentric cylinder cells is below.
 In this example, there is one universe, the default `"ROOT_UNIVERSE"`, which contains one cell and is labeled as being the root universe.
 
-!listing csg_only_chained_out_csg.json start="UNIVERSES"
+!listing csg_only_chained_out_csg.json start="universes"
