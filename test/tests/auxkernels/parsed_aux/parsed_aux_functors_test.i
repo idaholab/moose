@@ -45,14 +45,14 @@
 []
 
 [BCs]
-  [left_u]
+  [top_u]
     type = DirichletBC
     variable = u
     boundary = top
     value = 0
   []
 
-  [right_u]
+  [bottom_u]
     type = DirichletBC
     variable = u
     boundary = bottom

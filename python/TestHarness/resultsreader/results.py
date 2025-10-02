@@ -9,8 +9,11 @@
 
 from datetime import datetime
 import importlib
-from typing import Union
+from typing import Optional, Union, Iterator
+from dataclasses import dataclass
 from TestHarness.validation.dataclasses import ValidationResult, ValidationData, ValidationDataTypesStr
+from pymongo.database import Database
+from bson.objectid import ObjectId
 
 # Load the data class module so that we can dynamically instantiate
 # validation data types based on their type stored in json
@@ -20,160 +23,35 @@ for data_type in ValidationDataTypesStr:
 
 NoneType = type(None)
 
-class TestHarnessResults:
+@dataclass(frozen=True)
+class TestName:
     """
-    Structure holding the information about a single
-    run_tests execution.
-
-    Does not contain the data for each individual test.
+    Name for a test (folder and name)
     """
-    def __init__(self, data: dict):
-        # The underlying data from the JSON results, which
-        # is the dictionary representation of the entire
-        # ".previous_test_results.json" file
-        self._data: dict = data
-
-        # Sanity check on all of our methods (in order of definition)
-        assert isinstance(self.data, dict)
-        assert isinstance(self.testharness, dict)
-        assert isinstance(self.version, int)
-        assert isinstance(self.validation_version, int)
-        assert isinstance(self.civet, dict)
-        assert isinstance(self.civet_version, int)
-        assert isinstance(self.civet_job_url, str)
-        assert isinstance(self.civet_job_id, int)
-        assert isinstance(self.hpc, dict)
-        assert isinstance(self.event_sha, str)
-        assert len(self.event_sha) == 40
-        assert isinstance(self.event_cause, str)
-        assert isinstance(self.pr_num, (int, NoneType))
-        assert isinstance(self.base_sha, (str, NoneType))
-        if self.base_sha:
-            assert len(self.base_sha) == 40
-        assert isinstance(self.time, datetime)
-
-    @property
-    def data(self) -> dict:
-        """
-        Get the underlying data
-        """
-        return self._data
-
-    @property
-    def testharness(self) -> dict:
-        """
-        Get the testharness entry in the data
-        """
-        return self.data['testharness']
-
-    @property
-    def version(self) -> int:
-        """
-        Get the result version
-        """
-        return self.testharness['version']
-
-    @property
-    def validation_version(self) -> int:
-        """
-        Get the validation version
-        """
-        return self.testharness.get('validation_version', 0)
-
-    @property
-    def civet(self) -> dict:
-        """
-        Get the CIVET entry from the data, which contains
-        information about the CIVET job that ran this test
-        """
-        return self.data['civet']
-
-    @property
-    def civet_version(self) -> int:
-        """
-        Get the CIVET schema version
-        """
-        return self.civet.get('version', 0)
-
-    @property
-    def civet_job_url(self) -> str:
-        """
-        Get the URL to the CIVET job that ran this test
-        """
-        return self.civet['job_url']
-
-    @property
-    def civet_job_id(self) -> int:
-        """
-        Get the ID of the civet job that ran this test
-        """
-        return self.civet['job_id']
-
-    @property
-    def hpc(self) -> dict:
-        """
-        Get the HPC entry that describes the HPC environment
-        these tests ran on, if any (empty dict if not)
-        """
-        return self.data.get('hpc', {})
-
-    @property
-    def event_sha(self) -> str:
-        """
-        Get the commit that these tests were ran on
-        """
-        return self.data['event_sha']
-
-    @property
-    def event_cause(self) -> str:
-        """
-        Get the cause for these tests that were ran
-        """
-        return self.data['event_cause']
-
-    @property
-    def pr_num(self) -> Union[int, None]:
-        """
-        Get the PR number associated with these tests (if any)
-        """
-        return self.data['pr_num']
-
-    @property
-    def base_sha(self) -> Union[str, None]:
-        """
-        Get the base commit that these tests were ran on
-        """
-        if self.civet_version < 2:
-            return None
-        return self.data['base_sha']
-
-    @property
-    def time(self) -> datetime:
-        """
-        Get the time these tests were added to the database
-        """
-        return self.data['time']
+    folder: str
+    name: str
 
 class TestHarnessTestResult:
     """
     Structure holding the information about a single test result
     """
-    def __init__(self, data: dict, result: TestHarnessResults):
+    def __init__(self, data: dict, result: 'TestHarnessResults'):
         # The underlying data for this test, which comes from
         # "tests/*/tests" in the TestHarness results file
         self._data: dict = data
         # The combined results that this test comes from
-        self._results: TestHarnessResults = result
+        self._results: 'TestHarnessResults' = result
 
         # Sanity check on all of our data and methods
         assert isinstance(self.data, dict)
+        assert isinstance(self.id, ObjectId)
         assert isinstance(self.results, TestHarnessResults)
         assert isinstance(self.test_name, str)
         assert isinstance(self.folder_name, str)
         assert isinstance(self.status, dict)
         assert isinstance(self.status_value, str)
         assert isinstance(self.timing, dict)
-        assert isinstance(self.run_time, float)
+        assert isinstance(self.run_time, (float, NoneType))
         assert isinstance(self.hpc_queued_time, (float, NoneType))
         assert isinstance(self.event_sha, str)
         assert len(self.event_sha) == 40
@@ -203,7 +81,11 @@ class TestHarnessTestResult:
         return self._data
 
     @property
-    def results(self) -> TestHarnessResults:
+    def id(self) -> ObjectId:
+        return self.data['_id']
+
+    @property
+    def results(self) -> 'TestHarnessResults':
         """
         Get the combined results that this test comes from
         """
@@ -245,11 +127,11 @@ class TestHarnessTestResult:
         return self.data['timing']
 
     @property
-    def run_time(self) -> float:
+    def run_time(self) -> Union[float, None]:
         """
-        Get the run time for this test
+        Get the run time for this test (if available)
         """
-        return self.timing['runner_run']
+        return self.timing.get('runner_run')
 
     @property
     def hpc_queued_time(self) -> Union[float, None]:
@@ -264,42 +146,42 @@ class TestHarnessTestResult:
         """
         Get the commit that this test was ran on
         """
-        assert(self.data['event_sha'] == self.results.event_sha)
-        return self.data['event_sha']
+        return self.results.event_sha
 
     @property
     def event_cause(self) -> str:
         """
         Get the cause for the test that was ran
         """
-        assert(self.data['event_cause'] == self.results.event_cause)
-        return self.data['event_cause']
+        return self.results.event_cause
+
+    @property
+    def event_id(self) -> int:
+        """
+        Get the ID of the event that this job was ran on
+        """
+        return self.results.event_id
 
     @property
     def pr_num(self) -> Union[int, None]:
         """
         Get the PR number associated with the test (if any)
         """
-        assert(self.data['pr_num'] == self.results.pr_num)
-        return self.data['pr_num']
+        return self.results.pr_num
 
     @property
     def base_sha(self) -> Union[str, None]:
         """
         Get the base commit that these tests were ran on
         """
-        value = None
-        if self.results.civet_version > 1:
-            value = self.data['base_sha']
-        assert(value == self.results.base_sha)
-        return value
+        return self.results.base_sha
 
     @property
     def time(self) -> datetime:
         """
         Get the time this test was added to the database
         """
-        return self.data['time']
+        return self.results.time
 
     @property
     def tester(self) -> str:
@@ -388,3 +270,258 @@ class TestHarnessTestResult:
             data[k] = getattr(validation_dataclasses_module, data_type)(**v)
 
         return data
+
+class TestHarnessResults:
+    """
+    Structure holding the information about a single
+    run_tests execution.
+
+    Does not contain the data for each individual test.
+    """
+    def __init__(self, data: dict, db: Optional[Database] = None):
+        # The underlying data from the JSON results, which
+        # is the dictionary representation of the entire
+        # ".previous_test_results.json" file
+        assert isinstance(data, dict)
+        self._data: dict = data
+
+        # The database connection, used for querying test results
+        assert isinstance(db, (Database, NoneType))
+        self._db: Optional[Database] = db
+
+        # Initialize empty test objects
+        tests = data['tests']
+        assert isinstance(tests, dict)
+        self._tests = self.build_empty_tests(tests)
+
+        # Sanity check on all of our methods (in order of definition)
+        assert isinstance(self.data, dict)
+        assert isinstance(self.id, ObjectId)
+        assert isinstance(self.testharness, dict)
+        assert isinstance(self.version, int)
+        assert isinstance(self.validation_version, int)
+        assert isinstance(self.civet, dict)
+        assert isinstance(self.civet_version, int)
+        assert isinstance(self.civet_job_url, str)
+        assert isinstance(self.civet_job_id, int)
+        assert isinstance(self.hpc, dict)
+        assert isinstance(self.event_sha, str)
+        assert len(self.event_sha) == 40
+        assert isinstance(self.event_cause, str)
+        assert isinstance(self.event_id, (int, NoneType))
+        assert isinstance(self.pr_num, (int, NoneType))
+        assert isinstance(self.base_sha, (str, NoneType))
+        if self.base_sha:
+            assert len(self.base_sha) == 40
+        assert isinstance(self.time, datetime)
+        assert isinstance(self.test_names, list)
+        for v in self.test_names:
+            assert isinstance(v, TestName)
+
+    @staticmethod
+    def build_empty_tests(tests: dict) -> dict[TestName, Union[TestHarnessTestResult, ObjectId]]:
+        """
+        Builds the names (folder, name) of the held tests
+        """
+        assert isinstance(tests, dict)
+
+        values: dict[TestName, ObjectId] = {}
+        for test_folder, folder_entry in tests.items():
+            for test_name, id in folder_entry['tests'].items():
+                assert id not in values.values()
+                values[TestName(test_folder, test_name)] = id
+
+        return values
+
+    @property
+    def data(self) -> dict:
+        """
+        Get the underlying data
+        """
+        return self._data
+
+    @property
+    def id(self) -> ObjectId:
+        return self.data['_id']
+
+    @property
+    def testharness(self) -> dict:
+        """
+        Get the testharness entry in the data
+        """
+        return self.data['testharness']
+
+    @property
+    def version(self) -> int:
+        """
+        Get the result version
+        """
+        return self.testharness['version']
+
+    @property
+    def validation_version(self) -> int:
+        """
+        Get the validation version
+        """
+        return self.testharness.get('validation_version', 0)
+
+    @property
+    def civet(self) -> dict:
+        """
+        Get the CIVET entry from the data, which contains
+        information about the CIVET job that ran this test
+        """
+        return self.data['civet']
+
+    @property
+    def civet_version(self) -> int:
+        """
+        Get the CIVET schema version
+        """
+        # Version was first added to ['civet']['version'], and
+        # was then moved to ['civet_version']
+        version = self.civet.get('version', self.data.get('civet_version', 0))
+        assert isinstance(version, int)
+        return version
+
+    @property
+    def civet_job_url(self) -> str:
+        """
+        Get the URL to the CIVET job that ran this test
+        """
+        return self.civet['job_url']
+
+    @property
+    def civet_job_id(self) -> int:
+        """
+        Get the ID of the civet job that ran this test
+        """
+        return self.civet['job_id']
+
+    @property
+    def hpc(self) -> dict:
+        """
+        Get the HPC entry that describes the HPC environment
+        these tests ran on, if any (empty dict if not)
+        """
+        return self.data.get('hpc', {})
+
+    @property
+    def event_sha(self) -> str:
+        """
+        Get the commit that these tests were ran on
+        """
+        return self.data['event_sha']
+
+    @property
+    def event_cause(self) -> str:
+        """
+        Get the cause for these tests that were ran
+        """
+        return self.data['event_cause']
+
+    @property
+    def event_id(self) -> int:
+        """
+        Get the ID of the civet event that ran this test
+        """
+        if self.civet_version > 2:
+            id = self.data['event_id']
+            assert isinstance(id, int)
+            return id
+        return None
+
+    @property
+    def pr_num(self) -> Union[int, None]:
+        """
+        Get the PR number associated with these tests (if any)
+        """
+        return self.data['pr_num']
+
+    @property
+    def base_sha(self) -> Union[str, None]:
+        """
+        Get the base commit that these tests were ran on
+        """
+        if self.civet_version < 2:
+            return None
+        return self.data['base_sha']
+
+    @property
+    def time(self) -> datetime:
+        """
+        Get the time these tests were added to the database
+        """
+        return self.data['time']
+
+    @property
+    def test_names(self) -> list[TestName]:
+        """
+        Get the combined names of all tests
+        """
+        return list(self._tests.keys())
+
+    def has_test(self, folder_name: str, test_name: str) -> bool:
+        """
+        Whether or not a test with the given folder and test name is stored
+        """
+        assert isinstance(folder_name, str)
+        assert isinstance(test_name, str)
+
+        key = TestName(folder_name, test_name)
+        return key in self._tests
+
+    def _find_test_data(self, id: ObjectId) -> dict:
+        """
+        Helper for getting the data associated with a test
+
+        This is a separate function so that it can be mocked
+        easily within unit tests
+        """
+        assert self._db is not None
+        assert isinstance(self._db, Database)
+        assert isinstance(id, ObjectId)
+
+        return self._db.tests.find_one({"_id": id})
+
+    def get_test(self, folder_name: str, test_name: str) -> TestHarnessTestResult:
+        """
+        Get the test result associated with the given test folder and test name
+        """
+        assert isinstance(folder_name, str)
+        assert isinstance(test_name, str)
+
+        # Search for the data in the cache
+        key = TestName(folder_name, test_name)
+        value = self._tests.get(key)
+
+        # Doesn't exist
+        if value is None:
+            raise KeyError(f'No test named {key}')
+
+        # Is already built
+        if isinstance(value, TestHarnessTestResult):
+            return value
+
+        # Not built, so pull from database
+        data = self._find_test_data(value)
+        if data is None:
+            raise KeyError(f'Database missing results: _id={value}')
+
+        # Build the true object from the data
+        try:
+            test_result = TestHarnessTestResult(data, self)
+        except Exception as e:
+            raise Exception(f'Failed to build result: _id={value}') from e
+
+        # And store in the cache
+        self._tests[key] = test_result
+
+        return test_result
+
+    def get_tests(self) -> Iterator[TestHarnessTestResult]:
+        """
+        Get all of the test results
+        """
+        for combined_name in self._tests:
+            yield self.get_test(combined_name.folder, combined_name.name)

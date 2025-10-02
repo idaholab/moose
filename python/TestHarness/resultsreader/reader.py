@@ -10,9 +10,10 @@
 import os
 import yaml
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Union, Iterator
 
 import pymongo
+from pymongo.cursor import Cursor
 from bson.objectid import ObjectId
 
 from TestHarness.resultsreader.results import TestHarnessResults, TestHarnessTestResult
@@ -44,7 +45,7 @@ class TestHarnessResultsReader:
         # The password
         password: str
         # The port
-        port: int | None = None
+        port: Optional[int] = None
 
     def __init__(self, database: str, client: Optional[pymongo.MongoClient | Authentication] = None):
         self.client: pymongo.MongoClient = None
@@ -68,8 +69,19 @@ class TestHarnessResultsReader:
             raise ValueError(f'Database {database} not found')
         self.db = self.client.get_database(database)
 
-        # Cached TestHarness result objects, by ID
-        self._test_harness_results: dict[ObjectId, TestHarnessResults | None] = {}
+        # Cached results, by ID
+        self._results: dict[ObjectId, Optional[TestHarnessResults]] = {}
+        # Cached results by PR number
+        self._pr_num_results: dict[int, Optional[TestHarnessResults]] = {}
+        # Cached results by event ID
+        self._event_id_results: dict[int, Optional[TestHarnessResults]] = {}
+        # Cached results by commit
+        self._event_sha_results: dict[str, Optional[TestHarnessResults]] = {}
+
+        # Cached TestHarnessResults objects for events, in order from latest
+        self._latest_event_results: list[TestHarnessResults] = []
+        # The last event that we searched
+        self._last_latest_event_id: Optional[ObjectId] = None
 
     def __del__(self):
         # Clean up the client if it is loaded
@@ -123,176 +135,150 @@ class TestHarnessResultsReader:
         """
         return TestHarnessResultsReader.loadEnvironmentAuthentication() is not None
 
-    @staticmethod
-    def _testFilter(folder_name: str, test_name: str) -> dict:
-        """
-        Helper for getting the mongo filter for a given test
-        """
-        return {"folder_name": {"$eq": folder_name}, "test_name": {"$eq": test_name}}
-
-    def _getTestsPREntry(self, folder_name: str, test_name: str, pr_num: int,
-                         filter: Optional[dict] = {}) -> dict | None:
-        """
-        Internal method for getting the pull request entry for a given test
-
-        Args:
-            folder_name: The folder name for the test
-            test_name: The test name for the test
-            pr_num: The pull request number
-        Keyword args:
-            filter: Additional filters to pass to the query
-        """
-        assert isinstance(folder_name, str)
-        assert isinstance(test_name, str)
-        assert isinstance(pr_num, int)
-
-        find = {"pr_num": {"$eq": pr_num}}
-        find.update(self._testFilter(folder_name, test_name))
-        find.update(filter)
-
-        entry = self.db.tests.find_one(find, sort=self.mongo_sort_id)
-        if entry:
-            return dict(entry)
-        return None
-
-    def _getTestsEntry(self, folder_name: str, test_name: str,
-                       limit: int = 50, unique_event: bool = True,
-                       filter: dict = {}, pr_num: Optional[int] = None) -> list[dict]:
-        """
-        Internal helper for getting the raw database entries for a specific test.
-
-        Args:
-            folder_name: The folder name for the test
-            test_name: The test name for the test
-        Keyword args:
-            limit: Limit of entries to return
-            unique_event: Whether or not to only return one test per event
-            filter: Additional filters to pass to the query
-            pr_num: Number of a PR to include in results if available
-        """
-        assert isinstance(limit, int)
-        assert isinstance(unique_event, bool)
-        assert isinstance(filter, (dict, NoneType))
-        assert isinstance(pr_num, (int, NoneType))
-
-        values = []
-
-        # Find a single entry for this pull request, if requested and put at the top
-        if pr_num is not None:
-            pr_entry = self._getTestsPREntry(folder_name, test_name, pr_num, filter=filter)
-            if pr_entry:
-                values.append(pr_entry)
-
-        # Filtering for a non-pr for these tests
-        find_base = {"event_cause": {"$ne": "pr"}}
-        find_base.update(self._testFilter(folder_name, test_name))
-        find_base.update(filter)
-
-        # Last ID to filter less than, if any
-        last_id = None
-
-        # Due to the fact that we could have multiple entries for one event
-        # (with invalidation), we might need to do multiple queries to obtain
-        # the number of entries requested
-        unique_shas = set()
-        # Be able to decrease the limit if we need to do extra loops
-        find_event_limit = limit
-        # Decrease how many we need to find if we found a PR
-        if pr_num is not None and values:
-            find_event_limit -= 1
-
-        while True:
-            filter_non_pr = {}
-            if last_id is not None:
-                filter_non_pr['_id'] = {'$lt': last_id}
-            filter_non_pr.update(find_base)
-
-            cursor = self.db.tests.find(filter_non_pr, limit=find_event_limit, sort=self.mongo_sort_id)
-
-            entry_count = 0
-            for entry in cursor:
-                if len(values) == limit:
-                    break
-
-                last_id = entry['_id']
-                entry_count += 1
-
-                # Only get the most recent value for this sha (in case of invalidation)
-                if unique_event:
-                    event_sha = entry['event_sha']
-                    if event_sha in unique_shas:
-                        continue
-                    unique_shas.add(event_sha)
-
-                values.append(dict(entry))
-
-            # Didn't find anything; done
-            if not entry_count:
-                break
-
-            # If we're running again, decrease the limit to
-            # however many we need left
-            if len(values) < limit:
-                find_event_limit = len(values) - limit
-
-        return values
-
-    def getTestResults(self, folder_name: str, test_name: str, **kwargs) -> list[TestHarnessTestResult]:
+    def getTestResults(self, folder_name: str, test_name: str, limit: int = 50,
+                       pr_num: Optional[int] = None) -> list[TestHarnessTestResult]:
         """
         Get the TestHarnessTestResults given a specific test.
 
         Args:
             folder_name: The folder name for the test
             test_name: The test name for the test
-        Keyword args:
-            See _getTestsEntry() for additional arguments
+        Optional args:
+            limit: The limit in the number of results to get
+            pr_num: A pull request to also pull from
         """
-        entries = self._getTestsEntry(folder_name, test_name, **kwargs)
+        test_results: list[TestHarnessTestResult] = []
 
-        values = []
-        for entry in entries:
-            result_id = entry['result_id']
-            test_harness_results = self._getTestHarnessResult(result_id)
-            test_result = TestHarnessTestResult(entry, test_harness_results)
-            values.append(test_result)
-        return values
+        # Append the PR result at the top, if any
+        if pr_num is not None:
+            pr_result = self.getPRResults(pr_num)
+            if pr_result is not None:
+                test_results.append(pr_result)
 
-    def _getResultsEntry(self, id: ObjectId | str) -> dict:
+        # Get the event results
+        for result in self.getLatestEventResults():
+            if result.has_test(folder_name, test_name):
+                test_result = result.get_test(folder_name, test_name)
+                test_results.append(test_result)
+            if len(test_results) == limit:
+                break
+
+        return test_results
+
+    def _findResults(self, *args, **kwargs) -> Cursor:
         """
-        Internal helper for getting the raw JSON entry
-        for a entry in the "results" collection given the ID
+        Helper for querying the results database collection
 
-        This is separate so that we can mock it in unit tests
+        Used so that it can be easily movcked in unit tests
         """
-        assert isinstance(id, (ObjectId, str))
-        if isinstance(id, str):
-            id = ObjectId(id)
+        return self.db.results.find(*args, **kwargs, sort=self.mongo_sort_id)
 
-        value = self.db.results.find_one({"_id": id})
-        if value is None:
-            raise KeyError(f'No {self.database}.results entry with _id={id}')
-        return value
-
-    def _getTestHarnessResult(self, id: ObjectId | str) -> TestHarnessResults:
+    def getLatestEventResults(self) -> Iterator[TestHarnessResults]:
         """
-        Internal helper for getting the TestHarnessResults representation
-        of a specific results entry in the database, with caching
+        Iterate through the latest unique event results
         """
-        assert isinstance(id, (ObjectId, str))
-        if isinstance(id, str):
-            id = ObjectId(id)
+        i = 0
+        while True:
+            # At end of cache, pull more results
+            if i == len(self._latest_event_results):
+                # Searching for only events
+                filter = {"event_cause": {"$ne": "pr"}}
+                # Only search past what we've searched so far
+                if self._last_latest_event_id is not None:
+                    filter['_id'] = {"$lt": self._last_latest_event_id}
 
-        # Cached this result already
-        if id in self._test_harness_results:
-            return self._test_harness_results[id]
+                cursor = self._findResults(filter, limit=10)
 
-        # Find with the given ID
-        entry = self._getResultsEntry(id)
+                for data in cursor:
+                    id = data.get('_id')
+                    assert isinstance(id, ObjectId)
 
-        # Build the representation
-        result = TestHarnessResults(entry)
+                    # So that we know where to search next time
+                    self._last_latest_event_id = id
 
-        # Store cached result
-        self._test_harness_results[id] = result
+                    # Due to invalidation, we could have multiple results
+                    # from the same event. If we already have this event
+                    # (the latest version of it), skip this one
+                    event_id = data.get('event_id')
+                    if event_id is not None and \
+                        any(r.event_id == event_id for r in self._latest_event_results):
+                        continue
+
+                    # Build/get the result and store it for future use
+                    result = self._buildResults(data)
+                    self._latest_event_results.append(result)
+
+            if i < len(self._latest_event_results):
+                yield self._latest_event_results[i]
+                i += 1
+            else:
+                return
+
+    def _getCachedResults(self, index: str, value) -> TestHarnessResults:
+        """
+        Internal helper for getting a result given a filter and storing
+        it in a cache given a key
+        """
+        cache = getattr(self, f'_{index}_results')
+
+        # Value exists in the cache
+        cached_value = cache.get(value)
+        if cached_value is not None:
+            return cached_value
+
+        # Search for the value
+        filter = {index: {"$eq": value}}
+        data = self.db.results.find_one(filter, sort=self.mongo_sort_id)
+
+        # No such thing
+        if data is None:
+            cache[value] = None
+            return None
+
+        # Has an entry, so build it
+        result = self._buildResults(data)
+        cache[value] = result
+        return result
+
+    def getEventResults(self, event_id: int) -> Union[TestHarnessResults, None]:
+        """
+        Get the TestHarnessResults for a given event, if any
+        """
+        assert isinstance(event_id, int)
+        return self._getCachedResults('event_id', event_id)
+
+    def getPRResults(self, pr_num: int) -> Union[TestHarnessResults, None]:
+        """
+        Get the TestHarnessResults for a given PR, if any
+        """
+        assert isinstance(pr_num, int)
+        return self._getCachedResults('pr_num', pr_num)
+
+    def getCommitResults(self, commit_sha: str) -> Union[TestHarnessResults, None]:
+        """
+        Get the TestHarnessResults for a given commit, if any
+        """
+        assert isinstance(commit_sha, str)
+        assert len(commit_sha) == 40
+        return self._getCachedResults('event_sha', commit_sha)
+
+    def _buildResults(self, data: dict) -> TestHarnessTestResult:
+        """
+        Internal helper for building a TestHarnessTestResult given
+        the data from a results entry, also storing it in the cache
+        """
+        assert isinstance(data, dict)
+        assert '_id' in data
+
+        id = data['_id']
+        assert isinstance(id, ObjectId)
+
+        result = self._results.get(id)
+        if result is None:
+            try:
+                result = TestHarnessResults(data, self.db)
+            except Exception as e:
+                raise Exception(f'Failed to build result _id={id}') from e
+            self._results[id] = result
 
         return result
