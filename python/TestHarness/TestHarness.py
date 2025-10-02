@@ -41,10 +41,26 @@ def readTestRoot(fname):
     # allow users to control fallthrough for e.g. individual module binaries vs. the
     # combined binary.
     app_name = root.get('app_name') or None
-    return app_name, args, root
+
+    # Append to PYTHONPATH based on argument in file
+    extra_pythonpath_val: str = root.get('extra_pythonpath', None)
+    extra_pythonpath_val = extra_pythonpath_val.split(':') if extra_pythonpath_val else []
+    extra_pythonpath = []
+    for val in extra_pythonpath_val:
+        path = os.path.abspath(os.path.join(os.path.dirname(fname), val))
+        if not os.path.exists(path):
+            raise FileNotFoundError(
+                "Test Root Parsing Error: "
+                f"Could not find {path} for PYTHONPATH append. "
+                f"Check 'extra_pythonpath' in {fname} to resolve."
+            )
+        else:
+            extra_pythonpath.append(path)
+
+    return app_name, args, root, extra_pythonpath
 
 # Struct that represents all of the information pertaining to a testroot file
-TestRoot = namedtuple('TestRoot', ['root_dir', 'app_name', 'args', 'hit_node'])
+TestRoot = namedtuple('TestRoot', ['root_dir', 'app_name', 'args', 'hit_node', 'extra_pythonpath'])
 def findTestRoot() -> TestRoot:
     """
     Search for the test root in all folders above this one
@@ -54,8 +70,8 @@ def findTestRoot() -> TestRoot:
     while os.path.dirname(root_dir) != root_dir:
         testroot_file = os.path.join(root_dir, 'testroot')
         if os.path.exists(testroot_file) and os.access(testroot_file, os.R_OK):
-            app_name, args, hit_node = readTestRoot(testroot_file)
-            return TestRoot(root_dir=root_dir, app_name=app_name, args=args, hit_node=hit_node)
+            tuple_args = readTestRoot(testroot_file)
+            return TestRoot(root_dir, *tuple_args)
         root_dir = os.path.dirname(root_dir)
     return None
 
@@ -231,6 +247,12 @@ class TestHarness:
         # Search for the test root (if any; required when app_name is not specified)
         test_root = None if skip_testroot else findTestRoot()
 
+        # Append PYTHONPATH paths specified from testroot
+        if test_root:
+            for path in test_root.extra_pythonpath:
+                if path not in sys.path: # Prevents duplication
+                    sys.path.append(path)
+
         # Failed to find a test root
         if test_root is None:
             # app_name was specified so without a testroot, we don't
@@ -240,7 +262,7 @@ class TestHarness:
             # app_name was specified so just run from this directory
             # without any additional parameters
             test_root = TestRoot(root_dir='.', app_name=app_name,
-                                 args=[], hit_node=pyhit.Node())
+                                 args=[], hit_node=pyhit.Node(), extra_pythonpath="")
         # Found a testroot, but without an app_name
         elif test_root.app_name is None:
             # app_name was specified from buildAndRun(), so use it
@@ -330,6 +352,13 @@ class TestHarness:
             self.executable = self.getExecutable() if self.app_name else None
         except FileNotFoundError as e:
             self.errorExit(f'{e}')
+
+        # If we have an executable and there is python directory next to it,
+        # append that directory to PYTHONPATH
+        if self.executable is not None:
+            exe_python_dir = os.path.join(os.path.dirname(os.path.abspath(self.executable)), 'python')
+            if os.path.isdir(exe_python_dir) and exe_python_dir not in sys.path:
+                sys.path.append(exe_python_dir)
 
         # Load capabilities if they're needed
         self.options._required_capabilities = []
@@ -496,7 +525,7 @@ class TestHarness:
                                 # Rely on the fact that os.walk does a depth first traversal.
                                 # Any directories below this one will use the executable specified
                                 # in this testroot file unless it is overridden.
-                                app_name, args, root_params = readTestRoot(os.path.join(dirpath, file))
+                                app_name, args, root_params, _ = readTestRoot(os.path.join(dirpath, file))
                                 full_app_name = app_name + "-" + self.options.method
                                 if platform.system() == 'Windows':
                                     full_app_name += '.exe'

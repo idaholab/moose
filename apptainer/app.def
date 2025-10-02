@@ -89,6 +89,10 @@ Fingerprints: 0CFFCAB55E806363601C442D211817B01E0911DB
     export PATH=/opt/{{ BINARY_NAME }}/bin:/opt/code-server-{{ BINARY_NAME }}/bin:$PATH
     export INSTALLED_BINARIES={{ BINARY_NAME }}-{{ METHOD }}:exodiff:hit
     export MOOSE_LANGUAGE_SERVER={{ BINARY_NAME }}-{{ METHOD }}
+    # Add installed python directories to PYTHONPATH
+    for dir in /opt/{{ BINARY_NAME }}/share/*/python; do
+        export PYTHONPATH=${dir}:${PYTHONPATH}
+    done
 {%- if BINARY_NAME == 'moose' %}
     export INSTALLED_BINARIES=${INSTALLED_BINARIES}:moose_test-{{ METHOD }}
 {%- endif %}

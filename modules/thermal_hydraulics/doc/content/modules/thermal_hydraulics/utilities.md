@@ -1,7 +1,7 @@
 # THM Utilities
 
 THM provides the following [Peacock](python/peacock.md optional=True) plugins, located in
-`modules/thermal_hydraulics/python/peacock/`, relative to the root MOOSE directory:
+`modules/thermal_hydraulics/python/moose_thm/peacock/`, relative to the root MOOSE directory:
 
 - `FluidPropertyInterrogatorPlugin.py`: Computes various fluid properties from a
   [FluidProperties](syntax/FluidProperties/index.md) object. Note that currently there
@@ -16,6 +16,6 @@ an instance of Peacock but instead, run their source files directly with `python
 For example,
 
 ```
-cd ~/projects/moose/modules/thermal_hydraulics/python/peacock/
+cd ~/projects/moose/modules/thermal_hydraulics/python/moose_thm/peacock/
 python FluidPropertyInterrogatorPlugin.py
 ```

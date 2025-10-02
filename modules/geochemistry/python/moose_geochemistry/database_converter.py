@@ -13,10 +13,12 @@ import sys
 import argparse
 import datetime
 import json
-# so we can find our libraries, no matter how we're called
-findbin = os.path.dirname(os.path.realpath(sys.argv[0]))
-sys.path.append(findbin)
-from readers import gwb_reader, eq36_reader
+import importlib.util
+
+if importlib.util.find_spec('moose_geochemistry') is None:
+    _geochemistry_python_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    sys.path.append(_geochemistry_python_path)
+from moose_geochemistry.readers import gwb_reader, eq36_reader
 
 def command_line_options():
     """

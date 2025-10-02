@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from thm_utilities import readMOOSEXML
+from moose_thm.thm_utilities import readMOOSEXML
 
 data_1to1 = readMOOSEXML('junction_one_to_one.xml')
 data_volume = readMOOSEXML('volume_junction.xml')
