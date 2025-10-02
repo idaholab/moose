@@ -160,7 +160,7 @@ public:
   /**
    * Get the size of a dimension
    * @param dim The dimension index
-   * @returns The array size of the dimension
+   * @returns The size of the dimension
    */
   KOKKOS_FUNCTION dof_id_type n(unsigned int dim) const { return _n[dim]; }
   /**
