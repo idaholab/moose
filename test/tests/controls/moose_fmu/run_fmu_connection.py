@@ -30,6 +30,8 @@ def main():
     step_size = 0.5
     change_time = 1.0
 
+    flag = "INITIAL MULTIAPP_FIXED_POINT_END"
+
     # Extract FMUs
     fmu_model = extract(fmu_filename)
     moose_model = extract(moose_filename)
@@ -50,9 +52,8 @@ def main():
             fmu=moose_instance,
             model_description=moose_description,
             start_values={
-                "flag":             "INITIAL TIMESTEP_END",
-                "moose_executable": "../../../moose_test-opt",
-                "moose_inputfile":  "fmu_diffusion.i",
+                "flag":             flag,
+                'moose_command': "../../../moose_test-opt -i fmu_diffusion.i",
                 "server_name":      "web_server",
                 "max_retries":      10,
             },
@@ -94,9 +95,8 @@ def main():
             fmu=moose_instance,
             model_description=moose_description,
             start_values={
-                "flag":             "INITIAL TIMESTEP_END",
-                "moose_executable": "../../../moose_test-opt",
-                "moose_inputfile":  "fmu_diffusion.i",
+                "flag":             flag,
+                'moose_command': "../../../moose_test-opt -i fmu_diffusion.i",
                 "server_name":      "web_server",
                 "max_retries":      10,
             },
