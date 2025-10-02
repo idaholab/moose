@@ -34,6 +34,12 @@ class TestName:
     def __str__(self):
         return f'{self.folder}.{self.name}'
 
+class DatabaseException(Exception):
+    """
+    Represents an error querying data in the database
+    """
+    pass
+
 class TestHarnessTestResult:
     """
     Structure holding the information about a single test result
@@ -374,8 +380,8 @@ class TestHarnessResults:
                 # Unknown type
                 else:
                     raise TypeError(
-                        f'Test {name} entry in result _id={self.id} '
-                        f'has unexpected type {type(test_entry)}'
+                        f'Test "{name}" entry in result._id={self.id} '
+                        f'has unexpected type "{type(test_entry).__name__}"'
                     )
 
                 assert name not in values
@@ -550,7 +556,7 @@ class TestHarnessResults:
             return TestHarnessTestResult(data, name, self)
         except Exception as e:
             id = data.get('_id')
-            raise Exception(f'Failed to build test result _id={id}') from e
+            raise ValueError(f'Failed to build test result id={id}') from e
 
     def get_test(self, folder_name: str, test_name: str) -> TestHarnessTestResult:
         """
@@ -565,7 +571,7 @@ class TestHarnessResults:
 
         # Doesn't exist
         if value is None:
-            raise KeyError(f'No test named {name}')
+            raise KeyError(f'Test "{name}" does not exist')
 
         # Is already built
         if isinstance(value, TestHarnessTestResult):
@@ -575,7 +581,7 @@ class TestHarnessResults:
         assert isinstance(value, ObjectId)
         data = self._find_test_data(value)
         if data is None:
-            raise KeyError(f'Database missing results: _id={value}')
+            raise DatabaseException(f'Database missing tests._id={value}')
 
         # Build the true object from the data
         test_result = self._build_test(data, name)
