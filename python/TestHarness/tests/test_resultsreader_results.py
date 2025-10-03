@@ -14,6 +14,8 @@ import zlib
 from bson.objectid import ObjectId
 from datetime import datetime
 from mock import patch
+from copy import deepcopy
+from typing import Tuple
 from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
 from TestHarness.resultsreader.results import TestHarnessResults, TestHarnessTestResult, TestName, DatabaseException
 
@@ -104,7 +106,7 @@ class TestResultsReaderResults(TestHarnessTestCase):
 
         return results, tests
 
-    def buildResult(self, *args, **kwargs):
+    def buildResult(self, *args, **kwargs) -> Tuple[TestHarnessResults, dict]:
         result_data, test_data = self.captureResult(*args, **kwargs)
 
         results = TestHarnessResults(result_data)
@@ -339,6 +341,82 @@ class TestResultsReaderResults(TestHarnessTestCase):
         for test_result in result.get_tests():
             self.assertIsNone(test_result.status)
             self.assertIsNone(test_result.status_value)
+
+    def _compareSerialized(self, result: TestHarnessResults, new_result: TestHarnessResults,
+                           same_tests: bool):
+        # Test keys should be the same (values will not be
+        # because they were loaded from the database and
+        # were originally stored as IDs)
+        self.assertEqual(result.data['tests'].keys(), new_result.data['tests'].keys())
+        self.assertEqual(result._tests.keys(), new_result._tests.keys())
+        # And the underlying test objects should also be the same
+        for test_name in result.test_names:
+            test = result._tests[test_name]
+
+            new_test = new_result._tests[test_name]
+            self.assertEqual(test._data, new_test._data)
+            self.assertEqual(test.name, new_test.name)
+            self.assertEqual(test._validation_results, new_test._validation_results)
+            self.assertEqual(test._validation_data, new_test._validation_data)
+
+        # Compare all of the data
+        new_data = deepcopy(new_result.data)
+        # If the tests entry isn't exactly the same, just
+        # duplicate it
+        if not same_tests:
+            new_data['tests'] = deepcopy(result.data['tests'])
+        self.assertEqual(result.data, new_data)
+
+    @patch.object(TestHarnessResults, '_find_test_data')
+    def testSerializeTestsNotLoaded(self, patch_find_test_data):
+        """
+        Test serializing and deserializing a result when the data
+        is not already loaded
+        """
+        result_data, test_data = self.captureResult(test_in_results=False)
+
+        # Mock getting the test results from mongodb
+        def get_test_data(id):
+            for test in test_data.values():
+                if test['_id'] == id:
+                    return test
+            return None
+        patch_find_test_data.side_effect = get_test_data
+
+        result = TestHarnessResults(result_data)
+
+        # Tests should not be loaded yet
+        for entry in result._tests.values():
+            self.assertIsInstance(entry, ObjectId)
+
+        serialized = result.serialize()
+
+        # And should be loaded now
+        for entry in result._tests.values():
+            self.assertIsInstance(entry, TestHarnessTestResult)
+
+        new_result = TestHarnessResults.deserialize_build(serialized)
+
+        # Compare all of the data
+        self._compareSerialized(result, new_result, False)
+
+    def testSerializeTestsInResult(self):
+        """
+        Test serializing and deserializing a result when the test
+        data is already loaded in the result data (no database loads)
+        """
+        result, _ = self.buildResult()
+
+        # Tests should be loaded already
+        for entry in result._tests.values():
+            self.assertIsInstance(entry, TestHarnessTestResult)
+
+        serialized = result.serialize()
+
+        new_result = TestHarnessResults.deserialize_build(serialized)
+
+        # Compare all of the data
+        self._compareSerialized(result, new_result, True)
 
 if __name__ == '__main__':
     unittest.main()

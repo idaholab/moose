@@ -10,6 +10,7 @@
 from datetime import datetime
 import importlib
 from typing import Optional, Union, Iterator
+from copy import deepcopy
 from dataclasses import dataclass
 from TestHarness.validation.dataclasses import ValidationResult, ValidationData, ValidationDataTypesStr
 from pymongo.database import Database
@@ -272,7 +273,7 @@ class TestHarnessTestResult:
         results in JSON to the underlying ValidationResult objects
         """
         if self.validation is not None:
-            return [ValidationResult(**v) for v in self.validation.get('results', [])]
+            return [ValidationResult(**v) for v in deepcopy(self.validation.get('results', []))]
         return None
 
     def _buildValidationData(self) -> Optional[dict[str, ValidationData]]:
@@ -283,7 +284,7 @@ class TestHarnessTestResult:
         if self.validation is None:
             return None
 
-        input = self.validation.get('data', {})
+        input = deepcopy(self.validation.get('data', {}))
         data = {}
 
         for k, v in input.items():
@@ -591,9 +592,65 @@ class TestHarnessResults:
 
         return test_result
 
+    def load_all_tests(self):
+        """
+        Loads all of the tests from the database if they have
+        not already been loaded
+        """
+        load_names = []
+        for name, value in self._tests.items():
+            if isinstance(value, ObjectId):
+                load_names.append(name)
+        for name in load_names:
+            self.get_test(name.folder, name.name)
+
     def get_tests(self) -> Iterator[TestHarnessTestResult]:
         """
         Get all of the test results
         """
         for combined_name in self._tests:
             yield self.get_test(combined_name.folder, combined_name.name)
+
+    def serialize(self) -> dict:
+        """
+        Serializes this result into a dictionary that can be stored
+        and reloaded later using deserialize/deserialize_build
+        """
+        # Load all tests so that they can be stored
+        self.load_all_tests()
+
+        data = deepcopy(self.data)
+        data['time'] = data['time'].isoformat()
+        data['_id'] = str(data['_id'])
+        for name, test_result in self._tests.items():
+            data['tests'][name.folder]['tests'][name.name] = deepcopy(test_result.data)
+            test_entry = data['tests'][name.folder]['tests'][name.name]
+            for key in ['_id', 'result_id']:
+                test_entry[key] = str(test_entry[key])
+
+        return data
+
+    @staticmethod
+    def deserialize(data: dict) -> dict:
+        """
+        Deserializes data built with serialize, which can be
+        used to construct a TestHarnessResults object
+        """
+        assert isinstance(data, dict)
+
+        data['time'] = datetime.fromisoformat(data['time'])
+        data['_id'] = ObjectId(data['_id'])
+        for folder_entry in data['tests'].values():
+            for test_entry in folder_entry['tests'].values():
+                for key in ['_id', 'result_id']:
+                    test_entry[key] = ObjectId(test_entry[key])
+
+        return data
+
+    @staticmethod
+    def deserialize_build(data: dict) -> dict:
+        """
+        Builds a TestHarnessResults object using serialized data
+        that was built with serialize()
+        """
+        return TestHarnessResults(TestHarnessResults.deserialize(data))
