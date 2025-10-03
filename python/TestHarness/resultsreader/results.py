@@ -620,7 +620,7 @@ class TestHarnessResults:
         self.load_all_tests()
 
         data = deepcopy(self.data)
-        data['time'] = data['time'].isoformat()
+        data['time'] = str(data['time'])
         data['_id'] = str(data['_id'])
         for name, test_result in self._tests.items():
             data['tests'][name.folder]['tests'][name.name] = deepcopy(test_result.data)
