@@ -48,7 +48,7 @@ class TestHarnessResultsReader:
         port: Optional[int] = None
 
     def __init__(self, database: str, client: Optional[pymongo.MongoClient | Authentication] = None):
-        self.client: pymongo.MongoClient = None
+        self._client: pymongo.MongoClient = None
         assert isinstance(database, str)
 
         # No client; test the environment
@@ -57,17 +57,16 @@ class TestHarnessResultsReader:
             if client is None:
                 raise ValueError("Must specify either 'client' or set RESULTS_READER_AUTH_FILE with credentials")
         if isinstance(client, pymongo.MongoClient):
-            self.client = client
+            self._client = client
         elif isinstance(client, self.Authentication):
-            self.client = pymongo.MongoClient(client.host, username=client.username, password=client.password)
+            self._client = pymongo.MongoClient(client.host, username=client.username, password=client.password)
         else:
             raise TypeError(f"Invalid type for 'client'")
 
         # Get the database
-        self.database: str = database
-        if database not in self.client.list_database_names():
+        if database not in self._client.list_database_names():
             raise ValueError(f'Database {database} not found')
-        self.db = self.client.get_database(database)
+        self._db = self._client.get_database(database)
 
         # Cached results, by ID
         self._results: dict[ObjectId, Optional[TestHarnessResults]] = {}
@@ -85,8 +84,8 @@ class TestHarnessResultsReader:
 
     def __del__(self):
         # Clean up the client if it is loaded
-        if self.client is not None:
-            self.client.close()
+        if self._client is not None:
+            self._client.close()
 
     @staticmethod
     def loadEnvironmentAuthentication() -> Authentication | None:
@@ -175,7 +174,7 @@ class TestHarnessResultsReader:
         Used so that it can be easily movcked in unit tests
         """
         kwargs['sort'] = self.mongo_sort_id
-        with self.db.results.find(*args, **kwargs) as cursor:
+        with self._db.results.find(*args, **kwargs) as cursor:
            return [d for d in cursor]
 
     def getLatestPushResults(self, num: int) -> list[TestHarnessResults]:
@@ -269,7 +268,7 @@ class TestHarnessResultsReader:
 
         # Search for the value
         filter = {index: {"$eq": value}}
-        data = self.db.results.find_one(filter, sort=self.mongo_sort_id)
+        data = self._db.results.find_one(filter, sort=self.mongo_sort_id)
 
         # No such thing
         if data is None:
@@ -317,7 +316,7 @@ class TestHarnessResultsReader:
         result = self._results.get(id)
         if result is None:
             try:
-                result = TestHarnessResults(data, self.db)
+                result = TestHarnessResults(data, self._db)
             except Exception as e:
                 raise ValueError(f'Failed to build result _id={id}') from e
             self._results[id] = result
