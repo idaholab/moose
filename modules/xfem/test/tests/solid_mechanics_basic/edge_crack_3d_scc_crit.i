@@ -1,27 +1,30 @@
+# This takes 1 step of max_growth_size and back computes a time of 11s which
+# is the amount of time edge_crack_3d_scc.i takes to grow a crack of similar length.
+
 [Reporters]
-  [fatigue]
-    type = ParisLaw
-    growth_increment_name = "growth_increment"
-    cycles_to_max_growth_size_name = "fatigue"
+  [scc_crack_growth]
+    type = StressCorrosionCracking
+    growth_increment_name = "crack_growth"
+    time_to_max_growth_size_name = "max_growth_timestep"
     crackMeshCut3DUserObject_name = cut_mesh
     max_growth_size = 0.1
-    paris_law_c = 1e-13
-    paris_law_m = 2.5
+    k_low = 10
+    growth_rate_low = 0.075
+    k_high = 20
+    growth_rate_high = 0.015
+    growth_rate_mid_multiplier = 0.00075
+    growth_rate_mid_exp_factor = 1
   []
 []
-
 [UserObjects]
   [cut_mesh]
     type = CrackMeshCut3DUserObject
     mesh_generator_name = mesh_cutter
-    growth_dir_method = FUNCTION
+    growth_dir_method = MAX_HOOP_STRESS
     size_control = 1
     n_step_growth = 1
     growth_rate_method = REPORTER
-    growth_direction_x = growth_func_x
-    growth_direction_y = growth_func_y
-    growth_direction_z = growth_func_z
-    growth_reporter = "fatigue/growth_increment"
+    growth_reporter = "scc_crack_growth/crack_growth"
     crack_front_nodes = '7 6 5 4'
   []
 []
@@ -40,23 +43,7 @@
   incremental = true
 []
 
-# function for CrackMeshCut3DUserObject crack
-[Functions]
-  [growth_func_x]
-    type = ParsedFunction
-    expression = 1
-  []
-  [growth_func_y]
-    type = ParsedFunction
-    expression = 0
-  []
-  [growth_func_z]
-    type = ParsedFunction
-    expression = 0
-  []
-[]
-
-#functino for BC on top surface
+#function for BC on top surface
 [Functions]
   [top_trac_y]
     type = ConstantFunction
@@ -69,6 +56,10 @@
 []
 
 [Outputs]
-  file_base = edge_crack_3d_fatigue_out
-  json = true
+  file_base = edge_crack_3d_scc_crit_out
+  execute_on = 'FINAL'
+  [json_out]
+    type = JSON
+    execute_system_information_on = none
+  []
 []
