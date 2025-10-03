@@ -8,14 +8,14 @@
 
 ## Overview
 
-AuxKernel for calculating the sum of two MFEM variables that are defined on the same finite element
-space, and storing the result in a third. Both variables may be (optionally) scaled by a real scalar
-constant prior to addition.
+AuxKernel for calculating the sum of two or more MFEM variables that are defined on the same finite
+element space, and storing the result in another. All variables may be (optionally) scaled by a real
+scalar constant prior to addition.
 
 !equation
-u = \lambda_1 v_1 + \lambda_2 v_2.
+u = \sum_i \lambda_i v_i.
 
-where $u, v_1, v_2$ are defined on the same FE space, and $\lambda_1, \lambda_2$ are real scalar
+where $u$ and $\{v_i\}$ are defined on the same FE space, and $\{\lambda_i\}$ are real scalar
 constants.
 
 ## Example Input File Syntax
