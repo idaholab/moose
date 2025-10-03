@@ -394,7 +394,7 @@ rho = 1
       vars = 'vel_bar_x vel_bar_y'
       # petsc_options = '-ksp_converged_reason'
       # petsc_options_iname = '-pc_type -ksp_type -ksp_rtol -ksp_gmres_restart -ksp_pc_side -pc_factor_mat_solver_type -ksp_max_it -ksp_atol -ksp_norm_type'
-      # petsc_options_value = 'ilu      gmres     1e-2      300                right        strumpack                  30          1e-8      unpreconditioned'
+      # petsc_options_value = 'ilu      gmres     1e-2      300                right        strumpack                  300         1e-8      unpreconditioned'
       petsc_options_iname = '-pc_type -ksp_type -pc_factor_mat_solver_type'
       petsc_options_value = 'ilu      preonly   strumpack'
     []
@@ -402,7 +402,7 @@ rho = 1
       vars = 'pressure_bar'
       # petsc_options = '-ksp_converged_reason'
       # petsc_options_iname = '-pc_type -ksp_type -ksp_rtol -ksp_gmres_restart -ksp_pc_side -pc_factor_mat_solver_type -ksp_max_it -ksp_atol -ksp_norm_type'
-      # petsc_options_value = 'ilu      gmres     1e-2      300                right        strumpack                  30          1e-8      unpreconditioned'
+      # petsc_options_value = 'ilu      gmres     1e-2      300                right        strumpack                  300         1e-8      unpreconditioned'
       petsc_options_iname = '-pc_type -pc_jacobi_type -ksp_type'
       petsc_options_value = 'jacobi   rowsum          preonly'
     []
@@ -427,9 +427,12 @@ rho = 1
   solve_type = 'PJFNK'
   petsc_options_iname = '-ksp_type'
   petsc_options_value = 'preonly'
-  end_time = 1e4
-  dt = 250
   nl_abs_tol = 1e-7
+  [TimeStepper]
+    type = TimeSequenceStepper
+    time_sequence = '1 10 50 100 150 200 250 350 400 600 800 1000 1200 1400 1600 1800 2000 2200 2400 2600 2800 3000 3200 3400 3600 3800 4000 4200 4400 4600 4800 5000 5200 5400 5600 5800 6000 6200 6400 6600 6800 7000 7200 7400 7600 7800 8000 8200 8400 8600 8800 9000 9200 9400 9600 9800 10000'
+    use_last_t_for_end_time = true
+  []
 []
 
 [Outputs]
