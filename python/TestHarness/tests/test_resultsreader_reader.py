@@ -19,7 +19,7 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 
 from TestHarness.resultsreader.reader import TestHarnessResultsReader
-from TestHarness.resultsreader.results import TestHarnessResults, TestHarnessTestResult
+from TestHarness.resultsreader.results import TestHarnessResults, TestHarnessTestResult, TestName
 
 # Whether or not authentication is available from env var RESULTS_READER_AUTH_FILE
 HAS_AUTH = TestHarnessResultsReader.hasEnvironmentAuthentication()
@@ -29,14 +29,12 @@ PROD_GET_TEST_RESULTS_GOLD_PATH = os.path.join(os.path.dirname(__file__), 'gold'
 # Production database name for testing real results
 PROD_DATABASE_NAME = 'civet_tests_moose_performance'
 # Arguments for using the production database for getting real results
-PROD_FOLDER_NAME = 'simple_transient_diffusion'
-PROD_TEST_NAME = 'test'
+PROD_TEST_NAME = TestName('simple_transient_diffusion', 'test')
 
 # Test database name for testing pull request results
 TEST_DATABASE_NAME = 'civet_tests_moose_test_results'
 # Arguments for using the production database for getting real results
-TEST_FOLDER_NAME = 'tests/test_harness'
-TEST_TEST_NAME = 'ok'
+TEST_TEST_NAME = TestName('tests/test_harness', 'ok')
 
 class FakeMongoClient(MongoClient):
     def __init__(self, *args, **kwargs):
@@ -84,7 +82,11 @@ class TestResultsReaderReader(unittest.TestCase):
                       # bump to civet_version=3 (added event_id)
                       GoldTest(event_sha=None,
                                event_id=258481,
-                               civet_version=3)]
+                               civet_version=3),
+                      # bump to civet_version=4 (remove indices from tests)
+                      GoldTest(event_sha=None,
+                               event_id=259309,
+                               civet_version=4)]
 
         # This can be set to true once to overwrite the gold file
         rewrite_gold = False
@@ -103,7 +105,7 @@ class TestResultsReaderReader(unittest.TestCase):
 
             gold['results'][str(results.id)] = results.data
 
-            test_results = results.get_test(PROD_FOLDER_NAME, PROD_TEST_NAME)
+            test_results = results.get_test(PROD_TEST_NAME.folder, PROD_TEST_NAME.name)
             self.assertIsNotNone(test_results)
             gold['tests'][str(test_results.id)] = test_results.data
 
@@ -131,15 +133,27 @@ class TestResultsReaderReader(unittest.TestCase):
         with open(PROD_GET_TEST_RESULTS_GOLD_PATH, 'r') as f:
             gold = json.load(f)
 
-        # Convert datetime strings to objects
+        # Conversion for results documents
         results = gold['results']
         for result in results.values():
+            # Convert times to datetime
             result['time'] = datetime.fromisoformat(result['time'])
+            # Convert ID to an ObjectID
             result['_id'] = ObjectId(result['_id'])
+            # Convert test IDs to ObjectIDs
+            for folder_entry in result['tests'].values():
+                folder_tests = folder_entry['tests']
+                for test_name in list(folder_tests.keys()):
+                    if isinstance(folder_tests[test_name], str):
+                        folder_tests[test_name] = ObjectId(folder_tests[test_name])
+
+        # Conversions for tests documents
         tests = gold['tests']
         for test in tests.values():
-            test['time'] = datetime.fromisoformat(test['time'])
+            # Convert ID to an ObjectID
             test['_id'] = ObjectId(test['_id'])
+            # Convert result_id to an ObjectID
+            test['result_id'] = ObjectId(test['result_id'])
 
         return results, tests
 
@@ -172,7 +186,7 @@ class TestResultsReaderReader(unittest.TestCase):
         Helper for testing getTestResults(), regardless of if
         the data was produced from a gold file or live
         """
-        results = reader.getTestResults(PROD_FOLDER_NAME, PROD_TEST_NAME, **kwargs)
+        results = reader.getTestResults(PROD_TEST_NAME.folder, PROD_TEST_NAME.name, **kwargs)
 
         for result in results:
             self.assertIsInstance(result, TestHarnessTestResult)
@@ -180,6 +194,7 @@ class TestResultsReaderReader(unittest.TestCase):
             # Test that result is the correct one
             test_harness_results = result.results
             self.assertEqual(test_harness_results, result.results)
+            self.assertEqual(PROD_TEST_NAME, result.name)
             self.assertIsInstance(test_harness_results, TestHarnessResults)
 
             # Test basic state for results header
@@ -212,7 +227,7 @@ class TestResultsReaderReader(unittest.TestCase):
         gold_results, gold_tests = self.getGetTestResultsGold()
         # Mock getting the test results from mongodb
         def get_test_data(id):
-            return gold_tests[id]
+            return gold_tests[str(id)]
         patch_find_test_data.side_effect = get_test_data
         # Mock getting the results from mongodb
         def get_results_data(*args, **kwargs):
@@ -308,8 +323,11 @@ class TestResultsReaderReader(unittest.TestCase):
             pr_num = int(pr_num)
 
         reader = TestHarnessResultsReader(TEST_DATABASE_NAME)
-        results = reader.getTestResults(TEST_FOLDER_NAME, TEST_TEST_NAME, pr_num=pr_num)
+        results = reader.getTestResults(TEST_TEST_NAME.folder, TEST_TEST_NAME.name, pr_num=pr_num)
         self.assertGreater(len(results), 0)
+
+        for result in results:
+            self.assertIsInstance(result, TestHarnessTestResult)
 
         result = results[0]
         self.assertEqual(result.event_id, event_id)
@@ -324,13 +342,14 @@ class TestResultsReaderReader(unittest.TestCase):
             event_results = [r for r in results if r.event_sha == head_sha]
             self.assertEqual(len(event_results), 1)
 
-            result = event_results[0]
-
         start_index = 0
         if is_pr:
             start_index = 1
         for result in results[start_index:]:
             self.assertNotEqual(result.event_cause, 'pr')
+
+        for result in results:
+            self.assertEqual(result.name, TEST_TEST_NAME)
 
     @unittest.skipUnless(os.environ.get('TEST_RESULTSREADER_READER'), f"Skipping because TEST_RESULTSREADER_READER not set")
     def testGetEventResultsLive(self):
@@ -352,8 +371,9 @@ class TestResultsReaderReader(unittest.TestCase):
         self.assertEqual(results.event_id, event_id)
 
         self.assertEqual(len(results.test_names), 1)
-        test_results = results.get_test(TEST_FOLDER_NAME, TEST_TEST_NAME)
+        test_results = results.get_test(TEST_TEST_NAME.folder, TEST_TEST_NAME.name)
         self.assertIsNotNone(test_results)
+        self.assertEqual(test_results.name, TEST_TEST_NAME)
 
     @unittest.skipUnless(os.environ.get('TEST_RESULTSREADER_READER'), f"Skipping because TEST_RESULTSREADER_READER not set")
     def testGetCommitResultsLive(self):
@@ -374,8 +394,9 @@ class TestResultsReaderReader(unittest.TestCase):
         self.assertEqual(results.event_sha, head_sha)
 
         self.assertEqual(len(results.test_names), 1)
-        test_results = results.get_test(TEST_FOLDER_NAME, TEST_TEST_NAME)
+        test_results = results.get_test(TEST_TEST_NAME.folder, TEST_TEST_NAME.name)
         self.assertIsNotNone(test_results)
+        self.assertEqual(test_results.name, TEST_TEST_NAME)
 
 if __name__ == '__main__':
     unittest.main()

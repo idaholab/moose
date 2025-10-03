@@ -31,14 +31,25 @@ class TestName:
     folder: str
     name: str
 
+    def __str__(self):
+        return f'{self.folder}.{self.name}'
+
+class DatabaseException(Exception):
+    """
+    Represents an error querying data in the database
+    """
+    pass
+
 class TestHarnessTestResult:
     """
     Structure holding the information about a single test result
     """
-    def __init__(self, data: dict, result: 'TestHarnessResults'):
+    def __init__(self, data: dict, name: TestName, result: 'TestHarnessResults'):
         # The underlying data for this test, which comes from
         # "tests/*/tests" in the TestHarness results file
         self._data: dict = data
+        # The combined name for this test (folder + name)
+        self._name: TestName = name
         # The combined results that this test comes from
         self._results: 'TestHarnessResults' = result
 
@@ -46,6 +57,8 @@ class TestHarnessTestResult:
         assert isinstance(self.data, dict)
         assert isinstance(self.id, ObjectId)
         assert isinstance(self.results, TestHarnessResults)
+        assert isinstance(self.result_id, ObjectId)
+        assert isinstance(self.name, TestName)
         assert isinstance(self.test_name, str)
         assert isinstance(self.folder_name, str)
         assert isinstance(self.status, (dict, NoneType))
@@ -83,7 +96,7 @@ class TestHarnessTestResult:
     @property
     def id(self) -> ObjectId:
         """
-        Get the mongo database ID for these results
+        Get the mongo database ID for this test
         """
         return self.data['_id']
 
@@ -95,18 +108,33 @@ class TestHarnessTestResult:
         return self._results
 
     @property
-    def test_name(self) -> str:
+    def result_id(self) -> ObjectId:
         """
-        Get the name of the test
+        Get the mongo database ID the results
         """
-        return self.data['test_name']
+        assert self.results.id == self.data['result_id']
+        return self.results.id
+
+    @property
+    def name(self) -> TestName:
+        """
+        Get the combined name for this test (folder + name)
+        """
+        return self._name
 
     @property
     def folder_name(self) -> str:
         """
+        Get the name of the folder the test is in
+        """
+        return self.name.folder
+
+    @property
+    def test_name(self) -> str:
+        """
         Get the name of the test
         """
-        return self.data['folder_name']
+        return self.name.name
 
     @property
     def status(self) -> Optional[dict]:
@@ -298,7 +326,7 @@ class TestHarnessResults:
         # Initialize empty test objects
         tests = data['tests']
         assert isinstance(tests, dict)
-        self._tests = self.build_empty_tests(tests)
+        self._tests = self.init_tests(tests)
 
         # Sanity check on all of our methods (in order of definition)
         assert isinstance(self.data, dict)
@@ -324,18 +352,40 @@ class TestHarnessResults:
         for v in self.test_names:
             assert isinstance(v, TestName)
 
-    @staticmethod
-    def build_empty_tests(tests: dict) -> dict[TestName, Union[TestHarnessTestResult, ObjectId]]:
+    def init_tests(self, tests: dict) -> dict[TestName, Union[TestHarnessTestResult, ObjectId]]:
         """
-        Builds the names (folder, name) of the held tests
+        Build the tests to be stored within the _tests member
+
+        This is a dict from test (folder name, test name) to either:
+          - An ObjectID, if the test is stored in a separate collection
+          - A TestHarnessTestResult, if the test is stored directly in the results
         """
         assert isinstance(tests, dict)
 
-        values: dict[TestName, ObjectId] = {}
-        for test_folder, folder_entry in tests.items():
-            for test_name, id in folder_entry['tests'].items():
-                assert id not in values.values()
-                values[TestName(test_folder, test_name)] = id
+        values: dict[TestName, Union[TestHarnessTestResult, ObjectId]] = {}
+
+        for folder_name, folder_entry in tests.items():
+            for test_name, test_entry in folder_entry['tests'].items():
+                name = TestName(folder_name, test_name)
+
+                # References a test in a seprate collection
+                # Store the id to be pulled later if needed
+                if isinstance(test_entry, ObjectId):
+                    assert test_entry not in values.values()
+                    value = test_entry
+                # Is direct test data
+                # Store the actual test object
+                elif isinstance(test_entry, dict):
+                    value = self._build_test(test_entry, name)
+                # Unknown type
+                else:
+                    raise TypeError(
+                        f'Test "{name}" entry in result._id={self.id} '
+                        f'has unexpected type "{type(test_entry).__name__}"'
+                    )
+
+                assert name not in values
+                values[name] = value
 
         return values
 
@@ -493,6 +543,21 @@ class TestHarnessResults:
 
         return self._db.tests.find_one({"_id": id})
 
+    def _build_test(self, data: dict, name: TestName) -> TestHarnessTestResult:
+        """
+        Helper for building a TestHarnessTestResult given its
+        data with exception handling on a failure
+        """
+        assert isinstance(data, dict)
+        assert isinstance(name, TestName)
+
+        # Build the true object from the data
+        try:
+            return TestHarnessTestResult(data, name, self)
+        except Exception as e:
+            id = data.get('_id')
+            raise ValueError(f'Failed to build test result id={id}') from e
+
     def get_test(self, folder_name: str, test_name: str) -> TestHarnessTestResult:
         """
         Get the test result associated with the given test folder and test name
@@ -501,30 +566,28 @@ class TestHarnessResults:
         assert isinstance(test_name, str)
 
         # Search for the data in the cache
-        key = TestName(folder_name, test_name)
-        value = self._tests.get(key)
+        name = TestName(folder_name, test_name)
+        value = self._tests.get(name)
 
         # Doesn't exist
         if value is None:
-            raise KeyError(f'No test named {key}')
+            raise KeyError(f'Test "{name}" does not exist')
 
         # Is already built
         if isinstance(value, TestHarnessTestResult):
             return value
 
         # Not built, so pull from database
+        assert isinstance(value, ObjectId)
         data = self._find_test_data(value)
         if data is None:
-            raise KeyError(f'Database missing results: _id={value}')
+            raise DatabaseException(f'Database missing tests._id={value}')
 
         # Build the true object from the data
-        try:
-            test_result = TestHarnessTestResult(data, self)
-        except Exception as e:
-            raise Exception(f'Failed to build result: _id={value}') from e
+        test_result = self._build_test(data, name)
 
         # And store in the cache
-        self._tests[key] = test_result
+        self._tests[name] = test_result
 
         return test_result
 
