@@ -78,10 +78,10 @@ class TestHarnessResultsReader:
         # Cached results by commit
         self._event_sha_results: dict[str, Optional[TestHarnessResults]] = {}
 
-        # Cached TestHarnessResults objects for events, in order from latest
-        self._latest_event_results: list[TestHarnessResults] = []
-        # The last event that we searched
-        self._last_latest_event_id: Optional[ObjectId] = None
+        # Cached TestHarnessResults objects for push events, latest to oldest
+        self._latest_push_results: list[TestHarnessResults] = []
+        # The last push event that we searched
+        self._last_latest_push_event_id: Optional[ObjectId] = None
 
     def __del__(self):
         # Clean up the client if it is loaded
@@ -156,8 +156,10 @@ class TestHarnessResultsReader:
                 if pr_result.has_test(folder_name, test_name):
                     test_results.append(pr_result.get_test(folder_name, test_name))
 
-        # Get the event results
-        for result in self.getLatestEventResults():
+        # Get the event results, limited to limit or
+        # (limit - 1) if we have a PR
+        num = limit - len(test_results)
+        for result in self.iterateLatestPushResults(num):
             if result.has_test(folder_name, test_name):
                 test_result = result.get_test(folder_name, test_name)
                 test_results.append(test_result)
@@ -166,51 +168,89 @@ class TestHarnessResultsReader:
 
         return test_results
 
-    def _findResults(self, *args, **kwargs) -> Cursor:
+    def _findResults(self, *args, **kwargs) -> list[dict]:
         """
         Helper for querying the results database collection
 
         Used so that it can be easily movcked in unit tests
         """
-        return self.db.results.find(*args, **kwargs, sort=self.mongo_sort_id)
+        kwargs['sort'] = self.mongo_sort_id
+        with self.db.results.find(*args, **kwargs) as cursor:
+           return [d for d in cursor]
 
-    def getLatestEventResults(self) -> Iterator[TestHarnessResults]:
+    def getLatestPushResults(self, num: int) -> list[TestHarnessResults]:
         """
-        Iterate through the latest unique event results
+        Get the latest results from push events, newest to oldest
         """
+        assert isinstance(num, int)
+        assert num > 0
+
+        results = []
+        for result in self.iterateLatestPushResults(num=num):
+            results.append(result)
+            if len(results) == num:
+                break
+        return results
+
+    def iterateLatestPushResults(self, num: Optional[int] = None) -> Iterator[TestHarnessResults]:
+        """
+        Iterate through the latest unique push event results
+
+        The number of needed results can optionally be passed
+        in order to optimize the number of database queries
+        """
+        assert isinstance(num, (int, NoneType))
+
+        # If we were given a number we want, pull exactly
+        # however many more we need the first time around
+        if isinstance(num, int):
+            assert num > 0
+            batch_size = num - len(self._latest_push_results)
+        # Otherwise, just pull one at a time
+        else:
+            batch_size = 1
+
         i = 0
+
         while True:
             # At end of cache, pull more results
-            if i == len(self._latest_event_results):
+            if i == len(self._latest_push_results):
                 # Searching for only events
                 filter = {"event_cause": {"$ne": "pr"}}
                 # Only search past what we've searched so far
-                if self._last_latest_event_id is not None:
-                    filter['_id'] = {"$lt": self._last_latest_event_id}
+                if self._last_latest_push_event_id is not None:
+                    filter['_id'] = {"$lt": self._last_latest_push_event_id}
 
-                cursor = self._findResults(filter, limit=10)
+                cursor = self._findResults(filter, limit=batch_size)
+
+                # After the first batch size (could be set by num),
+                # only pull one at a time. We should only ever
+                # hit this case when num is set if we find multiple
+                # entries for the same event (due to invalidation)
+                if isinstance(num, int):
+                    batch_size = 1
 
                 for data in cursor:
                     id = data.get('_id')
                     assert isinstance(id, ObjectId)
 
                     # So that we know where to search next time
-                    self._last_latest_event_id = id
+                    self._last_latest_push_event_id = id
 
                     # Due to invalidation, we could have multiple results
                     # from the same event. If we already have this event
                     # (the latest version of it), skip this one
                     event_id = data.get('event_id')
                     if event_id is not None and \
-                        any(r.event_id == event_id for r in self._latest_event_results):
+                        any(r.event_id == event_id for r in self._latest_push_results):
                         continue
 
                     # Build/get the result and store it for future use
                     result = self._buildResults(data)
-                    self._latest_event_results.append(result)
+                    self._latest_push_results.append(result)
 
-            if i < len(self._latest_event_results):
-                yield self._latest_event_results[i]
+            if i < len(self._latest_push_results):
+                yield self._latest_push_results[i]
                 i += 1
             else:
                 return

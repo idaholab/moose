@@ -140,7 +140,7 @@ class TestResultsReaderResults(TestHarnessTestCase):
         self.assertEqual(result.time, FAKE_TIME)
 
         # Has same number of tests
-        for test_result in result.get_tests():
+        for test_result in result.tests:
             data = test_data[test_result.name]
 
             # Get the actual Job object from the TestHarness
@@ -303,7 +303,7 @@ class TestResultsReaderResults(TestHarnessTestCase):
         Tests timing not being available in a test result
         """
         result, _ = self.buildResult(delete_test_key=['timing'])
-        for test_result in result.get_tests():
+        for test_result in result.tests:
             self.assertIsNone(test_result.timing)
             self.assertIsNone(test_result.run_time)
             self.assertIsNone(test_result.hpc_queued_time)
@@ -313,7 +313,7 @@ class TestResultsReaderResults(TestHarnessTestCase):
         Tests run_time not being available in timing in a test result
         """
         result, _ = self.buildResult(delete_test_key=['timing', 'runner_run'])
-        for test_result in result.get_tests():
+        for test_result in result.tests:
             self.assertIsNone(test_result.run_time)
 
     def testNoHPCQueuedTime(self):
@@ -321,7 +321,7 @@ class TestResultsReaderResults(TestHarnessTestCase):
         Tests hpc_queued_time not being available in timing in a test result
         """
         result, _ = self.buildResult(delete_test_key=['timing', 'hpc_queued'])
-        for test_result in result.get_tests():
+        for test_result in result.tests:
             self.assertIsNone(test_result.hpc_queued_time)
 
     def testNoTester(self):
@@ -329,7 +329,7 @@ class TestResultsReaderResults(TestHarnessTestCase):
         Tests tester not being available in a test result
         """
         result, _ = self.buildResult(delete_test_key=['tester'])
-        for test_result in result.get_tests():
+        for test_result in result.tests:
             self.assertIsNone(test_result.tester)
             self.assertIsNone(test_result.json_metadata)
 
@@ -338,7 +338,7 @@ class TestResultsReaderResults(TestHarnessTestCase):
         Tests status not being available in a test result
         """
         result, _ = self.buildResult(delete_test_key=['status'])
-        for test_result in result.get_tests():
+        for test_result in result.tests:
             self.assertIsNone(test_result.status)
             self.assertIsNone(test_result.status_value)
 
@@ -367,8 +367,8 @@ class TestResultsReaderResults(TestHarnessTestCase):
             new_data['tests'] = deepcopy(result.data['tests'])
         self.assertEqual(result.data, new_data)
 
-    @patch.object(TestHarnessResults, '_find_test_data')
-    def testSerializeTestsNotLoaded(self, patch_find_test_data):
+    @patch.object(TestHarnessResults, '_find_tests_data')
+    def testSerializeTestsNotLoaded(self, patch_find_tests_data):
         """
         Test serializing and deserializing a result when the data
         is not already loaded
@@ -376,12 +376,9 @@ class TestResultsReaderResults(TestHarnessTestCase):
         result_data, test_data = self.captureResult(test_in_results=False)
 
         # Mock getting the test results from mongodb
-        def get_test_data(id):
-            for test in test_data.values():
-                if test['_id'] == id:
-                    return test
-            return None
-        patch_find_test_data.side_effect = get_test_data
+        def find_tests_data(ids):
+            return [v for v in test_data.values() if v['_id'] in ids]
+        patch_find_tests_data.side_effect = find_tests_data
 
         result = TestHarnessResults(result_data)
 
@@ -417,6 +414,20 @@ class TestResultsReaderResults(TestHarnessTestCase):
 
         # Compare all of the data
         self._compareSerialized(result, new_result, True)
+
+    @patch.object(TestHarnessResults, '_find_tests_data')
+    def testLoadAllTestsMissing(self, patch_find_tests_data):
+        """
+        Tests TestHarnessResults.load_all_data when test(s)
+        were not found in the database
+        """
+        result_data, _ = self.captureResult(test_in_results=False)
+
+        patch_find_tests_data.return_value = []
+
+        with self.assertRaisesRegex(KeyError, 'Failed to load test results'):
+            TestHarnessResults(result_data).load_all_tests()
+
 
 if __name__ == '__main__':
     unittest.main()

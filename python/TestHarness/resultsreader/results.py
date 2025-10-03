@@ -365,15 +365,18 @@ class TestHarnessResults:
 
         values: dict[TestName, Union[TestHarnessTestResult, ObjectId]] = {}
 
+        all_ids = set()
         for folder_name, folder_entry in tests.items():
             for test_name, test_entry in folder_entry['tests'].items():
                 name = TestName(folder_name, test_name)
+                assert name not in values
 
                 # References a test in a seprate collection
                 # Store the id to be pulled later if needed
                 if isinstance(test_entry, ObjectId):
-                    assert test_entry not in values.values()
+                    assert test_entry not in all_ids
                     value = test_entry
+                    all_ids.add(test_entry)
                 # Is direct test data
                 # Store the actual test object
                 elif isinstance(test_entry, dict):
@@ -385,7 +388,6 @@ class TestHarnessResults:
                         f'has unexpected type "{type(test_entry).__name__}"'
                     )
 
-                assert name not in values
                 values[name] = value
 
         return values
@@ -531,14 +533,13 @@ class TestHarnessResults:
         key = TestName(folder_name, test_name)
         return key in self._tests
 
-    def _find_test_data(self, id: ObjectId) -> dict:
+    def _find_test_data(self, id: ObjectId) -> Optional[dict]:
         """
         Helper for getting the data associated with a test
 
         This is a separate function so that it can be mocked
         easily within unit tests
         """
-        assert self._db is not None
         assert isinstance(self._db, Database)
         assert isinstance(id, ObjectId)
 
@@ -592,24 +593,53 @@ class TestHarnessResults:
 
         return test_result
 
+    def _find_tests_data(self, ids: list[ObjectId]) -> list[dict]:
+        """
+        Helper for getting the data associated with multiple tests
+
+        This is a separate function so that it can be mocked
+        easily within unit tests
+        """
+        assert self._db is not None
+        assert isinstance(self._db, Database)
+        assert isinstance(ids, list)
+
+        with self._db.tests.find({"_id": {"$in": ids}}) as cursor:
+            return [doc for doc in cursor]
+
     def load_all_tests(self):
         """
-        Loads all of the tests from the database if they have
-        not already been loaded
+        Loads all tests that have not been loaded yet
         """
-        load_names = []
-        for name, value in self._tests.items():
-            if isinstance(value, ObjectId):
-                load_names.append(name)
-        for name in load_names:
-            self.get_test(name.folder, name.name)
+        # Get tests that need to be loaded; need a mapping
+        # of id -> name so that we can go from a document
+        # to a name when obtaining data from the database
+        tests = {id: name for name, id in self._tests.items() if isinstance(id, ObjectId)}
 
-    def get_tests(self) -> Iterator[TestHarnessTestResult]:
+        # Nothing to load
+        if not tests:
+            return
+
+        # Load and build everything we need
+        for doc in self._find_tests_data(list(tests.keys())):
+            id = doc['_id']
+            name = tests[id]
+            self._tests[name] = self._build_test(doc, name)
+
+        # Make sure we found every test
+        missing = [str(entry) for entry in self._tests.values() if isinstance(entry, ObjectId)]
+        if missing:
+            raise KeyError(f'Failed to load test results for _id={missing}')
+
+    @property
+    def tests(self) -> list[TestHarnessTestResult]:
         """
         Get all of the test results
+
+        Will load all tests that have not been loaded yet
         """
-        for combined_name in self._tests:
-            yield self.get_test(combined_name.folder, combined_name.name)
+        self.load_all_tests()
+        return list(self._tests.values())
 
     def serialize(self) -> dict:
         """

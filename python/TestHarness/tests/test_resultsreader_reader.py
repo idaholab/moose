@@ -302,8 +302,8 @@ class TestResultsReaderReader(unittest.TestCase):
         # only wanted two
         last_i = min(10, len(gold)) - 1
         last_result_id = list(gold.keys())[last_i]
-        self.assertEqual(reader._last_latest_event_id, last_result_id)
-        self.assertEqual(len(reader._latest_event_results), last_i + 1)
+        self.assertEqual(reader._last_latest_push_event_id, last_result_id)
+        self.assertEqual(len(reader._latest_push_results), last_i + 1)
 
     @unittest.skipUnless(HAS_AUTH, f"Skipping because authentication is not available")
     def testGetTestResultsLive(self):
@@ -311,10 +311,11 @@ class TestResultsReaderReader(unittest.TestCase):
         Tests calling getTestResults() using the real server, if available
         """
         reader = TestHarnessResultsReader(PROD_DATABASE_NAME)
-        limit = 10
-        results = self._testGetTestResults(reader, limit=limit)
-        self.assertEqual(len(results), limit)
-        self.assertEqual(len(reader._latest_event_results), 10)
+
+        for limit in [1, 2, 3]:
+            results = self._testGetTestResults(reader, limit=limit)
+            self.assertEqual(len(results), limit)
+            self.assertEqual(len(reader._latest_push_results), limit)
 
     @unittest.skipIf(HAS_AUTH, f"Skipping because authentication is available")
     def testMissingClient(self):
