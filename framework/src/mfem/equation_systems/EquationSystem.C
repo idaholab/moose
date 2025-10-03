@@ -144,6 +144,8 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
     // Create auxiliary gridfunctions for storing essential constraints from Dirichlet conditions
     _var_ess_constraints.emplace_back(
         std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));
+    _td_var_ess_constraints.emplace_back(
+        std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));        
   }
 
   // Store pointers to FESpaces of all coupled variables
@@ -255,11 +257,15 @@ EquationSystem::FormSystem(mfem::OperatorHandle & op,
 }
 
 void
-EquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
-                                 mfem::BlockVector & trueX,
-                                 mfem::BlockVector & trueRHS)
+EquationSystem::assembleJacobian(Moose::MFEM::NamedFieldsMap<mfem::ParBilinearForm> &jac_blfs,
+                            Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>> & jac_mblfs,
+                            Moose::MFEM::NamedFieldsMap<mfem::ParLinearForm> & rhs_lfs,
+                            std::vector<mfem::Array<int>> & ess_tdof_lists,
+                            std::vector<std::unique_ptr<mfem::ParGridFunction>> &var_ess_constraints,
+                            mfem::OperatorHandle & op,
+                            mfem::BlockVector & trueX,
+                            mfem::BlockVector & trueRHS)
 {
-
   // Allocate block operator
   DeleteAllBlocks();
   _h_blocks.SetSize(_test_var_names.size(), _test_var_names.size());
@@ -267,12 +273,12 @@ EquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
   for (const auto i : index_range(_test_var_names))
   {
     auto & test_var_name = _test_var_names.at(i);
-    auto blf = _blfs.Get(test_var_name);
-    auto lf = _lfs.Get(test_var_name);
+    auto blf = jac_blfs.Get(test_var_name);
+    auto lf = rhs_lfs.Get(test_var_name);
     mfem::Vector aux_x, aux_rhs;
     mfem::HypreParMatrix * aux_a = new mfem::HypreParMatrix;
     blf->FormLinearSystem(
-        _ess_tdof_lists.at(i), *(_var_ess_constraints.at(i)), *lf, *aux_a, aux_x, aux_rhs);
+        ess_tdof_lists.at(i), *(var_ess_constraints.at(i)), *lf, *aux_a, aux_x, aux_rhs);
     _h_blocks(i, i) = aux_a;
     trueX.GetBlock(i) = aux_x;
     trueRHS.GetBlock(i) = aux_rhs;
@@ -289,13 +295,13 @@ EquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
       mfem::Vector aux_x, aux_rhs;
       mfem::ParLinearForm aux_lf(_test_pfespaces.at(i));
       aux_lf = 0.0;
-      if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(trial_var_name))
+      if (jac_mblfs.Has(test_var_name) && jac_mblfs.Get(test_var_name)->Has(trial_var_name))
       {
-        auto mblf = _mblfs.Get(test_var_name)->Get(trial_var_name);
+        auto mblf = jac_mblfs.Get(test_var_name)->Get(trial_var_name);
         mfem::HypreParMatrix * aux_a = new mfem::HypreParMatrix;
-        mblf->FormRectangularLinearSystem(_ess_tdof_lists.at(j),
-                                          _ess_tdof_lists.at(i),
-                                          *(_var_ess_constraints.at(j)),
+        mblf->FormRectangularLinearSystem(ess_tdof_lists.at(j),
+                                          ess_tdof_lists.at(i),
+                                          *(var_ess_constraints.at(j)),
                                           aux_lf,
                                           *aux_a,
                                           aux_x,
@@ -306,14 +312,19 @@ EquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
     }
   }
   // Sync memory
-  for (const auto i : index_range(_test_var_names))
-  {
-    trueX.GetBlock(i).SyncAliasMemory(trueX);
-    trueRHS.GetBlock(i).SyncAliasMemory(trueRHS);
-  }
+  trueX.SyncFromBlocks();
+  trueRHS.SyncFromBlocks();
 
   // Create monolithic matrix
-  op.Reset(mfem::HypreParMatrixFromBlocks(_h_blocks));
+  op.Reset(mfem::HypreParMatrixFromBlocks(_h_blocks));  
+}                                 
+
+void
+EquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
+                                 mfem::BlockVector & trueX,
+                                 mfem::BlockVector & trueRHS)
+{
+  assembleJacobian(_blfs, _mblfs, _lfs, _ess_tdof_lists, _var_ess_constraints, op, trueX, trueRHS);
 }
 
 void
@@ -361,9 +372,6 @@ EquationSystem::BuildLinearForms()
     _lfs.GetRef(test_var_name) = 0.0;
   }
 
-  // Apply boundary conditions
-  ApplyEssentialBCs();
-
   for (auto & test_var_name : _test_var_names)
   {
     // Apply kernels
@@ -372,6 +380,9 @@ EquationSystem::BuildLinearForms()
     ApplyBoundaryLFIntegrators(test_var_name, lf, _integrated_bc_map);
     lf->Assemble();
   }
+
+  // Apply boundary conditions
+  ApplyEssentialBCs();
 
   // Eliminate trivially eliminated variables by subtracting contributions from linear forms
   EliminateCoupledVariables();
@@ -578,44 +589,37 @@ TimeDependentEquationSystem::BuildBilinearForms()
 }
 
 void
+TimeDependentEquationSystem::ApplyEssentialBCs()
+{
+  EquationSystem::ApplyEssentialBCs();
+
+  // Eliminate contributions from variables at previous timestep.
+  for (const auto i : index_range(_test_var_names))
+  {
+    auto & test_var_name = _test_var_names.at(i);
+    auto blf = _blfs.Get(test_var_name);
+    auto lf = _lfs.Get(test_var_name);
+    // if implicit, add contribution to linear form from terms involving state
+    // The AddMult method in mfem::BilinearForm is not defined for non-legacy assembly
+    mfem::Vector lf_prev(lf->Size());
+    blf->Mult(*_eliminated_variables.Get(test_var_name), lf_prev);
+    *lf -= lf_prev;
+    // }
+    mfem::Vector aux_x, aux_rhs;
+    // Update solution values on Dirichlet values to be in terms of du/dt instead of u
+    *_td_var_ess_constraints.at(i).get() = *(_var_ess_constraints.at(i).get());
+    *_td_var_ess_constraints.at(i).get() -= *_eliminated_variables.Get(test_var_name);
+    *_td_var_ess_constraints.at(i).get() /= _dt_coef.constant;
+  }  
+}
+
+void
 TimeDependentEquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
                                               mfem::BlockVector & truedXdt,
                                               mfem::BlockVector & trueRHS)
 {
-
-  // Allocate block operator
-  DeleteAllBlocks();
-  _h_blocks.SetSize(_test_var_names.size(), _test_var_names.size());
-  // Form diagonal blocks.
-  for (const auto i : index_range(_test_var_names))
-  {
-    auto & test_var_name = _test_var_names.at(i);
-    auto td_blf = _td_blfs.Get(test_var_name);
-    auto blf = _blfs.Get(test_var_name);
-    auto lf = _lfs.Get(test_var_name);
-    // if implicit, add contribution to linear form from terms involving state
-    // variable at previous timestep: {
-    blf->AddMult(*_eliminated_variables.Get(test_var_name), *lf, -1.0);
-    // }
-    mfem::Vector aux_x, aux_rhs;
-    // Update solution values on Dirichlet values to be in terms of du/dt instead of u
-    mfem::Vector bc_x = *(_var_ess_constraints.at(i).get());
-    bc_x -= *_eliminated_variables.Get(test_var_name);
-    bc_x /= _dt_coef.constant;
-
-    // Form linear system for operator acting on vector of du/dt
-    mfem::HypreParMatrix * aux_a = new mfem::HypreParMatrix;
-    td_blf->FormLinearSystem(_ess_tdof_lists.at(i), bc_x, *lf, *aux_a, aux_x, aux_rhs);
-    _h_blocks(i, i) = aux_a;
-    truedXdt.GetBlock(i) = aux_x;
-    trueRHS.GetBlock(i) = aux_rhs;
-  }
-
-  truedXdt.SyncFromBlocks();
-  trueRHS.SyncFromBlocks();
-
-  // Create monolithic matrix
-  op.Reset(mfem::HypreParMatrixFromBlocks(_h_blocks));
+  // Form linear system for operator acting on vector of du/dt
+  assembleJacobian(_td_blfs, _td_mblfs, _lfs, _ess_tdof_lists, _td_var_ess_constraints, op, truedXdt, trueRHS);
 }
 
 void
@@ -625,25 +629,12 @@ TimeDependentEquationSystem::FormSystem(mfem::OperatorHandle & op,
 {
   auto & test_var_name = _test_var_names.at(0);
   auto td_blf = _td_blfs.Get(test_var_name);
-  auto blf = _blfs.Get(test_var_name);
   auto lf = _lfs.Get(test_var_name);
-  // if implicit, add contribution to linear form from terms involving state
-  // variable at previous timestep: {
-
-  // The AddMult method in mfem::BilinearForm is not defined for non-legacy assembly
-  mfem::Vector lf_prev(lf->Size());
-  blf->Mult(*_eliminated_variables.Get(test_var_name), lf_prev);
-  *lf -= lf_prev;
-  // }
-  mfem::Vector aux_x, aux_rhs;
-  // Update solution values on Dirichlet values to be in terms of du/dt instead of u
-  mfem::Vector bc_x = *(_var_ess_constraints.at(0).get());
-  bc_x -= *_eliminated_variables.Get(test_var_name);
-  bc_x /= _dt_coef.constant;
 
   // Form linear system for operator acting on vector of du/dt
   mfem::OperatorPtr aux_a;
-  td_blf->FormLinearSystem(_ess_tdof_lists.at(0), bc_x, *lf, aux_a, aux_x, aux_rhs);
+  mfem::Vector aux_x, aux_rhs;
+  td_blf->FormLinearSystem(_ess_tdof_lists.at(0), *(_td_var_ess_constraints.at(0)), *lf, aux_a, aux_x, aux_rhs);
 
   truedXdt.GetBlock(0) = aux_x;
   trueRHS.GetBlock(0) = aux_rhs;
