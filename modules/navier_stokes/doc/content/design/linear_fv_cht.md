@@ -51,7 +51,7 @@ The coupling of the solid and fluid domains is done through boundary conditions 
 
 The methods currently recommended for CHT utilize [LinearFVDirichletCHTBC.md] and
 [LinearFVRobinCHTBC.md] in the two different ways listed below. The Robin BC can also
-emulate a Neumann BC by setting the [!param](/LinearFVBCs/LinearFVRobinCHTBC/htc) parameter to 0.
+emulate a Neumann BC by setting the [!param](/LinearFVBCs/LinearFVRobinCHTBC/h) parameter to 0.
 
 - +Neumann-Dirichlet Coupling+
 

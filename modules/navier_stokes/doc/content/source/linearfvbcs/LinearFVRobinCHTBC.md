@@ -16,7 +16,7 @@ automatically created functors within [SIMPLE.md] are:
 - heat_flux_to_fluid_* (where * is the interface boundary name)
 
 When this boundary condition is action on the fluid side the user is
-recommended to set [!param](LinearFVBCs/LinearFVRobinCHTBC/incoming_flux) parameter to
+recommended to set [!param](/LinearFVBCs/LinearFVRobinCHTBC/incoming_flux) parameter to
 the `heat_flux_to_fluid` functor. The same logic applies to the solid side.
 Furthermore, this boundary condition also requires a surface temperature which
 is typically the surface temperature on the other side of the interface.
@@ -26,7 +26,7 @@ The interface temperatures are also tracked in fuctors and are created within th
 - interface_temperature_solid_* (where * is the interface boundary name)
 - interface_temperature_fluid_* (where * is the interface boundary name)
 
-!listing modules/navier_stokes/test/tests/finite_volume/ins/cht/conjugate_heat_transfer/cht_rob-rob_top.i block=fluid_solid solid_fluid
+!listing modules/navier_stokes/test/tests/finite_volume/ins/cht/conjugate_heat_transfer/cht_rob-rob.i block=fluid_solid solid_fluid
 
 !syntax parameters /LinearFVBCs/LinearFVRobinCHTBC
 

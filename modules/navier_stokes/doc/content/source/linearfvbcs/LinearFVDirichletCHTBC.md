@@ -7,7 +7,7 @@ Its role is to enforce a fixed Dirichlet value at an interface where heat is exc
 In practice, it is a wrapper around [LinearFVAdvectionDiffusionFunctorDirichletBC.md] with additional content
 allowing error checking in CHT applications. For more information on the design of CHT, see [the CHT capability page](linear_fv_cht.md).
 
-!listing modules/navier_stokes/test/tests/finite_volume/ins/cht/conjugate_heat_transfer/cht_neu-dir_top.i block=fluid_solid solid_fluid
+!listing modules/navier_stokes/test/tests/finite_volume/ins/cht/conjugate_heat_transfer/cht_neu-dir.i block=fluid_solid solid_fluid
 
 !syntax parameters /LinearFVBCs/LinearFVDirichletCHTBC
 
