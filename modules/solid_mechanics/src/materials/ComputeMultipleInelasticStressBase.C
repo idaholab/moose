@@ -12,6 +12,7 @@
 #include "StressUpdateBase.h"
 #include "MooseException.h"
 #include "DamageBase.h"
+#include "MultipleInelasticStressHelper.h"
 #include "libmesh/int_range.h"
 
 InputParameters
@@ -282,23 +283,12 @@ ComputeMultipleInelasticStressBase::finiteStrainRotation(const bool force_elasti
 void
 ComputeMultipleInelasticStressBase::computeQpJacobianMult()
 {
-  if (_tangent_calculation_method == TangentCalculationMethod::ELASTIC)
-    _Jacobian_mult[_qp] = _elasticity_tensor[_qp];
-  else if (_tangent_calculation_method == TangentCalculationMethod::PARTIAL)
-  {
-    RankFourTensor A = _identity_symmetric_four;
-    for (const auto i_rmm : make_range(_num_models))
-      A += _consistent_tangent_operator[i_rmm];
-    mooseAssert(A.isSymmetric(), "Tangent operator isn't symmetric");
-    _Jacobian_mult[_qp] = A.invSymm() * _elasticity_tensor[_qp];
-  }
-  else
-  {
-    const RankFourTensor E_inv = _elasticity_tensor[_qp].invSymm();
-    _Jacobian_mult[_qp] = _consistent_tangent_operator[0];
-    for (const auto i_rmm : make_range(1u, _num_models))
-      _Jacobian_mult[_qp] = _consistent_tangent_operator[i_rmm] * E_inv * _Jacobian_mult[_qp];
-  }
+  _Jacobian_mult[_qp] = MultipleInelasticStressHelper::computeJacobianMult(
+      _tangent_calculation_method,
+      _elasticity_tensor[_qp],
+      _consistent_tangent_operator,
+      _num_models,
+      _identity_symmetric_four);
 }
 
 void

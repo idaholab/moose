@@ -12,6 +12,7 @@
 #include "StressUpdateBase.h"
 #include "MooseException.h"
 #include "DamageBase.h"
+#include "MultipleInelasticStressHelper.h"
 #include "libmesh/int_range.h"
 
 registerMooseObject("SolidMechanicsApp", ComputeMultipleInelasticStress);
@@ -95,26 +96,16 @@ ComputeMultipleInelasticStress::updateQpState(RankTwoTensor & elastic_strain_inc
                              inelastic_strain_increment[i_rmm],
                              _consistent_tangent_operator[i_rmm]);
 
-      if (i_rmm == 0)
-      {
-        stress_max = _stress[_qp];
-        stress_min = _stress[_qp];
-      }
-      else
-      {
-        for (const auto i : make_range(Moose::dim))
-          for (const auto j : make_range(Moose::dim))
-            if (_stress[_qp](i, j) > stress_max(i, j))
-              stress_max(i, j) = _stress[_qp](i, j);
-            else if (stress_min(i, j) > _stress[_qp](i, j))
-              stress_min(i, j) = _stress[_qp](i, j);
-      }
+      // Update stress min/max for convergence checking
+      MultipleInelasticStressHelper::updateStressMinMax(
+          _stress[_qp], stress_max, stress_min, i_rmm == 0);
     }
 
     // now check convergence in the stress:
     // once the change in stress is within tolerance after each recompute material
     // consider the stress to be converged
-    l2norm_delta_stress = (stress_max - stress_min).L2norm();
+    l2norm_delta_stress =
+        MultipleInelasticStressHelper::computeStressDifferenceNorm(stress_max, stress_min);
     if (counter == 0 && l2norm_delta_stress > 0.0)
       first_l2norm_delta_stress = l2norm_delta_stress;
 
@@ -138,20 +129,13 @@ ComputeMultipleInelasticStress::updateQpState(RankTwoTensor & elastic_strain_inc
       (l2norm_delta_stress / first_l2norm_delta_stress) > _relative_tolerance)
     throw MooseException("Max stress iteration hit during ComputeMultipleInelasticStress solve!");
 
-  combined_inelastic_strain_increment.zero();
-  for (const auto i_rmm : make_range(_num_models))
-    combined_inelastic_strain_increment +=
-        _inelastic_weights[i_rmm] * inelastic_strain_increment[i_rmm];
+  combined_inelastic_strain_increment =
+      MultipleInelasticStressHelper::computeCombinedInelasticStrainIncrement(
+          inelastic_strain_increment, _inelastic_weights, _num_models);
 
   if (_fe_problem.currentlyComputingJacobian())
     computeQpJacobianMult();
 
-  _material_timestep_limit[_qp] = 0.0;
-  for (const auto i_rmm : make_range(_num_models))
-    _material_timestep_limit[_qp] += 1.0 / _models[i_rmm]->computeTimeStepLimit();
-
-  if (MooseUtils::absoluteFuzzyEqual(_material_timestep_limit[_qp], 0.0))
-    _material_timestep_limit[_qp] = std::numeric_limits<Real>::max();
-  else
-    _material_timestep_limit[_qp] = 1.0 / _material_timestep_limit[_qp];
+  _material_timestep_limit[_qp] =
+      MultipleInelasticStressHelper::computeMaterialTimestepLimit(_models, _num_models);
 }
