@@ -1,0 +1,13 @@
+[Tests]
+  design = 'ComputeMultipleInelasticStressSmallStrain.md'
+  issues = '#TBD'
+
+  [isotropic_plasticity_small_strain]
+    type = Exodiff
+    input = 'isotropic_plasticity_small_strain.i'
+    exodiff = 'isotropic_plasticity_small_strain_out.e'
+    requirement = 'The system shall compute the J2 isotropic plasticity stress and plastic strain '
+                  'response under tensile loading using the small strain (total) formulation with '
+                  'ComputeMultipleInelasticStressSmallStrain.'
+  []
+[]
