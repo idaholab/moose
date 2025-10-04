@@ -89,7 +89,7 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
                 getMFEMProblem().mesh().getMFEMParMesh().GetComm());
   MPI_Bcast(_cut_normal.GetData(),
             _cut_normal.Size(),
-            MPI_DOUBLE,
+            MFEM_MPI_REAL_T,
             rank_with_submesh,
             getMFEMProblem().mesh().getMFEMParMesh().GetComm());
   // Iterate over all vertices on cut, find elements with those vertices,
@@ -110,7 +110,7 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
     {
       const int el_adj_to_cut = els_adj_to_cut[i];
       if (isInDomain(el_adj_to_cut, getSubdomainAttributes(), parent_mesh) &&
-          sideOfCut(el_adj_to_cut, cut_vert, parent_mesh) == 1)
+          isPositiveSideOfCut(el_adj_to_cut, cut_vert, parent_mesh))
         transition_els.Append(el_adj_to_cut);
     }
   }
@@ -162,7 +162,7 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
           {
             const int el_adj_to_cut = els_adj_to_cut[i];
             if (isInDomain(el_adj_to_cut, getSubdomainAttributes(), parent_mesh) &&
-                sideOfCut(el_adj_to_cut, cut_vert, parent_mesh) == 1)
+                isPositiveSideOfCut(el_adj_to_cut, cut_vert, parent_mesh))
               transition_els.Append(el_adj_to_cut);
           }
         }
@@ -203,10 +203,10 @@ MFEMCutTransitionSubMesh::findFaceNormal(const mfem::ParMesh & mesh, const int &
   return normal;
 }
 
-int
-MFEMCutTransitionSubMesh::sideOfCut(const int & el,
-                                    const int & el_vertex_on_cut,
-                                    mfem::ParMesh & parent_mesh)
+bool
+MFEMCutTransitionSubMesh::isPositiveSideOfCut(const int & el,
+                                              const int & el_vertex_on_cut,
+                                              mfem::ParMesh & parent_mesh)
 {
   const int sdim = parent_mesh.SpaceDimension();
   mfem::Vector el_center(3);
@@ -215,11 +215,7 @@ MFEMCutTransitionSubMesh::sideOfCut(const int & el,
   mfem::Vector relative_center(sdim);
   for (int j = 0; j < sdim; j++)
     relative_center[j] = el_center[j] - vertex_coords[j];
-  double side = _cut_normal * relative_center;
-  if (side > 0)
-    return 1;
-  else
-    return -1;
+  return _cut_normal * relative_center > 0;
 }
 
 void

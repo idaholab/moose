@@ -100,7 +100,7 @@ TEST_F(MFEMPostprocessorTest, MFEMVectorL2Error)
   pp_params.set<VariableName>("variable") = "vector_var";
   auto & l2_pp = addObject<MFEMVectorL2Error>("MFEMVectorL2Error", "ppl2", pp_params);
 
-  mfem::VectorConstantCoefficient twos(mfem::Vector({2., 2.}));
+  mfem::VectorConstantCoefficient twos(mfem::Vector({2., 2., 2.}));
   _vector_var->ProjectCoefficient(twos);
   EXPECT_GT(l2_pp.getValue(), 1.);
 

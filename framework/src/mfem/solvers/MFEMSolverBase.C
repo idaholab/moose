@@ -57,7 +57,7 @@ template void MFEMSolverBase::setPreconditioner(mfem::HypreFGMRES &);
 template void MFEMSolverBase::setPreconditioner(mfem::HypreGMRES &);
 template void MFEMSolverBase::setPreconditioner(mfem::HyprePCG &);
 
-bool
+void
 MFEMSolverBase::checkSpectralEquivalence(mfem::ParBilinearForm & blf) const
 {
   bool equiv = true;
@@ -75,7 +75,9 @@ MFEMSolverBase::checkSpectralEquivalence(mfem::ParBilinearForm & blf) const
       equiv = false;
   }
 
-  return equiv;
+  if (!equiv)
+    mooseError("Low-Order-Refined solver requires the FESpace closed-basis to be GaussLobatto "
+               "and the open-basis to be IntegratedGLL for ND and RT elements.");
 }
 
 #endif

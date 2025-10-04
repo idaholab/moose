@@ -140,7 +140,7 @@ public:
     return block_map.count(block) > 0;
   }
 
-  void setTime(const double time)
+  void setTime(const mfem::real_t time)
   {
     for (auto & coef : this->_iterable_coefficients)
       coef->SetTime(time);

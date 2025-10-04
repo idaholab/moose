@@ -20,14 +20,24 @@ MFEMVectorFESpace::validParams()
   params.addClassDescription(
       "Convenience class to construct vector finite element spaces, abstracting away some of the "
       "mathematical complexity of specifying the dimensions.");
-  MooseEnum fec_types("H1 ND RT L2", "H1", true);
+  MooseEnum fec_types("H1 ND RT L2", "H1");
   params.addParam<MooseEnum>("fec_type", fec_types, "Specifies the family of FE shape functions.");
-  params.addParam<std::string>("closed_basis",
-                               "GaussLobatto",
-                               "Specifies the closed quadrature basis used for vector elements.");
-  params.addParam<std::string>("open_basis",
-                               "GaussLegendre",
-                               "Specifies the open quadrature basis used for vector elements.");
+  MooseEnum closed_basis_types("GaussLobatto=1 ClosedUniform=4 Serendipity=6 ClosedGL=7",
+                               "GaussLobatto");
+  params.addParam<MooseEnum>("closed_basis",
+                             closed_basis_types,
+                             "Specifies the closed basis used for ND and RT elements.");
+  MooseEnum basis_types("GaussLegendre GaussLobatto Positive OpenUniform ClosedUniform "
+                        "OpenHalfUniform Serendipity ClosedGL IntegratedGLL",
+                        "GaussLegendre");
+  params.addParam<MooseEnum>(
+      "open_basis", basis_types, "Specifies the open basis used for ND and RT elements.");
+  basis_types = "GaussLobatto";
+  params.addParam<MooseEnum>(
+      "basis",
+      basis_types,
+      "Specifies the basis used for H1 and L2 vector elements. H1 spaces require a closed basis "
+      "(GaussLobatto Positive ClosedUniform Serendipity ClosedGL)");
   params.addParam<int>("range_dim",
                        0,
                        "The number of components of the vectors in reference space. Zero "
@@ -39,8 +49,8 @@ MFEMVectorFESpace::validParams()
 
 MFEMVectorFESpace::MFEMVectorFESpace(const InputParameters & parameters)
   : MFEMSimplifiedFESpace(parameters),
-    _fec_type(parameters.get<MooseEnum>("fec_type")),
-    _range_dim(parameters.get<int>("range_dim"))
+    _fec_type(getParam<MooseEnum>("fec_type")),
+    _range_dim(getParam<int>("range_dim"))
 {
 }
 
@@ -57,15 +67,26 @@ MFEMVectorFESpace::getFECName() const
     actual_type += "_R" + std::to_string(pdim) + "D";
   }
 
-  const char cb = mfem::BasisType::GetChar(getBasis(getParam<std::string>("closed_basis")));
-  const std::string closed_basis(1, cb);
-  const char ob = mfem::BasisType::GetChar(getBasis(getParam<std::string>("open_basis")));
-  const std::string open_basis(1, ob);
+  std::string basis = _fec_type == "L2" ? "_T" : "@";
 
-  // This is to get around an MFEM bug where if you pass the full name of the default element type,
-  // it crashes
-  const std::string basis =
-      (closed_basis + open_basis == "Gg" ? "" : "@" + closed_basis + open_basis);
+  if (_fec_type == "ND" || _fec_type == "RT")
+  {
+    if (isParamSetByUser("basis"))
+      mooseWarning("basis parameter ignored, using closed_basis/open_basis parameters instead");
+    basis += mfem::BasisType::GetChar(getParam<MooseEnum>("closed_basis"));
+    basis += mfem::BasisType::GetChar(getParam<MooseEnum>("open_basis"));
+  }
+  else if (_fec_type == "H1" || _fec_type == "L2")
+  {
+    if (isParamSetByUser("closed_basis") || isParamSetByUser("open_basis"))
+      mooseWarning("closed_basis/open_basis parameter ignored, using basis parameter instead");
+    basis += _fec_type == "L2"
+                 ? std::to_string(getParam<MooseEnum>("basis"))
+                 : std::string({mfem::BasisType::GetChar(getParam<MooseEnum>("basis"))});
+  }
+
+  // This is to get around an MFEM bug (to be removed in #31525)
+  basis = (basis == "@Gg" || basis == "@G" || basis == "_T0") ? "" : basis;
 
   return actual_type + basis + "_" + std::to_string(pdim) + "D_P" + std::to_string(_fec_order);
 }

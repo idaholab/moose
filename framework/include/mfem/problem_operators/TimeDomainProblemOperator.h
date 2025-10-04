@@ -24,7 +24,7 @@ public:
 
   void SetGridFunctions() override;
   void Solve() override {}
-  void ImplicitSolve(const double, const mfem::Vector &, mfem::Vector &) override {}
+  void ImplicitSolve(const mfem::real_t, const mfem::Vector &, mfem::Vector &) override {}
 };
 
 } // namespace Moose::MFEM

@@ -302,7 +302,7 @@ public:
 
   void AddCoupledVariableNameIfMissing(const std::string & coupled_var_name) override;
 
-  virtual void SetTimeStep(double dt);
+  virtual void SetTimeStep(mfem::real_t dt);
   virtual void UpdateEquationSystem();
 
   virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel) override;

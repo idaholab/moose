@@ -46,7 +46,7 @@ TimeDomainEquationSystemProblemOperator::Solve()
 }
 
 void
-TimeDomainEquationSystemProblemOperator::ImplicitSolve(const double dt,
+TimeDomainEquationSystemProblemOperator::ImplicitSolve(const mfem::real_t dt,
                                                        const mfem::Vector & /*X*/,
                                                        mfem::Vector & dX_dt)
 {
@@ -74,7 +74,7 @@ TimeDomainEquationSystemProblemOperator::ImplicitSolve(const double dt,
 }
 
 void
-TimeDomainEquationSystemProblemOperator::BuildEquationSystemOperator(double dt)
+TimeDomainEquationSystemProblemOperator::BuildEquationSystemOperator(mfem::real_t dt)
 {
   GetEquationSystem()->SetTimeStep(dt);
   GetEquationSystem()->UpdateEquationSystem();
