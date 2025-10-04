@@ -379,6 +379,17 @@ class TestResultsReaderCIVETStorer(TestHarnessTestCase):
                           run_tests_kwargs=run_tests_kwargs,
                           build_kwargs={'ignore_skipped': True})
 
+    def testHasAuth(self):
+        """
+        Helper for checking if auth is available or not given an environment
+        variable. This lets us within CIVET tests assert whether or not
+        the authentication is available when we expect it to be so (or not).
+        """
+        if os.environ.get('TEST_CIVETSTORER_HAS_AUTH') is not None:
+            self.assertTrue(HAS_AUTH)
+        if os.environ.get('TEST_CIVETSTORER_MISSING_AUTH') is not None:
+            self.assertFalse(HAS_AUTH)
+
     def getStoredResult(self, result_id: ObjectId,
                         test_ids: Optional[list[ObjectId]]) -> Tuple[dict, Optional[list[dict]]]:
         """
