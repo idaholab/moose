@@ -10,19 +10,19 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #pragma once
-#include "MFEMVectorFEMassKernel.h"
+#include "MFEMMixedVectorGradientKernel.h"
 
 /**
  * \f[
- * (k du/dt, v)
+ * (k \vec \nabla du/dt, \vec v)
  * \f]
  */
-class MFEMTimeDerivativeVectorFEMassKernel : public MFEMVectorFEMassKernel
+class MFEMTimeDerivativeMixedVectorGradientKernel : public MFEMMixedVectorGradientKernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMTimeDerivativeVectorFEMassKernel(const InputParameters & parameters);
+  MFEMTimeDerivativeMixedVectorGradientKernel(const InputParameters & parameters);
 
   /// Get name of the trial variable (gridfunction) the kernel acts on.
   /// Defaults to the name of the test variable labelling the weak form.
