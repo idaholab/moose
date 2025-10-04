@@ -51,7 +51,7 @@ advected_interp_method = 'upwind'
         coupled_flow_physics = flow
 
         solve_for_enthalpy = true
-        # There are no fluid temperature (auxiliary) variable when solving for enthalpy
+        # There is no fluid temperature (auxiliary) variable when solving for enthalpy
         # with nonlinear finite volume, because we need T_from_p_h to be computed on-the-fly
         # rather than on an auxiliary kernel update which does not preserve automatic differentiation
         # fluid_temperature_variable = 'T_fluid'

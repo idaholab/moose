@@ -488,7 +488,8 @@ WCNSFVFluidHeatTransferPhysics::addMaterials()
   if (!_has_energy_equation)
     return;
 
-  // Note that this material choice would not work for Newton-INSFV + solve_for_enthalpy
+  // Note that this material choice does not make sense for Newton-INSFV + solve_for_enthalpy since
+  // this material explicitly computes enthalpy from temperature
   const auto object_type = "INSFVEnthalpyFunctorMaterial";
 
   InputParameters params = getFactory().getValidParams(object_type);
