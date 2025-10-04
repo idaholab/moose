@@ -11,6 +11,7 @@
 #include "FEProblem.h"
 #include "SegregatedSolverUtils.h"
 #include "LinearSystem.h"
+#include "Executioner.h"
 
 using namespace libMesh;
 
@@ -69,6 +70,11 @@ LinearAssemblySegregatedSolve::validParams()
       "active_scalar_l_tol active_scalar_l_abs_tol active_scalar_l_max_its",
       "Active Scalars Equations");
 
+  /*
+   * Parameters to control the conjugate heat transfer
+   */
+  params += NS::FV::CHTHandler::validParams();
+
   return params;
 }
 
@@ -92,7 +98,8 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
         getParam<std::vector<Real>>("active_scalar_equation_relaxation")),
     _active_scalar_l_abs_tol(getParam<Real>("active_scalar_l_abs_tol")),
     _active_scalar_absolute_tolerance(
-        getParam<std::vector<Real>>("active_scalar_absolute_tolerance"))
+        getParam<std::vector<Real>>("active_scalar_absolute_tolerance")),
+    _cht(ex.parameters())
 {
   // We fetch the systems and their numbers for the momentum equations.
   for (auto system_i : index_range(_momentum_system_names))
@@ -168,6 +175,10 @@ LinearAssemblySegregatedSolve::LinearAssemblySegregatedSolve(Executioner & ex)
   // for setting the petsc parameters
   for (auto & system : _systems_to_solve)
     system->system().prefix_with_name(false);
+
+  // Link CHT objects, this will also do some error checking
+  if (_cht.enabled())
+    _cht.linkEnergySystems(_solid_energy_system, _energy_system);
 }
 
 void
@@ -281,6 +292,16 @@ LinearAssemblySegregatedSolve::solveMomentumPredictor()
   momentum_solver.reuse_preconditioner(false);
 
   return its_normalized_residuals;
+}
+
+void
+LinearAssemblySegregatedSolve::initialSetup()
+{
+  if (_cht.enabled())
+  {
+    _cht.deduceCHTBoundaryCoupling();
+    _cht.setupConjugateHeatTransferContainers();
+  }
 }
 
 std::pair<unsigned int, Real>
@@ -576,6 +597,9 @@ LinearAssemblySegregatedSolve::solve()
 
   bool converged = false;
   // Loop until converged or hit the maximum allowed iteration number
+  if (_cht.enabled())
+    _cht.initializeCHTCouplingFields();
+
   while (simple_iteration_counter < _num_iterations && !converged)
   {
     simple_iteration_counter++;
@@ -606,28 +630,58 @@ LinearAssemblySegregatedSolve::solve()
     // outside of the velocity-pressure loop
     if (_has_energy_system)
     {
-      // We set the preconditioner/controllable parameters through petsc options. Linear
-      // tolerances will be overridden within the solver.
-      Moose::PetscSupport::petscSetOptions(_energy_petsc_options, solver_params);
-      ns_residuals[momentum_residual.size() + _has_energy_system] =
-          solveAdvectedSystem(_energy_sys_number,
-                              *_energy_system,
-                              _energy_equation_relaxation,
-                              _energy_linear_control,
-                              _energy_l_abs_tol);
-    }
-    if (_has_solid_energy_system)
-    {
-      // We set the preconditioner/controllable parameters through petsc options. Linear
-      // tolerances will be overridden within the solver.
-      Moose::PetscSupport::petscSetOptions(_solid_energy_petsc_options, solver_params);
-      ns_residuals[momentum_residual.size() + _has_solid_energy_system + _has_energy_system] =
-          solveSolidEnergy();
+      // If there is no CHT specified this will just do go once through this block
+      _cht.resetCHTConvergence();
+      while (!_cht.converged())
+      {
+        if (_cht.enabled())
+          _cht.updateCHTBoundaryCouplingFields(NS::CHTSide::FLUID);
+
+        // We set the preconditioner/controllable parameters through petsc options. Linear
+        // tolerances will be overridden within the solver.
+        Moose::PetscSupport::petscSetOptions(_energy_petsc_options, solver_params);
+        ns_residuals[momentum_residual.size() + _has_energy_system] =
+            solveAdvectedSystem(_energy_sys_number,
+                                *_energy_system,
+                                _energy_equation_relaxation,
+                                _energy_linear_control,
+                                _energy_l_abs_tol);
+
+        if (_has_solid_energy_system)
+        {
+          // For now we only update gradients if cht is needed, might change in the future
+          if (_cht.enabled())
+          {
+            _energy_system->computeGradients();
+            _cht.updateCHTBoundaryCouplingFields(NS::CHTSide::SOLID);
+          }
+
+          // We set the preconditioner/controllable parameters through petsc options. Linear
+          // tolerances will be overridden within the solver.
+          Moose::PetscSupport::petscSetOptions(_solid_energy_petsc_options, solver_params);
+          ns_residuals[momentum_residual.size() + _has_solid_energy_system + _has_energy_system] =
+              solveSolidEnergy();
+
+          // For now we only update gradients if cht is needed, might change in the future
+          if (_cht.enabled())
+            _solid_energy_system->computeGradients();
+        }
+
+        if (_cht.enabled())
+        {
+          _cht.sumIntegratedFluxes();
+          _cht.printIntegratedFluxes();
+        }
+
+        _cht.incrementCHTIterators();
+      }
+      if (_cht.enabled())
+        _cht.resetIntegratedFluxes();
     }
 
     // If we have active scalar equations, solve them here in case they depend on temperature
-    // or they affect the fluid properties such that they must be solved concurrently with pressure
-    // and velocity
+    // or they affect the fluid properties such that they must be solved concurrently with
+    // pressure and velocity
     if (_has_active_scalar_systems)
     {
       _problem.execute(EXEC_NONLINEAR);
@@ -670,9 +724,9 @@ LinearAssemblySegregatedSolve::solve()
     converged = NS::FV::converged(ns_residuals, ns_abs_tols);
   }
 
-  // If we have passive scalar equations, solve them here. We assume the material properties in the
-  // Navier-Stokes equations do not depend on passive scalars, as they are passive, therefore we
-  // solve outside of the velocity-pressure loop
+  // If we have passive scalar equations, solve them here. We assume the material properties in
+  // the Navier-Stokes equations do not depend on passive scalars, as they are passive, therefore
+  // we solve outside of the velocity-pressure loop
   if (_has_passive_scalar_systems && (converged || _continue_on_max_its))
   {
     // The reason why we need more than one iteration is due to the matrix relaxation

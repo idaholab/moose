@@ -17,7 +17,7 @@ object's and acts accordingly. To account for the heat flux on both sides of the
 the boundary condition should be used by both variables as
 shown in:
 
-!listing modules/navier_stokes/test/tests/finite_volume/ins/cht/flow-around-square-linear.i block=LinearFVBCs
+!listing modules/navier_stokes/test/tests/finite_volume/ins/cht/bulk_heat_transfer/flow-around-square-linear.i block=LinearFVBCs
 
 !syntax parameters /LinearFVBCs/LinearFVConvectiveHeatTransferBC
 

@@ -12,6 +12,7 @@
 // Moose includes
 #include "RhieChowMassFlux.h"
 #include "SIMPLESolveBase.h"
+#include "CHTHandler.h"
 
 /**
  * Common base class for segregated solvers for the Navier-Stokes
@@ -27,6 +28,8 @@ public:
   static InputParameters validParams();
 
   virtual void linkRhieChowUserObject() override;
+
+  virtual void initialSetup() override;
 
   /**
    * Performs the momentum pressure coupling.
@@ -81,19 +84,19 @@ protected:
   /// The number of the system corresponding to the pressure equation
   const unsigned int _pressure_sys_number;
 
-  /// Reference to the nonlinear system corresponding to the pressure equation
+  /// Reference to the linear system corresponding to the pressure equation
   LinearSystem & _pressure_system;
 
   /// The number of the system corresponding to the energy equation
   const unsigned int _energy_sys_number;
 
-  /// Pointer to the nonlinear system corresponding to the fluid energy equation
+  /// Pointer to the linear system corresponding to the fluid energy equation
   LinearSystem * _energy_system;
 
   /// The number of the system corresponding to the solid energy equation
   const unsigned int _solid_energy_sys_number;
 
-  /// Pointer to the nonlinear system corresponding to the solid energy equation
+  /// Pointer to the linear system corresponding to the solid energy equation
   LinearSystem * _solid_energy_system;
 
   /// Pointer(s) to the system(s) corresponding to the passive scalar equation(s)
@@ -137,4 +140,9 @@ protected:
 
   /// The user-defined absolute tolerance for determining the convergence in active scalars
   const std::vector<Real> _active_scalar_absolute_tolerance;
+
+  /// ********************** Conjugate heat transfer variables ************** //
+
+  // Handler object for CHT problems
+  NS::FV::CHTHandler _cht;
 };

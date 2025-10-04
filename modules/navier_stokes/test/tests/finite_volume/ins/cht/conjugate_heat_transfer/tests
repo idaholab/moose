@@ -1,0 +1,56 @@
+[Tests]
+  [neumann_dirichlet]
+    design = 'LinearFVRobinCHTBC.md LinearFVDirichletCHTBC.md'
+    issues = '#31203'
+    requirement = 'The system shall be able to solve conjugate heat transfer problems using a Neumann-Dirichlet boundary conditions pair '
+    [bottom]
+      type = CSVDiff
+      input = cht_neu-dir.i
+      csvdiff = 'cht_neu-dir_out_y_vs_tf_0001.csv cht_neu-dir_out_y_vs_ts_0001.csv'
+      detail = 'with the heat transfer interface normals matching the principal normal directions.'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [top]
+      type = CSVDiff
+      input = cht_neu-dir.i
+      csvdiff = 'cht_neu-dir_out_y_vs_tf_0001.csv cht_neu-dir_out_y_vs_ts_0001.csv'
+      cli_args = "Mesh/inactive='' "
+                 "VectorPostprocessors/y_vs_ts/start_point='0.05 1e-9 0' "
+                 "VectorPostprocessors/y_vs_ts/end_point='0.05 ${fparse b-1e-9} 0' "
+                 "VectorPostprocessors/y_vs_tf/start_point='0.05 -1e-9 0' "
+                 "VectorPostprocessors/y_vs_tf/end_point='0.05 ${fparse -b+1e-9} 0' "
+      detail = 'with the heat transfer interface normals pointing in the opposite directions as the principal normal direction.'
+      ignore_columns = 'x y z'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
+  []
+  [robin_robin]
+    design = 'LinearFVRobinCHTBC.md'
+    issues = '#31203'
+    requirement = 'The system shall be able to solve conjugate heat transfer problems using a Robin-Robin boundary conditions pair '
+    [bottom]
+      type = CSVDiff
+      input = cht_rob-rob.i
+      csvdiff = 'cht_rob-rob_out_y_vs_tf_0001.csv cht_rob-rob_out_y_vs_ts_0001.csv'
+      detail = 'with the heat transfer interface normals matching the principal normal directions.'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
+    [top]
+      type = CSVDiff
+      input = cht_rob-rob.i
+      csvdiff = 'cht_rob-rob_out_y_vs_tf_0001.csv cht_rob-rob_out_y_vs_ts_0001.csv'
+      cli_args = "Mesh/inactive='' "
+                 "VectorPostprocessors/y_vs_ts/start_point='0.05 1e-9 0' "
+                 "VectorPostprocessors/y_vs_ts/end_point='0.05 ${fparse b-1e-9} 0' "
+                 "VectorPostprocessors/y_vs_tf/start_point='0.05 -1e-9 0' "
+                 "VectorPostprocessors/y_vs_tf/end_point='0.05 ${fparse -b+1e-9} 0' "
+      detail = 'with the heat transfer interface normals pointing in the opposite directions as the principal normal direction.'
+      ignore_columns = 'x y z'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+    []
+  []
+[]
