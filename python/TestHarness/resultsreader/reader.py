@@ -17,6 +17,7 @@ from pymongo.cursor import Cursor
 from bson.objectid import ObjectId
 
 from TestHarness.resultsreader.results import TestHarnessResults, TestHarnessTestResult
+from TestHarness.resultsreader.auth import Authentication, load_authentication, has_authentication
 
 NoneType = type(None)
 
@@ -88,7 +89,7 @@ class TestHarnessResultsReader:
             self._client.close()
 
     @staticmethod
-    def loadEnvironmentAuthentication() -> Authentication | None:
+    def loadEnvironmentAuthentication() -> Optional[Authentication]:
         """
         Attempts to first load the authentication environment from
         env vars RESULTS_READER_AUTH_[HOST,USERNAME,PASSWORD] if
@@ -96,43 +97,14 @@ class TestHarnessResultsReader:
         environment from the file set by env var
         RESULTS_READER_AUTH_FILE if it is available.
         """
-        # Helpers for getting authentication variables
-        var_name = lambda k: f'RESULTS_READER_AUTH_{k.upper()}'
-        get_var = lambda k: os.environ.get(var_name(k))
-
-        # Try to get authentication from env
-        all_auth_keys = ['host', 'username', 'password']
-        auth = {}
-        for key in all_auth_keys:
-            v = get_var(key)
-            if v:
-                auth[key] = v
-        # Have all three set
-        if len(auth) == 3:
-            auth['port'] = get_var('port')
-            return TestHarnessResultsReader.Authentication(**auth)
-        # Have one or two but not all three set
-        if len(auth) != 0:
-            all_auth_vars = ' '.join(map(var_name, all_auth_keys))
-            raise ValueError(f'All environment variables "{all_auth_vars}" must be set for authentication')
-
-        # Try to get authentication from file
-        auth_file = get_var('file')
-        if auth_file is None:
-            return None
-        try:
-            with open(auth_file, 'r') as f:
-                values = yaml.safe_load(f)
-            return TestHarnessResultsReader.Authentication(**values)
-        except Exception as e:
-            raise Exception(f"Failed to load credentials from '{auth_file}'") from e
+        return load_authentication('RESULTS_READER')
 
     @staticmethod
     def hasEnvironmentAuthentication() -> bool:
         """
         Checks whether or not environment authentication is available
         """
-        return TestHarnessResultsReader.loadEnvironmentAuthentication() is not None
+        return has_authentication('RESULTS_READER')
 
     def getTestResults(self, folder_name: str, test_name: str, limit: int = 50,
                        pr_num: Optional[int] = None) -> list[TestHarnessTestResult]:
