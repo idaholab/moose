@@ -35,12 +35,32 @@ CylinderComponent::validParams()
                                      "Dimension of the cylinder. 0 for a point (not implemented), "
                                      "1 for an (axial) 1D line, 2 for a 2D-RZ cylinder, and 3 for "
                                      "a 3D cylinder (not implemented)");
-  params.addRequiredRangeCheckedParam<Real>("radius", "radius>0", "Radius of the cylinder");
+  params.addRangeCheckedParam<Real>("radius", "radius>0", "Radius of the cylinder");
   params.addRequiredRangeCheckedParam<Real>("length", "length>0", "Length/Height of the cylinder");
 
+  params.addParam<unsigned int>("n_radial",
+                                "Number of radial elements. Only assign if mesh is 2D!");
+  params.addParam<unsigned int>(
+      "n_radial_rings",
+      1,
+      "Number of radial rings within the mesh (does not affect boundary layers).");
+
   params.addRequiredParam<unsigned int>("n_axial", "Number of axial elements of the cylinder");
-  params.addParam<unsigned int>("n_radial", "Number of radial elements of the cylinder");
-  params.addParam<unsigned int>("n_azimuthal", "Number of azimuthal elements of the cylinder");
+  params.addRangeCheckedParam<Real>("boundary_layer_width",
+                                    "boundary_layer_width>=0",
+                                    "The width of the boundary layer (if assigned).");
+  params.addParam<unsigned int>("n_boundary_layers", 1, "The number of boundary layers.");
+  params.addParam<unsigned int>("n_sectors",
+                                "Number of azimuthal sectors in each quadrant of cylinder face.");
+
+  MooseEnum radial_growth_methods("LINEAR CUBIC", "LINEAR");
+  params.addParam<MooseEnum>("radial_growth_method",
+                             radial_growth_methods,
+                             "Functional form to change radius while extruding along curve.");
+  params.addParam<Real>("start_radius", "Starting radius for expansion.");
+  params.addParam<Real>("end_radius", "Ending radius for expansion.");
+  params.addParam<Real>("start_radial_growth_rate", 0, "Starting rate of radial expansion.");
+  params.addParam<Real>("end_radial_growth_rate", 0, "Ending rate of radial expansion.");
 
   params.addParam<SubdomainName>("block", "Block name for the cylinder");
 
@@ -53,9 +73,7 @@ CylinderComponent::CylinderComponent(const InputParameters & params)
     ComponentMaterialPropertyInterface(params),
     ComponentInitialConditionInterface(params),
     ComponentBoundaryConditionInterface(params),
-    ComponentMeshTransformHelper(params),
-    _radius(getParam<Real>("radius")),
-    _height(getParam<Real>("length"))
+    ComponentMeshTransformHelper(params)
 {
   _dimension = getParam<MooseEnum>("dimension");
   addRequiredTask("add_mesh_generator");
@@ -67,7 +85,7 @@ CylinderComponent::addMeshGenerators()
   // Create the base mesh for the component using a mesh generator
   if (_dimension == 0)
     paramError("dimension", "0D cylinder not implemented");
-  else if (_dimension == 1 || _dimension == 2)
+  else if (_dimension == 1 || (_dimension == 2 && !isParamValid("end_radius")))
   {
     InputParameters params = _factory.getValidParams("GeneratedMeshGenerator");
     params.set<MooseEnum>("dim") = _dimension;
@@ -77,9 +95,10 @@ CylinderComponent::addMeshGenerators()
     if (_dimension == 2)
     {
       params.set<Real>("ymax") = {getParam<Real>("radius")};
+      params.set<Real>("ymin") = {-getParam<Real>("radius")};
       if (!isParamValid("n_radial"))
         paramError("n_radial", "Should be provided for a 2D cylinder");
-      params.set<unsigned int>("ny") = {getParam<unsigned int>("n_radial")};
+      params.set<unsigned int>("ny") = {getParam<unsigned int>("n_radial") * 2};
     }
     else if (isParamValid("n_radial"))
       paramError("n_radial", "Should not be provided for a 1D cylinder");
@@ -93,13 +112,124 @@ CylinderComponent::addMeshGenerators()
         "GeneratedMeshGenerator", name() + "_base", params);
     _mg_names.push_back(name() + "_base");
   }
-  else
+  else if (_dimension == 2)
   {
-    paramError("dimension", "3D cylinder is not implemented");
-    if (!isParamValid("n_radial"))
-      paramError("n_radial", "Should be provided for a 3D cylinder");
-    if (!isParamValid("n_azimuthal"))
-      paramError("n_azimuthal", "Should be provided in 3D");
+    if (!isParamValid("end_radius"))
+      paramError("end_radius", "If start_radius is set, end_radius must be set!");
+    // create base
+    InputParameters edge_params = _factory.getValidParams("GeneratedMeshGenerator");
+    edge_params.set<MooseEnum>("dim") = 1;
+    edge_params.set<Real>("xmax") = getParam<Real>("start_radius");
+    edge_params.set<Real>("xmin") = -getParam<Real>("start_radius");
+    edge_params.set<unsigned int>("nx") = getParam<unsigned int>("n_radial") * 2;
+    _app.getMeshGeneratorSystem().addMeshGenerator(
+        "GeneratedMeshGenerator", name() + "_edge", edge_params);
+    _mg_names.push_back(name() + "_edge");
+
+    // rotate to have extrusion axis be along x-axis
+    InputParameters rotate_params = _factory.getValidParams("TransformGenerator");
+    rotate_params.set<MeshGeneratorName>("input") = _mg_names.back();
+    rotate_params.set<MooseEnum>("transform") = "ROTATE_EXT";
+    RealVectorValue angles(-90, 0, 0);
+    rotate_params.set<RealVectorValue>("vector_value") = angles;
+    _app.getMeshGeneratorSystem().addMeshGenerator(
+        "TransformGenerator", name() + "_2D_init_rotate", rotate_params);
+    _mg_names.push_back(name() + "_2D_init_rotate");
+
+    // extrude with expansion
+    InputParameters aeg_params = _factory.getValidParams("AdvancedExtruderGenerator");
+    aeg_params.set<MeshGeneratorName>("input") = _mg_names.back();
+    aeg_params.set<std::vector<unsigned int>>("num_layers") = {getParam<unsigned int>("n_axial")};
+    aeg_params.set<std::vector<Real>>("heights") = {getParam<Real>("length")};
+    aeg_params.set<BoundaryName>("bottom_boundary") = name() + "_bottom_boundary";
+    aeg_params.set<BoundaryName>("top_boundary") = name() + "_top_boundary";
+
+    // parameters for expansion
+    aeg_params.set<MooseEnum>("radial_growth_method") = getParam<MooseEnum>("radial_growth_method");
+    aeg_params.set<Real>("r_final") = getParam<Real>("end_radius");
+    aeg_params.set<Real>("start_radial_growth_rate") = getParam<Real>("start_radial_growth_rate");
+    aeg_params.set<Real>("end_radial_growth_rate") = getParam<Real>("end_radial_growth_rate");
+
+    aeg_params.set<Point>("direction") = Point(1, 0, 0);
+    _app.getMeshGeneratorSystem().addMeshGenerator(
+        "AdvancedExtruderGenerator", name() + "_base", aeg_params);
+    _mg_names.push_back(name() + "_base");
+  }
+  else if (_dimension == 3)
+  {
+    if (!isParamValid("n_axial"))
+      paramError("n_axial", "Should be provided for a 3D cylinder");
+    if (!isParamValid("n_sectors"))
+      paramError("n_sectors", "Should be provided in 3D");
+    if (isParamValid("start_radius") && !isParamValid("end_radius"))
+      paramError("end_radius", "If start_radius is set, end_radius must also be set.");
+    if (isParamValid("start_radius") && isParamValid("radius"))
+      paramError("radius", "If radius is set, start_radius must not be!");
+
+    // create circular face
+    InputParameters circle_params = _factory.getValidParams("ConcentricCircleMeshGenerator");
+    circle_params.set<bool>("preserve_volumes") = true;
+    circle_params.set<bool>("has_outer_square") = false;
+
+    Real radius;
+    if (isParamValid("start_radius"))
+      radius = getParam<Real>("start_radius");
+    else
+      radius = getParam<Real>("radius");
+
+    if (isParamValid("boundary_layer_width"))
+    {
+      Real inner_radius = radius - getParam<Real>("boundary_layer_width");
+      circle_params.set<std::vector<Real>>("radii") = {inner_radius, radius};
+      circle_params.set<std::vector<unsigned int>>("rings") = {
+          getParam<unsigned int>("n_radial_rings"), getParam<unsigned int>("n_boundary_layers")};
+    }
+    else
+    {
+      circle_params.set<std::vector<Real>>("radii") = {radius};
+      circle_params.set<std::vector<unsigned int>>("rings") = {
+          getParam<unsigned int>("n_radial_rings")};
+    }
+
+    circle_params.set<unsigned int>("num_sectors") = getParam<unsigned int>("n_sectors");
+    _app.getMeshGeneratorSystem().addMeshGenerator(
+        "ConcentricCircleMeshGenerator", name() + "_circle_base", circle_params);
+    _mg_names.push_back(name() + "_circle_base");
+
+    // rotate to have extrusion axis be along x-axis
+    InputParameters rotate_params = _factory.getValidParams("TransformGenerator");
+    rotate_params.set<MeshGeneratorName>("input") = _mg_names.back();
+    rotate_params.set<MooseEnum>("transform") = "ROTATE_EXT";
+    RealVectorValue angles(-90, -90, 90);
+    rotate_params.set<RealVectorValue>("vector_value") = angles;
+    _app.getMeshGeneratorSystem().addMeshGenerator(
+        "TransformGenerator", name() + "_3D_init_rotate", rotate_params);
+    _mg_names.push_back(name() + "_3D_init_rotate");
+
+    // extrude surface
+    InputParameters ext_params = _factory.getValidParams("AdvancedExtruderGenerator");
+    ext_params.set<std::vector<unsigned int>>("num_layers") = {getParam<unsigned int>("n_axial")};
+    ext_params.set<MeshGeneratorName>("input") = _mg_names.back();
+    ext_params.set<std::vector<Real>>("heights") = {getParam<Real>("length")};
+    ext_params.set<BoundaryName>("bottom_boundary") = name() + "_bottom_boundary";
+    ext_params.set<BoundaryName>("top_boundary") = name() + "_top_boundary";
+
+    // parameters for expansion
+    if (isParamValid("end_radius"))
+    {
+      ext_params.set<MooseEnum>("radial_growth_method") =
+          getParam<MooseEnum>("radial_growth_method");
+      ext_params.set<Real>("r_final") = getParam<Real>("end_radius");
+      ext_params.set<Real>("start_radial_growth_rate") = getParam<Real>("start_radial_growth_rate");
+      ext_params.set<Real>("end_radial_growth_rate") = getParam<Real>("end_radial_growth_rate");
+      ext_params.set<Real>("r_start_intended") = radius;
+    }
+
+    const Point default_direction(1, 0, 0);
+    ext_params.set<Point>("direction") = default_direction;
+    _app.getMeshGeneratorSystem().addMeshGenerator(
+        "AdvancedExtruderGenerator", name() + "_base", ext_params);
+    _mg_names.push_back(name() + "_base");
   }
 
   ComponentMeshTransformHelper::addMeshGenerators();
