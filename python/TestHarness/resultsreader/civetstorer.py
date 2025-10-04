@@ -1,0 +1,442 @@
+#!/usr/bin/env python3
+#* This file is part of the MOOSE framework
+#* https://mooseframework.inl.gov
+#*
+#* All rights reserved, see COPYRIGHT for full restrictions
+#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#*
+#* Licensed under LGPL 2.1, please see LICENSE for details
+#* https://www.gnu.org/licenses/lgpl-2.1.html
+
+import argparse
+import json
+import os
+import sys
+import re
+import yaml
+from copy import deepcopy
+from dataclasses import dataclass
+from typing import Optional, Tuple
+from datetime import datetime
+from pymongo import MongoClient
+from bson.objectid import ObjectId
+from bson.binary import Binary
+import zlib
+
+NoneType = type(None)
+
+MAX_RESULT_SIZE = 5.0 # MB
+
+class CIVETStorer:
+    CIVET_VERSION = 6
+
+    @staticmethod
+    def parse_args() -> argparse.Namespace:
+        """
+        Parse command-line arguments.
+        """
+        parser = argparse.ArgumentParser(
+            description='Converts test results from a CIVET run for filling into a database'
+        )
+        parser.add_argument('result_path', type=str, help='Path to the results file')
+        parser.add_argument('base_sha', type=str, help='The base commit')
+        parser.add_argument('database', type=str, help='The database')
+        parser.add_argument('--ignore-skipped', action='store_true', help='Ignore skipped tests')
+        parser.add_argument('--ignore-status', action='store_true', help='Ignore status entry in tests')
+        parser.add_argument('--ignore-timing', action='store_true', help='Ignore timing entry in tests')
+        parser.add_argument('--ignore-tester', action='store_true', help='Ignore tester entry in tests')
+        parser.add_argument('--only-runtime', action='store_true', help='Only store runner_run time in tests')
+        parser.add_argument('--max-result-size', type=float, default=MAX_RESULT_SIZE,
+                            help='Max size of a result for tests to be stored within it')
+        return parser.parse_args()
+
+    @dataclass
+    class Authentication:
+        """
+        Helper class for storing the authentication to a mongo database
+        """
+        def __post_init__(self):
+            assert isinstance(self.host, str)
+            assert isinstance(self.username, str)
+            assert isinstance(self.password, str)
+            assert isinstance(self.port, (int, NoneType))
+
+        # The host name
+        host: str
+        # The username
+        username: str
+        # The password
+        password: str
+        # The port
+        port: Optional[int] = None
+
+    @staticmethod
+    def load_authentication() -> Authentication | None:
+        """
+        Loads mongo authentication from a file defined
+        by the environment variable CIVET_STORER_AUTH_FILE.
+
+        If CIVET_STORER_AUTH_FILE is not set, will return None.
+
+        The authentication file should be in YAML syntax with
+        required values host, username, password and an optional
+        value of port.
+        """
+        auth_file = os.environ.get('CIVET_STORER_AUTH_FILE')
+        if auth_file is None:
+            return None
+        auth_file = os.path.abspath(auth_file)
+        try:
+            with open(auth_file, 'r') as f:
+                values = yaml.safe_load(f)
+            return CIVETStorer.Authentication(**values)
+        except Exception as e:
+            raise Exception(f"Failed to load authentication from '{auth_file}'") from e
+
+    @staticmethod
+    def has_authentication() -> bool:
+        """
+        Checks whether or not environment authentication is available.
+        """
+        return CIVETStorer.load_authentication() is not None
+
+    @staticmethod
+    def get_size(obj, seen: Optional[set] = None) -> int:
+        """
+        Recursively find the size of an object in bytes
+        """
+        get_size = CIVETStorer.get_size
+        size = sys.getsizeof(obj)
+        if seen is None:
+            seen = set()
+        obj_id = id(obj)
+        if obj_id in seen:
+            return 0
+        seen.add(obj_id)
+        if isinstance(obj, dict):
+            size += sum([get_size(v, seen) for v in obj.values()])
+            size += sum([get_size(k, seen) for k in obj.keys()])
+        elif hasattr(obj, '__dict__'):
+            size += get_size(obj.__dict__, seen)
+        elif hasattr(obj, '__iter__') and not isinstance(obj, (str, bytes, bytearray)):
+            size += sum([get_size(i, seen) for i in obj])
+        return size
+
+    @staticmethod
+    def parse_ssh_repo(repo: str) -> Tuple[str, str, str]:
+        """
+        Parses a ssh repo (git@[server]:[org]/[repo]) into
+        (server, org, repo)
+        """
+        assert isinstance(repo, str)
+
+        search = re.search(r'^git@([a-zA-Z._\-]+):([a-zA-Z0-9._\-]+)\/([a-zA-Z0-9._\-]+).git$',
+                            repo)
+        if search is None:
+            search = re.search(r'^git@([a-zA-Z._\-]+):([a-zA-Z0-9._\-]+)\/([a-zA-Z0-9._\-]+)$',
+                                repo)
+        if search is None:
+            raise ValueError(f'Failed to parse SSH repo from {"value"}')
+        return search.group(1), search.group(2), search.group(3)
+
+    @staticmethod
+    def get_repo_url(env: dict = dict(os.environ)) -> str:
+        """
+        Determines the repository URL from either
+        CIVET_BASE_SSH_URL or APPLICATION_REPO
+        """
+        assert isinstance(env, dict)
+
+        ssh_repo = env.get('CIVET_BASE_SSH_URL', env.get('APPLICATION_REPO'))
+        if ssh_repo is None:
+            raise ValueError('Failed to obtain repo from CIVET_BASE_SSH_URL or APPLICATION_REPO')
+
+        server, org, repo = CIVETStorer.parse_ssh_repo(ssh_repo)
+        return f'{server}/{org}/{repo}'
+
+    @staticmethod
+    def get_civet_server(civet_server: str) -> str:
+        """
+        Parses the CIVET sever from the server variable
+        """
+        assert isinstance(civet_server, str)
+        # civet.inl.gov reports as civet-be.inl.gov
+        civet_server = civet_server.replace('civet-be', 'civet')
+        # Remove the https://
+        return civet_server.replace('https://', '')
+
+    @staticmethod
+    def build_header(base_sha: str, env: dict) -> dict:
+        """
+        Builds the main header for a results entry given
+        a CIVET environment
+        """
+        assert isinstance(base_sha, str)
+        assert len(base_sha) == 40
+        assert isinstance(env, dict)
+
+        # Load variables from the CIVET environment
+        civet_env = {}
+        load_civet_vars = [
+            'event_cause',
+            'event_id',
+            'head_ref',
+            'head_sha',
+            'job_id',
+            'pr_num',
+            'recipe_name',
+            'server',
+            'step_name',
+            'step_num'
+        ]
+        civet_int_vars = [
+            'event_id',
+            'job_id',
+            'step_num'
+        ]
+        for var in load_civet_vars:
+            civet_var = f'CIVET_{var.upper()}'
+            value = env.get(civet_var)
+            if value is None:
+                raise KeyError(f'Environment variable {civet_var} not set')
+            if var in civet_int_vars:
+                value = int(value)
+            civet_env[var] = value
+
+        assert len(civet_env['head_sha']) == 40
+
+        # Load URL to repo (i.e., github.com/idaholab/moose)
+        repo_url = CIVETStorer.get_repo_url(env)
+
+        # Load CIVET server (i.e., civet.inl.gov)
+        civet_server = CIVETStorer.get_civet_server(civet_env['server'])
+
+        # Fill 'civet' entry, which isn't part of the index
+        # but adds additional context about the CIVET job
+        civet_entry = {
+            'job_id': civet_env['job_id'],
+            'job_url': f'{civet_server}/job/{civet_env["job_id"]}',
+            'recipe_name': civet_env['recipe_name'],
+            'repo_url': repo_url,
+            'step_name': civet_env['step_name'],
+            'step': civet_env['step_num']
+        }
+
+        # Get [event_cause, pr_num] for the main header and
+        # set [event_url, push_branch] in the civet entry
+        event_cause = civet_env['event_cause']
+        if event_cause.startswith('Pull'):
+            pr_num = int(civet_env['pr_num'])
+
+            event_cause = 'pr'
+            civet_entry['event_url'] = f'{repo_url}/pull/{pr_num}'
+            civet_entry['push_branch'] = civet_env['head_ref']
+        else:
+            pr_num = None
+            if event_cause.startswith('Push'):
+                event_cause = 'push'
+            elif event_cause.startswith('Scheduled'):
+                event_cause = 'scheduled'
+            else:
+                raise ValueError(f'Unknown event cause "{event_cause}"')
+            civet_entry['event_url'] = f'{repo_url}/commit/{civet_env["head_sha"]}'
+
+        assert isinstance(pr_num, (int, NoneType))
+
+        header = {
+            'base_sha': base_sha,
+            'civet': civet_entry,
+            'civet_version': CIVETStorer.CIVET_VERSION,
+            'event_sha': civet_env['head_sha'],
+            'event_id': civet_env['event_id'],
+            'event_cause': event_cause,
+            'pr_num': pr_num,
+            'time': datetime.now()
+        }
+
+        return header
+
+    def build(self, results: dict, base_sha: str, env: dict = dict(os.environ),
+              max_result_size: float = MAX_RESULT_SIZE, **kwargs) -> Tuple[dict, Optional[list]]:
+        """
+        Builds the data for storing a test harness result
+        """
+        assert isinstance(base_sha, str)
+        assert len(base_sha) == 40
+        assert isinstance(max_result_size, (float, int))
+        assert max_result_size > 0
+
+        results = deepcopy(results)
+
+        version = results['testharness']['version']
+        print(f'Loaded results; testharness version = {version}')
+
+        # Append header
+        header = self.build_header(base_sha, env)
+        results.update(header)
+
+        tests_entry = results['tests']
+
+        # Remove skipped tests if requested
+        skip_tests = []
+        if kwargs.get('ignore_skipped'):
+            for folder_name, folder_values in tests_entry.items():
+                for test_name, test_values in folder_values['tests'].items():
+                    if test_values['status']['status'] == 'SKIP':
+                        skip_tests.append((folder_name, test_name))
+            for folder_name, test_name in skip_tests:
+                del tests_entry[folder_name]['tests'][test_name]
+                if not tests_entry[folder_name]['tests']:
+                    del tests_entry[folder_name]
+
+        # Cleanup each test as needed
+        for folder_values in tests_entry.values():
+            for test_values in folder_values['tests'].values():
+                # Remove all output from results
+                for key in ['output', 'output_files']:
+                    if key in test_values:
+                        del test_values[key]
+
+                # Remove keys if requested
+                for entry in ['status', 'timing', 'tester']:
+                    if kwargs.get(f'ignore_{entry}'):
+                        del test_values[entry]
+
+                # Only store runner runtime if requested
+                if kwargs.get('only_runtime'):
+                    for key in list(test_values['timing'].keys()):
+                        if key != 'runner_run':
+                            del test_values['timing'][key]
+
+                # Append metadata content from file
+                json_metadata = test_values.get('tester', {}).get('json_metadata', {})
+                for key, value in json_metadata.items():
+                    if value:
+                        try:
+                            with open(value, 'r') as f:
+                                json_metadata[key] = json.load(f)
+                        except:
+                            print(f'WARNING: Failed to load metadata file {value}')
+
+        tests = None
+        max_result_size = max_result_size * 1e6
+        results_size = self.get_size(results)
+        results_size_mb = results_size / 1e6
+        if results_size < max_result_size:
+            print(f'Storing tests within results; size = {results_size_mb:.2f}MB')
+        else:
+            print(f'Storing tests separately; size = {results_size_mb:.2f}MB')
+            i = 0
+            tests = []
+            for folder_values in tests_entry.values():
+                folder_tests = folder_values['tests']
+                for test_name in list(folder_tests.keys()):
+                    tests.append(deepcopy(folder_tests[test_name]))
+                    folder_tests[test_name] = i
+                    i += 1
+
+        return results, tests
+
+    @staticmethod
+    def setup_client() -> MongoClient:
+        """
+        Helper for setting up a mongo client with authentication
+        from the environment
+        """
+        auth = CIVETStorer.load_authentication()
+        if auth is None:
+            raise SystemExit('ERROR: Authentication is not available')
+        return MongoClient(auth.host,
+                           auth.port,
+                           username=auth.username,
+                           password=auth.password)
+
+    def store(self, database: str, results: dict,
+              base_sha: str, **kwargs) -> Tuple[ObjectId, Optional[list[ObjectId]]]:
+        """
+        Stores the data in the database from a test harness result
+        """
+        assert isinstance(database, str)
+
+        result, tests = self.build(results, base_sha, **kwargs)
+
+        auth = self.load_authentication()
+        if auth is None:
+            raise SystemExit('ERROR: Authentication is not available')
+        client_args = [auth.host, auth.port]
+        client_kwargs = {'username': auth.username, 'password': auth.password}
+        with self.setup_client() as client:
+            db = client[database]
+
+            insert_tests = []
+            insert_test_names = []
+            for folder_name, folder_entry in result['tests'].items():
+                for test_name, test_entry in folder_entry['tests'].items():
+                    if tests:
+                        test_data = tests[test_entry]
+                        test_data['result_id'] = None
+                        insert_tests.append(test_data)
+                        insert_test_names.append((folder_name, test_name))
+                    else:
+                        test_data = test_entry
+
+                    # Store larger contents as binary
+                    tester = test_data.get('tester', {})
+                    json_metadata = tester.get('json_metadata', {})
+                    for k, v in json_metadata.items():
+                        if v:
+                            compressed = Binary(zlib.compress(json.dumps(v).encode('utf-8')))
+                            json_metadata[k] = compressed
+
+            # Store the tests (if any)
+            test_ids = None
+            if insert_tests:
+                assert tests is not None
+                inserted = db.tests.insert_many(insert_tests)
+                assert inserted.acknowledged
+                test_ids = inserted.inserted_ids
+                print(f'Inserted {len(test_ids)} tests into {database}')
+
+                # Update the test IDs for each test in the result
+                for i, id in enumerate(test_ids):
+                    folder_name, test_name = insert_test_names[i]
+                    result['tests'][folder_name]['tests'][test_name] = id
+
+            # Store the result
+            inserted = db.results.insert_one(result)
+            assert inserted.acknowledged
+            result_id = inserted.inserted_id
+            print(f'Inserted result {result_id} into {database}')
+
+            # Update the result ID for each test
+            if test_ids:
+                filter = {'_id': {'$in': test_ids}}
+                update = {'$set': {'result_id': result_id}}
+                updated = db.tests.update_many(filter, update)
+                assert updated.acknowledged
+                assert updated.modified_count == len(test_ids)
+                print('Updated test result IDs')
+
+            return result_id, test_ids
+
+    def main(self, result_path: str, database: str,
+             **kwargs) -> Tuple[ObjectId, Optional[list[ObjectId]]]:
+        """
+        Main method; stores into the database given the
+        path to a test harness result
+        """
+        assert isinstance(result_path, str)
+        assert isinstance(database, str)
+
+        result_path = os.path.abspath(result_path)
+        if not os.path.isfile(result_path):
+            raise SystemExit(f'Result file {result_path} does not exist')
+
+        with open(result_path, 'r') as f:
+            results = json.load(f)
+
+        return self.store(database, results, **kwargs)
+
+if __name__ == '__main__':
+    args = CIVETStorer.parse_args()
+    CIVETStorer().main(**vars(args))
