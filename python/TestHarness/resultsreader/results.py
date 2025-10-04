@@ -10,6 +10,7 @@
 from datetime import datetime
 import importlib
 from typing import Optional, Union, Iterator
+from copy import deepcopy
 from dataclasses import dataclass
 from TestHarness.validation.dataclasses import ValidationResult, ValidationData, ValidationDataTypesStr
 from pymongo.database import Database
@@ -112,7 +113,10 @@ class TestHarnessTestResult:
         """
         Get the mongo database ID the results
         """
-        assert self.results.id == self.data['result_id']
+        # Will be none if this test data exists in results
+        result_id = self.data.get('result_id')
+        if result_id is not None:
+            assert self.results.id == result_id
         return self.results.id
 
     @property
@@ -272,7 +276,7 @@ class TestHarnessTestResult:
         results in JSON to the underlying ValidationResult objects
         """
         if self.validation is not None:
-            return [ValidationResult(**v) for v in self.validation.get('results', [])]
+            return [ValidationResult(**v) for v in deepcopy(self.validation.get('results', []))]
         return None
 
     def _buildValidationData(self) -> Optional[dict[str, ValidationData]]:
@@ -283,7 +287,7 @@ class TestHarnessTestResult:
         if self.validation is None:
             return None
 
-        input = self.validation.get('data', {})
+        input = deepcopy(self.validation.get('data', {}))
         data = {}
 
         for k, v in input.items():
@@ -364,15 +368,18 @@ class TestHarnessResults:
 
         values: dict[TestName, Union[TestHarnessTestResult, ObjectId]] = {}
 
+        all_ids = set()
         for folder_name, folder_entry in tests.items():
             for test_name, test_entry in folder_entry['tests'].items():
                 name = TestName(folder_name, test_name)
+                assert name not in values
 
                 # References a test in a seprate collection
                 # Store the id to be pulled later if needed
                 if isinstance(test_entry, ObjectId):
-                    assert test_entry not in values.values()
+                    assert test_entry not in all_ids
                     value = test_entry
+                    all_ids.add(test_entry)
                 # Is direct test data
                 # Store the actual test object
                 elif isinstance(test_entry, dict):
@@ -384,7 +391,6 @@ class TestHarnessResults:
                         f'has unexpected type "{type(test_entry).__name__}"'
                     )
 
-                assert name not in values
                 values[name] = value
 
         return values
@@ -530,14 +536,13 @@ class TestHarnessResults:
         key = TestName(folder_name, test_name)
         return key in self._tests
 
-    def _find_test_data(self, id: ObjectId) -> dict:
+    def _find_test_data(self, id: ObjectId) -> Optional[dict]:
         """
         Helper for getting the data associated with a test
 
         This is a separate function so that it can be mocked
         easily within unit tests
         """
-        assert self._db is not None
         assert isinstance(self._db, Database)
         assert isinstance(id, ObjectId)
 
@@ -591,9 +596,96 @@ class TestHarnessResults:
 
         return test_result
 
-    def get_tests(self) -> Iterator[TestHarnessTestResult]:
+    def _find_tests_data(self, ids: list[ObjectId]) -> list[dict]:
+        """
+        Helper for getting the data associated with multiple tests
+
+        This is a separate function so that it can be mocked
+        easily within unit tests
+        """
+        assert self._db is not None
+        assert isinstance(self._db, Database)
+        assert isinstance(ids, list)
+
+        with self._db.tests.find({"_id": {"$in": ids}}) as cursor:
+            return [doc for doc in cursor]
+
+    def load_all_tests(self):
+        """
+        Loads all tests that have not been loaded yet
+        """
+        # Get tests that need to be loaded; need a mapping
+        # of id -> name so that we can go from a document
+        # to a name when obtaining data from the database
+        tests = {id: name for name, id in self._tests.items() if isinstance(id, ObjectId)}
+
+        # Nothing to load
+        if not tests:
+            return
+
+        # Load and build everything we need
+        for doc in self._find_tests_data(list(tests.keys())):
+            id = doc['_id']
+            name = tests[id]
+            self._tests[name] = self._build_test(doc, name)
+
+        # Make sure we found every test
+        missing = [str(entry) for entry in self._tests.values() if isinstance(entry, ObjectId)]
+        if missing:
+            raise KeyError(f'Failed to load test results for _id={missing}')
+
+    @property
+    def tests(self) -> list[TestHarnessTestResult]:
         """
         Get all of the test results
+
+        Will load all tests that have not been loaded yet
         """
-        for combined_name in self._tests:
-            yield self.get_test(combined_name.folder, combined_name.name)
+        self.load_all_tests()
+        return list(self._tests.values())
+
+    def serialize(self) -> dict:
+        """
+        Serializes this result into a dictionary that can be stored
+        and reloaded later using deserialize/deserialize_build
+        """
+        # Load all tests so that they can be stored
+        self.load_all_tests()
+
+        data = deepcopy(self.data)
+        data['time'] = str(data['time'])
+        data['_id'] = str(data['_id'])
+        for name, test_result in self._tests.items():
+            data['tests'][name.folder]['tests'][name.name] = deepcopy(test_result.data)
+            test_entry = data['tests'][name.folder]['tests'][name.name]
+            test_entry['_id'] = str(test_entry['_id'])
+            if 'result_id' in test_entry:
+                test_entry['result_id'] = str(test_entry['result_id'])
+
+        return data
+
+    @staticmethod
+    def deserialize(data: dict) -> dict:
+        """
+        Deserializes data built with serialize, which can be
+        used to construct a TestHarnessResults object
+        """
+        assert isinstance(data, dict)
+
+        data['time'] = datetime.fromisoformat(data['time'])
+        data['_id'] = ObjectId(data['_id'])
+        for folder_entry in data['tests'].values():
+            for test_entry in folder_entry['tests'].values():
+                test_entry['_id'] = ObjectId(test_entry['_id'])
+                if 'result_id' in test_entry:
+                    test_entry['result_id'] = ObjectId(test_entry['result_id'])
+
+        return data
+
+    @staticmethod
+    def deserialize_build(data: dict) -> dict:
+        """
+        Builds a TestHarnessResults object using serialized data
+        that was built with serialize()
+        """
+        return TestHarnessResults(TestHarnessResults.deserialize(data))

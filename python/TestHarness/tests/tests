@@ -316,6 +316,12 @@
     requirement = 'The system shall provide a python interface for loading previous test results from a database'
     issues = '#30819'
   []
+  [resultsreader_civetstorer]
+    type = PythonUnitTest
+    input = test_resultsreader_civetstorer.py
+    requirement = 'The system shall provide a python interface for storing test results into a database for future access'
+    issues = '#31675'
+  []
   [augmented_capabilities]
     type = PythonUnitTest
     input = test_AugmentedCapabilities.py
