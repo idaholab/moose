@@ -163,7 +163,7 @@ protected:
    * @param local_ke The local nodal Jacobian contribution
    * @param node The contiguous node ID
    * @param jvar The variable number for column
-   * @param comp The Variable component
+   * @param comp The variable component
    */
   KOKKOS_FUNCTION void accumulateTaggedNodalMatrix(const bool add,
                                                    const Real local_ke,
@@ -174,14 +174,14 @@ protected:
   /**
    * The common loop structure template for computing elemental residual
    * @param datum The ResidualDatum object of the current thread
-   * @param body The quadrature-point loop body
+   * @param body The quadrature point loop body
    */
   template <typename function>
   KOKKOS_FUNCTION void computeResidualInternal(ResidualDatum & datum, function body) const;
   /**
    * The common loop structure template for computing elemental Jacobian
    * @param datum The ResidualDatum object of the current thread
-   * @param body The quadrature-point loop body
+   * @param body The quadrature point loop body
    */
   template <typename function>
   KOKKOS_FUNCTION void computeJacobianInternal(ResidualDatum & datum, function body) const;
@@ -212,7 +212,7 @@ ResidualObject::accumulateTaggedElementalResidual(const Real local_re,
   if (!local_re)
     return;
 
-  auto & sys = kokkosSystem(_kokkos_var.sys());
+  auto & sys = kokkosSystem(_kokkos_var.sys(comp));
   auto dof = sys.getElemLocalDofIndex(elem, i, _kokkos_var.var(comp));
 
   for (dof_id_type t = 0; t < _vector_tags.size(); ++t)
@@ -239,7 +239,7 @@ ResidualObject::accumulateTaggedNodalResidual(const bool add,
   if (!local_re)
     return;
 
-  auto & sys = kokkosSystem(_kokkos_var.sys());
+  auto & sys = kokkosSystem(_kokkos_var.sys(comp));
   auto dof = sys.getNodeLocalDofIndex(node, _kokkos_var.var(comp));
 
   for (dof_id_type t = 0; t < _vector_tags.size(); ++t)
@@ -267,7 +267,7 @@ ResidualObject::accumulateTaggedElementalMatrix(const Real local_ke,
   if (!local_ke)
     return;
 
-  auto & sys = kokkosSystem(_kokkos_var.sys());
+  auto & sys = kokkosSystem(_kokkos_var.sys(comp));
   auto row = sys.getElemLocalDofIndex(elem, i, _kokkos_var.var(comp));
   auto col = sys.getElemGlobalDofIndex(elem, j, jvar);
 
@@ -296,7 +296,7 @@ ResidualObject::accumulateTaggedNodalMatrix(const bool add,
   if (!local_ke)
     return;
 
-  auto & sys = kokkosSystem(_kokkos_var.sys());
+  auto & sys = kokkosSystem(_kokkos_var.sys(comp));
   auto row = sys.getNodeLocalDofIndex(node, _kokkos_var.var(comp));
   auto col = sys.getNodeGlobalDofIndex(node, jvar);
 

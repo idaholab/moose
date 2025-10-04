@@ -14,20 +14,20 @@
   []
 []
 
-# [AuxVariables]
-#   [prop1]
-#     order = SECOND
-#     family = MONOMIAL
-#   []
-# []
+[AuxVariables]
+  [prop1]
+    order = SECOND
+    family = MONOMIAL
+  []
+[]
 
-# [AuxKernels]
-#   [prop1_output]
-#     type = MaterialRealAux
-#     variable = prop1
-#     property = thermal_conductivity
-#   []
-# []
+[KokkosAuxKernels]
+  [prop1_output]
+    type = KokkosMaterialRealAux
+    variable = prop1
+    property = thermal_conductivity
+  []
+[]
 
 [KokkosKernels]
   [heat]

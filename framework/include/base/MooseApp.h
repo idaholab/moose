@@ -1111,13 +1111,13 @@ public:
 #endif
   }
 
+#ifdef MOOSE_KOKKOS_ENABLED
   /**
    * Get whether there is any Kokkos object added by actions
    * @returns Whether there is any Kokkos object added by actions
    */
   bool hasKokkosObjects() const { return _has_kokkos_objects; }
 
-#ifdef MOOSE_KOKKOS_ENABLED
   /**
    * Allocate Kokkos memory pool
    * @param size The memory pool size in the number of bytes
@@ -1638,7 +1638,6 @@ private:
    * Deallocate Kokkos memory pool
    */
   void deallocateKokkosMemoryPool();
-#endif
 
   /**
    * Flag whether every process has an associated Kokkos GPU
@@ -1649,6 +1648,7 @@ private:
    * Flag whether there is any Kokkos object added by actions
    */
   bool _has_kokkos_objects = false;
+#endif
 };
 
 template <class T>

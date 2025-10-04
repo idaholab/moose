@@ -126,6 +126,16 @@ ExplicitTimeIntegrator::initialSetup()
                   .getMatrixTagObjectWarehouse(mass_matrix_tag_id, 0)
                   .hasVariableObjects(var_id))
             continue;
+#ifdef MOOSE_KOKKOS_ENABLED
+          if (_nl->getKokkosKernelWarehouse()
+                  .getMatrixTagObjectWarehouse(mass_matrix_tag_id, 0)
+                  .hasVariableObjects(var_id))
+            continue;
+          if (_nl->getKokkosNodalKernelWarehouse()
+                  .getMatrixTagObjectWarehouse(mass_matrix_tag_id, 0)
+                  .hasVariableObjects(var_id))
+            continue;
+#endif
         }
       }
       else if (_nl->getScalarKernelWarehouse()

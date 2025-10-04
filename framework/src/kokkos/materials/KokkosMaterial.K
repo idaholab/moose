@@ -120,5 +120,21 @@ Material::computeProperties()
   }
 }
 
+void
+Material::getKokkosMaterialPropertyHook(const std::string & prop_name_in, const unsigned int state)
+{
+  MaterialBase::checkExecutionStage();
+
+  const auto prop_name =
+      _get_suffix.empty()
+          ? prop_name_in
+          : MooseUtils::join(std::vector<std::string>({prop_name_in, _get_suffix}), "_");
+
+  if (state == 0)
+    _requested_props.insert(prop_name);
+
+  registerPropName(prop_name, true, state);
+}
+
 } // namespace Kokkos
 } // namespace Moose
