@@ -419,7 +419,8 @@ EquationSystem::BuildMixedBilinearForms()
   for (const auto i : index_range(_test_var_names))
   {
     auto test_var_name = _test_var_names.at(i);
-    auto test_mblfs = std::make_shared<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>();
+    auto test_td_mblfs =
+        std::make_shared<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>();
     for (const auto j : index_range(_coupled_var_names))
     {
       const auto & coupled_var_name = _coupled_var_names.at(j);
@@ -439,12 +440,12 @@ EquationSystem::BuildMixedBilinearForms()
         mblf->Assemble();
         // Register mixed bilinear forms associated with a single trial variable
         // for the current test variable
-        test_mblfs->Register(coupled_var_name, mblf);
+        test_td_mblfs->Register(coupled_var_name, mblf);
       }
     }
     // Register all mixed bilinear form sets associated with a single test
     // variable
-    _mblfs.Register(test_var_name, test_mblfs);
+    _mblfs.Register(test_var_name, test_td_mblfs);
   }
 }
 
@@ -511,12 +512,13 @@ TimeDependentEquationSystem::SetTrialVariableNames()
 void
 TimeDependentEquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
 {
-  if (kernel->getTrialVariableName() == GetTimeDerivativeName(kernel->getTestVariableName()))
+  if (kernel->applyTimeDerivative())
   {
     auto trial_var_name = kernel->getTrialVariableName();
     auto test_var_name = kernel->getTestVariableName();
     AddTestVariableNameIfMissing(test_var_name);
-    AddCoupledVariableNameIfMissing(test_var_name);
+    EquationSystem::AddCoupledVariableNameIfMissing(test_var_name);
+    EquationSystem::AddCoupledVariableNameIfMissing(trial_var_name);
 
     if (!_td_kernels_map.Has(test_var_name))
     {
@@ -524,13 +526,27 @@ TimeDependentEquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
           std::make_shared<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>();
       _td_kernels_map.Register(test_var_name, std::move(kernel_field_map));
     }
-    // Register new kernels map if not present for the test variable
-    if (!_td_kernels_map.Get(test_var_name)->Has(test_var_name))
+
+    if (kernel->getTrialVariableName() == GetTimeDerivativeName(kernel->getTestVariableName()))
     {
-      auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMKernel>>>();
-      _td_kernels_map.Get(test_var_name)->Register(test_var_name, std::move(kernels));
+      // Register new kernels map if not present for the test variable
+      if (!_td_kernels_map.Get(test_var_name)->Has(test_var_name))
+      {
+        auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMKernel>>>();
+        _td_kernels_map.Get(test_var_name)->Register(test_var_name, std::move(kernels));
+      }
+      _td_kernels_map.GetRef(test_var_name).Get(test_var_name)->push_back(std::move(kernel));
     }
-    _td_kernels_map.GetRef(test_var_name).Get(test_var_name)->push_back(std::move(kernel));
+    else
+    {
+      // Register new kernels map if not present for the test variable
+      if (!_td_kernels_map.Get(test_var_name)->Has(trial_var_name))
+      {
+        auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMKernel>>>();
+        _td_kernels_map.Get(test_var_name)->Register(trial_var_name, std::move(kernels));
+      }
+      _td_kernels_map.GetRef(test_var_name).Get(trial_var_name)->push_back(std::move(kernel));
+    }
   }
   else
   {
@@ -585,6 +601,48 @@ TimeDependentEquationSystem::BuildBilinearForms()
 
     // Assemble form
     td_blf->Assemble();
+  }
+}
+
+void
+TimeDependentEquationSystem::BuildMixedBilinearForms()
+{
+  EquationSystem::BuildMixedBilinearForms();
+  // Register mixed bilinear forms. Note that not all combinations may
+  // have a kernel
+
+  // Create mblf for each test/coupled variable pair with an added kernel
+  for (const auto i : index_range(_test_var_names))
+  {
+    auto test_var_name = _test_var_names.at(i);
+    auto test_td_mblfs =
+        std::make_shared<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>();
+    for (const auto j : index_range(_coupled_var_names))
+    {
+      const auto & coupled_var_name = _coupled_var_names.at(j);
+      auto td_mblf = std::make_shared<mfem::ParMixedBilinearForm>(_coupled_pfespaces.at(j),
+                                                                  _test_pfespaces.at(i));
+      // Register MixedBilinearForm if kernels exist for it, and assemble
+      // kernels
+      if (_td_kernels_map.Has(test_var_name) &&
+          _td_kernels_map.Get(test_var_name)->Has(coupled_var_name) &&
+          test_var_name != coupled_var_name)
+      {
+        td_mblf->SetAssemblyLevel(_assembly_level);
+        // Apply all mixed kernels with this test/trial pair
+        ApplyDomainBLFIntegrators<mfem::ParMixedBilinearForm>(
+            coupled_var_name, test_var_name, td_mblf, _td_kernels_map);
+
+        // Assemble mixed bilinear forms
+        td_mblf->Assemble();
+        // Register mixed bilinear forms associated with a single trial variable
+        // for the current test variable
+        test_td_mblfs->Register(coupled_var_name, td_mblf);
+      }
+    }
+    // Register all mixed bilinear form sets associated with a single test
+    // variable
+    _td_mblfs.Register(test_var_name, test_td_mblfs);
   }
 }
 

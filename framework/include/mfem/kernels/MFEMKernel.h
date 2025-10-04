@@ -38,6 +38,9 @@ public:
   /// Defaults to the name of the test variable labelling the weak form.
   virtual const VariableName & getTrialVariableName() const { return _test_var_name; }
 
+  /// Apply time derivative to trial variable
+  virtual bool applyTimeDerivative() { return false; }
+
 protected:
   /// Name of (the test variable associated with) the weak form that the kernel is applied to.
   const VariableName & _test_var_name;
