@@ -113,7 +113,10 @@ class TestHarnessTestResult:
         """
         Get the mongo database ID the results
         """
-        assert self.results.id == self.data['result_id']
+        # Will be none if this test data exists in results
+        result_id = self.data.get('result_id')
+        if result_id is not None:
+            assert self.results.id == result_id
         return self.results.id
 
     @property
@@ -655,8 +658,9 @@ class TestHarnessResults:
         for name, test_result in self._tests.items():
             data['tests'][name.folder]['tests'][name.name] = deepcopy(test_result.data)
             test_entry = data['tests'][name.folder]['tests'][name.name]
-            for key in ['_id', 'result_id']:
-                test_entry[key] = str(test_entry[key])
+            test_entry['_id'] = str(test_entry['_id'])
+            if 'result_id' in test_entry:
+                test_entry['result_id'] = str(test_entry['result_id'])
 
         return data
 
@@ -672,8 +676,9 @@ class TestHarnessResults:
         data['_id'] = ObjectId(data['_id'])
         for folder_entry in data['tests'].values():
             for test_entry in folder_entry['tests'].values():
-                for key in ['_id', 'result_id']:
-                    test_entry[key] = ObjectId(test_entry[key])
+                test_entry['_id'] = ObjectId(test_entry['_id'])
+                if 'result_id' in test_entry:
+                    test_entry['result_id'] = ObjectId(test_entry['result_id'])
 
         return data
 

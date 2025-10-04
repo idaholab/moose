@@ -342,6 +342,15 @@ class TestResultsReaderResults(TestHarnessTestCase):
             self.assertIsNone(test_result.status)
             self.assertIsNone(test_result.status_value)
 
+    def testNoTestResultID(self):
+        """
+        Test result_id not being within a test (when tests
+        are stored directly within result data)
+        """
+        result, _ = self.buildResult(delete_test_key=['result_id'])
+        for test_result in result.tests:
+            self.assertEqual(test_result.result_id, result.id)
+
     def _compareSerialized(self, result: TestHarnessResults, new_result: TestHarnessResults,
                            same_tests: bool):
         # Test keys should be the same (values will not be
