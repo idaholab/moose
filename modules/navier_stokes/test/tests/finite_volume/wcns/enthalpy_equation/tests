@@ -25,7 +25,7 @@
       type = CSVDiff
       input = 1d_test_h_fp-nonlinearFV.i
       csvdiff = 1d_test_h_fp-nonlinearFV_out.csv
-      detail = 'using an enthalpy function defined in fluid properties and the nonlinear finite volume discretization'
+      detail = 'using an enthalpy function defined in fluid properties and the nonlinear finite volume implementation'
       abs_zero = 1e-5
       rel_err = 1e-5
     []
@@ -54,7 +54,7 @@
     cli_args = "Physics/NavierStokes/Flow/flow/momentum_inlet_types='flux-velocity'
                 Physics/NavierStokes/Flow/flow/flux_inlet_pps='${bulk_u}'"
     csvdiff = 'enthalpy_equation-physics-nonlinearFV_out.csv'
-    requirement = 'The system shall be able to solve a two-dimensional enthalpy conservation equation using fluid properties for the definition of enthalpy and the shorthand physics syntax, using the nonlinear finite volume discretization and flux boundary conditions in the momentum equation.'
+    requirement = 'The system shall be able to solve a two-dimensional enthalpy conservation equation using fluid properties for the definition of enthalpy and the shorthand physics syntax, using the nonlinear finite volume implementation and flux boundary conditions in the momentum equation.'
   []
   [2d-fp-physics-dirichlet-vel-and-T-inlet]
     type = 'CSVDiff'
@@ -68,6 +68,6 @@
     # we expect some difference between dirichlet and flux BCs for a non-constant cp non-constant rho fluid
     rel_err = 2e-3
     prereq = '2d-fp-physics-flux-vel-inlet'
-    requirement = 'The system shall be able to solve a two-dimensional enthalpy conservation equation using fluid properties for the definition of enthalpy and the shorthand physics syntax, using the nonlinear finite volume discretization and Dirichlet boundary conditons on velocity.'
+    requirement = 'The system shall be able to solve a two-dimensional enthalpy conservation equation using fluid properties for the definition of enthalpy and the shorthand physics syntax, using the nonlinear finite volume implementation and Dirichlet boundary conditions on velocity.'
   []
 []
