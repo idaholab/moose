@@ -12,22 +12,26 @@
 #include "ParsedReporterBase.h"
 
 /**
- * Reporter containing operation between vectors from another Reporter
+ * Reporter performing a reduction on a vector using a parsed function
  */
-class ParsedScalarReporter : public ParsedReporterBase
+class ParsedVectorRealReductionReporter : public ParsedReporterBase
 {
 public:
   static InputParameters validParams();
 
-  ParsedScalarReporter(const InputParameters & parameters);
+  ParsedVectorRealReductionReporter(const InputParameters & parameters);
 
   virtual void initialize() override {}
   virtual void execute() override {}
   virtual void finalize() override;
 
 private:
-  /// output scalar
+  // initial value of element-wise reduction
+  const Real _initial_reduction_value;
+
+  /// Vector being operated on
+  const std::vector<Real> & _vector_reporter_data;
+
+  /// output containing reduction of vector into a scalar
   Real & _output_reporter;
-  /// Input reporter values
-  std::vector<const Real *> _reporter_data;
 };

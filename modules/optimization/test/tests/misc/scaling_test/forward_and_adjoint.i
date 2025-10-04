@@ -167,8 +167,8 @@
   [gradient]
     type = ParsedVectorReporter
     name = inner
-    reporter_names = 'gradient_real/inner_product gradient_imag/inner_product'
-    reporter_symbols = 'a b'
+    vector_reporter_names = 'gradient_real/inner_product gradient_imag/inner_product'
+    vector_reporter_symbols = 'a b'
     expression = 'a+b'
     execute_on = ADJOINT_TIMESTEP_END
     execution_order_group = 1
@@ -176,8 +176,8 @@
   [obj]
     type = ParsedScalarReporter
     name = value
-    reporter_names = 'measure_data_real/objective_value measure_data_imag/objective_value'
-    reporter_symbols = 'a b'
+    scalar_reporter_names = 'measure_data_real/objective_value measure_data_imag/objective_value'
+    scalar_reporter_symbols = 'a b'
     expression = 'a+b'
     execute_on = ADJOINT_TIMESTEP_END
     execution_order_group = 1

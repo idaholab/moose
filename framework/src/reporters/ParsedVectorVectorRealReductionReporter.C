@@ -10,7 +10,7 @@
 #include "ParsedVectorVectorRealReductionReporter.h"
 #include <cstddef>
 
-registerMooseObject("OptimizationApp", ParsedVectorVectorRealReductionReporter);
+registerMooseObject("MooseApp", ParsedVectorVectorRealReductionReporter);
 
 InputParameters
 ParsedVectorVectorRealReductionReporter::validParams()
@@ -18,30 +18,31 @@ ParsedVectorVectorRealReductionReporter::validParams()
   InputParameters params = ParsedReporterBase::validParams();
   params.addClassDescription("Use a parsed function to iterate through a rows of a vector of "
                              "vector and reduce it to a vector.");
-  params.addRequiredParam<ReporterName>("reporter_name",
+  params.addRequiredParam<ReporterName>("vector_of_vector_reporter_name",
                                         "Reporter name with vector of vectors to reduce.");
-  params.addRequiredParam<Real>("initial_value", "Value to intialize the reduction with.");
 
-  // reporter_symbols are the two symbols for reduction value and current value for the reduction
-  // operation, these symbols are enforced in the constructor with a mooseError
-  params.set<std::vector<std::string>>("reporter_symbols") = {"reduction_value", "indexed_value"};
-  params.suppressParameter<std::vector<std::string>>("reporter_symbols");
+  params.addRequiredParam<Real>("initial_reduction_value",
+                                "Value to intialize the reduction with.");
 
-  // This reporter is for postprocessing optimization results and should be exectuted at the end of
-  // execution
-  params.set<ExecFlagEnum>("execute_on") = EXEC_TIMESTEP_END;
+  // vector_reporter_symbols are the two symbols for reduction value and current value for the
+  // reduction operation, these symbols are enforced in the constructor with a mooseError
+  params.set<std::vector<std::string>>("vector_reporter_symbols") = {"reduction_value",
+                                                                     "indexed_value"};
+  params.suppressParameter<std::vector<std::string>>("vector_reporter_symbols");
+  params.suppressParameter<std::vector<std::string>>("scalar_reporter_symbols");
+
   return params;
 }
 
 ParsedVectorVectorRealReductionReporter::ParsedVectorVectorRealReductionReporter(
     const InputParameters & parameters)
   : ParsedReporterBase(parameters),
-    _initial_value(getParam<Real>("initial_value")),
-    _vec_of_vec_name(getParam<ReporterName>("reporter_name")),
+    _initial_reduction_value(getParam<Real>("initial_reduction_value")),
+    _vec_of_vec_name(getParam<ReporterName>("vector_of_vector_reporter_name")),
     _output_reporter(
         declareValueByName<std::vector<Real>>(getParam<std::string>("name"), REPORTER_MODE_ROOT)),
     _reporter_data(getReporterValueByName<std::vector<std::vector<Real>>>(
-        getParam<ReporterName>("reporter_name")))
+        getParam<ReporterName>("vector_of_vector_reporter_name")))
 {
   // parse function
   std::string function = getParam<std::string>("expression");
@@ -64,7 +65,7 @@ ParsedVectorVectorRealReductionReporter::finalize()
   for (auto & reporter_vector : _reporter_data)
   {
     if (reporter_vector.size() != nrows)
-      mooseError("Every vector in 'reporter_name=",
+      mooseError("Every vector in 'vector_of_vector_reporter_name=",
                  _vec_of_vec_name,
                  "' must be the same size.",
                  "\nFirst Vector size = ",
@@ -74,10 +75,10 @@ ParsedVectorVectorRealReductionReporter::finalize()
   }
 
   _output_reporter.clear();
-  _output_reporter.resize(nrows, _initial_value);
+  _output_reporter.resize(nrows, _initial_reduction_value);
   for (const auto i_row : make_range(nrows))
   {
-    Real reduction = _initial_value;
+    Real reduction = _initial_reduction_value;
     for (const auto j_col : make_range(ncols))
     {
       _func_params[0] = reduction;

@@ -143,8 +143,8 @@
   [combined]
     type = ParsedVectorReporter
     name = gradient
-    reporter_names = 'adjoint_pt_x/inner_product adjoint_pt_y/inner_product'
-    reporter_symbols = 'a b'
+    vector_reporter_names = 'adjoint_pt_x/inner_product adjoint_pt_y/inner_product'
+    vector_reporter_symbols = 'a b'
     expression = 'a+b'
     execute_on = ADJOINT_TIMESTEP_END
     # Just to confirm this happens after the gradient calcutions
@@ -153,9 +153,9 @@
   [obj]
     type = ParsedScalarReporter
     name = obj_val
-    reporter_names = 'measure_data_x/objective_value
+    scalar_reporter_names = 'measure_data_x/objective_value
     measure_data_y/objective_value'
-    reporter_symbols = 'a b'
+    scalar_reporter_symbols = 'a b'
     expression = 'a+b'
     execute_on = ADJOINT_TIMESTEP_END
     # Just to confirm this happens after the gradient calcutions

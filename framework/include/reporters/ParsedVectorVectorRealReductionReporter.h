@@ -12,14 +12,14 @@
 #include "ParsedReporterBase.h"
 
 /**
- * Reporter performing a reduction on a vector using a parsed function
+ * Reporter containing row sum of a vector of vectors from another Reporter
  */
-class ParsedVectorRealReductionReporter : public ParsedReporterBase
+class ParsedVectorVectorRealReductionReporter : public ParsedReporterBase
 {
 public:
   static InputParameters validParams();
 
-  ParsedVectorRealReductionReporter(const InputParameters & parameters);
+  ParsedVectorVectorRealReductionReporter(const InputParameters & parameters);
 
   virtual void initialize() override {}
   virtual void execute() override {}
@@ -27,11 +27,14 @@ public:
 
 private:
   // initial value of element-wise reduction
-  const Real _initial_value;
+  const Real _initial_reduction_value;
+
+  // reporter vector of vector w/ data
+  const ReporterName _vec_of_vec_name;
+
+  /// output containing reduction of vector of vector into a vector
+  std::vector<Real> & _output_reporter;
 
   /// Vector being operated on
-  const std::vector<Real> & _reporter_data;
-
-  /// output containing reduction of vector into a scalar
-  Real & _output_reporter;
+  const std::vector<std::vector<Real>> & _reporter_data;
 };

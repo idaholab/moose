@@ -153,7 +153,8 @@ class TestHarnessResultsReader:
         if pr_num is not None:
             pr_result = self.getPRResults(pr_num)
             if pr_result is not None:
-                test_results.append(pr_result)
+                if pr_result.has_test(folder_name, test_name):
+                    test_results.append(pr_result.get_test(folder_name, test_name))
 
         # Get the event results
         for result in self.getLatestEventResults():
@@ -278,7 +279,7 @@ class TestHarnessResultsReader:
             try:
                 result = TestHarnessResults(data, self.db)
             except Exception as e:
-                raise Exception(f'Failed to build result _id={id}') from e
+                raise ValueError(f'Failed to build result _id={id}') from e
             self._results[id] = result
 
         return result

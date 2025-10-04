@@ -192,8 +192,8 @@ omega = '${fparse 2*3.14159265359*frequencyHz}'
   [gradient]
     type = ParsedVectorReporter
     name = gradient
-    reporter_names = 'gradient_from_real/inner_product gradient_from_imag/inner_product'
-    reporter_symbols = 'a b'
+    vector_reporter_names = 'gradient_from_real/inner_product gradient_from_imag/inner_product'
+    vector_reporter_symbols = 'a b'
     expression = 'a+b'
     execute_on = ADJOINT_TIMESTEP_END
     execution_order_group = 0
@@ -201,8 +201,8 @@ omega = '${fparse 2*3.14159265359*frequencyHz}'
   [objective]
     type = ParsedScalarReporter
     name = objective
-    reporter_names = 'measure_data_ur/obj_val measure_data_ui/obj_val'
-    reporter_symbols = 'a b'
+    scalar_reporter_names = 'measure_data_ur/obj_val measure_data_ui/obj_val'
+    scalar_reporter_symbols = 'a b'
     expression = 'a+b'
     execute_on = ADJOINT_TIMESTEP_END
     # Just to confirm this happens after the gradient calcutions
