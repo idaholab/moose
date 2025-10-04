@@ -13,10 +13,10 @@ import tempfile
 import json
 from io import StringIO
 from contextlib import nullcontext, redirect_stdout
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from typing import Optional
 from mock import patch
-
+from copy import deepcopy
 from TestHarness import TestHarness
 from TestHarness import util
 from TestHarness.schedulers.Job import Job
@@ -30,11 +30,12 @@ class TestHarnessTestCase(unittest.TestCase):
     """
     TestCase class for running TestHarness commands.
     """
-
     # Cache for util.getCapabilities
     CAPABILITIES_CACHE = {}
     # Original method for util.getCapabilities to call during the patch
     ORIG_GET_CAPABILITIES = util.getCapabilities
+    # Cache for runTestsCached()
+    RUN_TESTS_CACHED_CACHE: dict[str, 'RunTestsResult'] = {}
 
     @dataclass
     class RunTestsResult:
@@ -144,6 +145,30 @@ class TestHarnessTestCase(unittest.TestCase):
                     result.results = json.loads(f.read())
 
         return result
+
+    def runTestsCached(self, *args, **kwargs) -> RunTestsResult:
+        """
+        Same as runTests(), but caches the result based on the
+        arguments so that the test harness isn't ran multiple
+        times with the same number of arguments.
+
+        The TestHarness object isn't deep copied, but the output
+        and results are so that they can be manipulated
+        """
+        # Combined key for the arguments
+        key = 'args=' + ','.join(args) + 'kwargs=' + ','.join([f'{k}={v}' for k, v in kwargs.items()])
+        # Build the result if it doesn't exist in the cache
+        if key not in self.RUN_TESTS_CACHED_CACHE:
+            self.RUN_TESTS_CACHED_CACHE[key] = self.runTests(*args, **kwargs)
+
+        # Build a new result with copied data
+        result = self.RUN_TESTS_CACHED_CACHE[key]
+        result_copy = {'harness': result.harness}
+        for key in ['output', 'results']:
+            if getattr(result, key):
+                result_copy[key] = deepcopy(getattr(result, key))
+
+        return self.RunTestsResult(**result_copy)
 
     @staticmethod
     def buildTestSpec(tests: dict[str, list[dict]]) -> str:
