@@ -526,27 +526,14 @@ TimeDependentEquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
           std::make_shared<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>();
       _td_kernels_map.Register(test_var_name, std::move(kernel_field_map));
     }
-
-    if (kernel->getTrialVariableName() == GetTimeDerivativeName(kernel->getTestVariableName()))
+    
+    // Register new kernels map if not present for the test variable
+    if (!_td_kernels_map.Get(test_var_name)->Has(trial_var_name))
     {
-      // Register new kernels map if not present for the test variable
-      if (!_td_kernels_map.Get(test_var_name)->Has(test_var_name))
-      {
-        auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMKernel>>>();
-        _td_kernels_map.Get(test_var_name)->Register(test_var_name, std::move(kernels));
-      }
-      _td_kernels_map.GetRef(test_var_name).Get(test_var_name)->push_back(std::move(kernel));
+      auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMKernel>>>();
+      _td_kernels_map.Get(test_var_name)->Register(trial_var_name, std::move(kernels));
     }
-    else
-    {
-      // Register new kernels map if not present for the test variable
-      if (!_td_kernels_map.Get(test_var_name)->Has(trial_var_name))
-      {
-        auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMKernel>>>();
-        _td_kernels_map.Get(test_var_name)->Register(trial_var_name, std::move(kernels));
-      }
-      _td_kernels_map.GetRef(test_var_name).Get(trial_var_name)->push_back(std::move(kernel));
-    }
+    _td_kernels_map.GetRef(test_var_name).Get(trial_var_name)->push_back(std::move(kernel));
   }
   else
   {
@@ -573,7 +560,7 @@ TimeDependentEquationSystem::BuildBilinearForms()
     ApplyBoundaryBLFIntegrators<mfem::ParBilinearForm>(
         test_var_name, test_var_name, td_blf, _integrated_bc_map);
     ApplyDomainBLFIntegrators<mfem::ParBilinearForm>(
-        test_var_name, test_var_name, td_blf, _td_kernels_map);
+        GetTimeDerivativeName(test_var_name), test_var_name, td_blf, _td_kernels_map);
 
     // Recover and scale integrators from blf. This is to apply the dt*du/dt contributions from the
     // operator on the trial variable in the implicit integration scheme
@@ -626,7 +613,7 @@ TimeDependentEquationSystem::BuildMixedBilinearForms()
       // kernels
       if (_td_kernels_map.Has(test_var_name) &&
           _td_kernels_map.Get(test_var_name)->Has(coupled_var_name) &&
-          test_var_name != coupled_var_name)
+          GetTimeDerivativeName(test_var_name) != coupled_var_name)
       {
         td_mblf->SetAssemblyLevel(_assembly_level);
         // Apply all mixed kernels with this test/trial pair
