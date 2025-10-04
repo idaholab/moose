@@ -48,6 +48,11 @@ BUILD_CIVET_ENV = {
 }
 BUILD_CIVET_ENV.update(BASE_CIVET_ENV)
 
+# Default arguments to the TestHarness for running runTests()
+# that are used by most tests
+DEFAULT_TESTHARNESS_ARGS = ['-i', 'validation', '--capture-perf-graph']
+DEFAULT_TESTHARNESS_KWARGS = {'exit_code': 132}
+
 class TestResultsReaderCIVETStorer(TestHarnessTestCase):
     def testParseSSHRepo(self):
         """
@@ -303,8 +308,8 @@ class TestResultsReaderCIVETStorer(TestHarnessTestCase):
 
                 self.assertEqual(modified_test_entry, stored_test)
 
-    def runTestBuild(self, run_tests_args: list[str] = ['-i', 'validation', '--capture-perf-graph'],
-                     run_tests_kwargs: dict = {'exit_code': 132},
+    def runTestBuild(self, run_tests_args: list[str] = DEFAULT_TESTHARNESS_ARGS,
+                     run_tests_kwargs: dict = DEFAULT_TESTHARNESS_KWARGS,
                      **kwargs):
         """
         Helper for testing the build() method based on a test harness execution.
@@ -407,7 +412,7 @@ class TestResultsReaderCIVETStorer(TestHarnessTestCase):
         """
         Helper for testing the store() method.
         """
-        run_tests_result = self.runTestsCached('-i', 'validation', '--capture-perf-graph', exit_code=132)
+        run_tests_result = self.runTestsCached(*DEFAULT_TESTHARNESS_ARGS, **DEFAULT_TESTHARNESS_KWARGS)
         results = run_tests_result.results
 
         store_args = [TEST_DATABASE, results, BASE_SHA]
@@ -440,7 +445,7 @@ class TestResultsReaderCIVETStorer(TestHarnessTestCase):
         """
         Test running from main
         """
-        run_tests_result = self.runTestsCached('-i', 'validation', '--capture-perf-graph', exit_code=132)
+        run_tests_result = self.runTestsCached(*DEFAULT_TESTHARNESS_ARGS, **DEFAULT_TESTHARNESS_KWARGS)
         result = run_tests_result.results
 
         with NamedTemporaryFile() as temp_result:
