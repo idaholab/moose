@@ -13,15 +13,15 @@ import json
 import os
 import sys
 import re
-import yaml
 from copy import deepcopy
-from dataclasses import dataclass
 from typing import Optional, Tuple
 from datetime import datetime
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from bson.binary import Binary
 import zlib
+
+from TestHarness.resultsreader.auth import Authentication, load_authentication, has_authentication
 
 NoneType = type(None)
 
@@ -50,55 +50,23 @@ class CIVETStorer:
                             help='Max size of a result for tests to be stored within it')
         return parser.parse_args()
 
-    @dataclass
-    class Authentication:
-        """
-        Helper class for storing the authentication to a mongo database
-        """
-        def __post_init__(self):
-            assert isinstance(self.host, str)
-            assert isinstance(self.username, str)
-            assert isinstance(self.password, str)
-            assert isinstance(self.port, (int, NoneType))
-
-        # The host name
-        host: str
-        # The username
-        username: str
-        # The password
-        password: str
-        # The port
-        port: Optional[int] = None
-
     @staticmethod
     def load_authentication() -> Authentication | None:
         """
-        Loads mongo authentication from a file defined
-        by the environment variable CIVET_STORER_AUTH_FILE.
-
-        If CIVET_STORER_AUTH_FILE is not set, will return None.
-
-        The authentication file should be in YAML syntax with
-        required values host, username, password and an optional
-        value of port.
+        Attempts to first load the authentication environment from
+        env vars CIVET_STORER_AUTH_[HOST,USERNAME,PASSWORD] if
+        available. Otherwise, tries to load the authentication
+        environment from the file set by env var
+        CIVET_STORER_AUTH_FILE if it is available.
         """
-        auth_file = os.environ.get('CIVET_STORER_AUTH_FILE')
-        if auth_file is None:
-            return None
-        auth_file = os.path.abspath(auth_file)
-        try:
-            with open(auth_file, 'r') as f:
-                values = yaml.safe_load(f)
-            return CIVETStorer.Authentication(**values)
-        except Exception as e:
-            raise Exception(f"Failed to load authentication from '{auth_file}'") from e
+        return load_authentication('CIVET_STORER')
 
     @staticmethod
     def has_authentication() -> bool:
         """
         Checks whether or not environment authentication is available.
         """
-        return CIVETStorer.load_authentication() is not None
+        return has_authentication('CIVET_STORER')
 
     @staticmethod
     def get_size(obj, seen: Optional[set] = None) -> int:
