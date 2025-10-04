@@ -247,6 +247,16 @@ class TestResultsReaderCIVETStorer(TestHarnessTestCase):
         # Check each test
         for folder_name, folder_entry in result['tests'].items():
             for test_name, test_entry in folder_entry['tests'].items():
+                # Ignore skipped tests and this one is skipped
+                if store_kwargs.get('ignore_skipped') and \
+                    test_entry['status']['status'] == 'SKIP':
+                    has_folder = folder_name in stored_results['tests']
+                    has_test = False
+                    if has_folder:
+                        has_test = test_name in stored_results['tests'][folder_name]['tests']
+                    self.assertTrue(not has_folder or not has_test)
+                    continue
+
                 # Start with the original entry and remove/modify
                 # the things that would be different
                 modified_test_entry = deepcopy(test_entry)
@@ -295,15 +305,14 @@ class TestResultsReaderCIVETStorer(TestHarnessTestCase):
         """
         run_tests_result = self.runTests('-i', 'validation', '--capture-perf-graph', exit_code=132)
 
-        def run_test(**kwargs):
-            result_copy = deepcopy(run_tests_result.results)
+        def run_test(result=deepcopy(run_tests_result.results), **kwargs):
             stored_result, stored_tests = CIVETStorer().build(
-                result_copy,
+                result,
                 base_sha=BASE_SHA,
                 env=BUILD_CIVET_ENV,
                 **kwargs.get('store_kwargs', {})
             )
-            self.checkResult(result_copy, stored_result, stored_tests, **kwargs)
+            self.checkResult(result, stored_result, stored_tests, **kwargs)
 
         # Store when tests are contained within the result
         run_test()
@@ -318,6 +327,11 @@ class TestResultsReaderCIVETStorer(TestHarnessTestCase):
 
         # Only store runtime
         run_test(store_kwargs={'only_runtime': True})
+
+        # Ignore skipped tests
+        skipped_result = self.runTests('-i', 'validation', '--only-tests-that-require', 'libtorch',
+                                       no_capabilities=False)
+        run_test(result=skipped_result.results, store_kwargs={'ignore_skipped': True})
 
     def getStoredResult(self, result_id: ObjectId,
                         test_ids: Optional[list[ObjectId]]) -> Tuple[dict, Optional[list[dict]]]:
