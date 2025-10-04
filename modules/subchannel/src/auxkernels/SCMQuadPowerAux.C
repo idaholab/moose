@@ -41,6 +41,9 @@ SCMQuadPowerAux::SCMQuadPowerAux(const InputParameters & parameters)
     _filename(getParam<std::string>("filename")),
     _axial_heat_rate(getFunction("axial_heat_rate"))
 {
+  if (processor_id() > 0)
+    return;
+
   auto nx = _quadMesh.getNx();
   auto ny = _quadMesh.getNy();
   // Matrix sizing
@@ -80,6 +83,9 @@ SCMQuadPowerAux::SCMQuadPowerAux(const InputParameters & parameters)
 void
 SCMQuadPowerAux::initialSetup()
 {
+  if (processor_id() > 0)
+    return;
+
   auto nx = _quadMesh.getNx();
   auto ny = _quadMesh.getNy();
   auto n_pins = (nx - 1) * (ny - 1);

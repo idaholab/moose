@@ -204,7 +204,7 @@ protected:
   inline PetscErrorCode createPetscVector(Vec & v, PetscInt n)
   {
     PetscFunctionBegin;
-    LibmeshPetscCall(VecCreate(PETSC_COMM_WORLD, &v));
+    LibmeshPetscCall(VecCreate(PETSC_COMM_SELF, &v));
     LibmeshPetscCall(PetscObjectSetName((PetscObject)v, "Solution"));
     LibmeshPetscCall(VecSetSizes(v, PETSC_DECIDE, n));
     LibmeshPetscCall(VecSetFromOptions(v));
@@ -215,7 +215,7 @@ protected:
   inline PetscErrorCode createPetscMatrix(Mat & M, PetscInt n, PetscInt m)
   {
     PetscFunctionBegin;
-    LibmeshPetscCall(MatCreate(PETSC_COMM_WORLD, &M));
+    LibmeshPetscCall(MatCreate(PETSC_COMM_SELF, &M));
     LibmeshPetscCall(MatSetSizes(M, PETSC_DECIDE, PETSC_DECIDE, n, m));
     LibmeshPetscCall(MatSetFromOptions(M));
     LibmeshPetscCall(MatSetUp(M));

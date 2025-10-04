@@ -70,6 +70,7 @@
   [viz]
     type = TransientMultiApp
     input_files = 'quad_viz.i'
+    max_procs_per_app = 1
   []
 []
 

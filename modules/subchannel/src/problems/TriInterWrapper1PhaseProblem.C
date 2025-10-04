@@ -374,6 +374,8 @@ TriInterWrapper1PhaseProblem::externalSolve()
           _converged = false;
         }
         auto T_L2norm_old_block = _T_soln->L2norm();
+        if (processor_id() > 0)
+          goto aux_close;
 
         // computeWij(iblock);
         computeWijFromSolve(iblock);
@@ -393,6 +395,7 @@ TriInterWrapper1PhaseProblem::externalSolve()
 
         // We must do a global assembly to make sure data is parallel consistent before we do things
         // like compute L2 norms
+      aux_close:
         _aux->solution().close();
 
         auto T_L2norm_new = _T_soln->L2norm();

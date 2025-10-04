@@ -39,6 +39,9 @@ SCMTriPowerIC::SCMTriPowerIC(const InputParameters & params)
     _filename(getParam<std::string>("filename")),
     _axial_heat_rate(getFunction("axial_heat_rate"))
 {
+  if (processor_id() > 0)
+    return;
+
   auto n_pins = _mesh.getNumOfPins();
   auto heated_length = _mesh.getHeatedLength();
 
@@ -85,6 +88,8 @@ SCMTriPowerIC::SCMTriPowerIC(const InputParameters & params)
 void
 SCMTriPowerIC::initialSetup()
 {
+  if (processor_id() > 0)
+    return;
   auto n_pins = _mesh.getNumOfPins();
   auto nz = _mesh.getNumOfAxialCells();
   auto z_grid = _mesh.getZGrid();

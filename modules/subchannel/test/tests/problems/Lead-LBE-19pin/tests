@@ -9,7 +9,6 @@
         valgrind = NONE
         recover = false
         rel_err = 1e-5
-        max_parallel = 1
         requirement = 'The system will examine the tri subchannel solver for lead bismuth eutetic coolant'
     []
     [test_LEAD]
@@ -19,7 +18,6 @@
         capabilities = 'method!=dbg'
         valgrind = NONE
         recover = false
-        max_parallel = 1
         requirement = 'The system will examine the tri subchannel solver for lead coolant'
     []
 []

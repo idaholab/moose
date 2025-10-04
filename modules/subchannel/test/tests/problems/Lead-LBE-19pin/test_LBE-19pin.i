@@ -247,6 +247,7 @@ P_out = 1.0e5 # Pa
 #     type = FullSolveMultiApp
 #     input_files = "3d_LBE_19.i"
 #     execute_on = "timestep_end"
+#     max_procs_per_app = 1
 #   []
 # []
 
