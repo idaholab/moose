@@ -229,10 +229,14 @@ class TestResultsReaderCIVETStorer(TestHarnessTestCase):
             CIVETStorer.build_header(BASE_SHA, env)
 
     def checkResult(self, result: dict, stored_results: dict,
-                    stored_tests: Optional[list], store_kwargs: dict = {}):
+                    stored_tests: Optional[list], build_kwargs: dict = {}):
         """
-        Helper for checking a result and tests based on
-        a test harness result
+        Combined helper for comparing a test harness result to a set
+        of stored results and tests.
+
+        Each test entry is compared directly to the test harness result entry,
+        where vaues are modified/removed as needed based on the arguments
+        that are passed the build method via build_kwargs
         """
         result_id = stored_results.get('_id')
         in_database = result_id is not None
@@ -248,7 +252,7 @@ class TestResultsReaderCIVETStorer(TestHarnessTestCase):
         for folder_name, folder_entry in result['tests'].items():
             for test_name, test_entry in folder_entry['tests'].items():
                 # Ignore skipped tests and this one is skipped
-                if store_kwargs.get('ignore_skipped') and \
+                if build_kwargs.get('ignore_skipped') and \
                     test_entry['status']['status'] == 'SKIP':
                     has_folder = folder_name in stored_results['tests']
                     has_test = False
@@ -289,49 +293,86 @@ class TestResultsReaderCIVETStorer(TestHarnessTestCase):
                     modified_test_entry['tester']['json_metadata'] = stored_test['tester']['json_metadata']
 
                 # Only runtime (runner_run timing entry)
-                if store_kwargs.get('only_runtime'):
+                if build_kwargs.get('only_runtime'):
                     modified_test_entry['timing'] = {'runner_run': modified_test_entry['timing']['runner_run']}
 
                 # Removed keys via options
                 for key in ['status', 'timing', 'tester']:
-                    if store_kwargs.get(f'ignore_{key}'):
+                    if build_kwargs.get(f'ignore_{key}'):
                         del modified_test_entry[key]
 
                 self.assertEqual(modified_test_entry, stored_test)
 
+    def runTestBuild(self, run_tests_args: list[str] = ['-i', 'validation', '--capture-perf-graph'],
+                     run_tests_kwargs: dict = {'exit_code': 132},
+                     **kwargs):
+        """
+        Helper for testing the build() method based on a test harness execution.
+
+        The 'build_kwargs' kwarg is passed to the build method and to the check
+        method so that things can be checked based on how they are built
+        """
+        run_tests_result = self.runTestsCached(*run_tests_args, **run_tests_kwargs)
+        results = run_tests_result.results
+
+        stored_result, stored_tests = CIVETStorer().build(results,
+                                                          base_sha=BASE_SHA,
+                                                          env=BUILD_CIVET_ENV,
+                                                          **kwargs.get('build_kwargs', {}))
+        self.checkResult(results, stored_result, stored_tests, **kwargs)
+
     def testBuild(self):
         """
-        Test the build() method with the various options
+        Test the build() method with no additional arguments and the
+        tests contained within the result (result is small enough)
         """
-        run_tests_result = self.runTests('-i', 'validation', '--capture-perf-graph', exit_code=132)
+        self.runTestBuild()
 
-        def run_test(result=deepcopy(run_tests_result.results), **kwargs):
-            stored_result, stored_tests = CIVETStorer().build(
-                result,
-                base_sha=BASE_SHA,
-                env=BUILD_CIVET_ENV,
-                **kwargs.get('store_kwargs', {})
-            )
-            self.checkResult(result, stored_result, stored_tests, **kwargs)
+    def testBuildSeparateTests(self):
+        """
+        Test the build() method with no additional arguments and the
+        tests stored separate from the results
+        """
+        self.runTestBuild(build_kwargs={'max_result_size': 1e-6})
 
-        # Store when tests are contained within the result
-        run_test()
+    def testBuildIgnoreStatus(self):
+        """
+        Test the build() method with --ignore-status, not storing
+        the status entry
+        """
+        self.runTestBuild(build_kwargs={'ignore_status': True})
 
-        # Store when tests are not contained within the result,
-        # modified by setting the max result size to something small
-        run_test(store_kwargs={'max_result_size': 1e-6})
+    def testBuildIgnoreTester(self):
+        """
+        Test the build() method with --ignore-status, not storing
+        the tester entry
+        """
+        self.runTestBuild(build_kwargs={'ignore_tester': True})
 
-        # Store with --ignore-[status, tester, timing], not storing those test keys
-        for key in ['status', 'tester', 'timing']:
-            run_test(store_kwargs={f'ignore_{key}': True})
+    def testBuildIgnoreTiming(self):
+        """
+        Test the build() method with --ignore-timing, not storing
+        the tester entry
+        """
+        self.runTestBuild(build_kwargs={'ignore_timing': True})
 
-        # Only store runtime
-        run_test(store_kwargs={'only_runtime': True})
+    def testBuildOnlyRuntime(self):
+        """
+        Test the build() method with --only-runtime, storing
+        only the 'runner_run' timing argument
+        """
+        self.runTestBuild(build_kwargs={'only_runtime': True})
 
-        # Ignore skipped tests
-        skipped_result = self.runTests('-i', 'validation', '--only-tests-that-require', 'libtorch',
-                                       no_capabilities=False)
-        run_test(result=skipped_result.results, store_kwargs={'ignore_skipped': True})
+    def testBuildIgnoreSkipped(self):
+        """
+        Test the build() method with --ignore-skipped, not storing
+        tests that are skipped
+        """
+        run_tests_args = ['-i', 'validation', '--only-tests-that-require', 'libtorch']
+        run_tests_kwargs = {'no_capabilities': False}
+        self.runTestBuild(run_tests_args=run_tests_args,
+                          run_tests_kwargs=run_tests_kwargs,
+                          build_kwargs={'ignore_skipped': True})
 
     def getStoredResult(self, result_id: ObjectId,
                         test_ids: Optional[list[ObjectId]]) -> Tuple[dict, Optional[list[dict]]]:
@@ -362,37 +403,44 @@ class TestResultsReaderCIVETStorer(TestHarnessTestCase):
 
         return stored_result, stored_tests
 
+    def runTestStore(self, **kwargs):
+        """
+        Helper for testing the store() method.
+        """
+        run_tests_result = self.runTestsCached('-i', 'validation', '--capture-perf-graph', exit_code=132)
+        results = run_tests_result.results
+
+        store_args = [TEST_DATABASE, results, BASE_SHA]
+        build_kwargs = {'env': BUILD_CIVET_ENV}
+        result_id, test_ids = CIVETStorer().store(*store_args, **build_kwargs, **kwargs)
+        self.assertIsInstance(result_id, ObjectId)
+        self.assertIsInstance(test_ids, (list, type(None)))
+
+        stored_result, stored_tests = self.getStoredResult(result_id, test_ids)
+        self.checkResult(results, stored_result, stored_tests, build_kwargs=kwargs)
+
     @unittest.skipUnless(HAS_AUTH, f"Skipping because authentication is not available")
     def testStore(self):
         """
-        Test the store() method with the various options
+        Test the store() method with no additional arguments and the
+        tests contained within the result (result is small enough)
         """
-        run_tests_result = self.runTests('-i', 'validation', '--capture-perf-graph', exit_code=132)
+        self.runTestStore()
 
-        def run_test(separate_tests=False, **kwargs):
-            result_copy = deepcopy(run_tests_result.results)
-
-            store_args = [TEST_DATABASE, result_copy, BASE_SHA]
-            store_kwargs = {'env': BUILD_CIVET_ENV}
-            result_id, test_ids = CIVETStorer().store(*store_args, **store_kwargs, **kwargs)
-            self.assertIsInstance(result_id, ObjectId)
-            self.assertIsInstance(test_ids, (list, type(None)))
-
-            stored_result, stored_tests = self.getStoredResult(result_id, test_ids)
-            self.checkResult(result_copy, stored_result, stored_tests, store_kwargs=kwargs)
-
-        # Store with tests combined with results
-        run_test()
-
-        # Store with tests separate from results
-        run_test(max_result_size=1e-6)
+    @unittest.skipUnless(HAS_AUTH, f"Skipping because authentication is not available")
+    def testStoreSeparateTests(self):
+        """
+        Test the store() method with no additional arguments and the
+        tests stored separate from the results
+        """
+        self.runTestStore(max_result_size=1e-6)
 
     @unittest.skipUnless(HAS_AUTH, f"Skipping because authentication is not available")
     def testMain(self):
         """
         Test running from main
         """
-        run_tests_result = self.runTests('-i', 'validation', '--capture-perf-graph', exit_code=132)
+        run_tests_result = self.runTestsCached('-i', 'validation', '--capture-perf-graph', exit_code=132)
         result = run_tests_result.results
 
         with NamedTemporaryFile() as temp_result:
