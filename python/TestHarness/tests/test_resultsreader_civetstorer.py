@@ -41,22 +41,6 @@ BASE_CIVET_ENV = {
     'CIVET_STEP_NUM': '4'
 }
 
-# Base gold to be used for testing build_header()
-BASE_HEADER_GOLD = {
-    'civet': {
-        'job_id': int(BASE_CIVET_ENV['CIVET_JOB_ID']),
-        'job_url': f'civet.inl.gov/job/{BASE_CIVET_ENV["CIVET_JOB_ID"]}',
-        'recipe_name': BASE_CIVET_ENV['CIVET_RECIPE_NAME'],
-        'repo_url': 'github.com/idaholab/moose',
-        'step': int(BASE_CIVET_ENV['CIVET_STEP_NUM']),
-        'step_name': BASE_CIVET_ENV['CIVET_STEP_NAME']
-    },
-    'base_sha': BASE_SHA,
-    'civet_version': CIVETStorer.CIVET_VERSION,
-    'event_id': int(BASE_CIVET_ENV['CIVET_EVENT_ID']),
-    'event_sha': BASE_CIVET_ENV['CIVET_HEAD_SHA'],
-}
-
 # Base civet environment to be used for testing build() and store()
 BUILD_CIVET_ENV = {
     'CIVET_EVENT_CAUSE': 'Pull request',
@@ -110,6 +94,27 @@ class TestResultsReaderCIVETStorer(TestHarnessTestCase):
             'civet.inl.gov'
         )
 
+    @staticmethod
+    def buildHeaderGold(base_sha: str, env: dict) -> dict:
+        """
+        Build the base gold for build_header() given a
+        base sha and an env to read from
+        """
+        return {
+            'civet': {
+                'job_id': int(env['CIVET_JOB_ID']),
+                'job_url': f'civet.inl.gov/job/{env["CIVET_JOB_ID"]}',
+                'recipe_name': env['CIVET_RECIPE_NAME'],
+                'repo_url': 'github.com/idaholab/moose',
+                'step': int(env['CIVET_STEP_NUM']),
+                'step_name': env['CIVET_STEP_NAME']
+            },
+            'base_sha': base_sha,
+            'civet_version': CIVETStorer.CIVET_VERSION,
+            'event_id': int(env['CIVET_EVENT_ID']),
+            'event_sha': env['CIVET_HEAD_SHA'],
+        }
+
     def testBuildHeaderPR(self):
         """
         Tests build_header() for a pull request
@@ -120,9 +125,30 @@ class TestResultsReaderCIVETStorer(TestHarnessTestCase):
 
         result = CIVETStorer.build_header(BASE_SHA, env)
 
-        gold = deepcopy(BASE_HEADER_GOLD)
+        gold = self.buildHeaderGold(BASE_SHA, BASE_CIVET_ENV)
         gold['civet']['event_url'] = f'github.com/idaholab/moose/pull/{pr_num}'
         gold['civet']['push_branch'] = BASE_CIVET_ENV['CIVET_HEAD_REF']
+        gold['event_cause'] = 'pr'
+        gold['pr_num'] = pr_num
+        gold['time'] = result['time']
+
+        self.assertEqual(result, gold)
+
+    @unittest.skipUnless(os.environ.get('CIVET_EVENT_CAUSE') == 'Pull request',
+                         f"Skipping because not on a CIVET PR")
+    def testBuildHeaderPRLive(self):
+        """
+        Tests build_header() for a pull request when used on CIVET
+        """
+        env = dict(os.environ)
+        pr_num = int(env['CIVET_PR_NUM'])
+        base_sha = env['CIVET_BASE_SHA']
+
+        result = CIVETStorer.build_header(base_sha, env)
+
+        gold = self.buildHeaderGold(base_sha, env)
+        gold['civet']['event_url'] = f'github.com/idaholab/moose/pull/{pr_num}'
+        gold['civet']['push_branch'] = env['CIVET_HEAD_REF']
         gold['event_cause'] = 'pr'
         gold['pr_num'] = pr_num
         gold['time'] = result['time']
@@ -138,8 +164,27 @@ class TestResultsReaderCIVETStorer(TestHarnessTestCase):
 
         result = CIVETStorer.build_header(BASE_SHA, env)
 
-        gold = deepcopy(BASE_HEADER_GOLD)
+        gold = self.buildHeaderGold(BASE_SHA, BASE_CIVET_ENV)
         gold['civet']['event_url'] = f'github.com/idaholab/moose/commit/{BASE_CIVET_ENV["CIVET_HEAD_SHA"]}'
+        gold['event_cause'] = 'push'
+        gold['pr_num'] = None
+        gold['time'] = result['time']
+
+        self.assertEqual(result, gold)
+
+    @unittest.skipUnless(os.environ.get('CIVET_EVENT_CAUSE', '').startswith('Push'),
+                         f"Skipping because not on a CIVET push")
+    def testBuildHeaderPushLive(self):
+        """
+        Tests build_header() for a pull request when used on CIVET
+        """
+        env = dict(os.environ)
+        base_sha = env['CIVET_BASE_SHA']
+
+        result = CIVETStorer.build_header(base_sha, env)
+
+        gold = self.buildHeaderGold(base_sha, env)
+        gold['civet']['event_url'] = f'github.com/idaholab/moose/commit/{env["CIVET_HEAD_SHA"]}'
         gold['event_cause'] = 'push'
         gold['pr_num'] = None
         gold['time'] = result['time']
@@ -155,7 +200,7 @@ class TestResultsReaderCIVETStorer(TestHarnessTestCase):
 
         result = CIVETStorer.build_header(BASE_SHA, env)
 
-        gold = deepcopy(BASE_HEADER_GOLD)
+        gold = self.buildHeaderGold(BASE_SHA, BASE_CIVET_ENV)
         gold['civet']['event_url'] = f'github.com/idaholab/moose/commit/{BASE_CIVET_ENV["CIVET_HEAD_SHA"]}'
         gold['event_cause'] = 'scheduled'
         gold['pr_num'] = None
