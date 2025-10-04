@@ -1,12 +1,12 @@
 ################################################################################
 # MATERIAL PROPERTIES
 ################################################################################
-rho = 3279.
-T_0 = 875.0
-mu = 1.
+rho_0 = 3279.
+mu = 1.0
 k_cond = 38.0
-cp = 640.
-alpha = 3.26e-5
+cp = ${fparse 640}
+alpha_b = 3.26e-5
+T_0 = 875.0
 
 walls = 'right left top bottom'
 
@@ -30,10 +30,10 @@ walls = 'right left top bottom'
   [gen]
     type = GeneratedMeshGenerator
     dim = 2
-    xmin = 0
-    xmax = 1
-    ymin = 0
-    ymax = 1
+    xmin = 1
+    xmax = 2.0
+    ymin = 1.0
+    ymax = 2.0
     nx = 15
     ny = 15
   []
@@ -49,9 +49,9 @@ walls = 'right left top bottom'
     u = vel_x
     v = vel_y
     pressure = pressure
-    rho = ${rho}
+    rho = 'rho'
     p_diffusion_kernel = p_diffusion
-    body_force_kernel_names = "u_buoyancy; v_buoyancy"
+    body_force_kernel_names = 'u_buoyancy; v_buoyancy'
   []
 []
 
@@ -91,13 +91,11 @@ walls = 'right left top bottom'
     momentum_component = 'x'
   []
   [u_buoyancy]
-    type = LinearFVMomentumBoussinesq
+    type = LinearFVMomentumBuoyancy
     variable = vel_x
-    T_fluid = T_fluid
-    gravity = '0 -9.8 0'
-    rho = ${rho}
-    ref_temperature = ${T_0}
-    alpha_name = ${alpha}
+    rho = 'rho'
+    reference_rho = ${rho_0}
+    gravity = '0 -9.81 0'
     momentum_component = 'x'
   []
 
@@ -115,13 +113,11 @@ walls = 'right left top bottom'
     momentum_component = 'y'
   []
   [v_buoyancy]
-    type = LinearFVMomentumBoussinesq
+    type = LinearFVMomentumBuoyancy
     variable = vel_y
-    T_fluid = T_fluid
+    rho = 'rho'
+    reference_rho = ${rho_0}
     gravity = '0 -9.81 0'
-    rho = ${rho}
-    ref_temperature = ${T_0}
-    alpha_name = ${alpha}
     momentum_component = 'y'
   []
 
@@ -149,10 +145,9 @@ walls = 'right left top bottom'
   [conduction]
     type = LinearFVDiffusion
     variable = T_fluid
-    diffusion_coeff = ${fparse k_cond}
+    diffusion_coeff = ${k_cond}
   []
 []
-
 
 [LinearFVBCs]
   [no-slip-u]
@@ -180,10 +175,10 @@ walls = 'right left top bottom'
     functor = 880.0
   []
   [T_all]
-    type = LinearFVAdvectionDiffusionExtrapolatedBC
+    type = LinearFVAdvectionDiffusionFunctorNeumannBC
     variable = T_fluid
     boundary = 'top bottom'
-    use_two_term_expansion = false
+    functor = 0.0
   []
   [pressure]
     type = LinearFVPressureFluxBC
@@ -195,10 +190,11 @@ walls = 'right left top bottom'
 []
 
 [FunctorMaterials]
-  [constant_functors]
-    type = GenericFunctorMaterial
-    prop_names = 'cp alpha_b'
-    prop_values = '${cp} ${alpha}'
+  [rho_function]
+    type = ParsedFunctorMaterial
+    property_name = 'rho'
+    functor_names = 'T_fluid'
+    expression = '${rho_0}*(1-${alpha_b}*(T_fluid-${T_0})) '
   []
 []
 
@@ -230,9 +226,8 @@ walls = 'right left top bottom'
 
   pin_pressure = true
   pressure_pin_value = 0.0
-  pressure_pin_point = '0.5 0.0 0.0'
+  pressure_pin_point = '1.5 1.5 0.0'
 
-  # momentum_petsc_options = '-ksp_monitor'
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'
 
@@ -250,9 +245,6 @@ walls = 'right left top bottom'
 ################################################################################
 
 [Outputs]
-  #exodus = true
-  [out]
-    type = Exodus
-    file_base = 'diff_heated_cavity_linear_segregated_out'
-  []
+  exodus = true
 []
+
