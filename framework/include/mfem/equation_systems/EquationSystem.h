@@ -318,7 +318,8 @@ public:
   virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel) override;
   virtual void BuildBilinearForms() override;
   virtual void BuildMixedBilinearForms() override;
-  virtual void ApplyEssentialBCs() override;  
+  virtual void ApplyEssentialBCs() override;
+  virtual void EliminateCoupledVariables() override;
   virtual void FormLegacySystem(mfem::OperatorHandle & op,
                                 mfem::BlockVector & truedXdt,
                                 mfem::BlockVector & trueRHS) override;
