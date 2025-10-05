@@ -25,6 +25,8 @@ from TestHarness.resultsreader.auth import Authentication, load_authentication, 
 
 NoneType = type(None)
 
+# The max size that a result entry can be before its tests are
+# stored separately in a tests document
 MAX_RESULT_SIZE = 5.0 # MB
 
 class CIVETStorer:
