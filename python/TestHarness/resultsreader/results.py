@@ -56,7 +56,7 @@ class TestHarnessTestResult:
 
         # Sanity check on all of our data and methods
         assert isinstance(self.data, dict)
-        assert isinstance(self.id, ObjectId)
+        assert isinstance(self.id, (ObjectId, NoneType))
         assert isinstance(self.results, TestHarnessResults)
         assert isinstance(self.result_id, ObjectId)
         assert isinstance(self.name, TestName)
@@ -95,11 +95,13 @@ class TestHarnessTestResult:
         return self._data
 
     @property
-    def id(self) -> ObjectId:
+    def id(self) -> Optional[ObjectId]:
         """
-        Get the mongo database ID for this test
+        Get the mongo database ID for this test, which
+        could be None if the test is stored within the
+        results data
         """
-        return self.data['_id']
+        return self.data.get('_id')
 
     @property
     def results(self) -> 'TestHarnessResults':
