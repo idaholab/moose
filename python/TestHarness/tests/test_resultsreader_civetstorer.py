@@ -71,24 +71,24 @@ class TestResultsReaderCIVETStorer(TestHarnessTestCase):
         with self.assertRaises(ValueError):
             CIVETStorer.parse_ssh_repo('foo')
 
-    def testGetRepoURL(self):
+    def getGetCIVETRepoUrl(self):
         """
-        Tests get_repo_url()
+        Tests get_civet_repo_url()
         """
         env = {'CIVET_BASE_SSH_URL': BASE_CIVET_ENV['APPLICATION_REPO']}
         self.assertEqual(
-            CIVETStorer.get_repo_url(env),
+            CIVETStorer.get_civet_repo_url(env),
             'github.com/idaholab/moose'
         )
 
         env = {'APPLICATION_REPO': BASE_CIVET_ENV['APPLICATION_REPO']}
         self.assertEqual(
-            CIVETStorer.get_repo_url(env),
+            CIVETStorer.get_civet_repo_url(env),
             'github.com/idaholab/moose'
         )
 
         with self.assertRaises(ValueError):
-            CIVETStorer.get_repo_url({})
+            CIVETStorer.get_civet_repo_url({})
 
     def testGetCIVETServer(self):
         """

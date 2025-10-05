@@ -53,8 +53,10 @@ class CIVETStorer:
         return parser.parse_args()
 
     @staticmethod
-    def load_authentication() -> Authentication | None:
+    def load_authentication() -> Optional[Authentication]:
         """
+        Loads mongo authentication, if available.
+
         Attempts to first load the authentication environment from
         env vars CIVET_STORER_AUTH_[HOST,USERNAME,PASSWORD] if
         available. Otherwise, tries to load the authentication
@@ -66,14 +68,14 @@ class CIVETStorer:
     @staticmethod
     def has_authentication() -> bool:
         """
-        Checks whether or not environment authentication is available.
+        Checks whether or not authentication is available.
         """
         return has_authentication('CIVET_STORER')
 
     @staticmethod
     def get_size(obj, seen: Optional[set] = None) -> int:
         """
-        Recursively find the size of an object in bytes
+        Recursively find the size of an object in bytes.
         """
         get_size = CIVETStorer.get_size
         size = sys.getsizeof(obj)
@@ -95,8 +97,12 @@ class CIVETStorer:
     @staticmethod
     def parse_ssh_repo(repo: str) -> Tuple[str, str, str]:
         """
-        Parses a ssh repo (git@[server]:[org]/[repo]) into
-        (server, org, repo)
+        Parses a Git SSH repo into its server, org, and repo name.
+
+        For example, 'git@github.com:idaholab/moose' ->
+        ('github.com', 'idaholab', 'moose').
+
+        Needed because CIVET stores the repository in this form.
         """
         assert isinstance(repo, str)
 
@@ -110,10 +116,12 @@ class CIVETStorer:
         return search.group(1), search.group(2), search.group(3)
 
     @staticmethod
-    def get_repo_url(env: dict = dict(os.environ)) -> str:
+    def get_civet_repo_url(env: dict) -> str:
         """
-        Determines the repository URL from either
-        CIVET_BASE_SSH_URL or APPLICATION_REPO
+        Determines the URL of the Git repo from the CIVET environment.
+
+        CIVET will set either CIVET_BASE_SSH_URL or APPLICATION_REPO
+        to be the Git SSH repository, which are parsed.
         """
         assert isinstance(env, dict)
 
@@ -127,7 +135,11 @@ class CIVETStorer:
     @staticmethod
     def get_civet_server(civet_server: str) -> str:
         """
-        Parses the CIVET sever from the server variable
+        Parses the CIVET server from the CIVET environment.
+
+        Does some cleanup - changes the backend URL to the
+        frontend URL for civet.inl.gov and removes the
+        leading 'https://'.
         """
         assert isinstance(civet_server, str)
         # civet.inl.gov reports as civet-be.inl.gov
@@ -138,9 +150,31 @@ class CIVETStorer:
     @staticmethod
     def build_header(base_sha: str, env: dict) -> dict:
         """
-        Builds the main header for a results entry given
-        a CIVET environment
+        Builds the header for a results entry from the CIVET environment.
+
+        The base event SHA must also be provided because the one that
+        is reported from CIVET is not necessarily the real base. This
+        can be the case when PRs in MOOSE go into next, but we actually
+        base them on devel.
+
+        This data is appended to the main results entry that is
+        stored in the database.
+
+        The entries that are stored are:
+          - base_sh (str): The base_sha passed to this method
+          - civet (dict): A dict containing other CIVET info; this
+            is kept separate because it is info that will not be
+            indexed from the top level of the database entry
+          - civet_version (int): The schema version from this
+            storer, set from CIVET_VERSION
+          - event_sha (str): The head SHA of the event
+          - event_id (int): The ID of the CIVET event
+          - event_cause (pr): The cause for this CIVET event;
+            current options are ['pr', 'push', 'scheduled']
+          - pr_num (int or None): The PR number, if any
+          - time (datettime): The current time
         """
+
         assert isinstance(base_sha, str)
         assert len(base_sha) == 40
         assert isinstance(env, dict)
@@ -176,7 +210,7 @@ class CIVETStorer:
         assert len(civet_env['head_sha']) == 40
 
         # Load URL to repo (i.e., github.com/idaholab/moose)
-        repo_url = CIVETStorer.get_repo_url(env)
+        repo_url = CIVETStorer.get_civet_repo_url(env)
 
         # Load CIVET server (i.e., civet.inl.gov)
         civet_server = CIVETStorer.get_civet_server(civet_env['server'])
@@ -213,7 +247,7 @@ class CIVETStorer:
 
         assert isinstance(pr_num, (int, NoneType))
 
-        header = {
+        return {
             'base_sha': base_sha,
             'civet': civet_entry,
             'civet_version': CIVETStorer.CIVET_VERSION,
@@ -224,12 +258,28 @@ class CIVETStorer:
             'time': datetime.now()
         }
 
-        return header
-
-    def build(self, results: dict, base_sha: str, env: dict = dict(os.environ),
+    def build(self, results: dict, base_sha: str, env: dict,
               max_result_size: float = MAX_RESULT_SIZE, **kwargs) -> Tuple[dict, Optional[list]]:
         """
-        Builds the data for storing a test harness result
+        Builds an result entry for storage in the database.
+
+        See the optional parameters for store() for information
+        on the keyword arguments that are used here.
+
+        Parameters
+        ----------
+        results : dict
+            The results that come from TestHarness JSON result output.
+        base_sha : str
+            The base commit SHA for the CIVET event.
+        env : dict
+            The environment to load the CIVET context from.
+
+        Optional Parameters
+        -------------------
+        max_result_size : float
+            The max size that a database result entry can have before
+            the tests will be stored in a separate 'tests' collection.
         """
         assert isinstance(base_sha, str)
         assert len(base_sha) == 40
@@ -310,8 +360,7 @@ class CIVETStorer:
     @staticmethod
     def setup_client() -> MongoClient:
         """
-        Helper for setting up a mongo client with authentication
-        from the environment
+        Builds a MongoClient given the available authentication.
         """
         auth = CIVETStorer.load_authentication()
         if auth is None:
@@ -324,7 +373,38 @@ class CIVETStorer:
     def store(self, database: str, results: dict,
               base_sha: str, **kwargs) -> Tuple[ObjectId, Optional[list[ObjectId]]]:
         """
-        Stores the data in the database from a test harness result
+        Stores the data in the database from a test harness result.
+
+        Parameters
+        ----------
+        database : str
+            The name of the mongo database to store into
+        results : dict
+            The results that come from TestHarness JSON result output
+        base_sha : str
+            The base commit SHA for the CIVET event
+
+        Optional Parameters
+        -------------------
+        ignore_skipped : bool
+            Do not store test entries that have a 'SKIP' status
+        ignore_status : bool
+            Do not store the 'status' key in test entries
+        ignore_timing : bool
+            Do not store the 'timing' key in test entries
+        ignore_tester : bool
+            Do not store the 'test' key in test entries
+        only_runtime : bool
+            Only store the 'runner_run' key in test 'timing' entries
+
+        Returns
+        -------
+        ObjectID:
+            The mongo ObjectID of the inserted results document
+        list[ObjectId] or None:
+            The mongo ObjectIDs of the inserted test documents, if any;
+            this will be None if tests are small enough to be stored
+            within the results document (determined by build())
         """
         assert isinstance(database, str)
 
@@ -389,23 +469,42 @@ class CIVETStorer:
 
             return result_id, test_ids
 
-    def main(self, result_path: str, database: str,
+    def main(self, result_path: str, database: str, base_sha: str,
              **kwargs) -> Tuple[ObjectId, Optional[list[ObjectId]]]:
         """
-        Main method; stores into the database given the
-        path to a test harness result
+        Main method that is called when executed from command line.
+
+        See the store() method for common optional keyword args.
+
+        Parameters
+        ----------
+        result_path : str
+            The path to the TestHarness JSON results file
+        database : str
+            The name of the mongo database to store into
+        base_sha : str
+            The base commit SHA for the CIVET event
+
+        Returns
+        -------
+        ObjectID:
+            The mongo ObjectID of the inserted results document
+        list[ObjectId] or None:
+            The mongo ObjectIDs of the inserted test documents, if any;
+            this will be None if tests are small enough to be stored
+            within the results document (determined by build())
         """
         assert isinstance(result_path, str)
         assert isinstance(database, str)
+        assert isinstance(base_sha, str)
 
         result_path = os.path.abspath(result_path)
         if not os.path.isfile(result_path):
             raise SystemExit(f'Result file {result_path} does not exist')
-
         with open(result_path, 'r') as f:
             results = json.load(f)
 
-        return self.store(database, results, **kwargs)
+        return self.store(database, results, base_sha, **kwargs)
 
 if __name__ == '__main__':
     args = CIVETStorer.parse_args()
