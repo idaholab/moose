@@ -154,8 +154,7 @@ class TestHarnessResultsReader:
 
         # If we were given a number we want, pull exactly
         # however many more we need the first time around
-        if isinstance(num, int):
-            assert num > 0
+        if isinstance(num, int) and num > 0:
             batch_size = num - len(self._latest_push_results)
         # Otherwise, just pull one at a time
         else:
