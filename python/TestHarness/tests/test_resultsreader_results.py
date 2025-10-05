@@ -165,6 +165,8 @@ class TestResultsReaderResults(TestHarnessTestCase):
         self.assertEqual(results.time, FAKE_TIME)
 
         # Has same number of tests
+        self.assertEqual(results.num_tests, len(results._tests))
+        self.assertEqual(results.num_tests, len(results.tests))
         for test_result in results.tests:
             data = built_result.test_data[test_result.name]
 

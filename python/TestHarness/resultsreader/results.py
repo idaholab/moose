@@ -354,6 +354,7 @@ class TestHarnessResults:
         if self.base_sha:
             assert len(self.base_sha) == 40
         assert isinstance(self.time, datetime)
+        assert isinstance(self.num_tests, int)
         assert isinstance(self.test_names, list)
         for v in self.test_names:
             assert isinstance(v, TestName)
@@ -520,6 +521,13 @@ class TestHarnessResults:
         Get the time these tests were added to the database
         """
         return self.data['time']
+
+    @property
+    def num_tests(self) -> int:
+        """
+        Get the number of stored tests
+        """
+        return len(self._tests)
 
     @property
     def test_names(self) -> list[TestName]:
