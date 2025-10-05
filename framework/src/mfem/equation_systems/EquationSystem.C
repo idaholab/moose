@@ -520,14 +520,13 @@ TimeDependentEquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
     EquationSystem::AddCoupledVariableNameIfMissing(test_var_name);
     EquationSystem::AddCoupledVariableNameIfMissing(trial_var_name);
 
+    // Register new kernels map if not present for the test variable    
     if (!_td_kernels_map.Has(test_var_name))
     {
       auto kernel_field_map =
           std::make_shared<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>();
       _td_kernels_map.Register(test_var_name, std::move(kernel_field_map));
     }
-    
-    // Register new kernels map if not present for the test variable
     if (!_td_kernels_map.Get(test_var_name)->Has(trial_var_name))
     {
       auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMKernel>>>();
@@ -642,6 +641,20 @@ TimeDependentEquationSystem::ApplyEssentialBCs()
   for (const auto i : index_range(_test_var_names))
   {
     auto & test_var_name = _test_var_names.at(i);
+    // Update solution values on Dirichlet values to be in terms of du/dt instead of u
+    *_td_var_ess_constraints.at(i).get() = *(_var_ess_constraints.at(i).get());
+    *_td_var_ess_constraints.at(i).get() -= *_eliminated_variables.Get(test_var_name);
+    *_td_var_ess_constraints.at(i).get() /= _dt_coef.constant;
+  }  
+}
+
+void
+TimeDependentEquationSystem::EliminateCoupledVariables()
+{
+  // Eliminate contributions from variables at previous timestep.
+  for (const auto i : index_range(_test_var_names))
+  {
+    auto & test_var_name = _test_var_names.at(i);
     auto blf = _blfs.Get(test_var_name);
     auto lf = _lfs.Get(test_var_name);
     // if implicit, add contribution to linear form from terms involving state
@@ -649,13 +662,9 @@ TimeDependentEquationSystem::ApplyEssentialBCs()
     mfem::Vector lf_prev(lf->Size());
     blf->Mult(*_eliminated_variables.Get(test_var_name), lf_prev);
     *lf -= lf_prev;
-    // }
-    mfem::Vector aux_x, aux_rhs;
-    // Update solution values on Dirichlet values to be in terms of du/dt instead of u
-    *_td_var_ess_constraints.at(i).get() = *(_var_ess_constraints.at(i).get());
-    *_td_var_ess_constraints.at(i).get() -= *_eliminated_variables.Get(test_var_name);
-    *_td_var_ess_constraints.at(i).get() /= _dt_coef.constant;
-  }  
+  }
+  // Eliminate contributions from other coupled variables.
+  EquationSystem::EliminateCoupledVariables();
 }
 
 void
