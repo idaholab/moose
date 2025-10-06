@@ -256,6 +256,7 @@ class TestHarnessResultsSummary:
             return
         removed_table, added_table, same_table = self.diff_table(base_results,head_results, base_names, head_names)
         summary_result = self.build_summary(removed_table, added_table, same_table)
+        print(summary_result)
         return summary_result
 
     def summary_output_file(self, summary_result: str, out: str) -> None:

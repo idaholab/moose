@@ -167,8 +167,9 @@ class TestResultsSummary(unittest.TestCase):
         Tests pr() when there are no changes between base and head test names.
         """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
-
-        summary_result = summary.pr(event_id=EVENT_ID)
+        stdout = StringIO()
+        with redirect_stdout(stdout):
+            summary_result = summary.pr(event_id=EVENT_ID)
         self.assertIn('Removed Tests:',summary_result)
         self.assertIn('No Removed Tests',summary_result)
         self.assertIn('New Tests:',summary_result)
@@ -198,7 +199,9 @@ class TestResultsSummary(unittest.TestCase):
         Tests summary output file when output file path exit and there is no change between base and head.
         """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
-        summary_result = summary.pr(event_id=EVENT_ID)
+        stdout = StringIO()
+        with redirect_stdout(stdout):
+            summary_result = summary.pr(event_id=EVENT_ID)
 
         with tempfile.NamedTemporaryFile(delete=False, mode='r+') as tmp_file:
             tmp_path = tmp_file.name
@@ -222,7 +225,9 @@ class TestResultsSummary(unittest.TestCase):
         Tests that summary_output_file when output file path is invalid.
         """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
-        summary_result = summary.pr(event_id=EVENT_ID)
+        stdout = StringIO()
+        with redirect_stdout(stdout):
+            summary_result = summary.pr(event_id=EVENT_ID)
 
         invalid_path = "/this/path/does/not/exist/output.txt"
 
@@ -244,7 +249,9 @@ class TestResultsSummary(unittest.TestCase):
         with tempfile.NamedTemporaryFile(delete=False, mode='r+') as tmp_file:
             tmp_path = tmp_file.name
         try:
-            summary.main( out=tmp_path, action='pr', event_id=EVENT_ID)
+            stdout = StringIO()
+            with redirect_stdout(stdout):
+                summary.main( out=tmp_path, action='pr', event_id=EVENT_ID)
             with open(tmp_path, 'r') as f:
                 output = f.read()
             self.assertIn('Removed Tests:', output)
