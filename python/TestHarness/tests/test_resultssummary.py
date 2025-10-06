@@ -41,10 +41,11 @@ class TestResultsSummary(unittest.TestCase):
         Tests diff_table when there are no changes between base and head test names.
         """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
-        results, head_names, base_names = summary.pr_test_names(event_id=EVENT_ID)
-        removed_table, added_table = summary.diff_table(results, base_names, head_names)
+        base_results, head_results, base_names, head_names = summary.pr_test_names(event_id=EVENT_ID)
+        removed_table, added_table, same_table = summary.diff_table(base_results, head_results, base_names, head_names)
         self.assertIsNone(removed_table)
         self.assertIsNone(added_table)
+        self.assertIsNone(same_table)
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testDiffTableRemovedTest(self):
@@ -52,11 +53,12 @@ class TestResultsSummary(unittest.TestCase):
         Tests diff_table() when test is removed from base.
         """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
-        results, _, base_names = summary.pr_test_names(event_id=EVENT_ID)
-        removed_table, added_table = summary.diff_table(results, base_names, set())
+        base_results, head_results,base_names, _= summary.pr_test_names(event_id=EVENT_ID)
+        removed_table, added_table, same_table = summary.diff_table(base_results, head_results, base_names, set())
         self.assertEqual(len(removed_table), 1)
         self.assertEqual(removed_table[0], TEST_NAME)
         self.assertIsNone(added_table)
+        self.assertIsNone(same_table)
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testDiffTableAddedTest(self):
@@ -64,8 +66,8 @@ class TestResultsSummary(unittest.TestCase):
         Tests diff_table() when test is newly added.
         """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
-        results, head_names , _ = summary.pr_test_names(event_id=EVENT_ID)
-        removed_table, added_table = summary.diff_table(results, set(), head_names)
+        base_results, head_results, _, head_names = summary.pr_test_names(event_id=EVENT_ID)
+        removed_table, added_table, same_table = summary.diff_table(base_results, head_results, set(), head_names)
 
         reader = TestHarnessResultsReader(TEST_DATABASE_NAME)
         results = reader.getEventResults(event_id=EVENT_ID)
@@ -75,6 +77,7 @@ class TestResultsSummary(unittest.TestCase):
         self.assertEqual(added_table[0][0], str(TEST_NAME))
         self.assertEqual(added_table[0][1], test_result.run_time)
         self.assertIsNone(removed_table)
+        self.assertIsNone(same_table)
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testPRTestNamesNoChanges(self):
@@ -82,10 +85,10 @@ class TestResultsSummary(unittest.TestCase):
         Tests pr_test_names() when there are no changes between base and head test names.
         """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
-        _, head_names, base_names = summary.pr_test_names(event_id=EVENT_ID)
-        self.assertEqual(head_names, base_names)
-        self.assertEqual(head_names, set([TEST_NAME]))
+        _, _, base_names, head_names = summary.pr_test_names(event_id=EVENT_ID)
+        self.assertEqual(base_names, head_names)
         self.assertEqual(base_names, set([TEST_NAME]))
+        self.assertEqual(head_names, set([TEST_NAME]))
 
     @patch.object(TestHarnessResultsReader, 'getCommitResults')
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
@@ -97,7 +100,7 @@ class TestResultsSummary(unittest.TestCase):
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
         stdout = StringIO()
         with redirect_stdout(stdout):
-            results, test_names, base_test_names = summary.pr_test_names(event_id=EVENT_ID)
+            base_results, head_results, base_test_names, test_names = summary.pr_test_names(event_id=EVENT_ID)
         self.assertIsNone(base_test_names)
 
     @patch.object(TestHarnessResultsReader, 'getEventResults')
@@ -117,11 +120,12 @@ class TestResultsSummary(unittest.TestCase):
         Tests building a summary when there are no changes between base and head test names.
         """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
-        results, head_names , base_names = summary.pr_test_names(event_id=EVENT_ID)
-        removed_table, added_table = summary.diff_table(results,base_names,head_names)
+        base_results, head_results, base_names, head_names = summary.pr_test_names(event_id=EVENT_ID)
+        removed_table, added_table, same_table = summary.diff_table(base_results, head_results,base_names,head_names)
 
-        self.assertIsNone(added_table)
         self.assertIsNone(removed_table)
+        self.assertIsNone(added_table)
+        self.assertIsNone(same_table)
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testBuildSummaryRemovedTest(self):
@@ -129,12 +133,13 @@ class TestResultsSummary(unittest.TestCase):
         Tests building a summary when a test is removed from base
         """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
-        results, _ , base_names = summary.pr_test_names(event_id=EVENT_ID)
-        removed_table, added_table = summary.diff_table(results,base_names,set())
+        base_results, head_results, base_names, _ = summary.pr_test_names(event_id=EVENT_ID)
+        removed_table, added_table, same_table = summary.diff_table(base_results,head_results,base_names,set())
 
         self.assertEqual(len(removed_table), 1)
         self.assertEqual(removed_table[0], TEST_NAME)
         self.assertIsNone(added_table)
+        self.assertIsNone(same_table)
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testBuildSummaryAddedTest(self):
@@ -142,8 +147,8 @@ class TestResultsSummary(unittest.TestCase):
         Tests building a summary when a test is newly added in the head test names.
         """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
-        results, head_names , _ = summary.pr_test_names(event_id=EVENT_ID)
-        removed_table, added_table = summary.diff_table(results, set(), head_names)
+        base_results, head_results, _, head_names = summary.pr_test_names(event_id=EVENT_ID)
+        removed_table, added_table,same_table = summary.diff_table(base_results, head_results, set(), head_names)
 
         reader = TestHarnessResultsReader(TEST_DATABASE_NAME)
         results = reader.getEventResults(event_id=EVENT_ID)
@@ -153,6 +158,7 @@ class TestResultsSummary(unittest.TestCase):
         self.assertEqual(added_table[0][0], str(TEST_NAME))
         self.assertEqual(added_table[0][1], test_result.run_time)
         self.assertIsNone(removed_table)
+        self.assertIsNone(same_table)
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testPRNoChange(self):
@@ -168,6 +174,8 @@ class TestResultsSummary(unittest.TestCase):
         self.assertIn('No Removed Tests', stdout.getvalue())
         self.assertIn('New Tests:', stdout.getvalue())
         self.assertIn('No Removed Tests', stdout.getvalue())
+        self.assertIn('Same Tests', stdout.getvalue())
+        self.assertIn('No Tests', stdout.getvalue())
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testPRNoBase(self):
@@ -177,7 +185,7 @@ class TestResultsSummary(unittest.TestCase):
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
         def mock_pr_test_names(**kwargs):
             print("Comparison not available")
-            return [], {'head_test1'}, None
+            return None,[], None,{'head_test1'}
         summary.pr_test_names = mock_pr_test_names
 
         stdout = StringIO()
@@ -199,6 +207,8 @@ class TestResultsSummary(unittest.TestCase):
         self.assertIn('No Removed Tests', stdout.getvalue())
         self.assertIn('New Tests:', stdout.getvalue())
         self.assertIn('No Removed Tests', stdout.getvalue())
+        self.assertIn('Same Tests', stdout.getvalue())
+        self.assertIn('No Tests', stdout.getvalue())
 
 if __name__ == '__main__':
     unittest.main()
