@@ -28,7 +28,8 @@ class Moose2FMU(Fmi2Slave):
     ):
         super().__init__(*args, **kwargs, logging_add_standard_categories=True)
 
-        self.logger = logging.getLogger(self.__class__.__name__)
+        base_logger = logging.getLogger(self.__class__.__module__)
+        self.logger = base_logger.getChild(self.__class__.__name__)
         self.logger.info("Moose2FMU initialized successfully.")
 
         # Configuration parameters
@@ -136,13 +137,33 @@ class Moose2FMU(Fmi2Slave):
                 self.control.finalize()
                 return None, None
 
+
             moose_time = self.control.getTime()
 
             if flag in parsed_allowed_flags:
                 signal = flag
-                self.logger.debug("Captured synchronization flag '%s'", flag)
+
+
+                # set next time in MOOSE, ensure MOOSE has data avaiable for all FMU times (Optional)
+                # To-do: need MooseControl create a time object and a postprocessor backend,
+                # then we don't need users adding extra blocks in their input files
+                if signal in ["INITIAL", "MULTIAPP_FIXED_POINT_BEGIN"]:
+                    moose_dt = self.control.getTimeStepSize()
+
+                    self.logger.debug(
+                        "moose_time=%.6f → current_time=%.6f → moose_dt=%.6f → step_size=%.6f",
+                        moose_time,
+                        current_time,
+                        moose_dt,
+                        step_size,
+                    )
+
+                    if moose_dt > step_size:
+                        logging.info("moose_dt (%s) must be <= step_size (%s).", moose_dt, step_size)
+                        return None, None
 
             if abs(moose_time - current_time) < self.dt_tolerance:
+                self.logger.debug("Captured synchronization flag '%s'", flag)
                 self.logger.debug(f"The current time is {current_time}, the moose time is {moose_time}")
                 self.logger.info("Successfully sync MOOSE time with FMU step")
 
@@ -551,16 +572,30 @@ class Moose2FMU(Fmi2Slave):
         self.logger.debug("Received flag '%s'", normalized_flag or flag_value)
         return normalized_flag or flag_value
 
-    def _build_moose_command(self) -> List[str]:
-        if self.moose_mpi:
-            return [
-                self.moose_mpi,
-                "-n",
-                str(self.mpi_num),
-                self.moose_executable,
-                "-i",
-                self.moose_inputfile,
-            ]
-        return [self.moose_executable, "-i", self.moose_inputfile]
 
+    def _schedule_next_time(self, next_time: float) -> bool:
+        """Request MOOSE to insert an additional time point if needed.
 
+        Parameters
+        ----------
+        next_time
+            The time that MOOSE should be forced to hit before advancing further.
+
+        Returns
+        -------
+        bool
+            ``True`` when a new request was sent to MOOSE, ``False`` if it was
+            skipped because the same value was already applied.
+        """
+
+        path = "Times/external_input/next_time"
+        cached = self._controllable_real_cache.get(path)
+        if cached == next_time:
+            self.logger.debug(
+                "Skipping next-time scheduling; %.6f already requested", next_time
+            )
+            return False
+
+        self.control.setControllableReal(path, next_time)
+        self._controllable_real_cache[path] = next_time
+        return True

@@ -3,21 +3,88 @@ import logging
 import sys
 import unittest
 from pathlib import Path
-from types import SimpleNamespace
+from types import ModuleType, SimpleNamespace
 
 from unittest.mock import patch
 
 _TEST_DIR = Path(__file__).resolve().parent
-_SPEC = importlib.util.spec_from_file_location(
+_TEST_SPEC = importlib.util.spec_from_file_location(
     "MooseFMU.test", _TEST_DIR / "__init__.py"
 )
 if "MooseFMU.test" not in sys.modules:
-    _package_module = importlib.util.module_from_spec(_SPEC)
+    _package_module = importlib.util.module_from_spec(_TEST_SPEC)
     sys.modules["MooseFMU.test"] = _package_module
-    assert _SPEC.loader is not None
-    _SPEC.loader.exec_module(_package_module)
+    assert _TEST_SPEC.loader is not None
+    _TEST_SPEC.loader.exec_module(_package_module)
 
 from MooseFMU import fmu_utils
+
+
+class TestConfigureFmuLogging(unittest.TestCase):
+    def setUp(self):
+        self._root_logger = logging.getLogger()
+        self._root_level = self._root_logger.level
+        self._root_handlers = list(self._root_logger.handlers)
+        for handler in list(self._root_logger.handlers):
+            self._root_logger.removeHandler(handler)
+
+        self._moose_logger = logging.getLogger("Moose2FMU")
+        self._moose_level = self._moose_logger.level
+        self._moose_handlers = list(self._moose_logger.handlers)
+
+        self._urllib_logger = logging.getLogger("urllib3.connectionpool")
+        self._urllib_level = self._urllib_logger.level
+        self._urllib_disabled = self._urllib_logger.disabled
+        self._urllib_propagate = self._urllib_logger.propagate
+        self._urllib_handlers = list(self._urllib_logger.handlers)
+
+    def tearDown(self):
+        for handler in list(self._root_logger.handlers):
+            self._root_logger.removeHandler(handler)
+        for handler in self._root_handlers:
+            self._root_logger.addHandler(handler)
+        self._root_logger.setLevel(self._root_level)
+
+        for handler in list(self._moose_logger.handlers):
+            self._moose_logger.removeHandler(handler)
+        for handler in self._moose_handlers:
+            self._moose_logger.addHandler(handler)
+        self._moose_logger.setLevel(self._moose_level)
+
+        for handler in list(self._urllib_logger.handlers):
+            self._urllib_logger.removeHandler(handler)
+        for handler in self._urllib_handlers:
+            self._urllib_logger.addHandler(handler)
+        self._urllib_logger.setLevel(self._urllib_level)
+        self._urllib_logger.disabled = self._urllib_disabled
+        self._urllib_logger.propagate = self._urllib_propagate
+
+    def test_configure_sets_info_levels_and_disables_urllib3(self):
+        logger = fmu_utils.configure_fmu_logging(logger_name="test.logger.info")
+
+        self.assertEqual(logger.name, "test.logger.info")
+        self.assertEqual(logger.level, logging.INFO)
+        self.assertEqual(self._root_logger.level, logging.INFO)
+        self.assertEqual(logging.getLogger("Moose2FMU").level, logging.INFO)
+
+        urllib_logger = logging.getLogger("urllib3.connectionpool")
+        self.assertTrue(urllib_logger.disabled)
+        self.assertFalse(urllib_logger.propagate)
+
+    def test_configure_sets_debug_levels_and_logs_message(self):
+        with self.assertLogs("test.logger.debug", level="DEBUG") as captured:
+            logger = fmu_utils.configure_fmu_logging(
+                debug=True, logger_name="test.logger.debug"
+            )
+
+            self.assertEqual(logger.level, logging.DEBUG)
+            self.assertEqual(self._root_logger.level, logging.DEBUG)
+            self.assertEqual(logging.getLogger("Moose2FMU").level, logging.DEBUG)
+
+        self.assertEqual(logger.getEffectiveLevel(), logging.DEBUG)
+
+        log_output = "\n".join(captured.output)
+        self.assertIn("FMU debug logging is enabled", log_output)
 
 
 class TestFmuUtils(unittest.TestCase):

@@ -92,7 +92,6 @@ class MooseTest(Moose2FMU):
         if not self.ensure_control_listening():
             return False
 
-        self.logger.info("Information exchange")
         self.moose_time = moose_time
         self.time = current_time
 
@@ -119,6 +118,7 @@ class MooseTest(Moose2FMU):
             # send value to FMU variable.
             self.rep_value = rep_value
 
+            self.logger.info("Information sync complete!")
             # resume MOOSE simulation after sync
             self.control.setContinue()
 

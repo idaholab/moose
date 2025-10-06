@@ -1,6 +1,7 @@
 """MOOSE FMU interface base classes and helper utilities."""
 from .MOOSE2FMU import Moose2FMU
 from .fmu_utils import (
+    configure_fmu_logging,
     fmu_info,
     get_bool,
     get_real,
@@ -12,6 +13,7 @@ from .fmu_utils import (
 
 __all__ = [
     "Moose2FMU",
+    "configure_fmu_logging",
     "fmu_info",
     "get_bool",
     "get_real",
