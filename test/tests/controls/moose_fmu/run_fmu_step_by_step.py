@@ -1,4 +1,6 @@
-import logging
+#!/usr/bin/env python3
+
+from MooseFMU import configure_fmu_logging
 import moose_fmu_tester
 
 """
@@ -21,27 +23,7 @@ if __name__ == "__main__":
     # Toggle this flag to switch between INFO and DEBUG logging for the script and FMU
     FMU_DEBUG_LOGGING = True
 
-    # Configure root logger
-    logging.basicConfig(
-        level=logging.DEBUG if FMU_DEBUG_LOGGING else logging.INFO,
-        format='%(asctime)s [%(levelname)s] %(name)s: %(message)s'
-    )
-    logger = logging.getLogger(__name__)
-
-    # Keep urllib3 connection pool noise suppressed unless explicitly debugging
-    urllib3_logger = logging.getLogger("urllib3.connectionpool")
-    urllib3_logger.propagate = False
-    urllib3_logger.disabled = True
-
-    if FMU_DEBUG_LOGGING:
-        logging.getLogger("Moose2FMU").setLevel(logging.DEBUG)
-    else:
-        logging.getLogger("Moose2FMU").setLevel(logging.INFO)
-
-    root_logger = logging.getLogger()
-    root_logger.setLevel(logging.DEBUG if FMU_DEBUG_LOGGING else logging.INFO)
-    if FMU_DEBUG_LOGGING:
-        logger.debug("FMU debug logging is enabled")
+    logger = configure_fmu_logging(debug=FMU_DEBUG_LOGGING, logger_name=__name__)
 
     # Provide your own MOOSE command for non testing senarios
     cmd = moose_fmu_tester.test_controller()

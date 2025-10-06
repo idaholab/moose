@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import time
 import matplotlib.pyplot as plt
 from fmpy import extract, instantiate_fmu
@@ -8,7 +10,7 @@ from MooseFMU import (
     set_real,
     set_string,
 )
-import logging
+from MooseFMU import configure_fmu_logging
 import math
 import pandas as pd
 import moose_fmu_tester
@@ -42,17 +44,10 @@ Notes
   mapping by name in production code to avoid brittle indexing.
 """
 
-# Configure root logger
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s [%(levelname)s] %(name)s: %(message)s'
-)
-logger = logging.getLogger(__name__)
-
-
 if __name__ == '__main__':
+    logger = configure_fmu_logging(logger_name=__name__)
     # Filenames and simulation parameters
-    fmu_filename = 'Dahlquist.fmu'  # dahlquist test equation y'(t) = k * y(t)
+    fmu_filename = 'Dahlquist.fmu'
     moose_filename = 'MooseTest.fmu'
 
     start_time = 0.0
