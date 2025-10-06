@@ -941,7 +941,7 @@ class Tester(MooseObject, OutputInterface):
                             output += f'{prefix}cannot be loaded\n'
                             self.setStatus(self.fail, 'BAD METADATA')
                         else:
-                            output += f'{prefix}exists and is valid\n'
+                            output += f'{prefix}loaded\n'
                     else:
                         output += f'{prefix}does not exist\n'
                         self.setStatus(self.fail, 'MISSING METADATA')
