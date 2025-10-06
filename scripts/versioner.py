@@ -269,7 +269,7 @@ class Versioner:
                 if not changes and brief:
                     continue
                 change_text = 'BEHIND' if changes else colorize('OK', 'GREEN')
-                entries.append((package.name, change_text, to_path, template_path))
+                entries.append([package.name, change_text, to_path, template_path])
                 if changes:
                     num_templates_failed += 1
                     entries[-1] = [colorize(v, 'RED') for v in entries[-1]]
@@ -377,8 +377,8 @@ class Versioner:
                                 version_color = 'RED'
                                 status = 'FUTURE DATE'
                         # Version is bumped, but build isn't zero
-                        elif head_package.build_number is not None \
-                        and head_package.build_number != 0:
+                        if head_package.build_number is not None \
+                        and head_package.build_number != 0 and version_color != 'RED':
                             build_color = 'RED'
                             status = 'BUILD NONZERO'
                     # Version is bumped correctly
