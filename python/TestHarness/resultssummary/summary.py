@@ -17,11 +17,13 @@ from TestHarness.resultsreader.results import TestHarnessResults, TestName
 from tabulate import tabulate
 
 NoneType = type(None)
-HEAD_RUNTIME_THREADSHOLD = 1
-RELATIVE_RUNTIME_RATE = 0.5
-
+#HEAD_RUNTIME_THREADSHOLD = 0.5
+#RELATIVE_RUNTIME_RATE = 0.3
 
 class TestHarnessResultsSummary:
+    HEAD_RUNTIME_THREADSHOLD = 1
+    RELATIVE_RUNTIME_RATE = 0.5
+
     def __init__(self, database: str):
         self.reader = TestHarnessResultsReader(database)
 
@@ -121,11 +123,11 @@ class TestHarnessResultsSummary:
             for test_name in same_names:
                 base_result = base_results.get_test(test_name.folder, test_name.name)
                 head_result = head_results.get_test(test_name.folder, test_name.name)
-                if (head_result.run_time is None or base_result.run_time is None or head_result.run_time < HEAD_RUNTIME_THREADSHOLD):
+                if (head_result.run_time is None or base_result.run_time is None or head_result.run_time < TestHarnessResultsSummary.HEAD_RUNTIME_THREADSHOLD):
                     continue
                 else:
                     relative_runtime = (head_result.run_time - base_result.run_time)/ base_result.run_time
-                    if relative_runtime > RELATIVE_RUNTIME_RATE:
+                    if relative_runtime >= TestHarnessResultsSummary.RELATIVE_RUNTIME_RATE:
                         same_table.append([str(test_name), base_result.run_time, head_result.run_time, f'{relative_runtime:.2%}'])
             if not same_table:
                 same_table = None
@@ -225,7 +227,7 @@ class TestHarnessResultsSummary:
         else:
             summary.append("No New Tests")
 
-        summary.append(f"### Same Tests but head runtime limit > {HEAD_RUNTIME_THREADSHOLD} and relative runtime rate > {RELATIVE_RUNTIME_RATE:.2%}")
+        summary.append(f"### Same Tests but head runtime limit > {TestHarnessResultsSummary.HEAD_RUNTIME_THREADSHOLD} and relative runtime rate > {TestHarnessResultsSummary.RELATIVE_RUNTIME_RATE:.2%}")
         if same_table:
             summary.append(tabulate(same_table, headers=["Test Name", "Base Run Time", "Head Run Time", "Relative Run Time Rate"], tablefmt="github"))
         else:
