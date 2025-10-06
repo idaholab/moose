@@ -618,7 +618,7 @@ TimeDependentEquationSystem::BuildMixedBilinearForms()
         ApplyDomainBLFIntegrators<mfem::ParMixedBilinearForm>(
             coupled_var_name, test_var_name, td_mblf, _td_kernels_map);
 
-        // TODO: mblf trial variable should be u, to add to td_blfs trial variable du_dt
+        // TODO: mblf trial variable should be u, to add to td_mblfs trial variable du_dt
         // (coupled_var_name)
         if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(coupled_var_name))
         {
