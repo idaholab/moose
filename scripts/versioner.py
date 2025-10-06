@@ -170,7 +170,7 @@ class AppInfo:
 
 ### Unittest Tracking Libraries (versioner_hashes.yaml)
 # note: Order is important
-TRACKING_LIBRARIES = ['tools', 'mpi', 'petsc', 'libmesh', 'wasp', 'moose-dev', 'app']
+TRACKING_LIBRARIES = ['tools', 'mpi', 'petsc', 'libmesh', 'wasp', 'moose-dev', 'app', 'python']
 
 ### Additional libraries for tracking_libraries, necessary to build the moose-dev Conda stack
 # This allows returning a proper verification
@@ -243,7 +243,7 @@ class Versioner:
             tablefmt = 'github' if brief else 'rounded_grid'
             contents = ''
             length = 0
-            if brief:
+            if brief or not data:
                 contents = f'{summary}\n'
             if data:
                 table = tabulate(data, headers=keys, tablefmt=tablefmt)
@@ -288,9 +288,9 @@ class Versioner:
         influential_removed = 0
         entries = []
         for package in head.values():
+            influential = package.influential[package.name]
             base_package = base.get(package.name)
             if base_package is not None:
-                influential = package.influential[package.name]
                 base_influential = base_package.influential.get(package.name, {})
                 for file, hash in influential.items():
                     base_hash = base_influential.get(file)
@@ -306,6 +306,10 @@ class Versioner:
                     if file not in influential:
                         influential_removed += 1
                         entries.append([package.name, colorize('REMOVED', 'YELLOW'), file])
+            else:
+                influential_new += len(influential)
+                entries += [[package.name, colorize('NEW', 'YELLOW'), file] for file in influential.keys()]
+
         status = f'Found {len(all_influential)} influential files, {influential_change} changed, '
         status += f'{influential_new} added, {influential_removed} removed'
         print_result(entries,
@@ -326,8 +330,6 @@ class Versioner:
 
             num_packages += 1
             head_conda = head_package.conda
-            base_package = base[name]
-            base_conda = base_package.conda
 
             status = 'OK'
             status_color = 'GREEN'
@@ -337,8 +339,17 @@ class Versioner:
             version_color = None
             build_color = None
 
+            base_package = base.get(name, None)
+            base_conda = base_package.conda if base_package else None
+
+            # This is a new package
+            if base_package is None:
+                num_packages_changed += 1
+                status = 'NEW'
+                status_color = 'CYAN'
+
             # Hashes are different, something changed
-            if base_package.hash != head_package.hash:
+            elif base_package.hash != head_package.hash:
                 num_packages_changed += 1
                 hash_color = 'YELLOW'
 
@@ -383,21 +394,27 @@ class Versioner:
                     build_color = 'RED'
 
             # Something went wrong, make status and package red
-            if status not in ['OK', 'CHANGE']:
+            if status not in ['OK', 'CHANGE', 'NEW']:
                 package_color = 'RED'
                 status_color = 'RED'
                 num_packages_failed += 1
 
             if not brief or status != 'OK':
-                base_version = base_conda.version
-                if base_package.build_number is not None:
-                    base_version += f' build {base_package.build_number}'
+                if base_package is None:
+                    base_version = 'none'
+                    base_hash = 'none'
+                else:
+                    base_version = base_conda.version
+                    if base_package.build_number is not None:
+                        base_version += f' build {base_package.build_number}'
+                    base_hash = base_package.hash
+
                 head_version = colorize(head_conda.version, version_color)
                 if head_package.build_number is not None:
                     head_version += colorize(f' build {head_package.build_number}', build_color)
                 entries.append([colorize(name, package_color),
                                 colorize(status, status_color),
-                                base_package.hash,
+                                base_hash,
                                 colorize(head_package.hash, hash_color),
                                 base_version,
                                 head_version])
