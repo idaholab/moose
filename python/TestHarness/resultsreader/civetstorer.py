@@ -258,7 +258,7 @@ class CIVETStorer:
             'time': datetime.now()
         }
 
-    def build(self, results: dict, base_sha: str, env: dict,
+    def build(self, results: dict, base_sha: str, env: dict = dict(os.environ),
               max_result_size: float = MAX_RESULT_SIZE, **kwargs) -> Tuple[dict, Optional[list]]:
         """
         Builds an result entry for storage in the database.
@@ -272,11 +272,12 @@ class CIVETStorer:
             The results that come from TestHarness JSON result output.
         base_sha : str
             The base commit SHA for the CIVET event.
-        env : dict
-            The environment to load the CIVET context from.
 
         Optional Parameters
         -------------------
+        env : dict
+            The environment to load the CIVET context from. Defaults
+            to the environment from os.environ.
         max_result_size : float
             The max size that a database result entry can have before
             the tests will be stored in a separate 'tests' collection.
