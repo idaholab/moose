@@ -1,15 +1,22 @@
 # Training
 
+!!!
 !style! halign=left
 Upcoming MOOSE related training in chronological order:
 !style-end!
+!!!
 
-- [BISON](https://ncrcaims.inl.gov/Identity/Account/TrainingRegistration) Fuels Performance (2025 June 18-19, Idaho Falls)
-
+!alert! note
+There are currently no upcoming MOOSE-related training events. Please return to this page to view
+future opportunities for in-person training. For online training, tutorials, and examples, please
+refer to the [getting_started/examples_and_tutorials/index.md] page.
+!alert-end!
 
 #### Past Training:
 
-- [MOOSE Framework Fundamentals](https://ncrcaims.inl.gov/Identity/Account/TrainingRegistration) (2025 June 3-5, Idaho Falls)
+- [BISON](https://mooseframework.inl.gov/bison) Fuels Performance (2025 June 18-19, Idaho Falls)
+
+- MOOSE Framework Fundamentals (2025 June 3-5, Idaho Falls)
 
 - [Griffin Workshop during M&C 2025](https://www.ans.org/meetings/mc2025/calendar/event-1560/) (2025 April 27, Denver)
 
@@ -47,6 +54,7 @@ Upcoming MOOSE related training in chronological order:
   - Video: [MOOSE Workshop (Summer 2023, Part 2)](https://www.youtube.com/watch?v=JwbtDXRYPYo)
 
 - Reactor Meshing Workshop (2023 May 16, virtual)
+
 - MOOSE Framework (2022 June)
 
 #### Past Conferences
