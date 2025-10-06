@@ -274,7 +274,6 @@ PenetrationThread::operator()(const NodeIdRange & range)
         (*point_locator)(*closest_node, candidate_elements);
 
         if (candidate_elements.empty())
-        {
           mooseError("No proximate elements found at node ",
                      closest_node->id(),
                      " at ",
@@ -282,7 +281,6 @@ PenetrationThread::operator()(const NodeIdRange & range)
                      " on boundary ",
                      _nearest_node._boundary1,
                      ".  This should never happen.");
-        }
 
         for (const Elem * elem : candidate_elements)
         {
@@ -295,7 +293,6 @@ PenetrationThread::operator()(const NodeIdRange & range)
         }
 
         if (located_elem_ids.empty())
-        {
           mooseError("No proximate elements found at node ",
                      closest_node->id(),
                      " at ",
@@ -304,7 +301,6 @@ PenetrationThread::operator()(const NodeIdRange & range)
                      _nearest_node._boundary1,
                      " share that boundary.  This may happen if the mesh uses the same boundary id "
                      "for a nodeset and an unrelated sideset.");
-        }
 
         closest_elems = &located_elem_ids;
       }
