@@ -36,6 +36,7 @@ class TestResultsSummary(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    #@patch.object(TestHarnessResultsSummary, 'HEAD_RUNTIME_THREADSHOLD',new=1)
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testDiffTableNoChanges(self):
         """
@@ -79,6 +80,37 @@ class TestResultsSummary(unittest.TestCase):
         self.assertEqual(added_table[0][1], test_result.run_time)
         self.assertIsNone(removed_table)
         self.assertIsNone(same_table)
+
+    @patch.object(TestHarnessResultsSummary, 'HEAD_RUNTIME_THREADSHOLD',new=0.5)
+    @patch.object(TestHarnessResultsSummary, 'RELATIVE_RUNTIME_RATE',new=0.1)
+    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
+    def testDiffTableSameTestHighRelativeRunTime(self):
+        """
+        Tests diff_table() when same test name exit in both base and head, where:
+            -the head runtime exceeds a predefined threshold and
+            -the relative runtime increase exceeds a defined rate.
+        """
+        summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
+        base_results, head_results, base_names, head_names = summary.pr_test_names(event_id=EVENT_ID)
+        removed_table, added_table, same_table = summary.diff_table(base_results, head_results,base_names, head_names)
+
+        reader = TestHarnessResultsReader(TEST_DATABASE_NAME)
+        results = reader.getEventResults(event_id=EVENT_ID)
+        test_result = results.get_test(TEST_NAME.folder, TEST_NAME.name)
+
+        base_results = reader.getCommitResults(results.base_sha)
+        base_result = base_results.get_test(TEST_NAME.folder, TEST_NAME.name)
+
+        self.assertEqual(len(same_table), 1)
+        self.assertEqual(same_table[0][0], str(TEST_NAME))
+        self.assertEqual(same_table[0][1], base_result.run_time)
+        self.assertEqual(same_table[0][2], test_result.run_time)
+
+        relative_diff_str = same_table[0][3]
+        relative_diff = float(relative_diff_str.strip('%')) / 100
+        self.assertGreater(relative_diff, TestHarnessResultsSummary.RELATIVE_RUNTIME_RATE)
+        self.assertIsNone(removed_table)
+        self.assertIsNone(added_table)
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testPRTestNamesNoChanges(self):
