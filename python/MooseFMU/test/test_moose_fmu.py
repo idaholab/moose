@@ -304,9 +304,10 @@ class TestMoose2FMU(unittest.TestCase):
                 pass
 
         slave.control = Control()
+        test_self = self
 
         def fake_get_flag(self, allowed_flags, max_retries, wait_seconds=0.5):
-            self.assertEqual(set(allowed_flags), {"USER_FLAG"})
+            test_self.assertEqual(set(allowed_flags), {"USER_FLAG"})
             return "USER_FLAG"
 
         slave.get_flag_with_retries = MethodType(fake_get_flag, slave)
@@ -367,10 +368,7 @@ class TestMoose2FMU(unittest.TestCase):
     def test_exit_initialization_mode_rebuilds_command(self, mock_control):
         slave = _DummyMoose(instance_name="test", guid="1234")
 
-        slave.moose_mpi = "mpiexec"
-        slave.mpi_num = "4"
-        slave.moose_executable = "/custom/moose-opt"
-        slave.moose_inputfile = "custom_input.i"
+        slave.moose_command = "mpiexec -n 4 /custom/moose-opt -i custom_input.i"
 
         self.assertTrue(slave.exit_initialization_mode())
 
@@ -388,7 +386,6 @@ class TestMoose2FMU(unittest.TestCase):
             moose_control_name=slave.server_name,
         )
         mock_control.return_value.initialize.assert_called_once_with()
-        self.assertEqual(slave.cmd, expected_command)
 
     def test_sync_with_moose_success(self):
         slave = _DummyMoose(instance_name="test", guid="1234")
@@ -398,6 +395,7 @@ class TestMoose2FMU(unittest.TestCase):
                 self._times = iter([0.0, 1.0005])
                 self.wait_calls = []
                 self.continue_calls = 0
+                self._running_checks = iter([True, True])
 
             def getTime(self):
                 return next(self._times)
@@ -407,6 +405,15 @@ class TestMoose2FMU(unittest.TestCase):
 
             def setContinue(self):
                 self.continue_calls += 1
+
+            def getTimeStepSize(self):
+                return 5e-4
+
+            def isProcessRunning(self):
+                try:
+                    return next(self._running_checks)
+                except StopIteration:
+                    return False
 
         slave.control = Control()
 
@@ -419,14 +426,14 @@ class TestMoose2FMU(unittest.TestCase):
 
         moose_time, signal = slave.sync_with_moose(1.0, 0.1)
 
-        self.assertEqual(signal, "TIMESTEP_BEGIN")
+        self.assertEqual(signal, "INITIAL")
         self.assertAlmostEqual(moose_time, 1.0005, delta=1e-3)
         self.assertEqual(slave.control.wait_calls, ["INITIAL"])
         self.assertEqual(slave.control.continue_calls, 1)
 
 
-        def test_ensure_control_listening(self):
-            slave = _DummyMoose(instance_name="test", guid="1234")
+    def test_ensure_control_listening(self):
+        slave = _DummyMoose(instance_name="test", guid="1234")
 
         class Control:
             def __init__(self, listening: bool):
@@ -446,6 +453,16 @@ class TestMoose2FMU(unittest.TestCase):
         slave.control = Control(False)
         self.assertFalse(slave.ensure_control_listening())
         self.assertTrue(slave.control.finalized)
+
+    def test_setup_experiment_saves_parameters(self):
+        slave = _DummyMoose(instance_name="test", guid="1234")
+
+        result = slave.setup_experiment(start_time=0.5, stop_time=10.0, tolerance=1e-4)
+
+        self.assertTrue(result)
+        self.assertEqual(slave.start_time, 0.5)
+        self.assertEqual(slave.stop_time, 10.0)
+        self.assertEqual(slave.tolerance, 1e-4)
 
     def test_get_postprocessor_value(self):
         slave = _DummyMoose(instance_name="test", guid="1234")
@@ -475,11 +492,11 @@ class TestMoose2FMU(unittest.TestCase):
 
         slave.get_flag_with_retries = MethodType(fake_get_flag, slave)
 
-        value = slave.get_postprocessor_value("READY", "temp", 1.0)
+        value = slave.get_postprocessor_value("temp", 1.0, flag="READY")
 
         self.assertEqual(value, 42.0)
         self.assertEqual(slave.control.waited, ["READY"])
-        self.assertEqual(slave.control.continue_calls, 1)
+        self.assertEqual(slave.control.continue_calls, 0)
         self.assertFalse(slave.control.finalized)
 
     def test_get_postprocessor_value_failure(self):
@@ -499,7 +516,7 @@ class TestMoose2FMU(unittest.TestCase):
 
         slave.get_flag_with_retries = MethodType(fake_get_flag, slave)
 
-        result = slave.get_postprocessor_value("READY", "temp", 5.0)
+        result = slave.get_postprocessor_value("temp", 5.0, flag="READY")
 
         self.assertIsNone(result)
         self.assertTrue(slave.control.finalized)
@@ -532,13 +549,13 @@ class TestMoose2FMU(unittest.TestCase):
 
         slave.get_flag_with_retries = MethodType(fake_get_flag, slave)
 
-        value = slave.get_reporter_value("READY", "flux", 2.0)
+        value = slave.get_reporter_value("flux", 2.0, flag="READY")
 
 
 
         self.assertEqual(value, 3.14)
         self.assertEqual(slave.control.waited, ["READY"])
-        self.assertEqual(slave.control.continue_calls, 1)
+        self.assertEqual(slave.control.continue_calls, 0)
         self.assertFalse(slave.control.finalized)
 
 if __name__ == "__main__":

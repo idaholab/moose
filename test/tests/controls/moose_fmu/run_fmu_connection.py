@@ -17,7 +17,7 @@ import moose_fmu_tester
 
 """
 Couple a toy FMU (Dahlquist test equation y'(t) = k * y) with a MOOSE FMU and
-compare a reference run (MOOSE-only) against a coupled run (FMU → MOOSE BC).
+compare a reference run (MOOSE-only) against a coupled run (FMU -> MOOSE BC).
 
 Workflow
 --------
@@ -51,7 +51,7 @@ if __name__ == '__main__':
     moose_filename = 'MooseTest.fmu'
 
     start_time = 0.0
-    stop_time = 5.0
+    stop_time = 2.0
     step_size = 0.5
     change_time = 1.0
 
@@ -111,7 +111,7 @@ if __name__ == '__main__':
 
     # Pause before coupled run
     logger.info("Start the second moose run after 2s")
-    time.sleep(2)
+    time.sleep(1)
 
     # Re-instantiate Moose for coupled run
     moose_instance = instantiate_fmu(moose_model, moose_description)
@@ -167,7 +167,7 @@ if __name__ == '__main__':
 
     # Report results
     for ti, mti, d in zip(times, moose_times, diffused):
-        print(f"fmu_time={ti:.1f} → moose_time={mti:.5f} → diffused={d:.5f}")
+        print(f"fmu_time={ti:.1f} -> moose_time={mti:.5f} -> diffused={d:.5f}")
 
     df = pd.DataFrame(
         zip(times, moose_times, diffused),

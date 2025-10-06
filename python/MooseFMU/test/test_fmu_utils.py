@@ -3,7 +3,7 @@ import logging
 import sys
 import unittest
 from pathlib import Path
-from types import ModuleType, SimpleNamespace
+from types import SimpleNamespace
 
 from unittest.mock import patch
 
