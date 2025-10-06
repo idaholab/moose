@@ -9,6 +9,7 @@
 
 import unittest
 import os
+import tempfile
 from mock import patch
 from contextlib import redirect_stdout
 from io import StringIO
@@ -167,15 +168,13 @@ class TestResultsSummary(unittest.TestCase):
         """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
 
-        stdout = StringIO()
-        with redirect_stdout(stdout):
-            summary.pr(event_id=EVENT_ID)
-        self.assertIn('Removed Tests:', stdout.getvalue())
-        self.assertIn('No Removed Tests', stdout.getvalue())
-        self.assertIn('New Tests:', stdout.getvalue())
-        self.assertIn('No Removed Tests', stdout.getvalue())
-        self.assertIn('Same Tests', stdout.getvalue())
-        self.assertIn('No Tests', stdout.getvalue())
+        summary_result = summary.pr(event_id=EVENT_ID)
+        self.assertIn('Removed Tests:',summary_result)
+        self.assertIn('No Removed Tests',summary_result)
+        self.assertIn('New Tests:',summary_result)
+        self.assertIn('No New Tests',summary_result)
+        self.assertIn('Same Tests',summary_result)
+        self.assertIn('No Tests',summary_result)
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testPRNoBase(self):
@@ -194,21 +193,68 @@ class TestResultsSummary(unittest.TestCase):
         self.assertIn('Comparison not available', stdout.getvalue())
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
-    def testMain(self):
+    def testSummaryOutputFileValidPath(self):
         """
-        Tests main() output for a PR event, verifying summary messages are printed.
+        Tests summary output file when output file path exit and there is no change between base and head.
         """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
+        summary_result = summary.pr(event_id=EVENT_ID)
+
+        with tempfile.NamedTemporaryFile(delete=False, mode='r+') as tmp_file:
+            tmp_path = tmp_file.name
+        try:
+            summary.summary_output_file(summary_result,tmp_path)
+            with open(tmp_path, 'r') as f:
+                output = f.read()
+            self.assertIn('Removed Tests:', output)
+            self.assertIn('No Removed Tests', output)
+            self.assertIn('New Tests:', output)
+            self.assertIn('No New Tests', output)
+            self.assertIn('Same Tests', output)
+            self.assertIn('No Tests', output)
+        finally:
+            os.remove(tmp_path)
+
+
+    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
+    def testSummaryOutputFileInvalidPath(self):
+        """
+        Tests that summary_output_file when output file path is invalid.
+        """
+        summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
+        summary_result = summary.pr(event_id=EVENT_ID)
+
+        invalid_path = "/this/path/does/not/exist/output.txt"
 
         stdout = StringIO()
         with redirect_stdout(stdout):
-            summary.main(action='pr', event_id=EVENT_ID)
-        self.assertIn('Removed Tests:', stdout.getvalue())
-        self.assertIn('No Removed Tests', stdout.getvalue())
-        self.assertIn('New Tests:', stdout.getvalue())
-        self.assertIn('No Removed Tests', stdout.getvalue())
-        self.assertIn('Same Tests', stdout.getvalue())
-        self.assertIn('No Tests', stdout.getvalue())
+            summary.summary_output_file(summary_result, invalid_path)
+
+        output = stdout.getvalue()
+        self.assertIn("Failed to write to", output)
+
+
+    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
+    def testMain(self):
+        """
+        Tests main() output for a PR event, verifying summary messages are printed in output file path.
+        """
+        summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
+
+        with tempfile.NamedTemporaryFile(delete=False, mode='r+') as tmp_file:
+            tmp_path = tmp_file.name
+        try:
+            summary.main( out=tmp_path, action='pr', event_id=EVENT_ID)
+            with open(tmp_path, 'r') as f:
+                output = f.read()
+            self.assertIn('Removed Tests:', output)
+            self.assertIn('No Removed Tests', output)
+            self.assertIn('New Tests:', output)
+            self.assertIn('No New Tests', output)
+            self.assertIn('Same Tests', output)
+            self.assertIn('No Tests', output)
+        finally:
+            os.remove(tmp_path)
 
 if __name__ == '__main__':
     unittest.main()

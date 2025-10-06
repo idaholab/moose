@@ -234,20 +234,24 @@ class TestHarnessResultsSummary:
         if base_names is None:
             return
         removed_table, added_table, same_table = self.diff_table(base_results,head_results, base_names, head_names)
+        #print(self.build_summary(removed_table, added_table, same_table))
+        summary_result = self.build_summary(removed_table, added_table, same_table)
+        #print(summary_result)
+        return summary_result
 
-        print(self.build_summary(removed_table, added_table, same_table))
-        summary = self.build_summary(removed_table, added_table, same_table)
-        output_file = kwargs.get('out')
-
+    def summary_output_file(self, summary_result: str, out: str) -> None:
         try:
-            with open(output_file, 'w') as f:
-                f.write(summary)
+            with open(out, 'w') as f:
+                f.write(summary_result)
         except Exception as e:
-            print(f"Failed to write to {output_file}: {e}")
+            print(f"Failed to write to {out}: {e}")
 
     def main(self, **kwargs):
         action = kwargs['action']
-        getattr(self, action)(**kwargs)
+        summary_result = getattr(self, action)(**kwargs)
+
+        out = kwargs['out']
+        self.summary_output_file(summary_result,out)
 
 if __name__ == '__main__':
     args = TestHarnessResultsSummary.parseArgs()
