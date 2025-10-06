@@ -9,10 +9,11 @@
 
 from datetime import datetime
 import importlib
-from typing import Optional, Union, Iterator
+from typing import Optional, Union
 from copy import deepcopy
 from dataclasses import dataclass
 from TestHarness.validation.dataclasses import ValidationResult, ValidationData, ValidationDataTypesStr
+from TestHarness.resultsstore.civetstore import decompress_dict, compress_dict
 from pymongo.database import Database
 from bson.objectid import ObjectId
 
@@ -76,7 +77,6 @@ class StoredTestResult:
             assert len(self.base_sha) == 40
         assert isinstance(self.time, datetime)
         assert isinstance(self.tester, (dict, NoneType))
-        assert isinstance(self.json_metadata, (dict, NoneType))
         assert isinstance(self.hpc, (dict, NoneType))
         assert isinstance(self.hpc_id, (str, NoneType))
         assert isinstance(self.validation, (dict, NoneType))
@@ -86,6 +86,11 @@ class StoredTestResult:
         self._validation_data: Optional[dict[str, ValidationData]] = self._buildValidationData()
         assert isinstance(self.validation_results, (list, NoneType))
         assert isinstance(self.validation_data, (dict, NoneType))
+
+        # Load JSON metadata, which is compressed
+        self._json_metadata: Optional[dict[str, dict]] = self._buildJSONMetadata()
+        assert isinstance(self.json_metadata, (dict, NoneType))
+        assert isinstance(self.perf_graph, (dict, NoneType))
 
     @property
     def data(self) -> dict:
@@ -228,13 +233,6 @@ class StoredTestResult:
         return self.data.get('tester')
 
     @property
-    def json_metadata(self) -> Optional[dict]:
-        """
-        Get the 'json_metadata' entry from the Tester entry
-        """
-        return self.tester.get('json_metadata') if self.tester is not None else None
-
-    @property
     def hpc(self) -> Optional[dict]:
         """
         Get the 'hpc' entry if it exists
@@ -310,6 +308,48 @@ class StoredTestResult:
             data[k] = getattr(validation_dataclasses_module, data_type)(**v)
 
         return data
+
+    @property
+    def json_metadata(self) -> Optional[dict[str, dict]]:
+        """
+        Get the 'json_metadata' entry from the Tester entry
+        """
+        return self._json_metadata
+
+    def _buildJSONMetadata(self) -> Optional[dict[str, dict]]:
+        """
+        Helper for building the tester.json_metadata entry,
+        in which each value is a compressed JSON string
+        """
+        # No metadata without a tester (stored in the tester)
+        if self.tester is None:
+            return None
+        # If no json_metadata key, there was none
+        json_metadata = self.tester.get('json_metadata')
+        if json_metadata is None:
+            return None
+
+        assert isinstance(json_metadata, dict)
+
+        json_metadata_decompressed = {}
+        for k, v in json_metadata.items():
+            assert isinstance(v, bytes)
+            try:
+                loaded = decompress_dict(v)
+            except Exception as e:
+                raise ValueError(
+                    f'Failed to decompress json_metadata {k} '
+                    f'in test {self.name}'
+                )
+            json_metadata_decompressed[k] = loaded
+        return json_metadata_decompressed
+
+    @property
+    def perf_graph(self) -> Optional[dict]:
+        """
+        Get the perf_graph entry in the JSON metadata if available
+        """
+        return self.json_metadata.get('perf_graph') if self.json_metadata else None
 
 class StoredResult:
     """
@@ -662,15 +702,33 @@ class StoredResult:
         # Load all tests so that they can be stored
         self.load_all_tests()
 
+        # Copy our data
         data = deepcopy(self.data)
+
+        # Convert datetime to str that can be converted back
         data['time'] = str(data['time'])
+        # Convert ObjectID to string id
         data['_id'] = str(data['_id'])
+
+        # Convert each test and store in place
         for name, test_result in self._tests.items():
+            # Copy our data
             data['tests'][name.folder]['tests'][name.name] = deepcopy(test_result.data)
             test_entry = data['tests'][name.folder]['tests'][name.name]
+
+            # Convert ObjectID to string ID
             test_entry['_id'] = str(test_entry['_id'])
             if 'result_id' in test_entry:
                 test_entry['result_id'] = str(test_entry['result_id'])
+
+            # Convert binary JSON metadata to dict
+            json_metadata = test_entry.get('tester', {}).get('json_metadata', {})
+            for k, v in json_metadata.items():
+                json_metadata[k] = decompress_dict(v)
+
+            # Time entry existed before civet version 4
+            if self.civet_version < 4:
+                test_entry['time'] = str(test_entry['time'])
 
         return data
 
@@ -682,13 +740,28 @@ class StoredResult:
         """
         assert isinstance(data, dict)
 
+        # Convert datetime str to datetime object
         data['time'] = datetime.fromisoformat(data['time'])
+        # Convert string id to ObjectID
         data['_id'] = ObjectId(data['_id'])
+
+        # Convert each test
         for folder_entry in data['tests'].values():
             for test_entry in folder_entry['tests'].values():
+                # Convert string id to ObjectID
                 test_entry['_id'] = ObjectId(test_entry['_id'])
                 if 'result_id' in test_entry:
                     test_entry['result_id'] = ObjectId(test_entry['result_id'])
+
+                # Convert string JSON metadata to binary
+                json_metadata = test_entry.get('tester', {}).get('json_metadata', {})
+                for k, v in json_metadata.items():
+                    json_metadata[k] = compress_dict(v)
+
+                # Convert time if it exists (removed after
+                # civet_version 3)
+                if 'time' in test_entry:
+                    test_entry['time'] = datetime.fromisoformat(test_entry['time'])
 
         return data
 

@@ -29,6 +29,22 @@ NoneType = type(None)
 # stored separately in a tests document
 MAX_RESULT_SIZE = 5.0 # MB
 
+@staticmethod
+def compress_dict(value: dict) -> bytes:
+    """
+    Compresses dict into binary.
+    """
+    assert isinstance(value, dict)
+    return zlib.compress(json.dumps(value).encode('utf-8'))
+
+@staticmethod
+def decompress_dict(compressed: bytes) -> dict:
+    """
+    Decompresses a dict that was compressed with compress_dict().
+    """
+    assert isinstance(compressed, bytes)
+    return json.loads(zlib.decompress(compressed).decode('utf-8'))
+
 class CIVETStore:
     CIVET_VERSION = 6
 
@@ -329,15 +345,11 @@ class CIVETStore:
                         if key != 'runner_run':
                             del test_values['timing'][key]
 
-                # Append metadata content from file
-                json_metadata = test_values.get('tester', {}).get('json_metadata', {})
-                for key, value in json_metadata.items():
-                    if value:
-                        try:
-                            with open(value, 'r') as f:
-                                json_metadata[key] = json.load(f)
-                        except:
-                            print(f'WARNING: Failed to load metadata file {value}')
+                # Compress JSON metadata as binary
+                tester = test_values.get('tester', {})
+                json_metadata = tester.get('json_metadata', {})
+                for k, v in json_metadata.items():
+                    json_metadata[k] = compress_dict(v)
 
         tests = None
         max_result_size = max_result_size * 1e6
@@ -430,14 +442,6 @@ class CIVETStore:
                         insert_test_names.append((folder_name, test_name))
                     else:
                         test_data = test_entry
-
-                    # Store larger contents as binary
-                    tester = test_data.get('tester', {})
-                    json_metadata = tester.get('json_metadata', {})
-                    for k, v in json_metadata.items():
-                        if v:
-                            compressed = Binary(zlib.compress(json.dumps(v).encode('utf-8')))
-                            json_metadata[k] = compressed
 
             # Store the tests (if any)
             test_ids = None

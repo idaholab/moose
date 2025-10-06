@@ -106,18 +106,12 @@ class TestResultsReader(unittest.TestCase):
             self.assertTrue(results.has_test(PROD_TEST_NAME.folder, PROD_TEST_NAME.name))
 
             gold[str(results.id)] = results.serialize()
-            gold_entry = gold[str(results.id)]
-
-            # Remove json_metadata as it's lengthy binary
-            for folder_entry in gold_entry['tests'].values():
-                for test_entry in folder_entry['tests'].values():
-                    test_entry['tester']['json_metadata'] = {}
 
             # Checks
             self.assertEqual(results.civet_version, gold_test.civet_version)
 
         # Dump the values so that we can load them
-        gold_dumped = json.dumps(gold, default=str, indent=2, sort_keys=True)
+        gold_dumped = json.dumps(gold, indent=2, sort_keys=True)
 
         # Rewrite the gold file if we set to do so
         if rewrite_gold:

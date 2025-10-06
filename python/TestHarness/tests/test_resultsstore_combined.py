@@ -22,7 +22,7 @@ from test_resultsstore_civetstore import TEST_DATABASE, base_civet_env, random_i
 HAS_STORE_AUTH = CIVETStore.has_authentication()
 HAS_READER_AUTH = ResultsReader.hasEnvironmentAuthentication()
 
-DEFAULT_TESTHARNESS_ARGS = ['-i', 'always_ok']
+DEFAULT_TESTHARNESS_ARGS = ['-i', 'always_ok', '--capture-perf-graph']
 
 TEST_NAME = TestName('tests/test_harness', 'always_ok')
 
@@ -66,6 +66,7 @@ class TestResultsStoreCombined(TestHarnessTestCase):
         pr_test = results.get_test(TEST_NAME.folder, TEST_NAME.name)
         self.assertEqual(pr_test.results, results)
         self.assertEqual(pr_test.name, TEST_NAME)
+        self.assertIsNotNone(pr_test.perf_graph)
 
     def runGetResultsTest(self, env: dict, base_sha: str, id: ObjectId):
         """

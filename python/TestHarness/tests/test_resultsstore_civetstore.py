@@ -17,7 +17,7 @@ from copy import deepcopy
 from typing import Optional, Tuple
 from bson.objectid import ObjectId
 
-from TestHarness.resultsstore.civetstore import CIVETStore
+from TestHarness.resultsstore.civetstore import CIVETStore, decompress_dict, compress_dict
 from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
 
 # Whether or not authentication is available from env var RESULTS_READER_AUTH_FILE
@@ -76,6 +76,16 @@ DEFAULT_TESTHARNESS_ARGS = ['-i', 'validation', '--capture-perf-graph']
 DEFAULT_TESTHARNESS_KWARGS = {'exit_code': 132}
 
 class TestCIVETStore(TestHarnessTestCase):
+    def testCompressDict(self):
+        """
+        Tests compress_dic() and decompress_dict()
+        """
+        value = {'foo': 'bar'}
+        compressed_value = compress_dict(value)
+        self.assertIsInstance(compressed_value, bytes)
+        decompressed_value = decompress_dict(compressed_value)
+        self.assertEqual(value, decompressed_value)
+
     def testParseSSHRepo(self):
         """
         Tests parse_ssh_repo()
@@ -320,10 +330,6 @@ class TestCIVETStore(TestHarnessTestCase):
                         del modified_test_entry[key]
                     self.assertNotIn(key, stored_test)
 
-                # JSON metadata is loaded from file so it'll differ
-                if 'tester' in stored_test:
-                    modified_test_entry['tester']['json_metadata'] = stored_test['tester']['json_metadata']
-
                 # Only runtime (runner_run timing entry)
                 if build_kwargs.get('only_runtime'):
                     modified_test_entry['timing'] = {'runner_run': modified_test_entry['timing']['runner_run']}
@@ -332,6 +338,12 @@ class TestCIVETStore(TestHarnessTestCase):
                 for key in ['status', 'timing', 'tester']:
                     if build_kwargs.get(f'ignore_{key}'):
                         del modified_test_entry[key]
+
+                # Compress the JSON metadata
+                tester = modified_test_entry.get('tester', {})
+                json_metadata = tester.get('json_metadata', {})
+                for k, v in json_metadata.items():
+                    json_metadata[k] = compress_dict(v)
 
                 self.assertEqual(modified_test_entry, stored_test)
 

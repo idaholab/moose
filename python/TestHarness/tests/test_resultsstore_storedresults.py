@@ -20,6 +20,7 @@ from dataclasses import dataclass
 from TestHarness import TestHarness
 from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
 from TestHarness.resultsstore.storedresults import StoredResult, StoredTestResult, TestName, DatabaseException
+from TestHarness.resultsstore.civetstore import compress_dict, decompress_dict
 
 FAKE_RESULT_ID = ObjectId()
 FAKE_CIVET_VERSION = 4
@@ -33,7 +34,6 @@ FAKE_PR_NUM = 1234
 FAKE_HPC_QUEUED_TIME = 1.234
 FAKE_TIME = datetime.now()
 FAKE_TEST_NAME = TestName('folder', 'name')
-FAKE_JSON_METADATA = {'foo': 'bar'}
 
 class TestResultsStoredResults(TestHarnessTestCase):
     @dataclass
@@ -76,10 +76,14 @@ class TestResultsStoredResults(TestHarnessTestCase):
                     if key in test_values:
                         del test_values[key]
 
-                tester_metadata = test_values.get('tester', {}).get('json_metadata', {})
-                for key, value in tester_metadata.items():
-                    if value:
-                        tester_metadata[key] = zlib.compress(json.dumps(FAKE_JSON_METADATA).encode('utf-8'))
+                # Compress JSON metadata, which should only exist
+                # if the test actually ran
+                json_metadata = test_values['tester'].get('json_metadata')
+                if test_values['status']['status'] == 'OK':
+                    for k, v in json_metadata.items():
+                        json_metadata[k] = compress_dict(v)
+                else:
+                    self.assertIsNone(json_metadata)
 
                 # Fake values from HPC
                 test_values['timing']['hpc_queued'] = FAKE_HPC_QUEUED_TIME
@@ -202,9 +206,24 @@ class TestResultsStoredResults(TestHarnessTestCase):
 
             # Tester properties
             self.assertEqual(test_result.tester, data['tester'])
-            self.assertEqual(test_result.json_metadata, data['tester']['json_metadata'])
-            for k, v in data['tester']['json_metadata'].items():
-                self.assertEqual(test_result.json_metadata[k], v)
+
+            # JSON metadata, which only appears for tests that ran
+            if test_result.status_value == 'OK':
+                # Decompress the data and compare
+                json_metadata = data['tester']['json_metadata']
+                if json_metadata is not None:
+                    self.assertEqual(len(json_metadata), len(test_result.json_metadata))
+                    for k, v in json_metadata.items():
+                        self.assertIn(k, test_result.json_metadata)
+                        decompressed = decompress_dict(v)
+                        self.assertEqual(test_result.json_metadata[k], decompressed)
+
+                # Should thus have a perf_graph entry
+                self.assertEqual(test_result.perf_graph, decompress_dict(json_metadata['perf_graph']))
+            # Test didn't run, so no metadata or perf_graph
+            else:
+                self.assertIsNone(test_result.json_metadata)
+                self.assertIsNone(test_result.perf_graph)
 
             # Validation data
             results_i = 0

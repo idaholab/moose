@@ -17,6 +17,7 @@ from FactorySystem.InputParameters import InputParameters
 from pathlib import Path
 from dataclasses import dataclass
 from copy import deepcopy
+from typing import Optional
 
 class Tester(MooseObject, OutputInterface):
     """
@@ -188,6 +189,7 @@ class Tester(MooseObject, OutputInterface):
     @dataclass
     class JSONMetadata:
         path: os.PathLike
+        data: Optional[dict] = None
 
     def __init__(self, name, params):
         MooseObject.__init__(self, name, params)
@@ -289,11 +291,16 @@ class Tester(MooseObject, OutputInterface):
 
     def getResults(self, options) -> dict:
         """Get the results dict for this Tester"""
-        json_metadata = {k: os.path.join(self.getTestDir(), v.path) if v else None for k, v in self.json_metadata.items()}
-        return {'name': self.__class__.__name__,
-                'command': self.getCommand(options),
-                'input_file': self.getInputFile(),
-                'json_metadata': json_metadata}
+        results = {'name': self.__class__.__name__,
+                   'command': self.getCommand(options),
+                   'input_file': self.getInputFile()}
+        json_metadata = {}
+        for key, value in self.json_metadata.items():
+            if value.data:
+                json_metadata[key] = value.data
+        if json_metadata:
+            results['json_metadata'] = json_metadata
+        return results
 
     def getStatusMessage(self):
         return self.__tester_message
@@ -919,9 +926,9 @@ class Tester(MooseObject, OutputInterface):
         if output:
             output = output.rstrip() + '\n\n'
 
-        # Check existance of metadata
+        # Load metadata if it exists
         if not self.isSkip() and self.json_metadata:
-            output += 'Checking JSON metadata...\n'
+            output += 'Loading JSON metadata...\n'
             if exit_code == 0:
                 for key, entry in self.json_metadata.items():
                     path = os.path.join(self.getTestDir(), entry.path)
@@ -929,8 +936,7 @@ class Tester(MooseObject, OutputInterface):
                     if os.path.isfile(path):
                         try:
                             with open(path, 'r') as f:
-                                result = json.load(f)
-                                del result
+                                entry.data = json.load(f)
                         except:
                             output += f'{prefix}cannot be loaded\n'
                             self.setStatus(self.fail, 'BAD METADATA')
@@ -940,7 +946,7 @@ class Tester(MooseObject, OutputInterface):
                         output += f'{prefix}does not exist\n'
                         self.setStatus(self.fail, 'MISSING METADATA')
             else:
-                output += '  Not checking due to non-zero exit code\n'
+                output += '  Not loading due to non-zero exit code\n'
             output += '\n'
 
         # If the tester requested to be skipped at the last minute, report that.
