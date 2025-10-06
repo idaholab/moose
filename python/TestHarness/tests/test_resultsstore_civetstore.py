@@ -17,14 +17,14 @@ from copy import deepcopy
 from typing import Optional, Tuple
 from bson.objectid import ObjectId
 
-from TestHarness.resultsreader.civetstorer import CIVETStorer
+from TestHarness.resultsstore.civetstore import CIVETStore
 from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
 
 # Whether or not authentication is available from env var RESULTS_READER_AUTH_FILE
-HAS_AUTH = CIVETStorer.has_authentication()
+HAS_AUTH = CIVETStore.has_authentication()
 
 # Name for the database used for testing database store
-TEST_DATABASE = 'civet_tests_moose_resultsreader'
+TEST_DATABASE = 'civet_tests_moose_resultsstore'
 
 # Generate a random Git SHA
 def random_git_sha() -> str:
@@ -75,23 +75,23 @@ def build_civet_env() -> Tuple[str, dict]:
 DEFAULT_TESTHARNESS_ARGS = ['-i', 'validation', '--capture-perf-graph']
 DEFAULT_TESTHARNESS_KWARGS = {'exit_code': 132}
 
-class TestResultsReaderCIVETStorer(TestHarnessTestCase):
+class TestCIVETStore(TestHarnessTestCase):
     def testParseSSHRepo(self):
         """
         Tests parse_ssh_repo()
         """
         self.assertEqual(
-            CIVETStorer.parse_ssh_repo(APPLICATION_REPO),
+            CIVETStore.parse_ssh_repo(APPLICATION_REPO),
             ('github.com', 'idaholab', 'moose')
         )
 
         self.assertEqual(
-            CIVETStorer.parse_ssh_repo('git@othergithub.host.com:org/repo.git'),
+            CIVETStore.parse_ssh_repo('git@othergithub.host.com:org/repo.git'),
             ('othergithub.host.com', 'org', 'repo')
         )
 
         with self.assertRaises(ValueError):
-            CIVETStorer.parse_ssh_repo('foo')
+            CIVETStore.parse_ssh_repo('foo')
 
     def getGetCIVETRepoUrl(self):
         """
@@ -99,25 +99,25 @@ class TestResultsReaderCIVETStorer(TestHarnessTestCase):
         """
         env = {'CIVET_BASE_SSH_URL': APPLICATION_REPO}
         self.assertEqual(
-            CIVETStorer.get_civet_repo_url(env),
+            CIVETStore.get_civet_repo_url(env),
             'github.com/idaholab/moose'
         )
 
         env = {'APPLICATION_REPO': APPLICATION_REPO}
         self.assertEqual(
-            CIVETStorer.get_civet_repo_url(env),
+            CIVETStore.get_civet_repo_url(env),
             'github.com/idaholab/moose'
         )
 
         with self.assertRaises(ValueError):
-            CIVETStorer.get_civet_repo_url({})
+            CIVETStore.get_civet_repo_url({})
 
     def testGetCIVETServer(self):
         """
         Tests get_civet_server()
         """
         self.assertEqual(
-            CIVETStorer.get_civet_server(CIVET_SERVER),
+            CIVETStore.get_civet_server(CIVET_SERVER),
             'civet.inl.gov'
         )
 
@@ -137,7 +137,7 @@ class TestResultsReaderCIVETStorer(TestHarnessTestCase):
                 'step_name': env['CIVET_STEP_NAME']
             },
             'base_sha': base_sha,
-            'civet_version': CIVETStorer.CIVET_VERSION,
+            'civet_version': CIVETStore.CIVET_VERSION,
             'event_id': int(env['CIVET_EVENT_ID']),
             'event_sha': env['CIVET_HEAD_SHA'],
         }
@@ -151,7 +151,7 @@ class TestResultsReaderCIVETStorer(TestHarnessTestCase):
         env = {'CIVET_EVENT_CAUSE': 'Pull request', 'CIVET_PR_NUM': str(pr_num)}
         env.update(base_env)
 
-        result = CIVETStorer.build_header(base_sha, env)
+        result = CIVETStore.build_header(base_sha, env)
 
         gold = self.buildHeaderGold(base_sha, base_env)
         gold['civet']['event_url'] = f'github.com/idaholab/moose/pull/{pr_num}'
@@ -172,7 +172,7 @@ class TestResultsReaderCIVETStorer(TestHarnessTestCase):
         pr_num = int(env['CIVET_PR_NUM'])
         base_sha = env['CIVET_BASE_SHA']
 
-        result = CIVETStorer.build_header(base_sha, env)
+        result = CIVETStore.build_header(base_sha, env)
 
         gold = self.buildHeaderGold(base_sha, env)
         gold['civet']['event_url'] = f'github.com/idaholab/moose/pull/{pr_num}'
@@ -191,7 +191,7 @@ class TestResultsReaderCIVETStorer(TestHarnessTestCase):
         env = {'CIVET_EVENT_CAUSE': 'Push next', 'CIVET_PR_NUM': '0'}
         env.update(base_env)
 
-        result = CIVETStorer.build_header(base_sha, env)
+        result = CIVETStore.build_header(base_sha, env)
 
         gold = self.buildHeaderGold(base_sha, base_env)
         gold['civet']['event_url'] = f'github.com/idaholab/moose/commit/{base_env["CIVET_HEAD_SHA"]}'
@@ -210,7 +210,7 @@ class TestResultsReaderCIVETStorer(TestHarnessTestCase):
         env = dict(os.environ)
         base_sha = env['CIVET_BASE_SHA']
 
-        result = CIVETStorer.build_header(base_sha, env)
+        result = CIVETStore.build_header(base_sha, env)
 
         gold = self.buildHeaderGold(base_sha, env)
         gold['civet']['event_url'] = f'github.com/idaholab/moose/commit/{env["CIVET_HEAD_SHA"]}'
@@ -228,7 +228,7 @@ class TestResultsReaderCIVETStorer(TestHarnessTestCase):
         env = {'CIVET_EVENT_CAUSE': 'Scheduled', 'CIVET_PR_NUM': '0'}
         env.update(base_env)
 
-        result = CIVETStorer.build_header(base_sha, env)
+        result = CIVETStore.build_header(base_sha, env)
 
         gold = self.buildHeaderGold(base_sha, base_env)
         gold['civet']['event_url'] = f'github.com/idaholab/moose/commit/{base_env["CIVET_HEAD_SHA"]}'
@@ -247,7 +247,7 @@ class TestResultsReaderCIVETStorer(TestHarnessTestCase):
         env.update(base_env)
 
         with self.assertRaisesRegex(KeyError, 'Environment variable CIVET_PR_NUM not set'):
-            CIVETStorer.build_header(base_sha, env)
+            CIVETStore.build_header(base_sha, env)
 
     def testBuildHeaderBadCause(self):
         """
@@ -258,7 +258,7 @@ class TestResultsReaderCIVETStorer(TestHarnessTestCase):
         env.update(base_env)
 
         with self.assertRaisesRegex(ValueError, 'Unknown event cause "Foo"'):
-            CIVETStorer.build_header(base_sha, env)
+            CIVETStore.build_header(base_sha, env)
 
     def checkResult(self, base_sha: str, env: dict, result: dict, stored_results: dict,
                     stored_tests: Optional[list], build_kwargs: dict = {}):
@@ -274,7 +274,7 @@ class TestResultsReaderCIVETStorer(TestHarnessTestCase):
         in_database = result_id is not None
 
         # Header should exist
-        header = CIVETStorer.build_header(base_sha, env)
+        header = CIVETStore.build_header(base_sha, env)
         header['time'] = stored_results['time']
         for key in header:
             self.assertIn(key, stored_results)
@@ -348,7 +348,7 @@ class TestResultsReaderCIVETStorer(TestHarnessTestCase):
         run_tests_result = self.runTestsCached(*run_tests_args, **run_tests_kwargs)
         results = run_tests_result.results
 
-        stored_result, stored_tests = CIVETStorer().build(results,
+        stored_result, stored_tests = CIVETStore().build(results,
                                                           base_sha=base_sha,
                                                           env=env,
                                                           **kwargs.get('build_kwargs', {}))
@@ -413,9 +413,9 @@ class TestResultsReaderCIVETStorer(TestHarnessTestCase):
         variable. This lets us within CIVET tests assert whether or not
         the authentication is available when we expect it to be so (or not).
         """
-        if os.environ.get('TEST_CIVETSTORER_HAS_AUTH') is not None:
+        if os.environ.get('TEST_CIVETSTORE_HAS_AUTH') is not None:
             self.assertTrue(HAS_AUTH)
-        if os.environ.get('TEST_CIVETSTORER_MISSING_AUTH') is not None:
+        if os.environ.get('TEST_CIVETSTORE_MISSING_AUTH') is not None:
             self.assertFalse(HAS_AUTH)
 
     def getStoredResult(self, result_id: ObjectId,
@@ -424,7 +424,7 @@ class TestResultsReaderCIVETStorer(TestHarnessTestCase):
         Helper for querying the database for a result and tests
         that have been previously stored
         """
-        with CIVETStorer.setup_client() as client:
+        with CIVETStore.setup_client() as client:
             db = client[TEST_DATABASE]
 
             result_filter = {'_id': {'$eq': result_id}}
@@ -458,7 +458,7 @@ class TestResultsReaderCIVETStorer(TestHarnessTestCase):
 
         store_args = [TEST_DATABASE, results, base_sha]
         build_kwargs = {'env': env}
-        result_id, test_ids = CIVETStorer().store(*store_args, **build_kwargs, **kwargs)
+        result_id, test_ids = CIVETStore().store(*store_args, **build_kwargs, **kwargs)
         self.assertIsInstance(result_id, ObjectId)
         self.assertIsInstance(test_ids, (list, type(None)))
 
@@ -495,7 +495,7 @@ class TestResultsReaderCIVETStorer(TestHarnessTestCase):
             with open(temp_result.name, 'w') as f:
                 json.dump(result, f)
 
-            result_id, test_ids = CIVETStorer().main(database=TEST_DATABASE,
+            result_id, test_ids = CIVETStore().main(database=TEST_DATABASE,
                                                      result_path=temp_result.name,
                                                      base_sha=base_sha,
                                                      env=env)
@@ -509,7 +509,7 @@ class TestResultsReaderCIVETStorer(TestHarnessTestCase):
         """
         with self.assertRaisesRegex(SystemExit,
                                     f'Result file {os.path.abspath("foo")} does not exist'):
-            CIVETStorer().main(database='foo', result_path='foo', out_path='', base_sha='')
+            CIVETStore().main(database='foo', result_path='foo', out_path='', base_sha='')
 
 if __name__ == '__main__':
     unittest.main()

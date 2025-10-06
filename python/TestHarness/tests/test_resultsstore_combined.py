@@ -13,26 +13,26 @@ from bson.objectid import ObjectId
 from typing import Optional
 
 from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
-from TestHarness.resultsreader.civetstorer import CIVETStorer
-from TestHarness.resultsreader.reader import TestHarnessResultsReader
-from TestHarness.resultsreader.results import TestHarnessResults, TestName
+from TestHarness.resultsstore.civetstore import CIVETStore
+from TestHarness.resultsstore.reader import ResultsReader
+from TestHarness.resultsstore.storedresults import StoredResult, TestName
 
-from test_resultsreader_civetstorer import TEST_DATABASE, base_civet_env, random_id
+from test_resultsstore_civetstore import TEST_DATABASE, base_civet_env, random_id
 
-HAS_STORER_AUTH = CIVETStorer.has_authentication()
-HAS_READER_AUTH = TestHarnessResultsReader.hasEnvironmentAuthentication()
+HAS_STORE_AUTH = CIVETStore.has_authentication()
+HAS_READER_AUTH = ResultsReader.hasEnvironmentAuthentication()
 
 DEFAULT_TESTHARNESS_ARGS = ['-i', 'always_ok']
 
 TEST_NAME = TestName('tests/test_harness', 'always_ok')
 
-class TestResultsReaderCombined(TestHarnessTestCase):
+class TestResultsStoreCombined(TestHarnessTestCase):
     def deleteDocuments(self, result_id: ObjectId, test_ids: Optional[ObjectId] = None):
         """
         Helper for deleting documents in a database
         after storing into it
         """
-        with CIVETStorer.setup_client() as client:
+        with CIVETStore.setup_client() as client:
             db = client[TEST_DATABASE]
 
             result_filter = {'_id': {'$eq': result_id}}
@@ -46,7 +46,7 @@ class TestResultsReaderCombined(TestHarnessTestCase):
                 self.assertTrue(tests_deleted.acknowledged)
                 self.assertEqual(tests_deleted.deleted_count, len(test_ids))
 
-    def compareResults(self, results: TestHarnessResults, env: dict, base_sha: str, id: ObjectId):
+    def compareResults(self, results: StoredResult, env: dict, base_sha: str, id: ObjectId):
         """
         Helper for comparing results to the expected environment
         """
@@ -80,7 +80,7 @@ class TestResultsReaderCombined(TestHarnessTestCase):
         head_sha = env['CIVET_HEAD_SHA']
 
         for load_type in ['pr', 'event', 'commit']:
-            reader = TestHarnessResultsReader(TEST_DATABASE)
+            reader = ResultsReader(TEST_DATABASE)
             if load_type == 'pr':
                 if pr_num is None:
                     continue
@@ -92,7 +92,7 @@ class TestResultsReaderCombined(TestHarnessTestCase):
             self.assertIsNotNone(result)
             self.compareResults(result, env, base_sha, id)
 
-    @unittest.skipUnless(HAS_STORER_AUTH, f"Skipping because store auth is not available")
+    @unittest.skipUnless(HAS_STORE_AUTH, f"Skipping because store auth is not available")
     @unittest.skipUnless(HAS_READER_AUTH, f"Skipping because reader auth is not available")
     def testPR(self):
         """
@@ -110,7 +110,7 @@ class TestResultsReaderCombined(TestHarnessTestCase):
         }
         env.update(base_env)
 
-        result_id, test_ids = CIVETStorer().store(TEST_DATABASE, result, base_sha, env=env)
+        result_id, test_ids = CIVETStore().store(TEST_DATABASE, result, base_sha, env=env)
         self.assertIsNone(test_ids)
 
         try:
@@ -119,7 +119,7 @@ class TestResultsReaderCombined(TestHarnessTestCase):
 
             # Get by test results with a PR option, from which the
             # first one should be the one from the PR
-            test_reader = TestHarnessResultsReader(TEST_DATABASE)
+            test_reader = ResultsReader(TEST_DATABASE)
             test_results = test_reader.getTestResults(TEST_NAME.folder, TEST_NAME.name,
                                                       limit=1, pr_num=pr_num)
             self.assertEqual(len(test_results), 1)
@@ -134,7 +134,7 @@ class TestResultsReaderCombined(TestHarnessTestCase):
 
         self.deleteDocuments(result_id)
 
-    @unittest.skipUnless(HAS_STORER_AUTH, f"Skipping because store auth is not available")
+    @unittest.skipUnless(HAS_STORE_AUTH, f"Skipping because store auth is not available")
     @unittest.skipUnless(HAS_READER_AUTH, f"Skipping because reader auth is not available")
     def testPush(self):
         """
@@ -151,7 +151,7 @@ class TestResultsReaderCombined(TestHarnessTestCase):
         }
         env.update(base_env)
 
-        result_id, test_ids = CIVETStorer().store(TEST_DATABASE, result, base_sha, env=env)
+        result_id, test_ids = CIVETStore().store(TEST_DATABASE, result, base_sha, env=env)
         self.assertIsNone(test_ids)
 
         try:
@@ -161,7 +161,7 @@ class TestResultsReaderCombined(TestHarnessTestCase):
             # Test getLatestPushResults(); python tests share
             # a database so we want to make sure that we have
             # at least one that matches ours
-            latest_reader = TestHarnessResultsReader(TEST_DATABASE)
+            latest_reader = ResultsReader(TEST_DATABASE)
             latest_results = latest_reader.getLatestPushResults(50)
             find_result = [r for r in latest_results if r.id == result_id]
             self.assertEqual(len(find_result), 1)
@@ -170,7 +170,7 @@ class TestResultsReaderCombined(TestHarnessTestCase):
 
             # Test getTestResults(); same issue with python
             # tests sharing a database here too
-            test_reader = TestHarnessResultsReader(TEST_DATABASE)
+            test_reader = ResultsReader(TEST_DATABASE)
             test_results = test_reader.getTestResults(TEST_NAME.folder, TEST_NAME.name, limit=50)
             find_test_result = [r for r in test_results if r.result_id == result_id]
             self.assertEqual(len(find_test_result), 1)
@@ -184,7 +184,7 @@ class TestResultsReaderCombined(TestHarnessTestCase):
 
         self.deleteDocuments(result_id)
 
-    @unittest.skipUnless(HAS_STORER_AUTH, f"Skipping because store auth is not available")
+    @unittest.skipUnless(HAS_STORE_AUTH, f"Skipping because store auth is not available")
     @unittest.skipUnless(HAS_READER_AUTH, f"Skipping because reader auth is not available")
     def testSeparateTests(self):
         """
@@ -203,12 +203,12 @@ class TestResultsReaderCombined(TestHarnessTestCase):
         env.update(base_env)
         event_sha = env['CIVET_HEAD_SHA']
 
-        result_id, test_ids = CIVETStorer().store(TEST_DATABASE, result, base_sha, env=env, max_result_size=1e-6)
+        result_id, test_ids = CIVETStore().store(TEST_DATABASE, result, base_sha, env=env, max_result_size=1e-6)
         self.assertIsNotNone(test_ids)
         self.assertEqual(len(test_ids), 1)
 
         try:
-            reader = TestHarnessResultsReader(TEST_DATABASE)
+            reader = ResultsReader(TEST_DATABASE)
             results = reader.getCommitResults(event_sha)
             self.assertIsNotNone(result)
             self.compareResults(results, env, base_sha, result_id)

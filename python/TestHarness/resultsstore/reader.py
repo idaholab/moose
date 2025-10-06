@@ -16,12 +16,12 @@ import pymongo
 from pymongo.cursor import Cursor
 from bson.objectid import ObjectId
 
-from TestHarness.resultsreader.results import TestHarnessResults, TestHarnessTestResult
-from TestHarness.resultsreader.auth import Authentication, load_authentication, has_authentication
+from TestHarness.resultsstore.storedresults import StoredResult, StoredTestResult
+from TestHarness.resultsstore.auth import Authentication, load_authentication, has_authentication
 
 NoneType = type(None)
 
-class TestHarnessResultsReader:
+class ResultsReader:
     """
     Utility for reading test harness results stored in a mongodb database
     """
@@ -50,16 +50,16 @@ class TestHarnessResultsReader:
         self._db = self._client.get_database(database)
 
         # Cached results, by ID
-        self._results: dict[ObjectId, Optional[TestHarnessResults]] = {}
+        self._results: dict[ObjectId, Optional[StoredResult]] = {}
         # Cached results by PR number
-        self._pr_num_results: dict[int, Optional[TestHarnessResults]] = {}
+        self._pr_num_results: dict[int, Optional[StoredResult]] = {}
         # Cached results by event ID
-        self._event_id_results: dict[int, Optional[TestHarnessResults]] = {}
+        self._event_id_results: dict[int, Optional[StoredResult]] = {}
         # Cached results by commit
-        self._event_sha_results: dict[str, Optional[TestHarnessResults]] = {}
+        self._event_sha_results: dict[str, Optional[StoredResult]] = {}
 
-        # Cached TestHarnessResults objects for push events, latest to oldest
-        self._latest_push_results: list[TestHarnessResults] = []
+        # Cached StoredResult objects for push events, latest to oldest
+        self._latest_push_results: list[StoredResult] = []
         # The last push event that we searched
         self._last_latest_push_event_id: Optional[ObjectId] = None
 
@@ -87,9 +87,9 @@ class TestHarnessResultsReader:
         return has_authentication('RESULTS_READER')
 
     def getTestResults(self, folder_name: str, test_name: str, limit: int = 50,
-                       pr_num: Optional[int] = None) -> list[TestHarnessTestResult]:
+                       pr_num: Optional[int] = None) -> list[StoredTestResult]:
         """
-        Get the TestHarnessTestResults given a specific test.
+        Get the StoredTestResults given a specific test.
 
         Args:
             folder_name: The folder name for the test
@@ -98,7 +98,7 @@ class TestHarnessResultsReader:
             limit: The limit in the number of results to get
             pr_num: A pull request to also pull from
         """
-        test_results: list[TestHarnessTestResult] = []
+        test_results: list[StoredTestResult] = []
 
         # Append the PR result at the top, if any
         if pr_num is not None:
@@ -129,7 +129,7 @@ class TestHarnessResultsReader:
         with self._db.results.find(*args, **kwargs) as cursor:
            return [d for d in cursor]
 
-    def getLatestPushResults(self, num: int) -> list[TestHarnessResults]:
+    def getLatestPushResults(self, num: int) -> list[StoredResult]:
         """
         Get the latest results from push events, newest to oldest
         """
@@ -143,7 +143,7 @@ class TestHarnessResultsReader:
                 break
         return results
 
-    def iterateLatestPushResults(self, num: Optional[int] = None) -> Iterator[TestHarnessResults]:
+    def iterateLatestPushResults(self, num: Optional[int] = None) -> Iterator[StoredResult]:
         """
         Iterate through the latest unique push event results
 
@@ -205,7 +205,7 @@ class TestHarnessResultsReader:
             else:
                 return
 
-    def _getCachedResults(self, index: str, value) -> TestHarnessResults:
+    def _getCachedResults(self, index: str, value) -> StoredResult:
         """
         Internal helper for getting a result given a filter and storing
         it in a cache given a key
@@ -231,31 +231,31 @@ class TestHarnessResultsReader:
         cache[value] = result
         return result
 
-    def getEventResults(self, event_id: int) -> Union[TestHarnessResults, None]:
+    def getEventResults(self, event_id: int) -> Union[StoredResult, None]:
         """
-        Get the TestHarnessResults for a given event, if any
+        Get the StoredResult for a given event, if any
         """
         assert isinstance(event_id, int)
         return self._getCachedResults('event_id', event_id)
 
-    def getPRResults(self, pr_num: int) -> Union[TestHarnessResults, None]:
+    def getPRResults(self, pr_num: int) -> Union[StoredResult, None]:
         """
-        Get the TestHarnessResults for a given PR, if any
+        Get the StoredResult for a given PR, if any
         """
         assert isinstance(pr_num, int)
         return self._getCachedResults('pr_num', pr_num)
 
-    def getCommitResults(self, commit_sha: str) -> Union[TestHarnessResults, None]:
+    def getCommitResults(self, commit_sha: str) -> Union[StoredResult, None]:
         """
-        Get the TestHarnessResults for a given commit, if any
+        Get the StoredResult for a given commit, if any
         """
         assert isinstance(commit_sha, str)
         assert len(commit_sha) == 40
         return self._getCachedResults('event_sha', commit_sha)
 
-    def _buildResults(self, data: dict) -> TestHarnessTestResult:
+    def _buildResults(self, data: dict) -> StoredTestResult:
         """
-        Internal helper for building a TestHarnessTestResult given
+        Internal helper for building a StoredTestResult given
         the data from a results entry, also storing it in the cache
         """
         assert isinstance(data, dict)
@@ -267,7 +267,7 @@ class TestHarnessResultsReader:
         result = self._results.get(id)
         if result is None:
             try:
-                result = TestHarnessResults(data, self._db)
+                result = StoredResult(data, self._db)
             except Exception as e:
                 raise ValueError(f'Failed to build result _id={id}') from e
             self._results[id] = result

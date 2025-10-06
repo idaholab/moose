@@ -18,14 +18,14 @@ import json
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 
-from TestHarness.resultsreader.reader import TestHarnessResultsReader
-from TestHarness.resultsreader.results import TestHarnessResults, TestHarnessTestResult, TestName
+from TestHarness.resultsstore.reader import ResultsReader
+from TestHarness.resultsstore.storedresults import StoredResult, StoredTestResult, TestName
 
 # Whether or not authentication is available from env var RESULTS_READER_AUTH_FILE
-HAS_AUTH = TestHarnessResultsReader.hasEnvironmentAuthentication()
+HAS_AUTH = ResultsReader.hasEnvironmentAuthentication()
 
 # Production database file for testing get_test_results
-PROD_GET_TEST_RESULTS_GOLD_PATH = os.path.join(os.path.dirname(__file__), 'gold', 'resultsreader', 'prod_get_test_results.json')
+PROD_GET_TEST_RESULTS_GOLD_PATH = os.path.join(os.path.dirname(__file__), 'gold', 'resultsstore', 'prod_get_test_results.json')
 # Production database name for testing real results
 PROD_DATABASE_NAME = 'civet_tests_moose_performance'
 # Arguments for using the production database for getting real results
@@ -49,7 +49,7 @@ class FakeMongoClient(MongoClient):
     def close(self):
         pass
 
-class TestResultsReaderReader(unittest.TestCase):
+class TestResultsReader(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -91,7 +91,7 @@ class TestResultsReaderReader(unittest.TestCase):
         # This can be set to true once to overwrite the gold file
         rewrite_gold = False
 
-        reader = TestHarnessResultsReader(PROD_DATABASE_NAME)
+        reader = ResultsReader(PROD_DATABASE_NAME)
 
         # Load each result, where gold is indexed from
         # result id -> result data
@@ -150,7 +150,7 @@ class TestResultsReaderReader(unittest.TestCase):
 
         self.assertEqual(gold, json.loads(new_gold))
 
-    def _testGetTestResults(self, reader: TestHarnessResultsReader, **kwargs) -> list[TestHarnessTestResult]:
+    def _testGetTestResults(self, reader: ResultsReader, **kwargs) -> list[StoredTestResult]:
         """
         Helper for testing getTestResults(), regardless of if
         the data was produced from a gold file or live
@@ -161,13 +161,13 @@ class TestResultsReaderReader(unittest.TestCase):
         last_time = None
 
         for result in results:
-            self.assertIsInstance(result, TestHarnessTestResult)
+            self.assertIsInstance(result, StoredTestResult)
 
             # Test that result is the correct one
             test_harness_results = result.results
             self.assertEqual(test_harness_results, result.results)
             self.assertEqual(PROD_TEST_NAME, result.name)
-            self.assertIsInstance(test_harness_results, TestHarnessResults)
+            self.assertIsInstance(test_harness_results, StoredResult)
 
             # Test basic state for results header
             self.assertRegex(test_harness_results.civet_job_url, r'civet.inl.gov/job/\d+')
@@ -207,17 +207,17 @@ class TestResultsReaderReader(unittest.TestCase):
         with open(PROD_GET_TEST_RESULTS_GOLD_PATH, 'r') as f:
             gold = json.load(f)
         # Deserialize each object
-        gold = {ObjectId(id): TestHarnessResults.deserialize(entry) for id, entry in gold.items()}
+        gold = {ObjectId(id): StoredResult.deserialize(entry) for id, entry in gold.items()}
         # And sorted based on ID (latest first)
         return dict(OrderedDict(sorted(gold.items(), key=lambda x: x[0], reverse=True)))
 
-    @patch.object(TestHarnessResultsReader, '_findResults')
-    @patch.object(TestHarnessResults, '_find_test_data')
+    @patch.object(ResultsReader, '_findResults')
+    @patch.object(StoredResult, '_find_test_data')
     def testGetTestResultsTestsSeparate(self, patch_find_test_data, patch_find_results):
         """
         Tests calling getTestResults() using mocked returns from mongodb when
         the tests are not stored within the result data entry, which requires
-        queries within TestHarnessResults to get the test data
+        queries within StoredResult to get the test data
         """
         gold = self.deserializeGold()
 
@@ -242,7 +242,7 @@ class TestResultsReaderReader(unittest.TestCase):
             return []
         patch_find_results.side_effect = get_results_data
 
-        reader = TestHarnessResultsReader(PROD_DATABASE_NAME, FakeMongoClient())
+        reader = ResultsReader(PROD_DATABASE_NAME, FakeMongoClient())
         test_results = self._testGetTestResults(reader)
 
         # Make sure we have a test entry for each gold test, in the right order
@@ -250,12 +250,12 @@ class TestResultsReaderReader(unittest.TestCase):
         for i, entry in enumerate(gold):
             self.assertEqual(entry, test_results[i].result_id)
 
-    @patch.object(TestHarnessResultsReader, '_findResults')
+    @patch.object(ResultsReader, '_findResults')
     def testGetTestResultsTestsIncluded(self, patch_find_results):
         """
         Tests calling getTestResults() using mocked returns from mongodb when
         the tests are stored within the results entry, thus there are no
-        database calls from within the TestHarnessResults
+        database calls from within the StoredResult
         """
         gold = self.deserializeGold()
 
@@ -267,7 +267,7 @@ class TestResultsReaderReader(unittest.TestCase):
             return []
         patch_find_results.side_effect = get_results_data
 
-        reader = TestHarnessResultsReader(PROD_DATABASE_NAME, FakeMongoClient())
+        reader = ResultsReader(PROD_DATABASE_NAME, FakeMongoClient())
         test_results = self._testGetTestResults(reader)
 
         # Make sure we have a test entry for each gold test, in the right order
@@ -275,7 +275,7 @@ class TestResultsReaderReader(unittest.TestCase):
         for i, entry in enumerate(gold):
             self.assertEqual(entry, test_results[i].result_id)
 
-    @patch.object(TestHarnessResultsReader, '_findResults')
+    @patch.object(ResultsReader, '_findResults')
     def testGetTestResultsWithLimit(self, patch_find_results):
         """
         Tests calling getTestResults() with a limit
@@ -290,7 +290,7 @@ class TestResultsReaderReader(unittest.TestCase):
             return []
         patch_find_results.side_effect = get_results_data
 
-        reader = TestHarnessResultsReader(PROD_DATABASE_NAME, FakeMongoClient())
+        reader = ResultsReader(PROD_DATABASE_NAME, FakeMongoClient())
         test_results = self._testGetTestResults(reader, limit=2)
 
         # Make sure we have only the last two entries (the latest)
@@ -310,7 +310,7 @@ class TestResultsReaderReader(unittest.TestCase):
         """
         Tests calling getTestResults() using the real server, if available
         """
-        reader = TestHarnessResultsReader(PROD_DATABASE_NAME)
+        reader = ResultsReader(PROD_DATABASE_NAME)
 
         for limit in [1, 2, 3]:
             results = self._testGetTestResults(reader, limit=limit)
@@ -320,21 +320,21 @@ class TestResultsReaderReader(unittest.TestCase):
     @unittest.skipIf(HAS_AUTH, f"Skipping because authentication is available")
     def testMissingClient(self):
         """
-        Tests creating the TestHarnessResultsReader without a client/auth
+        Tests creating the ResultsReader without a client/auth
         """
         with self.assertRaisesRegex(ValueError, 'Must specify'):
-            TestHarnessResultsReader('unused')
+            ResultsReader('unused')
 
     def testInvalidClient(self):
         """
-        Tests creating the TestHarnessResultsReader without a valid client/auth
+        Tests creating the ResultsReader without a valid client/auth
         """
         with self.assertRaisesRegex(TypeError, "Invalid type for 'client'"):
-            TestHarnessResultsReader('unused', 'bad_client')
+            ResultsReader('unused', 'bad_client')
 
     def testMissingDatabase(self):
         """
-        Tests creating the TestHarnessResultsReader with a database that isn't found,
+        Tests creating the ResultsReader with a database that isn't found,
         with a mocked database
         """
         class BadDatabaseClient(FakeMongoClient):
@@ -342,16 +342,16 @@ class TestResultsReaderReader(unittest.TestCase):
                 return ['foo']
 
         with self.assertRaisesRegex(ValueError, f'Database {PROD_DATABASE_NAME} not found'):
-            TestHarnessResultsReader(PROD_DATABASE_NAME, BadDatabaseClient())
+            ResultsReader(PROD_DATABASE_NAME, BadDatabaseClient())
 
     @unittest.skipUnless(HAS_AUTH, f"Skipping because authentication is not available")
     def testMissingDatabaseLive(self):
         """
-        Tests creating the TestHarnessResultsReader with a database that isn't found
+        Tests creating the ResultsReader with a database that isn't found
         """
         name = 'foo1234'
         with self.assertRaisesRegex(ValueError, f'Database {name} not found'):
-            TestHarnessResultsReader(name)
+            ResultsReader(name)
 
     @unittest.skipUnless(os.environ.get('TEST_RESULTSREADER_READER'), f"Skipping because TEST_RESULTSREADER_READER not set")
     def testGetTestsWithPRLive(self):
@@ -385,7 +385,7 @@ class TestResultsReaderReader(unittest.TestCase):
             self.assertIsNotNone('CIVET_PR_NUM')
             pr_num = int(pr_num)
 
-        reader = TestHarnessResultsReader(TEST_DATABASE_NAME)
+        reader = ResultsReader(TEST_DATABASE_NAME)
         results = reader.getTestResults(TEST_TEST_NAME.folder, TEST_TEST_NAME.name, pr_num=pr_num)
         self.assertGreater(len(results), 0)
 
@@ -437,7 +437,7 @@ class TestResultsReaderReader(unittest.TestCase):
         self.assertIsNotNone(event_id)
         event_id = int(event_id)
 
-        reader = TestHarnessResultsReader(TEST_DATABASE_NAME)
+        reader = ResultsReader(TEST_DATABASE_NAME)
         results = reader.getEventResults(event_id)
         self.assertIsNotNone(results)
         self.assertEqual(results.event_id, event_id)
@@ -460,7 +460,7 @@ class TestResultsReaderReader(unittest.TestCase):
         head_sha = os.environ.get('CIVET_HEAD_SHA')
         self.assertIsNotNone(head_sha)
 
-        reader = TestHarnessResultsReader(TEST_DATABASE_NAME)
+        reader = ResultsReader(TEST_DATABASE_NAME)
         results = reader.getCommitResults(head_sha)
         self.assertIsNotNone(results)
         self.assertEqual(results.event_sha, head_sha)

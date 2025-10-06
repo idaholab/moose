@@ -19,7 +19,7 @@ from typing import Tuple
 from dataclasses import dataclass
 from TestHarness import TestHarness
 from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
-from TestHarness.resultsreader.results import TestHarnessResults, TestHarnessTestResult, TestName, DatabaseException
+from TestHarness.resultsstore.storedresults import StoredResult, StoredTestResult, TestName, DatabaseException
 
 FAKE_RESULT_ID = ObjectId()
 FAKE_CIVET_VERSION = 4
@@ -35,7 +35,7 @@ FAKE_TIME = datetime.now()
 FAKE_TEST_NAME = TestName('folder', 'name')
 FAKE_JSON_METADATA = {'foo': 'bar'}
 
-class TestResultsReaderResults(TestHarnessTestCase):
+class TestResultsStoredResults(TestHarnessTestCase):
     @dataclass
     class CapturedResult:
         """
@@ -43,7 +43,7 @@ class TestResultsReaderResults(TestHarnessTestCase):
         """
         # The test harness from the run
         harness: TestHarness
-        # The data for building the TestHarnessResults
+        # The data for building the StoredResult
         result_data: dict
         # The data for building the tests
         test_data: dict
@@ -125,15 +125,15 @@ class TestResultsReaderResults(TestHarnessTestCase):
         """
         # The test harness from the run
         harness: TestHarness
-        # The built TestHarnessResults object
-        results: TestHarnessResults
+        # The built StoredResult object
+        results: StoredResult
         # The test data
         test_data: dict
 
     def buildResult(self, *args, **kwargs) -> BuiltResult:
         captured_result = self.captureResult(*args, **kwargs)
 
-        results = TestHarnessResults(captured_result.result_data)
+        results = StoredResult(captured_result.result_data)
         if not kwargs.get('no_tests', False):
             self.assertEqual(len(results._tests), len(captured_result.test_data))
 
@@ -218,7 +218,7 @@ class TestResultsReaderResults(TestHarnessTestCase):
                 for k, v in case.data.items():
                     self.assertEqual(v, test_result.validation_data[k])
 
-    @patch.object(TestHarnessResults, '_find_test_data')
+    @patch.object(StoredResult, '_find_test_data')
     def testGetTest(self, patch_find_test_data):
         """
         Tests when tests are stored as ObjectId (reference to another collection)
@@ -236,7 +236,7 @@ class TestResultsReaderResults(TestHarnessTestCase):
             return None
         patch_find_test_data.side_effect = get_test_data
 
-        result = TestHarnessResults(result_data)
+        result = StoredResult(result_data)
         self.assertEqual(len(result._tests), len(test_data))
 
         for name, data in test_data.items():
@@ -266,7 +266,7 @@ class TestResultsReaderResults(TestHarnessTestCase):
         with self.assertRaisesRegex(KeyError, 'Test "foo.bar" does not exist'):
             results.get_test('foo', 'bar')
 
-    @patch.object(TestHarnessResults, '_find_test_data')
+    @patch.object(StoredResult, '_find_test_data')
     def testGetTestMissingDatabase(self, patch_find_test_data):
         """
         Tests TestHarnessResult.get_test when a test does not exist
@@ -282,7 +282,7 @@ class TestResultsReaderResults(TestHarnessTestCase):
             with self.assertRaisesRegex(DatabaseException, f'Database missing tests._id={id}'):
                 results.get_test(name.folder, name.name)
 
-    @patch.object(TestHarnessTestResult, '__init__')
+    @patch.object(StoredTestResult, '__init__')
     def testBuildTestException(self, patch_init):
         """
         Tests TestHarnessResult._build_test throwing an excption with the ID
@@ -306,7 +306,7 @@ class TestResultsReaderResults(TestHarnessTestCase):
                 folder_entry['tests'][test_name] = 1
 
         with self.assertRaisesRegex(TypeError, 'has unexpected type "int"'):
-            TestHarnessResults(result_data)
+            StoredResult(result_data)
 
     def testDeprecatedBaseSHA(self):
         """
@@ -383,7 +383,7 @@ class TestResultsReaderResults(TestHarnessTestCase):
         for test_result in built_result.results.tests:
             self.assertEqual(test_result.result_id, built_result.results.id)
 
-    def _compareSerialized(self, result: TestHarnessResults, new_result: TestHarnessResults,
+    def _compareSerialized(self, result: StoredResult, new_result: StoredResult,
                            same_tests: bool):
         # Test keys should be the same (values will not be
         # because they were loaded from the database and
@@ -408,7 +408,7 @@ class TestResultsReaderResults(TestHarnessTestCase):
             new_data['tests'] = deepcopy(result.data['tests'])
         self.assertEqual(result.data, new_data)
 
-    @patch.object(TestHarnessResults, '_find_tests_data')
+    @patch.object(StoredResult, '_find_tests_data')
     def testSerializeTestsNotLoaded(self, patch_find_tests_data):
         """
         Test serializing and deserializing a result when the data
@@ -423,7 +423,7 @@ class TestResultsReaderResults(TestHarnessTestCase):
             return [v for v in test_data.values() if v['_id'] in ids]
         patch_find_tests_data.side_effect = find_tests_data
 
-        result = TestHarnessResults(result_data)
+        result = StoredResult(result_data)
 
         # Tests should not be loaded yet
         for entry in result._tests.values():
@@ -433,9 +433,9 @@ class TestResultsReaderResults(TestHarnessTestCase):
 
         # And should be loaded now
         for entry in result._tests.values():
-            self.assertIsInstance(entry, TestHarnessTestResult)
+            self.assertIsInstance(entry, StoredTestResult)
 
-        new_result = TestHarnessResults.deserialize_build(serialized)
+        new_result = StoredResult.deserialize_build(serialized)
 
         # Compare all of the data
         self._compareSerialized(result, new_result, False)
@@ -450,19 +450,19 @@ class TestResultsReaderResults(TestHarnessTestCase):
 
         # Tests should be loaded already
         for entry in results._tests.values():
-            self.assertIsInstance(entry, TestHarnessTestResult)
+            self.assertIsInstance(entry, StoredTestResult)
 
         serialized = results.serialize()
 
-        new_result = TestHarnessResults.deserialize_build(serialized)
+        new_result = StoredResult.deserialize_build(serialized)
 
         # Compare all of the data
         self._compareSerialized(results, new_result, True)
 
-    @patch.object(TestHarnessResults, '_find_tests_data')
+    @patch.object(StoredResult, '_find_tests_data')
     def testLoadAllTestsMissing(self, patch_find_tests_data):
         """
-        Tests TestHarnessResults.load_all_data when test(s)
+        Tests StoredResult.load_all_data when test(s)
         were not found in the database
         """
         captured_result = self.captureResult(test_in_results=False)
@@ -470,7 +470,7 @@ class TestResultsReaderResults(TestHarnessTestCase):
         patch_find_tests_data.return_value = []
 
         with self.assertRaisesRegex(KeyError, 'Failed to load test results'):
-            TestHarnessResults(captured_result.result_data).load_all_tests()
+            StoredResult(captured_result.result_data).load_all_tests()
 
 
 if __name__ == '__main__':

@@ -41,23 +41,23 @@ class DatabaseException(Exception):
     """
     pass
 
-class TestHarnessTestResult:
+class StoredTestResult:
     """
     Structure holding the information about a single test result
     """
-    def __init__(self, data: dict, name: TestName, result: 'TestHarnessResults'):
+    def __init__(self, data: dict, name: TestName, result: 'StoredResult'):
         # The underlying data for this test, which comes from
         # "tests/*/tests" in the TestHarness results file
         self._data: dict = data
         # The combined name for this test (folder + name)
         self._name: TestName = name
         # The combined results that this test comes from
-        self._results: 'TestHarnessResults' = result
+        self._results: 'StoredResult' = result
 
         # Sanity check on all of our data and methods
         assert isinstance(self.data, dict)
         assert isinstance(self.id, (ObjectId, NoneType))
-        assert isinstance(self.results, TestHarnessResults)
+        assert isinstance(self.results, StoredResult)
         assert isinstance(self.result_id, ObjectId)
         assert isinstance(self.name, TestName)
         assert isinstance(self.test_name, str)
@@ -104,7 +104,7 @@ class TestHarnessTestResult:
         return self.data.get('_id')
 
     @property
-    def results(self) -> 'TestHarnessResults':
+    def results(self) -> 'StoredResult':
         """
         Get the combined results that this test comes from
         """
@@ -311,7 +311,7 @@ class TestHarnessTestResult:
 
         return data
 
-class TestHarnessResults:
+class StoredResult:
     """
     Structure holding the information about a single
     run_tests execution.
@@ -359,17 +359,17 @@ class TestHarnessResults:
         for v in self.test_names:
             assert isinstance(v, TestName)
 
-    def init_tests(self, tests: dict) -> dict[TestName, Union[TestHarnessTestResult, ObjectId]]:
+    def init_tests(self, tests: dict) -> dict[TestName, Union[StoredTestResult, ObjectId]]:
         """
         Build the tests to be stored within the _tests member
 
         This is a dict from test (folder name, test name) to either:
           - An ObjectID, if the test is stored in a separate collection
-          - A TestHarnessTestResult, if the test is stored directly in the results
+          - A StoredTestResult, if the test is stored directly in the results
         """
         assert isinstance(tests, dict)
 
-        values: dict[TestName, Union[TestHarnessTestResult, ObjectId]] = {}
+        values: dict[TestName, Union[StoredTestResult, ObjectId]] = {}
 
         all_ids = set()
         for folder_name, folder_entry in tests.items():
@@ -558,9 +558,9 @@ class TestHarnessResults:
 
         return self._db.tests.find_one({"_id": id})
 
-    def _build_test(self, data: dict, name: TestName) -> TestHarnessTestResult:
+    def _build_test(self, data: dict, name: TestName) -> StoredTestResult:
         """
-        Helper for building a TestHarnessTestResult given its
+        Helper for building a StoredTestResult given its
         data with exception handling on a failure
         """
         assert isinstance(data, dict)
@@ -568,12 +568,12 @@ class TestHarnessResults:
 
         # Build the true object from the data
         try:
-            return TestHarnessTestResult(data, name, self)
+            return StoredTestResult(data, name, self)
         except Exception as e:
             id = data.get('_id')
             raise ValueError(f'Failed to build test result id={id}') from e
 
-    def get_test(self, folder_name: str, test_name: str) -> TestHarnessTestResult:
+    def get_test(self, folder_name: str, test_name: str) -> StoredTestResult:
         """
         Get the test result associated with the given test folder and test name
         """
@@ -589,7 +589,7 @@ class TestHarnessResults:
             raise KeyError(f'Test "{name}" does not exist')
 
         # Is already built
-        if isinstance(value, TestHarnessTestResult):
+        if isinstance(value, StoredTestResult):
             return value
 
         # Not built, so pull from database
@@ -645,7 +645,7 @@ class TestHarnessResults:
             raise KeyError(f'Failed to load test results for _id={missing}')
 
     @property
-    def tests(self) -> list[TestHarnessTestResult]:
+    def tests(self) -> list[StoredTestResult]:
         """
         Get all of the test results
 
@@ -678,7 +678,7 @@ class TestHarnessResults:
     def deserialize(data: dict) -> dict:
         """
         Deserializes data built with serialize, which can be
-        used to construct a TestHarnessResults object
+        used to construct a StoredResult object
         """
         assert isinstance(data, dict)
 
@@ -695,7 +695,7 @@ class TestHarnessResults:
     @staticmethod
     def deserialize_build(data: dict) -> dict:
         """
-        Builds a TestHarnessResults object using serialized data
+        Builds a StoredResult object using serialized data
         that was built with serialize()
         """
-        return TestHarnessResults(TestHarnessResults.deserialize(data))
+        return StoredResult(StoredResult.deserialize(data))

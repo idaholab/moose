@@ -21,7 +21,7 @@ from bson.objectid import ObjectId
 from bson.binary import Binary
 import zlib
 
-from TestHarness.resultsreader.auth import Authentication, load_authentication, has_authentication
+from TestHarness.resultsstore.auth import Authentication, load_authentication, has_authentication
 
 NoneType = type(None)
 
@@ -29,7 +29,7 @@ NoneType = type(None)
 # stored separately in a tests document
 MAX_RESULT_SIZE = 5.0 # MB
 
-class CIVETStorer:
+class CIVETStore:
     CIVET_VERSION = 6
 
     @staticmethod
@@ -58,26 +58,26 @@ class CIVETStorer:
         Loads mongo authentication, if available.
 
         Attempts to first load the authentication environment from
-        env vars CIVET_STORER_AUTH_[HOST,USERNAME,PASSWORD] if
+        env vars CIVET_STORE_AUTH_[HOST,USERNAME,PASSWORD] if
         available. Otherwise, tries to load the authentication
         environment from the file set by env var
-        CIVET_STORER_AUTH_FILE if it is available.
+        CIVET_STORE_AUTH_FILE if it is available.
         """
-        return load_authentication('CIVET_STORER')
+        return load_authentication('CIVET_STORE')
 
     @staticmethod
     def has_authentication() -> bool:
         """
         Checks whether or not authentication is available.
         """
-        return has_authentication('CIVET_STORER')
+        return has_authentication('CIVET_STORE')
 
     @staticmethod
     def get_size(obj, seen: Optional[set] = None) -> int:
         """
         Recursively find the size of an object in bytes.
         """
-        get_size = CIVETStorer.get_size
+        get_size = CIVETStore.get_size
         size = sys.getsizeof(obj)
         if seen is None:
             seen = set()
@@ -129,7 +129,7 @@ class CIVETStorer:
         if ssh_repo is None:
             raise ValueError('Failed to obtain repo from CIVET_BASE_SSH_URL or APPLICATION_REPO')
 
-        server, org, repo = CIVETStorer.parse_ssh_repo(ssh_repo)
+        server, org, repo = CIVETStore.parse_ssh_repo(ssh_repo)
         return f'{server}/{org}/{repo}'
 
     @staticmethod
@@ -210,10 +210,10 @@ class CIVETStorer:
         assert len(civet_env['head_sha']) == 40
 
         # Load URL to repo (i.e., github.com/idaholab/moose)
-        repo_url = CIVETStorer.get_civet_repo_url(env)
+        repo_url = CIVETStore.get_civet_repo_url(env)
 
         # Load CIVET server (i.e., civet.inl.gov)
-        civet_server = CIVETStorer.get_civet_server(civet_env['server'])
+        civet_server = CIVETStore.get_civet_server(civet_env['server'])
 
         # Fill 'civet' entry, which isn't part of the index
         # but adds additional context about the CIVET job
@@ -250,7 +250,7 @@ class CIVETStorer:
         return {
             'base_sha': base_sha,
             'civet': civet_entry,
-            'civet_version': CIVETStorer.CIVET_VERSION,
+            'civet_version': CIVETStore.CIVET_VERSION,
             'event_sha': civet_env['head_sha'],
             'event_id': civet_env['event_id'],
             'event_cause': event_cause,
@@ -363,7 +363,7 @@ class CIVETStorer:
         """
         Builds a MongoClient given the available authentication.
         """
-        auth = CIVETStorer.load_authentication()
+        auth = CIVETStore.load_authentication()
         if auth is None:
             raise SystemExit('ERROR: Authentication is not available')
         return MongoClient(auth.host,
@@ -508,5 +508,5 @@ class CIVETStorer:
         return self.store(database, results, base_sha, **kwargs)
 
 if __name__ == '__main__':
-    args = CIVETStorer.parse_args()
-    CIVETStorer().main(**vars(args))
+    args = CIVETStore.parse_args()
+    CIVETStore().main(**vars(args))
