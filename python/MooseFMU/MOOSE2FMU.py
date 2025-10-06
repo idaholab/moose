@@ -151,7 +151,7 @@ class Moose2FMU(Fmi2Slave):
                     moose_dt = self.control.getTimeStepSize()
 
                     self.logger.debug(
-                        "moose_time=%.6f → current_time=%.6f → moose_dt=%.6f → step_size=%.6f",
+                        "moose_time=%.6f -> current_time=%.6f -> moose_dt=%.6f -> step_size=%.6f",
                         moose_time,
                         current_time,
                         moose_dt,
