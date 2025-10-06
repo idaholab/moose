@@ -1,0 +1,11 @@
+moose_python:
+  - python 3.13
+  - python 3.12
+  - python 3.11
+  - python 3.10
+
+moose_pyhit:
+  - moose-pyhit 2025.09.18
+
+moose_tools:
+  - moose-tools 2025.06.26

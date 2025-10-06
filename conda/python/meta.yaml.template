@@ -1,0 +1,59 @@
+# Making a Change to this package?
+# REMEMBER TO UPDATE the .yaml files for the following packages:
+#   moose/conda_build_config.yaml
+# As well as any directions pertaining to modifying those files.
+{% set version = "__VERSIONER_PYTHON_VERSION__" %}
+
+package:
+  name: moose-python
+  version: {{ version }}
+
+source:
+  - path: pyproject.toml
+  - path: ../../python/mooseutils
+    folder: src/mooseutils
+  - path: ../../python/MooseControl
+    folder: src/MooseControl
+  - path: ../../python/mms
+    folder: src/mms
+  - path: ../../modules/geochemistry/python
+    folder: src
+  - path: ../../modules/level_set/python
+    folder: src
+  - path: ../../modules/navier_stokes/python
+    folder: src
+  - path: ../../modules/stochastic_tools/python
+    folder: src
+  - path: ../../modules/thermal_hydraulics/python/moose_thm/__init__.py
+    folder: src/moose_thm
+  - path: ../../modules/thermal_hydraulics/python/moose_thm/thm_utilities.py
+    folder: src/moose_thm
+
+build:
+  number: 0
+  script_env:
+    - REQUESTS_CA_BUNDLE
+    - SSL_CERT_FILE
+    - CURL_CA_BUNDLE
+    - NODE_EXTRA_CA_CERTS
+  script: MOOSE_PYTHON_VERSION={{ version }} python -m pip install .
+
+requirements:
+  build:
+    - {{ moose_python }}
+    - pip
+    - setuptools
+  run:
+    - {{ moose_pyhit }}
+    - {{ moose_tools }}
+
+test:
+  imports:
+    - mooseutils
+    - MooseControl
+    - mms
+    - moose_geochemistry
+    - moose_level_set
+    - moose_navier_stokes
+    - moose_stochastic_tools
+    - moose_thm
