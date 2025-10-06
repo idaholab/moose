@@ -44,10 +44,10 @@ class TestHarnessResultsSummary:
             type=str,
             help='The name of the database')
 
-        # parser.add_argument(
-        #     'out',
-        #     type=str,
-        #     help='path to output the summary to')
+        parser.add_argument(
+            'out',
+            type=str,
+            help='path to output the summary to')
 
         action_parser = parser.add_subparsers(dest='action', help='Action to perform')
         action_parser.required = True
@@ -236,24 +236,14 @@ class TestHarnessResultsSummary:
         removed_table, added_table, same_table = self.diff_table(base_results,head_results, base_names, head_names)
 
         print(self.build_summary(removed_table, added_table, same_table))
+        summary = self.build_summary(removed_table, added_table, same_table)
+        output_file = kwargs.get('out')
 
-    # def pr(self, **kwargs) -> str:
-    #     results, base_results, head_names, base_names = self.WIP_pr_test_names(**kwargs)
-    #     assert isinstance(head_names,set)
-    #     assert isinstance(base_names,(set,NoneType))
-    #     if base_names is None:
-    #         return
-    #     same_table = self.WIP_same_table(results, base_results, base_names, head_names)
-
-    #     print(self.WIP_build_summary(same_table))
-    #     # summary = self.WIP_build_summary(same_table)
-    #     # output_file = kwargs.get('out')
-
-    #     # try:
-    #     #     with open(output_file, 'w') as f:
-    #     #         f.write(summary)
-    #     # except Exception as e:
-    #         # print(f"Failed to write to {output_file}: {e}")
+        try:
+            with open(output_file, 'w') as f:
+                f.write(summary)
+        except Exception as e:
+            print(f"Failed to write to {output_file}: {e}")
 
     def main(self, **kwargs):
         action = kwargs['action']
