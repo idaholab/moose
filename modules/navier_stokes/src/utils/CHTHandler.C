@@ -248,11 +248,20 @@ CHTHandler::setupConjugateHeatTransferContainers()
       if (fi->boundaryIDs().count(bd_id))
         bd_fi_container.push_back(fi);
 
+    // We do this because the coupling functors should be evaluated on both sides
+    // of the interface and there are rigorous checks if the functors don't support a subdomain
+    std::set<SubdomainID> combined_set;
+    std::set_union(solid_variable->blockIDs().begin(),
+                   solid_variable->blockIDs().end(),
+                   fluid_variable->blockIDs().begin(),
+                   fluid_variable->blockIDs().end(),
+                   std::inserter(combined_set, combined_set.begin()));
+
     // We instantiate the coupling fuctors for heat flux and temperature
     FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> solid_bd_flux(
-        _problem.mesh(), solid_variable->blockIDs(), "heat_flux_to_solid_" + bd_name);
+        _problem.mesh(), combined_set, "heat_flux_to_solid_" + bd_name);
     FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> fluid_bd_flux(
-        _problem.mesh(), fluid_variable->blockIDs(), "heat_flux_to_fluid_" + bd_name);
+        _problem.mesh(), combined_set, "heat_flux_to_fluid_" + bd_name);
 
     _boundary_heat_flux.push_back(
         std::vector<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>>(
@@ -262,9 +271,9 @@ CHTHandler::setupConjugateHeatTransferContainers()
     _integrated_boundary_heat_flux.push_back(std::vector<Real>({0.0, 0.0}));
 
     FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> solid_bd_temperature(
-        _problem.mesh(), solid_variable->blockIDs(), "interface_temperature_solid_" + bd_name);
+        _problem.mesh(), combined_set, "interface_temperature_solid_" + bd_name);
     FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>> fluid_bd_temperature(
-        _problem.mesh(), fluid_variable->blockIDs(), "interface_temperature_fluid_" + bd_name);
+        _problem.mesh(), combined_set, "interface_temperature_fluid_" + bd_name);
 
     _boundary_temperature.push_back(
         std::vector<FaceCenteredMapFunctor<Real, std::unordered_map<dof_id_type, Real>>>(

@@ -61,12 +61,12 @@ private:
   /// on all subdomains
   const std::set<SubdomainID> _sub_ids;
 
-  ValueType evaluate(const ElemArg & elem_arg, const StateArg & state) const override final;
-  ValueType evaluate(const FaceArg & face, const StateArg & state) const override final;
+  ValueType evaluate(const ElemArg &, const StateArg &) const override final;
+  ValueType evaluate(const FaceArg &, const StateArg &) const override final;
   ValueType evaluate(const ElemPointArg &, const StateArg &) const override;
   ValueType evaluate(const ElemQpArg &, const StateArg &) const override;
   ValueType evaluate(const ElemSideQpArg &, const StateArg &) const override;
-  ValueType evaluate(const NodeArg & node_arg, const StateArg & state) const override final;
+  ValueType evaluate(const NodeArg &, const StateArg &) const override final;
 };
 
 template <typename T, typename Map>
