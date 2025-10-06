@@ -8276,7 +8276,7 @@ FEProblemBase::updateMeshXFEM()
           /*intermediate_change=*/false, /*contract_mesh=*/true, /*clean_refinement_flags=*/false);
 
     updated = _xfem->update(_time, _nl, *_aux);
-    if (updated)
+    if (updated) // if subcrical crack advancement, do not need to reinitialize solution
     {
       meshChanged(
           /*intermediate_change=*/false, /*contract_mesh=*/true, /*clean_refinement_flags=*/false);
@@ -8284,10 +8284,19 @@ FEProblemBase::updateMeshXFEM()
       restoreSolutions();
       _console << "\nXFEM update complete: Mesh modified" << std::endl;
     }
+  }
+  bool crack_front_advanced = false;
+  if (!updated)
+  {
+    crack_front_advanced = _xfem->didNearTipEnrichmentChange();
+    if (crack_front_advanced)
+      _console << "\nXFEM update complete: Mesh not modified but advancing crack changed near-tip "
+                  "enrichment"
+               << std::endl;
     else
       _console << "\nXFEM update complete: Mesh not modified" << std::endl;
   }
-  return updated;
+  return (updated | crack_front_advanced);
 }
 
 void

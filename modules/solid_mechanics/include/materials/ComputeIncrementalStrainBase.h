@@ -40,4 +40,5 @@ protected:
   const MaterialProperty<RankTwoTensor> & _total_strain_old;
 
   std::vector<const MaterialProperty<RankTwoTensor> *> _eigenstrains_old;
+  MaterialProperty<RankTwoTensor> & _grad_disp_rate;
 };

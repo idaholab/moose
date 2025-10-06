@@ -322,6 +322,7 @@ public:
   CutSubdomainID getCutSubdomainID(const GeometricCutUserObject * gcuo,
                                    const Elem * cut_elem,
                                    const Elem * parent_elem = nullptr) const;
+  virtual bool didNearTipEnrichmentChange() override;
 
 private:
   bool _has_secondary_cut;

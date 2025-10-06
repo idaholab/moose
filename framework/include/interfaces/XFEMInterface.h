@@ -93,6 +93,7 @@ public:
                       const std::vector<std::shared_ptr<NonlinearSystemBase>> & nl,
                       AuxiliarySystem & aux) = 0;
 
+  virtual bool didNearTipEnrichmentChange() = 0;
   /**
    * Initialize the solution on newly created nodes
    */

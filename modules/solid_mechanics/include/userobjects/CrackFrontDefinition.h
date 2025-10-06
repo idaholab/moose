@@ -41,6 +41,8 @@ public:
   virtual void finalize() override;
   virtual void execute() override;
 
+  void updateCrackFrontPoints();
+
   /**
    * Change the number of crack front nodes. As the crack grows, the number of crack fronts nodes
    * may keep increasing in many cases.
