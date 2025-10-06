@@ -90,8 +90,10 @@ class TestHarnessResultsSummary:
         added_table : list or None
             A list of newly added test names along with their runtime.
         same_table : list or None
-            A list of same test names which above head runtime threadshold limit and > relative runtime rate
-
+            A list of test names that exist in both base and head, where:
+            - The head runtime exceeds a predefined threshold.
+            - The relative runtime increase exceeds a defined rate.
+            and respective runtime and relative runtime rate
         """
         assert isinstance(base_results, TestHarnessResults)
         assert isinstance(head_results, TestHarnessResults)
@@ -195,7 +197,10 @@ class TestHarnessResultsSummary:
         added_table : list
             A list of newly added testnames and its runtime
         same_table : list
-            A list of same testnames xxxxxx
+            A list of test names that exist in both base and head, where:
+            - The head runtime exceeds a predefined threshold.
+            - The relative runtime increase exceeds a defined rate.
+            and respective runtime and relative runtime rate
 
         Returns
         -------
@@ -228,18 +233,47 @@ class TestHarnessResultsSummary:
         return "\n".join(summary)
 
     def pr(self, **kwargs) -> str:
+        """
+        Generate a pull request test summary.
+
+        Parameters
+        ----------
+        **kwargs : dict
+            Keyword arguments passed to `pr_test_names()`, typically including:
+            - event_id : int
+                The identifier for the PR test event.
+
+        Returns
+        -------
+        summary_result : str
+            A formatted summary string of removed, new, and runtime-sensitive tests.
+            If `base_names` is None, returns None.
+        """
         base_results,head_results, base_names, head_names = self.pr_test_names(**kwargs)
         assert isinstance(head_names,set)
         assert isinstance(base_names,(set,NoneType))
         if base_names is None:
             return
         removed_table, added_table, same_table = self.diff_table(base_results,head_results, base_names, head_names)
-        #print(self.build_summary(removed_table, added_table, same_table))
         summary_result = self.build_summary(removed_table, added_table, same_table)
-        #print(summary_result)
         return summary_result
 
     def summary_output_file(self, summary_result: str, out: str) -> None:
+        """
+        Write the summary result to a specified output file.
+
+        Parameters
+        ----------
+        summary_result : str
+            The formatted summary string to be written to the file.
+        out : str
+            The file path where the summary should be saved.
+
+        Returns
+        -------
+        None
+            This method does not return anything. It performs a file write operation.
+        """
         try:
             with open(out, 'w') as f:
                 f.write(summary_result)
