@@ -32,6 +32,12 @@ class _DummyMoose(Moose2FMU):
 
 
 class TestMoose2FMU(unittest.TestCase):
+
+    def test_logger_uses_module_hierarchy(self):
+        slave = _DummyMoose(instance_name="test", guid="1234")
+        expected = f"{_DummyMoose.__module__}.{_DummyMoose.__name__}"
+        self.assertEqual(slave.logger.name, expected)
+
     def test_get_flag_with_retries_success(self):
         slave = _DummyMoose(instance_name="test", guid="1234")
 
@@ -80,9 +86,9 @@ class TestMoose2FMU(unittest.TestCase):
 
         result = slave.get_flag_with_retries({"READY"}, max_retries=3, wait_seconds=0)
 
-        def getWaitingFlag(self):
-            self.calls += 1
-            return None
+        self.assertEqual(result, "READY")
+        self.assertEqual(calls["waiting"], 2)
+        self.assertEqual(calls["skip"], ["foo"])
 
     def test_get_flag_with_retries_failure(self):
         slave = _DummyMoose(instance_name="test", guid="1234")
