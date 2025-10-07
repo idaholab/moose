@@ -12,8 +12,8 @@
 import argparse
 from typing import Tuple, Optional
 
-from TestHarness.resultsreader.reader import TestHarnessResultsReader
-from TestHarness.resultsreader.results import TestHarnessResults, TestName
+from TestHarness.resultsstore.reader import ResultsReader
+from TestHarness.resultsstore.storedresults import StoredResult, TestName
 from tabulate import tabulate
 
 NoneType = type(None)
@@ -21,7 +21,7 @@ NoneType = type(None)
 class TestHarnessResultsSummary:
 
     def __init__(self, database: str):
-        self.reader = TestHarnessResultsReader(database)
+        self.reader = ResultsReader(database)
 
     @staticmethod
     def parseArgs() -> argparse.Namespace:
@@ -78,7 +78,7 @@ class TestHarnessResultsSummary:
         return parser.parse_args()
 
     @staticmethod
-    def diff_table(base_results: TestHarnessResults, head_results: TestHarnessResults, base_names: set[TestName],
+    def diff_table(base_results: StoredResult, head_results: StoredResult, base_names: set[TestName],
                    head_names: set[TestName], **kwargs) -> Tuple[Optional[list], Optional[list]]:
         """
         Compare test names between the base and current head, and return
@@ -86,9 +86,9 @@ class TestHarnessResultsSummary:
 
         Parameters
         ----------
-        base_results : TestHarnessResults
+        base_results : StoredResult
             An object that provides access to test results for the head
-        head_results : TestHarnessResults
+        head_results : StoredResult
             An object that provides access to test results for the head
         base_names : set of TestName
             The set of test names from the base commit.
@@ -115,8 +115,8 @@ class TestHarnessResultsSummary:
             - The head runtime exceeds a predefined threshold (run-time-floor).
             - The relative runtime increase exceeds a defined rate (run-time-rate-floor).
         """
-        assert isinstance(base_results, TestHarnessResults)
-        assert isinstance(head_results, TestHarnessResults)
+        assert isinstance(base_results, StoredResult)
+        assert isinstance(head_results, StoredResult)
         assert isinstance(head_names,(set, NoneType))
         assert isinstance(base_names,(set, NoneType))
 
@@ -184,9 +184,9 @@ class TestHarnessResultsSummary:
 
         Returns
         -------
-        base_results : TestHarnessResults
+        base_results : StoredResult
             The test results object for base related to the given event.
-        head_results : TestHarnessResults
+        head_results : StoredResult
             The test results object for the given event.
         test_names : set of str
             A set of test names associated with the pull request event.
@@ -216,7 +216,7 @@ class TestHarnessResultsSummary:
         assert isinstance(base_sha, str)
 
         base_results = self.reader.getCommitResults(base_sha)
-        if not isinstance(base_results, TestHarnessResults):
+        if not isinstance(base_results, StoredResult):
             no_base =f"Comparison not available: no baseline results found for base SHA {base_sha}"
             print(no_base)
             self.summary_output_file(no_base,out)

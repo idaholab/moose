@@ -14,12 +14,14 @@ from mock import patch
 from contextlib import redirect_stdout
 from io import StringIO
 
-from TestHarness.resultsreader.reader import TestHarnessResultsReader
+from TestHarness.resultsstore.reader import ResultsReader
 from TestHarness.resultssummary.summary import TestHarnessResultsSummary
-from TestHarness.resultsreader.results import TestName
+from TestHarness.resultsstore.storedresults import TestName
+
+from TestHarnessTestCase import TestHarnessTestCase
 
 # Whether or not authentication is available from env var RESULTS_READER_AUTH_FILE
-HAS_AUTH = TestHarnessResultsReader.hasEnvironmentAuthentication()
+HAS_AUTH = ResultsReader.hasEnvironmentAuthentication()
 
 # Test database name for testing pull request results
 TEST_DATABASE_NAME = 'civet_tests_moose_test_results'
@@ -77,7 +79,7 @@ class TestResultsSummary(unittest.TestCase):
         base_results, head_results, _, head_names = summary.pr_test_names(event_id=EVENT_ID,out=tmp_path)
         removed_table, added_table, same_table = summary.diff_table(base_results, head_results, set(), head_names)
 
-        reader = TestHarnessResultsReader(TEST_DATABASE_NAME)
+        reader = ResultsReader(TEST_DATABASE_NAME)
         results = reader.getEventResults(event_id=EVENT_ID)
         test_result = results.get_test(TEST_NAME.folder, TEST_NAME.name)
 
@@ -108,7 +110,7 @@ class TestResultsSummary(unittest.TestCase):
                                                                     run_time_floor=fake_run_time_floor,
                                                                     run_time_rate_floor=fake_run_tiime_rate_floor)
 
-        reader = TestHarnessResultsReader(TEST_DATABASE_NAME)
+        reader = ResultsReader(TEST_DATABASE_NAME)
         results = reader.getEventResults(event_id=EVENT_ID)
         test_result = results.get_test(TEST_NAME.folder, TEST_NAME.name)
 
@@ -139,7 +141,7 @@ class TestResultsSummary(unittest.TestCase):
         self.assertEqual(base_names, set([TEST_NAME]))
         self.assertEqual(head_names, set([TEST_NAME]))
 
-    @patch.object(TestHarnessResultsReader, 'getCommitResults')
+    @patch.object(ResultsReader, 'getCommitResults')
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testPRTestNamesNoBaseResults(self, patch_commit_results):
         """
@@ -154,7 +156,7 @@ class TestResultsSummary(unittest.TestCase):
             base_results, head_results, base_test_names, test_names = summary.pr_test_names(event_id=EVENT_ID,out=tmp_path)
         self.assertIsNone(base_test_names)
 
-    @patch.object(TestHarnessResultsReader, 'getEventResults')
+    @patch.object(ResultsReader, 'getEventResults')
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testPRTestNamesNoEventResults(self, patch_event_results):
         """
@@ -209,7 +211,7 @@ class TestResultsSummary(unittest.TestCase):
         base_results, head_results, _, head_names = summary.pr_test_names(event_id=EVENT_ID,out=tmp_path)
         removed_table, added_table,same_table = summary.diff_table(base_results, head_results, set(), head_names)
 
-        reader = TestHarnessResultsReader(TEST_DATABASE_NAME)
+        reader = ResultsReader(TEST_DATABASE_NAME)
         results = reader.getEventResults(event_id=EVENT_ID)
         test_result = results.get_test(TEST_NAME.folder, TEST_NAME.name)
 
