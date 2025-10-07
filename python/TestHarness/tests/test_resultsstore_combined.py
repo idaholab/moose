@@ -27,6 +27,25 @@ DEFAULT_TESTHARNESS_ARGS = ['-i', 'always_ok', '--capture-perf-graph']
 TEST_NAME = TestName('tests/test_harness', 'always_ok')
 
 class TestResultsStoreCombined(TestHarnessTestCase):
+    """
+    Tests the full workflow for storing and reading result data.
+
+    The CIVETStore object is used to store result data (produced
+    by here by a TestHarness execution) and then the ResultsReaer
+    object is used to load the data that was just stored.
+
+    Sad caveat: tests that run here share a database, which means
+    that if this is running in multiple jobs at once, we could
+    have some contention. Thus, we rely on randomly generated
+    data (event id, PR number, SHAs, etc) to let these tests
+    run (kind of) independently. The only time this causes a real
+    problem is when getting "latest event data", because there could
+    be multiple events in the database at the same time. Thus,
+    we just make sure that we can find our event somewhere in the
+    list (not necessarily the absolute latest). Lastly, we do
+    clean up immediately after testing every entry that is added
+    to the database to try to minimize contention.
+    """
     def deleteDocuments(self, result_id: ObjectId, test_ids: Optional[ObjectId] = None):
         """
         Helper for deleting documents in a database
