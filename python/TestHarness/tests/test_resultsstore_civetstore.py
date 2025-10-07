@@ -319,7 +319,6 @@ class TestCIVETStore(TestHarnessTestCase):
                     else:
                         self.assertIsInstance(stored_test_id, int)
                         stored_test = stored_tests[stored_test_id]
-                    pass
                 else:
                     stored_test = stored_results['tests'][folder_name]['tests'][test_name]
                 self.assertIsInstance(stored_test, dict)
