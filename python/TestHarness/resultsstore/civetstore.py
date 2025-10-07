@@ -46,6 +46,25 @@ def decompress_dict(compressed: bytes) -> dict:
     return json.loads(zlib.decompress(compressed).decode('utf-8'))
 
 class CIVETStore:
+    """
+    Class that handles the storage of TestHarness results
+    (loaded from the TestHarness JSON output) to later
+    be indexed and retrieved via the ResultsReader, which
+    represents tests via StoredResult and StoredTestResult
+    objects.
+
+    This class is to be used in practice via command line,
+    where one will pass in a JSON output to be stored
+    in a database.
+
+    The bulk of the implementation here involves parsing
+    the current CIVET environment (mainly from CIVET_*
+    environment variables) and storing it in a form
+    that can be indexed in a database (for example,
+    to load a result given a CIVET event).
+    """
+    # The current schema version for storage; history:
+    # - 6: Initial version when moved to CIVETStore
     CIVET_VERSION = 6
 
     @staticmethod
@@ -247,7 +266,6 @@ class CIVETStore:
         event_cause = civet_env['event_cause']
         if event_cause.startswith('Pull'):
             pr_num = int(civet_env['pr_num'])
-
             event_cause = 'pr'
             civet_entry['event_url'] = f'{repo_url}/pull/{pr_num}'
             civet_entry['push_branch'] = civet_env['head_ref']
@@ -352,6 +370,11 @@ class CIVETStore:
                     json_metadata[k] = compress_dict(v)
 
         tests = None
+        # Determine the size (ish) of the current results dict,
+        # which contains the tests within it. If below a certain
+        # size, keep the tests within the results data. If above,
+        # separate them. We need to do this to keep mongodb
+        # documents a reasonable size (the max is 10MB).
         max_result_size = max_result_size * 1e6
         results_size = self.get_size(results)
         results_size_mb = results_size / 1e6
@@ -423,39 +446,38 @@ class CIVETStore:
 
         result, tests = self.build(results, base_sha, **kwargs)
 
-        auth = self.load_authentication()
-        if auth is None:
-            raise SystemExit('ERROR: Authentication is not available')
-        client_args = [auth.host, auth.port]
-        client_kwargs = {'username': auth.username, 'password': auth.password}
         with self.setup_client() as client:
             db = client[database]
 
-            insert_tests = []
-            insert_test_names = []
-            for folder_name, folder_entry in result['tests'].items():
-                for test_name, test_entry in folder_entry['tests'].items():
-                    if tests:
+            test_ids = None
+
+            # Store tests separately
+            if tests:
+                # Accumulate test data to be inserted, and also keep
+                # track of the names in this order so that we can
+                # in the main results object replace each test
+                # with the corresponding ID of the test within
+                # the separate tests collection
+                insert_tests = []
+                insert_test_names = []
+                for folder_name, folder_entry in result['tests'].items():
+                    for test_name, test_entry in folder_entry['tests'].items():
                         test_data = tests[test_entry]
                         test_data['result_id'] = None
                         insert_tests.append(test_data)
                         insert_test_names.append((folder_name, test_name))
-                    else:
-                        test_data = test_entry
 
-            # Store the tests (if any)
-            test_ids = None
-            if insert_tests:
-                assert tests is not None
+                # Do the insertion
                 inserted = db.tests.insert_many(insert_tests)
                 assert inserted.acknowledged
                 test_ids = inserted.inserted_ids
                 print(f'Inserted {len(test_ids)} tests into {database}')
 
-                # Update the test IDs for each test in the result
-                for i, id in enumerate(test_ids):
-                    folder_name, test_name = insert_test_names[i]
-                    result['tests'][folder_name]['tests'][test_name] = id
+                # For each inserted test, update the results data
+                # so that it can reference the corresponding inserted
+                # test (instead of storing the data within itself)
+                for i, (folder_name, test_name) in enumerate(insert_test_names):
+                    result['tests'][folder_name]['tests'][test_name] = test_ids[i]
 
             # Store the result
             inserted = db.results.insert_one(result)
@@ -463,7 +485,10 @@ class CIVETStore:
             result_id = inserted.inserted_id
             print(f'Inserted result {result_id} into {database}')
 
-            # Update the result ID for each test
+            # If we stored tests separately, we now need to update
+            # 'result_id' on each of the tests (now that the result
+            # has been inserted) so that each test can reference
+            # its parent result object
             if test_ids:
                 filter = {'_id': {'$in': test_ids}}
                 update = {'$set': {'result_id': result_id}}
