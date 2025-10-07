@@ -16,9 +16,10 @@ from io import StringIO
 
 from TestHarness.resultsstore.reader import ResultsReader
 from TestHarness.resultssummary.summary import TestHarnessResultsSummary
-from TestHarness.resultsstore.storedresults import TestName
+from TestHarness.resultsstore.storedresults import TestName, StoredResult
 
 from TestHarnessTestCase import TestHarnessTestCase
+from test_resultsstore_storedresults import TestResultsStoredResults
 
 # Whether or not authentication is available from env var RESULTS_READER_AUTH_FILE
 HAS_AUTH = ResultsReader.hasEnvironmentAuthentication()
@@ -30,13 +31,40 @@ TEST_FOLDER_NAME = 'tests/test_harness'
 TEST_TEST_NAME = 'ok'
 TEST_NAME = TestName(TEST_FOLDER_NAME, TEST_TEST_NAME)
 
+MOCKED_TEST_NAME = TestName('tests/test_harness', 'always_ok')
+
 EVENT_ID = os.environ.get('CIVET_EVENT_ID')
 if EVENT_ID is not None:
     EVENT_ID = int(EVENT_ID)
 
-class TestResultsSummary(unittest.TestCase):
+class TestResultsSummary(TestHarnessTestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+    def getResult(self, **kwargs) -> StoredResult:
+        run_test_result = self.runTestsCached('-i', 'always_ok')
+        converted = TestResultsStoredResults.convertTestHarnessResults(run_test_result.results, **kwargs)
+        return StoredResult(converted.result_data)
+
+    def testFoo(self):
+        # Change runtime
+        head_result = self.getResult()
+        base_result = self.getResult()
+
+        head_test = head_result.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
+        base_test = base_result.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
+
+        print(head_test.run_time)
+        print(base_test.run_time)
+        base_test._data['timing']['runner_run'] = 1e6
+        print(base_test.run_time)
+
+        # Add a test
+        head_result = self.getResult(no_tests=True)
+        base_result = self.getResult()
+
+        print(head_result.num_tests)
+        print(base_result.num_tests)
 
     #@patch.object(TestHarnessResultsSummary, 'HEAD_RUNTIME_THREADSHOLD',new=1)
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
@@ -52,6 +80,28 @@ class TestResultsSummary(unittest.TestCase):
         self.assertIsNone(removed_table)
         self.assertIsNone(added_table)
         self.assertIsNone(same_table)
+
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    @patch.object(TestHarnessResultsSummary, 'get_event_results')
+    @patch.object(TestHarnessResultsSummary, 'get_commit_results')
+    def testFooBar(self, mock_get_commit_results, mock_get_event_results, mock_init_reader):
+        head_result_no_tests = self.getResult(no_tests=True)
+        base_result_with_tests = self.getResult()
+        mock_get_commit_results.return_value = base_result_with_tests
+        mock_get_event_results.return_value = head_result_no_tests
+        mock_init_reader.return_value = None
+
+        with tempfile.NamedTemporaryFile() as tmp_file:
+            summary = TestHarnessResultsSummary(None)
+            base_results, head_results, base_test_names, head_test_names = summary.pr_test_names(
+                event_id=EVENT_ID, out=tmp_file.name
+            )
+            self.assertEqual(base_results, base_result_with_tests)
+            self.assertEqual(head_results, head_result_no_tests)
+            self.assertEqual(len(head_test_names), 0)
+            self.assertEqual(len(base_test_names), base_results.num_tests)
+
+        TestHarnessResultsSummary(None)
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testDiffTableRemovedTest(self):
