@@ -23,7 +23,8 @@ namespace libMesh
 class QBase;
 }
 
-// fixme lynn this needs to be removed from the globalname space in a seperate commit
+// fixme lynn this needs to be removed from the globalname space in a seperate commit after Grizzly
+// is fixed to use includeCrackFrontDefinitionParams
 void addCrackFrontDefinitionParams(InputParameters & params);
 /**
  * Class used in fracture integrals to define geometric characteristics of the crack front
@@ -34,12 +35,14 @@ public:
   static InputParameters validParams();
 
   CrackFrontDefinition(const InputParameters & parameters);
-  virtual ~CrackFrontDefinition();
 
   virtual void initialSetup() override;
   virtual void initialize() override;
   virtual void finalize() override;
   virtual void execute() override;
+
+  /// used by Actions to add CrackFrontDefinitionParams
+  static void includeCrackFrontDefinitionParams(InputParameters & params);
 
   /**
    * Change the number of crack front nodes. As the crack grows, the number of crack fronts nodes
@@ -294,8 +297,6 @@ protected:
   AuxiliarySystem & _aux;
   /// Reference to the mesh
   MooseMesh & _mesh;
-  /// Tolerance used in geometric calculations
-  static const Real _tol;
 
   /// Crack front nodes ordered from the start to end of the crack front
   std::vector<dof_id_type> _ordered_crack_front_nodes;
@@ -386,6 +387,8 @@ protected:
   const CrackFrontPointsProvider * _crack_front_points_provider;
   /// Number of points coming from the CrackFrontPointsProvider
   std::size_t _num_points_from_provider;
+  /// tolerance for matching nodes at crack front
+  const Real _tol;
 
   /**
    * Get the set of all crack front nodes
