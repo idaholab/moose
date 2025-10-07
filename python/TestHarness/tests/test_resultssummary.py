@@ -81,8 +81,8 @@ class TestResultsSummary(unittest.TestCase):
         self.assertIsNone(removed_table)
         self.assertIsNone(same_table)
 
-    @patch.object(TestHarnessResultsSummary, 'HEAD_RUNTIME_THREADSHOLD',new=0.5)
-    @patch.object(TestHarnessResultsSummary, 'RELATIVE_RUNTIME_RATE',new=0.1)
+    # @patch.object(TestHarnessResultsSummary, 'HEAD_RUNTIME_THREADSHOLD',new=0.5)
+    # @patch.object(TestHarnessResultsSummary, 'RELATIVE_RUNTIME_RATE',new=0.1)
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testDiffTableSameTestHighRelativeRunTime(self):
         """
@@ -90,9 +90,17 @@ class TestResultsSummary(unittest.TestCase):
             -the head runtime exceeds a predefined threshold and
             -the relative runtime increase exceeds a defined rate.
         """
+        fake_run_time_floor = 0.1
+        fake_run_tiime_rate_floor = 0.1
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
         base_results, head_results, base_names, head_names = summary.pr_test_names(event_id=EVENT_ID)
-        removed_table, added_table, same_table = summary.diff_table(base_results, head_results,base_names, head_names)
+        removed_table, added_table, same_table = summary.diff_table(
+                                                                    base_results,
+                                                                    head_results,
+                                                                    base_names,
+                                                                    head_names,
+                                                                    run_time_floor=fake_run_time_floor,
+                                                                    run_time_rate_floor=fake_run_tiime_rate_floor)
 
         reader = TestHarnessResultsReader(TEST_DATABASE_NAME)
         results = reader.getEventResults(event_id=EVENT_ID)
@@ -108,7 +116,7 @@ class TestResultsSummary(unittest.TestCase):
 
         relative_diff_str = same_table[0][3]
         relative_diff = float(relative_diff_str.strip('%')) / 100
-        self.assertGreater(relative_diff, TestHarnessResultsSummary.RELATIVE_RUNTIME_RATE)
+        self.assertGreater(relative_diff, fake_run_time_floor)
         self.assertIsNone(removed_table)
         self.assertIsNone(added_table)
 
@@ -144,8 +152,10 @@ class TestResultsSummary(unittest.TestCase):
         """
         patch_event_results.return_value = None
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
+        with tempfile.NamedTemporaryFile() as tmp_file:
+            tmp_path = tmp_file.name
         with self.assertRaisesRegex(SystemExit, 'Results do not exist for event'):
-            summary.pr_test_names(event_id=EVENT_ID)
+            summary.pr_test_names(event_id=EVENT_ID,out=tmp_path)
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testBuildSummaryNoChange(self):
@@ -235,9 +245,8 @@ class TestResultsSummary(unittest.TestCase):
         with redirect_stdout(stdout):
             summary_result = summary.pr(event_id=EVENT_ID)
 
-        with tempfile.NamedTemporaryFile(delete=False, mode='r+') as tmp_file:
+        with tempfile.NamedTemporaryFile() as tmp_file:
             tmp_path = tmp_file.name
-        try:
             summary.summary_output_file(summary_result,tmp_path)
             with open(tmp_path, 'r') as f:
                 output = f.read()
@@ -247,9 +256,6 @@ class TestResultsSummary(unittest.TestCase):
             self.assertIn('No New Tests', output)
             self.assertIn('Same Tests', output)
             self.assertIn('No Tests', output)
-        finally:
-            os.remove(tmp_path)
-
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testSummaryOutputFileInvalidPath(self):
@@ -278,9 +284,8 @@ class TestResultsSummary(unittest.TestCase):
         """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
 
-        with tempfile.NamedTemporaryFile(delete=False, mode='r+') as tmp_file:
+        with tempfile.NamedTemporaryFile() as tmp_file:
             tmp_path = tmp_file.name
-        try:
             stdout = StringIO()
             with redirect_stdout(stdout):
                 summary.main( out=tmp_path, action='pr', event_id=EVENT_ID)
@@ -292,8 +297,6 @@ class TestResultsSummary(unittest.TestCase):
             self.assertIn('No New Tests', output)
             self.assertIn('Same Tests', output)
             self.assertIn('No Tests', output)
-        finally:
-            os.remove(tmp_path)
 
 if __name__ == '__main__':
     unittest.main()
