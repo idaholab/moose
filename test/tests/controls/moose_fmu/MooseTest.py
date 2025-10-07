@@ -24,12 +24,14 @@ class MooseTest(Moose2FMU):
         self.register_variable(String("BC_info", causality=Fmi2Causality.input, variability=Fmi2Variability.discrete))
         self.register_variable(Real("BC_value", causality=Fmi2Causality.input, variability=Fmi2Variability.continuous))
 
+        # Default experiment configuration
+        self.default_experiment = DefaultExperiment(start_time=0.0, stop_time=3.0, step_size=0.1)
+
         self.logger.info("MooseTest instance created.")
 
     def do_step(self,
                 current_time: float,
-                step_size:    float,
-                no_set_fmu_state_prior: bool = False) -> bool:
+                step_size:    float) -> bool:
 
         # Set a controllable ``Real`` parameter as boundary condition.
         if self.BC_info:
@@ -38,7 +40,7 @@ class MooseTest(Moose2FMU):
                     f"Change boundary condition {self.BC_info} to {self.BC_value}")
 
         # Synchronize MOOSE simulation time with FMU (support MOOSE simulation time stepping mechanism)
-        moose_time, signal = self.sync_with_moose(current_time, self.flag)
+        moose_time, signal = self.sync_with_moose(current_time, step_size, self.flag)
 
         if moose_time is None:
                 return False
@@ -63,7 +65,7 @@ class MooseTest(Moose2FMU):
             # send value to FMU variable
             self.diffused = diffused
 
-             # get the value of "pi" reporter named "constant" from MOOSE
+            # get the value of "pi" reporter named "constant" from MOOSE
             rep_value = self.get_reporter_value(self.flag, "constant/pi", current_time)
 
             if rep_value is None:
