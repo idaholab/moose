@@ -84,7 +84,7 @@ class SpecModifier:
         return ' '.join(conditions)
       fix_param(param_name, do_versioned_param)
     # string params, implicit or, negation allowed
-    string_params = ['compiler', 'method', 'platform']
+    string_params = ['compiler', 'method']
     for param in string_params:
       def do_string_param(value):
         conditions = []
