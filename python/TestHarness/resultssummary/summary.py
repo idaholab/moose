@@ -65,14 +65,14 @@ class TestHarnessResultsSummary:
             '--run-time-floor',
             type=float,
             default=1,
-            help='Sets a minimum threshold for the head test run time.'
+            help='Sets a minimum threshold for the head test run time (seconds)'
         )
 
         pr_parser.add_argument(
             '--run-time-rate-floor',
             type=float,
             default=0.5,
-            help='Sets a minimum relative run time ratio between base and head.'
+            help='Sets a minimum relative run time ratio between base and head'
         )
 
         return parser.parse_args()
@@ -194,16 +194,23 @@ class TestHarnessResultsSummary:
         event_id = kwargs.pop('event_id')
         assert isinstance(event_id, int)
 
+        out = kwargs.get('out')
+
         head_results = self.reader.getEventResults(event_id)
         if head_results is None:
-            raise SystemExit(f'ERROR: Results do not exist for event {event_id}')
+            error_msg = f'ERROR: Results do not exist for event {event_id}'
+            self.summary_output_file(error_msg, out)
+            raise SystemExit(error_msg)
+
         test_names = set(head_results.test_names)
         base_sha = head_results.base_sha
         assert isinstance(base_sha, str)
 
         base_results = self.reader.getCommitResults(base_sha)
         if not isinstance(base_results, TestHarnessResults):
-            print(f"\nComparison not available: no baseline results found for base SHA {base_sha}")
+            no_base =f"Comparison not available: no baseline results found for base SHA {base_sha}"
+            print(no_base)
+            self.summary_output_file(no_base,out)
             return None, head_results, None, test_names
         base_test_names = set(base_results.test_names)
         return base_results, head_results, base_test_names, test_names
@@ -287,23 +294,27 @@ class TestHarnessResultsSummary:
             A formatted summary string of removed, new, and runtime-sensitive tests.
             If `base_names` is None, returns None.
         """
+        out = kwargs.get('out')
+
         base_results,head_results, base_names, head_names = self.pr_test_names(**kwargs)
         assert isinstance(head_names,set)
         assert isinstance(base_names,(set,NoneType))
+        
         if base_names is None:
             return
         removed_table, added_table, same_table = self.diff_table(base_results,head_results, base_names, head_names, **kwargs)
         summary_result = self.build_summary(removed_table, added_table, same_table)
         print(summary_result)
+        self.summary_output_file(summary_result,out)
         return summary_result
 
-    def summary_output_file(self, summary_result: str, out: str) -> None:
+    def summary_output_file(self, output_result: str, out: str) -> None:
         """
         Write the summary result to a specified output file.
 
         Parameters
         ----------
-        summary_result : str
+        output_result : str
             The formatted summary string to be written to the file.
         out : str
             The file path where the summary should be saved.
@@ -313,18 +324,19 @@ class TestHarnessResultsSummary:
         None
             This method does not return anything. It performs a file write operation.
         """
+        if output_result is None:
+            print("No summary result to write.")
+            return
+
         try:
             with open(out, 'w') as f:
-                f.write(summary_result)
+                f.write(output_result)
         except Exception as e:
             print(f"Failed to write to {out}: {e}")
 
     def main(self, **kwargs):
         action = kwargs['action']
         summary_result = getattr(self, action)(**kwargs)
-
-        out = kwargs['out']
-        self.summary_output_file(summary_result,out)
 
 if __name__ == '__main__':
     args = TestHarnessResultsSummary.parseArgs()
