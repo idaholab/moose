@@ -28,12 +28,12 @@ HAS_AUTH = ResultsReader.hasEnvironmentAuthentication()
 PROD_GET_TEST_RESULTS_GOLD_PATH = os.path.join(os.path.dirname(__file__), 'gold', 'resultsstore', 'prod_get_test_results.json')
 # Production database name for testing real results
 PROD_DATABASE_NAME = 'civet_tests_moose_performance'
-# Arguments for using the production database for getting real results
+# The name of the test to load from the production database
 PROD_TEST_NAME = TestName('simple_transient_diffusion', 'test')
 
 # Test database name for testing pull request results
 TEST_DATABASE_NAME = 'civet_tests_moose_test_results'
-# Arguments for using the production database for getting real results
+# The name of the test to load from the test database
 TEST_TEST_NAME = TestName('tests/test_harness', 'ok')
 
 class FakeMongoClient(MongoClient):
@@ -50,13 +50,17 @@ class FakeMongoClient(MongoClient):
         pass
 
 class TestResultsReader(unittest.TestCase):
+    """
+    Tests the ResultsReader object, which loads data
+    from the database stored by CIVETStore.
+    """
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def buildProdGetTestResultsGold(self):
         """
-        Helper for building the gold file for testing getTestResults(),
-        using a live production database
+        Builds a gold file for testing getTestResults(), using data
+        from a live production database
         """
         @dataclass
         class GoldTest:
@@ -64,8 +68,7 @@ class TestResultsReader(unittest.TestCase):
             event_id: str | None
             civet_version: int
 
-        # Static set of test IDs (test entires in the database) that we
-        # will always test with
+        # Static set of results from which to build the gold file
         gold_tests = [GoldTest(event_sha='968f537a3c89ffb556fb7da18da28da52b592ee0',
                                event_id=None,
                                civet_version=0),
@@ -135,7 +138,8 @@ class TestResultsReader(unittest.TestCase):
     def testGetTestResultsGold(self):
         """
         Tests that generating the gold file (using static test entries) using
-        the live server gets us the same gold file that we currently have
+        the live server gets us the same gold file that we currently have,
+        which should not differ
         """
         new_gold = self.buildProdGetTestResultsGold()
 
@@ -196,13 +200,12 @@ class TestResultsReader(unittest.TestCase):
     def deserializeGold() -> dict[ObjectId, dict]:
         """
         Helper for deserializing the gold data into a dict
-        of result ID -> result data
+        of result ID -> result data, sorted by ID
+        (latest event first)
         """
         with open(PROD_GET_TEST_RESULTS_GOLD_PATH, 'r') as f:
             gold = json.load(f)
-        # Deserialize each object
         gold = {ObjectId(id): StoredResult.deserialize(entry) for id, entry in gold.items()}
-        # And sorted based on ID (latest first)
         return dict(OrderedDict(sorted(gold.items(), key=lambda x: x[0], reverse=True)))
 
     @patch.object(ResultsReader, '_findResults')
