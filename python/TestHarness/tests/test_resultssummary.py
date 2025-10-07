@@ -43,7 +43,9 @@ class TestResultsSummary(unittest.TestCase):
         Tests diff_table when there are no changes between base and head test names.
         """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
-        base_results, head_results, base_names, head_names = summary.pr_test_names(event_id=EVENT_ID)
+        with tempfile.NamedTemporaryFile() as tmp_file:
+            tmp_path = tmp_file.name
+        base_results, head_results, base_names, head_names = summary.pr_test_names(event_id=EVENT_ID,out=tmp_path)
         removed_table, added_table, same_table = summary.diff_table(base_results, head_results, base_names, head_names)
         self.assertIsNone(removed_table)
         self.assertIsNone(added_table)
@@ -55,7 +57,9 @@ class TestResultsSummary(unittest.TestCase):
         Tests diff_table() when test is removed from base.
         """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
-        base_results, head_results,base_names, _= summary.pr_test_names(event_id=EVENT_ID)
+        with tempfile.NamedTemporaryFile() as tmp_file:
+            tmp_path = tmp_file.name
+        base_results, head_results,base_names, _= summary.pr_test_names(event_id=EVENT_ID,out=tmp_path)
         removed_table, added_table, same_table = summary.diff_table(base_results, head_results, base_names, set())
         self.assertEqual(len(removed_table), 1)
         self.assertEqual(removed_table[0], TEST_NAME)
@@ -68,7 +72,9 @@ class TestResultsSummary(unittest.TestCase):
         Tests diff_table() when test is newly added.
         """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
-        base_results, head_results, _, head_names = summary.pr_test_names(event_id=EVENT_ID)
+        with tempfile.NamedTemporaryFile() as tmp_file:
+            tmp_path = tmp_file.name
+        base_results, head_results, _, head_names = summary.pr_test_names(event_id=EVENT_ID,out=tmp_path)
         removed_table, added_table, same_table = summary.diff_table(base_results, head_results, set(), head_names)
 
         reader = TestHarnessResultsReader(TEST_DATABASE_NAME)
@@ -81,8 +87,6 @@ class TestResultsSummary(unittest.TestCase):
         self.assertIsNone(removed_table)
         self.assertIsNone(same_table)
 
-    # @patch.object(TestHarnessResultsSummary, 'HEAD_RUNTIME_THREADSHOLD',new=0.5)
-    # @patch.object(TestHarnessResultsSummary, 'RELATIVE_RUNTIME_RATE',new=0.1)
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testDiffTableSameTestHighRelativeRunTime(self):
         """
@@ -93,7 +97,9 @@ class TestResultsSummary(unittest.TestCase):
         fake_run_time_floor = 0.1
         fake_run_tiime_rate_floor = 0.1
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
-        base_results, head_results, base_names, head_names = summary.pr_test_names(event_id=EVENT_ID)
+        with tempfile.NamedTemporaryFile() as tmp_file:
+            tmp_path = tmp_file.name
+        base_results, head_results, base_names, head_names = summary.pr_test_names(event_id=EVENT_ID,out=tmp_path)
         removed_table, added_table, same_table = summary.diff_table(
                                                                     base_results,
                                                                     head_results,
@@ -126,7 +132,9 @@ class TestResultsSummary(unittest.TestCase):
         Tests pr_test_names() when there are no changes between base and head test names.
         """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
-        _, _, base_names, head_names = summary.pr_test_names(event_id=EVENT_ID)
+        with tempfile.NamedTemporaryFile() as tmp_file:
+            tmp_path = tmp_file.name
+        _, _, base_names, head_names = summary.pr_test_names(event_id=EVENT_ID,out=tmp_path)
         self.assertEqual(base_names, head_names)
         self.assertEqual(base_names, set([TEST_NAME]))
         self.assertEqual(head_names, set([TEST_NAME]))
@@ -139,9 +147,11 @@ class TestResultsSummary(unittest.TestCase):
         """
         patch_commit_results.return_value = None
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
+        with tempfile.NamedTemporaryFile() as tmp_file:
+            tmp_path = tmp_file.name
         stdout = StringIO()
         with redirect_stdout(stdout):
-            base_results, head_results, base_test_names, test_names = summary.pr_test_names(event_id=EVENT_ID)
+            base_results, head_results, base_test_names, test_names = summary.pr_test_names(event_id=EVENT_ID,out=tmp_path)
         self.assertIsNone(base_test_names)
 
     @patch.object(TestHarnessResultsReader, 'getEventResults')
@@ -163,7 +173,9 @@ class TestResultsSummary(unittest.TestCase):
         Tests building a summary when there are no changes between base and head test names.
         """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
-        base_results, head_results, base_names, head_names = summary.pr_test_names(event_id=EVENT_ID)
+        with tempfile.NamedTemporaryFile() as tmp_file:
+            tmp_path = tmp_file.name
+        base_results, head_results, base_names, head_names = summary.pr_test_names(event_id=EVENT_ID,out=tmp_path)
         removed_table, added_table, same_table = summary.diff_table(base_results, head_results,base_names,head_names)
 
         self.assertIsNone(removed_table)
@@ -176,7 +188,9 @@ class TestResultsSummary(unittest.TestCase):
         Tests building a summary when a test is removed from base
         """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
-        base_results, head_results, base_names, _ = summary.pr_test_names(event_id=EVENT_ID)
+        with tempfile.NamedTemporaryFile() as tmp_file:
+            tmp_path = tmp_file.name
+        base_results, head_results, base_names, _ = summary.pr_test_names(event_id=EVENT_ID,out=tmp_path)
         removed_table, added_table, same_table = summary.diff_table(base_results,head_results,base_names,set())
 
         self.assertEqual(len(removed_table), 1)
@@ -190,7 +204,9 @@ class TestResultsSummary(unittest.TestCase):
         Tests building a summary when a test is newly added in the head test names.
         """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
-        base_results, head_results, _, head_names = summary.pr_test_names(event_id=EVENT_ID)
+        with tempfile.NamedTemporaryFile() as tmp_file:
+            tmp_path = tmp_file.name
+        base_results, head_results, _, head_names = summary.pr_test_names(event_id=EVENT_ID,out=tmp_path)
         removed_table, added_table,same_table = summary.diff_table(base_results, head_results, set(), head_names)
 
         reader = TestHarnessResultsReader(TEST_DATABASE_NAME)
@@ -209,9 +225,11 @@ class TestResultsSummary(unittest.TestCase):
         Tests pr() when there are no changes between base and head test names.
         """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
+        with tempfile.NamedTemporaryFile() as tmp_file:
+            tmp_path = tmp_file.name
         stdout = StringIO()
         with redirect_stdout(stdout):
-            summary_result = summary.pr(event_id=EVENT_ID)
+            summary_result = summary.pr(event_id=EVENT_ID,out=tmp_path)
         self.assertIn('Removed Tests:',summary_result)
         self.assertIn('No Removed Tests',summary_result)
         self.assertIn('New Tests:',summary_result)
@@ -225,6 +243,8 @@ class TestResultsSummary(unittest.TestCase):
         Tests pr() when no base is available to compare.
         """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
+        with tempfile.NamedTemporaryFile() as tmp_file:
+            tmp_path = tmp_file.name
         def mock_pr_test_names(**kwargs):
             print("Comparison not available")
             return None,[], None,{'head_test1'}
@@ -232,7 +252,7 @@ class TestResultsSummary(unittest.TestCase):
 
         stdout = StringIO()
         with redirect_stdout(stdout):
-            summary.pr(event_id=EVENT_ID)
+            summary.pr(event_id=EVENT_ID,out=tmp_path)
         self.assertIn('Comparison not available', stdout.getvalue())
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
@@ -241,12 +261,12 @@ class TestResultsSummary(unittest.TestCase):
         Tests summary output file when output file path exit and there is no change between base and head.
         """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
-        stdout = StringIO()
-        with redirect_stdout(stdout):
-            summary_result = summary.pr(event_id=EVENT_ID)
-
         with tempfile.NamedTemporaryFile() as tmp_file:
             tmp_path = tmp_file.name
+        stdout = StringIO()
+        with redirect_stdout(stdout):
+            summary_result = summary.pr(event_id=EVENT_ID, out=tmp_path)
+
             summary.summary_output_file(summary_result,tmp_path)
             with open(tmp_path, 'r') as f:
                 output = f.read()
@@ -263,11 +283,10 @@ class TestResultsSummary(unittest.TestCase):
         Tests that summary_output_file when output file path is invalid.
         """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
+        invalid_path = "/this/path/does/not/exist/output.txt"
         stdout = StringIO()
         with redirect_stdout(stdout):
-            summary_result = summary.pr(event_id=EVENT_ID)
-
-        invalid_path = "/this/path/does/not/exist/output.txt"
+            summary_result = summary.pr(event_id=EVENT_ID, out=invalid_path)
 
         stdout = StringIO()
         with redirect_stdout(stdout):
@@ -275,7 +294,6 @@ class TestResultsSummary(unittest.TestCase):
 
         output = stdout.getvalue()
         self.assertIn("Failed to write to", output)
-
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testMain(self):

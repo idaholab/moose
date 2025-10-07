@@ -195,6 +195,7 @@ class TestHarnessResultsSummary:
         assert isinstance(event_id, int)
 
         out = kwargs.get('out')
+        assert isinstance(out, str)
 
         head_results = self.reader.getEventResults(event_id)
         if head_results is None:
@@ -295,6 +296,7 @@ class TestHarnessResultsSummary:
             If `base_names` is None, returns None.
         """
         out = kwargs.get('out')
+        assert isinstance(out,str)
 
         base_results,head_results, base_names, head_names = self.pr_test_names(**kwargs)
         assert isinstance(head_names,set)
@@ -324,10 +326,9 @@ class TestHarnessResultsSummary:
         None
             This method does not return anything. It performs a file write operation.
         """
-        if output_result is None:
-            print("No summary result to write.")
-            return
-
+        # if output_result is None:
+        #     print("No summary result to write.")
+        #     return
         try:
             with open(out, 'w') as f:
                 f.write(output_result)
