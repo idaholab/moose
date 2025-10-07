@@ -82,9 +82,11 @@ MFEMProblem::addMFEMNonlinearSolver()
   auto nl_solver = std::make_shared<mfem::NewtonSolver>(getComm());
 
   // Defaults to one iteration, without further nonlinear iterations
-  getProblemData().nonlinear_solver->SetRelTol(0.0);
-  getProblemData().nonlinear_solver->SetAbsTol(0.0);
-  getProblemData().nonlinear_solver->SetMaxIter(1);
+  nl_solver->SetRelTol(0.0);
+  nl_solver->SetAbsTol(0.0);
+  nl_solver->SetMaxIter(1);
+
+  getProblemData().nonlinear_solver = nl_solver;
 }
 
 void
@@ -94,8 +96,6 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
 {
   FEProblemBase::addUserObject(bc_name, name, parameters);
   const UserObject * mfem_bc_uo = &(getUserObjectBase(name));
-
-  std::string action_name = _app.actionWarehouse().getCurrentActionName();
 
   if (dynamic_cast<const MFEMIntegratedBC *>(mfem_bc_uo) != nullptr)
   {

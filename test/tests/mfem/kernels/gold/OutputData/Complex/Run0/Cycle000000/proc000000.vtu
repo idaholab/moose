@@ -146,7 +146,7 @@
 </DataArray>
 </CellData>
 <PointData >
-<DataArray type="Float64" Name="u_i" NumberOfComponents="1"  format="ascii" >
+<DataArray type="Float64" Name="u_imag" NumberOfComponents="1"  format="ascii" >
 0
 0
 0.00538653
@@ -212,7 +212,7 @@
 0
 0.00538653
 </DataArray>
-<DataArray type="Float64" Name="u_r" NumberOfComponents="1"  format="ascii" >
+<DataArray type="Float64" Name="u_real" NumberOfComponents="1"  format="ascii" >
 1
 1
 -0.139999
