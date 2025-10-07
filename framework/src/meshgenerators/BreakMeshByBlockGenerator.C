@@ -420,9 +420,10 @@ BreakMeshByBlockGenerator::generate()
       _factory.releaseSharedObjects(*rm);
   }
 
+  // Prepare the new IDs
   mesh->prepare_for_use();
 
-  addDisconnectedNeighborsFromMap(elem_side_to_fake_neighbor_elem_side);
+  addDisconnectedNeighborsFromMap(elem_side_to_fake_neighbor_elem_side, *mesh);
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
@@ -638,7 +639,8 @@ void
 BreakMeshByBlockGenerator::addDisconnectedNeighborsFromMap(
     const std::unordered_map<std::pair<const Elem *, unsigned int>,
                              std::pair<const Elem *, unsigned int>> &
-        elem_side_to_fake_neighbor_elem_side)
+        elem_side_to_fake_neighbor_elem_side,
+    MeshBase & mesh)
 {
   // Loop over elem_side_to_fake_neighbor_elem_side to add disconnected neighbors to the MOOSE mesh
   for (const auto & entry : elem_side_to_fake_neighbor_elem_side)
@@ -649,7 +651,10 @@ BreakMeshByBlockGenerator::addDisconnectedNeighborsFromMap(
     const auto connected_side = entry.second.second;
 
     // Register as disconnected neighbors in MooseMesh
-    _mesh->addDisconnectedNeighbors(MooseMesh::ElemSide{elem_id, side},
-                                    MooseMesh::ElemSide{connected_elem_id, connected_side});
+    mesh.add_disconnected_neighbors(MeshBase::ElemSide{elem_id, side},
+                                    MeshBase::ElemSide{connected_elem_id, connected_side});
   }
+
+  // Update the neighbor information in the mesh
+  mesh.find_neighbors();
 }
