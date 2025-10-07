@@ -17,12 +17,8 @@ from TestHarness.resultsreader.results import TestHarnessResults, TestName
 from tabulate import tabulate
 
 NoneType = type(None)
-#HEAD_RUNTIME_THREADSHOLD = 0.5
-#RELATIVE_RUNTIME_RATE = 0.3
 
 class TestHarnessResultsSummary:
-    HEAD_RUNTIME_THREADSHOLD = 1
-    RELATIVE_RUNTIME_RATE = 0.5
 
     def __init__(self, database: str):
         self.reader = TestHarnessResultsReader(database)
@@ -65,11 +61,25 @@ class TestHarnessResultsSummary:
             type=int,
             help='The event ID')
 
+        pr_parser.add_argument(
+            '--run-time-floor',
+            type=float,
+            default=1,
+            help='Sets a minimum threshold for the head test run time.'
+        )
+
+        pr_parser.add_argument(
+            '--run-time-rate-floor',
+            type=float,
+            default=0.5,
+            help='Sets a minimum relative run time ratio between base and head.'
+        )
+
         return parser.parse_args()
 
     @staticmethod
     def diff_table(base_results: TestHarnessResults, head_results: TestHarnessResults, base_names: set[TestName],
-                   head_names: set[TestName]) -> Tuple[Optional[list], Optional[list]]:
+                   head_names: set[TestName], **kwargs) -> Tuple[Optional[list], Optional[list]]:
         """
         Compare test names between the base and current head, and return
         the difference
@@ -81,9 +91,18 @@ class TestHarnessResultsSummary:
         head_results : TestHarnessResults
             An object that provides access to test results for the head
         base_names : set of TestName
-            The set of test names from the base commit or version.
+            The set of test names from the base commit.
         head_names : set of TestName
-            The set of test names from the current head commit or version.
+            The set of test names from the current head commit.
+
+        Optional Parameters
+        -------------------
+        --run-time-floor : float
+            The runtime at which to not check for a difference
+            (default: 1 s)
+        --run-time-rate-floor : float
+            The runtime rate at which to not attach in same_table summary
+            (default: 0.5 i.e 50%)
 
         Returns
         -------
@@ -92,15 +111,20 @@ class TestHarnessResultsSummary:
         added_table : list or None
             A list of newly added test names along with their runtime.
         same_table : list or None
-            A list of test names that exist in both base and head, where:
-            - The head runtime exceeds a predefined threshold.
-            - The relative runtime increase exceeds a defined rate.
-            and respective runtime and relative runtime rate
+            A list of test names, runtime and relative runtime rate that exist in both base and head, where:
+            - The head runtime exceeds a predefined threshold (run-time-floor).
+            - The relative runtime increase exceeds a defined rate (run-time-rate-floor).
         """
         assert isinstance(base_results, TestHarnessResults)
         assert isinstance(head_results, TestHarnessResults)
         assert isinstance(head_names,(set, NoneType))
         assert isinstance(base_names,(set, NoneType))
+
+        head_run_time_floor = kwargs.pop('run_time_floor', 1)
+        assert isinstance(head_run_time_floor, (float, int))
+
+        run_time_rate_floor = kwargs.pop('run_time_rate_floor', 0.5)
+        assert isinstance(run_time_rate_floor, (float, int))
 
         removed_names = base_names - head_names
         if removed_names:
@@ -123,11 +147,11 @@ class TestHarnessResultsSummary:
             for test_name in same_names:
                 base_result = base_results.get_test(test_name.folder, test_name.name)
                 head_result = head_results.get_test(test_name.folder, test_name.name)
-                if (head_result.run_time is None or base_result.run_time is None or head_result.run_time < TestHarnessResultsSummary.HEAD_RUNTIME_THREADSHOLD):
+                if (head_result.run_time is None or base_result.run_time is None or head_result.run_time < head_run_time_floor):
                     continue
                 else:
                     relative_runtime = abs(head_result.run_time - base_result.run_time)/ base_result.run_time
-                    if relative_runtime >= TestHarnessResultsSummary.RELATIVE_RUNTIME_RATE:
+                    if relative_runtime >= run_time_rate_floor:
                         same_table.append([str(test_name), base_result.run_time, head_result.run_time, f'{relative_runtime:.2%}'])
             if not same_table:
                 same_table = None
@@ -167,7 +191,7 @@ class TestHarnessResultsSummary:
         SystemExit
             If no results exist for the given event ID.
         """
-        event_id = kwargs['event_id']
+        event_id = kwargs.pop('event_id')
         assert isinstance(event_id, int)
 
         head_results = self.reader.getEventResults(event_id)
@@ -223,13 +247,25 @@ class TestHarnessResultsSummary:
 
         summary.append("### New Tests:")
         if added_table:
-            summary.append(tabulate(added_table, headers=["Test Name", "Run Time"], tablefmt="github"))
+            summary.append(
+                tabulate(
+                    added_table,
+                    headers=["Test Name", "Run Time"],
+                    tablefmt="github"
+                )
+            )
         else:
             summary.append("No New Tests")
 
-        summary.append(f"### Same Tests but head runtime limit > {TestHarnessResultsSummary.HEAD_RUNTIME_THREADSHOLD} and relative runtime rate > {TestHarnessResultsSummary.RELATIVE_RUNTIME_RATE:.2%}")
+        summary.append(f"### Same Tests that exceed relative run time rate")
         if same_table:
-            summary.append(tabulate(same_table, headers=["Test Name", "Base Run Time", "Head Run Time", "Relative Run Time Rate"], tablefmt="github"))
+            summary.append(
+                tabulate(
+                    same_table,
+                    headers=["Test Name", "Base Run Time", "Head Run Time", "Relative Run Time Rate"],
+                    tablefmt="github"
+                )
+            )
         else:
             summary.append("No Tests")
         return "\n".join(summary)
@@ -256,7 +292,7 @@ class TestHarnessResultsSummary:
         assert isinstance(base_names,(set,NoneType))
         if base_names is None:
             return
-        removed_table, added_table, same_table = self.diff_table(base_results,head_results, base_names, head_names)
+        removed_table, added_table, same_table = self.diff_table(base_results,head_results, base_names, head_names, **kwargs)
         summary_result = self.build_summary(removed_table, added_table, same_table)
         print(summary_result)
         return summary_result
