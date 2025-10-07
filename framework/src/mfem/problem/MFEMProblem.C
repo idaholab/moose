@@ -81,8 +81,9 @@ MFEMProblem::addMFEMNonlinearSolver()
   auto nl_solver = std::make_shared<mfem::NewtonSolver>(getComm());
 
   // Defaults to one iteration, without further nonlinear iterations
-  nl_solver->SetRelTol(0.0);
-  nl_solver->SetAbsTol(0.0);
+  nl_solver->SetRelTol(1e-12);
+  nl_solver->SetAbsTol(1e-9);
+  nl_solver->SetPrintLevel(2);
   nl_solver->SetMaxIter(1);
 
   getProblemData().nonlinear_solver = nl_solver;

@@ -361,6 +361,9 @@ void
 EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
 {
   const_cast<EquationSystem*>(this)->CopyVec(sol,_trueBlockSol);
+
+  std::cout << "******************** Sol ***********************" << std::endl;
+  sol.Print(std::cout);
   
   for (int i = 0; i < _trial_var_names.size(); i++)
   {
@@ -390,6 +393,7 @@ EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
     nlf->ParallelAssemble(_BlockResidual.GetBlock(i));
 
     _BlockResidual.GetBlock(i) -= aux;
+    _BlockResidual.GetBlock(i) *= -1;
 
     if(_non_linear)
       _BlockResidual.GetBlock(i).SetSubVector(_ess_tdof_lists.at(i),0.0);
@@ -403,9 +407,10 @@ EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
     const_cast<EquationSystem*>(this)->FormLinearSystem(_jacobian,  _trueBlockSol, _BlockResidual);
   }
 
+  residual *= -1.0;
+
   if(!_non_linear)
     {
-      residual *= -1.0;
       _jacobian->AddMult(_trueBlockSol, residual);
     }
 
