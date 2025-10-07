@@ -77,6 +77,8 @@ test:
     - ruff --version
   imports:
     - bs4
+    - deepdiff
+    - fmpy
     - coverage
     - deepdiff
     - git
