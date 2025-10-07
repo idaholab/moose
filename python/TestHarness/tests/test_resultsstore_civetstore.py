@@ -212,7 +212,7 @@ class TestCIVETStore(TestHarnessTestCase):
         self.assertEqual(result, gold)
 
     @unittest.skipUnless(os.environ.get('CIVET_EVENT_CAUSE', '').startswith('Push'),
-                         f"Skipping because not on a CIVET push")
+                         "Skipping because not on a CIVET push")
     def testBuildHeaderPushLive(self):
         """
         Tests build_header() for a pull request when used on CIVET
@@ -477,7 +477,7 @@ class TestCIVETStore(TestHarnessTestCase):
         stored_result, stored_tests = self.getStoredResult(result_id, test_ids)
         self.checkResult(base_sha, env, results, stored_result, stored_tests, build_kwargs=kwargs)
 
-    @unittest.skipUnless(HAS_AUTH, f"Skipping because authentication is not available")
+    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testStore(self):
         """
         Test the store() method with no additional arguments and the
@@ -485,7 +485,7 @@ class TestCIVETStore(TestHarnessTestCase):
         """
         self.runTestStore()
 
-    @unittest.skipUnless(HAS_AUTH, f"Skipping because authentication is not available")
+    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testStoreSeparateTests(self):
         """
         Test the store() method with no additional arguments and the
@@ -493,7 +493,7 @@ class TestCIVETStore(TestHarnessTestCase):
         """
         self.runTestStore(max_result_size=1e-6)
 
-    @unittest.skipUnless(HAS_AUTH, f"Skipping because authentication is not available")
+    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testMain(self):
         """
         Test running from main

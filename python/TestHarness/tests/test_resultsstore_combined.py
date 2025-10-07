@@ -113,7 +113,7 @@ class TestResultsStoreCombined(TestHarnessTestCase):
             self.compareResults(result, env, base_sha, id)
 
     @unittest.skipUnless(HAS_STORE_AUTH, f"Skipping because store auth is not available")
-    @unittest.skipUnless(HAS_READER_AUTH, f"Skipping because reader auth is not available")
+    @unittest.skipUnless(HAS_READER_AUTH, "Skipping because reader auth is not available")
     def testPR(self):
         """
         Test storing a pull request result and then loading
@@ -155,7 +155,7 @@ class TestResultsStoreCombined(TestHarnessTestCase):
         self.deleteDocuments(result_id)
 
     @unittest.skipUnless(HAS_STORE_AUTH, f"Skipping because store auth is not available")
-    @unittest.skipUnless(HAS_READER_AUTH, f"Skipping because reader auth is not available")
+    @unittest.skipUnless(HAS_READER_AUTH, "Skipping because reader auth is not available")
     def testPush(self):
         """
         Test storing a push event result and then loading
@@ -205,7 +205,7 @@ class TestResultsStoreCombined(TestHarnessTestCase):
         self.deleteDocuments(result_id)
 
     @unittest.skipUnless(HAS_STORE_AUTH, f"Skipping because store auth is not available")
-    @unittest.skipUnless(HAS_READER_AUTH, f"Skipping because reader auth is not available")
+    @unittest.skipUnless(HAS_READER_AUTH, "Skipping because reader auth is not available")
     def testSeparateTests(self):
         """
         Test storing an event where the tests are stored

@@ -134,7 +134,7 @@ class TestResultsReader(unittest.TestCase):
         if os.environ.get('TEST_RESULTSREADER_MISSING_AUTH') is not None:
             self.assertFalse(HAS_AUTH)
 
-    @unittest.skipUnless(HAS_AUTH, f"Skipping because authentication is not available")
+    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testGetTestResultsGold(self):
         """
         Tests that generating the gold file (using static test entries) using
@@ -302,7 +302,7 @@ class TestResultsReader(unittest.TestCase):
         self.assertEqual(reader._last_latest_push_event_id, last_result_id)
         self.assertEqual(len(reader._latest_push_results), last_i + 1)
 
-    @unittest.skipUnless(HAS_AUTH, f"Skipping because authentication is not available")
+    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testGetTestResultsLive(self):
         """
         Tests calling getTestResults() using the real server, if available
@@ -341,7 +341,7 @@ class TestResultsReader(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, f'Database {PROD_DATABASE_NAME} not found'):
             ResultsReader(PROD_DATABASE_NAME, BadDatabaseClient())
 
-    @unittest.skipUnless(HAS_AUTH, f"Skipping because authentication is not available")
+    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testMissingDatabaseLive(self):
         """
         Tests creating the ResultsReader with a database that isn't found
