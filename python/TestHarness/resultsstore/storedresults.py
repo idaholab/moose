@@ -820,7 +820,7 @@ class StoredResult:
         return data
 
     @staticmethod
-    def deserialize_build(data: dict) -> dict:
+    def deserialize_build(data: dict) -> 'StoredResult':
         """
         Builds a StoredResult object using serialized data
         that was built with serialize()
