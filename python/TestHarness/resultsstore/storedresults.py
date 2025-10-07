@@ -734,8 +734,7 @@ class StoredResult:
         if missing:
             raise KeyError(f'Failed to load test results for _id={missing}')
 
-    @property
-    def tests(self) -> list[StoredTestResult]:
+    def get_tests(self) -> list[StoredTestResult]:
         """
         Get all of the test results.
 

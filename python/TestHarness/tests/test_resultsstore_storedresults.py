@@ -235,8 +235,8 @@ class TestResultsStoredResults(TestHarnessTestCase):
 
         # Has same number of tests
         self.assertEqual(results.num_tests, len(results._tests))
-        self.assertEqual(results.num_tests, len(results.tests))
-        for test_result in results.tests:
+        self.assertEqual(results.num_tests, len(results.get_tests()))
+        for test_result in results.get_tests():
             data = built_result.test_data[test_result.name]
 
             # Get the actual Job object from the TestHarness
@@ -414,7 +414,7 @@ class TestResultsStoredResults(TestHarnessTestCase):
         Tests timing not being available in a test result
         """
         built_result = self.buildResult(delete_test_key=['timing'])
-        for test_result in built_result.results.tests:
+        for test_result in built_result.results.get_tests():
             self.assertIsNone(test_result.timing)
             self.assertIsNone(test_result.run_time)
             self.assertIsNone(test_result.hpc_queued_time)
@@ -424,7 +424,7 @@ class TestResultsStoredResults(TestHarnessTestCase):
         Tests run_time not being available in timing in a test result
         """
         built_result = self.buildResult(delete_test_key=['timing', 'runner_run'])
-        for test_result in built_result.results.tests:
+        for test_result in built_result.results.get_tests():
             self.assertIsNone(test_result.run_time)
 
     def testNoHPCQueuedTime(self):
@@ -432,7 +432,7 @@ class TestResultsStoredResults(TestHarnessTestCase):
         Tests hpc_queued_time not being available in timing in a test result
         """
         built_result = self.buildResult(delete_test_key=['timing', 'hpc_queued'])
-        for test_result in built_result.results.tests:
+        for test_result in built_result.results.get_tests():
             self.assertIsNone(test_result.hpc_queued_time)
 
     def testNoTester(self):
@@ -440,7 +440,7 @@ class TestResultsStoredResults(TestHarnessTestCase):
         Tests tester not being available in a test result
         """
         built_result = self.buildResult(delete_test_key=['tester'])
-        for test_result in built_result.results.tests:
+        for test_result in built_result.results.get_tests():
             self.assertIsNone(test_result.tester)
             self.assertIsNone(test_result.json_metadata)
 
@@ -449,7 +449,7 @@ class TestResultsStoredResults(TestHarnessTestCase):
         Tests status not being available in a test result
         """
         built_result = self.buildResult(delete_test_key=['status'])
-        for test_result in built_result.results.tests:
+        for test_result in built_result.results.get_tests():
             self.assertIsNone(test_result.status)
             self.assertIsNone(test_result.status_value)
 
@@ -459,7 +459,7 @@ class TestResultsStoredResults(TestHarnessTestCase):
         are stored directly within result data)
         """
         built_result = self.buildResult(delete_test_key=['result_id'])
-        for test_result in built_result.results.tests:
+        for test_result in built_result.results.get_tests():
             self.assertEqual(test_result.result_id, built_result.results.id)
 
     def _compareSerialized(self, result: StoredResult, new_result: StoredResult,
