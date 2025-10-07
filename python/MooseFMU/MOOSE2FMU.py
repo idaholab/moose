@@ -3,12 +3,15 @@ from pythonfmu.enums import Fmi2Causality, Fmi2Variability
 from pythonfmu.variables import Integer, Real, String
 from pythonfmu.default_experiment import DefaultExperiment
 from MooseControl import MooseControl
-from typing import Dict, Optional
+from typing import List, Dict, Optional
 import logging
 import time
 from . import fmu_utils
 from typing import Iterable, Union, Set, Tuple
 import re
+import shutil
+import mooseutils
+import numbers
 
 logging.basicConfig(
     level=logging.INFO,
@@ -30,8 +33,8 @@ class Moose2FMU(Fmi2Slave):
         flag: str = "",
         moose_mpi: str = "",
         mpi_num: str = 1,
-        moose_executable: str = "../../../moose_test-opt",
-        moose_inputfile: str = "fmu_diffusion.i",
+        moose_executable: str = "",
+        moose_inputfile: str = "",
         server_name: str = "web_server",
         max_retries: int = 5,
         dt_tolerance: Real = 1e-3,
@@ -46,12 +49,20 @@ class Moose2FMU(Fmi2Slave):
         self.flag: str = flag
         self.moose_mpi: str = moose_mpi
         self.mpi_num: str = mpi_num
-        self.moose_executable: str = moose_executable
         self.moose_inputfile: str = moose_inputfile
         self.server_name: str = server_name
         self.max_retries: int = max_retries
         self.dt_tolerance: Real = dt_tolerance
         self.moose_time: Real = 0.0
+        # self.begin_time: Real = 0.0
+        # self.end_time: Real = float("inf")
+
+        # Find moose executable
+        exec = shutil.which("moose-opt") or mooseutils.find_moose_executable_recursive()
+        if not exec and moose_executable:
+            raise AssertionError("Cannot find a valid MOOSE executable.")
+
+        self.moose_executable: str = exec
 
         # Register tunable parameters
         self.register_variable(String("flag", causality=Fmi2Causality.parameter, variability=Fmi2Variability.tunable))
@@ -68,23 +79,27 @@ class Moose2FMU(Fmi2Slave):
 
 
         # Setup MooseControl
-        if self.moose_mpi:
-            self.cmd = [self.moose_mpi, "-n", self.mpi_num, self.moose_executable, "-i", self.moose_inputfile]
-        else:
-            self.cmd = [self.moose_executable, "-i", self.moose_inputfile]
+        self.cmd = self._build_moose_command()
 
         # Track previously applied controllable values so repeated requests can be skipped
         self._controllable_real_cache: Dict[str, float] = {}
-
-        # Default experiment configuration
-        self.default_experiment = DefaultExperiment(start_time=0.0, stop_time=3.0, step_size=0.5)
+        self._controllable_vector_cache: Dict[Tuple[str, str], Tuple[Union[float, int, str], ...]] = {}
 
     def exit_initialization_mode(self) -> bool:
 
+        self.cmd = self._build_moose_command()
         self.control = MooseControl(moose_command=self.cmd, moose_control_name=self.server_name)
         self.control.initialize()
 
         return True
+
+    # def setup_experiment(self, start_time: float, stop_time: Optional[float], tolerance: Optional[float]):
+    #     self.begin_time = start_time
+    #     if stop_time:
+    #         self.end_time = stop_time
+    #     else:
+    #         self.end_time = float("inf")
+    #     pass
 
     def do_step(
         self,
@@ -101,6 +116,7 @@ class Moose2FMU(Fmi2Slave):
     def sync_with_moose(
         self,
         current_time: float,
+        step_size: float,
         allowed_flags: Optional[Union[str, Iterable[str]]] = None,
     ) -> Tuple[Optional[float], Optional[str]]:
         """Synchronize with the running MOOSE simulation.
@@ -139,7 +155,6 @@ class Moose2FMU(Fmi2Slave):
                 return None, None
 
             moose_time = self.control.getTime()
-            upper_flag = flag.strip().upper()
 
             if flag in parsed_allowed_flags:
                 signal = flag
@@ -154,6 +169,7 @@ class Moose2FMU(Fmi2Slave):
                 return moose_time, signal
 
             self._skip_flag(flag)
+
 
     def ensure_control_listening(self) -> bool:
         """Verify the MooseControl server is listening before proceeding."""
@@ -199,6 +215,119 @@ class Moose2FMU(Fmi2Slave):
         self._controllable_real_cache[path] = value
         self.logger.info(
             "Set controllable real '%s' to %s", path, value
+        )
+        return True
+
+    def set_controllable_vector(
+        self,
+        path: str,
+        value: Iterable[Union[float, int, str]],
+        *,
+        value_type: Optional[str] = None,
+        force: bool = False,
+    ) -> bool:
+        """Set a controllable vector parameter using the appropriate MooseControl API.
+
+        Parameters
+        ----------
+        path
+            The controllable parameter path recognized by WebServerControl.
+        value
+            Iterable containing the values that should be applied.
+        value_type
+            Optional hint describing the type of the vector elements. Accepted
+            values are ``"real"``, ``"int"``/``"integer```, and ``"string"``.
+            When omitted the type is inferred from the provided values.
+        force
+            When ``True`` the value will be pushed even if it matches the last
+            applied value.
+
+        Returns
+        -------
+        bool
+            ``True`` if a new value was sent to MOOSE, ``False`` when the
+            request was skipped because it matches the previously applied value.
+
+        Raises
+        ------
+        TypeError
+            When ``value`` is not an iterable of scalars, or when a type cannot
+            be inferred and ``value_type`` is omitted.
+        ValueError
+            When attempting to set an empty vector without specifying a
+            ``value_type``.
+        """
+
+        if isinstance(value, (str, bytes)):
+            raise TypeError("'value' must be an iterable of scalar entries")
+
+        if hasattr(value, "tolist"):
+            raw_values = value.tolist()
+        else:
+            raw_values = list(value)
+
+        if not raw_values and value_type is None:
+            raise ValueError("value_type must be provided when assigning an empty vector")
+
+        def _is_integral(entry: object) -> bool:
+            return isinstance(entry, numbers.Integral) and not isinstance(entry, bool)
+
+        def _is_numeric(entry: object) -> bool:
+            return isinstance(entry, numbers.Real) and not isinstance(entry, bool)
+
+        normalized_type: Optional[str] = None
+        if value_type:
+            normalized = value_type.strip().lower()
+            if normalized in {"real", "reals", "float", "double"}:
+                normalized_type = "real"
+            elif normalized in {"int", "integer", "integers"}:
+                normalized_type = "int"
+            elif normalized in {"string", "strings", "str"}:
+                normalized_type = "string"
+            else:
+                raise TypeError(f"Unsupported value_type '{value_type}'")
+        elif raw_values:
+            if all(isinstance(entry, str) for entry in raw_values):
+                normalized_type = "string"
+            elif all(_is_integral(entry) for entry in raw_values):
+                normalized_type = "int"
+            elif all(_is_numeric(entry) for entry in raw_values):
+                normalized_type = "real"
+            else:
+                raise TypeError(
+                    "Unable to infer vector type from heterogeneous values; provide value_type"
+                )
+
+        assert normalized_type is not None
+
+        if normalized_type == "real":
+            converted = tuple(float(entry) for entry in raw_values)
+            setter = self.control.setControllableVectorReal
+        elif normalized_type == "int":
+            converted = tuple(int(entry) for entry in raw_values)
+            setter = self.control.setControllableVectorInt
+        else:
+            converted = tuple(str(entry) for entry in raw_values)
+            setter = self.control.setControllableVectorString
+
+        cache_key = (path, normalized_type)
+        cached = self._controllable_vector_cache.get(cache_key)
+        if not force and cached == converted:
+            self.logger.debug(
+                "Skipping controllable vector update for '%s'; value %s already applied",
+                path,
+                list(converted),
+            )
+            return False
+
+        setter(path, list(converted))
+        self.control.setContinue()
+        self._controllable_vector_cache[cache_key] = converted
+        self.logger.info(
+            "Set controllable vector '%s' (%s) to %s",
+            path,
+            normalized_type,
+            list(converted),
         )
         return True
 
@@ -335,6 +464,16 @@ class Moose2FMU(Fmi2Slave):
         self.control.wait(flag)
         self.control.setContinue()
 
-
+    def _build_moose_command(self) -> List[str]:
+        if self.moose_mpi:
+            return [
+                self.moose_mpi,
+                "-n",
+                str(self.mpi_num),
+                self.moose_executable,
+                "-i",
+                self.moose_inputfile,
+            ]
+        return [self.moose_executable, "-i", self.moose_inputfile]
 
 
