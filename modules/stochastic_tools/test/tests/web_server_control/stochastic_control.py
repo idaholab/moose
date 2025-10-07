@@ -21,22 +21,45 @@ doesn't match a python version of these functions.
 
 import os
 import sys
+import shutil
 import numpy as np
 import argparse
 import importlib.util
 from scipy.optimize import rosen  # Exact match to Rosenbrock::rosen
 
-if importlib.util.find_spec("moose_stochastic_tools") is None:
+StochasticControl = None
+StochasticRunOptions = None
+
+def tryImportStochasticControl(path = None):
+    global StochasticControl
+    global StochasticRunOptions
+
+    if StochasticControl is not None:
+        return True
+
+    append_path = not (path is None or path in sys.path)
+    if append_path:
+        if not os.path.isdir(path):
+            return False
+        sys.path.append(path)
+
+    if importlib.util.find_spec("moose_stochastic_tools") is None:
+        if append_path:
+            sys.path.pop(path)
+        return False
+    else:
+        from moose_stochastic_tools import StochasticControl, StochasticRunOptions
+        return True
+
+
+if not tryImportStochasticControl():
     _moose_dir = os.environ.get("MOOSE_DIR", None)
     if not _moose_dir:
         _moose_dir = os.path.join(os.path.dirname(__file__), *([".."] * 5))
     _stm_python_path = os.path.abspath(
         os.path.join(_moose_dir, "modules", "stochastic_tools", "python")
     )
-    sys.path.append(_stm_python_path)
-
-from moose_stochastic_tools import StochasticControl, StochasticRunOptions
-
+    tryImportStochasticControl(_stm_python_path)
 
 def eggholder(x):
     """Exact match to Eggholder::eggholder"""
@@ -82,20 +105,6 @@ if __name__ == "__main__":
     num_cols = np.random.randint(3, 10)
     options = {}  # Options to insert into StochasticRunOptions
 
-    # Arguments from cli
-    cli_args = test_options()
-    parameters = [
-        "Postprocessors/rosenbrock/x["
-        + ",".join([str(i) for i in range(num_cols)])
-        + "]"
-    ]
-    qois = ["rosenbrock/value"]
-    if cli_args.multi_output:
-        parameters.append(f"Postprocessors/eggholder/x[{num_cols},{num_cols + 1}]")
-        qois.append("eggholder/value")
-        num_cols += 2
-    options["multiapp_mode"] = StochasticRunOptions.MultiAppMode(cli_args.mode)
-
     # Arguments gathered from RUNAPP_COMMAND
     cmd = os.environ.get("RUNAPP_COMMAND")
     if cmd is None:
@@ -112,6 +121,28 @@ if __name__ == "__main__":
     input_file = cmd[exec_index + 2]
     # Everything after the input is cli_args
     options["cli_args"] = cmd[(exec_index + 3) :]
+
+    # Import StochasticControl based on executable location (i.e. from conda)
+    if StochasticControl is None:
+        _exec_dir = os.path.dirname(os.path.abspath(shutil.which(executable)))
+        _share_dir = os.path.abspath(os.path.join(_exec_dir, "..", "share"))
+        _moose_stm_python = os.path.join(_share_dir, "stochastic_tools", "python")
+        if not tryImportStochasticControl(_moose_stm_python):
+            raise ModuleNotFoundError("Could not find MOOSE stochastic tools module python utilities.")
+
+    # Arguments from cli
+    cli_args = test_options()
+    parameters = [
+        "Postprocessors/rosenbrock/x["
+        + ",".join([str(i) for i in range(num_cols)])
+        + "]"
+    ]
+    qois = ["rosenbrock/value"]
+    if cli_args.multi_output:
+        parameters.append(f"Postprocessors/eggholder/x[{num_cols},{num_cols + 1}]")
+        qois.append("eggholder/value")
+        num_cols += 2
+    options["multiapp_mode"] = StochasticRunOptions.MultiAppMode(cli_args.mode)
 
     # Get sampling matrices to test with
     matrices = [None] * num_steps
