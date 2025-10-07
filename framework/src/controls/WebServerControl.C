@@ -212,22 +212,21 @@ WebServerControl::startServer()
             return HttpResponse{200, res_json};
           });
 
-  // GET /get/timestepsize
+  // GET /get/dt
   // Returns code 200 on success and JSON:
-  //   'timestepsize' (double): The current time step size
-  _server->when("/get/timestepsize")
-      ->requested(
-          [this, &require_waiting](const HttpRequest & /*req*/)
-          {
-            // Should be waiting for data
-            if (const auto response = require_waiting(*this))
-              return *response;
+  //   'dt' (double): The current time step size
+  _server->when("/get/dt")->requested(
+      [this, &require_waiting](const HttpRequest & /*req*/)
+      {
+        // Should be waiting for data
+        if (const auto response = require_waiting(*this))
+          return *response;
 
-            miniJson::Json::_object res_json;
-            res_json["timestepsize"] = _fe_problem.dt();
+        miniJson::Json::_object res_json;
+        res_json["dt"] = _fe_problem.dt();
 
-            return HttpResponse{200, res_json};
-          });
+        return HttpResponse{200, res_json};
+      });
 
   // POST /get/reporter, with data:
   //   'name' (string): The name of the Reporter value (object_name/value_name)

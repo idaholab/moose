@@ -624,7 +624,7 @@ class MooseControl:
         assert isinstance(r['time'], (int, float))
         return r['time']
 
-    def getTimeStepSize(self) -> float:
+    def getDT(self) -> float:
         """Gets a time step size value
 
         Returns:
@@ -633,13 +633,13 @@ class MooseControl:
         logger.debug(f'Getting the MOOSE simulation time step size value')
         self._requireWaiting()
 
-        status, r = self._get('get/timestepsize')
+        status, r = self._get('get/dt')
 
         if status != 200:
             raise self.ControlException(f'Unexpected status {status} from getting time step size value')
-        self._checkResponse(['timestepsize'], r)
-        assert isinstance(r['timestepsize'], (int, float))
-        return r['timestepsize']
+        self._checkResponse(['dt'], r)
+        assert isinstance(r['dt'], (int, float))
+        return r['dt']
 
     @staticmethod
     def spawnMoose(cmd: list[str], inherit_environment: bool = True) -> subprocess.Popen:

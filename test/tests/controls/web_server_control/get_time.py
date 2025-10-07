@@ -24,7 +24,7 @@ if __name__ == '__main__':
 
         # Check time step size
         pp_dt = control.getPostprocessor('dt')
-        dt  = control.getTimeStepSize()
+        dt  = control.getDT()
         expect_close(pp_dt, dt)
 
         # Tell MOOSE to continue with the solve
@@ -40,7 +40,7 @@ if __name__ == '__main__':
             expect_close(pp_t, t)
 
             pp_dt = control.getPostprocessor('dt')
-            dt  = control.getTimeStepSize()
+            dt  = control.getDT()
             expect_close(pp_dt, dt)
 
             # Tell MOOSE to continue with the solve
