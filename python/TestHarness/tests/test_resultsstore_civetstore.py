@@ -103,7 +103,7 @@ class TestCIVETStore(TestHarnessTestCase):
         with self.assertRaises(ValueError):
             CIVETStore.parse_ssh_repo('foo')
 
-    def getGetCIVETRepoUrl(self):
+    def testGetGetCIVETRepoUrl(self):
         """
         Tests get_civet_repo_url()
         """
