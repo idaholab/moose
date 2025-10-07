@@ -386,8 +386,8 @@ SubChannel1PhaseProblem::computeNusseltNumber(NusseltStruct nusselt_args)
   // Geometry Specific Parameters
   const auto pitch = _subchannel_mesh.getPitch();
   Real D;
-  bool valid_pin_indices = (nusselt_args.i_pin >= std::numeric_limits<unsigned int>::max() -1 
-                            || nusselt_args.iz <= std::numeric_limits<unsigned int>::max() -1);
+  bool valid_pin_indices = (nusselt_args.i_pin >= std::numeric_limits<unsigned int>::max() - 1 ||
+                            nusselt_args.iz <= std::numeric_limits<unsigned int>::max() - 1);
   if (!valid_pin_indices)
   {
     const auto * pin_node = _subchannel_mesh.getPinNode(nusselt_args.i_pin, nusselt_args.iz);
@@ -2830,7 +2830,8 @@ SubChannel1PhaseProblem::externalSolve()
       NusseltStruct nusselt_struct;
       nusselt_struct.Re = Re;
       nusselt_struct.Pr = Pr;
-      nusselt_struct.i_pin = std::numeric_limits<unsigned int>::max(); // don't care about this - large value
+      nusselt_struct.i_pin =
+          std::numeric_limits<unsigned int>::max(); // don't care about this - large value
       const auto channel_node = _subchannel_mesh.getChannelNodeFromDuct(dn);
       const libMesh::Point & node_point = *channel_node;
       nusselt_struct.iz = _subchannel_mesh.getZIndex(node_point);
