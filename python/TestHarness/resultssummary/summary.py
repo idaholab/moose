@@ -147,12 +147,18 @@ class TestHarnessResultsSummary:
             for test_name in same_names:
                 base_result = base_results.get_test(test_name.folder, test_name.name)
                 head_result = head_results.get_test(test_name.folder, test_name.name)
-                if (head_result.run_time is None or base_result.run_time is None or head_result.run_time < head_run_time_floor):
+                if (head_result.run_time is None or
+                    base_result.run_time is None or
+                    head_result.run_time < head_run_time_floor):
                     continue
                 else:
                     relative_runtime = abs(head_result.run_time - base_result.run_time)/ base_result.run_time
                     if relative_runtime >= run_time_rate_floor:
-                        same_table.append([str(test_name), base_result.run_time, head_result.run_time, f'{relative_runtime:.2%}'])
+                        same_table.append([str(test_name),
+                                           base_result.run_time,
+                                           head_result.run_time,
+                                           f'{relative_runtime:.2%}'
+                                           ])
             if not same_table:
                 same_table = None
         else:
@@ -173,6 +179,8 @@ class TestHarnessResultsSummary:
             Keyword arguments. Must include:
             - event_id : int
                 The ID of the pull request event.
+            - out : str
+                path to output message if there is no event or no base
 
         Returns
         -------
@@ -231,15 +239,14 @@ class TestHarnessResultsSummary:
         added_table : list
             A list of newly added testnames and its runtime
         same_table : list
-            A list of test names that exist in both base and head, where:
-            - The head runtime exceeds a predefined threshold.
-            - The relative runtime increase exceeds a defined rate.
-            and respective runtime and relative runtime rate
+            A list of test names, runtime and relative runtime rate that exist in both base and head, where:
+            - The head runtime exceeds a predefined threshold (run-time-floor).
+            - The relative runtime increase exceeds a defined rate (run-time-rate-floor).
 
         Returns
         -------
         summary : str
-            A formatted string summarizing removed and new tests, same tests with xxxx using GitHub-style format
+            A formatted string summarizing removed and new tests, same tests with  using GitHub-style format
         """
         assert isinstance(removed_table,(list,NoneType))
         assert isinstance(added_table,(list,NoneType))
@@ -288,6 +295,8 @@ class TestHarnessResultsSummary:
             Keyword arguments passed to `pr_test_names()`, typically including:
             - event_id : int
                 The identifier for the PR test event.
+            - out : str
+                path to output the summary to
 
         Returns
         -------
@@ -301,10 +310,15 @@ class TestHarnessResultsSummary:
         base_results,head_results, base_names, head_names = self.pr_test_names(**kwargs)
         assert isinstance(head_names,set)
         assert isinstance(base_names,(set,NoneType))
-        
+
         if base_names is None:
             return
-        removed_table, added_table, same_table = self.diff_table(base_results,head_results, base_names, head_names, **kwargs)
+        removed_table, added_table, same_table = self.diff_table(base_results,
+                                                                 head_results,
+                                                                 base_names,
+                                                                 head_names,
+                                                                 **kwargs
+                                                                )
         summary_result = self.build_summary(removed_table, added_table, same_table)
         print(summary_result)
         self.summary_output_file(summary_result,out)
@@ -326,9 +340,6 @@ class TestHarnessResultsSummary:
         None
             This method does not return anything. It performs a file write operation.
         """
-        # if output_result is None:
-        #     print("No summary result to write.")
-        #     return
         try:
             with open(out, 'w') as f:
                 f.write(output_result)
