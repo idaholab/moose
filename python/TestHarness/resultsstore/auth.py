@@ -34,7 +34,6 @@ class Authentication:
     # The port
     port: Optional[int] = None
 
-@staticmethod
 def load_authentication(var_prefix: str) -> Optional[Authentication]:
     """
     Attempts to first load the authentication environment from
@@ -74,7 +73,6 @@ def load_authentication(var_prefix: str) -> Optional[Authentication]:
     except Exception as e:
         raise Exception(f"Failed to load credentials from '{auth_file}'") from e
 
-@staticmethod
 def has_authentication(var_prefix: str) -> bool:
     """
     Checks whether or not environment authentication is available
