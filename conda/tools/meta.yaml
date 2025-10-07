@@ -3,7 +3,7 @@
 #   moose-dev/*
 #
 # As well as any directions pertaining to modifying those files.
-{% set version = "2025.06.26" %}
+{% set version = "2025.10.07" %}
 
 package:
   name: moose-tools
@@ -32,6 +32,7 @@ requirements:
     - {{ clang_format }}
     - {{ clang_tools }}
     - deepdiff
+    - fmpy
     - git-lfs <3.5.1
     - gitpython
     - graphviz
@@ -66,8 +67,6 @@ requirements:
     - uncertainties
     - xmltodict <0.14
     - yaml
-    - pythonfmu
-    - fmpy
 test:
   commands:
     - clang-format --version
@@ -77,6 +76,7 @@ test:
   imports:
     - bs4
     - deepdiff
+    - fmpy
     - git
     - jinja2
     - livereload
@@ -99,8 +99,6 @@ test:
     - tabulate
     - xmltodict
     - yaml
-    - pythonfmu
-    - fmpy
 
 about:
   home: https://mooseframework.inl.gov/
