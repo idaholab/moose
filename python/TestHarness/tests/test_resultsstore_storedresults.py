@@ -9,14 +9,11 @@
 
 # pylint: disable
 import unittest
-import json
-import zlib
 from bson.objectid import ObjectId
-from datetime import datetime
 from mock import patch
 from copy import deepcopy
-from typing import Tuple
 from dataclasses import dataclass
+from typing import Optional
 from TestHarness import TestHarness
 from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
 from TestHarness.resultsstore.storedresults import StoredResult, StoredTestResult, TestName, DatabaseException
@@ -50,37 +47,58 @@ class TestResultsStoredResults(TestHarnessTestCase):
     as the CIVETStore.CIVET_VERSION changes, which denotes changes
     in the structure of the data.
     """
+
     @dataclass
-    class CapturedResult:
+    class ConvertedTestHarnessResults:
         """
-        Helper data class for captureResult()
+        Helper data class for convertTestHarnessResults()
         """
-        # The test harness from the run
-        harness: TestHarness
         # The data for building the StoredResult
         result_data: dict
-        # The data for building the tests
-        test_data: dict
+        # The data for the tests, indexed by TestName
+        test_data: dict[TestName, dict]
 
-    def captureResult(self, remove_header=[], civet_version=CIVETStore.CIVET_VERSION,
-                      test_in_results=True, no_tests=False, delete_test_key=None) -> CapturedResult:
+    @staticmethod
+    def convertTestHarnessResults(test_harness_results: dict, remove_header: list = [],
+                                  civet_version: int = CIVETStore.CIVET_VERSION,
+                                  test_in_results: bool = True, no_tests: bool = False,
+                                  delete_test_key: Optional[list[str]] = None) -> ConvertedTestHarnessResults:
         """
-        Take TestHarness JSON output and produce data that can be used
-        to produce a StoredResult and StoredTestResult(s).
+        Take the passed in test_harness_results (the result JSON)
+        and build data that can be used to produce a StoredResult and
+        StoredTestResult(s).
 
-        remove_header: Removes entries from the header from CIVETStore
-        civet_version: Modify the result civet_version key
-        test_in_results: True to put the tests in with the results, False
-            to store them separately
-        no_tests: Don't store any tests at all
-        delete_test_key: Delete this key in each test
+        This exists as a static method so that other tests can
+        use it to generate their own data.
+
+        Parameters
+        ----------
+        test_harness_results : dict
+            The results that come from TestHarness JSON result output.
+
+        Optional Parameters
+        -------------------
+        remove_header : dict
+            Remove these keys from the header
+        civet_version : int
+            Modify the civet_version key
+        test_in_results : bool
+            True to put the tests in with the results, False to
+            store them separately
+        no_tests : bool
+            Don't store any tests at all
+        delete_test_key : list
+            Delete this key from each test entry (can be nested)
+
+        Returns
+        -------
+        ConvertedTestHarnessResults:
+            Structure that contains the dict to build the StoredResult
+            and optionally the separate test data
         """
-        result = self.runTestsCached('-i', 'validation', '--capture-perf-graph', exit_code=132)
-        values = result.results
-
         # Modify each test
         tests = {}
-        for folder_name, folder_values in values['tests'].items():
+        for folder_name, folder_values in test_harness_results['tests'].items():
             for test_name, test_values in folder_values['tests'].items():
                 name = TestName(folder_name, test_name)
 
@@ -99,13 +117,9 @@ class TestResultsStoredResults(TestHarnessTestCase):
                 # --capture-perf-graph, so a 'perf_graph' entry
                 # will exist here)
                 json_metadata = test_values['tester'].get('json_metadata')
-                if test_values['status']['status'] == 'OK':
+                if json_metadata is not None:
                     for k, v in json_metadata.items():
                         json_metadata[k] = compress_dict(v)
-                    self.assertIn('perf_graph', json_metadata)
-                # Otherwise, it should be empty
-                else:
-                    self.assertIsNone(json_metadata)
 
                 # Fake values from HPC
                 test_values['timing']['hpc_queued'] = HPC_QUEUED_TIME
@@ -120,7 +134,7 @@ class TestResultsStoredResults(TestHarnessTestCase):
                 tests[name] = test_values
 
         # Setup main results entry
-        results = values.copy()
+        results = test_harness_results.copy()
         # Dummy ID, which is the same set as 'result_id' in the tests
         results['_id'] = RESULT_ID
 
@@ -142,7 +156,32 @@ class TestResultsStoredResults(TestHarnessTestCase):
             del header[k]
         results.update(header)
 
-        return self.CapturedResult(harness=result.harness, result_data=results, test_data=tests)
+        return TestResultsStoredResults.ConvertedTestHarnessResults(
+            result_data=results,
+            test_data=tests
+        )
+
+    @dataclass
+    class CapturedResult(ConvertedTestHarnessResults):
+        """
+        Helper data class for captureResult()
+        """
+        # The test harness from the run
+        harness: TestHarness
+
+    def captureResult(self, **kwargs) -> CapturedResult:
+        """
+        Build TestHarness JSON output and produce data that can be used
+        to produce a StoredResult and StoredTestResult(s).
+        """
+        result = self.runTestsCached('-i', 'validation', '--capture-perf-graph', exit_code=132)
+
+        converted = self.convertTestHarnessResults(result.results, **kwargs)
+        return self.CapturedResult(
+            result_data=converted.result_data,
+            test_data=converted.test_data,
+            harness=result.harness
+        )
 
     @dataclass
     class BuiltResult:
