@@ -20,22 +20,36 @@ from dataclasses import dataclass
 from TestHarness import TestHarness
 from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
 from TestHarness.resultsstore.storedresults import StoredResult, StoredTestResult, TestName, DatabaseException
-from TestHarness.resultsstore.civetstore import compress_dict, decompress_dict
+from TestHarness.resultsstore.civetstore import compress_dict, decompress_dict, CIVETStore
+from test_resultsstore_civetstore import build_civet_env
 
-FAKE_RESULT_ID = ObjectId()
-FAKE_CIVET_VERSION = 4
-FAKE_CIVET_JOB_ID = 12345
-FAKE_CIVET_JOB_URL = f'civet.inl.gov/job/{FAKE_CIVET_JOB_ID}'
-FAKE_EVENT_SHA = 'abcd1234ababcd1234ababcd1234ababcd1234ab'
-FAKE_BASE_SHA = '1234abcdab1234abcdab1234abcdab1234abcdab'
-FAKE_EVENT_CAUSE = 'pr'
-FAKE_EVENT_ID = 5678
-FAKE_PR_NUM = 1234
-FAKE_HPC_QUEUED_TIME = 1.234
-FAKE_TIME = datetime.now()
-FAKE_TEST_NAME = TestName('folder', 'name')
+# ID for the tested built StoredResult object
+RESULT_ID = ObjectId()
+# A dummy environment from CIVET to build a dummy header
+BASE_SHA, CIVET_ENV = build_civet_env()
+# A dummy header (entries added to the result entry)
+STORE_HEADER = CIVETStore.build_header(BASE_SHA, CIVET_ENV)
+# Dummy value for a test's ['timing']['hpc_queued_time']
+HPC_QUEUED_TIME = 1.234
 
 class TestResultsStoredResults(TestHarnessTestCase):
+    """
+    Tests the StoredResult and StoredTestResult objects, which
+    are the objects that represent data stored within the database.
+
+    We will not interact with a database at all here, we will start
+    with TestHarness JSON output and:
+      - Add the header (built with CIVETStore) that contains the
+        indices (base sha, head sha, event id, etc...)
+      - Remove all output, which CIVETStore does
+      - Faked IDs for the entries in the database
+      - Compress the test ['tester']['json_metadata'] entries,
+        as CIVETStore would do
+
+    We will also test for capabilities that are changed over time
+    as the CIVETStore.CIVET_VERSION changes, which denotes changes
+    in the structure of the data.
+    """
     @dataclass
     class CapturedResult:
         """
@@ -48,28 +62,32 @@ class TestResultsStoredResults(TestHarnessTestCase):
         # The data for building the tests
         test_data: dict
 
-    def captureResult(self, remove_civet_keys=[], civet_version=FAKE_CIVET_VERSION,
+    def captureResult(self, remove_header=[], civet_version=CIVETStore.CIVET_VERSION,
                       test_in_results=True, no_tests=False, delete_test_key=None) -> CapturedResult:
+        """
+        Take TestHarness JSON output and produce data that can be used
+        to produce a StoredResult and StoredTestResult(s).
+
+        remove_header: Removes entries from the header from CIVETStore
+        civet_version: Modify the result civet_version key
+        test_in_results: True to put the tests in with the results, False
+            to store them separately
+        no_tests: Don't store any tests at all
+        delete_test_key: Delete this key in each test
+        """
         result = self.runTestsCached('-i', 'validation', '--capture-perf-graph', exit_code=132)
         values = result.results
 
+        # Modify each test
         tests = {}
-
-        # Faked values that CIVET would add
-        civet_values = {'event_sha': FAKE_EVENT_SHA,
-                        'event_cause': FAKE_EVENT_CAUSE,
-                        'event_id': FAKE_EVENT_ID,
-                        'pr_num': FAKE_PR_NUM,
-                        'base_sha': FAKE_BASE_SHA,
-                        'time': FAKE_TIME}
-        for k in remove_civet_keys:
-            del civet_values[k]
-
-        # Perform fixups that CIVET would do
         for folder_name, folder_values in values['tests'].items():
             for test_name, test_values in folder_values['tests'].items():
                 name = TestName(folder_name, test_name)
+
+                # Test would have an ID in the database
                 test_values['_id'] = ObjectId()
+                # And should reference a result in the database
+                test_values['result_id'] = RESULT_ID
 
                 # Remove output entires, as they're removed when storing
                 for key in ['output', 'output_files']:
@@ -77,18 +95,20 @@ class TestResultsStoredResults(TestHarnessTestCase):
                         del test_values[key]
 
                 # Compress JSON metadata, which should only exist
-                # if the test actually ran
+                # if the test actually ran (we run this with
+                # --capture-perf-graph, so a 'perf_graph' entry
+                # will exist here)
                 json_metadata = test_values['tester'].get('json_metadata')
                 if test_values['status']['status'] == 'OK':
                     for k, v in json_metadata.items():
                         json_metadata[k] = compress_dict(v)
+                    self.assertIn('perf_graph', json_metadata)
+                # Otherwise, it should be empty
                 else:
                     self.assertIsNone(json_metadata)
 
                 # Fake values from HPC
-                test_values['timing']['hpc_queued'] = FAKE_HPC_QUEUED_TIME
-                # Fake result ID
-                test_values['result_id'] = FAKE_RESULT_ID
+                test_values['timing']['hpc_queued'] = HPC_QUEUED_TIME
 
                 # Delete requested key
                 if delete_test_key:
@@ -101,9 +121,10 @@ class TestResultsStoredResults(TestHarnessTestCase):
 
         # Setup main results entry
         results = values.copy()
-        # Dummy ID
-        results['_id'] = FAKE_RESULT_ID
-        # Tests entry
+        # Dummy ID, which is the same set as 'result_id' in the tests
+        results['_id'] = RESULT_ID
+
+        # Setup the tests entry, if not instructed not to do so
         results['tests'] = {}
         if not no_tests:
             for name, values in tests.items():
@@ -113,12 +134,13 @@ class TestResultsStoredResults(TestHarnessTestCase):
                     results['tests'][name.folder]['tests'][name.name] = values.copy()
                 else:
                     results['tests'][name.folder]['tests'][name.name] = values['_id']
-        # CIVET key
-        results['civet'] = {'job_url': FAKE_CIVET_JOB_URL,
-                            'job_id': FAKE_CIVET_JOB_ID,
-                            'version': civet_version}
-        # Base CIVET values for indexing
-        results.update(civet_values)
+
+        # Add in header, removing keys to be deleted
+        header = deepcopy(STORE_HEADER)
+        header['civet_version'] = civet_version
+        for k in remove_header:
+            del header[k]
+        results.update(header)
 
         return self.CapturedResult(harness=result.harness, result_data=results, test_data=tests)
 
@@ -135,6 +157,10 @@ class TestResultsStoredResults(TestHarnessTestCase):
         test_data: dict
 
     def buildResult(self, *args, **kwargs) -> BuiltResult:
+        """
+        Similar to captureResult(), but also builds a StoredResult
+        object with the constructed data.
+        """
         captured_result = self.captureResult(*args, **kwargs)
 
         results = StoredResult(captured_result.result_data)
@@ -143,30 +169,30 @@ class TestResultsStoredResults(TestHarnessTestCase):
 
         return self.BuiltResult(harness=captured_result.harness, results=results, test_data=captured_result.test_data)
 
-    def testTestHarnessResult(self):
+    def testStoredResult(self):
         """
-        Tests a basic build of a TestHarnessResult and the underlying test data
+        Tests a basic build of a StoredResult and the underlying test data
         """
         built_result = self.buildResult()
         harness = built_result.harness
         results = built_result.results
 
         self.assertEqual(results.data, results._data)
-        self.assertEqual(results.id, FAKE_RESULT_ID)
+        self.assertEqual(results.id, RESULT_ID)
         self.assertEqual(results.testharness, results.data['testharness'])
         self.assertEqual(results.version, results.data['testharness']['version'])
         self.assertEqual(results.validation_version, results.data['testharness']['validation_version'])
 
-        # Faked entries for civet
-        self.assertEqual(results.civet_job_url, FAKE_CIVET_JOB_URL)
-        self.assertEqual(results.civet_job_id, FAKE_CIVET_JOB_ID)
-        self.assertEqual(results.civet_version, FAKE_CIVET_VERSION)
-        self.assertEqual(results.event_sha, FAKE_EVENT_SHA)
-        self.assertEqual(results.event_cause, FAKE_EVENT_CAUSE)
-        self.assertEqual(results.event_id, FAKE_EVENT_ID)
-        self.assertEqual(results.pr_num, FAKE_PR_NUM)
-        self.assertEqual(results.base_sha, FAKE_BASE_SHA)
-        self.assertEqual(results.time, FAKE_TIME)
+        # Faked entries from the CIVET header
+        self.assertEqual(results.civet_job_url, STORE_HEADER['civet']['job_url'])
+        self.assertEqual(results.civet_job_id, STORE_HEADER['civet']['job_id'])
+        self.assertEqual(results.civet_version, CIVETStore.CIVET_VERSION)
+        self.assertEqual(results.event_sha, STORE_HEADER['event_sha'])
+        self.assertEqual(results.event_cause, STORE_HEADER['event_cause'])
+        self.assertEqual(results.event_id, STORE_HEADER['event_id'])
+        self.assertEqual(results.pr_num, STORE_HEADER['pr_num'])
+        self.assertEqual(results.base_sha, BASE_SHA)
+        self.assertEqual(results.time, STORE_HEADER['time'])
 
         # Has same number of tests
         self.assertEqual(results.num_tests, len(results._tests))
@@ -194,15 +220,15 @@ class TestResultsStoredResults(TestHarnessTestCase):
             # Timing properties
             self.assertEqual(test_result.timing, data['timing'])
             self.assertEqual(test_result.run_time, data['timing']['runner_run'])
-            self.assertEqual(test_result.hpc_queued_time, FAKE_HPC_QUEUED_TIME)
+            self.assertEqual(test_result.hpc_queued_time, HPC_QUEUED_TIME)
 
-            # Faked CIVET properties
-            self.assertEqual(test_result.event_sha, FAKE_EVENT_SHA)
-            self.assertEqual(test_result.event_cause, FAKE_EVENT_CAUSE)
-            self.assertEqual(test_result.event_id, FAKE_EVENT_ID)
-            self.assertEqual(test_result.pr_num, FAKE_PR_NUM)
-            self.assertEqual(test_result.base_sha, FAKE_BASE_SHA)
-            self.assertEqual(test_result.time, FAKE_TIME)
+            # Faked entries from the CIVET header
+            self.assertEqual(test_result.event_sha, STORE_HEADER['event_sha'])
+            self.assertEqual(test_result.event_cause, STORE_HEADER['event_cause'])
+            self.assertEqual(test_result.event_id, STORE_HEADER['event_id'])
+            self.assertEqual(test_result.pr_num, STORE_HEADER['pr_num'])
+            self.assertEqual(test_result.base_sha, BASE_SHA)
+            self.assertEqual(test_result.time, STORE_HEADER['time'])
 
             # Tester properties
             self.assertEqual(test_result.tester, data['tester'])
@@ -249,10 +275,8 @@ class TestResultsStoredResults(TestHarnessTestCase):
 
         # Mock getting the test results from mongodb
         def get_test_data(id):
-            for test in test_data.values():
-                if test['_id'] == id:
-                    return test
-            return None
+            find_test = [v for v in test_data.values() if v['_id'] == id]
+            return find_test[0] if find_test else None
         patch_find_test_data.side_effect = get_test_data
 
         result = StoredResult(result_data)
@@ -332,9 +356,9 @@ class TestResultsStoredResults(TestHarnessTestCase):
         Tests when base_sha didn't exist in the database (civet version < 2)
         """
         civet_version = 1
-        built_result = self.buildResult(remove_civet_keys=['base_sha'],
-                                       civet_version=civet_version,
-                                      no_tests=True)
+        built_result = self.buildResult(remove_header=['base_sha'],
+                                        civet_version=civet_version,
+                                        no_tests=True)
         self.assertEqual(built_result.results.civet_version, civet_version)
         self.assertIsNone(built_result.results.base_sha)
 
@@ -343,7 +367,7 @@ class TestResultsStoredResults(TestHarnessTestCase):
         Tests when event_id didn't exist in the database (civet_version < 3)
         """
         civet_version = 2
-        built_result = self.buildResult(remove_civet_keys=['event_id'],
+        built_result = self.buildResult(remove_header=['event_id'],
                                         civet_version=civet_version,
                                         no_tests=True)
         self.assertEqual(built_result.results.civet_version, civet_version)
@@ -494,7 +518,6 @@ class TestResultsStoredResults(TestHarnessTestCase):
 
         with self.assertRaisesRegex(KeyError, 'Failed to load test results'):
             StoredResult(captured_result.result_data).load_all_tests()
-
 
 if __name__ == '__main__':
     unittest.main()
