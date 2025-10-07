@@ -44,11 +44,17 @@ class DatabaseException(Exception):
 
 class StoredTestResult:
     """
-    Structure holding the information about a single test result
+    Structure holding the information for a single test within
+    a single execution of the TestHarness.
+
+    It provides a convenient interface into one of the entries
+    in the 'tests' key from a TestHarness execution, stored into
+    a mongo database using the CIVETStore object.
     """
     def __init__(self, data: dict, name: TestName, result: 'StoredResult'):
         # The underlying data for this test, which comes from
-        # "tests/*/tests" in the TestHarness results file
+        # tests/<folder name>/tests/<test_name> in the TestHarness
+        # JSON output
         self._data: dict = data
         # The combined name for this test (folder + name)
         self._name: TestName = name
@@ -87,7 +93,9 @@ class StoredTestResult:
         assert isinstance(self.validation_results, (list, NoneType))
         assert isinstance(self.validation_data, (dict, NoneType))
 
-        # Load JSON metadata, which is compressed
+        # Load JSON metadata; this needs to be done separately
+        # because metadata is stored in a compressed (with zlib)
+        # form as it can be large
         self._json_metadata: Optional[dict[str, dict]] = self._buildJSONMetadata()
         assert isinstance(self.json_metadata, (dict, NoneType))
         assert isinstance(self.perf_graph, (dict, NoneType))
@@ -95,7 +103,7 @@ class StoredTestResult:
     @property
     def data(self) -> dict:
         """
-        Get the underlying data
+        Get the underlying data.
         """
         return self._data
 
@@ -104,21 +112,21 @@ class StoredTestResult:
         """
         Get the mongo database ID for this test, which
         could be None if the test is stored within the
-        results data
+        results data.
         """
         return self.data.get('_id')
 
     @property
     def results(self) -> 'StoredResult':
         """
-        Get the combined results that this test comes from
+        Get the combined results that this test comes from.
         """
         return self._results
 
     @property
     def result_id(self) -> ObjectId:
         """
-        Get the mongo database ID the results
+        Get the mongo database ID the results.
         """
         # Will be none if this test data exists in results
         result_id = self.data.get('result_id')
@@ -129,49 +137,49 @@ class StoredTestResult:
     @property
     def name(self) -> TestName:
         """
-        Get the combined name for this test (folder + name)
+        Get the combined name for this test (folder + name).
         """
         return self._name
 
     @property
     def folder_name(self) -> str:
         """
-        Get the name of the folder the test is in
+        Get the name of the folder the test is in.
         """
         return self.name.folder
 
     @property
     def test_name(self) -> str:
         """
-        Get the name of the test
+        Get the name of the test.
         """
         return self.name.name
 
     @property
     def status(self) -> Optional[dict]:
         """
-        Get the status entry for the test
+        Get the status entry for the test.
         """
         return self.data.get('status')
 
     @property
     def status_value(self) -> Optional[str]:
         """
-        Get the status value for the test (OK, ERROR, etc)
+        Get the status value for the test (OK, ERROR, etc).
         """
         return self.status['status'] if self.status is not None else None
 
     @property
     def timing(self) -> Optional[dict]:
         """
-        Get the timing entry for the test
+        Get the timing entry for the test.
         """
         return self.data.get('timing')
 
     @property
     def run_time(self) -> Optional[float]:
         """
-        Get the run time for this test (if available)
+        Get the run time for this test (if available).
         """
         return self.timing.get('runner_run') if self.timing is not None else None
 
@@ -179,86 +187,86 @@ class StoredTestResult:
     def hpc_queued_time(self) -> Optional[float]:
         """
         Get the time that this test was queued on HPC, if
-        it was ran on HPC (otherwise None)
+        it was ran on HPC (otherwise None).
         """
         return self.timing.get('hpc_queued') if self.timing is not None else None
 
     @property
     def event_sha(self) -> str:
         """
-        Get the commit that this test was ran on
+        Get the commit that this test was ran on.
         """
         return self.results.event_sha
 
     @property
     def event_cause(self) -> str:
         """
-        Get the cause for the test that was ran
+        Get the cause for the test that was ran.
         """
         return self.results.event_cause
 
     @property
     def event_id(self) -> int:
         """
-        Get the ID of the event that this job was ran on
+        Get the ID of the event that this job was ran on.
         """
         return self.results.event_id
 
     @property
     def pr_num(self) -> Optional[int]:
         """
-        Get the PR number associated with the test (if any)
+        Get the PR number associated with the test (if any).
         """
         return self.results.pr_num
 
     @property
     def base_sha(self) -> Optional[str]:
         """
-        Get the base commit that these tests were ran on
+        Get the base commit that these tests were ran on.
         """
         return self.results.base_sha
 
     @property
     def time(self) -> datetime:
         """
-        Get the time this test was added to the database
+        Get the time this test was added to the database.
         """
         return self.results.time
 
     @property
     def tester(self) -> Optional[dict]:
         """
-        Get the Tester entry in the data
+        Get the Tester entry in the data.
         """
         return self.data.get('tester')
 
     @property
     def hpc(self) -> Optional[dict]:
         """
-        Get the 'hpc' entry if it exists
+        Get the 'hpc' entry if it exists.
         """
         return self.data.get('hpc')
 
     @property
     def hpc_id(self) -> Optional[int]:
         """
-        Get the HPC job ID that ran this this test, if any
+        Get the HPC job ID that ran this this test, if any.
         """
         return self.hpc.get('id') if self.hpc is not None else None
 
     @property
     def validation(self) -> Optional[dict]:
         """
-        Get the 'validation' entry for the test, if any
+        Get the 'validation' entry for the test, if any.
 
-        Contains the validation data and results
+        Contains the validation data and results.
         """
         return self.data.get('validation')
 
     @property
     def validation_data(self) -> Optional[dict[str, ValidationData]]:
         """
-        Get the 'data' entry in 'validation' for this test, if any
+        Get the 'data' entry in 'validation' for this test, if any.
         """
         return self._validation_data
 
@@ -266,14 +274,14 @@ class StoredTestResult:
     def validation_results(self) -> Optional[list[ValidationResult]]:
         """
         Get the 'data' entry in 'validation' for this test, if any
-        (otherwise, empty dict)
+        (otherwise, empty dict).
         """
         return self._validation_results
 
     def _buildValidationResults(self) -> Optional[list[ValidationResult]]:
         """
         Internal method (use on construction) for converting validation
-        results in JSON to the underlying ValidationResult objects
+        results in JSON to the underlying ValidationResult objects.
         """
         if self.validation is not None:
             return [ValidationResult(**v) for v in deepcopy(self.validation.get('results', []))]
@@ -282,7 +290,7 @@ class StoredTestResult:
     def _buildValidationData(self) -> Optional[dict[str, ValidationData]]:
         """
         Internal method (use on construction) for converting validation
-        data in JSON to the underlying ValidationData objects
+        data in JSON to the underlying ValidationData objects.
         """
         if self.validation is None:
             return None
@@ -312,14 +320,18 @@ class StoredTestResult:
     @property
     def json_metadata(self) -> Optional[dict[str, dict]]:
         """
-        Get the 'json_metadata' entry from the Tester entry
+        Get the 'json_metadata' entry from the Tester entry, if available.
         """
         return self._json_metadata
 
     def _buildJSONMetadata(self) -> Optional[dict[str, dict]]:
         """
-        Helper for building the tester.json_metadata entry,
-        in which each value is a compressed JSON string
+        Helper for building the tester.json_metadata entry.
+
+        This is needed because JSON metadata is stored as
+        a compressed binary string in data, in which here
+        we will decompress the underlying data into its
+        original dict.
         """
         # No metadata without a tester (stored in the tester)
         if self.tester is None:
@@ -347,16 +359,27 @@ class StoredTestResult:
     @property
     def perf_graph(self) -> Optional[dict]:
         """
-        Get the perf_graph entry in the JSON metadata if available
+        Get the perf_graph entry in the JSON metadata, if available.
         """
         return self.json_metadata.get('perf_graph') if self.json_metadata else None
 
 class StoredResult:
     """
-    Structure holding the information about a single
-    run_tests execution.
+    Structure holding the information for a TestHarness result.
 
-    Does not contain the data for each individual test.
+    This represents the data from in a .previous_test_results.json
+    file from the TestHarness, stored within a mongo database.
+    These objects are queried using the ResultsReader and stored
+    using CIVETStore.
+
+    It provides access to the information in the header using
+    various properties and access to the contained tests
+    via get_tests() and the tests property.
+
+    Each individual test can either be stored within this
+    result's data, or within a separate mongo collection.
+    If the test data is stored separately, this object
+    will automatically query the data as needed.
     """
     def __init__(self, data: dict, db: Optional[Database] = None):
         # The underlying data from the JSON results, which
@@ -406,6 +429,10 @@ class StoredResult:
         This is a dict from test (folder name, test name) to either:
           - An ObjectID, if the test is stored in a separate collection
           - A StoredTestResult, if the test is stored directly in the results
+
+        When an object is stored as an ObjectID (the ID to the test
+        in the "tests" mongo collection), it can be queried later
+        on demand as needed.
         """
         assert isinstance(tests, dict)
 
@@ -441,35 +468,35 @@ class StoredResult:
     @property
     def data(self) -> dict:
         """
-        Get the underlying data
+        Get the underlying data.
         """
         return self._data
 
     @property
     def id(self) -> ObjectId:
         """
-        Get the mongo database ID for these results
+        Get the mongo database ID for these results.
         """
         return self.data['_id']
 
     @property
     def testharness(self) -> dict:
         """
-        Get the testharness entry in the data
+        Get the testharness entry in the data.
         """
         return self.data['testharness']
 
     @property
     def version(self) -> int:
         """
-        Get the result version
+        Get the result version.
         """
         return self.testharness['version']
 
     @property
     def validation_version(self) -> int:
         """
-        Get the validation version
+        Get the validation version.
         """
         return self.testharness.get('validation_version', 0)
 
@@ -477,14 +504,14 @@ class StoredResult:
     def civet(self) -> dict:
         """
         Get the CIVET entry from the data, which contains
-        information about the CIVET job that ran this test
+        information about the CIVET job that ran this test.
         """
         return self.data['civet']
 
     @property
     def civet_version(self) -> int:
         """
-        Get the CIVET schema version
+        Get the CIVET schema version.
         """
         # Version was first added to ['civet']['version'], and
         # was then moved to ['civet_version']
@@ -495,14 +522,14 @@ class StoredResult:
     @property
     def civet_job_url(self) -> str:
         """
-        Get the URL to the CIVET job that ran this test
+        Get the URL to the CIVET job that ran this test.
         """
         return self.civet['job_url']
 
     @property
     def civet_job_id(self) -> int:
         """
-        Get the ID of the civet job that ran this test
+        Get the ID of the civet job that ran this test.
         """
         return self.civet['job_id']
 
@@ -510,28 +537,28 @@ class StoredResult:
     def hpc(self) -> dict:
         """
         Get the HPC entry that describes the HPC environment
-        these tests ran on, if any (empty dict if not)
+        these tests ran on, if any (empty dict if not).
         """
         return self.data.get('hpc', {})
 
     @property
     def event_sha(self) -> str:
         """
-        Get the commit that these tests were ran on
+        Get the commit that these tests were ran on.
         """
         return self.data['event_sha']
 
     @property
     def event_cause(self) -> str:
         """
-        Get the cause for these tests that were ran
+        Get the cause for these tests that were ran.
         """
         return self.data['event_cause']
 
     @property
     def event_id(self) -> int:
         """
-        Get the ID of the civet event that ran this test
+        Get the ID of the civet event that ran this test.
         """
         if self.civet_version > 2:
             id = self.data['event_id']
@@ -542,14 +569,14 @@ class StoredResult:
     @property
     def pr_num(self) -> Optional[int]:
         """
-        Get the PR number associated with these tests (if any)
+        Get the PR number associated with these tests (if any).
         """
         return self.data['pr_num']
 
     @property
     def base_sha(self) -> Optional[str]:
         """
-        Get the base commit that these tests were ran on
+        Get the base commit that these tests were ran on.
         """
         if self.civet_version < 2:
             return None
@@ -558,27 +585,34 @@ class StoredResult:
     @property
     def time(self) -> datetime:
         """
-        Get the time these tests were added to the database
+        Get the time these tests were added to the database.
         """
         return self.data['time']
 
     @property
     def num_tests(self) -> int:
         """
-        Get the number of stored tests
+        Get the number of stored tests.
         """
         return len(self._tests)
 
     @property
     def test_names(self) -> list[TestName]:
         """
-        Get the combined names of all tests
+        Get the combined names of all tests.
         """
         return list(self._tests.keys())
 
     def has_test(self, folder_name: str, test_name: str) -> bool:
         """
         Whether or not a test with the given folder and test name is stored
+
+        Parameters
+        ----------
+        folder_name : str
+            The name of the folder for the test
+        test_name : str
+            The name of the test
         """
         assert isinstance(folder_name, str)
         assert isinstance(test_name, str)
@@ -588,10 +622,13 @@ class StoredResult:
 
     def _find_test_data(self, id: ObjectId) -> Optional[dict]:
         """
-        Helper for getting the data associated with a test
+        Helper for getting the data associated with a test.
 
         This is a separate function so that it can be mocked
-        easily within unit tests
+        easily within unit tests.
+
+        It queries the test database for a test that matches
+        the given ID.
         """
         assert isinstance(self._db, Database)
         assert isinstance(id, ObjectId)
@@ -600,8 +637,11 @@ class StoredResult:
 
     def _build_test(self, data: dict, name: TestName) -> StoredTestResult:
         """
-        Helper for building a StoredTestResult given its
-        data with exception handling on a failure
+        Helper for building a StoredTestResult.
+
+        Exists so that failures to build a StoredTestResult
+        (common when types conflict) are wrapped with
+        an exception with more conetxt.
         """
         assert isinstance(data, dict)
         assert isinstance(name, TestName)
@@ -616,6 +656,13 @@ class StoredResult:
     def get_test(self, folder_name: str, test_name: str) -> StoredTestResult:
         """
         Get the test result associated with the given test folder and test name
+
+        Parameters
+        ----------
+        folder_name : str
+            The name of the folder for the test
+        test_name : str
+            The name of the test
         """
         assert isinstance(folder_name, str)
         assert isinstance(test_name, str)
@@ -648,10 +695,13 @@ class StoredResult:
 
     def _find_tests_data(self, ids: list[ObjectId]) -> list[dict]:
         """
-        Helper for getting the data associated with multiple tests
+        Helper for getting the data associated with multiple tests.
 
         This is a separate function so that it can be mocked
-        easily within unit tests
+        easily within unit tests.
+
+        It queries the tests database for all documents that match
+        the given IDs.
         """
         assert self._db is not None
         assert isinstance(self._db, Database)
@@ -662,7 +712,7 @@ class StoredResult:
 
     def load_all_tests(self):
         """
-        Loads all tests that have not been loaded yet
+        Loads all tests that have not been loaded from the database.
         """
         # Get tests that need to be loaded; need a mapping
         # of id -> name so that we can go from a document
@@ -687,9 +737,9 @@ class StoredResult:
     @property
     def tests(self) -> list[StoredTestResult]:
         """
-        Get all of the test results
+        Get all of the test results.
 
-        Will load all tests that have not been loaded yet
+        Will load all tests that have not been loaded from the database.
         """
         self.load_all_tests()
         return list(self._tests.values())
@@ -697,7 +747,9 @@ class StoredResult:
     def serialize(self) -> dict:
         """
         Serializes this result into a dictionary that can be stored
-        and reloaded later using deserialize/deserialize_build
+        and reloaded later using deserialize/deserialize_build.
+
+        Used primarily in unit testing.
         """
         # Load all tests so that they can be stored
         self.load_all_tests()
@@ -736,7 +788,9 @@ class StoredResult:
     def deserialize(data: dict) -> dict:
         """
         Deserializes data built with serialize, which can be
-        used to construct a StoredResult object
+        used to construct a StoredResult object.
+
+        Used primarily in unit testing.
         """
         assert isinstance(data, dict)
 
@@ -770,5 +824,7 @@ class StoredResult:
         """
         Builds a StoredResult object using serialized data
         that was built with serialize()
+
+        Used primarily in unit testing.
         """
         return StoredResult(StoredResult.deserialize(data))
