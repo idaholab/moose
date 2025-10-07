@@ -126,7 +126,7 @@ class TestHarnessResultsSummary:
                 if (head_result.run_time is None or base_result.run_time is None or head_result.run_time < TestHarnessResultsSummary.HEAD_RUNTIME_THREADSHOLD):
                     continue
                 else:
-                    relative_runtime = (head_result.run_time - base_result.run_time)/ base_result.run_time
+                    relative_runtime = abs(head_result.run_time - base_result.run_time)/ base_result.run_time
                     if relative_runtime >= TestHarnessResultsSummary.RELATIVE_RUNTIME_RATE:
                         same_table.append([str(test_name), base_result.run_time, head_result.run_time, f'{relative_runtime:.2%}'])
             if not same_table:
