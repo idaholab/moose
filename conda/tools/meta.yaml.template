@@ -34,7 +34,7 @@ requirements:
     - {{ clang_tools }}
     - coverage
     - deepdiff
-    - fmpy                           # [linux]
+    - fmpy
     - git-lfs <3.5.1
     - gitpython
     - graphviz
@@ -82,6 +82,8 @@ test:
     - ruff --version
   imports:
     - bs4
+    - deepdiff
+    - fmpy
     - coverage
     - deepdiff
     - git
