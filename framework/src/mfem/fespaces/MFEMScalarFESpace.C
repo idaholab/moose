@@ -37,21 +37,7 @@ MFEMScalarFESpace::getFECName() const
   const char b = mfem::BasisType::GetChar(getBasis(getParam<std::string>("basis")));
   std::string basis(1, b);
 
-  // This is to get around an MFEM bug where if you pass the full name of the default element type,
-  // it crashes
-  if (_fec_type == "H1")
-    basis = (basis == "G" ? "" : "@" + basis);
-  else if (_fec_type == "L2")
-  {
-    if (basis != "g")
-      mooseInfo("L2 finite element space only supports GaussLegendre basis. Ignoring " +
-                getParam<std::string>("basis") +
-                " basis choice and using GaussLegendre instead.\n");
-
-    basis = "";
-  }
-
-  return _fec_type + basis + "_" + std::to_string(getProblemDim()) + "D_P" +
+  return _fec_type + "@" + basis + "_" + std::to_string(getProblemDim()) + "D_P" +
          std::to_string(_fec_order);
 }
 
