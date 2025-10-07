@@ -19,9 +19,11 @@ from tabulate import tabulate
 NoneType = type(None)
 
 class TestHarnessResultsSummary:
-
     def __init__(self, database: str):
-        self.reader = ResultsReader(database)
+        self.reader = self.init_reader(database)
+
+    def init_reader(self, database: str) -> ResultsReader:
+        return ResultsReader(database)
 
     @staticmethod
     def parseArgs() -> argparse.Namespace:
@@ -165,6 +167,12 @@ class TestHarnessResultsSummary:
             same_table = None
         return removed_table, added_table, same_table
 
+    def get_commit_results(self, commit: str) -> Optional[StoredResult]:
+        return self.reader.getCommitResults(commit)
+
+    def get_event_results(self, event_id: int) -> Optional[StoredResult]:
+        return self.reader.getEventResults(event_id)
+
     def pr_test_names(self, **kwargs):
         """
         Retrieve test names and base test names for a pull request event.
@@ -205,7 +213,7 @@ class TestHarnessResultsSummary:
         out = kwargs.get('out')
         assert isinstance(out, str)
 
-        head_results = self.reader.getEventResults(event_id)
+        head_results = self.get_event_results(event_id)
         if head_results is None:
             error_msg = f'ERROR: Results do not exist for event {event_id}'
             self.summary_output_file(error_msg, out)
@@ -215,7 +223,7 @@ class TestHarnessResultsSummary:
         base_sha = head_results.base_sha
         assert isinstance(base_sha, str)
 
-        base_results = self.reader.getCommitResults(base_sha)
+        base_results = self.get_commit_results(base_sha)
         if not isinstance(base_results, StoredResult):
             no_base =f"Comparison not available: no baseline results found for base SHA {base_sha}"
             print(no_base)
