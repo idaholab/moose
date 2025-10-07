@@ -388,13 +388,20 @@ SubChannel1PhaseProblem::computeNusseltNumber(NusseltStruct nusselt_args)
   Real D;
   bool valid_pin_indices = (nusselt_args.i_pin >= std::numeric_limits<unsigned int>::max() - 1 ||
                             nusselt_args.iz <= std::numeric_limits<unsigned int>::max() - 1);
-  if (!valid_pin_indices)
+
+  if (!valid_pin_indices) // this is for the pin temperature
   {
     const auto * pin_node = _subchannel_mesh.getPinNode(nusselt_args.i_pin, nusselt_args.iz);
-    D = (*_Dpin_soln)(pin_node);
+    if ((*_Dpin_soln)(pin_node) > 0)
+      D = (*_Dpin_soln)(pin_node);
+    else
+      mooseError(name(),
+                 "The diameter of the pin is equal or smaller than zero, "
+                 "please initialize the auxiliary variable Dpin.");
   }
-  else
+  else // this is for the duct temperature
     D = _subchannel_mesh.getPinDiameter();
+
   const auto poD = pitch / D;
   auto subch_type = _subchannel_mesh.getSubchannelType(nusselt_args.i_ch);
 
