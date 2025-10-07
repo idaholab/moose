@@ -50,8 +50,8 @@ MFEMDataCollection::registerFields()
   {
     if (dc.GetMesh() == gf_ptr->FESpace()->GetMesh())
     {
-      dc.RegisterField(gf_name + "_r", &gf_ptr->real());
-      dc.RegisterField(gf_name + "_i", &gf_ptr->imag());
+      dc.RegisterField(gf_name + "_real", &gf_ptr->real());
+      dc.RegisterField(gf_name + "_imag", &gf_ptr->imag());
     }
     else
       mooseInfo("The variable ",
