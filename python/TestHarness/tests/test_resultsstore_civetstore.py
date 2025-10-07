@@ -277,8 +277,8 @@ class TestCIVETStore(TestHarnessTestCase):
         of stored results and tests.
 
         Each test entry is compared directly to the test harness result entry,
-        where vaues are modified/removed as needed based on the arguments
-        that are passed the build method via build_kwargs
+        where values are modified/removed as needed based on the arguments
+        that are passed to the build method via build_kwargs
         """
         result_id = stored_results.get('_id')
         in_database = result_id is not None
