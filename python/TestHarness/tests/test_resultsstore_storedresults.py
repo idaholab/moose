@@ -313,10 +313,7 @@ class TestResultsStoredResults(TestHarnessTestCase):
         result_data = captured_result.result_data
 
         # Mock getting the test results from mongodb
-        def get_test_data(id):
-            find_test = [v for v in test_data.values() if v['_id'] == id]
-            return find_test[0] if find_test else None
-        patch_find_test_data.side_effect = get_test_data
+        patch_find_test_data.side_effect = lambda id: next((v for v in test_data.values() if v['_id'] == id), None)
 
         result = StoredResult(result_data)
         self.assertEqual(len(result._tests), len(test_data))
