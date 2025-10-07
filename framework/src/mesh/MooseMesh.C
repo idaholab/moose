@@ -31,7 +31,6 @@
 // libMesh
 #include "libmesh/bounding_box.h"
 #include "libmesh/boundary_info.h"
-#include "libmesh/id_types.h"
 #include "libmesh/mesh_tools.h"
 #include "libmesh/parallel.h"
 #include "libmesh/mesh_communication.h"
@@ -1395,7 +1394,6 @@ MooseMesh::getBoundaryActiveNeighborElemIds(BoundaryID bid) const
     if (elem_bid == bid)
     {
       const auto * neighbor = elem_ptr->neighbor_ptr(elem_side);
-
       // Dont add fully remote elements, ghosted is fine
       if (neighbor && neighbor != libMesh::remote_elem)
       {
@@ -1431,7 +1429,7 @@ MooseMesh::isBoundaryFullyExternalToSubdomains(BoundaryID bid,
       // If an element is internal to the group of subdomain, check the neighbor
       if (blk_group.find(elem_ptr->subdomain_id()) != blk_group.end())
       {
-        const auto * neighbor = elem_ptr->neighbor_ptr(elem_side);
+        const auto * const neighbor = elem_ptr->neighbor_ptr(elem_side);
 
         // If we did not ghost the neighbor, we cannot decide
         if (neighbor == libMesh::remote_elem)
@@ -2506,51 +2504,6 @@ MooseMesh::buildPRefinementAndCoarseningMaps(Assembly * const assembly)
 }
 
 void
-MooseMesh::addDisconnectedNeighbors(const ElemSide & side1, const ElemSide & side2)
-{
-  _disconnected_neighbors.insert(std::make_pair(side1, side2));
-}
-
-std::optional<MooseMesh::ElemSide>
-MooseMesh::disconnectedNeighbor(dof_id_type elem_id, unsigned int side) const
-{
-  // Quick return if we have no disconnected neighbors
-  if (!_disconnected_neighbors.size())
-    return std::nullopt;
-
-  // Check the cache first
-  auto it = _cached_disconnected_neighbors.find({elem_id, side});
-  if (it != _cached_disconnected_neighbors.end())
-    return it->second;
-
-  for (const auto & [elemside1, elemside2] : _disconnected_neighbors)
-  {
-    const auto [elem1, side1] = elemside1;
-    const auto [elem2, side2] = elemside2;
-
-    if (elem1 == elem_id && side1 == side)
-    {
-      _cached_disconnected_neighbors.emplace(elemside1, elemside2);
-      return elemside2;
-    }
-    else if (elem2 == elem_id && side2 == side)
-    {
-      _cached_disconnected_neighbors.emplace(elemside2, elemside1);
-      return elemside1;
-    }
-  }
-
-  return std::nullopt;
-}
-
-Elem *
-MooseMesh::disconnectedNeighborPtr(dof_id_type elem_id, unsigned int side) const
-{
-  auto neigh = disconnectedNeighbor(elem_id, side);
-  return neigh ? _mesh->elem_ptr(neigh->first) : nullptr;
-}
-
-void
 MooseMesh::buildRefinementAndCoarseningMaps(Assembly * const assembly)
 {
   TIME_SECTION("buildRefinementAndCoarseningMaps", 5, "Building Refinement And Coarsening Maps");
@@ -2632,9 +2585,10 @@ MooseMesh::getRefinementMap(const Elem & elem, int parent_side, int child, int c
   }
 
   /**
-   *  TODO: When running with parallel mesh + stateful adaptivty we will need to make sure that
-   * each processor has a complete map.  This may require parallel communication.  This is likely
-   * to happen when running on a mixed element mesh.
+   *  TODO: When running with parallel mesh + stateful adaptivty we will need to make sure that each
+   *  processor has a complete map.  This may require parallel communication.  This is likely to
+   * happen
+   *  when running on a mixed element mesh.
    */
 }
 
@@ -2659,9 +2613,10 @@ MooseMesh::buildCoarseningMap(const Elem & elem, QBase & qrule, QBase & qrule_fa
       &elem, qrule, qrule_face, refinement_map, coarsen_map, input_side, -1, input_side);
 
   /**
-   *  TODO: When running with parallel mesh + stateful adaptivty we will need to make sure that
-   * each processor has a complete map.  This may require parallel communication.  This is likely
-   * to happen when running on a mixed element mesh.
+   *  TODO: When running with parallel mesh + stateful adaptivty we will need to make sure that each
+   *  processor has a complete map.  This may require parallel communication.  This is likely to
+   * happen
+   *  when running on a mixed element mesh.
    */
 }
 
@@ -2967,8 +2922,8 @@ MooseMesh::init()
   /**
    * If the mesh base hasn't been constructed by the time init is called, just do it here.
    * This can happen if somebody builds a mesh outside of the normal Action system. Forcing
-   * developers to create, construct the MeshBase, and then init separately is a bit much for
-   * casual use but it gives us the ability to run MeshGenerators in-between.
+   * developers to create, construct the MeshBase, and then init separately is a bit much for casual
+   * use but it gives us the ability to run MeshGenerators in-between.
    */
   if (!_mesh)
     _mesh = buildMeshBaseObject();
@@ -3793,9 +3748,9 @@ MooseMesh::setPartitioner(MeshBase & mesh_base,
     case 1: // centroid
     {
       if (!params.isParamValid("centroid_partitioner_direction"))
-        context_obj.paramError("centroid_partitioner_direction",
-                               "If using the centroid partitioner you _must_ specify "
-                               "centroid_partitioner_direction!");
+        context_obj.paramError(
+            "centroid_partitioner_direction",
+            "If using the centroid partitioner you _must_ specify centroid_partitioner_direction!");
 
       MooseEnum direction = params.get<MooseEnum>("centroid_partitioner_direction");
 
@@ -3895,10 +3850,10 @@ MooseMesh::buildFiniteVolumeInfo() const
   _elem_to_elem_info.clear();
   _elem_info.clear();
 
-  // by performing the element ID comparison check in the below loop, we are ensuring that we
-  // never double count face contributions. If a face lies along a process boundary, the only
-  // process that will contribute to both sides of the face residuals/Jacobians will be the
-  // process that owns the element with the lower ID.
+  // by performing the element ID comparison check in the below loop, we are ensuring that we never
+  // double count face contributions. If a face lies along a process boundary, the only process that
+  // will contribute to both sides of the face residuals/Jacobians will be the process that owns the
+  // element with the lower ID.
   auto begin = getMesh().active_elements_begin();
   auto end = getMesh().active_elements_end();
 
@@ -3913,7 +3868,7 @@ MooseMesh::buildFiniteVolumeInfo() const
     for (unsigned int side = 0; side < elem->n_sides(); ++side)
     {
       // get the neighbor element
-      const auto * neighbor = elem->neighbor_ptr(side);
+      const Elem * neighbor = elem->neighbor_ptr(side);
 
       // Check if the FaceInfo shall belong to the element. If yes,
       // create and initialize the FaceInfo. We need this to ensure that
@@ -3957,8 +3912,8 @@ MooseMesh::buildFiniteVolumeInfo() const
   }
 
   // Build the local face info and elem_side to face info maps. We need to do this after
-  // _all_face_info is finished being constructed because emplace_back invalidates all iterators
-  // and references if ever the new size exceeds capacity
+  // _all_face_info is finished being constructed because emplace_back invalidates all iterators and
+  // references if ever the new size exceeds capacity
   for (auto & fi : _all_face_info)
   {
     const Elem * const elem = &fi.elem();
