@@ -416,8 +416,12 @@ class TestResultsStoredResults(TestHarnessTestCase):
             new_test = new_result._tests[test_name]
             self.assertEqual(test._data, new_test._data)
             self.assertEqual(test.name, new_test.name)
+
             self.assertEqual(test._validation_results, new_test._validation_results)
             self.assertEqual(test._validation_data, new_test._validation_data)
+
+            self.assertEqual(test.json_metadata, new_test.json_metadata)
+            self.assertEqual(test.perf_graph, new_test.perf_graph)
 
         # Compare all of the data
         new_data = deepcopy(new_result.data)
