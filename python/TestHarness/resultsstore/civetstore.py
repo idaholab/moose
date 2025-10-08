@@ -334,10 +334,12 @@ class CIVETStore:
 
         # Remove skipped tests if requested
         skip_tests = []
+        num_skipped_tests = 0
         if kwargs.get('ignore_skipped'):
             for folder_name, folder_values in tests_entry.items():
                 for test_name, test_values in folder_values['tests'].items():
                     if test_values['status']['status'] == 'SKIP':
+                        num_skipped_tests += 1
                         skip_tests.append((folder_name, test_name))
             for folder_name, test_name in skip_tests:
                 del tests_entry[folder_name]['tests'][test_name]
@@ -345,8 +347,11 @@ class CIVETStore:
                     del tests_entry[folder_name]
 
         # Cleanup each test as needed
+        num_tests = 0
         for folder_values in tests_entry.values():
             for test_values in folder_values['tests'].values():
+                num_tests += 1
+
                 # Remove all output from results
                 for key in ['output', 'output_files']:
                     if key in test_values:
@@ -369,7 +374,11 @@ class CIVETStore:
                 for k, v in json_metadata.items():
                     json_metadata[k] = compress_dict(v)
 
-        tests = None
+        # Friendly string for number of tests
+        num_tests_str = f'{num_tests} tests'
+        if num_skipped_tests:
+            num_tests_str += f' ({num_skipped_tests} skipped)'
+
         # Determine the size (ish) of the current results dict,
         # which contains the tests within it. If below a certain
         # size, keep the tests within the results data. If above,
@@ -378,10 +387,19 @@ class CIVETStore:
         max_result_size = max_result_size * 1e6
         results_size = self.get_size(results)
         results_size_mb = results_size / 1e6
-        if results_size < max_result_size:
-            print(f'Storing tests within results; size = {results_size_mb:.2f}MB')
-        else:
-            print(f'Storing tests separately; size = {results_size_mb:.2f}MB')
+        separate_tests = results_size > max_result_size
+
+        # Share what we're doin
+        info = [f'Storing {num_tests} tests']
+        if num_skipped_tests:
+            info += [f'({num_skipped_tests} skipped)']
+        info += [('separately' if separate_tests else 'within results') + ';']
+        info += [f'results size = {results_size_mb:.2f}MB']
+        print(' '.join(info))
+
+        tests = None
+        # Separate out the tests if needed
+        if separate_tests:
             i = 0
             tests = []
             for folder_values in tests_entry.values():
