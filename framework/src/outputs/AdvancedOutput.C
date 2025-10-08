@@ -658,15 +658,15 @@ AdvancedOutput::initOutputList(OutputData & data)
   hide.insert(interface_hide.begin(), interface_hide.end());
 
   // Both show and hide are empty and no show/hide settings were provided (show all available)
-  if (show.empty() && hide.empty() && !_execute_data.hasShowList())
+  if (!_execute_data.hasShowList() && hide.empty())
     output = avail;
 
   // Only hide is empty (show all the variables listed)
-  else if (!show.empty() && hide.empty())
+  else if (_execute_data.hasShowList() && hide.empty())
     output = show;
 
   // Only show is empty (show all except those hidden)
-  else if (show.empty() && !hide.empty())
+  else if (!_execute_data.hasShowList() && !hide.empty())
     std::set_difference(avail.begin(),
                         avail.end(),
                         hide.begin(),
@@ -674,7 +674,7 @@ AdvancedOutput::initOutputList(OutputData & data)
                         std::inserter(output, output.begin()));
 
   // Both hide and show are present (show all those listed)
-  else
+  else // (_execute_data.hasShowList() && !hide.empty())
   {
     // Check if variables are in both, which is invalid
     std::vector<std::string> tmp;
