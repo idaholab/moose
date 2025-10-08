@@ -30,9 +30,7 @@ bool
 EquationSystem::VectorContainsName(const std::vector<std::string> & the_vector,
                                    const std::string & name) const
 {
-
   auto iter = std::find(the_vector.begin(), the_vector.end(), name);
-
   return (iter != the_vector.end());
 }
 
@@ -125,7 +123,6 @@ EquationSystem::AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc)
 
 void
 EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
-                     const Moose::MFEM::FESpaces & /*fespaces*/,
                      mfem::AssemblyLevel assembly_level)
 {
   _assembly_level = assembly_level;
@@ -144,8 +141,6 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
     // Create auxiliary gridfunctions for storing essential constraints from Dirichlet conditions
     _var_ess_constraints.emplace_back(
         std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));
-    _td_var_ess_constraints.emplace_back(
-        std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));        
   }
 
   // Store pointers to FESpaces of all coupled variables
@@ -459,8 +454,21 @@ EquationSystem::BuildEquationSystem()
 TimeDependentEquationSystem::TimeDependentEquationSystem() : _dt_coef(1.0) {}
 
 void
+TimeDependentEquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
+                     mfem::AssemblyLevel assembly_level)
+{
+  EquationSystem::Init(gridfunctions, assembly_level);
+  for (auto & test_var_name : _test_var_names)
+    _td_var_ess_constraints.emplace_back(
+        std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));
+}
+
+void
 TimeDependentEquationSystem::AddCoupledVariableNameIfMissing(const std::string & coupled_var_name)
 {
+  const auto time_derivative_coupled_var_name = CreateTimeDerivativeName(coupled_var_name);
+  time_derivative_map.insert({coupled_var_name, time_derivative_coupled_var_name});
+
   /// The TimeDependentEquationSystem operator expects to act on a vector of variable time
   /// derivatives, so the coupled variable must be the time derivative of the 'base' variable
   EquationSystem::AddCoupledVariableNameIfMissing(GetTimeDerivativeName(coupled_var_name));
@@ -618,13 +626,15 @@ TimeDependentEquationSystem::BuildMixedBilinearForms()
         ApplyDomainBLFIntegrators<mfem::ParMixedBilinearForm>(
             coupled_var_name, test_var_name, td_mblf, _td_kernels_map);
 
-        // TODO: mblf trial variable should be u, to add to td_mblfs trial variable du_dt
-        // (coupled_var_name)
-        if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(coupled_var_name))
+        // Recover and scale integrators from the mblf acting on the time integral of the trial
+        // variable corresponding to coupled_var_name. This is to apply the dt*du/dt contributions
+        // from the operator on the trial variable in the implicit integration scheme
+        if (_mblfs.Has(test_var_name) &&
+            _mblfs.Get(test_var_name)->Has(GetTimeIntegralName(coupled_var_name)))
         {
           // Recover and scale integrators from mblf. This is to apply the dt*du/dt contributions
           // from the operator on the trial variable in the implicit integration scheme
-          auto mblf = _mblfs.Get(test_var_name)->Get(coupled_var_name);
+          auto mblf = _mblfs.Get(test_var_name)->Get(GetTimeIntegralName(coupled_var_name));
           auto integs = mblf->GetDBFI();
           auto b_integs = mblf->GetBBFI();
           auto markers = mblf->GetBBFI_Marker();

@@ -168,7 +168,7 @@ MFEMProblem::addVariable(const std::string & var_type,
   // MFEM GridFunctions store data for only one set of DoFs each, so we must add additional
   // GridFunctions for time derivatives.
   if (isTransient())
-    addGridFunction(var_type, Moose::MFEM::GetTimeDerivativeName(var_name), parameters);
+    addGridFunction(var_type, Moose::MFEM::CreateTimeDerivativeName(var_name), parameters);
 }
 
 void
