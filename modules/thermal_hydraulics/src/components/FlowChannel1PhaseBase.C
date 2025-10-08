@@ -26,6 +26,10 @@ FlowChannel1PhaseBase::validParams()
       SlopeReconstruction1DInterface<true>::getSlopeReconstructionMooseEnum("None"),
       "Slope reconstruction type for rDG spatial discretization");
 
+  params.addParam<Real>("p_ref", 101.325e3, "Reference pressure [Pa]");
+  params.addParam<Real>("T_ref", 273.15, "Reference temperature [K]");
+  params.addParam<Real>("vel_ref", 1.0, "Reference velocity [m/s]");
+
   params.declareControllable("initial_p initial_T initial_vel");
   params.addParamNamesToGroup("initial_p initial_T initial_vel", "Variable initialization");
   params.addParamNamesToGroup("rdg_slope_reconstruction", "Numerical scheme");
