@@ -177,6 +177,7 @@ P_out = 4.923e6 # Pa
     type = FullSolveMultiApp
     input_files = "quad_iw_viz.i"
     execute_on = "timestep_end"
+    max_procs_per_app = 1
   []
 []
 

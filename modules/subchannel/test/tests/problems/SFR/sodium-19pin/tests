@@ -8,7 +8,6 @@
     valgrind = NONE
     recover = false
     allow_warnings = true
-    max_parallel = 1
     requirement = 'The system will examine the subchannel explicit solver for a 19pin liquid sodium cooled assembly'
   []
   [test_implicit]
@@ -19,7 +18,6 @@
     recover = false
     rel_err = 5e-04 #Tolerance added due to CIVET machine difference, PR: Qprime #31380
     allow_warnings = true
-    max_parallel = 1
     requirement = 'The system will examine the subchannel implicit solver for a 19pin liquid sodium cooled assembly'
   []
   [test_monolithic]
@@ -29,7 +27,6 @@
     abs_zero = 1e-7
     valgrind = NONE
     recover = false
-    max_parallel = 1
     requirement = 'The system will examine the subchannel monolithic solver for a 19pin liquid sodium cooled assembly'
   []
   [test_full_monolithic]
@@ -40,7 +37,6 @@
     rel_err = 5e-04
     valgrind = NONE
     recover = false
-    max_parallel = 1
     requirement = 'The system will examine the subchannel full monolithic solver for a 19pin liquid sodium cooled assembly'
   []
 []

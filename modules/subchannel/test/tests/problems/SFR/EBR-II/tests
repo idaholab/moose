@@ -10,7 +10,6 @@
     recover = false
     abs_zero = 1e-6
     max_threads = 1
-    max_parallel = 1
     requirement = 'The system will examine the subchannel solver for the EBR-II case'
   []
 []
