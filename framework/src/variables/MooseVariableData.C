@@ -578,7 +578,7 @@ MooseVariableData<OutputType>::computeValuesInternal()
   // Curl
   if (_need_curl)
     fill(_curl_u, *_current_curl_phi, _vector_tags_dof_u[_solution_tag]);
-  if (_need_curl_old)
+  if (is_transient && _need_curl_old)
     fill(_curl_u_old, *_current_curl_phi, _vector_tags_dof_u[_old_solution_tag]);
 
   // Div
@@ -597,9 +597,10 @@ MooseVariableData<OutputType>::computeValuesInternal()
   // Vector tags
   for (auto tag : _required_vector_tags)
   {
-    if (_need_vector_tag_u[tag] && _sys.hasVector(tag) && _sys.getVector(tag).closed())
+    mooseAssert(_sys.getVector(tag).closed(), "Should be closed");
+    if (_need_vector_tag_u[tag] && _sys.hasVector(tag))
       fill(_vector_tag_u[tag], *_current_phi, _vector_tags_dof_u[tag]);
-    if (_need_vector_tag_grad[tag] && _sys.hasVector(tag) && _sys.getVector(tag).closed())
+    if (_need_vector_tag_grad[tag] && _sys.hasVector(tag))
       fill(_vector_tag_grad[tag], *_current_grad_phi, _vector_tags_dof_u[tag]);
   }
 
@@ -627,8 +628,6 @@ MooseVariableData<OutputType>::computeValuesInternal()
     if (_need_du_dot_du)
     {
       _du_dot_du.resize(nqp);
-      for (const auto qp : make_range(nqp))
-        _du_dot_du[qp] = 0.;
       for (const auto i : make_range(num_dofs))
         for (const auto qp : make_range(nqp))
           _du_dot_du[qp] = _dof_du_dot_du[i];
@@ -636,8 +635,6 @@ MooseVariableData<OutputType>::computeValuesInternal()
     if (_need_du_dotdot_du)
     {
       _du_dotdot_du.resize(nqp);
-      for (const auto qp : make_range(nqp))
-        _du_dotdot_du[qp] = 0.;
       for (const auto i : make_range(num_dofs))
         for (const auto qp : make_range(nqp))
           _du_dotdot_du[qp] = _dof_du_dotdot_du[i];
