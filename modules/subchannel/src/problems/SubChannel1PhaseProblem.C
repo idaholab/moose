@@ -2781,10 +2781,6 @@ SubChannel1PhaseProblem::externalSolve()
           auto cp = _fp->cp_from_p_T((*_P_soln)(node) + _P_out, (*_T_soln)(node));
           auto Pr = (*_mu_soln)(node)*cp / k;
 
-          if ((*_Dpin_soln)(pin_node) <= 0)
-            mooseError("Dpin should not be null or negative when computing pin powers: ",
-                       (*_Dpin_soln)(pin_node));
-
           // Create nusselt number structure
           NusseltStruct nusselt_struct;
           nusselt_struct.Re = Re;
