@@ -150,11 +150,11 @@
     max_parallel = 1
     recover = false
   []
-  [MFEMComplexERMES]
+  [MFEMComplexWaveguide]
     type = XMLDiff
-    input = complex_ermes.i
-    xmldiff = 'OutputData/ComplexERMES/Run0/Run0.pvd
-                OutputData/ComplexERMES/Run0/Cycle000001/proc000000.vtu'
+    input = complex_waveguide.i
+    xmldiff = 'OutputData/ComplexWaveguide/Run0/Run0.pvd
+                OutputData/ComplexWaveguide/Run0/Cycle000001/proc000000.vtu'
     ignored_items = "root['VTKFile']['@version']"
     requirement = 'The system shall have the ability to solve a complex-valued problem with integrated boundary conditions.'
     capabilities = 'mfem'
