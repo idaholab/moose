@@ -32,7 +32,7 @@ PROD_DATABASE_NAME = 'civet_tests_moose_performance'
 PROD_TEST_NAME = TestName('simple_transient_diffusion', 'test')
 
 # Test database name for testing pull request results
-TEST_DATABASE_NAME = 'civet_tests_moose_test_results'
+TEST_DATABASE_NAME = 'civet_tests_moose_store_results_live'
 # The name of the test to load from the test database
 TEST_TEST_NAME = TestName('tests/test_harness', 'ok')
 
