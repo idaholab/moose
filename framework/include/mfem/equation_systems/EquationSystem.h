@@ -49,7 +49,6 @@ public:
 
   /// Initialise
   virtual void Init(Moose::MFEM::GridFunctions & gridfunctions,
-                    const Moose::MFEM::FESpaces & fespaces,
                     mfem::AssemblyLevel assembly_level);
 
   /// Build linear forms and eliminate constrained DoFs
@@ -180,7 +179,6 @@ protected:
 
   /// Gridfunctions holding essential constraints from Dirichlet BCs
   std::vector<std::unique_ptr<mfem::ParGridFunction>> _var_ess_constraints;
-  std::vector<std::unique_ptr<mfem::ParGridFunction>> _td_var_ess_constraints;
 
   mfem::Array2D<const mfem::HypreParMatrix *> _h_blocks;
 
@@ -310,6 +308,9 @@ class TimeDependentEquationSystem : public EquationSystem
 public:
   TimeDependentEquationSystem();
 
+  /// Initialise
+  virtual void Init(Moose::MFEM::GridFunctions & gridfunctions,
+                    mfem::AssemblyLevel assembly_level) override;  
   void AddCoupledVariableNameIfMissing(const std::string & coupled_var_name) override;
 
   virtual void SetTimeStep(mfem::real_t dt);
@@ -327,6 +328,24 @@ public:
                           mfem::BlockVector & truedXdt,
                           mfem::BlockVector & trueRHS) override;
 
+  inline std::string GetTimeDerivativeName(const std::string & var_name)
+  {
+    return time_derivative_map[var_name];
+  }
+
+  inline std::string GetTimeIntegralName(const std::string & time_derivative_var_name)
+  {
+    for (auto const & [map_var_name, map_time_derivative_var_name] : time_derivative_map)
+    {
+      if (map_time_derivative_var_name == time_derivative_var_name)
+        return map_var_name;
+    }
+    mooseError("No variable representing the time integral of ",
+               time_derivative_var_name,
+               " found in the EquationSystem.");
+    return std::string();
+  }
+
 protected:
   /// Coefficient for timestep scaling
   mfem::ConstantCoefficient _dt_coef;
@@ -337,6 +356,12 @@ protected:
   Moose::MFEM::NamedFieldsMap<mfem::ParBilinearForm> _td_blfs;
   Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>
       _td_mblfs; // named according to trial variable
+
+  /// Gridfunctions holding essential constraints from Dirichlet BCs
+  std::vector<std::unique_ptr<mfem::ParGridFunction>> _td_var_ess_constraints;
+
+  /// Map between variable names and their time derivatives
+  Moose::MFEM::TimeDerivativeMap time_derivative_map;
 
 private:
   /// Set trial variable names from subset of coupled variables that have an associated test variable.

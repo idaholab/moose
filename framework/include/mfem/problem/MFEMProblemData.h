@@ -40,6 +40,7 @@ public:
   Moose::MFEM::FECollections fecs;
   Moose::MFEM::FESpaces fespaces;
   Moose::MFEM::GridFunctions gridfunctions;
+  Moose::MFEM::TimeDerivativeMap time_derivative_map;
 
   MPI_Comm comm;
   int myid;

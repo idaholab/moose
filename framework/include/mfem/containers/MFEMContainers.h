@@ -190,7 +190,7 @@ private:
 };
 
 inline std::string
-GetTimeDerivativeName(std::string name)
+CreateTimeDerivativeName(std::string name)
 {
   return std::string("d") + name + std::string("_dt");
 }
@@ -199,6 +199,7 @@ using FECollections = Moose::MFEM::NamedFieldsMap<mfem::FiniteElementCollection>
 using FESpaces = Moose::MFEM::NamedFieldsMap<mfem::ParFiniteElementSpace>;
 using GridFunctions = Moose::MFEM::NamedFieldsMap<mfem::ParGridFunction>;
 using SubMeshes = Moose::MFEM::NamedFieldsMap<mfem::ParSubMesh>;
+using TimeDerivativeMap = std::map<std::string, std::string>;
 
 } // namespace Moose::MFEM
 
