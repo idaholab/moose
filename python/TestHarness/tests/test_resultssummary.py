@@ -508,46 +508,37 @@ class TestResultsSummary(TestHarnessTestCase):
         self.assertIn(str(17),has_test_build_summary)
         self.assertIn('70.00%',has_test_build_summary)
 
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
-    def testSummaryOutputFileValidPath(self):
+    def testSummaryOutputFileValidPath(self,mock_init_reader):
         """
-        Tests summary output file when output file path exit and there is no change between base and head.
+        Tests output file write and read when output file path exit
         """
-        summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
+        summary = TestHarnessResultsSummary(None)
         with tempfile.NamedTemporaryFile() as tmp_file:
-            tmp_path = tmp_file.name
-        stdout = StringIO()
-        with redirect_stdout(stdout):
-            summary_result = summary.pr(event_id=EVENT_ID, out=tmp_path)
-
-            summary.summary_output_file(summary_result,tmp_path)
-            with open(tmp_path, 'r') as f:
+            output_result = 'File Path Exist and able to write file' 
+            summary.summary_output_file(output_result,tmp_file.name)
+            with open(tmp_file.name, 'r') as f:
                 output = f.read()
-            self.assertIn('Removed Tests:', output)
-            self.assertIn('No Removed Tests', output)
-            self.assertIn('New Tests:', output)
-            self.assertIn('No New Tests', output)
-            self.assertIn('Same Tests', output)
-            self.assertIn('No Tests', output)
+                self.assertEqual(output_result, output)
 
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
-    def testSummaryOutputFileInvalidPath(self):
+    def testSummaryOutputFileInvalidPath(self,mock_init_reader):
         """
         Tests that summary_output_file when output file path is invalid.
         """
-        summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
+        summary = TestHarnessResultsSummary(None)
+        
+        output_result = 'File Path Exist and able to write file' 
         invalid_path = '/this/path/does/not/exist/output.txt'
+        
         stdout = StringIO()
         with redirect_stdout(stdout):
-            summary_result = summary.pr(event_id=EVENT_ID, out=invalid_path)
+            summary.summary_output_file(output_result,invalid_path)
 
-        stdout = StringIO()
-        with redirect_stdout(stdout):
-            summary.summary_output_file(summary_result, invalid_path)
-
-        output = stdout.getvalue()
-        self.assertIn("Failed to write to", output)
-
+            output = stdout.getvalue()
+            self.assertIn("Failed to write to", output)
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testPRNoChange(self):
