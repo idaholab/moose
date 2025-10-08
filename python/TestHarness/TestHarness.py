@@ -216,7 +216,8 @@ class TestHarness:
     # 6 - Added 'testharness/validation_version'
     # 7 - Moved test output files from test/*/tests/*/tester/output_files to
     #     job output in test/*/tests/*/output_files
-    RESULTS_VERSION = 7
+    # 8 - Store tests/*/tests/*/tester/json_metadata values a dict instead of a file path
+    RESULTS_VERSION = 8
 
     # Validation version history:
     # 1 - Initial tracking of version
