@@ -83,6 +83,9 @@ class TestCIVETStore(TestHarnessTestCase):
         self._stdout_patcher = patch("sys.stdout", new=StringIO())
         self.stdout_mock: StringIO = self._stdout_patcher.start()
 
+    def tearDown(self):
+        self._stdout_patcher.stop()
+
     def testCompressDict(self):
         """
         Tests compress_dic() and decompress_dict()
