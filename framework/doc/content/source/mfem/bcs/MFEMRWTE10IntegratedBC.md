@@ -8,7 +8,9 @@
 
 ## Overview
 
-Adds the frequency space boundary integrator for the TE10 mode of an electromagnetic wave traveling through a rectangular waveguide. If the parameter `input` is set to `false`, corresponding to the output boundary of the waveguide, the following boundary integrator is applied:
+Adds the frequency space integrator corresponding to the value upon a cross-sectional boundary of the TE10 mode of an electromagnetic wave traveling through an infinite rectangular waveguide. The physical system in question is explained in more detail [here](https://phys.libretexts.org/Bookshelves/Electricity_and_Magnetism/Electromagnetics_II_(Ellingson)/06%3A_Waveguides/6.09%3A_Rectangular_Waveguide-_TE_Modes). 
+
+If the parameter `input` is set to `false`, corresponding to the output boundary of the waveguide, the following boundary integrator is applied:
 
 !equation
 iIm[k]\mu_0^{-1}(\vec u, \vec v)_{\partial\Omega} \,\,\, \forall v \in V

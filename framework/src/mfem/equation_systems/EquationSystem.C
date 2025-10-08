@@ -362,29 +362,13 @@ EquationSystem::GetGradient(const mfem::Vector &) const
 void
 EquationSystem::RecoverFEMSolution(mfem::BlockVector & trueX,
                                    Moose::MFEM::GridFunctions & gridfunctions,
-                                   Moose::MFEM::ComplexGridFunctions & cpx_gridfunctions)
+                                   Moose::MFEM::ComplexGridFunctions & /*cpx_gridfunctions*/)
 {
-  if (gridfunctions.size())
+  for (const auto i : index_range(_trial_var_names))
   {
-    for (const auto i : index_range(_trial_var_names))
-    {
-      auto & trial_var_name = _trial_var_names.at(i);
-      trueX.GetBlock(i).SyncAliasMemory(trueX);
-      gridfunctions.Get(trial_var_name)->Distribute(&(trueX.GetBlock(i)));
-    }
-  }
-  else if (cpx_gridfunctions.size())
-  {
-    for (const auto i : index_range(_trial_var_names))
-    {
-      auto & trial_var_name = _trial_var_names.at(i);
-      trueX.GetBlock(i).SyncAliasMemory(trueX);
-      cpx_gridfunctions.Get(trial_var_name)->Distribute(&(trueX.GetBlock(i)));
-    }
-  }
-  else
-  {
-    mooseError("No gridfunctions provided to recover solution from the equation system.");
+    auto & trial_var_name = _trial_var_names.at(i);
+    trueX.GetBlock(i).SyncAliasMemory(trueX);
+    gridfunctions.Get(trial_var_name)->Distribute(&(trueX.GetBlock(i)));
   }
 }
 

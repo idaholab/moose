@@ -268,6 +268,19 @@ ComplexEquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
   op.Reset(mfem::HypreParMatrixFromBlocks(_h_blocks));
 }
 
+void
+ComplexEquationSystem::RecoverFEMSolution(mfem::BlockVector & trueX,
+                                   Moose::MFEM::GridFunctions & /*gridfunctions*/,
+                                   Moose::MFEM::ComplexGridFunctions & cpx_gridfunctions)
+{
+  for (const auto i : index_range(_trial_var_names))
+  {
+    auto & trial_var_name = _trial_var_names.at(i);
+    trueX.GetBlock(i).SyncAliasMemory(trueX);
+    cpx_gridfunctions.Get(trial_var_name)->Distribute(&(trueX.GetBlock(i)));
+  }
+}
+
 }
 
 #endif
