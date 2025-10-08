@@ -6,6 +6,7 @@
 
 [Problem]
   type = MFEMProblem
+  numeric_type = complex
 []
 
 [FESpaces]
@@ -123,7 +124,6 @@
 
 [Executioner]
   type = MFEMSteady
-  numeric_type = complex
   assembly_level = legacy
 []
 

@@ -14,6 +14,7 @@ elec_cond_air = 0.0
 
 [Problem]
   type = MFEMProblem
+  numeric_type = complex
 []
 
 [FESpaces]
@@ -149,7 +150,6 @@ elec_cond_air = 0.0
 
 [Executioner]
   type = MFEMSteady
-  numeric_type = complex
   assembly_level = legacy
 []
 

@@ -231,6 +231,14 @@ public:
    */
   std::shared_ptr<mfem::ParGridFunction> getGridFunction(const std::string & name);
 
+  enum class NumericType
+  {
+     REAL,
+     COMPLEX
+   };
+  
+  NumericType num_type;
+
 protected:
   MFEMProblemData _problem_data;
 };
