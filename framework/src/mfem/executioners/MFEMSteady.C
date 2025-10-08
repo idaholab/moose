@@ -22,9 +22,6 @@ MFEMSteady::validParams()
   params += Executioner::validParams();
   params.addClassDescription("Executioner for steady state MFEM problems.");
   params.addParam<Real>("time", 0.0, "System time");
-  MooseEnum numeric_types("real complex", "real");
-  params.addParam<MooseEnum>(
-      "numeric_type", numeric_types, "Number type used for the problem. Can be real or complex.");
   return params;
 }
 
@@ -41,14 +38,14 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
   // If no ProblemOperators have been added by the user, add a default
   if (getProblemOperators().empty())
   {
-    if (getParam<MooseEnum>("numeric_type") == "real")
+    if (_mfem_problem.num_type == MFEMProblem::NumericType::REAL)
     {
       _mfem_problem_data.eqn_system = std::make_shared<Moose::MFEM::EquationSystem>();
       auto problem_operator =
           std::make_shared<Moose::MFEM::EquationSystemProblemOperator>(_mfem_problem);
       addProblemOperator(std::move(problem_operator));
     }
-    else if (getParam<MooseEnum>("numeric_type") == "complex")
+    else if (_mfem_problem.num_type == MFEMProblem::NumericType::COMPLEX)
     {
       _mfem_problem_data.eqn_system = std::make_shared<Moose::MFEM::ComplexEquationSystem>();
       auto problem_operator =
@@ -57,7 +54,7 @@ MFEMSteady::MFEMSteady(const InputParameters & params)
     }
     else
       mooseError("Unknown numeric type. "
-                 "Please set the numeric type to either 'REAL' or 'COMPLEX'.");
+                 "Please set the Problem numeric type to either 'real' or 'complex'.");
   }
 }
 
