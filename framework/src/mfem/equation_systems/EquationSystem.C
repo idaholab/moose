@@ -143,12 +143,12 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
         std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));
   }
 
+  // Extract which coupled variables are to be trivially eliminated and which are trial variables
+  SetTrialVariableNames();
+
   // Store pointers to FESpaces of all coupled variables
   for (auto & coupled_var_name : _coupled_var_names)
     _coupled_pfespaces.push_back(gridfunctions.Get(coupled_var_name)->ParFESpace());
-
-  // Extract which coupled variables are to be trivially eliminated and which are trial variables
-  SetTrialVariableNames();
 
   // Store pointers to coupled variable GridFunctions that are to be eliminated prior to forming the
   // jacobian
@@ -459,22 +459,10 @@ TimeDependentEquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
 {
   EquationSystem::Init(gridfunctions, assembly_level);
   for (auto & test_var_name : _test_var_names)
+  {
     _td_var_ess_constraints.emplace_back(
         std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));
-}
-
-void
-TimeDependentEquationSystem::AddCoupledVariableNameIfMissing(const std::string & coupled_var_name)
-{
-  const auto time_derivative_coupled_var_name = CreateTimeDerivativeName(coupled_var_name);
-  time_derivative_map.insert({coupled_var_name, time_derivative_coupled_var_name});
-
-  /// The TimeDependentEquationSystem operator expects to act on a vector of variable time
-  /// derivatives, so the coupled variable must be the time derivative of the 'base' variable
-  EquationSystem::AddCoupledVariableNameIfMissing(GetTimeDerivativeName(coupled_var_name));
-  /// When implicit, also register test_var_name in _eliminated_variables
-  /// for the elimination of 'old' variable values from the previous timestep
-  EquationSystem::AddCoupledVariableNameIfMissing(coupled_var_name);
+  }
 }
 
 void
@@ -495,6 +483,18 @@ TimeDependentEquationSystem::SetTimeStep(mfem::real_t dt)
 void
 TimeDependentEquationSystem::SetTrialVariableNames()
 {
+  // When implicit, also register test_var_name in _eliminated_variables
+  // for the elimination of 'old' variable values from the previous timestep
+  // The TimeDependentEquationSystem operator expects to act on a vector of variable time
+  // derivatives, so the trial variable must be the time derivative of the 'base' variable
+  for (const auto & test_var_name : _test_var_names)
+  {
+    const auto time_derivative_test_var_name = CreateTimeDerivativeName(test_var_name);
+    time_derivative_map.insert({test_var_name, time_derivative_test_var_name});
+    AddCoupledVariableNameIfMissing(test_var_name);
+    AddCoupledVariableNameIfMissing(GetTimeDerivativeName(test_var_name));
+  }
+
   // If a coupled variable has an equation associated with it,
   // add it to the set of trial variables.
   for (const auto & coupled_var_name : _coupled_var_names)
@@ -524,8 +524,7 @@ TimeDependentEquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
     auto trial_var_name = kernel->getTrialVariableName();
     auto test_var_name = kernel->getTestVariableName();
     AddTestVariableNameIfMissing(test_var_name);
-    EquationSystem::AddCoupledVariableNameIfMissing(test_var_name);
-    EquationSystem::AddCoupledVariableNameIfMissing(trial_var_name);
+    AddCoupledVariableNameIfMissing(trial_var_name);
 
     // Register new kernels map if not present for the test variable    
     if (!_td_kernels_map.Has(test_var_name))

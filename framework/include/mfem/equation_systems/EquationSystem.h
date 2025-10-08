@@ -310,8 +310,7 @@ public:
 
   /// Initialise
   virtual void Init(Moose::MFEM::GridFunctions & gridfunctions,
-                    mfem::AssemblyLevel assembly_level) override;  
-  void AddCoupledVariableNameIfMissing(const std::string & coupled_var_name) override;
+                    mfem::AssemblyLevel assembly_level) override;
 
   virtual void SetTimeStep(mfem::real_t dt);
   virtual void UpdateEquationSystem();
@@ -330,7 +329,15 @@ public:
 
   inline std::string GetTimeDerivativeName(const std::string & var_name)
   {
-    return time_derivative_map[var_name];
+    if (time_derivative_map.count(var_name))
+      return time_derivative_map[var_name];
+    else
+    {
+      mooseError("No variable representing the time derivative of ",
+                 var_name,
+                 " found in the EquationSystem.");
+      return std::string();
+    }
   }
 
   inline std::string GetTimeIntegralName(const std::string & time_derivative_var_name)
