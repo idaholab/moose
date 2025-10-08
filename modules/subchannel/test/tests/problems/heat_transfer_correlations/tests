@@ -1,5 +1,5 @@
 [Tests]
-  design = 'SubChannel1PhaseProblem.md TriSubChannel1PhaseProblem.md'
+  design = 'QuadSubChannel1PhaseProblem.md TriSubChannel1PhaseProblem.md'
   issues = '#31464'
   [EBR-II_SHRT-17_SS]
     requirement = 'The system shall be able to model the EBR-II steady state SHRT-17 case, '
