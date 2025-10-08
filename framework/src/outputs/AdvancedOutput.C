@@ -642,9 +642,19 @@ AdvancedOutput::initOutputList(OutputData & data)
   std::set<std::string> & avail = data.available;
   std::set<std::string> & output = data.output;
 
-  // Append to the hide list from OutputInterface objects
+  // Get the hide list from OutputInterface objects
+  std::set<std::string> interface_hide_all_types;
+  _app.getOutputWarehouse().buildInterfaceHideVariables(name(), interface_hide_all_types);
+
+  // OutputInterface hide list includes all types; only include those that are available
   std::set<std::string> interface_hide;
-  _app.getOutputWarehouse().buildInterfaceHideVariables(name(), interface_hide);
+  std::set_intersection(interface_hide_all_types.begin(),
+                        interface_hide_all_types.end(),
+                        avail.begin(),
+                        avail.end(),
+                        std::inserter(interface_hide, interface_hide.begin()));
+
+  // Append to the hide list from OutputInterface objects
   hide.insert(interface_hide.begin(), interface_hide.end());
 
   // Both show and hide are empty and no show/hide settings were provided (show all available)
