@@ -43,6 +43,9 @@ public:
   virtual void FormLegacySystem(mfem::OperatorHandle & op,
                                 mfem::BlockVector & trueX,
                                 mfem::BlockVector & trueRHS) override;
+  void RecoverFEMSolution(mfem::BlockVector & trueX,
+                          Moose::MFEM::GridFunctions & gridfunctions,
+                          Moose::MFEM::ComplexGridFunctions & cpx_gridfunctions) override;
 
   template <class FormType>
   void ApplyDomainBLFIntegrators(
