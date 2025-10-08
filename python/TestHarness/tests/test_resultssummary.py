@@ -142,6 +142,7 @@ class TestResultsSummary(TestHarnessTestCase):
         Tests pr_test_names() when no event results are available.
         """
         mock_get_event_results.return_value = None
+        mock_init_reader.return_value = None
 
         with tempfile.NamedTemporaryFile() as tmp_file:
             summary = TestHarnessResultsSummary(None)
@@ -514,6 +515,7 @@ class TestResultsSummary(TestHarnessTestCase):
         """
         Tests output file write and read when output file path exit
         """
+        mock_init_reader.return_value = None
         summary = TestHarnessResultsSummary(None)
         with tempfile.NamedTemporaryFile() as tmp_file:
             output_result = 'File Path Exist and able to write file'
@@ -528,6 +530,7 @@ class TestResultsSummary(TestHarnessTestCase):
         """
         Tests that summary_output_file when output file path is invalid.
         """
+        mock_init_reader.return_value = None
         summary = TestHarnessResultsSummary(None)
 
         output_result = 'File Path Exist and able to write file'
