@@ -681,7 +681,7 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
 
   _ad_dof_values.resize(num_dofs);
   for (const auto i : make_range(num_dofs))
-    _ad_dof_values[i] = (*_sys.currentSolution())(_dof_indices[i]);
+    _ad_dof_values[i] = _vector_tags_dof_u[_solution_tag][i];
   // NOTE!  You have to do this AFTER setting the value!
   if (do_derivatives)
     for (const auto i : make_range(num_dofs))
@@ -756,8 +756,6 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
       if (_need_ad_u_dotdot)
         _ad_dofs_dotdot.resize(num_dofs);
       _ad_u_dot.resize(nqp);
-      for (const auto qp : make_range(nqp))
-        _ad_u_dot[qp] = _ad_zero;
 
       if (_time_integrator && _time_integrator->dt())
       {
@@ -769,10 +767,14 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
                                                      _need_ad_u_dotdot ? _ad_dofs_dotdot[i]
                                                                        : _ad_real_dummy);
 
+        for (const auto qp : make_range(nqp))
+          _ad_u_dot[qp] = _ad_zero;
         for (const auto i : make_range(num_dofs))
           for (const auto qp : make_range(nqp))
             _ad_u_dot[qp] += (*_current_phi)[i][qp] * _ad_dofs_dot[i];
       }
+      // We are too early in the setup to have a time integrator, so we are not really using the
+      // AD-derivatives. We set the AD value of the derivatives to the nonAD value
       else if (!_time_integrator)
       {
         for (const auto i : make_range(num_dofs))
@@ -800,11 +802,12 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
     if (_need_ad_grad_u_dot)
     {
       _ad_grad_u_dot.resize(nqp);
-      for (const auto qp : make_range(nqp))
-        _ad_grad_u_dot[qp] = _ad_zero;
 
       if (_time_integrator && _time_integrator->dt())
       {
+        for (const auto qp : make_range(nqp))
+          _ad_grad_u_dot[qp] = _ad_zero;
+
         // The latter check here is for handling the fact that we have not yet implemented
         // calculation of ad_grad_phi for neighbor and neighbor-face, so if we are in that
         // situation we need to default to using the non-ad grad_phi
