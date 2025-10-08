@@ -516,7 +516,7 @@ class TestResultsSummary(TestHarnessTestCase):
         """
         summary = TestHarnessResultsSummary(None)
         with tempfile.NamedTemporaryFile() as tmp_file:
-            output_result = 'File Path Exist and able to write file' 
+            output_result = 'File Path Exist and able to write file'
             summary.summary_output_file(output_result,tmp_file.name)
             with open(tmp_file.name, 'r') as f:
                 output = f.read()
@@ -529,10 +529,10 @@ class TestResultsSummary(TestHarnessTestCase):
         Tests that summary_output_file when output file path is invalid.
         """
         summary = TestHarnessResultsSummary(None)
-        
-        output_result = 'File Path Exist and able to write file' 
+
+        output_result = 'File Path Exist and able to write file'
         invalid_path = '/this/path/does/not/exist/output.txt'
-        
+
         stdout = StringIO()
         with redirect_stdout(stdout):
             summary.summary_output_file(output_result,invalid_path)
@@ -540,62 +540,128 @@ class TestResultsSummary(TestHarnessTestCase):
             output = stdout.getvalue()
             self.assertIn("Failed to write to", output)
 
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    @patch.object(TestHarnessResultsSummary, 'get_event_results')
+    @patch.object(TestHarnessResultsSummary, 'get_commit_results')
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
-    def testPRNoChange(self):
+    def testPRNoChange(self, mock_get_commit_results, mock_get_event_results, mock_init_reader):
         """
         Tests pr() when there are no changes between base and head test names.
         """
-        summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
-        with tempfile.NamedTemporaryFile() as tmp_file:
-            tmp_path = tmp_file.name
-        stdout = StringIO()
-        with redirect_stdout(stdout):
-            summary_result = summary.pr(event_id=EVENT_ID,out=tmp_path)
-        self.assertIn('Removed Tests:',summary_result)
-        self.assertIn('No Removed Tests',summary_result)
-        self.assertIn('New Tests:',summary_result)
-        self.assertIn('No New Tests',summary_result)
-        self.assertIn('Same Tests',summary_result)
-        self.assertIn('No Tests',summary_result)
+        base_result_with_tests = self.getResult()
+        head_result_with_tests = self.getResult()
+        mock_get_commit_results.return_value = base_result_with_tests
+        mock_get_event_results.return_value = head_result_with_tests
+        mock_init_reader.return_value = None
 
+        with tempfile.NamedTemporaryFile() as tmp_file:
+            summary = TestHarnessResultsSummary(None)
+            stdout = StringIO()
+            with redirect_stdout(stdout):
+                summary_result = summary.pr(
+                event_id=EVENT_ID, out=tmp_file.name
+                )
+                self.assertIn('Removed Tests:',summary_result)
+                self.assertIn('No Removed Tests',summary_result)
+                self.assertIn('New Tests:',summary_result)
+                self.assertIn('No New Tests',summary_result)
+                self.assertIn('Same Tests',summary_result)
+                self.assertIn('No Tests',summary_result)
+
+                with open(tmp_file.name, 'r') as f:
+                    output = f.read()
+                    self.assertIn('Removed Tests:', output)
+                    self.assertIn('No Removed Tests', output)
+                    self.assertIn('New Tests:', output)
+                    self.assertIn('No New Tests', output)
+                    self.assertIn('Same Tests', output)
+                    self.assertIn('No Tests', output)
+
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    @patch.object(TestHarnessResultsSummary, 'get_event_results')
+    @patch.object(TestHarnessResultsSummary, 'get_commit_results')
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
-    def testPRNoBase(self):
+    def testPRNoBase(self, mock_get_commit_results, mock_get_event_results, mock_init_reader):
         """
         Tests pr() when no base is available to compare.
         """
-        summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
+        head_result_with_tests = self.getResult()
+        #set no base
+        mock_get_commit_results.return_value = None
+        mock_get_event_results.return_value = head_result_with_tests
+        mock_init_reader.return_value = None
+
         with tempfile.NamedTemporaryFile() as tmp_file:
-            tmp_path = tmp_file.name
-        def mock_pr_test_names(**kwargs):
-            print("Comparison not available")
-            return None,[], None,{'head_test1'}
-        summary.pr_test_names = mock_pr_test_names
+            summary = TestHarnessResultsSummary(None)
+            stdout = StringIO()
+            with redirect_stdout(stdout):
+                summary_result = summary.pr(
+                event_id=EVENT_ID, out=tmp_file.name
+                )
+                self.assertIsNone(summary_result)
+                self.assertIn('Comparison not available', stdout.getvalue())
 
-        stdout = StringIO()
-        with redirect_stdout(stdout):
-            summary.pr(event_id=EVENT_ID,out=tmp_path)
-        self.assertIn('Comparison not available', stdout.getvalue())
+                with open(tmp_file.name, 'r') as f:
+                    output = f.read()
+                    self.assertIn('Comparison not available', output)
 
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    @patch.object(TestHarnessResultsSummary, 'get_event_results')
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
-    def testMain(self):
+    def testPRNoEvent(self, mock_get_event_results, mock_init_reader):
+        """
+        Tests pr() when there is no event
+        """
+        mock_get_event_results.return_value = None
+        mock_init_reader.return_value = None
+
+        with tempfile.NamedTemporaryFile() as tmp_file:
+            summary = TestHarnessResultsSummary(None)
+            stdout = StringIO()
+            with redirect_stdout(stdout):
+                with self.assertRaisesRegex(SystemExit, 'Results do not exist for event'):
+                    summary.pr(event_id=EVENT_ID,out=tmp_file.name)
+
+                with open(tmp_file.name, 'r') as f:
+                    output = f.read()
+                    self.assertIn('Results do not exist for event', output)
+
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    @patch.object(TestHarnessResultsSummary, 'get_event_results')
+    @patch.object(TestHarnessResultsSummary, 'get_commit_results')
+    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
+    def testMain(self, mock_get_commit_results, mock_get_event_results, mock_init_reader):
         """
         Tests main() output for a PR event, verifying summary messages are printed in output file path.
         """
-        summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
+        base_result_with_tests = self.getResult()
+        head_result_with_tests = self.getResult()
+        mock_get_commit_results.return_value = base_result_with_tests
+        mock_get_event_results.return_value = head_result_with_tests
+        mock_init_reader.return_value = None
 
         with tempfile.NamedTemporaryFile() as tmp_file:
-            tmp_path = tmp_file.name
+            summary = TestHarnessResultsSummary(None)
             stdout = StringIO()
             with redirect_stdout(stdout):
-                summary.main( out=tmp_path, action='pr', event_id=EVENT_ID)
-            with open(tmp_path, 'r') as f:
-                output = f.read()
-            self.assertIn('Removed Tests:', output)
-            self.assertIn('No Removed Tests', output)
-            self.assertIn('New Tests:', output)
-            self.assertIn('No New Tests', output)
-            self.assertIn('Same Tests', output)
-            self.assertIn('No Tests', output)
+                summary.main(out=tmp_file.name, action='pr', event_id=EVENT_ID)
+                summary_result = stdout.getvalue()
+                print(summary_result)
+                self.assertIn('Removed Tests:',summary_result)
+                self.assertIn('No Removed Tests',summary_result)
+                self.assertIn('New Tests:',summary_result)
+                self.assertIn('No New Tests',summary_result)
+                self.assertIn('Same Tests',summary_result)
+                self.assertIn('No Tests',summary_result)
+
+                with open(tmp_file.name, 'r') as f:
+                    output = f.read()
+                    self.assertIn('Removed Tests:', output)
+                    self.assertIn('No Removed Tests', output)
+                    self.assertIn('New Tests:', output)
+                    self.assertIn('No New Tests', output)
+                    self.assertIn('Same Tests', output)
+                    self.assertIn('No Tests', output)
 
 if __name__ == '__main__':
     unittest.main()
