@@ -148,7 +148,7 @@ class Moose2FMU(Fmi2Slave):
                 # To-do: need MooseControl create a time object and a postprocessor backend,
                 # then we don't need users adding extra blocks in their input files
                 if signal in ["INITIAL", "MULTIAPP_FIXED_POINT_BEGIN"]:
-                    moose_dt = self.control.getTimeStepSize()
+                    moose_dt = self.control.getDT()
 
                     self.logger.debug(
                         "moose_time=%.6f -> current_time=%.6f -> moose_dt=%.6f -> step_size=%.6f",
