@@ -464,58 +464,53 @@ class CIVETStore:
 
         result, tests = self.build(results, base_sha, **kwargs)
 
+        # Assign an ID for the result
+        result_id = ObjectId()
+        result['_id'] = result_id
+
+        # Build the tests to be stored separately, if any
+        insert_tests = []
+        test_ids = None
+        if tests:
+            test_ids = []
+            for folder_entry in result['tests'].values():
+                folder_tests_entry = folder_entry['tests']
+                for test_name in list(folder_tests_entry.keys()):
+                    # Get the index into "tests"
+                    test_index = folder_tests_entry[test_name]
+                    assert isinstance(test_index, int)
+                    # And the associated test data
+                    test_data = tests[test_index]
+
+                    # Assign an ID to the test
+                    test_id = ObjectId()
+                    test_ids.append(test_id)
+                    test_data['_id'] = test_id
+                    test_data['result_id'] = result_id
+
+                    # Add to be inserted later
+                    insert_tests.append(test_data)
+
+                    # Set the ID in the results for this test
+                    # to this test's ID
+                    folder_tests_entry[test_name] = test_id
+
+        # Do the insertion
         with self.setup_client() as client:
             db = client[database]
 
-            test_ids = None
-
-            # Store tests separately
-            if tests:
-                # Accumulate test data to be inserted, and also keep
-                # track of the names in this order so that we can
-                # in the main results object replace each test
-                # with the corresponding ID of the test within
-                # the separate tests collection
-                insert_tests = []
-                insert_test_names = []
-                for folder_name, folder_entry in result['tests'].items():
-                    for test_name, test_entry in folder_entry['tests'].items():
-                        test_data = tests[test_entry]
-                        test_data['result_id'] = None
-                        insert_tests.append(test_data)
-                        insert_test_names.append((folder_name, test_name))
-
-                # Do the insertion
-                inserted = db.tests.insert_many(insert_tests)
-                assert inserted.acknowledged
-                test_ids = inserted.inserted_ids
-                print(f'Inserted {len(test_ids)} tests into {database}')
-
-                # For each inserted test, update the results data
-                # so that it can reference the corresponding inserted
-                # test (instead of storing the data within itself)
-                for i, (folder_name, test_name) in enumerate(insert_test_names):
-                    result['tests'][folder_name]['tests'][test_name] = test_ids[i]
-
-            # Store the result
-            inserted = db.results.insert_one(result)
-            assert inserted.acknowledged
-            result_id = inserted.inserted_id
+            inserted_result = db.results.insert_one(result)
+            assert inserted_result.acknowledged
+            assert result_id == inserted_result.inserted_id
             print(f'Inserted result {result_id} into {database}')
 
-            # If we stored tests separately, we now need to update
-            # 'result_id' on each of the tests (now that the result
-            # has been inserted) so that each test can reference
-            # its parent result object
-            if test_ids:
-                filter = {'_id': {'$in': test_ids}}
-                update = {'$set': {'result_id': result_id}}
-                updated = db.tests.update_many(filter, update)
-                assert updated.acknowledged
-                assert updated.modified_count == len(test_ids)
-                print('Updated test result IDs')
+            if insert_tests:
+                inserted_tests = db.tests.insert_many(insert_tests)
+                assert inserted_tests.acknowledged
+                assert set(test_ids) == set(inserted_tests.inserted_ids)
+                print(f'Inserted {len(test_ids)} tests into {database}')
 
-            return result_id, test_ids
+        return result_id, test_ids
 
     def main(self, result_path: str, database: str, base_sha: str,
              **kwargs) -> Tuple[ObjectId, Optional[list[ObjectId]]]:
