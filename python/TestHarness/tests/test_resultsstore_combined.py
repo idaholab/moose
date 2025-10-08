@@ -17,7 +17,10 @@ from TestHarness.resultsstore.civetstore import CIVETStore
 from TestHarness.resultsstore.reader import ResultsReader
 from TestHarness.resultsstore.storedresults import StoredResult, TestName
 
-from test_resultsstore_civetstore import TEST_DATABASE, base_civet_env, random_id
+from test_resultsstore_civetstore import base_civet_env, random_id
+
+# Name for the database used for testing database store
+TEST_DATABASE = 'civet_tests_moose_resultsstore_combined'
 
 HAS_STORE_AUTH = CIVETStore.has_authentication()
 HAS_READER_AUTH = ResultsReader.hasEnvironmentAuthentication()

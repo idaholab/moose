@@ -24,7 +24,7 @@ from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
 HAS_AUTH = CIVETStore.has_authentication()
 
 # Name for the database used for testing database store
-TEST_DATABASE = 'civet_tests_moose_resultsstore'
+TEST_DATABASE = 'civet_tests_moose_resultsstore_civetstore'
 
 # Generate a random Git SHA
 def random_git_sha() -> str:
