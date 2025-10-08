@@ -215,6 +215,7 @@ class TestResultsSummary(TestHarnessTestCase):
         summary = TestHarnessResultsSummary(None)
 
         head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
+        #mock head run time is lower than the head run time threadshold (fake_run_time_floor)
         head_test._data['timing']['runner_run'] = 0.5
 
         removed_table, added_table, same_table = summary.diff_table(
@@ -253,7 +254,7 @@ class TestResultsSummary(TestHarnessTestCase):
 
         base_test = base_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
         head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
-
+        #mock base and head runtime, so that relative run time rate is less than fake_run_time_rate_floor
         base_test._data['timing']['runner_run'] = 10
         head_test._data['timing']['runner_run'] = 13
 
@@ -295,7 +296,7 @@ class TestResultsSummary(TestHarnessTestCase):
 
         base_test = base_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
         head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
-
+        #mock base and head runtime, so that relative run time rate is higher than fake_run_time_rate_floor
         base_test._data['timing']['runner_run'] = 10
         head_test._data['timing']['runner_run'] = 17
 
@@ -331,6 +332,7 @@ class TestResultsSummary(TestHarnessTestCase):
             '### Removed Tests:\n'
             'No Removed Tests'
         )
+
         self.assertIn('Removed Tests:',format_removed_table)
         self.assertIn('No Removed Tests',format_removed_table)
         self.assertEqual(expected_output,format_removed_table)
@@ -345,14 +347,12 @@ class TestResultsSummary(TestHarnessTestCase):
         removed_table = [[str(MOCKED_TEST_NAME)]]
         summary = TestHarnessResultsSummary(None)
         format_removed_table = summary._format_removed_table(removed_table)
-
         expected_table = tabulate(
             removed_table,
             headers=["Test Name"],
             tablefmt="github"
         )
         expected_output = f"### Removed Tests:\n{expected_table}"
-
         self.assertEqual(expected_output,format_removed_table)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
@@ -384,7 +384,6 @@ class TestResultsSummary(TestHarnessTestCase):
         added_table = [[str(MOCKED_TEST_NAME),10]]
         summary = TestHarnessResultsSummary(None)
         format_added_table = summary._format_added_table(added_table)
-
         expected_table = tabulate(
             added_table,
             headers=["Test Name", "Run Time"],
@@ -439,7 +438,9 @@ class TestResultsSummary(TestHarnessTestCase):
         """
         mock_init_reader.return_value = None
         summary = TestHarnessResultsSummary(None)
+
         no_change_buid_summary = summary.build_summary(None,None,None)
+
         self.assertIn('Removed Tests',no_change_buid_summary)
         self.assertIn('No Removed Tests',no_change_buid_summary)
         self.assertIn('New Tests',no_change_buid_summary)
@@ -458,7 +459,9 @@ class TestResultsSummary(TestHarnessTestCase):
         removed_table =[[str(MOCKED_TEST_NAME)]]
         added_table =[[str(MOCKED_TEST_NAME),10]]
         same_table =[[str(MOCKED_TEST_NAME),10,17,'70.00%']]
+
         has_test_build_summary = summary.build_summary(removed_table,added_table,same_table)
+
         self.assertIn('Removed Tests',has_test_build_summary)
         self.assertIn('New Tests',has_test_build_summary)
         self.assertIn('Same Tests',has_test_build_summary)
@@ -477,9 +480,11 @@ class TestResultsSummary(TestHarnessTestCase):
         """
         mock_init_reader.return_value = None
         summary = TestHarnessResultsSummary(None)
+
         with tempfile.NamedTemporaryFile() as tmp_file:
             output_result = 'File Path Exist and able to write file'
             summary.summary_output_file(output_result,tmp_file.name)
+            #check output file is able to read
             with open(tmp_file.name, 'r') as f:
                 output = f.read()
                 self.assertEqual(output_result, output)
@@ -499,7 +504,7 @@ class TestResultsSummary(TestHarnessTestCase):
         stdout = StringIO()
         with redirect_stdout(stdout):
             summary.summary_output_file(output_result,invalid_path)
-
+            #check error message when file path is invalid
             output = stdout.getvalue()
             self.assertIn("Failed to write to", output)
 
@@ -563,7 +568,7 @@ class TestResultsSummary(TestHarnessTestCase):
                 )
                 self.assertIsNone(summary_result)
                 self.assertIn('Comparison not available', stdout.getvalue())
-
+                #check skip message is displayed in output file
                 with open(tmp_file.name, 'r') as f:
                     output = f.read()
                     self.assertIn('Comparison not available', output)
@@ -584,7 +589,7 @@ class TestResultsSummary(TestHarnessTestCase):
             with redirect_stdout(stdout):
                 with self.assertRaisesRegex(SystemExit, 'Results do not exist for event'):
                     summary.pr(event_id=EVENT_ID,out=tmp_file.name)
-
+                #check error message is displayed in output file
                 with open(tmp_file.name, 'r') as f:
                     output = f.read()
                     self.assertIn('Results do not exist for event', output)
