@@ -84,7 +84,7 @@ MFEMProblem::addMFEMNonlinearSolver()
   nl_solver->SetRelTol(1e-12);
   nl_solver->SetAbsTol(1e-9);
   nl_solver->SetPrintLevel(2);
-  nl_solver->SetMaxIter(1);
+  nl_solver->SetMaxIter(100);
 
   getProblemData().nonlinear_solver = nl_solver;
 }
