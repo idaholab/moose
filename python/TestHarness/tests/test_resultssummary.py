@@ -13,6 +13,7 @@ import tempfile
 from mock import patch
 from contextlib import redirect_stdout
 from io import StringIO
+from tabulate import tabulate
 
 from TestHarness.resultsstore.reader import ResultsReader
 from TestHarness.resultssummary.summary import TestHarnessResultsSummary
@@ -194,7 +195,7 @@ class TestResultsSummary(TestHarnessTestCase):
                                                                     head_test_no_names)
 
         self.assertEqual(len(removed_table),base_result_with_tests.num_tests)
-        self.assertEqual(removed_table,list(base_test_names))
+        self.assertEqual(removed_table[0],str(MOCKED_TEST_NAME))
         self.assertIsNone(added_table)
         self.assertIsNone(same_table)
 
@@ -355,57 +356,198 @@ class TestResultsSummary(TestHarnessTestCase):
         self.assertIsNone(removed_table)
         self.assertIsNone(added_table)
 
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
-    def testBuildSummaryNoChange(self):
+    def testFormatRemovedTableNoRemovedTest(self,mock_init_reader):
+        """
+        Tests formatting remove table when there is no removed tests.
+        """
+        mock_init_reader.return_value = None
+        removed_table = None
+        summary = TestHarnessResultsSummary(None)
+        format_removed_table = summary._format_removed_table(removed_table)
+        expected_output = (
+            '### Removed Tests:\n'
+            'No Removed Tests'
+        )
+        self.assertIn('Removed Tests:',format_removed_table)
+        self.assertIn('No Removed Tests',format_removed_table)
+        self.assertEqual(expected_output,format_removed_table)
+    
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
+    def testFormatRemovedTableHasRemovedTest(self,mock_init_reader):
+        """
+        Tests formatting remove table when there is removed tests.
+        """
+        mock_init_reader.return_value = None
+        removed_table = [[str(MOCKED_TEST_NAME)]]
+        summary = TestHarnessResultsSummary(None)
+        format_removed_table = summary._format_removed_table(removed_table)
+        
+        expected_table = tabulate(
+            removed_table,
+            headers=["Test Name"],
+            tablefmt="github"
+        )
+        expected_output = f"### Removed Tests:\n{expected_table}"
+        
+        self.assertEqual(expected_output,format_removed_table)
+
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
+    def testFormatAddedTableNoAddedTest(self,mock_init_reader):
+        """
+        Tests formatting added table when there is no added tests.
+        """
+        mock_init_reader.return_value = None
+        added_table = None
+        summary = TestHarnessResultsSummary(None)
+        format_added_table = summary._format_added_table(added_table)
+        expected_output = (
+            '### New Tests:\n'
+            'No New Tests'
+        )
+        self.assertIn('New Tests:',format_added_table)
+        self.assertIn('No New Tests',format_added_table)
+        self.assertEqual(expected_output,format_added_table)
+
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
+    def testFormatAddedTableHasAddedTest(self,mock_init_reader):
+        """
+        Tests formatting added table when there is added tests.
+        """
+        mock_init_reader.return_value = None
+        #fake added_table list
+        added_table = [[str(MOCKED_TEST_NAME),10]]
+        summary = TestHarnessResultsSummary(None)
+        format_added_table = summary._format_added_table(added_table)
+
+        expected_table = tabulate(
+            added_table,
+            headers=["Test Name", "Run Time"],
+            tablefmt="github"
+        )
+        expected_output = f"### New Tests:\n{expected_table}"
+        self.assertEqual(expected_output,format_added_table)
+    
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
+    def testFormatSameTableNoSameTest(self,mock_init_reader):
+        """
+        Tests formatting same table when there is no tests.
+        """
+        mock_init_reader.return_value = None
+        same_table = None
+        summary = TestHarnessResultsSummary(None)
+        format_same_table = summary._format_same_table(same_table)
+        expected_output = (
+            '### Same Tests that exceed relative run time rate:\n'
+            'No Tests'
+        )
+        self.assertIn('Same Tests',format_same_table)
+        self.assertIn('No Tests',format_same_table)
+        self.assertEqual(expected_output,format_same_table)
+
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
+    def testFormatSameTableHasSameTest(self,mock_init_reader):
+        """
+        Tests formatting same table when there is same tests with high relative runtime
+        """
+        mock_init_reader.return_value = None
+        same_table =[[str(MOCKED_TEST_NAME),10,17,'70.00%']]
+        summary = TestHarnessResultsSummary(None)
+        format_same_table = summary._format_same_table(same_table)
+
+        expected_table = tabulate(
+            same_table,
+            headers=["Test Name", "Base Run Time", "Head Run Time", "Relative Run Time Rate"],
+            tablefmt="github"
+        )
+        expected_output = f"### Same Tests that exceed relative run time rate:\n{expected_table}"
+
+        self.assertEqual(format_same_table, expected_output)
+
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
+    def testBuildSummaryNoChanges(self,mock_init_reader):
         """
         Tests building a summary when there are no changes between base and head test names.
         """
-        summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
-        with tempfile.NamedTemporaryFile() as tmp_file:
-            tmp_path = tmp_file.name
-        base_results, head_results, base_names, head_names = summary.pr_test_names(event_id=EVENT_ID,out=tmp_path)
-        removed_table, added_table, same_table = summary.diff_table(base_results, head_results,base_names,head_names)
+        mock_init_reader.return_value = None
+        summary = TestHarnessResultsSummary(None)
+        no_change_buid_summary = summary.build_summary(None,None,None)
+        self.assertIn('Removed Tests',no_change_buid_summary)
+        self.assertIn('No Removed Tests',no_change_buid_summary)
+        self.assertIn('New Tests',no_change_buid_summary)
+        self.assertIn('No New Tests',no_change_buid_summary)
+        self.assertIn('Same Tests',no_change_buid_summary)
+        self.assertIn('No Tests',no_change_buid_summary)
 
-        self.assertIsNone(removed_table)
-        self.assertIsNone(added_table)
-        self.assertIsNone(same_table)
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
+    def testBuildSummaryHasTests(self,mock_init_reader):
+        """
+        Tests building a summary when a test are removed from base, newly added and same tests with high runtime
+        """
+        mock_init_reader.return_value = None
+        summary = TestHarnessResultsSummary(None)
+        removed_table =[[str(MOCKED_TEST_NAME)]]
+        added_table =[[str(MOCKED_TEST_NAME),10]]
+        same_table =[[str(MOCKED_TEST_NAME),10,17,'70.00%']]
+        has_test_build_summary = summary.build_summary(removed_table,added_table,same_table)
+        self.assertIn('Removed Tests',has_test_build_summary)
+        self.assertIn('New Tests',has_test_build_summary)
+        self.assertIn('Same Tests',has_test_build_summary)
+        self.assertIn('Test Name',has_test_build_summary)
+        self.assertIn('Run Time',has_test_build_summary)
+        self.assertIn(str(MOCKED_TEST_NAME),has_test_build_summary)
+        self.assertIn(str(10),has_test_build_summary)
+        self.assertIn(str(17),has_test_build_summary)
+        self.assertIn('70.00%',has_test_build_summary)
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
-    def testBuildSummaryRemovedTest(self):
+    def testSummaryOutputFileValidPath(self):
         """
-        Tests building a summary when a test is removed from base
+        Tests summary output file when output file path exit and there is no change between base and head.
         """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
         with tempfile.NamedTemporaryFile() as tmp_file:
             tmp_path = tmp_file.name
-        base_results, head_results, base_names, _ = summary.pr_test_names(event_id=EVENT_ID,out=tmp_path)
-        removed_table, added_table, same_table = summary.diff_table(base_results,head_results,base_names,set())
+        stdout = StringIO()
+        with redirect_stdout(stdout):
+            summary_result = summary.pr(event_id=EVENT_ID, out=tmp_path)
 
-        self.assertEqual(len(removed_table), 1)
-        self.assertEqual(removed_table[0], TEST_NAME)
-        self.assertIsNone(added_table)
-        self.assertIsNone(same_table)
+            summary.summary_output_file(summary_result,tmp_path)
+            with open(tmp_path, 'r') as f:
+                output = f.read()
+            self.assertIn('Removed Tests:', output)
+            self.assertIn('No Removed Tests', output)
+            self.assertIn('New Tests:', output)
+            self.assertIn('No New Tests', output)
+            self.assertIn('Same Tests', output)
+            self.assertIn('No Tests', output)
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
-    def testBuildSummaryAddedTest(self):
+    def testSummaryOutputFileInvalidPath(self):
         """
-        Tests building a summary when a test is newly added in the head test names.
+        Tests that summary_output_file when output file path is invalid.
         """
         summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
-        with tempfile.NamedTemporaryFile() as tmp_file:
-            tmp_path = tmp_file.name
-        base_results, head_results, _, head_names = summary.pr_test_names(event_id=EVENT_ID,out=tmp_path)
-        removed_table, added_table,same_table = summary.diff_table(base_results, head_results, set(), head_names)
+        invalid_path = '/this/path/does/not/exist/output.txt'
+        stdout = StringIO()
+        with redirect_stdout(stdout):
+            summary_result = summary.pr(event_id=EVENT_ID, out=invalid_path)
 
-        reader = ResultsReader(TEST_DATABASE_NAME)
-        results = reader.getEventResults(event_id=EVENT_ID)
-        test_result = results.get_test(TEST_NAME.folder, TEST_NAME.name)
+        stdout = StringIO()
+        with redirect_stdout(stdout):
+            summary.summary_output_file(summary_result, invalid_path)
 
-        self.assertEqual(len(added_table), 1)
-        self.assertEqual(added_table[0][0], str(TEST_NAME))
-        self.assertEqual(added_table[0][1], test_result.run_time)
-        self.assertIsNone(removed_table)
-        self.assertIsNone(same_table)
+        output = stdout.getvalue()
+        self.assertIn("Failed to write to", output)
+
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testPRNoChange(self):
@@ -442,46 +584,6 @@ class TestResultsSummary(TestHarnessTestCase):
         with redirect_stdout(stdout):
             summary.pr(event_id=EVENT_ID,out=tmp_path)
         self.assertIn('Comparison not available', stdout.getvalue())
-
-    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
-    def testSummaryOutputFileValidPath(self):
-        """
-        Tests summary output file when output file path exit and there is no change between base and head.
-        """
-        summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
-        with tempfile.NamedTemporaryFile() as tmp_file:
-            tmp_path = tmp_file.name
-        stdout = StringIO()
-        with redirect_stdout(stdout):
-            summary_result = summary.pr(event_id=EVENT_ID, out=tmp_path)
-
-            summary.summary_output_file(summary_result,tmp_path)
-            with open(tmp_path, 'r') as f:
-                output = f.read()
-            self.assertIn('Removed Tests:', output)
-            self.assertIn('No Removed Tests', output)
-            self.assertIn('New Tests:', output)
-            self.assertIn('No New Tests', output)
-            self.assertIn('Same Tests', output)
-            self.assertIn('No Tests', output)
-
-    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
-    def testSummaryOutputFileInvalidPath(self):
-        """
-        Tests that summary_output_file when output file path is invalid.
-        """
-        summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
-        invalid_path = "/this/path/does/not/exist/output.txt"
-        stdout = StringIO()
-        with redirect_stdout(stdout):
-            summary_result = summary.pr(event_id=EVENT_ID, out=invalid_path)
-
-        stdout = StringIO()
-        with redirect_stdout(stdout):
-            summary.summary_output_file(summary_result, invalid_path)
-
-        output = stdout.getvalue()
-        self.assertIn("Failed to write to", output)
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testMain(self):
