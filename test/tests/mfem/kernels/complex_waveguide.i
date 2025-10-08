@@ -156,7 +156,7 @@ elec_cond_air = 0.0
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/ComplexERMES
+    file_base = OutputData/ComplexWaveguide
     vtk_format = ASCII
   []
 []
