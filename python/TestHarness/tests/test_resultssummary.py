@@ -373,7 +373,7 @@ class TestResultsSummary(TestHarnessTestCase):
         self.assertIn('Removed Tests:',format_removed_table)
         self.assertIn('No Removed Tests',format_removed_table)
         self.assertEqual(expected_output,format_removed_table)
-    
+
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testFormatRemovedTableHasRemovedTest(self,mock_init_reader):
@@ -384,14 +384,14 @@ class TestResultsSummary(TestHarnessTestCase):
         removed_table = [[str(MOCKED_TEST_NAME)]]
         summary = TestHarnessResultsSummary(None)
         format_removed_table = summary._format_removed_table(removed_table)
-        
+
         expected_table = tabulate(
             removed_table,
             headers=["Test Name"],
             tablefmt="github"
         )
         expected_output = f"### Removed Tests:\n{expected_table}"
-        
+
         self.assertEqual(expected_output,format_removed_table)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
@@ -431,7 +431,7 @@ class TestResultsSummary(TestHarnessTestCase):
         )
         expected_output = f"### New Tests:\n{expected_table}"
         self.assertEqual(expected_output,format_added_table)
-    
+
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testFormatSameTableNoSameTest(self,mock_init_reader):

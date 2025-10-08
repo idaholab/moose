@@ -79,94 +79,6 @@ class TestHarnessResultsSummary:
 
         return parser.parse_args()
 
-    @staticmethod
-    def diff_table(base_results: StoredResult, head_results: StoredResult, base_names: set[TestName],
-                   head_names: set[TestName], **kwargs) -> Tuple[Optional[list], Optional[list]]:
-        """
-        Compare test names between the base and current head, and return
-        the difference
-
-        Parameters
-        ----------
-        base_results : StoredResult
-            An object that provides access to test results for the head
-        head_results : StoredResult
-            An object that provides access to test results for the head
-        base_names : set of TestName
-            The set of test names from the base commit.
-        head_names : set of TestName
-            The set of test names from the current head commit.
-
-        Optional Parameters
-        -------------------
-        --run-time-floor : float
-            The runtime at which to not check for a difference
-            (default: 1 s)
-        --run-time-rate-floor : float
-            The runtime rate at which to not attach in same_table summary
-            (default: 0.5 i.e 50%)
-
-        Returns
-        -------
-        removed_table : list or None
-            A list of test names that were present in the base but not in the head.
-        added_table : list or None
-            A list of newly added test names along with their runtime.
-        same_table : list or None
-            A list of test names, runtime and relative runtime rate that exist in both base and head, where:
-            - The head runtime exceeds a predefined threshold (run-time-floor).
-            - The relative runtime increase exceeds a defined rate (run-time-rate-floor).
-        """
-        assert isinstance(base_results, StoredResult)
-        assert isinstance(head_results, StoredResult)
-        assert isinstance(head_names,(set, NoneType))
-        assert isinstance(base_names,(set, NoneType))
-
-        head_run_time_floor = kwargs.pop('run_time_floor', 1)
-        assert isinstance(head_run_time_floor, (float, int))
-
-        run_time_rate_floor = kwargs.pop('run_time_rate_floor', 0.5)
-        assert isinstance(run_time_rate_floor, (float, int))
-
-        removed_names = base_names - head_names
-        if removed_names:
-            removed_table = list(removed_names)
-        else:
-            removed_table = None
-
-        add_names = head_names - base_names
-        if add_names:
-            added_table = []
-            for test_name in add_names:
-                test_result = head_results.get_test(test_name.folder, test_name.name)
-                added_table.append([str(test_name), test_result.run_time])
-        else:
-            added_table = None
-
-        same_names = base_names & head_names
-        if same_names:
-            same_table = []
-            for test_name in same_names:
-                base_result = base_results.get_test(test_name.folder, test_name.name)
-                head_result = head_results.get_test(test_name.folder, test_name.name)
-                if (head_result.run_time is None or
-                    base_result.run_time is None or
-                    head_result.run_time < head_run_time_floor):
-                    continue
-                else:
-                    relative_runtime = abs(head_result.run_time - base_result.run_time)/ base_result.run_time
-                    if relative_runtime >= run_time_rate_floor:
-                        same_table.append([str(test_name),
-                                           base_result.run_time,
-                                           head_result.run_time,
-                                           f'{relative_runtime:.2%}'
-                                           ])
-            if not same_table:
-                same_table = None
-        else:
-            same_table = None
-        return removed_table, added_table, same_table
-
     def get_commit_results(self, commit: str) -> Optional[StoredResult]:
         return self.reader.getCommitResults(commit)
 
@@ -232,13 +144,141 @@ class TestHarnessResultsSummary:
         base_test_names = set(base_results.test_names)
         return base_results, head_results, base_test_names, test_names
 
+    @staticmethod
+    def diff_table(base_results: StoredResult, head_results: StoredResult, base_names: set[TestName],
+                   head_names: set[TestName], **kwargs) -> Tuple[Optional[list], Optional[list]]:
+        """
+        Compare test names between the base and current head, and return
+        the difference
+
+        Parameters
+        ----------
+        base_results : StoredResult
+            An object that provides access to test results for the head
+        head_results : StoredResult
+            An object that provides access to test results for the head
+        base_names : set of TestName
+            The set of test names from the base commit.
+        head_names : set of TestName
+            The set of test names from the current head commit.
+
+        Optional Parameters
+        -------------------
+        --run-time-floor : float
+            The runtime at which to not check for a difference
+            (default: 1 s)
+        --run-time-rate-floor : float
+            The runtime rate at which to not attach in same_table summary
+            (default: 0.5 i.e 50%)
+
+        Returns
+        -------
+        removed_table : list or None
+            A list of test names that were present in the base but not in the head.
+        added_table : list or None
+            A list of newly added test names along with their runtime.
+        same_table : list or None
+            A list of test names, runtime and relative runtime rate that exist in both base and head, where:
+            - The head runtime exceeds a predefined threshold (run-time-floor).
+            - The relative runtime increase exceeds a defined rate (run-time-rate-floor).
+        """
+        assert isinstance(base_results, StoredResult)
+        assert isinstance(head_results, StoredResult)
+        assert isinstance(head_names,(set, NoneType))
+        assert isinstance(base_names,(set, NoneType))
+
+        head_run_time_floor = kwargs.pop('run_time_floor', 1)
+        assert isinstance(head_run_time_floor, (float, int))
+
+        run_time_rate_floor = kwargs.pop('run_time_rate_floor', 0.5)
+        assert isinstance(run_time_rate_floor, (float, int))
+
+        removed_names = base_names - head_names
+        if removed_names:
+            removed_table = []
+            for test_name in removed_names:
+                removed_table.append(str(test_name))
+        else:
+            removed_table = None
+
+        add_names = head_names - base_names
+        if add_names:
+            added_table = []
+            for test_name in add_names:
+                test_result = head_results.get_test(test_name.folder, test_name.name)
+                added_table.append([str(test_name), test_result.run_time])
+        else:
+            added_table = None
+
+        same_names = base_names & head_names
+        if same_names:
+            same_table = []
+            for test_name in same_names:
+                base_result = base_results.get_test(test_name.folder, test_name.name)
+                head_result = head_results.get_test(test_name.folder, test_name.name)
+                if (head_result.run_time is None or
+                    base_result.run_time is None or
+                    head_result.run_time < head_run_time_floor):
+                    continue
+                else:
+                    relative_runtime = abs(head_result.run_time - base_result.run_time)/ base_result.run_time
+                    if relative_runtime >= run_time_rate_floor:
+                        same_table.append([str(test_name),
+                                           base_result.run_time,
+                                           head_result.run_time,
+                                           f'{relative_runtime:.2%}'
+                                           ])
+            if not same_table:
+                same_table = None
+        else:
+            same_table = None
+        return removed_table, added_table, same_table
+
+    def _format_removed_table(self, removed_table: list) -> str:
+        assert isinstance(removed_table,(list,NoneType))
+        format_removed_table = ["### Removed Tests:"]
+        if removed_table:
+            format_removed_table.append(tabulate(removed_table, headers=["Test Name"], tablefmt="github"))
+        else:
+            format_removed_table.append("No Removed Tests")
+        return "\n".join(format_removed_table)
+
+    def _format_added_table(self, added_table: list) -> str:
+        assert isinstance(added_table,(list,NoneType))
+        format_added_table = ["### New Tests:"]
+        if added_table:
+            format_added_table.append(
+                tabulate(
+                    added_table,
+                    headers=["Test Name", "Run Time"],
+                    tablefmt="github"
+                )
+            )
+        else:
+            format_added_table.append("No New Tests")
+        return "\n".join(format_added_table)
+
+    def _format_same_table(self, same_table: list) -> str:
+        assert isinstance(same_table,(list,NoneType))
+        format_same_table = ["### Same Tests that exceed relative run time rate:"]
+        if same_table:
+            format_same_table.append(
+                tabulate(
+                    same_table,
+                    headers=["Test Name",
+                             "Base Run Time",
+                             "Head Run Time",
+                             "Relative Run Time Rate"],
+                    tablefmt="github"
+                )
+            )
+        else:
+            format_same_table.append("No Tests")
+        return "\n".join(format_same_table)
+
     def build_summary(self, removed_table: list, added_table: list, same_table: list) -> str:
         """
-        Build a summary report of removed and newly added tests.
-
-        This method generates a formatted string summary that lists tests
-        removed from the base and tests newly added in the head, including
-        their runtime.
+        Build a summary report of removed, newly added tests, same test with high relative runtime rate
 
         Parameters
         ----------
@@ -254,44 +294,42 @@ class TestHarnessResultsSummary:
         Returns
         -------
         summary : str
-            A formatted string summarizing removed and new tests, same tests with  using GitHub-style format
+            A formatted string summarizing removed and new tests,
+            same tests with high relative runtime rate
+            using GitHub-style format
         """
         assert isinstance(removed_table,(list,NoneType))
         assert isinstance(added_table,(list,NoneType))
         assert isinstance(same_table,(list,NoneType))
 
         summary = []
-        summary.append("### Removed Tests:")
-        if removed_table:
-            table = [[str(test_name)] for test_name in removed_table]
-            summary.append(tabulate(table, headers=["Test Name"], tablefmt="github"))
-        else:
-            summary.append("No Removed Tests")
+        summary.append(self._format_removed_table(removed_table))
+        summary.append(self._format_added_table(added_table))
+        summary.append(self._format_same_table(same_table))
 
-        summary.append("### New Tests:")
-        if added_table:
-            summary.append(
-                tabulate(
-                    added_table,
-                    headers=["Test Name", "Run Time"],
-                    tablefmt="github"
-                )
-            )
-        else:
-            summary.append("No New Tests")
-
-        summary.append(f"### Same Tests that exceed relative run time rate")
-        if same_table:
-            summary.append(
-                tabulate(
-                    same_table,
-                    headers=["Test Name", "Base Run Time", "Head Run Time", "Relative Run Time Rate"],
-                    tablefmt="github"
-                )
-            )
-        else:
-            summary.append("No Tests")
         return "\n".join(summary)
+
+    def summary_output_file(self, output_result: str, out: str) -> None:
+        """
+        Write the summary result to a specified output file.
+
+        Parameters
+        ----------
+        output_result : str
+            The formatted summary string to be written to the file.
+        out : str
+            The file path where the summary should be saved.
+
+        Returns
+        -------
+        None
+            This method does not return anything. It performs a file write operation.
+        """
+        try:
+            with open(out, 'w') as f:
+                f.write(output_result)
+        except Exception as e:
+            print(f"Failed to write to {out}: {e}")
 
     def pr(self, **kwargs) -> str:
         """
@@ -332,31 +370,9 @@ class TestHarnessResultsSummary:
         self.summary_output_file(summary_result,out)
         return summary_result
 
-    def summary_output_file(self, output_result: str, out: str) -> None:
-        """
-        Write the summary result to a specified output file.
-
-        Parameters
-        ----------
-        output_result : str
-            The formatted summary string to be written to the file.
-        out : str
-            The file path where the summary should be saved.
-
-        Returns
-        -------
-        None
-            This method does not return anything. It performs a file write operation.
-        """
-        try:
-            with open(out, 'w') as f:
-                f.write(output_result)
-        except Exception as e:
-            print(f"Failed to write to {out}: {e}")
-
     def main(self, **kwargs):
         action = kwargs['action']
-        summary_result = getattr(self, action)(**kwargs)
+        getattr(self, action)(**kwargs)
 
 if __name__ == '__main__':
     args = TestHarnessResultsSummary.parseArgs()
