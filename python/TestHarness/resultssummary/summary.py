@@ -35,6 +35,12 @@ class TestHarnessResultsSummary:
             The action to perform (e.g., 'pr').
         - event_id : int
             The event ID (required for the 'pr' action).
+        --run-time-floor : float
+            Set minimum threshold for the head test run time
+            (default: 1 s)
+        --run-time-rate-floor : float
+            Set minimum relative run time ratio between base and head
+            (default: 0.5 i.e 50%)
         """
         parser = argparse.ArgumentParser(description='Produces a summary from test harness results')
         parent = argparse.ArgumentParser(add_help=False)
@@ -108,11 +114,11 @@ class TestHarnessResultsSummary:
             The test results object for base related to the given event.
         head_results : StoredResult
             The test results object for the given event.
-        test_names : set of str
-            A set of test names associated with the pull request event.
         base_test_names : set of str or None
             A set of test names from the base commit. Returns `None` if no
             baseline results are found for the base SHA.
+        test_names : set of str
+            A set of test names associated with the pull request event.
 
         Raises
         ------
@@ -154,7 +160,7 @@ class TestHarnessResultsSummary:
         Parameters
         ----------
         base_results : StoredResult
-            An object that provides access to test results for the head
+            An object that provides access to test results for the base
         head_results : StoredResult
             An object that provides access to test results for the head
         base_names : set of TestName
@@ -235,6 +241,9 @@ class TestHarnessResultsSummary:
         return removed_table, added_table, same_table
 
     def _format_removed_table(self, removed_table: list) -> str:
+        """
+        Formatting GitHub-style table for removed test results
+        """
         assert isinstance(removed_table,(list,NoneType))
         format_removed_table = ["### Removed Tests:"]
         if removed_table:
@@ -244,6 +253,9 @@ class TestHarnessResultsSummary:
         return "\n".join(format_removed_table)
 
     def _format_added_table(self, added_table: list) -> str:
+        """
+        Formatting GitHub-style table for added test results
+        """
         assert isinstance(added_table,(list,NoneType))
         format_added_table = ["### New Tests:"]
         if added_table:
@@ -259,6 +271,9 @@ class TestHarnessResultsSummary:
         return "\n".join(format_added_table)
 
     def _format_same_table(self, same_table: list) -> str:
+        """
+        Formatting GitHub-style table for same test results that exceed relative run time rate
+        """
         assert isinstance(same_table,(list,NoneType))
         format_same_table = ["### Same Tests that exceed relative run time rate:"]
         if same_table:
