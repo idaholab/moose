@@ -575,6 +575,7 @@ MooseVariableDataBase<OutputType>::fetchDoFValues()
         // tag is defined on problem but may not be used by a system
         // the grain tracker requires being able to read from solution vectors that we are also in
         // the process of writing :-/
+        // Note: the extra vector tags are also still not closed when a TagVectorAux uses them
         if (_sys.hasVector(tag) /* && _sys.getVector(tag).closed()*/)
         {
           auto & vec = _sys.getVector(tag);
@@ -592,8 +593,10 @@ MooseVariableDataBase<OutputType>::fetchDoFValues()
     {
       _matrix_tags_dof_u[tag].resize(n);
       if (_need_matrix_tag_dof_u[tag] || _need_matrix_tag_u[tag])
-        if (_sys.hasMatrix(tag) && _sys.matrixTagActive(tag) && _sys.getMatrix(tag).closed())
+        if (_sys.hasMatrix(tag) && _sys.matrixTagActive(tag))
         {
+          mooseAssert(_sys.getMatrix(tag).closed(),
+                      "Matrix with tag '" + std::to_string(tag) + "' should be closed");
           auto & mat = _sys.getMatrix(tag);
           for (unsigned i = 0; i < n; i++)
             _matrix_tags_dof_u[tag][i] = mat(_dof_indices[i], _dof_indices[i]);
@@ -685,8 +688,12 @@ MooseVariableDataBase<RealEigenVector>::fetchDoFValues()
          _subproblem.safeAccessTaggedVectors()) ||
         _subproblem.vectorTagType(tag) == Moose::VECTOR_TAG_SOLUTION)
       // tag is defined on problem but may not be used by a system
-      if (_sys.hasVector(tag) && _sys.getVector(tag).closed())
+      if (_sys.hasVector(tag))
+      {
+        mooseAssert(_sys.getVector(tag).closed(),
+                    "Vector with tag '" + std::to_string(tag) + "' should be closed");
         getArrayDoFValues(_sys.getVector(tag), n, _vector_tags_dof_u[tag]);
+      }
 
   if (_subproblem.safeAccessTaggedMatrices())
   {
@@ -696,8 +703,10 @@ MooseVariableDataBase<RealEigenVector>::fetchDoFValues()
     {
       _matrix_tags_dof_u[tag].resize(n);
       if (_need_matrix_tag_dof_u[tag] || _need_matrix_tag_u[tag])
-        if (_sys.hasMatrix(tag) && _sys.matrixTagActive(tag) && _sys.getMatrix(tag).closed())
+        if (_sys.hasMatrix(tag) && _sys.matrixTagActive(tag))
         {
+          mooseAssert(_sys.getMatrix(tag).closed(),
+                      "Matrix with tag '" + std::to_string(tag) + "' should be closed");
           auto & mat = _sys.getMatrix(tag);
           for (unsigned i = 0; i < n; i++)
             for (unsigned j = 0; j < _count; j++)

@@ -597,11 +597,16 @@ MooseVariableData<OutputType>::computeValuesInternal()
   // Vector tags
   for (auto tag : _required_vector_tags)
   {
-    mooseAssert(_sys.getVector(tag).closed(), "Should be closed");
     if (_need_vector_tag_u[tag] && _sys.hasVector(tag))
+    {
+      mooseAssert(_sys.getVector(tag).closed(), "Vector should be closed");
       fill(_vector_tag_u[tag], *_current_phi, _vector_tags_dof_u[tag]);
+    }
     if (_need_vector_tag_grad[tag] && _sys.hasVector(tag))
+    {
+      mooseAssert(_sys.getVector(tag).closed(), "Vector should be closed");
       fill(_vector_tag_grad[tag], *_current_grad_phi, _vector_tags_dof_u[tag]);
+    }
   }
 
   // Matrix tags
