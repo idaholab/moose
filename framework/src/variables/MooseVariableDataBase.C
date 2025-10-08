@@ -596,10 +596,7 @@ MooseVariableDataBase<OutputType>::fetchDoFValues()
         {
           auto & mat = _sys.getMatrix(tag);
           for (unsigned i = 0; i < n; i++)
-          {
-            Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
             _matrix_tags_dof_u[tag][i] = mat(_dof_indices[i], _dof_indices[i]);
-          }
         }
     }
   }
@@ -703,11 +700,8 @@ MooseVariableDataBase<RealEigenVector>::fetchDoFValues()
         {
           auto & mat = _sys.getMatrix(tag);
           for (unsigned i = 0; i < n; i++)
-          {
-            Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
             for (unsigned j = 0; j < _count; j++)
               _matrix_tags_dof_u[tag][i](j) = mat(_dof_indices[i] + j, _dof_indices[i] + j);
-          }
         }
     }
   }
