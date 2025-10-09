@@ -1,7 +1,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "libmesh/ignore_warnings.h"
-//#include "mfem/miniapps/common/mfem-common.hpp"
+// #include "mfem/miniapps/common/mfem-common.hpp"
 #include "libmesh/restore_warnings.h"
 #include "MFEMObjectUnitTest.h"
 #include "MFEMComplexScalarDirichletBC.h"
@@ -19,10 +19,12 @@ public:
 
   MFEMComplexEssentialBCTest()
     : MFEMObjectUnitTest("MooseUnitApp"),
-      _scalar_fes(_mfem_mesh_ptr->getMFEMParMeshPtr().get(), new mfem::H1_FECollection(1,3)),
-      _vector_h1_fes(_mfem_mesh_ptr->getMFEMParMeshPtr().get(), new mfem::H1_FECollection(1,3, mfem::BasisType::GaussLobatto),3),
-      _vector_hcurl_fes(_mfem_mesh_ptr->getMFEMParMeshPtr().get(), new mfem::ND_FECollection(2,3)),
-      _vector_hdiv_fes(_mfem_mesh_ptr->getMFEMParMeshPtr().get(), new mfem::RT_FECollection(2,3)),
+      _scalar_fes(_mfem_mesh_ptr->getMFEMParMeshPtr().get(), new mfem::H1_FECollection(1, 3)),
+      _vector_h1_fes(_mfem_mesh_ptr->getMFEMParMeshPtr().get(),
+                     new mfem::H1_FECollection(1, 3, mfem::BasisType::GaussLobatto),
+                     3),
+      _vector_hcurl_fes(_mfem_mesh_ptr->getMFEMParMeshPtr().get(), new mfem::ND_FECollection(2, 3)),
+      _vector_hdiv_fes(_mfem_mesh_ptr->getMFEMParMeshPtr().get(), new mfem::RT_FECollection(2, 3)),
       _scalar_gridfunc(&_scalar_fes),
       _vector_h1_gridfunc(&_vector_h1_fes),
       _vector_hcurl_gridfunc(&_vector_hcurl_fes),
@@ -96,7 +98,8 @@ TEST_F(MFEMComplexEssentialBCTest, MFEMComplexScalarDirichletConstantBC)
   bc_params.set<MFEMScalarCoefficientName>("coefficient_real") = "1.";
   bc_params.set<MFEMScalarCoefficientName>("coefficient_imag") = "1.";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  auto & essential_bc = addObject<MFEMComplexScalarDirichletBC>("MFEMComplexScalarDirichletBC", "bc1", bc_params);
+  auto & essential_bc =
+      addObject<MFEMComplexScalarDirichletBC>("MFEMComplexScalarDirichletBC", "bc1", bc_params);
 
   EXPECT_EQ(essential_bc.getTrialVariableName(), "test_cpx_variable_name");
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_cpx_variable_name");
@@ -111,7 +114,7 @@ TEST_F(MFEMComplexEssentialBCTest, MFEMComplexScalarDirichletConstantBC)
       1,
       _scalar_fes,
       [&scalar_variable_real](mfem::ElementTransformation * transform,
-                         const mfem::IntegrationPoint & point)
+                              const mfem::IntegrationPoint & point)
       { return scalar_variable_real.Eval(*transform, point) - 1.; },
       1e-8);
 
@@ -119,11 +122,10 @@ TEST_F(MFEMComplexEssentialBCTest, MFEMComplexScalarDirichletConstantBC)
       1,
       _scalar_fes,
       [&scalar_variable_imag](mfem::ElementTransformation * transform,
-                         const mfem::IntegrationPoint & point)
+                              const mfem::IntegrationPoint & point)
       { return scalar_variable_imag.Eval(*transform, point) - 1.; },
       1e-8);
 }
-
 
 ///**
 // * Test MFEMScalarDirichletBC can be constructed and applied successfully
@@ -136,7 +138,8 @@ TEST_F(MFEMComplexEssentialBCTest, MFEMComplexScalarDirichletBC)
   bc_params.set<MFEMScalarCoefficientName>("coefficient_real") = "func1";
   bc_params.set<MFEMScalarCoefficientName>("coefficient_imag") = "func1";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  auto & essential_bc = addObject<MFEMComplexScalarDirichletBC>("MFEMComplexScalarDirichletBC", "bc1", bc_params);
+  auto & essential_bc =
+      addObject<MFEMComplexScalarDirichletBC>("MFEMComplexScalarDirichletBC", "bc1", bc_params);
 
   EXPECT_EQ(essential_bc.getTrialVariableName(), "test_cpx_variable_name");
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_cpx_variable_name");
@@ -152,14 +155,14 @@ TEST_F(MFEMComplexEssentialBCTest, MFEMComplexScalarDirichletBC)
       1,
       _scalar_fes,
       [&scalar_variable_real, &expected](mfem::ElementTransformation * transform,
-                                    const mfem::IntegrationPoint & point)
+                                         const mfem::IntegrationPoint & point)
       { return scalar_variable_real.Eval(*transform, point) - expected.Eval(*transform, point); },
       1e-8);
   check_boundary(
       1,
       _scalar_fes,
       [&scalar_variable_imag, &expected](mfem::ElementTransformation * transform,
-                                    const mfem::IntegrationPoint & point)
+                                         const mfem::IntegrationPoint & point)
       { return scalar_variable_imag.Eval(*transform, point) - expected.Eval(*transform, point); },
       1e-8);
 }
@@ -176,8 +179,8 @@ TEST_F(MFEMComplexEssentialBCTest, MFEMComplexVectorNormalDirichletConstantBC)
   bc_params.set<MFEMVectorCoefficientName>("vector_coefficient_real") = "1. 2. 3.";
   bc_params.set<MFEMVectorCoefficientName>("vector_coefficient_imag") = "1. 2. 3.";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  auto & essential_bc =
-      addObject<MFEMComplexVectorNormalDirichletBC>("MFEMComplexVectorNormalDirichletBC", "bc1", bc_params);
+  auto & essential_bc = addObject<MFEMComplexVectorNormalDirichletBC>(
+      "MFEMComplexVectorNormalDirichletBC", "bc1", bc_params);
 
   EXPECT_EQ(essential_bc.getTrialVariableName(), "test_cpx_variable_name");
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_cpx_variable_name");
@@ -193,7 +196,7 @@ TEST_F(MFEMComplexEssentialBCTest, MFEMComplexVectorNormalDirichletConstantBC)
       1,
       _vector_hdiv_fes,
       [this, &variable_real, &assigned_val](mfem::ElementTransformation * transform,
-                                       const mfem::IntegrationPoint & point)
+                                            const mfem::IntegrationPoint & point)
       {
         mfem::Vector actual(3), expected(3), normal = calc_normal(transform);
         variable_real.Eval(actual, *transform, point);
@@ -207,7 +210,7 @@ TEST_F(MFEMComplexEssentialBCTest, MFEMComplexVectorNormalDirichletConstantBC)
       1,
       _vector_hdiv_fes,
       [this, &variable_imag, &assigned_val](mfem::ElementTransformation * transform,
-                                       const mfem::IntegrationPoint & point)
+                                            const mfem::IntegrationPoint & point)
       {
         mfem::Vector actual(3), expected(3), normal = calc_normal(transform);
         variable_imag.Eval(actual, *transform, point);
@@ -230,8 +233,8 @@ TEST_F(MFEMComplexEssentialBCTest, MFEMComplexVectorNormalDirichletBC)
   bc_params.set<MFEMVectorCoefficientName>("vector_coefficient_real") = "func2";
   bc_params.set<MFEMVectorCoefficientName>("vector_coefficient_imag") = "func2";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
-  auto & essential_bc =
-      addObject<MFEMComplexVectorNormalDirichletBC>("MFEMComplexVectorNormalDirichletBC", "bc1", bc_params);
+  auto & essential_bc = addObject<MFEMComplexVectorNormalDirichletBC>(
+      "MFEMComplexVectorNormalDirichletBC", "bc1", bc_params);
 
   EXPECT_EQ(essential_bc.getTrialVariableName(), "test_cpx_variable_name");
   EXPECT_EQ(essential_bc.getTestVariableName(), "test_cpx_variable_name");
@@ -248,7 +251,7 @@ TEST_F(MFEMComplexEssentialBCTest, MFEMComplexVectorNormalDirichletBC)
       1,
       _vector_hdiv_fes,
       [this, &variable_real, &function](mfem::ElementTransformation * transform,
-                                   const mfem::IntegrationPoint & point)
+                                        const mfem::IntegrationPoint & point)
       {
         mfem::Vector actual(3), expected(3), normal = calc_normal(transform);
         variable_real.Eval(actual, *transform, point);
@@ -262,7 +265,7 @@ TEST_F(MFEMComplexEssentialBCTest, MFEMComplexVectorNormalDirichletBC)
       1,
       _vector_hdiv_fes,
       [this, &variable_imag, &function](mfem::ElementTransformation * transform,
-                                   const mfem::IntegrationPoint & point)
+                                        const mfem::IntegrationPoint & point)
       {
         mfem::Vector actual(3), expected(3), normal = calc_normal(transform);
         variable_imag.Eval(actual, *transform, point);
@@ -302,7 +305,7 @@ TEST_F(MFEMComplexEssentialBCTest, MFEMComplexVectorTangentialDirichletConstantB
       1,
       _vector_hcurl_fes,
       [this, &variable_real, &expected](mfem::ElementTransformation * transform,
-                                   const mfem::IntegrationPoint & point)
+                                        const mfem::IntegrationPoint & point)
       {
         mfem::Vector actual(3), normal = calc_normal(transform), cross_prod(3);
         variable_real.Eval(actual, *transform, point);
@@ -318,7 +321,7 @@ TEST_F(MFEMComplexEssentialBCTest, MFEMComplexVectorTangentialDirichletConstantB
       1,
       _vector_hcurl_fes,
       [this, &variable_imag, &expected](mfem::ElementTransformation * transform,
-                                   const mfem::IntegrationPoint & point)
+                                        const mfem::IntegrationPoint & point)
       {
         mfem::Vector actual(3), normal = calc_normal(transform), cross_prod(3);
         variable_imag.Eval(actual, *transform, point);
@@ -361,7 +364,7 @@ TEST_F(MFEMComplexEssentialBCTest, MFEMComplexVectorTangentialDirichletBC)
       1,
       _vector_hcurl_fes,
       [this, &variable_real, &function](mfem::ElementTransformation * transform,
-                                   const mfem::IntegrationPoint & point)
+                                        const mfem::IntegrationPoint & point)
       {
         mfem::Vector actual(3), expected(3), normal = calc_normal(transform), cross_prod(3);
         variable_real.Eval(actual, *transform, point);
@@ -378,7 +381,7 @@ TEST_F(MFEMComplexEssentialBCTest, MFEMComplexVectorTangentialDirichletBC)
       1,
       _vector_hcurl_fes,
       [this, &variable_imag, &function](mfem::ElementTransformation * transform,
-                                   const mfem::IntegrationPoint & point)
+                                        const mfem::IntegrationPoint & point)
       {
         mfem::Vector actual(3), expected(3), normal = calc_normal(transform), cross_prod(3);
         variable_imag.Eval(actual, *transform, point);
@@ -392,7 +395,5 @@ TEST_F(MFEMComplexEssentialBCTest, MFEMComplexVectorTangentialDirichletBC)
       },
       1e-8);
 }
-
-
 
 #endif

@@ -12,7 +12,8 @@ public:
   {
     // Register a dummy ParComplexGridFunction for the variable the BCs apply to
     auto pm = _mfem_mesh_ptr->getMFEMParMeshPtr().get();
-    auto pgf = std::make_shared<mfem::ParComplexGridFunction>(new mfem::ParFiniteElementSpace(pm, new mfem::H1_FECollection(1, pm->Dimension())));
+    auto pgf = std::make_shared<mfem::ParComplexGridFunction>(
+        new mfem::ParFiniteElementSpace(pm, new mfem::H1_FECollection(1, pm->Dimension())));
     _mfem_problem->getProblemData().cpx_gridfunctions.Register("test_cpx_variable_name", pgf);
   }
 };
@@ -30,7 +31,7 @@ TEST_F(MFEMComplexIntegratedBCTest, MFEMComplexIntegratedLinearFormBC)
   bc_complex_params.set<VariableName>("variable") = "test_cpx_variable_name";
   bc_normal_params.set<VariableName>("variable") = "test_cpx_variable_name";
   bc_normal_params.set<MFEMVectorCoefficientName>("vector_coefficient") = "1. 2. 3.";
-  bc_normal_params.set<std::vector<BoundaryName>>("boundary") = {"1"};  
+  bc_normal_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
 
   MFEMBoundaryNormalIntegratedBC & normal_integrated_bc = addObject<MFEMBoundaryNormalIntegratedBC>(
       "MFEMBoundaryNormalIntegratedBC", "bc1", bc_normal_params);
