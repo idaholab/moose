@@ -34,7 +34,7 @@ MFEMTransient::MFEMTransient(const InputParameters & params)
   // If no ProblemOperators have been added by the user, add a default
   if (getProblemOperators().empty())
   {
-    _mfem_problem_data.eqn_system = std::make_shared<Moose::MFEM::TimeDependentEquationSystem>();
+    _mfem_problem_data.eqn_system = std::make_shared<Moose::MFEM::TimeDependentEquationSystem>(_mfem_problem_data.time_derivative_map);
     auto problem_operator =
         std::make_shared<Moose::MFEM::TimeDomainEquationSystemProblemOperator>(_mfem_problem);
     addProblemOperator(std::move(problem_operator));

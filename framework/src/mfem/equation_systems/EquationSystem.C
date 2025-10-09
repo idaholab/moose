@@ -451,7 +451,7 @@ EquationSystem::BuildEquationSystem()
   BuildLinearForms();
 }
 
-TimeDependentEquationSystem::TimeDependentEquationSystem() : _dt_coef(1.0) {}
+TimeDependentEquationSystem::TimeDependentEquationSystem(const Moose::MFEM::TimeDerivativeMap & time_derivative_map) : _dt_coef(1.0), _time_derivative_map(time_derivative_map) {}
 
 void
 TimeDependentEquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
@@ -483,14 +483,12 @@ TimeDependentEquationSystem::SetTimeStep(mfem::real_t dt)
 void
 TimeDependentEquationSystem::SetTrialVariableNames()
 {
-  // When implicit, also register test_var_name in _eliminated_variables
-  // for the elimination of 'old' variable values from the previous timestep
   // The TimeDependentEquationSystem operator expects to act on a vector of variable time
-  // derivatives, so the trial variable must be the time derivative of the 'base' variable
+  // derivatives, so the trial variable must be the time derivative of the 'base' variable. The base
+  // variable (test_var_name) without derivatives applied must also be coupled in implicit
+  // timestepping schemes for the elimination of 'old' variable values from the previous timestep
   for (const auto & test_var_name : _test_var_names)
   {
-    const auto time_derivative_test_var_name = CreateTimeDerivativeName(test_var_name);
-    time_derivative_map.insert({test_var_name, time_derivative_test_var_name});
     AddCoupledVariableNameIfMissing(test_var_name);
     AddCoupledVariableNameIfMissing(GetTimeDerivativeName(test_var_name));
   }
