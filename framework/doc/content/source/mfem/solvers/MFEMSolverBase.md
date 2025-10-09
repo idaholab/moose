@@ -9,15 +9,16 @@ Base class for `mfem::Solver` objects to use in MFEM problems.
 ## Overview
 
 Classes derived from `MFEMSolverBase` can usually be used as preconditioners or linear solvers; the
-`constructSolver` method should be overridden to construct a `shared_ptr` to an `mfem::Solver`
-derived object, and the `getSolver` method should return the `shared_ptr` for use during a solve.
+`constructSolver` method should be overridden to construct a `unique_ptr` to an `mfem::Solver`
+derived object. The `getSolver` method returns a reference to the underlying `mfem::Solver`
+for use during a solve.
 
 Problem-specific information - such as finite element spaces used in the set-up of some
 preconditioners - can be passed to the `mfem::Solver` at construction time.
 
-Most solvers have the option of being used as Low-Order-Refined (LOR) preconditioner, by setting their respective `low_order_refined` parameter to `true`. LOR solvers work by taking a problem and casting it onto a spectrally equivalent one with lower polynomial order and more refined mesh. Due to the scaling properties of the computing time with respect to polynomial order and mesh size, this change will often result in a significant performance improvement, which tends to be more pronounced at higher polynomial orders. More details can be found [here](https://mfem.org/pdf/workshop21/15_WillPazner_High_Order_Solvers.pdf).
+Most solvers have the option of being used as a Low-Order-Refined (LOR) preconditioner, by setting their respective `low_order_refined` parameter to `true`. LOR solvers work by taking a problem and casting it onto a spectrally equivalent one with lower polynomial order and more refined mesh. Due to the scaling properties of the computing time with respect to polynomial order and mesh size, this change will often result in a significant performance improvement, which tends to be more pronounced at higher polynomial orders. More details can be found [here](https://mfem.org/pdf/workshop21/15_WillPazner_High_Order_Solvers.pdf).
 
-!alert note Solving a problem with vector variables with the LOR method requires a specific choice of quadrature basis for the low-order and the high-order systems to be spectrally equivalent. Therefore, if you are solving an H(Curl) or H(Div) problem with an LOR solver, you must set `closed_basis = GaussLobatto` and `open_basis = IntegratedGLL` in the corresponding `FESpaces` block.
+!alert note Solving a problem with vector variables with the LOR method requires a specific choice of basis for the low-order and the high-order systems to be spectrally equivalent. Therefore, if you are solving (a) an H1 problem or (b) an H(Curl) or H(Div) problem with an LOR solver, you must set (a) `basis = GaussLobatto` (default) or (b) `closed_basis = GaussLobatto` (default) and `open_basis = IntegratedGLL` in the corresponding `FESpaces` block.
 
 
 !if-end!

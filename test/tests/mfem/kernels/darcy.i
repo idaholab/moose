@@ -34,6 +34,7 @@
     type = MFEMScalarFESpace
     fec_type = L2
     fec_order = SECOND
+    basis = GaussLegendre
   []
 []
 
