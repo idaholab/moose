@@ -16,39 +16,20 @@ import pymongo
 from pymongo.cursor import Cursor
 from bson.objectid import ObjectId
 
-from TestHarness.resultsreader.results import TestHarnessResults, TestHarnessTestResult
+from TestHarness.resultsstore.storedresults import StoredResult, StoredTestResult
+from TestHarness.resultsstore.auth import Authentication, load_authentication, has_authentication
 
 NoneType = type(None)
 
-class TestHarnessResultsReader:
+class ResultsReader:
     """
     Utility for reading test harness results stored in a mongodb database
     """
     # Default sort ID from mongo
     mongo_sort_id = sort=[('_id', pymongo.DESCENDING)]
 
-    @dataclass
-    class Authentication:
-        """
-        Helper class for storing the authentication to a mongo database
-        """
-        def __post_init__(self):
-            assert isinstance(self.host, str)
-            assert isinstance(self.username, str)
-            assert isinstance(self.password, str)
-            assert isinstance(self.port, (int, NoneType))
-
-        # The host name
-        host: str
-        # The username
-        username: str
-        # The password
-        password: str
-        # The port
-        port: Optional[int] = None
-
     def __init__(self, database: str, client: Optional[pymongo.MongoClient | Authentication] = None):
-        self.client: pymongo.MongoClient = None
+        self._client: pymongo.MongoClient = None
         assert isinstance(database, str)
 
         # No client; test the environment
@@ -57,39 +38,38 @@ class TestHarnessResultsReader:
             if client is None:
                 raise ValueError("Must specify either 'client' or set RESULTS_READER_AUTH_FILE with credentials")
         if isinstance(client, pymongo.MongoClient):
-            self.client = client
-        elif isinstance(client, self.Authentication):
-            self.client = pymongo.MongoClient(client.host, username=client.username, password=client.password)
+            self._client = client
+        elif isinstance(client, Authentication):
+            self._client = pymongo.MongoClient(client.host, username=client.username, password=client.password)
         else:
             raise TypeError(f"Invalid type for 'client'")
 
         # Get the database
-        self.database: str = database
-        if database not in self.client.list_database_names():
+        if database not in self._client.list_database_names():
             raise ValueError(f'Database {database} not found')
-        self.db = self.client.get_database(database)
+        self._db = self._client.get_database(database)
 
         # Cached results, by ID
-        self._results: dict[ObjectId, Optional[TestHarnessResults]] = {}
+        self._results: dict[ObjectId, Optional[StoredResult]] = {}
         # Cached results by PR number
-        self._pr_num_results: dict[int, Optional[TestHarnessResults]] = {}
+        self._pr_num_results: dict[int, Optional[StoredResult]] = {}
         # Cached results by event ID
-        self._event_id_results: dict[int, Optional[TestHarnessResults]] = {}
+        self._event_id_results: dict[int, Optional[StoredResult]] = {}
         # Cached results by commit
-        self._event_sha_results: dict[str, Optional[TestHarnessResults]] = {}
+        self._event_sha_results: dict[str, Optional[StoredResult]] = {}
 
-        # Cached TestHarnessResults objects for events, in order from latest
-        self._latest_event_results: list[TestHarnessResults] = []
-        # The last event that we searched
-        self._last_latest_event_id: Optional[ObjectId] = None
+        # Cached StoredResult objects for push events, latest to oldest
+        self._latest_push_results: list[StoredResult] = []
+        # The last push event that we searched
+        self._last_latest_push_event_id: Optional[ObjectId] = None
 
     def __del__(self):
         # Clean up the client if it is loaded
-        if self.client is not None:
-            self.client.close()
+        if self._client is not None:
+            self._client.close()
 
     @staticmethod
-    def loadEnvironmentAuthentication() -> Authentication | None:
+    def loadEnvironmentAuthentication() -> Optional[Authentication]:
         """
         Attempts to first load the authentication environment from
         env vars RESULTS_READER_AUTH_[HOST,USERNAME,PASSWORD] if
@@ -97,48 +77,19 @@ class TestHarnessResultsReader:
         environment from the file set by env var
         RESULTS_READER_AUTH_FILE if it is available.
         """
-        # Helpers for getting authentication variables
-        var_name = lambda k: f'RESULTS_READER_AUTH_{k.upper()}'
-        get_var = lambda k: os.environ.get(var_name(k))
-
-        # Try to get authentication from env
-        all_auth_keys = ['host', 'username', 'password']
-        auth = {}
-        for key in all_auth_keys:
-            v = get_var(key)
-            if v:
-                auth[key] = v
-        # Have all three set
-        if len(auth) == 3:
-            auth['port'] = get_var('port')
-            return TestHarnessResultsReader.Authentication(**auth)
-        # Have one or two but not all three set
-        if len(auth) != 0:
-            all_auth_vars = ' '.join(map(var_name, all_auth_keys))
-            raise ValueError(f'All environment variables "{all_auth_vars}" must be set for authentication')
-
-        # Try to get authentication from file
-        auth_file = get_var('file')
-        if auth_file is None:
-            return None
-        try:
-            with open(auth_file, 'r') as f:
-                values = yaml.safe_load(f)
-            return TestHarnessResultsReader.Authentication(**values)
-        except Exception as e:
-            raise Exception(f"Failed to load credentials from '{auth_file}'") from e
+        return load_authentication('RESULTS_READER')
 
     @staticmethod
     def hasEnvironmentAuthentication() -> bool:
         """
         Checks whether or not environment authentication is available
         """
-        return TestHarnessResultsReader.loadEnvironmentAuthentication() is not None
+        return has_authentication('RESULTS_READER')
 
     def getTestResults(self, folder_name: str, test_name: str, limit: int = 50,
-                       pr_num: Optional[int] = None) -> list[TestHarnessTestResult]:
+                       pr_num: Optional[int] = None) -> list[StoredTestResult]:
         """
-        Get the TestHarnessTestResults given a specific test.
+        Get the StoredTestResults given a specific test.
 
         Args:
             folder_name: The folder name for the test
@@ -147,7 +98,7 @@ class TestHarnessResultsReader:
             limit: The limit in the number of results to get
             pr_num: A pull request to also pull from
         """
-        test_results: list[TestHarnessTestResult] = []
+        test_results: list[StoredTestResult] = []
 
         # Append the PR result at the top, if any
         if pr_num is not None:
@@ -156,8 +107,10 @@ class TestHarnessResultsReader:
                 if pr_result.has_test(folder_name, test_name):
                     test_results.append(pr_result.get_test(folder_name, test_name))
 
-        # Get the event results
-        for result in self.getLatestEventResults():
+        # Get the event results, limited to limit or
+        # (limit - 1) if we have a PR
+        num = limit - len(test_results)
+        for result in self.iterateLatestPushResults(num):
             if result.has_test(folder_name, test_name):
                 test_result = result.get_test(folder_name, test_name)
                 test_results.append(test_result)
@@ -166,56 +119,93 @@ class TestHarnessResultsReader:
 
         return test_results
 
-    def _findResults(self, *args, **kwargs) -> Cursor:
+    def _findResults(self, *args, **kwargs) -> list[dict]:
         """
         Helper for querying the results database collection
 
         Used so that it can be easily movcked in unit tests
         """
-        return self.db.results.find(*args, **kwargs, sort=self.mongo_sort_id)
+        kwargs['sort'] = self.mongo_sort_id
+        with self._db.results.find(*args, **kwargs) as cursor:
+           return [d for d in cursor]
 
-    def getLatestEventResults(self) -> Iterator[TestHarnessResults]:
+    def getLatestPushResults(self, num: int) -> list[StoredResult]:
         """
-        Iterate through the latest unique event results
+        Get the latest results from push events, newest to oldest
         """
+        assert isinstance(num, int)
+        assert num > 0
+
+        results = []
+        for result in self.iterateLatestPushResults(num=num):
+            results.append(result)
+            if len(results) == num:
+                break
+        return results
+
+    def iterateLatestPushResults(self, num: Optional[int] = None) -> Iterator[StoredResult]:
+        """
+        Iterate through the latest unique push event results
+
+        The number of needed results can optionally be passed
+        in order to optimize the number of database queries
+        """
+        assert isinstance(num, (int, NoneType))
+
+        # If we were given a number we want, pull exactly
+        # however many more we need the first time around
+        if isinstance(num, int) and num > 0:
+            batch_size = num - len(self._latest_push_results)
+        # Otherwise, just pull one at a time
+        else:
+            batch_size = 1
+
         i = 0
+
         while True:
             # At end of cache, pull more results
-            if i == len(self._latest_event_results):
+            if i == len(self._latest_push_results):
                 # Searching for only events
                 filter = {"event_cause": {"$ne": "pr"}}
                 # Only search past what we've searched so far
-                if self._last_latest_event_id is not None:
-                    filter['_id'] = {"$lt": self._last_latest_event_id}
+                if self._last_latest_push_event_id is not None:
+                    filter['_id'] = {"$lt": self._last_latest_push_event_id}
 
-                cursor = self._findResults(filter, limit=10)
+                cursor = self._findResults(filter, limit=batch_size)
+
+                # After the first batch size (could be set by num),
+                # only pull one at a time. We should only ever
+                # hit this case when num is set if we find multiple
+                # entries for the same event (due to invalidation)
+                if isinstance(num, int):
+                    batch_size = 1
 
                 for data in cursor:
                     id = data.get('_id')
                     assert isinstance(id, ObjectId)
 
                     # So that we know where to search next time
-                    self._last_latest_event_id = id
+                    self._last_latest_push_event_id = id
 
                     # Due to invalidation, we could have multiple results
                     # from the same event. If we already have this event
                     # (the latest version of it), skip this one
                     event_id = data.get('event_id')
                     if event_id is not None and \
-                        any(r.event_id == event_id for r in self._latest_event_results):
+                        any(r.event_id == event_id for r in self._latest_push_results):
                         continue
 
                     # Build/get the result and store it for future use
                     result = self._buildResults(data)
-                    self._latest_event_results.append(result)
+                    self._latest_push_results.append(result)
 
-            if i < len(self._latest_event_results):
-                yield self._latest_event_results[i]
+            if i < len(self._latest_push_results):
+                yield self._latest_push_results[i]
                 i += 1
             else:
                 return
 
-    def _getCachedResults(self, index: str, value) -> TestHarnessResults:
+    def _getCachedResults(self, index: str, value) -> StoredResult:
         """
         Internal helper for getting a result given a filter and storing
         it in a cache given a key
@@ -229,7 +219,7 @@ class TestHarnessResultsReader:
 
         # Search for the value
         filter = {index: {"$eq": value}}
-        data = self.db.results.find_one(filter, sort=self.mongo_sort_id)
+        data = self._db.results.find_one(filter, sort=self.mongo_sort_id)
 
         # No such thing
         if data is None:
@@ -241,31 +231,31 @@ class TestHarnessResultsReader:
         cache[value] = result
         return result
 
-    def getEventResults(self, event_id: int) -> Union[TestHarnessResults, None]:
+    def getEventResults(self, event_id: int) -> Union[StoredResult, None]:
         """
-        Get the TestHarnessResults for a given event, if any
+        Get the StoredResult for a given event, if any
         """
         assert isinstance(event_id, int)
         return self._getCachedResults('event_id', event_id)
 
-    def getPRResults(self, pr_num: int) -> Union[TestHarnessResults, None]:
+    def getPRResults(self, pr_num: int) -> Union[StoredResult, None]:
         """
-        Get the TestHarnessResults for a given PR, if any
+        Get the StoredResult for a given PR, if any
         """
         assert isinstance(pr_num, int)
         return self._getCachedResults('pr_num', pr_num)
 
-    def getCommitResults(self, commit_sha: str) -> Union[TestHarnessResults, None]:
+    def getCommitResults(self, commit_sha: str) -> Union[StoredResult, None]:
         """
-        Get the TestHarnessResults for a given commit, if any
+        Get the StoredResult for a given commit, if any
         """
         assert isinstance(commit_sha, str)
         assert len(commit_sha) == 40
         return self._getCachedResults('event_sha', commit_sha)
 
-    def _buildResults(self, data: dict) -> TestHarnessTestResult:
+    def _buildResults(self, data: dict) -> StoredTestResult:
         """
-        Internal helper for building a TestHarnessTestResult given
+        Internal helper for building a StoredTestResult given
         the data from a results entry, also storing it in the cache
         """
         assert isinstance(data, dict)
@@ -277,7 +267,7 @@ class TestHarnessResultsReader:
         result = self._results.get(id)
         if result is None:
             try:
-                result = TestHarnessResults(data, self.db)
+                result = StoredResult(data, self._db)
             except Exception as e:
                 raise ValueError(f'Failed to build result _id={id}') from e
             self._results[id] = result
