@@ -306,7 +306,7 @@ EquationSystem::ApplyBoundaryLFIntegrators(
 class TimeDependentEquationSystem : public EquationSystem
 {
 public:
-  TimeDependentEquationSystem();
+  TimeDependentEquationSystem(const Moose::MFEM::TimeDerivativeMap &_time_derivative_map);
 
   /// Initialise
   virtual void Init(Moose::MFEM::GridFunctions & gridfunctions,
@@ -329,8 +329,8 @@ public:
 
   inline std::string GetTimeDerivativeName(const std::string & var_name)
   {
-    if (time_derivative_map.count(var_name))
-      return time_derivative_map[var_name];
+    if (_time_derivative_map.count(var_name))
+      return _time_derivative_map.at(var_name);
     else
     {
       mooseError("No variable representing the time derivative of ",
@@ -342,7 +342,7 @@ public:
 
   inline std::string GetTimeIntegralName(const std::string & time_derivative_var_name)
   {
-    for (auto const & [map_var_name, map_time_derivative_var_name] : time_derivative_map)
+    for (auto const & [map_var_name, map_time_derivative_var_name] : _time_derivative_map)
     {
       if (map_time_derivative_var_name == time_derivative_var_name)
         return map_var_name;
@@ -368,7 +368,7 @@ protected:
   std::vector<std::unique_ptr<mfem::ParGridFunction>> _td_var_ess_constraints;
 
   /// Map between variable names and their time derivatives
-  Moose::MFEM::TimeDerivativeMap time_derivative_map;
+  const Moose::MFEM::TimeDerivativeMap & _time_derivative_map;
 
 private:
   /// Set trial variable names from subset of coupled variables that have an associated test variable.
