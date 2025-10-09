@@ -541,6 +541,21 @@ class TestResultsStoredResults(TestHarnessTestCase):
         # Compare all of the data
         self._compareSerialized(results, new_result, True)
 
+    def testSerializeWithFilter(self):
+        """
+        Tests serialize() with test_filter set, only storing specific tests
+        """
+        results = self.buildResult().results
+
+        tests = list(results_test_iterator(results.data))
+        self.assertGreater(len(tests), 1)
+        keep_test = tests[0].name
+
+        serialized = results.serialize(test_filter=[keep_test])
+        serialized_tests = list(results_test_iterator(serialized))
+        self.assertEqual(len(serialized_tests), 1)
+        self.assertEqual(serialized_tests[0].name, keep_test)
+
     @patch.object(StoredResult, '_find_tests_data')
     def testLoadAllTestsMissing(self, patch_find_tests_data):
         """

@@ -12,7 +12,8 @@ import importlib
 from typing import Optional, Union
 from copy import deepcopy
 from TestHarness.validation.dataclasses import ValidationResult, ValidationData, ValidationDataTypesStr
-from TestHarness.resultsstore.utils import TestName, decompress_dict, compress_dict, results_test_iterator
+from TestHarness.resultsstore.utils import TestName, decompress_dict, compress_dict, \
+    results_folder_iterator, results_test_iterator
 
 from pymongo.database import Database
 from bson.objectid import ObjectId
@@ -730,12 +731,17 @@ class StoredResult:
         self.load_all_tests()
         return list(self._tests.values())
 
-    def serialize(self) -> dict:
+    def serialize(self, test_filter: Optional[list[TestName]] = None) -> dict:
         """
         Serializes this result into a dictionary that can be stored
         and reloaded later using deserialize/deserialize_build.
 
         Used primarily in unit testing.
+
+        Optional Parameters
+        -------------------
+        test_filter : Optional[list[TestName]]
+            Only store these named tests, if provided.
         """
         # Load all tests so that they can be stored
         self.load_all_tests()
@@ -748,25 +754,35 @@ class StoredResult:
         # Convert ObjectID to string id
         data['_id'] = str(data['_id'])
 
-        # Convert each test and store in place
-        for name, test_result in self._tests.items():
-            # Copy our data
-            data['tests'][name.folder]['tests'][name.name] = deepcopy(test_result.data)
-            test_entry = data['tests'][name.folder]['tests'][name.name]
+        for folder in results_folder_iterator(data):
+            for test in folder.test_iterator():
+                # Filter and not in the filter
+                if test_filter and test.name not in test_filter:
+                    test.delete()
+                    continue
 
-            # Convert ObjectID to string ID
-            test_entry['_id'] = str(test_entry['_id'])
-            if 'result_id' in test_entry:
-                test_entry['result_id'] = str(test_entry['result_id'])
+                # Duplicate test data for storage
+                test_data = deepcopy(self.get_test(test.folder_name, test.test_name).data)
 
-            # Convert binary JSON metadata to dict
-            json_metadata = test_entry.get('tester', {}).get('json_metadata', {})
-            for k, v in json_metadata.items():
-                json_metadata[k] = decompress_dict(v)
+                # Convert ObjectID to string ID
+                test_data['_id'] = str(test_data['_id'])
+                if 'result_id' in test_data:
+                    test_data['result_id'] = str(test_data['result_id'])
 
-            # Time entry existed before civet version 4
-            if self.civet_version < 4:
-                test_entry['time'] = str(test_entry['time'])
+                # Convert binary JSON metadata to dict
+                json_metadata = test_data.get('tester', {}).get('json_metadata', {})
+                for k, v in json_metadata.items():
+                    json_metadata[k] = decompress_dict(v)
+
+                # Time entry existed before civet version 4
+                if self.civet_version < 4:
+                    test_data['time'] = str(test_data['time'])
+
+                test.set_value(test_data)
+
+            # Don't store empty folders
+            if not folder.tests:
+                folder.delete()
 
         return data
 

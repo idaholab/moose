@@ -109,7 +109,7 @@ class TestResultsReader(unittest.TestCase):
             self.assertIsNotNone(results)
             self.assertTrue(results.has_test(PROD_TEST_NAME.folder, PROD_TEST_NAME.name))
 
-            gold[str(results.id)] = results.serialize()
+            gold[str(results.id)] = results.serialize(test_filter=[PROD_TEST_NAME])
 
             # Checks
             self.assertEqual(results.civet_version, gold_test.civet_version)
