@@ -38,11 +38,17 @@ PostprocessorConvergence::checkConvergenceInner(unsigned int /*iter*/)
   if (std::abs(_postprocessor) <= _tol)
   {
     std::ostringstream oss;
-    oss << "Converged due to |post-processor| (" << std::abs(_postprocessor) << ") <= tolerance ("
-        << _tol << ").";
+    oss << COLOR_GREEN << "Converged due to |post-processor| (" << std::abs(_postprocessor) << ") <= tolerance ("
+        << _tol << ")." << COLOR_DEFAULT;
     verboseOutput(oss);
     return MooseConvergenceStatus::CONVERGED;
   }
   else
+  {
+    std::ostringstream oss;
+    oss << "Still iterating due to |post-processor| (" << std::abs(_postprocessor) << ") > tolerance ("
+        << _tol << ").";
+    verboseOutput(oss);
     return MooseConvergenceStatus::ITERATING;
+  }
 }
