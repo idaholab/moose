@@ -1,0 +1,13 @@
+[Tests]
+  issues = '#31408'
+  design = shallow_water/index.md
+
+  [wet_dry]
+    type = Exodiff
+    input = wet_dry.i
+    exodiff = wet_dry_out.e
+    requirement = 'The system shall be able to model transitions between wet and dry cells.'
+    capabilities = 'method!=dbg'
+    heavy = true
+  []
+[]
