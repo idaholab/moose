@@ -30,7 +30,7 @@ MFEMProblem::validParams()
                              " the MFEM finite element library.");
   MooseEnum numeric_types("real complex", "real");
   params.addParam<MooseEnum>(
-    "numeric_type", numeric_types, "Number type used for the problem. Can be real or complex.");
+      "numeric_type", numeric_types, "Number type used for the problem. Can be real or complex.");
 
   return params;
 }
@@ -43,9 +43,9 @@ MFEMProblem::MFEMProblem(const InputParameters & params) : ExternalProblem(param
   libMesh::libMeshPrivateData::_n_threads = 1;
   setMesh();
 
-  if(getParam<MooseEnum>("numeric_type") == "real")
+  if (getParam<MooseEnum>("numeric_type") == "real")
     num_type = NumericType::REAL;
-  else if(getParam<MooseEnum>("numeric_type") == "complex")
+  else if (getParam<MooseEnum>("numeric_type") == "complex")
     num_type = NumericType::COMPLEX;
   else
     mooseError("Unknown numeric type. "
