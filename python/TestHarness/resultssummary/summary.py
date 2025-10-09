@@ -92,7 +92,7 @@ class TestHarnessResultsSummary:
         return self.reader.getEventResults(event_id)
 
     def pr_test_names(self, event_id: int, out_file: str) -> Tuple[Optional[StoredResult], Optional[StoredResult],
-        Optional[set], Optional[set]]:
+            Optional[set], Optional[set]]:
         """
         Retrieve test names and base test names for a pull request event.
 
