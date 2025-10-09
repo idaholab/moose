@@ -1,3 +1,10 @@
+mu = 1.0
+epsilon = 1.0
+sigma = 20.0
+omega = 10.0
+kappa_r = 12.7201964951406889525742371916
+kappa_i = -7.86151377757423297509831172647
+
 [Mesh]
   type = MFEMMesh
   file = ../mesh/inline-quad.mesh
@@ -25,59 +32,25 @@
 []
 
 [Functions]
-  [mu]
-    type = ParsedFunction
-    expression = 1.0
-  []
-  [epsilon]
-    type = ParsedFunction
-    expression = 1.0
-  []
-  [sigma]
-    type = ParsedFunction
-    expression = 20.0
-  []
-  [omega]
-    type = ParsedFunction
-    expression = 10.0
-  []
-  [kappa_r]
-    type = ParsedFunction
-    expression = 12.7201964951406889525742371916
-  []
-  [kappa_i]
-    type = ParsedFunction
-    expression = -7.86151377757423297509831172647
-  []
   [u0_r]
     type = ParsedFunction
-    expression = exp(y*kappa_i)*cos(y*kappa_r)
-    symbol_names = 'kappa_r kappa_i'
-    symbol_values = 'kappa_r kappa_i'
+    expression = exp(y*${kappa_i})*cos(y*${kappa_r})
   []
   [u0_i]
     type = ParsedFunction
-    expression = -exp(y*kappa_i)*sin(y*kappa_r)
-    symbol_names = 'kappa_r kappa_i'
-    symbol_values = 'kappa_r kappa_i'
+    expression = -exp(y*${kappa_i})*sin(y*${kappa_r})
   []
   [stiffnessCoef]
     type = ParsedFunction
-    expression = 1.0/mu
-    symbol_names = 'mu'
-    symbol_values = 'mu'
+    expression = 1.0/${mu}
   []
   [massCoef]
     type = ParsedFunction
-    expression = -omega*omega*epsilon
-    symbol_names = 'epsilon omega'
-    symbol_values = 'epsilon omega'
+    expression = -${omega}*${omega}*${epsilon}
   []
   [lossCoef]
     type = ParsedFunction
-    expression = omega*sigma
-    symbol_names = 'sigma omega'
-    symbol_values = 'sigma omega'
+    expression = ${omega}*${sigma}
   []
 []
 
