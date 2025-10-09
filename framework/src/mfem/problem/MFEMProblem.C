@@ -170,7 +170,8 @@ MFEMProblem::addVariable(const std::string & var_type,
   if (isTransient())
   {
     const auto time_derivative_var_name = Moose::MFEM::CreateTimeDerivativeName(var_name);
-    getProblemData().time_derivative_map.insert({var_name, time_derivative_var_name});  
+    getProblemData().time_derivative_map.addTimeDerivativeAssociation(var_name,
+                                                                      time_derivative_var_name);
     addGridFunction(var_type, time_derivative_var_name, parameters);
   }
 }
