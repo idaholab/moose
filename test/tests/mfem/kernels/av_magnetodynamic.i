@@ -41,6 +41,7 @@ exterior_bdr = '1 2 3'
   [time_integrated_electric_potential]
     type = MFEMVariable
     fespace = H1FESpace
+    time_derivative = electric_potential
   []
 []
 
