@@ -342,21 +342,6 @@ EquationSystem::BuildJacobian(mfem::BlockVector & trueX, mfem::BlockVector & tru
   FormLinearSystem(_jacobian, trueX, trueRHS);
 }
 
-void 
-EquationSystem::ApplyEssVals(const mfem::Vector &w, const mfem::Array<int> & constraint_list, mfem::Vector &x) const
-{
-   const int csz = constraint_list.Size();
-   auto idx = constraint_list.Read();
-   auto d_w = w.Read();
-   // Use read+write access - we are modifying sub-vector of x
-   auto d_x = x.ReadWrite(); 
-   mfem::forall(csz, [=] MFEM_HOST_DEVICE (int i)
-   {
-      const int id = idx[i];
-      d_x[id] = d_w[id];
-   });
-}
-
 void
 EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
 {
@@ -365,7 +350,6 @@ EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
   for (int i = 0; i < _trial_var_names.size(); i++)
   {
     auto & trial_var_name = _trial_var_names.at(i);
-    ApplyEssVals(*(_var_ess_constraints.at(i)), _ess_tdof_lists.at(i), _trueBlockSol.GetBlock(i));
     _gfuncs->Get(trial_var_name)->Distribute(&(_trueBlockSol.GetBlock(i)));
   }
 
