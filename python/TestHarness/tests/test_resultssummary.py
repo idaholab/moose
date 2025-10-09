@@ -567,11 +567,11 @@ class TestResultsSummary(TestHarnessTestCase):
                 event_id=EVENT_ID, out=tmp_file.name
                 )
                 self.assertIsNone(summary_result)
-                self.assertIn('Comparison not available', stdout.getvalue())
+                self.assertIn('Base results not available', stdout.getvalue())
                 #check skip message is displayed in output file
                 with open(tmp_file.name, 'r') as f:
                     output = f.read()
-                    self.assertIn('Comparison not available', output)
+                    self.assertIn('Base results not available', output)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')

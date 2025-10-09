@@ -29,18 +29,6 @@ class TestHarnessResultsSummary:
     def parseArgs() -> argparse.Namespace:
         """
         Parse command-line arguments for generating a test summary.
-        - database : str
-            The name of the database.
-        - action : str
-            The action to perform (e.g., 'pr').
-        - event_id : int
-            The event ID (required for the 'pr' action).
-        --run-time-floor : float
-            Set minimum threshold for the head test run time
-            (default: 1 s)
-        --run-time-rate-floor : float
-            Set minimum relative run time ratio between base and head
-            (default: 0.5 i.e 50%)
         """
         parser = argparse.ArgumentParser(description='Produces a summary from test harness results')
         parent = argparse.ArgumentParser(add_help=False)
@@ -86,9 +74,21 @@ class TestHarnessResultsSummary:
         return parser.parse_args()
 
     def get_commit_results(self, commit: str) -> Optional[StoredResult]:
+        """
+        The results associated with a commit.
+
+        This is a separate function so that it can be
+        mocked in unit tests
+        """
         return self.reader.getCommitResults(commit)
 
     def get_event_results(self, event_id: int) -> Optional[StoredResult]:
+        """
+        The results associated with a event_id.
+
+        This is a separate function so that it can be
+        mocked in unit tests
+        """
         return self.reader.getEventResults(event_id)
 
     def pr_test_names(self, **kwargs):
@@ -134,7 +134,7 @@ class TestHarnessResultsSummary:
         head_results = self.get_event_results(event_id)
         if head_results is None:
             error_msg = f'ERROR: Results do not exist for event {event_id}'
-            self.summary_output_file(error_msg, out)
+            self.write_output(error_msg, out)
             raise SystemExit(error_msg)
 
         test_names = set(head_results.test_names)
@@ -143,9 +143,9 @@ class TestHarnessResultsSummary:
 
         base_results = self.get_commit_results(base_sha)
         if not isinstance(base_results, StoredResult):
-            no_base =f"Comparison not available: no baseline results found for base SHA {base_sha}"
+            no_base =f"Base results not available for {base_sha}"
             print(no_base)
-            self.summary_output_file(no_base,out)
+            self.write_output(no_base,out)
             return None, head_results, None, test_names
         base_test_names = set(base_results.test_names)
         return base_results, head_results, base_test_names, test_names
@@ -170,10 +170,10 @@ class TestHarnessResultsSummary:
 
         Optional Parameters
         -------------------
-        --run-time-floor : float
+        run-time-floor : float
             The runtime at which to not check for a difference
             (default: 1 s)
-        --run-time-rate-floor : float
+        run-time-rate-floor : float
             The runtime rate at which to not attach in same_table summary
             (default: 0.5 i.e 50%)
 
@@ -222,7 +222,7 @@ class TestHarnessResultsSummary:
                     head_result.run_time < head_run_time_floor):
                     continue
                 else:
-                    relative_runtime = abs(head_result.run_time - base_result.run_time)/ base_result.run_time
+                    relative_runtime = abs(head_result.run_time - base_result.run_time) / base_result.run_time
                     if relative_runtime >= run_time_rate_floor:
                         same_table.append([str(test_name),
                                            base_result.run_time,
@@ -319,7 +319,7 @@ class TestHarnessResultsSummary:
 
         return "\n".join(summary)
 
-    def summary_output_file(self, output_result: str, out: str) -> None:
+    def write_output(self, output_result: str, out_file: str) -> None:
         """
         Write the summary result to a specified output file.
 
@@ -327,7 +327,7 @@ class TestHarnessResultsSummary:
         ----------
         output_result : str
             The formatted summary string to be written to the file.
-        out : str
+        out file : str
             The file path where the summary should be saved.
 
         Returns
@@ -336,10 +336,10 @@ class TestHarnessResultsSummary:
             This method does not return anything. It performs a file write operation.
         """
         try:
-            with open(out, 'w') as f:
+            with open(out_file, 'w') as f:
                 f.write(output_result)
         except Exception as e:
-            print(f"Failed to write to {out}: {e}")
+            print(f"Failed to write to {out_file}: {e}")
 
     def pr(self, **kwargs) -> str:
         """
@@ -377,7 +377,7 @@ class TestHarnessResultsSummary:
                                                                 )
         summary_result = self.build_summary(removed_table, added_table, same_table)
         print(summary_result)
-        self.summary_output_file(summary_result,out)
+        self.write_output(summary_result,out)
         return summary_result
 
     def main(self, **kwargs):
