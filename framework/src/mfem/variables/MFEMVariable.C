@@ -29,13 +29,22 @@ MFEMVariable::validParams()
   params.addClassDescription(
       "Class for adding MFEM variables to the problem (`mfem::ParGridFunction`s).");
   params.registerBase("MooseVariableBase");
+  params.addParam<VariableName>(
+      "time_derivative",
+      "Optional name to assign to the time derivative of the variable in transient problems.");
   return params;
 }
 
 MFEMVariable::MFEMVariable(const InputParameters & parameters)
   : MFEMGeneralUserObject(parameters),
     _fespace(getUserObject<MFEMFESpace>("fespace")),
-    _gridfunction(buildGridFunction())
+    _gridfunction(buildGridFunction()),
+    _time_derivative_name(
+        isParamValid("time_derivative")
+            ? getParam<VariableName>("time_derivative")
+            : VariableName(
+                  getMFEMProblem().getProblemData().time_derivative_map.createTimeDerivativeName(
+                      name())))
 {
   *_gridfunction = 0.0;
 }
