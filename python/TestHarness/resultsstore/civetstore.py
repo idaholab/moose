@@ -338,13 +338,12 @@ class CIVETStore:
         # Remove skipped tests if requested
         num_skipped_tests = 0
         if kwargs.get('ignore_skipped'):
-            for test in results_test_iterator(results):
-                if test.value['status']['status'] == 'SKIP':
-                    num_skipped_tests += 1
-                    test.delete()
-            # Remove folders without any tests
             for folder in results_folder_iterator(results):
-                if not folder.value:
+                for test in folder.test_iterator():
+                    if test.value['status']['status'] == 'SKIP':
+                        num_skipped_tests += 1
+                        test.delete()
+                if not folder.tests:
                     folder.delete()
 
         # Cleanup each test as needed
