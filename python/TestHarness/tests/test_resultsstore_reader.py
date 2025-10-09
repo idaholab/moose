@@ -12,6 +12,8 @@ from mock import patch
 from dataclasses import dataclass
 from copy import deepcopy
 from collections import OrderedDict
+from typing import Optional
+
 import os
 import json
 
@@ -58,6 +60,18 @@ class TestResultsReader(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+    @staticmethod
+    def replaceJSONMetadata(results: dict):
+        """
+        Simplify the tester json_metadata for each test
+        so that we can avoid storing excessive content
+        that is meaningless for a test
+        """
+        for test in results_test_iterator(results):
+            json_metadata = test.value.get('tester', {}).get('json_metadata', {})
+            for key in json_metadata.keys():
+                json_metadata[key] = {'fake_metadata_for': key}
+
     def buildProdGetTestResultsGold(self):
         """
         Builds a gold file for testing getTestResults(), using data
@@ -65,32 +79,30 @@ class TestResultsReader(unittest.TestCase):
         """
         @dataclass
         class GoldTest:
-            event_sha: str | None
-            event_id: str | None
             civet_version: int
+            event_sha: Optional[str] = None
+            event_id: Optional[int] = None
 
         # Static set of results from which to build the gold file
-        gold_tests = [GoldTest(event_sha='968f537a3c89ffb556fb7da18da28da52b592ee0',
-                               event_id=None,
-                               civet_version=0),
-                      GoldTest(event_sha='45b8a536530388e7bb1ff563398b1e94f2d691fc',
-                               event_id=None,
-                               civet_version=1),
-                      GoldTest(event_sha='3d48fa82c081e141fd86390dfb9edd1f11c984ca',
-                               event_id=None,
-                               civet_version=0),
-                      # bump to civet_version=2
-                      GoldTest(event_sha='1134c7e383972783be2ea702f2738ece79fe6a59',
-                               event_id=None,
-                               civet_version=2),
-                      # bump to civet_version=3 (added event_id)
-                      GoldTest(event_sha=None,
-                               event_id=258481,
-                               civet_version=3),
-                      # bump to civet_version=4 (remove indices from tests)
-                      GoldTest(event_sha=None,
-                               event_id=259309,
-                               civet_version=4)]
+        gold_tests = [
+            GoldTest(civet_version=0, event_sha='968f537a3c89ffb556fb7da18da28da52b592ee0'),
+            GoldTest(civet_version=0, event_sha='3d48fa82c081e141fd86390dfb9edd1f11c984ca'),
+            GoldTest(civet_version=1, event_sha='45b8a536530388e7bb1ff563398b1e94f2d691fc'),
+            # bump to civet_version=2
+            GoldTest(civet_version=2, event_sha='1134c7e383972783be2ea702f2738ece79fe6a59'),
+            # bump to civet_version=3
+            # - added event_id
+            GoldTest(civet_version=3, event_id=258481),
+            # bump to civet_version=4
+            # - remove indices from tests
+            GoldTest(civet_version=4, event_id=259309),
+            # bump to civet_version=5
+            GoldTest(civet_version=5, event_id=260038),
+            # bump to civet_version=6
+            # - tests can be stored with results
+            # - store moved to CIVETStore object
+            GoldTest(civet_version=6, event_id=260206)
+        ]
 
         # This can be set to true once to overwrite the gold file
         rewrite_gold = False
@@ -109,10 +121,22 @@ class TestResultsReader(unittest.TestCase):
             self.assertIsNotNone(results)
             self.assertTrue(results.has_test(PROD_TEST_NAME.folder, PROD_TEST_NAME.name))
 
-            gold[str(results.id)] = results.serialize(test_filter=[PROD_TEST_NAME])
+            # Serialize result so tha we can store it in a file
+            serialized = results.serialize(test_filter=[PROD_TEST_NAME])
+
+            # Replace JSON metadata with something smaller so that
+            # we don't need to store a large amount of data
+            self.replaceJSONMetadata(serialized)
+
+            # Store for output
+            gold[str(results.id)] = serialized
 
             # Checks
             self.assertEqual(results.civet_version, gold_test.civet_version)
+            if gold_test.event_sha:
+                self.assertEqual(results.event_sha, gold_test.event_sha)
+            elif gold_test.event_id:
+                self.assertEqual(results.event_id, gold_test.event_id)
 
         # Dump the values so that we can load them
         gold_dumped = json.dumps(gold, indent=2, sort_keys=True)
@@ -146,6 +170,10 @@ class TestResultsReader(unittest.TestCase):
 
         with open(PROD_GET_TEST_RESULTS_GOLD_PATH, 'r') as f:
             gold = json.load(f)
+
+        # Augment JSON metadata that was changed in the gold store
+        for result in gold.values():
+            self.replaceJSONMetadata(result)
 
         self.assertEqual(gold, json.loads(new_gold))
 
@@ -224,8 +252,9 @@ class TestResultsReader(unittest.TestCase):
         for result_entry in gold.values():
             for test in results_test_iterator(result_entry):
                 test_entry = test.value
-                tests[test_entry['_id']] = deepcopy(test_entry)
-                test.set_value(test_entry['_id'])
+                if '_id' in test_entry:
+                    tests[test_entry['_id']] = deepcopy(test_entry)
+                    test.set_value(test_entry['_id'])
 
         # Mock getting a test from mongodb
         def find_test_data(id):
@@ -255,6 +284,14 @@ class TestResultsReader(unittest.TestCase):
         database calls from within the StoredResult
         """
         gold = self.deserializeGold()
+
+        # Delete the ID and result_id in the tests if they exist
+        for result_entry in gold.values():
+            for test in results_test_iterator(result_entry):
+                test_entry = test.value
+                for key in ['_id', 'result_id']:
+                    if key in test_entry:
+                        del test_entry[key]
 
         # Mock getting the results from mongodb
         def get_results_data(*args, **kwargs):

@@ -765,9 +765,9 @@ class StoredResult:
                 test_data = deepcopy(self.get_test(test.folder_name, test.test_name).data)
 
                 # Convert ObjectID to string ID
-                test_data['_id'] = str(test_data['_id'])
-                if 'result_id' in test_data:
-                    test_data['result_id'] = str(test_data['result_id'])
+                for key in ['_id', 'result_id']:
+                    if key in test_data:
+                        test_data[key] = str(test_data[key])
 
                 # Convert binary JSON metadata to dict
                 json_metadata = test_data.get('tester', {}).get('json_metadata', {})
@@ -804,9 +804,9 @@ class StoredResult:
             test_entry = test.value
 
             # Convert string id to ObjectID
-            test_entry['_id'] = ObjectId(test_entry['_id'])
-            if 'result_id' in test_entry:
-                test_entry['result_id'] = ObjectId(test_entry['result_id'])
+            for key in ['_id', 'result_id']:
+                if key in test_entry:
+                    test_entry[key] = ObjectId(test_entry[key])
 
             # Convert string JSON metadata to binary
             json_metadata = test_entry.get('tester', {}).get('json_metadata', {})
