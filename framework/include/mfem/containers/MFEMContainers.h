@@ -202,18 +202,28 @@ public:
     _field_map.insert({var_name, time_derivative_var_name});
   }
 
-  inline std::string getTimeDerivativeName(const std::string & var_name) const
+  inline bool isTimeDerivative(const std::string & time_derivative_var_name) const
+  {
+    for (auto const & [map_var_name, map_time_derivative_var_name] : _field_map)
+    {
+      if (map_time_derivative_var_name == time_derivative_var_name)
+        return true;
+    }
+    return false;
+  }
+
+  inline const std::string & getTimeDerivativeName(const std::string & var_name) const
   {
     if (_field_map.count(var_name))
       return _field_map.at(var_name);
     else
     {
       mooseError("No variable representing the time derivative of ", var_name, " found.");
-      return std::string();
+      return null_str;
     }
   }
 
-  inline std::string getTimeIntegralName(const std::string & time_derivative_var_name) const
+  inline const std::string & getTimeIntegralName(const std::string & time_derivative_var_name) const
   {
     for (auto const & [map_var_name, map_time_derivative_var_name] : _field_map)
     {
@@ -222,22 +232,17 @@ public:
     }
     mooseError(
         "No variable representing the time integral of ", time_derivative_var_name, " found.");
-    return std::string();
+    return null_str;
   }
 
-  inline static std::string CreateTimeDerivativeName(std::string name)
+  inline static std::string createTimeDerivativeName(std::string name)
   {
     return std::string("d") + name + std::string("_dt");
   }
 
 private:
   MapType _field_map{};
-};
-
-inline std::string
-CreateTimeDerivativeName(std::string name)
-{
-  return std::string("d") + name + std::string("_dt");
+  const std::string null_str;
 };
 
 using FECollections = Moose::MFEM::NamedFieldsMap<mfem::FiniteElementCollection>;

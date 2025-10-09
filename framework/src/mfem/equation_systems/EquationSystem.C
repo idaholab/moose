@@ -522,10 +522,11 @@ TimeDependentEquationSystem::SetTrialVariableNames()
 void
 TimeDependentEquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
 {
-  if (kernel->applyTimeDerivative())
+  auto trial_var_name = kernel->getTrialVariableName();
+  auto test_var_name = kernel->getTestVariableName();
+
+  if (_time_derivative_map.isTimeDerivative(trial_var_name))
   {
-    auto trial_var_name = kernel->getTrialVariableName();
-    auto test_var_name = kernel->getTestVariableName();
     AddTestVariableNameIfMissing(test_var_name);
     AddCoupledVariableNameIfMissing(trial_var_name);
 

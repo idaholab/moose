@@ -28,8 +28,6 @@ public:
   /// Defaults to the name of the test variable labelling the weak form.
   virtual const VariableName & getTrialVariableName() const override { return _var_dot_name; }
 
-  bool applyTimeDerivative() override { return true; }
-
 protected:
   /// Name of variable (gridfunction) representing time derivative of variable.
   const VariableName _var_dot_name;

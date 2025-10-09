@@ -146,7 +146,7 @@ exterior_bdr = '1 2 3'
     variable = time_integrated_electric_potential
     coefficient = conductivity
     block = ${coil_domain}
-    transpose = true    
+    transpose = true
   []  
   [gradV,gradV']
     type = MFEMTimeDerivativeDiffusionKernel
@@ -165,12 +165,12 @@ exterior_bdr = '1 2 3'
   assembly_level = legacy
   dt = 5.0
   start_time = 0.0
-  end_time = 160.0  
+  end_time = 60.0  
 []
 
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/CurlCurl
+    file_base = OutputData/AVMagnetodynamic
   []
 []
