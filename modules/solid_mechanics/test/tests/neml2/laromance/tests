@@ -1,5 +1,5 @@
 [Tests]
-  design = 'NEML2/index.md modules/solid_mechanics/common/LAROMANCE6DInterpolation.md'
+  design = 'NEML2/index.md source/neml2/LAROMANCE6DInterpolation.md'
   issues = '#29774'
   [interpolate]
     type = 'CSVDiff'
