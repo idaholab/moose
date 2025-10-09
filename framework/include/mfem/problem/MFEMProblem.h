@@ -227,10 +227,10 @@ public:
 
   enum class NumericType
   {
-     REAL,
-     COMPLEX
-   };
-  
+    REAL,
+    COMPLEX
+  };
+
   NumericType num_type;
 
 protected:
