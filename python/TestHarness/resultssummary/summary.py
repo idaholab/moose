@@ -200,12 +200,7 @@ class TestHarnessResultsSummary:
         assert isinstance(run_time_rate_floor, (float, int))
 
         removed_names = base_names - head_names
-        if removed_names:
-            removed_table = []
-            for test_name in removed_names:
-                removed_table.append(str(test_name))
-        else:
-            removed_table = None
+        removed_table = [str(v) for v in removed_names] if removed_names else None
 
         add_names = head_names - base_names
         if add_names:
