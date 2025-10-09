@@ -91,7 +91,7 @@ class TestHarnessResultsSummary:
         """
         return self.reader.getEventResults(event_id)
 
-    def pr_test_names(self, **kwargs):
+    def pr_test_names(self, event_id:int, out:str) -> Tuple[Optional[StoredResult],Optional[StoredResult],Optional[set],Optional[set]]:
         """
         Retrieve test names and base test names for a pull request event.
 
@@ -101,12 +101,10 @@ class TestHarnessResultsSummary:
 
         Parameters
         ----------
-        **kwargs : dict
-            Keyword arguments. Must include:
-            - event_id : int
-                The ID of the pull request event.
-            - out : str
-                path to output message if there is no event or no base
+        event_id : int
+            The ID of the pull request event.
+        out : str
+            path to output message
 
         Returns
         -------
@@ -125,10 +123,7 @@ class TestHarnessResultsSummary:
         SystemExit
             If no results exist for the given event ID.
         """
-        event_id = kwargs.pop('event_id')
         assert isinstance(event_id, int)
-
-        out = kwargs.get('out')
         assert isinstance(out, str)
 
         head_results = self.get_event_results(event_id)
@@ -152,7 +147,7 @@ class TestHarnessResultsSummary:
 
     @staticmethod
     def diff_table(base_results: StoredResult, head_results: StoredResult, base_names: set[TestName],
-                   head_names: set[TestName], **kwargs) -> Tuple[Optional[list], Optional[list]]:
+                   head_names: set[TestName], **kwargs) -> Tuple[Optional[list], Optional[list],Optional[list]]:
         """
         Compare test names between the base and current head, and return
         the difference
@@ -341,18 +336,18 @@ class TestHarnessResultsSummary:
         except Exception as e:
             print(f"Failed to write to {out_file}: {e}")
 
-    def pr(self, **kwargs) -> str:
+    def pr(self, event_id: int, out:str, **kwargs) -> str:
         """
         Generate a pull request test summary.
 
         Parameters
         ----------
-        **kwargs : dict
-            Keyword arguments passed to `pr_test_names()`, typically including:
-            - event_id : int
+        event_id : int
                 The identifier for the PR test event.
-            - out : str
+        out : str
                 path to output the summary to
+        **kwargs : dict
+            Keyword arguments passed to `diff_table()`
 
         Returns
         -------
@@ -360,14 +355,16 @@ class TestHarnessResultsSummary:
             A formatted summary string of removed, new, and runtime-sensitive tests.
             If `base_names` is None, returns None.
         """
-        out = kwargs.get('out')
+        assert isinstance(event_id,int)
         assert isinstance(out,str)
 
-        base_results,head_results, base_names, head_names = self.pr_test_names(**kwargs)
-        assert isinstance(head_names,set)
+        base_results,head_results, base_names, head_names = self.pr_test_names(event_id, out)
+        assert isinstance(base_results,(StoredResult,NoneType))
+        assert isinstance(head_results, StoredResult)
         assert isinstance(base_names,(set,NoneType))
+        assert isinstance(head_names,set)
 
-        if base_names is None:
+        if base_results is None:
             return
         removed_table, added_table, same_table = self.diff_table(base_results,
                                                                  head_results,
@@ -381,8 +378,16 @@ class TestHarnessResultsSummary:
         return summary_result
 
     def main(self, **kwargs):
-        action = kwargs['action']
-        getattr(self, action)(**kwargs)
+        action = kwargs.pop('action')
+
+        if action == 'pr':
+            self.pr(
+                event_id=kwargs.pop('event_id'),
+                out=kwargs.pop('out'),
+                **kwargs
+            )
+        else:
+            getattr(self, action)(**kwargs)
 
 if __name__ == '__main__':
     args = TestHarnessResultsSummary.parseArgs()
