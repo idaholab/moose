@@ -62,8 +62,8 @@ TEST_F(MFEMComplexIntegratedBCTest, MFEMComplexIntegratedLinearFormBC)
 }
 
 /**
- * Test MFEMComplexIntegratedBC creates a real and imaginary mfem::BoundaryNormalLFIntegrator
- * successfully.
+ * Test MFEMComplexIntegratedBC creates a real and imaginary mfem::MFEMConvectiveHeatFluxBC
+ * and their associated LFs and BLFs successfully.
  */
 TEST_F(MFEMComplexIntegratedBCTest, MFEMComplexIntegratedBilinearFormBC)
 {
