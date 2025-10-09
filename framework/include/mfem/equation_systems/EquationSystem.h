@@ -306,7 +306,7 @@ EquationSystem::ApplyBoundaryLFIntegrators(
 class TimeDependentEquationSystem : public EquationSystem
 {
 public:
-  TimeDependentEquationSystem(const Moose::MFEM::TimeDerivativeMap &_time_derivative_map);
+  TimeDependentEquationSystem(const Moose::MFEM::TimeDerivativeMap & _time_derivative_map);
 
   /// Initialise
   virtual void Init(Moose::MFEM::GridFunctions & gridfunctions,
@@ -326,32 +326,6 @@ public:
   virtual void FormSystem(mfem::OperatorHandle & op,
                           mfem::BlockVector & truedXdt,
                           mfem::BlockVector & trueRHS) override;
-
-  inline std::string GetTimeDerivativeName(const std::string & var_name)
-  {
-    if (_time_derivative_map.count(var_name))
-      return _time_derivative_map.at(var_name);
-    else
-    {
-      mooseError("No variable representing the time derivative of ",
-                 var_name,
-                 " found in the EquationSystem.");
-      return std::string();
-    }
-  }
-
-  inline std::string GetTimeIntegralName(const std::string & time_derivative_var_name)
-  {
-    for (auto const & [map_var_name, map_time_derivative_var_name] : _time_derivative_map)
-    {
-      if (map_time_derivative_var_name == time_derivative_var_name)
-        return map_var_name;
-    }
-    mooseError("No variable representing the time integral of ",
-               time_derivative_var_name,
-               " found in the EquationSystem.");
-    return std::string();
-  }
 
 protected:
   /// Coefficient for timestep scaling

@@ -451,7 +451,11 @@ EquationSystem::BuildEquationSystem()
   BuildLinearForms();
 }
 
-TimeDependentEquationSystem::TimeDependentEquationSystem(const Moose::MFEM::TimeDerivativeMap & time_derivative_map) : _dt_coef(1.0), _time_derivative_map(time_derivative_map) {}
+TimeDependentEquationSystem::TimeDependentEquationSystem(
+    const Moose::MFEM::TimeDerivativeMap & time_derivative_map)
+  : _dt_coef(1.0), _time_derivative_map(time_derivative_map)
+{
+}
 
 void
 TimeDependentEquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
@@ -490,7 +494,7 @@ TimeDependentEquationSystem::SetTrialVariableNames()
   for (const auto & test_var_name : _test_var_names)
   {
     AddCoupledVariableNameIfMissing(test_var_name);
-    AddCoupledVariableNameIfMissing(GetTimeDerivativeName(test_var_name));
+    AddCoupledVariableNameIfMissing(_time_derivative_map.getTimeDerivativeName(test_var_name));
   }
 
   // If a coupled variable has an equation associated with it,
@@ -499,7 +503,8 @@ TimeDependentEquationSystem::SetTrialVariableNames()
   {
     for (const auto & test_var_name : _test_var_names)
     {
-      const auto time_derivative_test_var_name = GetTimeDerivativeName(test_var_name);
+      const auto time_derivative_test_var_name =
+          _time_derivative_map.getTimeDerivativeName(test_var_name);
       if (time_derivative_test_var_name == coupled_var_name)
       {
         if (!VectorContainsName(_trial_var_names, coupled_var_name))
@@ -563,7 +568,10 @@ TimeDependentEquationSystem::BuildBilinearForms()
     ApplyBoundaryBLFIntegrators<mfem::ParBilinearForm>(
         test_var_name, test_var_name, td_blf, _integrated_bc_map);
     ApplyDomainBLFIntegrators<mfem::ParBilinearForm>(
-        GetTimeDerivativeName(test_var_name), test_var_name, td_blf, _td_kernels_map);
+        _time_derivative_map.getTimeDerivativeName(test_var_name),
+        test_var_name,
+        td_blf,
+        _td_kernels_map);
 
     // Recover and scale integrators from blf. This is to apply the dt*du/dt contributions from the
     // operator on the trial variable in the implicit integration scheme
@@ -616,7 +624,7 @@ TimeDependentEquationSystem::BuildMixedBilinearForms()
       // kernels
       if (_td_kernels_map.Has(test_var_name) &&
           _td_kernels_map.Get(test_var_name)->Has(coupled_var_name) &&
-          GetTimeDerivativeName(test_var_name) != coupled_var_name)
+          _time_derivative_map.getTimeDerivativeName(test_var_name) != coupled_var_name)
       {
         td_mblf->SetAssemblyLevel(_assembly_level);
         // Apply all mixed kernels with this test/trial pair
@@ -627,11 +635,13 @@ TimeDependentEquationSystem::BuildMixedBilinearForms()
         // variable corresponding to coupled_var_name. This is to apply the dt*du/dt contributions
         // from the operator on the trial variable in the implicit integration scheme
         if (_mblfs.Has(test_var_name) &&
-            _mblfs.Get(test_var_name)->Has(GetTimeIntegralName(coupled_var_name)))
+            _mblfs.Get(test_var_name)
+                ->Has(_time_derivative_map.getTimeIntegralName(coupled_var_name)))
         {
           // Recover and scale integrators from mblf. This is to apply the dt*du/dt contributions
           // from the operator on the trial variable in the implicit integration scheme
-          auto mblf = _mblfs.Get(test_var_name)->Get(GetTimeIntegralName(coupled_var_name));
+          auto mblf = _mblfs.Get(test_var_name)
+                          ->Get(_time_derivative_map.getTimeIntegralName(coupled_var_name));
           auto integs = mblf->GetDBFI();
           auto b_integs = mblf->GetBBFI();
           auto markers = mblf->GetBBFI_Marker();
