@@ -474,7 +474,7 @@ class TestResultsSummary(TestHarnessTestCase):
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
-    def testSummaryOutputFileValidPath(self,mock_init_reader):
+    def testWriteOutputFileValidPath(self,mock_init_reader):
         """
         Tests output file write and read when output file path exit
         """
@@ -483,7 +483,7 @@ class TestResultsSummary(TestHarnessTestCase):
 
         with tempfile.NamedTemporaryFile() as tmp_file:
             output_result = 'File Path Exist and able to write file'
-            summary.summary_output_file(output_result,tmp_file.name)
+            summary.write_output(output_result,tmp_file.name)
             #check output file is able to read
             with open(tmp_file.name, 'r') as f:
                 output = f.read()
@@ -491,9 +491,9 @@ class TestResultsSummary(TestHarnessTestCase):
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
-    def testSummaryOutputFileInvalidPath(self,mock_init_reader):
+    def testWriteutputFileInvalidPath(self,mock_init_reader):
         """
-        Tests that summary_output_file when output file path is invalid.
+        Tests that write_output when output file path is invalid.
         """
         mock_init_reader.return_value = None
         summary = TestHarnessResultsSummary(None)
@@ -503,7 +503,7 @@ class TestResultsSummary(TestHarnessTestCase):
 
         stdout = StringIO()
         with redirect_stdout(stdout):
-            summary.summary_output_file(output_result,invalid_path)
+            summary.write_output(output_result,invalid_path)
             #check error message when file path is invalid
             output = stdout.getvalue()
             self.assertIn("Failed to write to", output)
