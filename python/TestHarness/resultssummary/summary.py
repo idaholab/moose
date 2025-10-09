@@ -91,7 +91,8 @@ class TestHarnessResultsSummary:
         """
         return self.reader.getEventResults(event_id)
 
-    def pr_test_names(self, event_id:int, out:str) -> Tuple[Optional[StoredResult],Optional[StoredResult],Optional[set],Optional[set]]:
+    def pr_test_names(self, event_id:int, out:str) -> Tuple[Optional[StoredResult],Optional[StoredResult],
+                                                            Optional[set],Optional[set]]:
         """
         Retrieve test names and base test names for a pull request event.
 
@@ -382,10 +383,10 @@ class TestHarnessResultsSummary:
 
         if action == 'pr':
             self.pr(
-                event_id=kwargs.pop('event_id'),
-                out=kwargs.pop('out'),
-                **kwargs
-            )
+                    event_id=kwargs.pop('event_id'),
+                    out=kwargs.pop('out'),
+                    **kwargs
+                    )
         else:
             getattr(self, action)(**kwargs)
 
