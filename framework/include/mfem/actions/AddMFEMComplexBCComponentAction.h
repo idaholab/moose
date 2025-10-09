@@ -14,7 +14,7 @@
 #include "MooseObjectAction.h"
 #include "MFEMProblem.h"
 /**
- * This class allows us to introduce as auxBCs the integrated BCs that will be
+ * This class allows us to add the user objects that will be
  * the real and imaginary components of MFEMComplexIntegratedBCs
  *
  */

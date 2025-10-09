@@ -152,14 +152,6 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
 }
 
 void
-MFEMProblem::addAuxBoundaryCondition(const std::string & bc_name,
-                                     const std::string & name,
-                                     InputParameters & parameters)
-{
-  FEProblemBase::addUserObject(bc_name, name, parameters);
-}
-
-void
 MFEMProblem::addMaterial(const std::string &, const std::string &, InputParameters &)
 {
   mooseError(
@@ -317,7 +309,7 @@ MFEMProblem::addComplexComponentToKernel(const std::string & kernel_name,
   auto parent_ptr = std::dynamic_pointer_cast<MFEMComplexKernel>(
       getUserObject<MFEMComplexKernel>(parent_name).getSharedPtr());
   parameters.set<VariableName>("variable") = parent_ptr->getParam<VariableName>("variable");
-  addAuxKernel(kernel_name, name, parameters);
+  FEProblemBase::addUserObject(kernel_name, name, parameters);
   auto kernel_ptr =
       std::dynamic_pointer_cast<MFEMKernel>(getUserObject<MFEMKernel>(name).getSharedPtr());
 
@@ -340,7 +332,7 @@ MFEMProblem::addComplexComponentToBC(const std::string & kernel_name,
   parameters.set<VariableName>("variable") = parent_ptr->getParam<VariableName>("variable");
   parameters.set<std::vector<BoundaryName>>("boundary") =
       parent_ptr->getParam<std::vector<BoundaryName>>("boundary");
-  addAuxBoundaryCondition(kernel_name, name, parameters);
+  FEProblemBase::addUserObject(kernel_name, name, parameters);
   auto bc_ptr = std::dynamic_pointer_cast<MFEMIntegratedBC>(
       getUserObject<MFEMIntegratedBC>(name).getSharedPtr());
 

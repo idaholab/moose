@@ -8,8 +8,7 @@
 
 ## Overview
 
-Action called to add a real or imaginary component of an [MFEMComplexKernel](source/mfem/kernels/MFEMComplexKernel.md).
-Each of these is included as an `AuxKernel`, to be retrieved later when the `MFEMComplexKernel` object is created.
+Action called to add a real or imaginary component of an [MFEMComplexKernel](source/mfem/kernels/MFEMComplexKernel.md), each in the form of a separate [MFEMKernel](source/mfem/kernels/MFEMKernel.md) user object.
 
 ## Example Input File Syntax
 

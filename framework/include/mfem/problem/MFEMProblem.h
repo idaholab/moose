@@ -137,13 +137,6 @@ public:
                     InputParameters & parameters) override;
 
   /**
-   * Creates an auxiliary boundary condition which is one component of a complex boundary condition.
-   */
-  void addAuxBoundaryCondition(const std::string & bc_name,
-                               const std::string & name,
-                               InputParameters & parameters);
-
-  /**
    * Override of ExternalProblem::addFunction. Uses ExternalProblem::addFunction to create a
    * MFEMGeneralUserObject representing the function in MOOSE, and creates a corresponding
    * MFEM Coefficient or VectorCoefficient object.
