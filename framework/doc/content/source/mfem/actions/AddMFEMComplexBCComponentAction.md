@@ -8,8 +8,7 @@
 
 ## Overview
 
-Action called to add a real or imaginary component of an [MFEMComplexIntegratedBC](source/mfem/bcs/MFEMComplexIntegratedBC.md).
-Each of these is included as an `AuxBoundaryCondition`, to be retrieved later when the `MFEMComplexIntegratedBC` object is created.
+Action called to add a real or imaginary component of an [MFEMComplexIntegratedBC](source/mfem/bcs/MFEMComplexIntegratedBC.md), each in the form of a separate [MFEMIntegratedBC](source/mfem/bcs/MFEMIntegratedBC.md) user object.
 
 !syntax parameters /BCs/AddMFEMComplexBCComponentAction
 
