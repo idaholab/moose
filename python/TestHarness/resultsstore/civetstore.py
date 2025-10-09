@@ -373,11 +373,6 @@ class CIVETStore:
             for k, v in json_metadata.items():
                 json_metadata[k] = compress_dict(v)
 
-        # Friendly string for number of tests
-        num_tests_str = f'{num_tests} tests'
-        if num_skipped_tests:
-            num_tests_str += f' ({num_skipped_tests} skipped)'
-
         # Determine the size of the current results dict, which
         # contains the tests within it. If below a certain size,
         # keep the tests within the results data. If above,
