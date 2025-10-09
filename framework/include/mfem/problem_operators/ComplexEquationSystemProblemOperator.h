@@ -34,7 +34,7 @@ public:
   {
     if (!_equation_system)
     {
-      mooseError("No equation system has been added to ProblemOperator.");
+      mooseError("No ComplexEquationSystem has been added to ComplexEquationSystemProblemOperator.");
     }
 
     return _equation_system.get();
