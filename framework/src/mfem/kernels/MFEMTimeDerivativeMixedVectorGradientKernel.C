@@ -30,7 +30,8 @@ MFEMTimeDerivativeMixedVectorGradientKernel::validParams()
 MFEMTimeDerivativeMixedVectorGradientKernel::MFEMTimeDerivativeMixedVectorGradientKernel(
     const InputParameters & parameters)
   : MFEMMixedVectorGradientKernel(parameters),
-    _var_dot_name(Moose::MFEM::CreateTimeDerivativeName(_trial_var_name))
+    _var_dot_name(getMFEMProblem().getProblemData().time_derivative_map.getTimeDerivativeName(
+        _trial_var_name))
 {
 }
 

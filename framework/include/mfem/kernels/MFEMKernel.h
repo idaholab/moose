@@ -36,10 +36,7 @@ public:
 
   /// Get name of the trial variable (gridfunction) the kernel acts on.
   /// Defaults to the name of the test variable labelling the weak form.
-  virtual const VariableName & getTrialVariableName() const { return _test_var_name; }
-
-  /// Apply time derivative to trial variable
-  virtual bool applyTimeDerivative() { return false; }
+  virtual const VariableName & getTrialVariableName() const { return _test_var_name; };
 
 protected:
   /// Name of (the test variable associated with) the weak form that the kernel is applied to.

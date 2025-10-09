@@ -27,7 +27,8 @@ MFEMTimeDerivativeDiffusionKernel::validParams()
 MFEMTimeDerivativeDiffusionKernel::MFEMTimeDerivativeDiffusionKernel(
     const InputParameters & parameters)
   : MFEMDiffusionKernel(parameters),
-    _var_dot_name(Moose::MFEM::CreateTimeDerivativeName(_test_var_name))
+    _var_dot_name(
+        getMFEMProblem().getProblemData().time_derivative_map.getTimeDerivativeName(_test_var_name))
 {
 }
 
