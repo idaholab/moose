@@ -47,7 +47,7 @@ public:
   virtual void AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> bc);
   virtual void AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc);
 
-  /// Build forms
+  /// Initialise
   virtual void Init(GridFunctions & gridfunctions,
                     ComplexGridFunctions & cpx_gridfunctions,
                     const FESpaces & fespaces,
