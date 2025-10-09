@@ -780,9 +780,7 @@ class StoredResult:
 
                 test.set_value(test_data)
 
-            # Don't store empty folders
-            if not folder.tests:
-                folder.delete()
+            folder.delete_if_empty()
 
         return data
 

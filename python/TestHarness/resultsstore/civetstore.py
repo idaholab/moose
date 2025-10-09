@@ -343,8 +343,7 @@ class CIVETStore:
                     if test.value['status']['status'] == 'SKIP':
                         num_skipped_tests += 1
                         test.delete()
-                if not folder.tests:
-                    folder.delete()
+                folder.delete_if_empty()
 
         # Cleanup each test as needed
         num_tests = 0

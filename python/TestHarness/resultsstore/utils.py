@@ -96,28 +96,28 @@ class ResultsTestIterator:
     @property
     def name(self) -> TestName:
         """
-        Get the combined name (folder name + test name) of the test
+        Get the combined name (folder name + test name) of the test.
         """
         return TestName(self.folder_name, self.test_name)
 
     @property
     def value(self) -> Any:
         """
-        Get the value of the test entry in the dict
+        Get the value of the test entry in the dict.
         """
         assert not self._deleted
         return self._folder_tests_entry[self.test_name]
 
     def set_value(self, value: Any):
         """
-        Set the value of the test entry in the dict
+        Set the value of the test entry in the dict.
         """
         assert not self._deleted
         self._folder_tests_entry[self.test_name] = value
 
     def delete(self):
         """
-        Delete the test entry in the dict
+        Delete the test entry in the dict.
         """
         assert not self._deleted
         del self._folder_tests_entry[self.test_name]
@@ -139,18 +139,10 @@ class ResultsFolderIterator:
     # Whether or not delete() was called
     _deleted: bool = False
 
-    def delete(self):
-        """
-        Delete the test entry in the dict
-        """
-        assert not self._deleted
-        del self._tests_entry[self.name]
-        self._deleted = True
-
     @property
     def value(self):
         """
-        Get the value of the test entry in the dict
+        Get the value of the test entry in the dict.
         """
         assert not self._deleted
         return self._tests_entry[self.name]
@@ -158,16 +150,32 @@ class ResultsFolderIterator:
     @property
     def tests(self):
         """
-        Get the underlying tests in the dict
+        Get the underlying tests in the dict.
         """
         return self.value['tests']
 
     def test_iterator(self) -> Iterator[ResultsTestIterator]:
         """
-        Create an iterator over the underlying tests
+        Create an iterator over the underlying tests.
         """
         for test_name in list(self.tests.keys()):
             yield ResultsTestIterator(self.name, test_name, self.tests)
+
+    def delete(self):
+        """
+        Delete the folder entry in the tests dict.
+        """
+        assert not self._deleted
+        del self._tests_entry[self.name]
+        self._deleted = True
+
+    def delete_if_empty(self):
+        """
+        Delete the folder entry in the tests dict if it has no tests.
+        """
+        assert not self._deleted
+        if not self.tests:
+            self.delete()
 
 def results_folder_iterator(results: dict) -> Iterator[ResultsFolderIterator]:
     """
