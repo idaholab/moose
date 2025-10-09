@@ -193,6 +193,16 @@ LinearFVFluxKernel::singleSidedFaceArg(const FaceInfo * fi,
   return makeFace(*fi, limiter_type, true, correct_skewness);
 }
 
+Real
+LinearFVFluxKernel::computeBoundaryFlux(const LinearFVBoundaryCondition & bc)
+{
+  const auto elem_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
+                             ? _current_face_info->elemInfo()
+                             : _current_face_info->neighborInfo();
+  return computeBoundaryMatrixContribution(bc) * _var.getElemValue(*elem_info, determineState()) -
+         computeBoundaryRHSContribution(bc);
+}
+
 void
 LinearFVFluxKernel::setupFaceData(const FaceInfo * face_info)
 {
