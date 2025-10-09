@@ -49,7 +49,7 @@ public:
   /// Add BC associated with essentially constrained DoFs on boundaries.
   virtual void AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc);
 
-  /// Build forms
+  /// Initialise
   virtual void Init(GridFunctions & gridfunctions,
                     ComplexGridFunctions & cpx_gridfunctions,
                     const FESpaces & fespaces,
