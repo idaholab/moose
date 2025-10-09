@@ -19,7 +19,8 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 
 from TestHarness.resultsstore.reader import ResultsReader
-from TestHarness.resultsstore.storedresults import StoredResult, StoredTestResult, TestName
+from TestHarness.resultsstore.storedresults import StoredResult, StoredTestResult
+from TestHarness.resultsstore.utils import TestName, results_test_iterator
 
 # Whether or not authentication is available from env var RESULTS_READER_AUTH_FILE
 HAS_AUTH = ResultsReader.hasEnvironmentAuthentication()
@@ -221,11 +222,10 @@ class TestResultsReader(unittest.TestCase):
         tests: dict[ObjectId, dict] = {}
         # Remove the tests entries and store them as IDs instead
         for result_entry in gold.values():
-            for folder_entry in result_entry['tests'].values():
-                for test_name in list(folder_entry['tests'].keys()):
-                    test_entry = folder_entry['tests'][test_name]
-                    tests[test_entry['_id']] = deepcopy(test_entry)
-                    folder_entry['tests'][test_name] = test_entry['_id']
+            for test in results_test_iterator(result_entry):
+                test_entry = test.value
+                tests[test_entry['_id']] = deepcopy(test_entry)
+                test.set_value(test_entry['_id'])
 
         # Mock getting a test from mongodb
         def find_test_data(id):

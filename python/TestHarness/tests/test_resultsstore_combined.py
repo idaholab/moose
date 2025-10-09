@@ -15,7 +15,8 @@ from typing import Optional
 from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
 from TestHarness.resultsstore.civetstore import CIVETStore
 from TestHarness.resultsstore.reader import ResultsReader
-from TestHarness.resultsstore.storedresults import StoredResult, TestName
+from TestHarness.resultsstore.storedresults import StoredResult
+from TestHarness.resultsstore.utils import TestName
 
 from test_resultsstore_civetstore import base_civet_env, random_id
 

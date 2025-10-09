@@ -16,8 +16,10 @@ from dataclasses import dataclass
 from typing import Optional
 from TestHarness import TestHarness
 from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
-from TestHarness.resultsstore.storedresults import StoredResult, StoredTestResult, TestName, DatabaseException
-from TestHarness.resultsstore.civetstore import compress_dict, decompress_dict, CIVETStore
+from TestHarness.resultsstore.storedresults import StoredResult, StoredTestResult, DatabaseException
+from TestHarness.resultsstore.utils import TestName, compress_dict, decompress_dict, \
+    results_test_iterator, results_set_test_value
+from TestHarness.resultsstore.civetstore import CIVETStore
 from test_resultsstore_civetstore import build_civet_env
 
 # ID for the tested built StoredResult object
@@ -98,40 +100,40 @@ class TestResultsStoredResults(TestHarnessTestCase):
         """
         # Modify each test
         tests = {}
-        for folder_name, folder_values in test_harness_results['tests'].items():
-            for test_name, test_values in folder_values['tests'].items():
-                name = TestName(folder_name, test_name)
+        for test in results_test_iterator(test_harness_results):
+            name = test.name
+            test_values = test.value
 
-                # Test would have an ID in the database
-                test_values['_id'] = ObjectId()
-                # And should reference a result in the database
-                test_values['result_id'] = RESULT_ID
+            # Test would have an ID in the database
+            test_values['_id'] = ObjectId()
+            # And should reference a result in the database
+            test_values['result_id'] = RESULT_ID
 
-                # Remove output entires, as they're removed when storing
-                for key in ['output', 'output_files']:
-                    if key in test_values:
-                        del test_values[key]
+            # Remove output entires, as they're removed when storing
+            for key in ['output', 'output_files']:
+                if key in test_values:
+                    del test_values[key]
 
-                # Compress JSON metadata, which should only exist
-                # if the test actually ran (we run this with
-                # --capture-perf-graph, so a 'perf_graph' entry
-                # will exist here)
-                json_metadata = test_values['tester'].get('json_metadata')
-                if json_metadata is not None:
-                    for k, v in json_metadata.items():
-                        json_metadata[k] = compress_dict(v)
+            # Compress JSON metadata, which should only exist
+            # if the test actually ran (we run this with
+            # --capture-perf-graph, so a 'perf_graph' entry
+            # will exist here)
+            json_metadata = test_values['tester'].get('json_metadata')
+            if json_metadata is not None:
+                for k, v in json_metadata.items():
+                    json_metadata[k] = compress_dict(v)
 
-                # Fake values from HPC
-                test_values['timing']['hpc_queued'] = HPC_QUEUED_TIME
+            # Fake values from HPC
+            test_values['timing']['hpc_queued'] = HPC_QUEUED_TIME
 
-                # Delete requested key
-                if delete_test_key:
-                    current = test_values
-                    for key in delete_test_key[:-1]:
-                        current = current[key]
-                    del current[delete_test_key[-1]]
+            # Delete requested key
+            if delete_test_key:
+                current = test_values
+                for key in delete_test_key[:-1]:
+                    current = current[key]
+                del current[delete_test_key[-1]]
 
-                tests[name] = test_values
+            tests[name] = test_values
 
         # Setup main results entry
         results = test_harness_results.copy()
@@ -144,10 +146,8 @@ class TestResultsStoredResults(TestHarnessTestCase):
             for name, values in tests.items():
                 if name.folder not in results['tests']:
                     results['tests'][name.folder] = {'tests': {}}
-                if test_in_results:
-                    results['tests'][name.folder]['tests'][name.name] = values.copy()
-                else:
-                    results['tests'][name.folder]['tests'][name.name] = values['_id']
+                set_value = values.copy() if test_in_results else values['_id']
+                results_set_test_value(results, name, set_value)
 
         # Add in header, removing keys to be deleted
         header = deepcopy(STORE_HEADER)
@@ -380,9 +380,8 @@ class TestResultsStoredResults(TestHarnessTestCase):
         captured_result = self.captureResult()
         result_data = captured_result.result_data
 
-        for folder_name, folder_entry in result_data['tests'].items():
-            for test_name in list(folder_entry['tests'].keys()):
-                folder_entry['tests'][test_name] = 1
+        for test in results_test_iterator(result_data):
+            test.set_value(1)
 
         with self.assertRaisesRegex(TypeError, 'has unexpected type "int"'):
             StoredResult(result_data)
