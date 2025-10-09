@@ -31,7 +31,7 @@ MFEMBoundaryCondition::MFEMBoundaryCondition(const InputParameters & parameters)
   : MFEMGeneralUserObject(parameters),
     MFEMBoundaryRestrictable(parameters, getMFEMProblem()
                                         .getProblemData()
-                                        .gridfunctions.size() ? 
+                                        .gridfunctions.Has(getParam<VariableName>("variable")) ? 
                                         *getMFEMProblem()
                                         .getProblemData()
                                         .gridfunctions.GetRef(getParam<VariableName>("variable"))
