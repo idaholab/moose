@@ -799,7 +799,7 @@ public:
   /**
    * Return the name of the boundary given the id.
    */
-  const std::string & getBoundaryName(BoundaryID boundary_id);
+  const std::string & getBoundaryName(BoundaryID boundary_id) const;
 
   /**
    * This routine builds a multimap of boundary ids to matching boundary ids across all periodic
