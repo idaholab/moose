@@ -11,39 +11,48 @@
 import argparse
 import json
 import os
-import sys
 import re
 from copy import deepcopy
 from typing import Optional, Tuple
 from datetime import datetime
 from pymongo import MongoClient
 from bson.objectid import ObjectId
-from bson.binary import Binary
-import zlib
+from bson import encode
 
 from TestHarness.resultsstore.auth import Authentication, load_authentication, has_authentication
+from TestHarness.resultsstore.utils import TestName, compress_dict, results_folder_iterator, \
+    results_test_iterator
 
 NoneType = type(None)
 
 # The max size that a result entry can be before its tests are
 # stored separately in a tests document
-MAX_RESULT_SIZE = 5.0 # MB
+MAX_RESULT_SIZE = 15.0 # MB
+# The max size that we'll allow for a document (mongo caps at 16)
+MAX_DOCUMENT_SIZE = 15.0 # MB
 
-@staticmethod
-def compress_dict(value: dict) -> bytes:
+class OversizedTestsError(SystemExit):
     """
-    Compresses dict into binary.
+    Exception thrown when test(s) too large for storing.
     """
-    assert isinstance(value, dict)
-    return zlib.compress(json.dumps(value).encode('utf-8'))
+    def __init__(self, tests: list[Tuple[TestName, float]]):
+        message = ['Oversized test(s) were found:']
+        message += [f'  {name} ({size:.2f}MB)' for name, size in tests]
+        super().__init__('\n'.join(message))
 
-@staticmethod
-def decompress_dict(compressed: bytes) -> dict:
+        # The oversized tests (name and size in MB)
+        self.tests: list[Tuple[TestName, float]] = tests
+
+class OversizedResultError(SystemExit):
     """
-    Decompresses a dict that was compressed with compress_dict().
+    Exception thrown when a result is too large for storing.
     """
-    assert isinstance(compressed, bytes)
-    return json.loads(zlib.decompress(compressed).decode('utf-8'))
+    def __init__(self, result_size: float):
+        message = f'Result is oversized ({result_size:.2f}MB)'
+        super().__init__(message)
+
+        # The size of the oversized result (MB)
+        self.result_size: float = result_size
 
 class CIVETStore:
     """
@@ -108,26 +117,13 @@ class CIVETStore:
         return has_authentication('CIVET_STORE')
 
     @staticmethod
-    def get_size(obj, seen: Optional[set] = None) -> int:
+    def get_document_size(doc: dict) -> float:
         """
-        Recursively find the size of an object in bytes.
+        Get the approximate size of a dict if it was
+        be stored in a mongodb document in MB.
         """
-        get_size = CIVETStore.get_size
-        size = sys.getsizeof(obj)
-        if seen is None:
-            seen = set()
-        obj_id = id(obj)
-        if obj_id in seen:
-            return 0
-        seen.add(obj_id)
-        if isinstance(obj, dict):
-            size += sum([get_size(v, seen) for v in obj.values()])
-            size += sum([get_size(k, seen) for k in obj.keys()])
-        elif hasattr(obj, '__dict__'):
-            size += get_size(obj.__dict__, seen)
-        elif hasattr(obj, '__iter__') and not isinstance(obj, (str, bytes, bytearray)):
-            size += sum([get_size(i, seen) for i in obj])
-        return size
+        assert isinstance(doc, dict)
+        return len(encode(doc)) / (1024 * 1024)
 
     @staticmethod
     def parse_ssh_repo(repo: str) -> Tuple[str, str, str]:
@@ -293,7 +289,8 @@ class CIVETStore:
         }
 
     def build(self, results: dict, base_sha: str, env: dict = dict(os.environ),
-              max_result_size: float = MAX_RESULT_SIZE, **kwargs) -> Tuple[dict, Optional[list]]:
+              max_result_size: float = MAX_RESULT_SIZE,
+              **kwargs) -> Tuple[dict, Optional[dict[TestName, dict]]]:
         """
         Builds an result entry for storage in the database.
 
@@ -315,6 +312,14 @@ class CIVETStore:
         max_result_size : float
             The max size that a database result entry can have before
             the tests will be stored in a separate 'tests' collection.
+
+        Returns
+        -------
+        dict:
+            The built result data.
+        Optional[dict[TestName, dict]]]:
+            The separate test data if tests are separate.
+
         """
         assert isinstance(base_sha, str)
         assert len(base_sha) == 40
@@ -330,84 +335,94 @@ class CIVETStore:
         header = self.build_header(base_sha, env)
         results.update(header)
 
-        tests_entry = results['tests']
-
         # Remove skipped tests if requested
-        skip_tests = []
         num_skipped_tests = 0
         if kwargs.get('ignore_skipped'):
-            for folder_name, folder_values in tests_entry.items():
-                for test_name, test_values in folder_values['tests'].items():
-                    if test_values['status']['status'] == 'SKIP':
+            for folder in results_folder_iterator(results):
+                for test in folder.test_iterator():
+                    if test.value['status']['status'] == 'SKIP':
                         num_skipped_tests += 1
-                        skip_tests.append((folder_name, test_name))
-            for folder_name, test_name in skip_tests:
-                del tests_entry[folder_name]['tests'][test_name]
-                if not tests_entry[folder_name]['tests']:
-                    del tests_entry[folder_name]
+                        test.delete()
+                folder.delete_if_empty()
 
         # Cleanup each test as needed
         num_tests = 0
-        for folder_values in tests_entry.values():
-            for test_values in folder_values['tests'].values():
-                num_tests += 1
+        for test in results_test_iterator(results):
+            test_values = test.value
+            num_tests += 1
 
-                # Remove all output from results
-                for key in ['output', 'output_files']:
-                    if key in test_values:
-                        del test_values[key]
+            # Remove all output from results
+            for key in ['output', 'output_files']:
+                if key in test_values:
+                    del test_values[key]
 
-                # Remove keys if requested
-                for entry in ['status', 'timing', 'tester']:
-                    if kwargs.get(f'ignore_{entry}'):
-                        del test_values[entry]
+            # Remove keys if requested
+            for entry in ['status', 'timing', 'tester']:
+                if kwargs.get(f'ignore_{entry}'):
+                    del test_values[entry]
 
-                # Only store runner runtime if requested
-                if kwargs.get('only_runtime'):
-                    for key in list(test_values['timing'].keys()):
-                        if key != 'runner_run':
-                            del test_values['timing'][key]
+            # Only store runner runtime if requested
+            if kwargs.get('only_runtime'):
+                for key in list(test_values['timing'].keys()):
+                    if key != 'runner_run':
+                        del test_values['timing'][key]
 
-                # Compress JSON metadata as binary
-                tester = test_values.get('tester', {})
-                json_metadata = tester.get('json_metadata', {})
-                for k, v in json_metadata.items():
-                    json_metadata[k] = compress_dict(v)
+            # Compress JSON metadata as binary
+            tester = test_values.get('tester', {})
+            json_metadata = tester.get('json_metadata', {})
+            for k, v in json_metadata.items():
+                json_metadata[k] = compress_dict(v)
 
-        # Friendly string for number of tests
-        num_tests_str = f'{num_tests} tests'
-        if num_skipped_tests:
-            num_tests_str += f' ({num_skipped_tests} skipped)'
-
-        # Determine the size (ish) of the current results dict,
-        # which contains the tests within it. If below a certain
-        # size, keep the tests within the results data. If above,
+        # Determine the size of the current results dict, which
+        # contains the tests within it. If below a certain size,
+        # keep the tests within the results data. If above,
         # separate them. We need to do this to keep mongodb
-        # documents a reasonable size (the max is 10MB).
-        max_result_size = max_result_size * 1e6
-        results_size = self.get_size(results)
-        results_size_mb = results_size / 1e6
+        # documents a reasonable size (the max is 16MB).
+        results_size = self.get_document_size(results)
         separate_tests = results_size > max_result_size
+
+        tests = None
+        tests_size = None
+        oversized_tests = None
+        # Separate out the tests if needed
+        if separate_tests:
+            tests = {}
+            tests_size = 0
+            oversized_tests = []
+            for test in results_test_iterator(results):
+                # Test data in the result entry, separated
+                test_data = deepcopy(test.value)
+                # Store and check test size
+                test_size = self.get_document_size(test_data)
+                tests_size += test_size
+                if test_size > MAX_DOCUMENT_SIZE:
+                    oversized_tests.append((test.name, test_size))
+                # Store the separate test data
+                tests[test.name] = test_data
+                # Set the test in the results entry to nothing
+                test.set_value(None)
+
+        # Error if tests were too large
+        if oversized_tests:
+            raise OversizedTestsError(oversized_tests)
+
+        # Recompute the result size if we separated tests
+        # as it has changed, and make sure it is small enough
+        if separate_tests:
+            results_size = self.get_document_size(results)
+            if results_size > MAX_DOCUMENT_SIZE:
+                raise OversizedResultError(results_size)
 
         # Share what we're doin
         info = [f'Storing {num_tests} tests']
         if num_skipped_tests:
             info += [f'({num_skipped_tests} skipped)']
         info += [('separately' if separate_tests else 'within results') + ';']
-        info += [f'results size = {results_size_mb:.2f}MB']
-        print(' '.join(info))
-
-        tests = None
-        # Separate out the tests if needed
+        sizes = [f'results size = {results_size:.2f}MB']
         if separate_tests:
-            i = 0
-            tests = []
-            for folder_values in tests_entry.values():
-                folder_tests = folder_values['tests']
-                for test_name in list(folder_tests.keys()):
-                    tests.append(deepcopy(folder_tests[test_name]))
-                    folder_tests[test_name] = i
-                    i += 1
+            sizes += [f'tests size = {tests_size:.2f}MB']
+        info += [', '.join(sizes)]
+        print(' '.join(info))
 
         return results, tests
 
@@ -464,58 +479,49 @@ class CIVETStore:
 
         result, tests = self.build(results, base_sha, **kwargs)
 
+        # Assign an ID for the result
+        result_id = ObjectId()
+        result['_id'] = result_id
+
+        # Build the tests to be stored separately, if any
+        insert_tests = []
+        test_ids = None
+        if tests:
+            test_ids = []
+            for result_test in results_test_iterator(result):
+                # Get the separate test data
+                test_data = tests[result_test.name]
+
+                # Assign an ID to the test
+                test_id = ObjectId()
+                test_ids.append(test_id)
+                test_data['_id'] = test_id
+                test_data['result_id'] = result_id
+
+                # Add to be inserted later
+                insert_tests.append(test_data)
+
+                # Set the ID in the results for this test
+                # to this test's ID
+                assert result_test.value is None
+                result_test.set_value(test_id)
+
+        # Do the insertion
         with self.setup_client() as client:
             db = client[database]
 
-            test_ids = None
-
-            # Store tests separately
-            if tests:
-                # Accumulate test data to be inserted, and also keep
-                # track of the names in this order so that we can
-                # in the main results object replace each test
-                # with the corresponding ID of the test within
-                # the separate tests collection
-                insert_tests = []
-                insert_test_names = []
-                for folder_name, folder_entry in result['tests'].items():
-                    for test_name, test_entry in folder_entry['tests'].items():
-                        test_data = tests[test_entry]
-                        test_data['result_id'] = None
-                        insert_tests.append(test_data)
-                        insert_test_names.append((folder_name, test_name))
-
-                # Do the insertion
-                inserted = db.tests.insert_many(insert_tests)
-                assert inserted.acknowledged
-                test_ids = inserted.inserted_ids
-                print(f'Inserted {len(test_ids)} tests into {database}')
-
-                # For each inserted test, update the results data
-                # so that it can reference the corresponding inserted
-                # test (instead of storing the data within itself)
-                for i, (folder_name, test_name) in enumerate(insert_test_names):
-                    result['tests'][folder_name]['tests'][test_name] = test_ids[i]
-
-            # Store the result
-            inserted = db.results.insert_one(result)
-            assert inserted.acknowledged
-            result_id = inserted.inserted_id
+            inserted_result = db.results.insert_one(result)
+            assert inserted_result.acknowledged
+            assert result_id == inserted_result.inserted_id
             print(f'Inserted result {result_id} into {database}')
 
-            # If we stored tests separately, we now need to update
-            # 'result_id' on each of the tests (now that the result
-            # has been inserted) so that each test can reference
-            # its parent result object
-            if test_ids:
-                filter = {'_id': {'$in': test_ids}}
-                update = {'$set': {'result_id': result_id}}
-                updated = db.tests.update_many(filter, update)
-                assert updated.acknowledged
-                assert updated.modified_count == len(test_ids)
-                print('Updated test result IDs')
+            if insert_tests:
+                inserted_tests = db.tests.insert_many(insert_tests)
+                assert inserted_tests.acknowledged
+                assert set(test_ids) == set(inserted_tests.inserted_ids)
+                print(f'Inserted {len(test_ids)} tests into {database}')
 
-            return result_id, test_ids
+        return result_id, test_ids
 
     def main(self, result_path: str, database: str, base_sha: str,
              **kwargs) -> Tuple[ObjectId, Optional[list[ObjectId]]]:

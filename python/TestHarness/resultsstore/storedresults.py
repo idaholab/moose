@@ -11,9 +11,10 @@ from datetime import datetime
 import importlib
 from typing import Optional, Union
 from copy import deepcopy
-from dataclasses import dataclass
 from TestHarness.validation.dataclasses import ValidationResult, ValidationData, ValidationDataTypesStr
-from TestHarness.resultsstore.civetstore import decompress_dict, compress_dict
+from TestHarness.resultsstore.utils import TestName, decompress_dict, compress_dict, \
+    results_folder_iterator, results_test_iterator
+
 from pymongo.database import Database
 from bson.objectid import ObjectId
 
@@ -24,17 +25,6 @@ for data_type in ValidationDataTypesStr:
     assert hasattr(validation_dataclasses_module, data_type)
 
 NoneType = type(None)
-
-@dataclass(frozen=True)
-class TestName:
-    """
-    Name for a test (folder and name)
-    """
-    folder: str
-    name: str
-
-    def __str__(self):
-        return f'{self.folder}.{self.name}'
 
 class DatabaseException(Exception):
     """
@@ -393,9 +383,7 @@ class StoredResult:
         self._db: Optional[Database] = db
 
         # Initialize empty test objects
-        tests = data['tests']
-        assert isinstance(tests, dict)
-        self._tests = self.init_tests(tests)
+        self._tests = self.init_tests(data)
 
         # Sanity check on all of our methods (in order of definition)
         assert isinstance(self.data, dict)
@@ -422,7 +410,7 @@ class StoredResult:
         for v in self.test_names:
             assert isinstance(v, TestName)
 
-    def init_tests(self, tests: dict) -> dict[TestName, Union[StoredTestResult, ObjectId]]:
+    def init_tests(self, results: dict) -> dict[TestName, Union[StoredTestResult, ObjectId]]:
         """
         Build the tests to be stored within the _tests member
 
@@ -434,34 +422,34 @@ class StoredResult:
         in the "tests" mongo collection), it can be queried later
         on demand as needed.
         """
-        assert isinstance(tests, dict)
+        assert isinstance(results, dict)
 
         values: dict[TestName, Union[StoredTestResult, ObjectId]] = {}
 
         all_ids = set()
-        for folder_name, folder_entry in tests.items():
-            for test_name, test_entry in folder_entry['tests'].items():
-                name = TestName(folder_name, test_name)
-                assert name not in values
+        for test in results_test_iterator(results):
+            name = test.name
+            assert name not in values
+            test_entry = test.value
 
-                # References a test in a seprate collection
-                # Store the id to be pulled later if needed
-                if isinstance(test_entry, ObjectId):
-                    assert test_entry not in all_ids
-                    value = test_entry
-                    all_ids.add(test_entry)
-                # Is direct test data
-                # Store the actual test object
-                elif isinstance(test_entry, dict):
-                    value = self._build_test(test_entry, name)
-                # Unknown type
-                else:
-                    raise TypeError(
-                        f'Test "{name}" entry in result._id={self.id} '
-                        f'has unexpected type "{type(test_entry).__name__}"'
-                    )
+            # References a test in a seprate collection
+            # Store the id to be pulled later if needed
+            if isinstance(test_entry, ObjectId):
+                assert test_entry not in all_ids
+                value = test_entry
+                all_ids.add(test_entry)
+            # Is direct test data
+            # Store the actual test object
+            elif isinstance(test_entry, dict):
+                value = self._build_test(test_entry, name)
+            # Unknown type
+            else:
+                raise TypeError(
+                    f'Test "{name}" entry in result._id={self.id} '
+                    f'has unexpected type "{type(test_entry).__name__}"'
+                )
 
-                values[name] = value
+            values[name] = value
 
         return values
 
@@ -743,12 +731,17 @@ class StoredResult:
         self.load_all_tests()
         return list(self._tests.values())
 
-    def serialize(self) -> dict:
+    def serialize(self, test_filter: Optional[list[TestName]] = None) -> dict:
         """
         Serializes this result into a dictionary that can be stored
         and reloaded later using deserialize/deserialize_build.
 
         Used primarily in unit testing.
+
+        Optional Parameters
+        -------------------
+        test_filter : Optional[list[TestName]]
+            Only store these named tests, if provided.
         """
         # Load all tests so that they can be stored
         self.load_all_tests()
@@ -761,25 +754,33 @@ class StoredResult:
         # Convert ObjectID to string id
         data['_id'] = str(data['_id'])
 
-        # Convert each test and store in place
-        for name, test_result in self._tests.items():
-            # Copy our data
-            data['tests'][name.folder]['tests'][name.name] = deepcopy(test_result.data)
-            test_entry = data['tests'][name.folder]['tests'][name.name]
+        for folder in results_folder_iterator(data):
+            for test in folder.test_iterator():
+                # Filter and not in the filter
+                if test_filter and test.name not in test_filter:
+                    test.delete()
+                    continue
 
-            # Convert ObjectID to string ID
-            test_entry['_id'] = str(test_entry['_id'])
-            if 'result_id' in test_entry:
-                test_entry['result_id'] = str(test_entry['result_id'])
+                # Duplicate test data for storage
+                test_data = deepcopy(self.get_test(test.folder_name, test.test_name).data)
 
-            # Convert binary JSON metadata to dict
-            json_metadata = test_entry.get('tester', {}).get('json_metadata', {})
-            for k, v in json_metadata.items():
-                json_metadata[k] = decompress_dict(v)
+                # Convert ObjectID to string ID
+                for key in ['_id', 'result_id']:
+                    if key in test_data:
+                        test_data[key] = str(test_data[key])
 
-            # Time entry existed before civet version 4
-            if self.civet_version < 4:
-                test_entry['time'] = str(test_entry['time'])
+                # Convert binary JSON metadata to dict
+                json_metadata = test_data.get('tester', {}).get('json_metadata', {})
+                for k, v in json_metadata.items():
+                    json_metadata[k] = decompress_dict(v)
+
+                # Time entry existed before civet version 4
+                if self.civet_version < 4:
+                    test_data['time'] = str(test_data['time'])
+
+                test.set_value(test_data)
+
+            folder.delete_if_empty()
 
         return data
 
@@ -799,22 +800,23 @@ class StoredResult:
         data['_id'] = ObjectId(data['_id'])
 
         # Convert each test
-        for folder_entry in data['tests'].values():
-            for test_entry in folder_entry['tests'].values():
-                # Convert string id to ObjectID
-                test_entry['_id'] = ObjectId(test_entry['_id'])
-                if 'result_id' in test_entry:
-                    test_entry['result_id'] = ObjectId(test_entry['result_id'])
+        for test in results_test_iterator(data):
+            test_entry = test.value
 
-                # Convert string JSON metadata to binary
-                json_metadata = test_entry.get('tester', {}).get('json_metadata', {})
-                for k, v in json_metadata.items():
-                    json_metadata[k] = compress_dict(v)
+            # Convert string id to ObjectID
+            for key in ['_id', 'result_id']:
+                if key in test_entry:
+                    test_entry[key] = ObjectId(test_entry[key])
 
-                # Convert time if it exists (removed after
-                # civet_version 3)
-                if 'time' in test_entry:
-                    test_entry['time'] = datetime.fromisoformat(test_entry['time'])
+            # Convert string JSON metadata to binary
+            json_metadata = test_entry.get('tester', {}).get('json_metadata', {})
+            for k, v in json_metadata.items():
+                json_metadata[k] = compress_dict(v)
+
+            # Convert time if it exists (removed after
+            # civet_version 3)
+            if 'time' in test_entry:
+                test_entry['time'] = datetime.fromisoformat(test_entry['time'])
 
         return data
 
