@@ -107,11 +107,7 @@ HeatSourceFromTotalPower::addMooseObjects()
       pars.set<RealVectorValue>("axis_dir") = hs_cyl->getDirection();
     }
     pars.set<ExecFlagEnum>("execute_on") = {EXEC_INITIAL};
-    // TODO: This seems to produce incorrect output files, even though this is the line
-    // that should be here, becuase we don't want this PPS to be in any output. The effect
-    // of this line is correct, but for some reason, MOOSE will start output scalar variables
-    // even though we did not ask it to do so. Refs idaholab/thm#
-    // pars.set<std::vector<OutputName>>("outputs") = getTHMProblem().getOutputsVector("none");
+    pars.set<std::vector<OutputName>>("outputs") = {"none"};
     getTHMProblem().addPostprocessor(class_name, power_shape_integral_name, pars);
   }
 
