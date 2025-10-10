@@ -261,7 +261,7 @@ public:
    * Get whether the array is finalized
    * @returns Whether the array is finalized
    */
-  KOKKOS_FUNCTION bool isFinalized() { return _finalized; }
+  KOKKOS_FUNCTION bool isFinalized() const { return _finalized; }
   /**
    * Get the total data array size
    * @returns The total data array size
@@ -286,7 +286,7 @@ public:
   KOKKOS_FUNCTION auto operator[](dof_id_type i) const
   {
     auto data = &_data[_offsets[i]];
-    auto dim = _dims[i];
+    const auto & dim = _dims[i];
 
     return JaggedArrayInnerData<T, inner>(data, dim);
   }
@@ -362,23 +362,23 @@ JaggedArrayBase<T, inner, outer>::finalize()
 {
   mooseAssert(!_finalized, "KokkosJaggedArray already finalized.");
 
-  dof_id_type dim = 1;
+  dof_id_type stride = 1;
 
   for (dof_id_type o = 0; o < _offsets.size(); ++o)
   {
-    dim = 1;
+    stride = 1;
 
     for (unsigned int i = 0; i < inner; ++i)
-      dim *= _dims[o][i];
+      stride *= _dims[o][i];
 
-    _offsets[o] = dim;
+    _offsets[o] = stride;
   }
 
   std::exclusive_scan(_offsets.begin(), _offsets.end(), _offsets.begin(), 0);
 
   _dims.copyToDevice();
   _offsets.copyToDevice();
-  _data.create(_offsets.last() + dim);
+  _data.create(_offsets.last() + stride);
 
   _finalized = true;
 }

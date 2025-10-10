@@ -30,7 +30,8 @@ Therefore, we provide alternative data containers to be used on GPU: `Moose::Kok
 It receives two template arguments: data type and dimension.
 It supports multi-dimensional indexing, and up to five-dimensional arrays are supported.
 The dimension can either be specified through the second template argument with the default being one-dimension or using type aliases: for instance, a three-dimensional array of type `double` can be declared either by `Array<double, 3>` or `Array3D<double>`.
-The entries of an array can be accessed with either `operator()` with multi-dimensional indices or `operator[]` with a dimensionless (1D) index, and they automatically return either CPU or GPU data depending on where they are being accessed.
+The entries of an array can be accessed with either `operator()` with multi-dimensional indices or `operator[]` with a flattened, dimensionless index, where the flattening follows a layout in which the innermost dimension varies the fastest.
+They automatically return either CPU or GPU data depending on where they are being accessed.
 Arrays can be allocated through the following APIs: `create()`, `createHost()`, and `createDevice()`.
 `create()` allocates memories on both CPU and GPU, while `createHost()` or `createDevice()` only allocates memory on either CPU or GPU.
 It is important to note that if the creation APIs are called for an initialized array, the original array will be destroyed and a new array will be created.
