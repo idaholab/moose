@@ -71,6 +71,9 @@ class TestHarnessResultsSummary:
             help = 'Sets a minimum relative run time ratio between base and head'
         )
 
+        pr_parser.add_argument(
+            '--no-run-time-comparison', action='store_true', help='Disable run time comparison')
+
         return parser.parse_args()
 
     def get_commit_results(self, commit: str) -> Optional[StoredResult]:
@@ -148,8 +151,10 @@ class TestHarnessResultsSummary:
         base_test_names = set(base_results.test_names)
         return base_results, head_results, base_test_names, test_names
 
-    @staticmethod
-    def diff_table(base_results: StoredResult, head_results: StoredResult, base_names: set[TestName],
+    def _format_test_name(self, test_name):
+        return f'`{str(test_name)}`'
+
+    def diff_table(self, base_results: StoredResult, head_results: StoredResult, base_names: set[TestName],
             head_names: set[TestName], **kwargs) -> Tuple[Optional[list], Optional[list], Optional[list]]:
         """
         Compare test names between the base and current head, and return
@@ -174,7 +179,8 @@ class TestHarnessResultsSummary:
         run-time-rate-floor : float
             The runtime rate at which to not attach in same_table summary
             (default: 0.5 i.e 50%)
-
+        no-run-time-comparison
+            if has this parameter, skip run time comparison
         Returns
         -------
         removed_table : list or None
@@ -191,55 +197,82 @@ class TestHarnessResultsSummary:
         assert isinstance(head_names,(set, NoneType))
         assert isinstance(base_names,(set, NoneType))
 
-        head_run_time_floor = kwargs.pop('run_time_floor', 1)
+        #Extract potional parameters
+        head_run_time_floor = kwargs.pop('run_time_floor', 1.0)
         assert isinstance(head_run_time_floor, (float, int))
-
         run_time_rate_floor = kwargs.pop('run_time_rate_floor', 0.5)
         assert isinstance(run_time_rate_floor, (float, int))
+        #check disable run time comparison option, it will display only test name and skip run time
+        no_run_time_comparison = kwargs.pop('no_run_time_comparison', False)
+
         #Extract removed tests
         removed_names = base_names - head_names
-        removed_table = [['`'+str(test_name)+'`'] for test_name in removed_names] if removed_names else None
-        #removed_table = [str(test_name) for test_name in removed_names] if removed_names else None
-        #Extract new tests
+        #Extract added tests
         add_names = head_names - base_names
-        if add_names:
-            added_table = []
-            for test_name in add_names:
-                test_result = head_results.get_test(test_name.folder, test_name.name)
-                formatted_test_name = '`'+str(test_name)+'`'
-                added_table.append([formatted_test_name, test_result.run_time])
-        else:
-            added_table = None
         #Extract same tests
         same_names = base_names & head_names
+
+        #Construct the list of tests that are removed
+        removed_table = [[self._format_test_name(test_name)] for test_name in removed_names] if removed_names else None
+        #need to removed
+        # if not removed_table:
+        #     removed_table = []
+        #     removed_table.append(['`testruntime.testing`'])
+
+        #Construct the list of tests that are added
+        if add_names:
+            added_table = []
+            if no_run_time_comparison:
+                #no run time
+                added_table = [[self._format_test_name(test_name)] for test_name in add_names] if add_names else None
+            else:
+                #with run time
+                for test_name in add_names:
+                    test_result = head_results.get_test(test_name.folder, test_name.name)
+
+                    added_table.append([
+                        self._format_test_name(test_name),
+                        f'{test_result.run_time:2f}'
+                    ])
+        #need to removed
+        # added_table=[]
+        # run = 10.123432543
+        # added_table.append(['`addedtestruntime.testing`',f'{run:+.2f}'])
+        else:
+            added_table = None
+
+        #Construct the list of same tests
         if same_names:
             same_table = []
-            for test_name in same_names:
-                base_result = base_results.get_test(test_name.folder, test_name.name)
-                head_result = head_results.get_test(test_name.folder, test_name.name)
-                #Skip to check relative run time if run time is None or below the threadshold
-                if  head_result.run_time is None or \
-                    base_result.run_time is None or \
-                    head_result.run_time < head_run_time_floor:
-                    continue
-                else:
-                    #Calculate relative runtime ratio between base and head
-                    relative_runtime = abs(head_result.run_time - base_result.run_time) / base_result.run_time
-                    #Check if relative run time rate is higher than threadshold, then it will put in the result
-                    if relative_runtime >= run_time_rate_floor:
-                        formatted_test_name = '`'+str(test_name)+'`'
-                        same_table.append(
-                            [
-                                formatted_test_name,
-                                base_result.run_time,
-                                head_result.run_time,
-                                f'{relative_runtime:.2%}'
-                            ]
-                        )
+            #disable run time comparison
+            if not no_run_time_comparison:
+                for test_name in same_names:
+                    base_result = base_results.get_test(test_name.folder, test_name.name)
+                    head_result = head_results.get_test(test_name.folder, test_name.name)
+                    #Skip to check relative run time if run time is None or below the threadshold
+                    if  head_result.run_time is None or \
+                        base_result.run_time is None or \
+                        head_result.run_time < head_run_time_floor:
+                        continue
+                    else:
+                        #Calculate relative runtime ratio between base and head
+                        relative_runtime = (head_result.run_time - base_result.run_time) / base_result.run_time
+                        #Check if relative run time rate is higher than threadshold, then it will put in the result
+                        if abs(relative_runtime) >= run_time_rate_floor:
+
+                            same_table.append(
+                                [
+                                    self._format_test_name(test_name),
+                                    f'{base_result.run_time:.2f}',
+                                    f'{head_result.run_time:.2f}',
+                                    f'{relative_runtime:+.2%}'
+                                ]
+                            )
+            #need to removed
+            #test_run = 0.8
+            #same_table.append(['`same_test.testing`',10,50,f'{test_run :+.2%}'])
             if not same_table:
                 same_table = None
-        else:
-            same_table = None
         return removed_table, added_table, same_table
 
     def _format_removed_table(self, removed_table: list) -> str:
