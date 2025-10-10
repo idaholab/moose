@@ -1171,9 +1171,9 @@ FEProblemBase::initialSetup()
           _neighbor_material_props.hasStatefulProperties())
         _has_initialized_stateful = true;
 #ifdef MOOSE_KOKKOS_ENABLED
-      else if (_kokkos_material_props.hasStatefulProperties() ||
-               _kokkos_bnd_material_props.hasStatefulProperties() ||
-               _kokkos_neighbor_material_props.hasStatefulProperties())
+      if (_kokkos_material_props.hasStatefulProperties() ||
+          _kokkos_bnd_material_props.hasStatefulProperties() ||
+          _kokkos_neighbor_material_props.hasStatefulProperties())
         _has_initialized_stateful = true;
 #endif
     }
@@ -1473,9 +1473,9 @@ FEProblemBase::initialSetup()
       initElementStatefulProps(*_mesh.getActiveLocalElementRange(), true);
     }
 #ifdef MOOSE_KOKKOS_ENABLED
-    else if (_kokkos_material_props.hasStatefulProperties() ||
-             _kokkos_bnd_material_props.hasStatefulProperties() ||
-             _kokkos_neighbor_material_props.hasStatefulProperties())
+    if (_kokkos_material_props.hasStatefulProperties() ||
+        _kokkos_bnd_material_props.hasStatefulProperties() ||
+        _kokkos_neighbor_material_props.hasStatefulProperties())
     {
       TIME_SECTION("computeMaterials", 2, "Computing Initial Material Properties");
 

@@ -55,10 +55,10 @@
 []
 
 [Postprocessors]
-  [./t_pp]
+  [t_pp]
     type = FunctionValuePostprocessor
     function = t_func
-  [../]
+  []
 []
 
 [Problem]

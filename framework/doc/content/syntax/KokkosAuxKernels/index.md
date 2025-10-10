@@ -4,7 +4,7 @@
 
 Before reading this documentation, consider reading the following materials first for a better understanding of this documentation:
 
-- [AuxKernels System](syntax/AuxKernels/index.md) to understand the MOOSE kernel system,
+- [AuxKernels System](syntax/AuxKernels/index.md) to understand the MOOSE auxiliary kernel system,
 - [Getting Started with Kokkos-MOOSE](syntax/Kokkos/index.md) to understand the programming practices for Kokkos-MOOSE,
 - [Kokkos Kernels System](syntax/KokkosKernels/index.md) to understand the common design pattern of objects in Kokkos-MOOSE.
 
@@ -40,7 +40,7 @@ The following example shows the implementation of `KokkosVariableTimeIntegration
 
 The computational loops are defined in `computeElementInternal()` and `computeNodeInternal()` for elemental and nodal variables, respectively, and they call the hook method `computeValue()`.
 Depending on the type of operations, however, you may be able to write more efficient kernels by customizing the loops directly.
-For example, what `KokkosCopyValueAux` does is simply copying an auxiliary variable to another, and the shape function family and order are always identical between the two variables.
+For example, what `KokkosCopyValueAux` does is simply copy one auxiliary variable to another, and the shape function family and order are always identical between the two variables.
 In this case, you can directly loop over DOFs instead of quadrature points.
 See the following source code of `KokkosCopyValueAux`, where `computeElementInternal()` and `computeNodeInternal()` are redefined instead of `computeValue()`:
 
