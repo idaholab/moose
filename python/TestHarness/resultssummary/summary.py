@@ -198,7 +198,8 @@ class TestHarnessResultsSummary:
         assert isinstance(run_time_rate_floor, (float, int))
         #Extract removed tests
         removed_names = base_names - head_names
-        removed_table = [str(v) for v in removed_names] if removed_names else None
+        removed_table = [[str(testname)] for testname in removed_names] if removed_names else None
+
         #Extract new tests
         add_names = head_names - base_names
         if add_names:
