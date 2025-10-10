@@ -23,9 +23,9 @@ public:
 
   template <typename Derived>
   KOKKOS_FUNCTION void computeElementInternal(const Derived & auxkernel,
-                                              ResidualDatum & datum) const;
+                                              AssemblyDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION void computeNodeInternal(const Derived & auxkernel, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION void computeNodeInternal(const Derived & auxkernel, AssemblyDatum & datum) const;
 
 protected:
   /// Variable used to specify state being copied
@@ -41,7 +41,7 @@ protected:
 template <typename Derived>
 KOKKOS_FUNCTION void
 KokkosCopyValueAux::computeElementInternal(const Derived & /* auxkernel */,
-                                           ResidualDatum & datum) const
+                                           AssemblyDatum & datum) const
 {
   auto & sys = kokkosSystem(_kokkos_var.sys());
   auto var = _kokkos_var.var();
@@ -55,7 +55,7 @@ KokkosCopyValueAux::computeElementInternal(const Derived & /* auxkernel */,
 template <typename Derived>
 KOKKOS_FUNCTION void
 KokkosCopyValueAux::computeNodeInternal(const Derived & /* auxkernel */,
-                                        ResidualDatum & datum) const
+                                        AssemblyDatum & datum) const
 {
   auto & sys = kokkosSystem(_kokkos_var.sys());
   auto var = _kokkos_var.var();

@@ -27,12 +27,12 @@ class VariablePhiValue
 public:
   /**
    * Get the current shape function
-   * @param datum The ResidualDatum object of the current thread
+   * @param datum The AssemblyDatum object of the current thread
    * @param i The element-local DOF index
    * @param qp The local quadrature point index
    * @returns The shape function
    */
-  KOKKOS_FUNCTION Real operator()(ResidualDatum & datum, unsigned int i, unsigned int qp) const
+  KOKKOS_FUNCTION Real operator()(AssemblyDatum & datum, unsigned int i, unsigned int qp) const
   {
     auto & elem = datum.elem();
     auto side = datum.side();
@@ -49,12 +49,12 @@ class VariablePhiGradient
 public:
   /**
    * Get the gradient of the current shape function
-   * @param datum The ResidualDatum object of the current thread
+   * @param datum The AssemblyDatum object of the current thread
    * @param i The element-local DOF index
    * @param qp The local quadrature point index
    * @returns The gradient of the shape function
    */
-  KOKKOS_FUNCTION Real3 operator()(ResidualDatum & datum, unsigned int i, unsigned int qp) const
+  KOKKOS_FUNCTION Real3 operator()(AssemblyDatum & datum, unsigned int i, unsigned int qp) const
   {
     auto & elem = datum.elem();
     auto side = datum.side();
@@ -72,12 +72,12 @@ class VariableTestValue
 public:
   /**
    * Get the current test function
-   * @param datum The ResidualDatum object of the current thread
+   * @param datum The AssemblyDatum object of the current thread
    * @param i The element-local DOF index
    * @param qp The local quadrature point index
    * @returns The test function
    */
-  KOKKOS_FUNCTION Real operator()(ResidualDatum & datum, unsigned int i, unsigned int qp) const
+  KOKKOS_FUNCTION Real operator()(AssemblyDatum & datum, unsigned int i, unsigned int qp) const
   {
     auto & elem = datum.elem();
     auto side = datum.side();
@@ -94,12 +94,12 @@ class VariableTestGradient
 public:
   /**
    * Get the gradient of the current test function
-   * @param datum The ResidualDatum object of the current thread
+   * @param datum The AssemblyDatum object of the current thread
    * @param i The element-local DOF index
    * @param qp The local quadrature point index
    * @returns The gradient of the test function
    */
-  KOKKOS_FUNCTION Real3 operator()(ResidualDatum & datum, unsigned int i, unsigned int qp) const
+  KOKKOS_FUNCTION Real3 operator()(AssemblyDatum & datum, unsigned int i, unsigned int qp) const
   {
     auto & elem = datum.elem();
     auto side = datum.side();

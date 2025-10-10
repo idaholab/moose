@@ -22,7 +22,7 @@ public:
    */
   KokkosMaterialRealAux(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeValue(const unsigned int qp, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION Real computeValue(const unsigned int qp, AssemblyDatum & datum) const;
 
 private:
   /// Material property for this AuxKernel
@@ -36,7 +36,7 @@ private:
 };
 
 KOKKOS_FUNCTION inline Real
-KokkosMaterialRealAux::computeValue(const unsigned int qp, ResidualDatum & datum) const
+KokkosMaterialRealAux::computeValue(const unsigned int qp, AssemblyDatum & datum) const
 {
   return _prop(datum, qp) * _factor + _offset;
 }

@@ -23,11 +23,11 @@ public:
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
-                                         ResidualDatum & datum) const;
+                                         AssemblyDatum & datum) const;
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
                                          const unsigned int j,
                                          const unsigned int qp,
-                                         ResidualDatum & datum) const;
+                                         AssemblyDatum & datum) const;
 
 protected:
   /// Scalar coefficient representing the relative amount consumed per unit time
@@ -37,7 +37,7 @@ protected:
 KOKKOS_FUNCTION inline Real
 KokkosReaction::computeQpResidual(const unsigned int i,
                                   const unsigned int qp,
-                                  ResidualDatum & datum) const
+                                  AssemblyDatum & datum) const
 {
   return _test(datum, i, qp) * _rate * _u(datum, qp);
 }
@@ -46,7 +46,7 @@ KOKKOS_FUNCTION inline Real
 KokkosReaction::computeQpJacobian(const unsigned int i,
                                   const unsigned int j,
                                   const unsigned int qp,
-                                  ResidualDatum & datum) const
+                                  AssemblyDatum & datum) const
 {
   return _test(datum, i, qp) * _rate * _phi(datum, j, qp);
 }

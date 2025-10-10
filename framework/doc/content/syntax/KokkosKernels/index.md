@@ -32,16 +32,16 @@ Their signatures look like the following:
 ```cpp
 KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                        const unsigned int qp,
-                                       ResidualDatum & datum) const;
+                                       AssemblyDatum & datum) const;
 KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
                                        const unsigned int j,
                                        const unsigned int qp,
-                                       ResidualDatum & datum) const;
+                                       AssemblyDatum & datum) const;
 KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int i,
                                               const unsigned int j,
                                               const unsigned int jvar,
                                               const unsigned int qp,
-                                              ResidualDatum & datum) const;
+                                              AssemblyDatum & datum) const;
 ```
 
 Analogously to the original MOOSE, `computeQpResidual()` must be provided in the derived class, and the definition of `computeQpJacobian()` and `computeQpOffDiagJacobian()` are optional.
@@ -76,7 +76,7 @@ will look like the following in `KokkosDiffusion`:
 KOKKOS_FUNCTION Real
 KokkosDiffusion::computeQpResidual(const unsigned int i,
                                    const unsigned int qp,
-                                   ResidualDatum & datum) const
+                                   AssemblyDatum & datum) const
 {
   return _grad_u(datum, qp) * _grad_test(datum, i, qp);
 }
@@ -85,7 +85,7 @@ KOKKOS_FUNCTION Real
 KokkosDiffusion::computeQpJacobian(const unsigned int i,
                                    const unsigned int j,
                                    const unsigned int qp,
-                                   ResidualDatum & datum) const
+                                   AssemblyDatum & datum) const
 {
   return _grad_phi(datum, j, qp) * _grad_test(datum, i, qp);
 }
@@ -112,20 +112,20 @@ The signatures of the hook methods are as follows:
 
 ```cpp
 KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp,
-                                       ResidualDatum & datum) const;
+                                       AssemblyDatum & datum) const;
 KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int j,
                                        const unsigned int qp,
-                                       ResidualDatum & datum) const;
+                                       AssemblyDatum & datum) const;
 ```
 
 - For `Moose::Kokkos::KernelGrad`,
 
 ```cpp
 KOKKOS_FUNCTION Real3 computeQpResidual(const unsigned int qp,
-                                        ResidualDatum & datum) const;
+                                        AssemblyDatum & datum) const;
 KOKKOS_FUNCTION Real3 computeQpJacobian(const unsigned int j,
                                         const unsigned int qp,
-                                        ResidualDatum & datum) const;
+                                        AssemblyDatum & datum) const;
 ```
 
 See the following source codes of `KokkosConvectionPrecompute` and `KokkosDiffusionPrecompute` for examples of optimized kernels:

@@ -173,18 +173,18 @@ protected:
 
   /**
    * The common loop structure template for computing elemental residual
-   * @param datum The ResidualDatum object of the current thread
+   * @param datum The AssemblyDatum object of the current thread
    * @param body The quadrature point loop body
    */
   template <typename function>
-  KOKKOS_FUNCTION void computeResidualInternal(ResidualDatum & datum, function body) const;
+  KOKKOS_FUNCTION void computeResidualInternal(AssemblyDatum & datum, function body) const;
   /**
    * The common loop structure template for computing elemental Jacobian
-   * @param datum The ResidualDatum object of the current thread
+   * @param datum The AssemblyDatum object of the current thread
    * @param body The quadrature point loop body
    */
   template <typename function>
-  KOKKOS_FUNCTION void computeJacobianInternal(ResidualDatum & datum, function body) const;
+  KOKKOS_FUNCTION void computeJacobianInternal(AssemblyDatum & datum, function body) const;
 
 private:
   /**
@@ -321,7 +321,7 @@ ResidualObject::accumulateTaggedNodalMatrix(const bool add,
 
 template <typename function>
 KOKKOS_FUNCTION void
-ResidualObject::computeResidualInternal(ResidualDatum & datum, function body) const
+ResidualObject::computeResidualInternal(AssemblyDatum & datum, function body) const
 {
   Real local_re[MAX_CACHED_DOF];
 
@@ -347,7 +347,7 @@ ResidualObject::computeResidualInternal(ResidualDatum & datum, function body) co
 
 template <typename function>
 KOKKOS_FUNCTION void
-ResidualObject::computeJacobianInternal(ResidualDatum & datum, function body) const
+ResidualObject::computeJacobianInternal(AssemblyDatum & datum, function body) const
 {
   Real local_ke[MAX_CACHED_DOF];
 

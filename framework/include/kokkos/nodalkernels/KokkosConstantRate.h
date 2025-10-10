@@ -18,7 +18,7 @@ public:
 
   KokkosConstantRate(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
 
 protected:
   const Moose::Kokkos::Scalar<const Real> _rate;
@@ -26,7 +26,7 @@ protected:
 
 KOKKOS_FUNCTION inline Real
 KokkosConstantRate::computeQpResidual(const unsigned int /* qp */,
-                                      ResidualDatum & /* datum */) const
+                                      AssemblyDatum & /* datum */) const
 {
   return -_rate;
 }

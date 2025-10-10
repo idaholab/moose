@@ -23,10 +23,10 @@ public:
 
   KokkosVariableTimeIntegrationAux(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeValue(const unsigned int qp, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION Real computeValue(const unsigned int qp, AssemblyDatum & datum) const;
 
 protected:
-  KOKKOS_FUNCTION Real getIntegralValue(const unsigned int qp, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION Real getIntegralValue(const unsigned int qp, AssemblyDatum & datum) const;
 
   Moose::Kokkos::Array<Moose::Kokkos::VariableValue> _coupled_vars;
   const Real _coef;
@@ -40,7 +40,7 @@ protected:
 };
 
 KOKKOS_FUNCTION inline Real
-KokkosVariableTimeIntegrationAux::computeValue(const unsigned int qp, ResidualDatum & datum) const
+KokkosVariableTimeIntegrationAux::computeValue(const unsigned int qp, AssemblyDatum & datum) const
 {
   Real integral = getIntegralValue(qp, datum);
 
@@ -52,7 +52,7 @@ KokkosVariableTimeIntegrationAux::computeValue(const unsigned int qp, ResidualDa
 
 KOKKOS_FUNCTION inline Real
 KokkosVariableTimeIntegrationAux::getIntegralValue(const unsigned int qp,
-                                                   ResidualDatum & datum) const
+                                                   AssemblyDatum & datum) const
 {
   Real integral_value = 0.0;
 

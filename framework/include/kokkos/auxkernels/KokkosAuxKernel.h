@@ -30,10 +30,10 @@ namespace Kokkos
  * class is as follows:
  *
  * @param qp The local quadrature point index
- * @param datum The ResidualDatum object of the current thread
+ * @param datum The AssemblyDatum object of the current thread
  * @returns The value at the quadrature point
  *
- * KOKKOS_FUNCTION Real computeValue(const unsigned int qp, ResidualDatum & datum) const;
+ * KOKKOS_FUNCTION Real computeValue(const unsigned int qp, AssemblyDatum & datum) const;
  */
 class AuxKernel : public ::AuxKernelBase,
                   public MeshHolder,
@@ -98,18 +98,18 @@ public:
   /**
    * Compute an element
    * @param kernel The auxiliary kernel object of the final derived type
-   * @param datum The ResidualDatum object of the current thread
+   * @param datum The AssemblyDatum object of the current thread
    */
   template <typename Derived>
   KOKKOS_FUNCTION void computeElementInternal(const Derived & auxkernel,
-                                              ResidualDatum & datum) const;
+                                              AssemblyDatum & datum) const;
   /**
    * Compute a node
    * @param kernel The auxiliary kernel object of the final derived type
-   * @param datum The ResidualDatum object of the current thread
+   * @param datum The AssemblyDatum object of the current thread
    */
   template <typename Derived>
-  KOKKOS_FUNCTION void computeNodeInternal(const Derived & auxkernel, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION void computeNodeInternal(const Derived & auxkernel, AssemblyDatum & datum) const;
   ///@}
 
 protected:
@@ -127,20 +127,20 @@ protected:
   /**
    * Set element values to the auxiliary solution vector
    * @param values The array containing the solution values of the element
-   * @param datum The ResidualDatum object of the current thread
+   * @param datum The AssemblyDatum object of the current thread
    * @param comp The variable component
    */
   KOKKOS_FUNCTION void setElementSolution(const Real * const values,
-                                          const ResidualDatum & datum,
+                                          const AssemblyDatum & datum,
                                           const unsigned int comp = 0) const;
   /**
    * Set node value to the auxiliary solution vector
    * @param values The node solution value
-   * @param datum The ResidualDatum object of the current thread
+   * @param datum The AssemblyDatum object of the current thread
    * @param comp The variable component
    */
   KOKKOS_FUNCTION void
-  setNodeSolution(const Real value, const ResidualDatum & datum, const unsigned int comp = 0) const;
+  setNodeSolution(const Real value, const AssemblyDatum & datum, const unsigned int comp = 0) const;
 
   /**
    * Flag whether this kernel is nodal
@@ -209,7 +209,7 @@ AuxKernel::operator()(ElementLoop, const ThreadID tid, const Derived & auxkernel
 {
   auto elem = kokkosBlockElementID(tid);
 
-  ResidualDatum datum(elem,
+  AssemblyDatum datum(elem,
                       libMesh::invalid_uint,
                       kokkosAssembly(),
                       kokkosSystems(),
@@ -229,14 +229,14 @@ AuxKernel::operator()(NodeLoop, const ThreadID tid, const Derived & auxkernel) c
   if (!sys.isNodalDefined(node, _kokkos_var.var()))
     return;
 
-  ResidualDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+  AssemblyDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
 
   auxkernel.computeNodeInternal(auxkernel, datum);
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-AuxKernel::computeElementInternal(const Derived & auxkernel, ResidualDatum & datum) const
+AuxKernel::computeElementInternal(const Derived & auxkernel, AssemblyDatum & datum) const
 {
   Real x[MAX_CACHED_DOF];
   Real b[MAX_CACHED_DOF];
@@ -278,7 +278,7 @@ AuxKernel::computeElementInternal(const Derived & auxkernel, ResidualDatum & dat
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-AuxKernel::computeNodeInternal(const Derived & auxkernel, ResidualDatum & datum) const
+AuxKernel::computeNodeInternal(const Derived & auxkernel, AssemblyDatum & datum) const
 {
   auto value = auxkernel.computeValue(0, datum);
 
@@ -287,7 +287,7 @@ AuxKernel::computeNodeInternal(const Derived & auxkernel, ResidualDatum & datum)
 
 KOKKOS_FUNCTION inline void
 AuxKernel::setElementSolution(const Real * const values,
-                              const ResidualDatum & datum,
+                              const AssemblyDatum & datum,
                               const unsigned int comp) const
 {
   auto & sys = kokkosSystem(_kokkos_var.sys(comp));
@@ -301,7 +301,7 @@ AuxKernel::setElementSolution(const Real * const values,
 
 KOKKOS_FUNCTION inline void
 AuxKernel::setNodeSolution(const Real value,
-                           const ResidualDatum & datum,
+                           const AssemblyDatum & datum,
                            const unsigned int comp) const
 {
   auto & sys = kokkosSystem(_kokkos_var.sys(comp));
