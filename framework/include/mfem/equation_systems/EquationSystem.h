@@ -54,6 +54,9 @@ public:
   /// Build linear forms and eliminate constrained DoFs
   virtual void BuildLinearForms();
   virtual void ApplyEssentialBCs();
+  virtual void ApplyEssentialBC(const std::string & test_var_name,
+                                mfem::ParGridFunction & trial_gf,
+                                mfem::Array<int> & global_ess_markers);
   virtual void EliminateCoupledVariables();
 
   /// Build bilinear forms

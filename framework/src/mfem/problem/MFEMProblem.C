@@ -171,8 +171,6 @@ MFEMProblem::addVariable(const std::string & var_type,
   {
     const auto time_derivative_var_name =
         getUserObject<MFEMVariable>(var_name).getTimeDerivativeName();
-    // const auto time_derivative_var_name =
-    //     getProblemData().time_derivative_map.createTimeDerivativeName(var_name);
     getProblemData().time_derivative_map.addTimeDerivativeAssociation(var_name,
                                                                       time_derivative_var_name);
     addGridFunction(var_type, time_derivative_var_name, parameters);

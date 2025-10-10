@@ -67,7 +67,7 @@ exterior_bdr = '1 2 3'
   [grad_potential]
     type = MFEMGradAux
     variable = e_field
-    source = time_integrated_electric_potential
+    source = electric_potential
     scale_factor = -1.0
     execute_on = TIMESTEP_END
   []  
@@ -82,7 +82,7 @@ exterior_bdr = '1 2 3'
   []
   [potential_diff]
     type = ParsedFunction
-    expression = '10. * t'
+    expression = '10.'
   []
 []
 
@@ -95,15 +95,15 @@ exterior_bdr = '1 2 3'
   []
   [high_terminal]
     type = MFEMScalarDirichletBC
-    variable = time_integrated_electric_potential
+    variable = electric_potential
     boundary = ${high_terminal_bdr}
     coefficient = potential_diff
   []
   [low_terminal]
     type = MFEMScalarDirichletBC
-    variable = time_integrated_electric_potential
+    variable = electric_potential
     boundary = ${low_terminal_bdr}
-    coefficient = conductivity
+    coefficient = 0.0
   []  
 []
 
@@ -134,8 +134,8 @@ exterior_bdr = '1 2 3'
     coefficient = conductivity
   []
   [sigmagradV,dA'_dt]
-    type = MFEMTimeDerivativeMixedVectorGradientKernel
-    trial_variable = time_integrated_electric_potential
+    type = MFEMMixedVectorGradientKernel
+    trial_variable = electric_potential
     variable = a_field
     coefficient = conductivity
     block = ${coil_domain}
@@ -150,7 +150,8 @@ exterior_bdr = '1 2 3'
     transpose = true
   []  
   [gradV,gradV']
-    type = MFEMTimeDerivativeDiffusionKernel
+    type = MFEMMixedGradGradKernel
+    trial_variable = electric_potential
     variable = time_integrated_electric_potential
     coefficient = conductivity
   []

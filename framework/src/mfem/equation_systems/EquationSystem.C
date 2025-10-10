@@ -111,7 +111,6 @@ EquationSystem::AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> bc)
 void
 EquationSystem::AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc)
 {
-  AddTestVariableNameIfMissing(bc->getTestVariableName());
   auto test_var_name = bc->getTestVariableName();
   if (!_essential_bc_map.Has(test_var_name))
   {
@@ -158,35 +157,42 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
 }
 
 void
+EquationSystem::ApplyEssentialBC(const std::string & var_name,
+                                 mfem::ParGridFunction & trial_gf,
+                                 mfem::Array<int> & global_ess_markers)
+{
+  // Set default value of gridfunction used in essential BC. Values
+  // overwritten in applyEssentialBCs
+  if (_essential_bc_map.Has(var_name))
+  {
+    auto bcs = _essential_bc_map.GetRef(var_name);
+    for (auto & bc : bcs)
+    {
+      bc->ApplyBC(trial_gf);
+      mfem::Array<int> ess_bdrs(bc->getBoundaryMarkers());
+      for (auto it = 0; it != trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max(); ++it)
+      {
+        global_ess_markers[it] = std::max(global_ess_markers[it], ess_bdrs[it]);
+      }
+    }
+  }
+}
+
+void
 EquationSystem::ApplyEssentialBCs()
 {
   _ess_tdof_lists.resize(_test_var_names.size());
   for (const auto i : index_range(_test_var_names))
   {
-    auto test_var_name = _test_var_names.at(i);
-    if (!_essential_bc_map.Has(test_var_name))
-      continue;
 
+    const auto test_var_name = _test_var_names.at(i);
+    mfem::ParGridFunction & trial_gf(*(_var_ess_constraints.at(i)));
+    mfem::Array<int> global_ess_markers(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
+    global_ess_markers = 0;
     // Set default value of gridfunction used in essential BC. Values
     // overwritten in applyEssentialBCs
-    mfem::ParGridFunction & trial_gf(*(_var_ess_constraints.at(i)));
-    auto * const pmesh = _test_pfespaces.at(i)->GetParMesh();
-    mooseAssert(pmesh, "parallel mesh is null");
-
-    auto bcs = _essential_bc_map.GetRef(test_var_name);
-    mfem::Array<int> global_ess_markers(pmesh->bdr_attributes.Max());
-    global_ess_markers = 0;
-    for (auto & bc : bcs)
-    {
-      bc->ApplyBC(trial_gf);
-
-      mfem::Array<int> ess_bdrs(bc->getBoundaryMarkers());
-      for (auto it = 0; it != pmesh->bdr_attributes.Max(); ++it)
-      {
-        global_ess_markers[it] = std::max(global_ess_markers[it], ess_bdrs[it]);
-      }
-    }
-    trial_gf.FESpace()->GetEssentialTrueDofs(global_ess_markers, _ess_tdof_lists.at(i));
+    ApplyEssentialBC(test_var_name, trial_gf, global_ess_markers);
+    trial_gf.ParFESpace()->GetEssentialTrueDofs(global_ess_markers, _ess_tdof_lists.at(i));
   }
 }
 
@@ -678,17 +684,29 @@ TimeDependentEquationSystem::BuildMixedBilinearForms()
 void
 TimeDependentEquationSystem::ApplyEssentialBCs()
 {
-  EquationSystem::ApplyEssentialBCs();
-
-  // Eliminate contributions from variables at previous timestep.
+  _ess_tdof_lists.resize(_test_var_names.size());
   for (const auto i : index_range(_test_var_names))
   {
-    auto & test_var_name = _test_var_names.at(i);
+
+    const auto test_var_name = _test_var_names.at(i);
+    const auto time_derivative_test_var_name =
+        _time_derivative_map.getTimeDerivativeName(test_var_name);
+    mfem::ParGridFunction & trial_gf(*(_var_ess_constraints.at(i)));
+    mfem::ParGridFunction & trial_gf_time_derivative(*(_td_var_ess_constraints.at(i)));
+    mfem::Array<int> global_ess_markers(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
+    global_ess_markers = 0;
+    // Set default value of gridfunction used in essential BC. Values
+    // overwritten in applyEssentialBCs
+    EquationSystem::ApplyEssentialBC(test_var_name, trial_gf, global_ess_markers);
     // Update solution values on Dirichlet values to be in terms of du/dt instead of u
     *_td_var_ess_constraints.at(i).get() = *(_var_ess_constraints.at(i).get());
     *_td_var_ess_constraints.at(i).get() -= *_eliminated_variables.Get(test_var_name);
     *_td_var_ess_constraints.at(i).get() /= _dt_coef.constant;
-  }  
+    // Apply any remaining Dirichlet BCs specified directly on du/dt
+    EquationSystem::ApplyEssentialBC(
+        time_derivative_test_var_name, trial_gf_time_derivative, global_ess_markers);
+    trial_gf.ParFESpace()->GetEssentialTrueDofs(global_ess_markers, _ess_tdof_lists.at(i));
+  }
 }
 
 void
