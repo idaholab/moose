@@ -165,7 +165,7 @@ ComplexEquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
 }
 
 void
-ComplexEquationSystem::AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> bc)
+ComplexEquationSystem::AddComplexIntegratedBC(std::shared_ptr<MFEMComplexIntegratedBC> bc)
 {
   AddTestVariableNameIfMissing(bc->getTestVariableName());
   AddCoupledVariableNameIfMissing(bc->getTrialVariableName());

@@ -121,6 +121,18 @@ MFEMProblem::addBoundaryCondition(const std::string & bc_name,
       mooseError("Cannot add integrated BC with name '" + name +
                  "' because there is no corresponding equation system.");
   }
+  else if (dynamic_cast<const MFEMComplexIntegratedBC *>(mfem_bc_uo) != nullptr)
+  {
+    auto object_ptr = getUserObject<MFEMComplexIntegratedBC>(name).getSharedPtr();
+    auto bc = std::dynamic_pointer_cast<MFEMComplexIntegratedBC>(object_ptr);
+    auto eqsys =
+        std::dynamic_pointer_cast<Moose::MFEM::ComplexEquationSystem>(getProblemData().eqn_system);
+    if (eqsys)
+      eqsys->AddComplexIntegratedBC(std::move(bc));
+    else
+      mooseError("Cannot add integrated BC with name '" + name +
+                 "' because there is no corresponding equation system.");
+  }
   else if (dynamic_cast<const MFEMComplexEssentialBC *>(mfem_bc_uo) != nullptr)
   {
     auto object_ptr = getUserObject<MFEMComplexEssentialBC>(name).getSharedPtr();

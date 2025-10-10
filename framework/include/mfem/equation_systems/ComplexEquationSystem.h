@@ -34,7 +34,7 @@ public:
   virtual void ApplyEssentialBCs() override;
 
   virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel) override;
-  void AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> bc) override;
+  void AddComplexIntegratedBC(std::shared_ptr<MFEMComplexIntegratedBC> bc);
   void AddComplexEssentialBCs(std::shared_ptr<MFEMComplexEssentialBC> bc);
 
   virtual void FormSystem(mfem::OperatorHandle & op,
