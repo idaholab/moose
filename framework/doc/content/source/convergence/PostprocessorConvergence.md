@@ -12,6 +12,13 @@ must include values that trigger execution before the desired check. For example
 Typically the post-processor used should attempt to approximate the error in a system,
 such as [/AverageVariableChange.md].
 
+The parameter [!param](/Convergence/PostprocessorConvergence/max_diverging_iterations) may be used to diverge after the specified number of consecutive iterations for which the post-processor/error value is "diverging". By default, "diverging" means the error value is getting larger, but the parameter [!param](/Convergence/PostprocessorConvergence/diverging_iteration_rel_reduction) can be used to specify some minimum reduction value $\tau_\text{reduction,min}$ such that the "diverging" condition is the following:
+
+!equation
+\frac{|y_{\ell-1}| - |y_\ell|}{|y_{\ell-1}|} < \tau_\text{reduction,min}
+
+This can be used to terminate iteration when convergence is proceeding too slowly.
+
 !syntax parameters /Convergence/PostprocessorConvergence
 
 !syntax inputs /Convergence/PostprocessorConvergence
