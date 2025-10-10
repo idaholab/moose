@@ -151,7 +151,8 @@ class TestResultsSummary(TestHarnessTestCase):
         )
 
         self.assertEqual(len(removed_table), base_result_with_tests.num_tests)
-        self.assertEqual(removed_table[0], str(MOCKED_TEST_NAME))
+        self.assertIsInstance(removed_table[0],list)
+        self.assertIn(str(MOCKED_TEST_NAME),removed_table[0][0])
         self.assertIsNone(added_table)
         self.assertIsNone(same_table)
 
@@ -183,7 +184,7 @@ class TestResultsSummary(TestHarnessTestCase):
         head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
 
         self.assertEqual(len(added_table), head_result_with_tests.num_tests)
-        self.assertEqual(added_table[0][0], str(MOCKED_TEST_NAME))
+        self.assertIn(str(MOCKED_TEST_NAME),added_table[0][0])
         self.assertEqual(added_table[0][1], head_test.run_time)
         self.assertIsNone(removed_table)
         self.assertIsNone(same_table)
@@ -310,7 +311,7 @@ class TestResultsSummary(TestHarnessTestCase):
         )
 
         self.assertEqual(len(same_table), 1)
-        self.assertEqual(same_table[0][0], str(MOCKED_TEST_NAME))
+        self.assertIn(str(MOCKED_TEST_NAME),same_table[0][0])
         self.assertEqual(same_table[0][1], base_test.run_time)
         self.assertEqual(same_table[0][2], head_test.run_time)
         self.assertGreater(same_table[0][2], fake_run_time_floor)

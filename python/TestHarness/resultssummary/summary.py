@@ -198,15 +198,16 @@ class TestHarnessResultsSummary:
         assert isinstance(run_time_rate_floor, (float, int))
         #Extract removed tests
         removed_names = base_names - head_names
-        removed_table = [[str(testname)] for testname in removed_names] if removed_names else None
-
+        removed_table = [['`'+str(test_name)+'`'] for test_name in removed_names] if removed_names else None
+        #removed_table = [str(test_name) for test_name in removed_names] if removed_names else None
         #Extract new tests
         add_names = head_names - base_names
         if add_names:
             added_table = []
             for test_name in add_names:
                 test_result = head_results.get_test(test_name.folder, test_name.name)
-                added_table.append([str(test_name), test_result.run_time])
+                formatted_test_name = '`'+str(test_name)+'`'
+                added_table.append([formatted_test_name, test_result.run_time])
         else:
             added_table = None
         #Extract same tests
@@ -226,9 +227,10 @@ class TestHarnessResultsSummary:
                     relative_runtime = abs(head_result.run_time - base_result.run_time) / base_result.run_time
                     #Check if relative run time rate is higher than threadshold, then it will put in the result
                     if relative_runtime >= run_time_rate_floor:
+                        formatted_test_name = '`'+str(test_name)+'`'
                         same_table.append(
                             [
-                                str(test_name),
+                                formatted_test_name,
                                 base_result.run_time,
                                 head_result.run_time,
                                 f'{relative_runtime:.2%}'
@@ -247,6 +249,7 @@ class TestHarnessResultsSummary:
         assert isinstance(removed_table,(list, NoneType))
         format_removed_table = ["### Removed Tests:"]
         if removed_table:
+            assert all(isinstance(removed_test, list) for removed_test in removed_table)
             format_removed_table.append(
                 tabulate(
                     removed_table,
@@ -265,6 +268,7 @@ class TestHarnessResultsSummary:
         assert isinstance(added_table,(list, NoneType))
         format_added_table = ["### New Tests:"]
         if added_table:
+            assert all(isinstance(added_test, list) for added_test in added_table)
             format_added_table.append(
                 tabulate(
                     added_table,
@@ -286,6 +290,7 @@ class TestHarnessResultsSummary:
         assert isinstance(same_table,(list, NoneType))
         format_same_table = ["### Same Tests that exceed relative run time rate:"]
         if same_table:
+            assert all(isinstance(same_test, list) for same_test in same_table)
             format_same_table.append(
                 tabulate(
                     same_table,
