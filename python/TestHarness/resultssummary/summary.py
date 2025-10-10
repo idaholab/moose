@@ -10,7 +10,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import argparse
-from typing import Tuple, Optional
+from typing import Tuple, Optional, List
 
 from TestHarness.resultsstore.reader import ResultsReader
 from TestHarness.resultsstore.storedresults import StoredResult, TestName
@@ -151,7 +151,8 @@ class TestHarnessResultsSummary:
         base_test_names = set(base_results.test_names)
         return base_results, head_results, base_test_names, test_names
 
-    def _format_test_name(self, test_name):
+    @staticmethod
+    def _format_test_name(test_name):
         return f'`{str(test_name)}`'
 
     def diff_table(self, base_results: StoredResult, head_results: StoredResult, base_names: set[TestName],
@@ -275,70 +276,35 @@ class TestHarnessResultsSummary:
                 same_table = None
         return removed_table, added_table, same_table
 
-    def _format_removed_table(self, removed_table: list) -> str:
+    @staticmethod
+    def _format_table(title: str, table_data: Optional[List[List]], headers: List[str], no_data_message: str) -> str:
         """
-        Formatting GitHub-style table for removed test results
-        """
-        assert isinstance(removed_table,(list, NoneType))
-        format_removed_table = ["### Removed Tests:"]
-        if removed_table:
-            assert all(isinstance(removed_test, list) for removed_test in removed_table)
-            format_removed_table.append(
-                tabulate(
-                    removed_table,
-                    headers = ["Test Name"],
-                    tablefmt = "github"
-                )
-            )
-        else:
-            format_removed_table.append("No Removed Tests")
-        return "\n".join(format_removed_table)
+        Format a GitHub-style table with a section title.
+        Parameters
+        ----------
+        title : str
+            The section title to display above the table (e.g., "### Removed Tests:").
+        table_data : list of list or None
+            The table content, where each inner list represents a row.
+        headers : list of str
+            The column headers for the table.
 
-    def _format_added_table(self, added_table: list) -> str:
+        Returns
+        -------
+        str
+            A formatted string containing the section title and a GitHub-style table,
+            or a message indicating there is no tests
         """
-        Formatting GitHub-style table for added test results
-        """
-        assert isinstance(added_table,(list, NoneType))
-        format_added_table = ["### New Tests:"]
-        if added_table:
-            assert all(isinstance(added_test, list) for added_test in added_table)
-            format_added_table.append(
-                tabulate(
-                    added_table,
-                    headers = [
-                        "Test Name",
-                        "Run Time"
-                    ],
-                    tablefmt = "github"
-                )
-            )
-        else:
-            format_added_table.append("No New Tests")
-        return "\n".join(format_added_table)
+        assert isinstance(table_data, (list, type(None)))
+        formatted_table = [title]
 
-    def _format_same_table(self, same_table: list) -> str:
-        """
-        Formatting GitHub-style table for same test results that exceed relative run time rate
-        """
-        assert isinstance(same_table,(list, NoneType))
-        format_same_table = ["### Same Tests that exceed relative run time rate:"]
-        if same_table:
-            assert all(isinstance(same_test, list) for same_test in same_table)
-            format_same_table.append(
-                tabulate(
-                    same_table,
-                    headers=[
-                        "Test Name",
-                        "Base Run Time",
-                        "Head Run Time",
-                        "Relative Run Time Rate"
-                    ],
-                    tablefmt="github"
-                )
-            )
+        if table_data:
+            assert all(isinstance(row, list) for row in table_data)
+            formatted_table.append(tabulate(table_data, headers=headers, tablefmt="github"))
         else:
-            format_same_table.append("No Tests")
-        return "\n".join(format_same_table)
+            formatted_table.append(no_data_message)
+
+        return "\n".join(formatted_table)
 
     def build_summary(self, removed_table: list, added_table: list, same_table: list) -> str:
         """
@@ -367,10 +333,33 @@ class TestHarnessResultsSummary:
         assert isinstance(same_table, (list, NoneType))
 
         summary = []
-        summary.append(self._format_removed_table(removed_table))
-        summary.append(self._format_added_table(added_table))
-        summary.append(self._format_same_table(same_table))
-
+        #Format removed table
+        summary.append(
+            self._format_table(
+                "### Removed Tests:",
+                removed_table,
+                ["Test Name"],
+                "No Removed Tests"
+            )
+        )
+        #Format added table
+        summary.append(
+            self._format_table(
+                "### New Tests:",
+                added_table,
+                ["Test Name", "Run Time"],
+                "No New Tests"
+            )
+        )
+        #Format same table
+        summary.append(
+            self._format_table(
+                "### Same Tests that exceed relative run time rate:",
+                same_table,
+                ["Test Name", "Base Run Time", "Head Run Time", "Relative Run Time Rate"],
+                "No Tests"
+            )
+        )
         return "\n".join(summary)
 
     def write_output(self, output_result: str, out_file: str) -> None:
