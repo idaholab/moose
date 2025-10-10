@@ -48,7 +48,6 @@ ParameterMeshFunction::ParameterMeshFunction(const InputParameters & parameters)
     ReporterInterface(this),
     _parameter_mesh(AddVariableAction::feType(parameters),
                     getParam<FileName>("exodus_mesh"),
-                    {},
                     getParam<bool>("project_points"),
                     getParam<unsigned int>("kdtree_candidates")),
     _values(getReporterValue<std::vector<Real>>("parameter_name")),
