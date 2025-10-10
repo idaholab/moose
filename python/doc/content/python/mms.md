@@ -71,11 +71,11 @@ exact solution. The complete output for this function is given below.
 8*pi^2*sin(2*x*pi)*sin(2*y*pi)
 [force]
   type = ParsedFunction
-  value = '8*pi^2*sin(2*x*pi)*sin(2*y*pi)'
+  expression = '8*pi^2*sin(2*x*pi)*sin(2*y*pi)'
 []
 [exact]
   type = ParsedFunction
-  value = 'sin(2*x*pi)*sin(2*y*pi)'
+  expression = 'sin(2*x*pi)*sin(2*y*pi)'
 []
 ```
 
@@ -180,11 +180,11 @@ file for the temporal problem is shown in [mms_temporal].
 3*x*y*t^2
 [force]
   type = ParsedFunction
-  value = '3*x*y*t^2'
+  expression = '3*x*y*t^2'
 []
 [exact]
   type = ParsedFunction
-  value = 'x*y*t^3'
+  expression = 'x*y*t^3'
 []
 ```
 

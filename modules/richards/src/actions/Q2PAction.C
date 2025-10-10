@@ -242,7 +242,7 @@ Q2PAction::act()
     // user wants total masses, so need to build Functions to do this
     InputParameters params = _factory.getValidParams("ParsedFunction");
 
-    params.set<std::string>("value") = "a*b";
+    params.set<std::string>("expression") = "a*b";
 
     std::vector<std::string> vars;
     vars.push_back("a");

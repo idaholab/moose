@@ -23,7 +23,7 @@
 [Functions]
   [params_fun]
     type = ParsedFunction
-    value = 'x*(x-1)*y*(y-1)'
+    expression = 'x*(x-1)*y*(y-1)'
   []
 []
 
