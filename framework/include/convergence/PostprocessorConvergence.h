@@ -29,4 +29,16 @@ protected:
 
   /// Tolerance to which post-processor is compared
   const Real _tol;
+
+  /// Maximum number of consecutive diverging iterations
+  const unsigned int _max_diverging_iterations;
+
+  /// Diverging relative reduction
+  const Real _div_rel_reduction;
+
+  /// Current diverging iterations count
+  unsigned int _diverging_iterations;
+
+  /// Previous execution of post-processor value
+  Real _pp_value_old;
 };

@@ -15,4 +15,11 @@
     requirement = 'The system shall be able to terminate MultiApp fixed point iteration according to a post-processor value.'
     issues = '#30784'
   []
+  [diverging_iterations]
+    type = RunException
+    input = 'diverging_iterations.i'
+    expect_err = "Diverged due to exceeding maximum number of diverging iterations \(2\)"
+    requirement = 'The system shall be able to report divergence when a post-processor value is not converging fast enough.'
+    issues = '#31703'
+  []
 []
