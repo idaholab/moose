@@ -30,8 +30,8 @@ CrackMeshCut3DUserObject::validParams()
   MooseEnum growthDirection("MAX_HOOP_STRESS FUNCTION", "FUNCTION");
   params.addParam<MooseEnum>(
       "growth_dir_method", growthDirection, "choose from FUNCTION, MAX_HOOP_STRESS");
-  MooseEnum growthRate("FATIGUE FUNCTION", "FUNCTION");
-  params.addParam<MooseEnum>("growth_rate_method", growthRate, "choose from FUNCTION, FATIGUE");
+  MooseEnum growthRate("REPORTER FUNCTION", "FUNCTION");
+  params.addParam<MooseEnum>("growth_rate_method", growthRate, "choose from FUNCTION, REPORTER");
   params.addParam<FunctionName>("growth_direction_x",
                                 "Function defining x-component of crack growth direction");
   params.addParam<FunctionName>("growth_direction_y",
@@ -39,6 +39,13 @@ CrackMeshCut3DUserObject::validParams()
   params.addParam<FunctionName>("growth_direction_z",
                                 "Function defining z-component of crack growth direction");
 
+  params.addParam<VectorPostprocessorName>(
+      "ki_vectorpostprocessor", "II_KI_1", "The name of the vectorpostprocessor that contains KI");
+  params.addParam<VectorPostprocessorName>("kii_vectorpostprocessor",
+                                           "II_KII_1",
+                                           "The name of the vectorpostprocessor that contains KII");
+  params.addParam<ReporterName>("growth_reporter",
+                                "The name of the reporter that contains growth increment");
   params.addParam<FunctionName>("growth_rate", "Function defining crack growth rate");
   params.addParam<Real>(
       "size_control", 0, "Criterion for refining elements while growing the crack");
@@ -64,14 +71,28 @@ CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & param
                                                           : nullptr),
     _func_z(parameters.isParamValid("growth_direction_z") ? &getFunction("growth_direction_z")
                                                           : nullptr),
-    _func_v(parameters.isParamValid("growth_rate") ? &getFunction("growth_rate") : nullptr)
+    _func_v(parameters.isParamValid("growth_rate") ? &getFunction("growth_rate") : nullptr),
+    _ki_vpp((_growth_dir_method == GrowthDirectionEnum::MAX_HOOP_STRESS)
+                ? &getVectorPostprocessorValue(
+                      "ki_vectorpostprocessor",
+                      getParam<VectorPostprocessorName>("ki_vectorpostprocessor"))
+                : nullptr),
+    _kii_vpp((_growth_dir_method == GrowthDirectionEnum::MAX_HOOP_STRESS)
+                 ? &getVectorPostprocessorValue(
+                       "kii_vectorpostprocessor",
+                       getParam<VectorPostprocessorName>("kii_vectorpostprocessor"))
+                 : nullptr),
+    _growth_inc_reporter((_growth_rate_method == GrowthRateEnum::REPORTER)
+                             ? &getReporterValueByName<std::vector<Real>>(
+                                   getParam<ReporterName>("growth_reporter"), REPORTER_MODE_ROOT)
+                             : nullptr)
 {
   _grow = (_n_step_growth == 0 ? 0 : 1);
 
   if (_grow)
   {
     if (!isParamValid("size_control"))
-      mooseError("Crack growth needs size control");
+      paramError("size_control", "Crack growth needs size control.");
 
     _size_control = getParam<Real>("size_control");
 
@@ -79,17 +100,11 @@ CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & param
         (_func_x == nullptr || _func_y == nullptr || _func_z == nullptr))
       mooseError("function is not specified for the function method that defines growth direction");
 
-    if (_growth_dir_method == GrowthDirectionEnum::FUNCTION && _func_v == nullptr)
-      mooseError("function is not specified for the function method that defines growth rate");
-
-    if (_growth_dir_method == GrowthDirectionEnum::FUNCTION && _func_v == nullptr)
-      mooseError("function with a variable is not specified for the fatigue method that defines "
-                 "growth rate");
-
     if (isParamValid("crack_front_nodes"))
     {
       _tracked_crack_front_points = getParam<std::vector<dof_id_type>>("crack_front_nodes");
       _num_crack_front_points = _tracked_crack_front_points.size();
+      _crack_front_points = _tracked_crack_front_points;
       _cfd = true;
     }
     else
@@ -97,17 +112,19 @@ CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & param
   }
 
   if ((_growth_dir_method == GrowthDirectionEnum::MAX_HOOP_STRESS ||
-       _growth_rate_method == GrowthRateEnum::FATIGUE) &&
+       _growth_rate_method == GrowthRateEnum::REPORTER) &&
       !_cfd)
-    mooseError("'crack_front_nodes' is not specified to use crack growth criteria!");
+    paramError(
+        "crack_front_nodes",
+        "Required for any crack growth or direction criterion that requires fracture integrals.");
 
   // test element type; only tri3 elements are allowed
   for (const auto & cut_elem : _cutter_mesh->element_ptr_range())
   {
     if (cut_elem->n_nodes() != _cut_elem_nnode)
-      mooseError("The input cut mesh should include tri elements only!");
+      paramError("mesh_generator_name", "The input cut mesh should include tri elements only!");
     if (cut_elem->dim() != _cut_elem_dim)
-      mooseError("The input cut mesh should have 2D elements only!");
+      paramError("mesh_generator_name", "The input cut mesh should have 2D elements only!");
   }
 }
 
@@ -115,23 +132,14 @@ void
 CrackMeshCut3DUserObject::initialSetup()
 {
   if (_cfd)
-  {
     _crack_front_definition =
         &_fe_problem.getUserObject<CrackFrontDefinition>("crackFrontDefinition");
-    _crack_front_points = _tracked_crack_front_points;
-  }
 
   if (_grow)
   {
     findBoundaryNodes();
     findBoundaryEdges();
     sortBoundaryNodes();
-  }
-
-  if (_growth_rate_method == GrowthRateEnum::FATIGUE)
-  {
-    _dn.clear();
-    _n.clear();
   }
 }
 
@@ -741,11 +749,8 @@ CrackMeshCut3DUserObject::findActiveBoundaryDirection()
     // determine growth direction based on KI and KII at the crack front
     else if (_growth_dir_method == GrowthDirectionEnum::MAX_HOOP_STRESS)
     {
-      const VectorPostprocessorValue & k1 = getVectorPostprocessorValueByName("II_KI_1", "II_KI_1");
-      const VectorPostprocessorValue & k2 =
-          getVectorPostprocessorValueByName("II_KII_1", "II_KII_1");
-      mooseAssert(k1.size() == k2.size(), "KI and KII VPPs should have the same size");
-      mooseAssert(k1.size() == _active_boundary[0].size(),
+      mooseAssert(_ki_vpp->size() == _kii_vpp->size(), "KI and KII VPPs should have the same size");
+      mooseAssert(_ki_vpp->size() == _active_boundary[0].size(),
                   "the number of crack front nodes in the self-similar method should equal to the "
                   "size of VPP defined at the crack front");
       mooseAssert(_crack_front_points.size() == _active_boundary[0].size(),
@@ -759,8 +764,9 @@ CrackMeshCut3DUserObject::findActiveBoundaryDirection()
       for (unsigned int j = i1; j < i2; ++j)
       {
         int ind = index[j];
-        Real theta = 2 * std::atan((k1[ind] - std::sqrt(k1[ind] * k1[ind] + k2[ind] * k2[ind])) /
-                                   (4 * k2[ind]));
+        Real ki = _ki_vpp->at(ind);
+        Real kii = _kii_vpp->at(ind);
+        Real theta = 2 * std::atan((ki - std::sqrt(ki * ki + kii * kii)) / (4 * kii));
 
         // growth direction in crack front coord (cfc) system based on the max hoop stress criterion
         RealVectorValue dir_cfc;
@@ -823,6 +829,7 @@ CrackMeshCut3DUserObject::growFront()
       i2 = _active_boundary[i].size();
     }
 
+    std::vector<int> index = getFrontPointsIndex();
     for (unsigned int j = i1; j < i2; ++j)
     {
       Node * this_node = _cutter_mesh->node_ptr(_active_boundary[i][j]);
@@ -831,29 +838,31 @@ CrackMeshCut3DUserObject::growFront()
       Point dir = _active_direction[i][j];
 
       Point x;
-
-      if (_growth_rate_method == GrowthRateEnum::FUNCTION)
-        for (unsigned int k = 0; k < 3; ++k)
-        {
-          Real velo = _func_v->value(0, Point(0, 0, 0));
-          x(k) = this_point(k) + dir(k) * velo;
-        }
-      else if (_growth_rate_method == GrowthRateEnum::FATIGUE)
+      Real growth_size = 0;
+      switch (_growth_rate_method)
       {
-        // get the number of loading cycles for this growth increament
-        if (j == i1)
+        case GrowthRateEnum::FUNCTION:
         {
-          unsigned long int dn = (unsigned long int)_func_v->value(0, Point(0, 0, 0));
-          _dn.push_back(dn);
-          _n.push_back(_n.size() == 0 ? dn : dn + _n[_n.size() - 1]);
+          growth_size = _func_v->value(0, Point(0, 0, 0));
+          break;
         }
-
-        Real growth_size = _growth_size[j];
-        for (unsigned int k = 0; k < 3; ++k)
-          x(k) = this_point(k) + dir(k) * growth_size;
+        case GrowthRateEnum::REPORTER:
+        {
+          int ind = index[j];
+          if (index[j] == -1)
+            growth_size = 0;
+          else
+            growth_size = _growth_inc_reporter->at(ind);
+          break;
+        }
+        default:
+        {
+          mooseError("This growth_rate_method is not pre-defined!");
+          break;
+        }
       }
-      else
-        mooseError("This growth_rate_method is not pre-defined!");
+      for (unsigned int k = 0; k < 3; ++k)
+        x(k) = this_point(k) + dir(k) * growth_size;
 
       this_node = Node::build(x, _cutter_mesh->n_nodes()).release();
       _cutter_mesh->add_node(this_node);
@@ -1079,7 +1088,11 @@ CrackMeshCut3DUserObject::refineFront()
     }
     else
       mooseError("the crack front and the tracked crack front definition must match in terms of "
-                 "their end nodes");
+                 "their end nodes\n _front[0][0]= " +
+                 Moose::stringify(_front[0][0]) + "\n _tracked_crack_front_points[0]= " +
+                 Moose::stringify(_tracked_crack_front_points[0]) +
+                 "\n _tracked_crack_front_points.back()=" +
+                 Moose::stringify(_tracked_crack_front_points.back()));
 
     _num_crack_front_points = _crack_front_points.size();
     _crack_front_definition->updateNumberOfCrackFrontPoints(_num_crack_front_points);
@@ -1220,8 +1233,11 @@ CrackMeshCut3DUserObject::getCrackFrontPoints(unsigned int number_crack_front_po
   // number_crack_front_points is updated via
   // _crack_front_definition->updateNumberOfCrackFrontPoints(_crack_front_points.size())
   if (number_crack_front_points != _crack_front_points.size())
-    mooseError("number_points_from_provider does not match the number of nodes given in "
-               "crack_front_nodes");
+    mooseError("Number of nodes in CrackFrontDefinition does not match the number of nodes in the "
+               "cutter_mesh.\nCrackFrontDefinition nodes = " +
+               Moose::stringify(number_crack_front_points) +
+               "\ncutter_mesh nodes = " + Moose::stringify(_crack_front_points.size()));
+
   for (unsigned int i = 0; i < number_crack_front_points; ++i)
   {
     dof_id_type id = _crack_front_points[i];
@@ -1277,7 +1293,7 @@ CrackMeshCut3DUserObject::getCrackPlaneNormals(unsigned int number_crack_front_p
 }
 
 std::vector<int>
-CrackMeshCut3DUserObject::getFrontPointsIndex()
+CrackMeshCut3DUserObject::getFrontPointsIndex() const
 {
   // Crack front definition using the cutter mesh currently only supports one active crack front
   // segment
@@ -1299,12 +1315,6 @@ CrackMeshCut3DUserObject::getFrontPointsIndex()
   }
 
   return index;
-}
-
-void
-CrackMeshCut3DUserObject::setSubCriticalGrowthSize(std::vector<Real> & growth_size)
-{
-  _growth_size = growth_size;
 }
 
 unsigned int
