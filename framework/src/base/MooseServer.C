@@ -24,6 +24,7 @@
 #include "Parser.h"
 #include "FEProblemBase.h"
 #include "PiecewiseBase.h"
+#include "ParseUtils.h"
 #include "pcrecpp.h"
 #include "hit/hit.h"
 #include "wasphit/HITInterpreter.h"
@@ -152,7 +153,7 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
     }
     // Will be thrown from the Parser while building the tree or
     // by the builder while building the input parameters
-    catch (Parser::Error & err)
+    catch (Moose::ParseUtils::ParseError & err)
     {
       for (const auto & error_message : err.error_messages)
         hit_error_message_diagnostic(error_message);
@@ -222,7 +223,8 @@ MooseServer::parseDocumentForDiagnostics(wasp::DataArray & diagnosticsList)
     app = AppFactory::instance().create(_moose_app.type(),
                                         AppFactory::main_app_name,
                                         app_params,
-                                        _moose_app.getCommunicator()->get());
+                                        _moose_app.getCommunicator()->get(),
+                                        /* throw_on_extract_error = */ true);
   };
   if (!try_catch(do_build_app))
   {

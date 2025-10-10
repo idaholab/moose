@@ -10,7 +10,6 @@
       csvdiff = 'lots_out.csv'
       cli_args = 'UserObjects/lots/method=smart
                   Outputs/file_base=lots_out'
-      allow_test_objects = true
       detail = 'an asynchronous method, '
     []
 
@@ -21,7 +20,6 @@
       cli_args = 'UserObjects/lots/method=bs
                   UserObjects/lots/allow_new_work_during_execution=false
                   Outputs/file_base=lots_out'
-      allow_test_objects = true
       detail = 'a bulk-synchronous method, '
     []
 
@@ -32,7 +30,6 @@
       cli_args = 'UserObjects/lots/method=harm
                   UserObjects/lots/allow_new_work_during_execution=false
                   Outputs/file_base=lots_out'
-      allow_test_objects = true
       detail = 'and the harm method.'
     []
   []

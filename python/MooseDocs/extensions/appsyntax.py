@@ -383,7 +383,9 @@ class SyntaxParametersCommand(SyntaxCommandHeadingBase):
                     parameters.append(ParameterToken(None, parameter=param, syntax=obj.name))
         elif obj.parameters:
             for param in obj.parameters.values():
-                parameters.append(ParameterToken(None, parameter=param, syntax=obj.name))
+                command_line = param.get('command_line')
+                if command_line is None or command_line['input_enabled']:
+                    parameters.append(ParameterToken(None, parameter=param, syntax=obj.name))
 
         self.createHeading(parent, page, settings)
         token = InputParametersToken(parent, syntax=obj.name, parameters=parameters,
@@ -786,6 +788,12 @@ class RenderParameterToken(components.RenderComponent):
             p = html.Tag(body, 'p', class_='moose-parameter-description-options')
             html.Tag(p, 'span', string='Options:')
             html.String(p, content=", ".join(param['options'].split()))
+
+        command_line = param.get('command_line')
+        if command_line is not None:
+            p = html.Tag(body, 'p', class_='moose-parameter-description-command-line-syntax')
+            html.Tag(p, 'span', string='Command Line Syntax:')
+            html.String(p, content=command_line['syntax'])
 
         p = html.Tag(body, 'p', class_='moose-parameter-description-controllable')
         html.Tag(p, 'span', string='Controllable:')

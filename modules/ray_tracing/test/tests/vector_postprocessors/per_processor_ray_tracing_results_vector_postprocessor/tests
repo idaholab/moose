@@ -8,7 +8,6 @@
     # max_parallel = 4
     # min_threads = 1
     # max_threads = 1
-    allow_test_objects = true
     issues = '#16028'
     design = 'PerProcessorRayTracingResultsVectorPostprocessor.md'
     requirement = 'The system shall support the output of information pretaining to the tracing of rays on a per-processor basis.'

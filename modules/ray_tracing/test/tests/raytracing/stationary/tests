@@ -6,7 +6,6 @@
     type = 'Exodiff'
     input = 'stationary.i'
     exodiff = 'stationary_out.e'
-    allow_test_objects = true
     requirement = 'The system shall support the tracing of stationary rays'
   []
 
@@ -17,7 +16,6 @@
       input = 'errors.i'
       cli_args = 'UserObjects/study/set_stationary_before_start=true'
       expect_err = 'Cannot use Ray::setStationary\(\) before Ray::setStart\(\)'
-      allow_test_objects = true
       detail = 'its starting point has not been set yet'
     []
     [stationary_with_direction]
@@ -25,7 +23,6 @@
       input = 'errors.i'
       cli_args = 'UserObjects/study/set_stationary_with_direction=true'
       expect_err = 'Cannot use Ray::setStationary\(\) with Ray::setStartingDirection\(\)'
-      allow_test_objects = true
       detail = 'its starting direction has already been set'
     []
     [stationary_with_end]
@@ -33,7 +30,6 @@
       input = 'errors.i'
       cli_args = 'UserObjects/study/set_stationary_with_end=true'
       expect_err = 'Cannot use Ray::setStationary\(\) after Ray::setStartingEndPoint\(\)'
-      allow_test_objects = true
       detail = 'its starting end point has already been set'
     []
   []
