@@ -1434,6 +1434,17 @@ public:
   /// Return construct node list from side list boolean
   bool getConstructNodeListFromSideList() { return _construct_node_list_from_side_list; }
 
+  using ElemSide = std::pair<dof_id_type, unsigned int>;
+
+  /// Add a pair of disconnected neighbors
+  void addDisconnectedNeighbors(const ElemSide & side1, const ElemSide & side2);
+
+  /// Find the disconnected neighbor for the given element and side
+  std::optional<ElemSide> disconnectedNeighbor(dof_id_type elem_id, unsigned int side) const;
+
+  /// Find the disconnected neighbor pointer for the given element and side
+  Elem * disconnectedNeighborPtr(dof_id_type elem_id, unsigned int side) const;
+
 protected:
   /// Deprecated (DO NOT USE)
   std::vector<std::unique_ptr<libMesh::GhostingFunctor>> _ghosting_functors;
@@ -1541,8 +1552,8 @@ protected:
   bool _node_to_active_semilocal_elem_map_built;
 
   /**
-   * A set of subdomain IDs currently present in the mesh. For parallel meshes, includes subdomains
-   * defined on other processors as well.
+   * A set of subdomain IDs currently present in the mesh. For parallel meshes, includes
+   * subdomains defined on other processors as well.
    */
   std::set<SubdomainID> _mesh_subdomains;
 
@@ -1616,6 +1627,20 @@ protected:
   /// Whether or not we are using a (pre-)split mesh (automatically DistributedMesh)
   const bool _is_split;
 
+  /**
+   * @brief List of neighbor pairs that are not topologically connected
+   *
+   * libmesh keeps track of element point/edge/face neighbors that are topologically connected. This
+   * data structure maintains additional element neighbors that are potentially topologically
+   * disconnected. In certain cases, constraints or weak forms (e.g., cohesive zone
+   * traction-separation models) may be applied across the "interfaces" defined by these neighbor
+   * pairs.
+   */
+  std::unordered_set<std::pair<ElemSide, ElemSide>> _disconnected_neighbors;
+
+  /// Cache for quick lookup of disconnected neighbors
+  mutable std::unordered_map<ElemSide, ElemSide> _cached_disconnected_neighbors;
+
   void cacheInfo();
   void freeBndNodes();
   void freeBndElems();
@@ -1673,7 +1698,8 @@ private:
 
   /**
    * Build the refinement map for a given element type.  This will tell you what quadrature points
-   * to copy from and to for stateful material properties on newly created elements from Adaptivity.
+   * to copy from and to for stateful material properties on newly created elements from
+   * Adaptivity.
    *
    * @param elem The element that represents the element type you need the refinement map for.
    * @param qrule The quadrature rule in use.
@@ -1691,7 +1717,8 @@ private:
 
   /**
    * Build the coarsening map for a given element type.  This will tell you what quadrature points
-   * to copy from and to for stateful material properties on newly created elements from Adaptivity.
+   * to copy from and to for stateful material properties on newly created elements from
+   * Adaptivity.
    *
    * @param elem The element that represents the element type you need the coarsening map for.
    * @param qrule The quadrature rule in use.
@@ -1716,9 +1743,9 @@ private:
                  std::vector<QpMap> & qp_map);
 
   /**
-   * Given an elem type, get maps that tell us what qp's are closest to each other between a parent
-   * and it's children.
-   * This is mainly used for mapping stateful material properties during adaptivity.
+   * Given an elem type, get maps that tell us what qp's are closest to each other between a
+   * parent and it's children. This is mainly used for mapping stateful material properties during
+   * adaptivity.
    *
    * There are 3 cases here:
    *
@@ -1756,8 +1783,8 @@ private:
       const std::map<std::pair<libMesh::ElemType, unsigned int>, std::vector<QpMap>> &) const;
 
   /**
-   * Update the coordinate transformation object based on our coordinate system data. The coordinate
-   * transformation will be created if it hasn't been already
+   * Update the coordinate transformation object based on our coordinate system data. The
+   * coordinate transformation will be created if it hasn't been already
    */
   void updateCoordTransform();
 
@@ -2132,9 +2159,9 @@ template <typename T>
 std::unique_ptr<T>
 MooseMesh::buildTypedMesh(unsigned int dim)
 {
-  // If the requested mesh type to build doesn't match our current value for _use_distributed_mesh,
-  // then we need to make sure to make our state consistent because other objects, like the periodic
-  // boundary condition action, will be querying isDistributedMesh()
+  // If the requested mesh type to build doesn't match our current value for
+  // _use_distributed_mesh, then we need to make sure to make our state consistent because other
+  // objects, like the periodic boundary condition action, will be querying isDistributedMesh()
   if (_use_distributed_mesh != std::is_same<T, libMesh::DistributedMesh>::value)
   {
     if (getMeshPtr())
