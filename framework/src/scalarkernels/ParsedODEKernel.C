@@ -26,10 +26,8 @@ ParsedODEKernel::validParams()
   params.addClassDescription("Parsed expression ODE kernel.");
 
   params.addRequiredCustomTypeParam<std::string>(
-      "function", "FunctionExpression", "function expression");
-  params.deprecateParam("function", "expression", "02/07/2024");
-  params.addCoupledVar("args", "Scalar variables coupled in the parsed expression.");
-  params.deprecateCoupledVar("args", "coupled_variables", "02/07/2024");
+      "expression", "FunctionExpression", "function expression");
+  params.addCoupledVar("coupled_variables", "Scalar variables coupled in the parsed expression.");
   params.addParam<std::vector<std::string>>(
       "constant_names", {}, "Vector of constants used in the parsed expression");
   params.addParam<std::vector<std::string>>(

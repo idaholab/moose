@@ -50,13 +50,13 @@
   [./eta_bulk1]
     type = AllenCahn
     variable = eta1
-    args = 'eta2'
+    coupled_variables = 'eta2'
     f_name = F
   [../]
   [./eta_bulk2]
     type = AllenCahn
     variable = eta2
-    args = 'eta1'
+    coupled_variables = 'eta1'
     f_name = F
   [../]
   [./eta_interface1]
@@ -144,7 +144,7 @@
   [./elastic_free_energy]
     type = ElasticEnergyMaterial
     f_name = Fe
-    args = 'eta1 eta2'
+    coupled_variables = 'eta1 eta2'
     derivative_order = 2
   [../]
 

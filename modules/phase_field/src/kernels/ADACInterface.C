@@ -18,8 +18,8 @@ ADACInterface::validParams()
   params.addClassDescription("Gradient energy Allen-Cahn Kernel");
   params.addParam<MaterialPropertyName>("mob_name", "L", "The mobility used with the kernel");
   params.addParam<MaterialPropertyName>("kappa_name", "kappa_op", "The kappa used with the kernel");
-  params.addCoupledVar("args", "Vector of nonlinear variable arguments this object depends on");
-  params.deprecateCoupledVar("args", "coupled_variables", "02/27/2024");
+  params.addCoupledVar("coupled_variables",
+                       "Vector of nonlinear variable arguments this object depends on");
 
   params.addParam<bool>("variable_L",
                         true,
@@ -49,17 +49,9 @@ ADACInterface::ADACInterface(const InputParameters & parameters)
       MooseVariable * ivar = _coupled_standard_moose_vars[i];
       const VariableName iname = ivar->name();
       if (iname == _var.name())
-      {
-        if (isCoupled("args"))
-          paramError(
-              "args",
-              "The kernel variable should not be specified in the coupled `args` parameter.");
-        else
-          paramError(
-              "coupled_variables",
-              "The kernel variable should not be specified in the coupled `coupled_variables` "
-              "parameter.");
-      }
+        paramError("coupled_variables",
+                   "The kernel variable should not be specified in the coupled `coupled_variables` "
+                   "parameter.");
 
       _dLdarg[i] = &getADMaterialProperty<Real>(derivativePropertyNameFirst(_name_L, iname));
       _gradarg[i] = &(ivar->adGradSln());

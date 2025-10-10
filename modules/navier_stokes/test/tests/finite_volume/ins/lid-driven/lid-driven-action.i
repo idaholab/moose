@@ -25,7 +25,7 @@ rho = 1
 
     inlet_boundaries = 'top'
     momentum_inlet_types = 'fixed-velocity'
-    momentum_inlet_function = '1 0'
+    momentum_inlet_functors = '1 0'
 
     wall_boundaries = 'left right bottom'
     momentum_wall_types = 'noslip noslip noslip'

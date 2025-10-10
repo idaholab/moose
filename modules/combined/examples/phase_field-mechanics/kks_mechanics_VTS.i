@@ -306,7 +306,7 @@
     type = ElasticEnergyMaterial
     base_name = matrix
     f_name = fe_m
-    args = ' '
+    coupled_variables = ' '
     outputs = exodus
   [../]
 # Total free energy of the matrix
@@ -330,7 +330,7 @@
     type = ElasticEnergyMaterial
     base_name = ppt
     f_name = fe_p
-    args = ' '
+    coupled_variables = ' '
     outputs = exodus
   [../]
 
@@ -478,7 +478,7 @@
     fa_name  = f_total_matrix
     fb_name  = f_total_ppt
     w        = 0.0264
-    args = 'cp cm'
+    coupled_variables = 'cp cm'
   [../]
   [./ACBulkC]
     type = KKSACBulkC

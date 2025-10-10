@@ -22,14 +22,14 @@ diff=1e-3
     # Inlet boundary conditions
     inlet_boundaries = 'left'
     momentum_inlet_types = 'fixed-velocity'
-    momentum_inlet_function = '1 0'
+    momentum_inlet_functors = '1 0'
     passive_scalar_inlet_types = 'fixed-value'
-    passive_scalar_inlet_function = '1'
+    passive_scalar_inlet_functors = '1'
 
     # Outlet boundary conditions
     outlet_boundaries = 'right'
     momentum_outlet_types = 'fixed-pressure'
-    pressure_function = 0
+    pressure_functors = 0
   []
 []
 

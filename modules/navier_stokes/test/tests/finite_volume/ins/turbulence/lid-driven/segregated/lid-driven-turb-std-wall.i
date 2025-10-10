@@ -231,7 +231,7 @@ pressure_tag = "pressure_grad"
     variable = TKED
     u = vel_x
     v = vel_y
-    k = TKE
+    tke = TKE
     rho = ${rho}
     mu = ${mu}
     mu_t = 'mu_t'
@@ -270,7 +270,7 @@ pressure_tag = "pressure_grad"
     rho = ${rho}
     mu = ${mu}
     mu_t = 'mu_t'
-    k = TKE
+    tke = TKE
     wall_treatment = ${wall_treatment}
   []
 []
@@ -288,7 +288,7 @@ pressure_tag = "pressure_grad"
     type = kEpsilonViscosityAux
     variable = mu_t
     C_mu = ${C_mu}
-    k = TKE
+    tke = TKE
     epsilon = TKED
     mu = ${mu}
     rho = ${rho}
