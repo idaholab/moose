@@ -17,8 +17,9 @@ InputParameters
 AddMFEMComplexBCComponentAction::validParams()
 {
   InputParameters params = MooseObjectAction::validParams();
-  params.addClassDescription("Add an MFEMIntegratedBC to serve as the real or imaginary component of "
-                             "an MFEMComplexIntegratedBC.");
+  params.addClassDescription(
+      "Add an MFEMIntegratedBC to serve as the real or imaginary component of "
+      "an MFEMComplexIntegratedBC.");
   return params;
 }
 

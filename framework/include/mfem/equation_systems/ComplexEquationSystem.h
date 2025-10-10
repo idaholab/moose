@@ -33,7 +33,7 @@ public:
   virtual void BuildBilinearForms() override;
   virtual void ApplyEssentialBCs() override;
 
-  virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel) override;
+  void AddComplexKernel(std::shared_ptr<MFEMComplexKernel> kernel);
   void AddComplexIntegratedBC(std::shared_ptr<MFEMComplexIntegratedBC> bc);
   void AddComplexEssentialBCs(std::shared_ptr<MFEMComplexEssentialBC> bc);
 

@@ -30,7 +30,9 @@ MFEMComplexKernel::validParams()
 }
 
 MFEMComplexKernel::MFEMComplexKernel(const InputParameters & parameters)
-  : MFEMKernel(parameters), _test_var_name(getParam<VariableName>("variable"))
+  : MFEMGeneralUserObject(parameters),
+    MFEMBlockRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh()),
+    _test_var_name(getParam<VariableName>("variable"))
 {
 }
 

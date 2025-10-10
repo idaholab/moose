@@ -19,7 +19,7 @@
 /*
 Class to construct an MFEM integrator to apply to the equation system.
 */
-class MFEMComplexKernel : public MFEMKernel
+class MFEMComplexKernel : public MFEMGeneralUserObject, public MFEMBlockRestrictable
 {
 public:
   static InputParameters validParams();
@@ -48,16 +48,23 @@ public:
   virtual void setRealKernel(std::shared_ptr<MFEMKernel> kernel) { _real_kernel = kernel; }
   virtual void setImagKernel(std::shared_ptr<MFEMKernel> kernel) { _imag_kernel = kernel; }
 
-  virtual mfem::LinearFormIntegrator * createLFIntegrator() override
-  {
-    mooseError("MFEMComplexKernel does not support createLFIntegrator(). Please use "
-               "getRealLFIntegrator() and getImagLFIntegrator()");
-  }
-  virtual mfem::BilinearFormIntegrator * createBFIntegrator() override
-  {
-    mooseError("MFEMComplexKernel does not support createBFIntegrator(). Please use "
-               "getRealBFIntegrator() and getImagBFIntegrator()");
-  }
+  /// Get name of the test variable labelling the weak form this kernel is added to
+  const VariableName & getTestVariableName() const { return _test_var_name; }
+
+  /// Get name of the trial variable (gridfunction) the kernel acts on.
+  /// Defaults to the name of the test variable labelling the weak form.
+  virtual const VariableName & getTrialVariableName() const { return _test_var_name; }
+
+  // virtual mfem::LinearFormIntegrator * createLFIntegrator() override
+  //{
+  //   mooseError("MFEMComplexKernel does not support createLFIntegrator(). Please use "
+  //              "getRealLFIntegrator() and getImagLFIntegrator()");
+  // }
+  // virtual mfem::BilinearFormIntegrator * createBFIntegrator() override
+  //{
+  //   mooseError("MFEMComplexKernel does not support createBFIntegrator(). Please use "
+  //              "getRealBFIntegrator() and getImagBFIntegrator()");
+  // }
 
 protected:
   /// Name of (the test variable associated with) the weak form that the kernel is applied to.
