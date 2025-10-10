@@ -423,7 +423,7 @@ public:
   KOKKOS_FUNCTION auto operator()(dof_id_type i0) const
   {
     auto data = &_data[_offsets(i0)];
-    auto dim = _dims(i0);
+    const auto & dim = _dims(i0);
 
     return JaggedArrayInnerData<T, inner>(data, dim);
   }
@@ -465,7 +465,7 @@ public:
   KOKKOS_FUNCTION auto operator()(dof_id_type i0, dof_id_type i1) const
   {
     auto data = &_data[_offsets(i0, i1)];
-    auto dim = _dims(i0, i1);
+    const auto & dim = _dims(i0, i1);
 
     return JaggedArrayInnerData<T, inner>(data, dim);
   }
@@ -513,7 +513,7 @@ public:
   KOKKOS_FUNCTION auto operator()(dof_id_type i0, dof_id_type i1, dof_id_type i2) const
   {
     auto data = &_data[_offsets(i0, i1, i2)];
-    auto dim = _dims(i0, i1, i2);
+    const auto & dim = _dims(i0, i1, i2);
 
     return JaggedArrayInnerData<T, inner>(data, dim);
   }
