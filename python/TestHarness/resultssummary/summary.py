@@ -154,6 +154,72 @@ class TestHarnessResultsSummary:
     @staticmethod
     def _format_test_name(test_name):
         return f'`{str(test_name)}`'
+    
+    @staticmethod
+    def _format_run_time(run_time):
+        return f'`{run_time:.2f}`'
+    
+    @staticmethod
+    def _format_run_time_rate(run_time_rate):
+        return f'`{run_time_rate:+.2%}`'
+    
+    def _build_removed_table(self, removed_names: list) -> Optional[list]:
+        if removed_names:
+            return [[self._format_test_name(test_name)] for test_name in removed_names]
+        else: 
+            return None
+    
+    def _build_added_table(self, add_names: list, head_results: StoredResult, no_run_time_comparison: bool) -> Optional[list]:
+        if add_names:
+            added_table = []
+            if no_run_time_comparison:
+                #no run time
+                added_table = [[self._format_test_name(test_name)] for test_name in add_names] if add_names else None
+            else:
+                #with run time
+                for test_name in add_names:
+                    test_result = head_results.get_test(test_name.folder, test_name.name)
+
+                    added_table.append([
+                        self._format_test_name(test_name),
+                        self._format_run_time(test_result.run_time)
+                    ])
+            return added_table
+        else:
+            return None
+        
+    def _build_same_table(self, same_names: list, base_results: StoredResult, head_results: StoredResult, 
+            head_run_time_floor: float, run_time_rate_floor: float)-> Optional[list]:
+        if same_names:
+            same_table = []
+            #disable run time comparison
+            for test_name in same_names:
+                base_result = base_results.get_test(test_name.folder, test_name.name)
+                head_result = head_results.get_test(test_name.folder, test_name.name)
+                #Skip to check relative run time if run time is None or below the threadshold
+                if  head_result.run_time is None or \
+                    base_result.run_time is None or \
+                    head_result.run_time < head_run_time_floor:
+                    continue
+                else:
+                    #Calculate relative runtime ratio between base and head
+                    relative_runtime = (head_result.run_time - base_result.run_time) / base_result.run_time
+                    #Check if relative run time rate is higher than threadshold, then it will put in the result
+                    if abs(relative_runtime) >= run_time_rate_floor:
+
+                        same_table.append(
+                            [
+                                self._format_test_name(test_name),
+                                f'{base_result.run_time:.2f}',
+                                f'{head_result.run_time:.2f}',
+                                f'{relative_runtime:+.2%}'
+                            ]
+                        )
+            if not same_table:
+                same_table = None
+            return same_table
+        else:
+            return None
 
     def diff_table(self, base_results: StoredResult, head_results: StoredResult, base_names: set[TestName],
             head_names: set[TestName], **kwargs) -> Tuple[Optional[list], Optional[list], Optional[list]]:
@@ -209,10 +275,18 @@ class TestHarnessResultsSummary:
         #Extract removed tests
         removed_names = base_names - head_names
         #Extract added tests
-        add_names = head_names - base_names
+        added_names = head_names - base_names
         #Extract same tests
         same_names = base_names & head_names
 
+        removed_table = self._build_removed_table(removed_names)
+        added_table = self._build_added_table(added_names, head_results, no_run_time_comparison)
+
+        if same_names and no_run_time_comparison:
+            same_table = self._build_same_table(same_names, base_results, head_results, head_run_time_floor, run_time_rate_floor)
+        else:
+            same_table = None
+        """
         #Construct the list of tests that are removed
         removed_table = [[self._format_test_name(test_name)] for test_name in removed_names] if removed_names else None
         #need to removed
@@ -274,6 +348,7 @@ class TestHarnessResultsSummary:
             #same_table.append(['`same_test.testing`',10,50,f'{test_run :+.2%}'])
             if not same_table:
                 same_table = None
+        """
         return removed_table, added_table, same_table
 
     @staticmethod
@@ -308,14 +383,14 @@ class TestHarnessResultsSummary:
 
     def build_summary(self, removed_table: list, added_table: list, same_table: list) -> str:
         """
-        Build a summary report of removed, newly added tests, same test with high relative runtime rate
+        Build a summary report of removed, newly added tests, same test and Optional (Runtime result)
 
         Parameters
         ----------
         removed_table : list
             A list of removed test names.
         added_table : list
-            A list of newly added testnames and its runtime
+            A list of newly added testnames and its runtime 
         same_table : list
             A list of test names, runtime and relative runtime rate that exist in both base and head, where:
             - The head runtime exceeds a predefined threshold (run-time-floor).
