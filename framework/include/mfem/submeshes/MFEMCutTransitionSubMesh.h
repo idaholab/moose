@@ -41,7 +41,7 @@ protected:
   mfem::Vector findFaceNormal(const mfem::ParMesh & mesh, const int & face);
 
   /// Checks whether an element lies on the positive or negative side of the cut plane
-  int sideOfCut(const int & el, const int & el_vertex_on_cut, mfem::ParMesh & mesh);
+  bool isPositiveSideOfCut(const int & el, const int & el_vertex_on_cut, mfem::ParMesh & mesh);
 
   const BoundaryName & _cut_boundary;
   std::shared_ptr<mfem::ParSubMesh> _cut_submesh{nullptr};

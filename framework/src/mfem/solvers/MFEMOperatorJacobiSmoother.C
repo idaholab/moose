@@ -40,10 +40,7 @@ MFEMOperatorJacobiSmoother::updateSolver(mfem::ParBilinearForm & a, mfem::Array<
 {
   if (_lor)
   {
-    if (!checkSpectralEquivalence(a))
-      mooseError("Low-Order-Refined solver requires the FESpace closed_basis to be GaussLobatto "
-                 "and the open-basis to be IntegratedGLL for ND and RT elements.");
-
+    checkSpectralEquivalence(a);
     _solver.reset(new mfem::LORSolver<mfem::OperatorJacobiSmoother>(a, tdofs));
   }
 }

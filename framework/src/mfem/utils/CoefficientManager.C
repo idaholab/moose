@@ -197,7 +197,7 @@ CoefficientManager::matrixPropertyIsDefined(const std::string & name,
 }
 
 void
-CoefficientManager::setTime(const double time)
+CoefficientManager::setTime(const mfem::real_t time)
 {
   this->_scalar_coeffs.setTime(time);
   this->_vector_coeffs.setTime(time);

@@ -13,11 +13,16 @@ import json
 import os
 import string
 import random
+from mock import patch
+from io import StringIO
 from copy import deepcopy
 from typing import Optional, Tuple
 from bson.objectid import ObjectId
 
-from TestHarness.resultsstore.civetstore import CIVETStore, decompress_dict, compress_dict
+from TestHarness.resultsstore.civetstore import CIVETStore, MAX_DOCUMENT_SIZE, \
+    OversizedTestsError, OversizedResultError
+from TestHarness.resultsstore.utils import TestName, decompress_dict, compress_dict, \
+    results_has_test, results_test_entry, results_test_iterator
 from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
 
 # Whether or not authentication is available from env var RESULTS_READER_AUTH_FILE
@@ -76,6 +81,14 @@ DEFAULT_TESTHARNESS_ARGS = ['-i', 'validation', '--capture-perf-graph']
 DEFAULT_TESTHARNESS_KWARGS = {'exit_code': 132}
 
 class TestCIVETStore(TestHarnessTestCase):
+    def setUp(self):
+        # Mock stdout so we can more easily get print statements
+        self._stdout_patcher = patch("sys.stdout", new=StringIO())
+        self.stdout_mock: StringIO = self._stdout_patcher.start()
+
+    def tearDown(self):
+        self._stdout_patcher.stop()
+
     def testCompressDict(self):
         """
         Tests compress_dic() and decompress_dict()
@@ -271,7 +284,7 @@ class TestCIVETStore(TestHarnessTestCase):
             CIVETStore.build_header(base_sha, env)
 
     def checkResult(self, base_sha: str, env: dict, result: dict, stored_results: dict,
-                    stored_tests: Optional[list], build_kwargs: dict = {}):
+                    stored_tests: Optional[dict[TestName, dict]], build_kwargs: dict = {}):
         """
         Combined helper for comparing a test harness result to a set
         of stored results and tests.
@@ -291,63 +304,62 @@ class TestCIVETStore(TestHarnessTestCase):
             self.assertEqual(stored_results[key], header[key])
 
         # Check each test
-        for folder_name, folder_entry in result['tests'].items():
-            for test_name, test_entry in folder_entry['tests'].items():
-                # Ignore skipped tests and this one is skipped
-                if build_kwargs.get('ignore_skipped') and \
-                    test_entry['status']['status'] == 'SKIP':
-                    has_folder = folder_name in stored_results['tests']
-                    has_test = False
-                    if has_folder:
-                        has_test = test_name in stored_results['tests'][folder_name]['tests']
-                    self.assertTrue(not has_folder or not has_test)
-                    continue
+        for test in results_test_iterator(result):
+            test_entry = test.value
+            name = test.name
 
-                # Start with the original entry and remove/modify
-                # the things that would be different
-                modified_test_entry = deepcopy(test_entry)
+            # Ignore skipped tests and this one is skipped
+            if build_kwargs.get('ignore_skipped') and \
+                test_entry['status']['status'] == 'SKIP':
+                self.assertTrue(not results_has_test(stored_results, name))
+                continue
 
-                if stored_tests:
-                    stored_test_id = stored_results['tests'][folder_name]['tests'][test_name]
-                    if in_database:
-                        self.assertIsInstance(stored_test_id, ObjectId)
-                        find_test = [doc for doc in stored_tests if doc['_id'] == stored_test_id]
-                        self.assertEqual(len(find_test), 1)
-                        stored_test = find_test[0]
-                        modified_test_entry['_id'] = stored_test_id
-                        modified_test_entry['result_id'] = result_id
-                    else:
-                        self.assertIsInstance(stored_test_id, int)
-                        stored_test = stored_tests[stored_test_id]
+            # Start with the original entry and remove/modify
+            # the things that would be different
+            modified_test_entry = deepcopy(test_entry)
+
+            stored_test_entry = results_test_entry(stored_results, name)
+            if stored_tests:
+                if in_database:
+                    self.assertIsInstance(stored_test_entry, ObjectId)
+                    find_test = [doc for doc in stored_tests if doc['_id'] == stored_test_entry]
+                    self.assertEqual(len(find_test), 1)
+                    stored_test = find_test[0]
+                    modified_test_entry['_id'] = stored_test_entry
+                    modified_test_entry['result_id'] = result_id
                 else:
-                    stored_test = stored_results['tests'][folder_name]['tests'][test_name]
-                self.assertIsInstance(stored_test, dict)
+                    self.assertIsNone(stored_test_entry)
+                    stored_test = stored_tests[name]
+            else:
+                stored_test = stored_test_entry
+            self.assertIsInstance(stored_test, dict)
 
-                # Output is removed
-                for key in ['output', 'output_files']:
-                    if key in modified_test_entry:
-                        del modified_test_entry[key]
-                    self.assertNotIn(key, stored_test)
+            # Output is removed
+            for key in ['output', 'output_files']:
+                if key in modified_test_entry:
+                    del modified_test_entry[key]
+                self.assertNotIn(key, stored_test)
 
-                # Only runtime (runner_run timing entry)
-                if build_kwargs.get('only_runtime'):
-                    modified_test_entry['timing'] = {'runner_run': modified_test_entry['timing']['runner_run']}
+            # Only runtime (runner_run timing entry)
+            if build_kwargs.get('only_runtime'):
+                modified_test_entry['timing'] = {'runner_run': modified_test_entry['timing']['runner_run']}
 
-                # Removed keys via options
-                for key in ['status', 'timing', 'tester']:
-                    if build_kwargs.get(f'ignore_{key}'):
-                        del modified_test_entry[key]
+            # Removed keys via options
+            for key in ['status', 'timing', 'tester']:
+                if build_kwargs.get(f'ignore_{key}'):
+                    del modified_test_entry[key]
 
-                # Compress the JSON metadata
-                tester = modified_test_entry.get('tester', {})
-                json_metadata = tester.get('json_metadata', {})
-                for k, v in json_metadata.items():
-                    json_metadata[k] = compress_dict(v)
+            # Compress the JSON metadata
+            tester = modified_test_entry.get('tester', {})
+            json_metadata = tester.get('json_metadata', {})
+            for k, v in json_metadata.items():
+                json_metadata[k] = compress_dict(v)
 
-                self.assertEqual(modified_test_entry, stored_test)
+            self.assertEqual(modified_test_entry, stored_test)
 
     def runTestBuild(self, run_tests_args: list[str] = DEFAULT_TESTHARNESS_ARGS,
                      run_tests_kwargs: dict = DEFAULT_TESTHARNESS_KWARGS,
+                     separate_tests: bool = False,
                      **kwargs):
         """
         Helper for testing the build() method based on a test harness execution.
@@ -355,15 +367,44 @@ class TestCIVETStore(TestHarnessTestCase):
         The 'build_kwargs' kwarg is passed to the build method and to the check
         method so that things can be checked based on how they are built
         """
+        if 'build_kwargs' not in kwargs:
+            kwargs['build_kwargs'] = {}
+        build_kwargs = kwargs['build_kwargs']
+
+        if separate_tests:
+           build_kwargs['max_result_size'] = 1e-6
+
         base_sha, env = build_civet_env()
         run_tests_result = self.runTestsCached(*run_tests_args, **run_tests_kwargs)
         results = run_tests_result.results
 
-        stored_result, stored_tests = CIVETStore().build(results,
-                                                          base_sha=base_sha,
-                                                          env=env,
-                                                          **kwargs.get('build_kwargs', {}))
-        self.checkResult(base_sha, env, results, stored_result, stored_tests, **kwargs)
+        build_result, build_tests = CIVETStore().build(results,
+                                                       base_sha=base_sha,
+                                                       env=env,
+                                                       **build_kwargs)
+        self.assertIsInstance(build_result, dict)
+        if separate_tests:
+            self.assertIsInstance(build_tests, dict)
+            for k, v in build_tests.items():
+                self.assertIsInstance(k, TestName)
+                self.assertIsInstance(v, dict)
+        else:
+            self.assertIsNone(build_tests)
+
+        num_tests = len(list(results_test_iterator(build_result)))
+
+        out_regex = rf'Storing {num_tests} tests'
+        if build_kwargs.get('ignore_skipped'):
+            out_regex += r' \(\d skipped\)'
+        out_regex += r' separately' if separate_tests else r' within results'
+        out_regex = r'; results size = \d+.\d{2}MB'
+        if separate_tests:
+            out_regex += r', tests size = \d+.\d{2}MB'
+
+        output = self.stdout_mock.getvalue()
+        self.assertRegex(output, out_regex)
+
+        self.checkResult(base_sha, env, results, build_result, build_tests, **kwargs)
 
     def testBuild(self):
         """
@@ -377,7 +418,7 @@ class TestCIVETStore(TestHarnessTestCase):
         Test the build() method with no additional arguments and the
         tests stored separate from the results
         """
-        self.runTestBuild(build_kwargs={'max_result_size': 1e-6})
+        self.runTestBuild(separate_tests=True)
 
     def testBuildIgnoreStatus(self):
         """
@@ -406,6 +447,43 @@ class TestCIVETStore(TestHarnessTestCase):
         only the 'runner_run' timing argument
         """
         self.runTestBuild(build_kwargs={'only_runtime': True})
+
+    def testBuildOversizedTest(self):
+        """
+        Test the build() method throwing an exception when test(s)
+        are oversized
+        """
+        base_sha, env = build_civet_env()
+        run_tests_result = self.runTestsCached(*DEFAULT_TESTHARNESS_ARGS, **DEFAULT_TESTHARNESS_KWARGS)
+        results = run_tests_result.results
+
+        for test in results_test_iterator(results):
+            test.value['foo'] = 'a' * int(MAX_DOCUMENT_SIZE * 1024 * 1024 * 1.5)
+            bad_test = test.name
+            break
+
+        with self.assertRaises(OversizedTestsError) as context:
+            CIVETStore().build(results, base_sha=base_sha, env=env)
+        tests = context.exception.tests
+        self.assertEqual(len(tests), 1)
+        self.assertEqual(tests[0][0], bad_test)
+        self.assertGreater(tests[0][1], MAX_DOCUMENT_SIZE)
+
+    def testBuildOversizedResult(self):
+        """
+        Test the build() method throwing an exception when the
+        result is oversized
+        """
+        base_sha, env = build_civet_env()
+        run_tests_result = self.runTestsCached(*DEFAULT_TESTHARNESS_ARGS, **DEFAULT_TESTHARNESS_KWARGS)
+        results = run_tests_result.results
+
+        results['foo'] = 'a' * int(MAX_DOCUMENT_SIZE * 1024 * 1024 * 1.5)
+
+        with self.assertRaises(OversizedResultError) as context:
+            CIVETStore().build(results, base_sha=base_sha, env=env)
+        result_size = context.exception.result_size
+        self.assertGreater(result_size, MAX_DOCUMENT_SIZE)
 
     def testBuildIgnoreSkipped(self):
         """
@@ -458,10 +536,13 @@ class TestCIVETStore(TestHarnessTestCase):
 
         return stored_result, stored_tests
 
-    def runTestStore(self, **kwargs):
+    def runTestStore(self, separate_tests: bool = False, **kwargs):
         """
         Helper for testing the store() method.
         """
+        if separate_tests:
+            kwargs['max_result_size'] = 1e-6
+
         base_sha, env = build_civet_env()
 
         run_tests_result = self.runTestsCached(*DEFAULT_TESTHARNESS_ARGS, **DEFAULT_TESTHARNESS_KWARGS)
@@ -471,7 +552,12 @@ class TestCIVETStore(TestHarnessTestCase):
         build_kwargs = {'env': env}
         result_id, test_ids = CIVETStore().store(*store_args, **build_kwargs, **kwargs)
         self.assertIsInstance(result_id, ObjectId)
-        self.assertIsInstance(test_ids, (list, type(None)))
+        self.assertIsInstance(test_ids, list if separate_tests else type(None))
+
+        output = self.stdout_mock.getvalue()
+        if separate_tests:
+            self.assertIn('Inserted 4 tests into ' + TEST_DATABASE, output)
+        self.assertIn(f'Inserted result {result_id}', output)
 
         stored_result, stored_tests = self.getStoredResult(result_id, test_ids)
         self.checkResult(base_sha, env, results, stored_result, stored_tests, build_kwargs=kwargs)
@@ -490,7 +576,7 @@ class TestCIVETStore(TestHarnessTestCase):
         Test the store() method with no additional arguments and the
         tests stored separate from the results
         """
-        self.runTestStore(max_result_size=1e-6)
+        self.runTestStore(separate_tests=True)
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testMain(self):
