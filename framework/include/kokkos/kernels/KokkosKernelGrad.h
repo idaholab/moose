@@ -28,12 +28,12 @@ namespace Kokkos
  * the derived class is as follows:
  *
  * @param qp The local quadrature point index
- * @param datum The ResidualDatum object of the current thread
+ * @param datum The AssemblyDatum object of the current thread
  * @returns The vector component of the residual contribution that will be multiplied by the
  * gradient of the test function
  *
  * KOKKOS_FUNCTION Real3 computeQpResidual(const unsigned int qp,
- *                                         ResidualDatum & datum) const;
+ *                                         AssemblyDatum & datum) const;
  *
  * The signature of computeQpJacobian() can be found in the code below. The definition of
  * computeQpOffDiagJacobian() is still the same with the original Kokkos kernel.
@@ -57,13 +57,13 @@ public:
    * Compute diagonal Jacobian contribution on a quadrature point
    * @param j The trial function DOF index
    * @param qp The local quadrature point index
-   * @param datum The ResidualDatum object of the current thread
+   * @param datum The AssemblyDatum object of the current thread
    * @returns The vector component of the Jacobian contribution that will be multiplied by the
    * gradient of the test function
    */
   KOKKOS_FUNCTION Real3 computeQpJacobian(const unsigned int /* j */,
                                           const unsigned int /* qp */,
-                                          ResidualDatum & /* datum */) const
+                                          AssemblyDatum & /* datum */) const
   {
     return Real3(0);
   }
@@ -80,15 +80,15 @@ public:
    */
   ///@{
   template <typename Derived>
-  KOKKOS_FUNCTION void computeResidualInternal(const Derived & kernel, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION void computeResidualInternal(const Derived & kernel, AssemblyDatum & datum) const;
   template <typename Derived>
-  KOKKOS_FUNCTION void computeJacobianInternal(const Derived & kernel, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION void computeJacobianInternal(const Derived & kernel, AssemblyDatum & datum) const;
   ///@}
 };
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-KernelGrad::computeResidualInternal(const Derived & kernel, ResidualDatum & datum) const
+KernelGrad::computeResidualInternal(const Derived & kernel, AssemblyDatum & datum) const
 {
   ResidualObject::computeResidualInternal(
       datum,
@@ -108,7 +108,7 @@ KernelGrad::computeResidualInternal(const Derived & kernel, ResidualDatum & datu
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-KernelGrad::computeJacobianInternal(const Derived & kernel, ResidualDatum & datum) const
+KernelGrad::computeJacobianInternal(const Derived & kernel, AssemblyDatum & datum) const
 {
   Real3 value;
 

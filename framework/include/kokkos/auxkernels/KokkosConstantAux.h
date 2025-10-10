@@ -21,7 +21,7 @@ public:
 
   KokkosConstantAux(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeValue(const unsigned int qp, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION Real computeValue(const unsigned int qp, AssemblyDatum & datum) const;
 
 protected:
   /// The value being set for the current node/element
@@ -29,7 +29,7 @@ protected:
 };
 
 KOKKOS_FUNCTION inline Real
-KokkosConstantAux::computeValue(const unsigned int /* qp */, ResidualDatum & /* datum */) const
+KokkosConstantAux::computeValue(const unsigned int /* qp */, AssemblyDatum & /* datum */) const
 {
   return _value;
 }

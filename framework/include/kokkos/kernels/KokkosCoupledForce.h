@@ -24,7 +24,7 @@ public:
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
-                                         ResidualDatum & datum) const;
+                                         AssemblyDatum & datum) const;
 
 private:
   /// Coupled variable number
@@ -38,7 +38,7 @@ private:
 KOKKOS_FUNCTION inline Real
 KokkosCoupledForce::computeQpResidual(const unsigned int i,
                                       const unsigned int qp,
-                                      ResidualDatum & datum) const
+                                      AssemblyDatum & datum) const
 {
   return -_coef * _v(datum, qp) * _test(datum, i, qp);
 }

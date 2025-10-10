@@ -24,12 +24,12 @@ public:
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
-                                         ResidualDatum & datum) const;
+                                         AssemblyDatum & datum) const;
   KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int i,
                                                 const unsigned int j,
                                                 const unsigned int jvar,
                                                 const unsigned int qp,
-                                                ResidualDatum & datum) const;
+                                                AssemblyDatum & datum) const;
 
 protected:
   /// Variable providing the value of grad(u) on the boundary.
@@ -48,7 +48,7 @@ protected:
 KOKKOS_FUNCTION inline Real
 KokkosCoupledVarNeumannBC::computeQpResidual(const unsigned int i,
                                              const unsigned int qp,
-                                             ResidualDatum & datum) const
+                                             AssemblyDatum & datum) const
 {
   return -_scale_factor(datum, qp) * _coef * _test(datum, i, qp) * _coupled_var(datum, qp);
 }
@@ -58,7 +58,7 @@ KokkosCoupledVarNeumannBC::computeQpOffDiagJacobian(const unsigned int i,
                                                     const unsigned int j,
                                                     const unsigned int jvar,
                                                     const unsigned int qp,
-                                                    ResidualDatum & datum) const
+                                                    AssemblyDatum & datum) const
 {
   if (jvar == _coupled_num)
     return -_scale_factor(datum, qp) * _coef * _test(datum, i, qp) * _phi(datum, j, qp);

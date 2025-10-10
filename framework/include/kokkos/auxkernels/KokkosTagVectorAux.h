@@ -22,7 +22,7 @@ public:
 
   KokkosTagVectorAux(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeValue(const unsigned int qp, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION Real computeValue(const unsigned int qp, AssemblyDatum & datum) const;
 
 protected:
   /// Whether to remove variable scaling from the returned value
@@ -34,7 +34,7 @@ protected:
 };
 
 KOKKOS_FUNCTION inline Real
-KokkosTagVectorAux::computeValue(const unsigned int qp, ResidualDatum & datum) const
+KokkosTagVectorAux::computeValue(const unsigned int qp, AssemblyDatum & datum) const
 {
   return _remove_variable_scaling ? _v(datum, qp) / _scaling_factor : _v(datum, qp);
 }

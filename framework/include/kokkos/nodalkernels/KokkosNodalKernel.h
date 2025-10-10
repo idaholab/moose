@@ -24,10 +24,10 @@ namespace Kokkos
  * computeQpResidual() expected to be defined in the derived class is as follows:
  *
  * @param qp The dummy quadrature point index (= 0)
- * @param datum The ResidualDatum object of the current thread
+ * @param datum The AssemblyDatum object of the current thread
  * @returns The residual contribution
  *
- * KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, ResidualDatum & datum) const;
+ * KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
  *
  * The signatures of computeQpJacobian() and computeOffDiagQpJacobian() can be found in the code
  * below, and their definition in the derived class is optional. If they are defined in the derived
@@ -60,11 +60,11 @@ public:
   /**
    * Compute diagonal Jacobian contribution on a node
    * @param qp The dummy quadrature point index (= 0)
-   * @param datum The ResidualDatum object of the current thread
+   * @param datum The AssemblyDatum object of the current thread
    * @returns The diagonal Jacobian contribution
    */
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int /* qp */,
-                                         ResidualDatum & /* datum */) const
+                                         AssemblyDatum & /* datum */) const
   {
     return 0;
   }
@@ -72,12 +72,12 @@ public:
    * Compute off-diagonal Jacobian contribution on a node
    * @param jvar The variable number for column
    * @param qp The dummy quadrature point index (= 0)
-   * @param datum The ResidualDatum object of the current thread
+   * @param datum The AssemblyDatum object of the current thread
    * @returns The off-diagonal Jacobian contribution
    */
   KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int /* jvar */,
                                                 const unsigned int /* qp */,
-                                                ResidualDatum & /* datum */) const
+                                                AssemblyDatum & /* datum */) const
   {
     return 0;
   }
@@ -129,7 +129,7 @@ NodalKernel::operator()(ResidualLoop, const ThreadID tid, const Derived & kernel
   if (!sys.isNodalDefined(node, _kokkos_var.var()))
     return;
 
-  ResidualDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+  AssemblyDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
 
   Real local_re = kernel.computeQpResidual(0, datum);
 
@@ -146,7 +146,7 @@ NodalKernel::operator()(JacobianLoop, const ThreadID tid, const Derived & kernel
   if (!sys.isNodalDefined(node, _kokkos_var.var()))
     return;
 
-  ResidualDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+  AssemblyDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
 
   Real local_ke = kernel.computeQpJacobian(0, datum);
 
@@ -165,7 +165,7 @@ NodalKernel::operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived &
   if (!sys.isNodalDefined(node, _kokkos_var.var()))
     return;
 
-  ResidualDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar);
+  AssemblyDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar);
 
   Real local_ke = kernel.computeQpOffDiagJacobian(jvar, 0, datum);
 

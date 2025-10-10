@@ -24,11 +24,11 @@ public:
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
-                                         ResidualDatum & datum) const;
+                                         AssemblyDatum & datum) const;
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
                                          const unsigned int j,
                                          const unsigned int qp,
-                                         ResidualDatum & datum) const;
+                                         AssemblyDatum & datum) const;
 
 private:
   /// Far-field temperature variable
@@ -44,7 +44,7 @@ private:
 KOKKOS_FUNCTION inline Real
 KokkosConvectiveHeatFluxBC::computeQpResidual(const unsigned int i,
                                               const unsigned int qp,
-                                              ResidualDatum & datum) const
+                                              AssemblyDatum & datum) const
 {
   return -_test(datum, i, qp) * _htc(datum, qp) * (_T_infinity(datum, qp) - _u(datum, qp));
 }
@@ -53,7 +53,7 @@ KOKKOS_FUNCTION inline Real
 KokkosConvectiveHeatFluxBC::computeQpJacobian(const unsigned int i,
                                               const unsigned int j,
                                               const unsigned int qp,
-                                              ResidualDatum & datum) const
+                                              AssemblyDatum & datum) const
 {
   return -_test(datum, i, qp) * _phi(datum, j, qp) *
          (-_htc(datum, qp) + _htc_dT(datum, qp) * (_T_infinity(datum, qp) - _u(datum, qp)));

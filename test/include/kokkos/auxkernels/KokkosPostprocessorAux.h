@@ -21,14 +21,14 @@ public:
 
   KokkosPostprocessorAux(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeValue(const unsigned int qp, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION Real computeValue(const unsigned int qp, AssemblyDatum & datum) const;
 
 protected:
   const Moose::Kokkos::PostprocessorValue _pp_val;
 };
 
 KOKKOS_FUNCTION inline Real
-KokkosPostprocessorAux::computeValue(const unsigned int /* qp */, ResidualDatum & /* datum */) const
+KokkosPostprocessorAux::computeValue(const unsigned int /* qp */, AssemblyDatum & /* datum */) const
 {
   return _pp_val;
 }

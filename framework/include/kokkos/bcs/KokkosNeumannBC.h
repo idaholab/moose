@@ -20,7 +20,7 @@ public:
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
-                                         ResidualDatum & datum) const;
+                                         AssemblyDatum & datum) const;
 
 private:
   /// Value of grad(u) on the boundary.
@@ -30,7 +30,7 @@ private:
 KOKKOS_FUNCTION inline Real
 KokkosNeumannBC::computeQpResidual(const unsigned int i,
                                    const unsigned int qp,
-                                   ResidualDatum & datum) const
+                                   AssemblyDatum & datum) const
 {
   return -_test(datum, i, qp) * _value;
 }

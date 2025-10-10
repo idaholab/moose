@@ -26,11 +26,11 @@ On the other hand, nodal boundary conditions have slightly different interfaces.
 The hook methods for a nodal boundary condition have the following signatures:
 
 ```cpp
-KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, ResidualDatum & datum) const;
-KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int qp, ResidualDatum & datum) const;
+KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
+KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int qp, AssemblyDatum & datum) const;
 KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int jvar,
                                               const unsigned int qp,
-                                              ResidualDatum & datum) const;
+                                              AssemblyDatum & datum) const;
 ```
 
 The test and trial function indices, `i` and `j`, are no longer passed as arguments.
@@ -54,7 +54,7 @@ becomes the following in `Moose::Kokkos::DirichletBCBase`:
 ```cpp
 template <typename Derived>
 KOKKOS_FUNCTION Real
-DirichletBCBase<Derived>::computeQpResidual(const unsigned int qp, ResidualDatum & datum) const
+DirichletBCBase<Derived>::computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
 {
   auto bc = static_cast<const Derived *>(this);
 

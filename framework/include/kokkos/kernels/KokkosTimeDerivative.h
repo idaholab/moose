@@ -19,15 +19,15 @@ public:
   KokkosTimeDerivative(const InputParameters & parameters);
 
   template <typename Derived>
-  KOKKOS_FUNCTION void computeJacobianInternal(const Derived & kernel, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION void computeJacobianInternal(const Derived & kernel, AssemblyDatum & datum) const;
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
-                                         ResidualDatum & datum) const;
+                                         AssemblyDatum & datum) const;
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
                                          const unsigned int j,
                                          const unsigned int qp,
-                                         ResidualDatum & datum) const;
+                                         AssemblyDatum & datum) const;
 
 protected:
   const bool _lumping;
@@ -35,7 +35,7 @@ protected:
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-KokkosTimeDerivative::computeJacobianInternal(const Derived & kernel, ResidualDatum & datum) const
+KokkosTimeDerivative::computeJacobianInternal(const Derived & kernel, AssemblyDatum & datum) const
 {
   using Moose::Kokkos::MAX_CACHED_DOF;
 
@@ -81,7 +81,7 @@ KokkosTimeDerivative::computeJacobianInternal(const Derived & kernel, ResidualDa
 KOKKOS_FUNCTION inline Real
 KokkosTimeDerivative::computeQpResidual(const unsigned int i,
                                         const unsigned int qp,
-                                        ResidualDatum & datum) const
+                                        AssemblyDatum & datum) const
 {
   return _test(datum, i, qp) * _u_dot(datum, qp);
 }
@@ -90,7 +90,7 @@ KOKKOS_FUNCTION inline Real
 KokkosTimeDerivative::computeQpJacobian(const unsigned int i,
                                         const unsigned int j,
                                         const unsigned int qp,
-                                        ResidualDatum & datum) const
+                                        AssemblyDatum & datum) const
 {
   return _test(datum, i, qp) * _phi(datum, j, qp) * _du_dot_du;
 }

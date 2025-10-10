@@ -20,7 +20,7 @@ public:
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
-                                         ResidualDatum & datum) const;
+                                         AssemblyDatum & datum) const;
 
 protected:
   /// Scale factor
@@ -33,7 +33,7 @@ protected:
 KOKKOS_FUNCTION inline Real
 KokkosBodyForce::computeQpResidual(const unsigned int i,
                                    const unsigned int qp,
-                                   ResidualDatum & datum) const
+                                   AssemblyDatum & datum) const
 {
   return -_test(datum, i, qp) * _scale * _postprocessor;
 }

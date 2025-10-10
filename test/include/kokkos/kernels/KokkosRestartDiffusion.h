@@ -22,11 +22,11 @@ public:
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
-                                         ResidualDatum & datum) const;
+                                         AssemblyDatum & datum) const;
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
                                          const unsigned int j,
                                          const unsigned int qp,
-                                         ResidualDatum & datum) const;
+                                         AssemblyDatum & datum) const;
 
 protected:
   Moose::Kokkos::Scalar<unsigned int> _step;
@@ -37,7 +37,7 @@ protected:
 KOKKOS_FUNCTION inline Real
 KokkosRestartDiffusion::computeQpResidual(const unsigned int i,
                                           const unsigned int qp,
-                                          ResidualDatum & datum) const
+                                          AssemblyDatum & datum) const
 {
   return _coef(_step) * KokkosDiffusion::computeQpResidual(i, qp, datum);
 }
@@ -46,7 +46,7 @@ KOKKOS_FUNCTION inline Real
 KokkosRestartDiffusion::computeQpJacobian(const unsigned int i,
                                           const unsigned int j,
                                           const unsigned int qp,
-                                          ResidualDatum & datum) const
+                                          AssemblyDatum & datum) const
 {
   return _coef(_step) * KokkosDiffusion::computeQpJacobian(i, j, qp, datum);
 }

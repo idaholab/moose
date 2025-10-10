@@ -16,7 +16,7 @@ There is no vector or array version at this moment.
 The signature of the `computeValue()` hook method is now as follows:
 
 ```cpp
-KOKKOS_FUNCTION Real computeValue(const unsigned int qp, ResidualDatum & datum) const;
+KOKKOS_FUNCTION Real computeValue(const unsigned int qp, AssemblyDatum & datum) const;
 ```
 
 To reiterate, the hook method no longer uses virtual dispatch.
