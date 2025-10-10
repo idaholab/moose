@@ -115,6 +115,19 @@ public:
                  InputParameters & parameters) override;
 
   /**
+   * Adds a real or imaginary component kernel to the parent MFEMComplexKernel.
+   */
+  void addComplexComponentToKernel(const std::string & kernel_name,
+                                   const std::string & name,
+                                   InputParameters & parameters);
+  /**
+   * Adds a real or imaginary component BC to the parent MFEMComplexIntegratedBC.
+   */
+  void addComplexComponentToBC(const std::string & kernel_name,
+                               const std::string & name,
+                               InputParameters & parameters);
+
+  /**
    * Override of ExternalProblem::addAuxKernel. Uses ExternalProblem::addAuxKernel to create a
    * MFEMGeneralUserObject representing the kernel in MOOSE, and creates corresponding MFEM kernel
    * to be used in the MFEM solve.
@@ -204,6 +217,14 @@ public:
    * @returns a shared pointer to an MFEM parallel grid function
    */
   std::shared_ptr<mfem::ParGridFunction> getGridFunction(const std::string & name);
+
+  enum class NumericType
+  {
+    REAL,
+    COMPLEX
+  };
+
+  NumericType num_type;
 
 protected:
   MFEMProblemData _problem_data;
