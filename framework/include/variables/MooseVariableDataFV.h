@@ -91,7 +91,7 @@ public:
 
   // DoF value type for the template class OutputType
   typedef typename Moose::DOFType<OutputType>::type OutputData;
-  typedef MooseArray<OutputData> DoFValue;
+  typedef MooseArray<OutputData> DofValue;
 
   MooseVariableDataFV(const MooseVariableFV<OutputType> & var,
                       SystemBase & sys,
@@ -247,10 +247,10 @@ public:
 
   /////////////////////////// DoF value getters /////////////////////////////////////
 
-  const DoFValue & dofValuesDot() const;
-  const DoFValue & dofValuesDotOld() const;
-  const DoFValue & dofValuesDotDot() const;
-  const DoFValue & dofValuesDotDotOld() const;
+  const DofValue & dofValuesDot() const;
+  const DofValue & dofValuesDotOld() const;
+  const DofValue & dofValuesDotDot() const;
+  const DofValue & dofValuesDotDotOld() const;
   const MooseArray<libMesh::Number> & dofValuesDuDotDu() const;
   const MooseArray<libMesh::Number> & dofValuesDuDotDotDu() const;
 
@@ -293,7 +293,7 @@ private:
    * values as they're referred to here in this class). These methods are only truly meaningful
    * for nodal basis families
    */
-  void fetchADDoFValues();
+  void fetchADDofValues();
 
   /**
    * Helper method that tells us whether it's safe to compute _ad_u_dot
@@ -430,7 +430,7 @@ private:
   using MooseVariableDataBase<OutputType>::_need_matrix_tag_u;
   using MooseVariableDataBase<OutputType>::_dof_indices;
   using MooseVariableDataBase<OutputType>::_has_dof_values;
-  using MooseVariableDataBase<OutputType>::fetchDoFValues;
+  using MooseVariableDataBase<OutputType>::fetchDofValues;
   using MooseVariableDataBase<OutputType>::assignNodalValue;
   using MooseVariableDataBase<OutputType>::zeroSizeDofValues;
   using MooseVariableDataBase<OutputType>::_solution_tag;

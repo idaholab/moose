@@ -275,11 +275,8 @@ ConservativeAdvectionTempl<is_ad>::fullUpwind(JacRes res_or_jac)
     this->addResiduals(this->_assembly, _my_local_re, _var.dofIndices(), _var.scalingFactor());
 
     if (this->_has_save_in)
-    {
-      Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
       for (const auto & var : this->_save_in)
         var->sys().solution().add_vector(MetaPhysicL::raw_value(_my_local_re), var->dofIndices());
-    }
   }
 
   if (res_or_jac == JacRes::CALCULATE_JACOBIAN)
