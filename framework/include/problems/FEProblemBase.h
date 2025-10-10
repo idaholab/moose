@@ -1056,6 +1056,7 @@ public:
   virtual void addFunctorMaterial(const std::string & functor_material_name,
                                   const std::string & name,
                                   InputParameters & parameters);
+  bool hasMaterial(const std::string & name, const THREAD_ID tid = 0);
 
 #ifdef MOOSE_KOKKOS_ENABLED
   virtual void addKokkosMaterial(const std::string & material_name,

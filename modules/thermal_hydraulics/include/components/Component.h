@@ -20,6 +20,7 @@
 class THMProblem;
 class THMMesh;
 class ThermalHydraulicsApp;
+class Convergence;
 
 /**
  * Base class for THM components
@@ -112,6 +113,11 @@ public:
   virtual void addVariables() {}
 
   virtual void addMooseObjects() {}
+
+  /**
+   * Gets the Component's nonlinear Convergence object if it has one
+   */
+  virtual Convergence * getNonlinearConvergence() const;
 
   /**
    * Return a reference to a component via a parameter name
