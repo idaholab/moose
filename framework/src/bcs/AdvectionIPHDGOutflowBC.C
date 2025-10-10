@@ -19,13 +19,18 @@ AdvectionIPHDGOutflowBC::validParams()
   params += AdvectionIPHDGAssemblyHelper::validParams();
   params.addClassDescription("Implements an outflow boundary condition for use with a hybridized "
                              "discretization of the advection equation");
+  params.addRequiredParam<bool>("constrain_lm",
+                                "Whether to constrain the Lagrange multiplier to weakly match the "
+                                "interior solution on this boundary. This should be set to true "
+                                "for pure advection problems and likely false otherwise.");
   return params;
 }
 
 AdvectionIPHDGOutflowBC::AdvectionIPHDGOutflowBC(const InputParameters & parameters)
   : IPHDGBC(parameters),
     _iphdg_helper(std::make_unique<AdvectionIPHDGAssemblyHelper>(
-        this, this, this, _sys, _assembly, _tid, std::set<SubdomainID>{}, boundaryIDs()))
+        this, this, this, _sys, _assembly, _tid, std::set<SubdomainID>{}, boundaryIDs())),
+    _constrain_lm(getParam<bool>("constrain_lm"))
 {
 }
 
@@ -37,5 +42,12 @@ AdvectionIPHDGOutflowBC::compute()
 
   // u, lm_u
   iphdg_helper.scalarFace();
-  iphdg_helper.lmOutflow();
+  if (_constrain_lm)
+    iphdg_helper.lmOutflow();
+}
+
+AdvectionIPHDGAssemblyHelper &
+AdvectionIPHDGOutflowBC::iphdgHelper()
+{
+  return *_iphdg_helper;
 }

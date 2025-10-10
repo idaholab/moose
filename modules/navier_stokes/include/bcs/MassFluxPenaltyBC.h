@@ -11,8 +11,6 @@
 
 #include "ADIntegratedBC.h"
 
-class Function;
-
 /*
  * The external face pair to the MassFluxPenalty DGKernel. The DGKernel adds a residual/Jacobian
  * contribution proportional to the jump in velocity at an internal face. This object running on the
@@ -30,6 +28,7 @@ public:
   virtual void computeResidual() override;
 
 protected:
+  void precalculateResidual() override;
   virtual ADReal computeQpResidual() override;
 
   const ADVariableValue & _vel_x;
@@ -39,5 +38,10 @@ protected:
   const bool _matrix_only;
   /// Stabilization magnitude parameter
   const Real _gamma;
-  const Function * const _dirichlet_func;
+  /// The velocity value on the boundary. For a Dirichlet boundary this should be the Dirichlet
+  /// value. For a Neumann boundary this should be the trace velocity
+  const Moose::Functor<ADRealVectorValue> & _face_functor;
+
+  /// Facet characteristic length for correct norm computations
+  Real _hmax;
 };

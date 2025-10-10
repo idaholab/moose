@@ -146,13 +146,12 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
     pressure_face_variable = pressure_bar
     component = 1
   []
-  [pressure_convection]
-    type = AdvectionIPHDGKernel
+  [pressure]
+    type = MassContinuityIPHDGKernel
     variable = pressure
     face_variable = pressure_bar
-    velocity = 'velocity'
-    coeff = '${fparse -rho}'
-    self_advection = false
+    interior_velocity_vars = 'vel_x vel_y'
+    face_velocity_functors = 'vel_bar_x vel_bar_y'
   []
 
   [u_jump]
@@ -221,15 +220,21 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
     component = 1
   []
 
-  [mass_convection]
-    type = AdvectionIPHDGPrescribedFluxBC
+  [pressure_walls]
+    type = MassContinuityIPHDGBC
     face_variable = pressure_bar
     variable = pressure
-    velocity = 'velocity'
-    coeff = '${fparse -rho}'
-    self_advection = false
-    boundary = 'left bottom_v2 top_v2 right_v2'
-    prescribed_normal_flux = 0
+    boundary = 'left bottom_v2 right_v2'
+    face_velocity_functors = '0 0'
+    interior_velocity_vars = 'vel_x vel_y'
+  []
+  [pressure_lid]
+    type = MassContinuityIPHDGBC
+    face_variable = pressure_bar
+    variable = pressure
+    boundary = 'top_v2'
+    face_velocity_functors = '${U} 0'
+    interior_velocity_vars = 'vel_x vel_y'
   []
 
   [pb_mass]
@@ -248,7 +253,7 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
     component = 0
     boundary = 'left right_v2 bottom_v2'
     gamma = ${gamma}
-    dirichlet_value = walls
+    face_functor = walls
   []
   [v_jump_walls]
     type = MassFluxPenaltyBC
@@ -258,7 +263,7 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
     component = 1
     boundary = 'left right_v2 bottom_v2'
     gamma = ${gamma}
-    dirichlet_value = walls
+    face_functor = walls
   []
   [u_jump_top]
     type = MassFluxPenaltyBC
@@ -268,7 +273,7 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
     component = 0
     boundary = 'top_v2'
     gamma = ${gamma}
-    dirichlet_value = top_vel
+    face_functor = top_vel
   []
   [v_jump_top]
     type = MassFluxPenaltyBC
@@ -278,21 +283,27 @@ step_length = '${fparse (log10(final_re) - log10(starting_re)) / (num_steps - 1)
     component = 1
     boundary = 'top_v2'
     gamma = ${gamma}
-    dirichlet_value = top_vel
+    face_functor = top_vel
   []
 []
 
 [Functions]
-  [top_vel]
-    type = ParsedVectorFunction
-    expression_x = ${U}
-  []
-  [walls]
-    type = ParsedVectorFunction
-  []
   [reynolds]
     type = ParsedFunction
     expression = '10^(log10(${starting_re}) + (t - 1) * ${step_length})'
+  []
+[]
+
+[FunctorMaterials]
+  [top]
+    type = GenericConstantVectorFunctorMaterial
+    prop_names = top_vel
+    prop_values = '${U} 0 0'
+  []
+  [walls]
+    type = GenericConstantVectorFunctorMaterial
+    prop_names = walls
+    prop_values = '0 0 0'
   []
 []
 
