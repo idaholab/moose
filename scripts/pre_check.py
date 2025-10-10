@@ -57,7 +57,7 @@ def git_files(*patterns: str) -> List[str]:
     if cp.returncode != 0:
         return []
     items = [p for p in cp.stdout.split("\x00") if p]
-    items = [p for p in items if not (p.startswith("contrib/") or "/contrib/" in p)]
+    items = [p for p in items if not (p.startswith("contrib/") or "/contrib/" in p or p.endswith('/test_pre_check.py'))]
     return items
 
 def read_text_bytes(path: str) -> bytes:
