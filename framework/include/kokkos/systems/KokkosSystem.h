@@ -106,7 +106,10 @@ public:
    * Get the MOOSE system
    * @returns The MOOSE system
    */
+  ///{@
+  auto & getSystem() { return _system; }
   const auto & getSystem() const { return _system; }
+  ///@}
   /**
    * Get the libMesh DOF map
    * @returns The libMesh DOF map

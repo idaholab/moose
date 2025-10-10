@@ -14,6 +14,18 @@
 #include "AuxiliarySystem.h"
 #include "MaterialBase.h"
 
+Moose::Kokkos::System &
+FEProblemBase::getKokkosSystem(const unsigned int sys_num)
+{
+  return _kokkos_systems[sys_num];
+}
+
+const Moose::Kokkos::System &
+FEProblemBase::getKokkosSystem(const unsigned int sys_num) const
+{
+  return _kokkos_systems[sys_num];
+}
+
 void
 FEProblemBase::addKokkosKernel(const std::string & kernel_name,
                                const std::string & name,

@@ -12,18 +12,18 @@
 void
 KokkosDispatcherTest::SetUp()
 {
-  Moose::Kokkos::DispatcherRegistry::add<KokkosTestObject::TestLoop, KokkosTestObject>(
-      "KokkosTestObject");
+  Moose::Kokkos::DispatcherRegistry::add<KokkosDispatcherTestObject::TestLoop,
+                                         KokkosDispatcherTestObject>("KokkosDispatcherTestObject");
 }
 
 TEST_F(KokkosDispatcherTest, dispatchKokkosObject)
 {
   Moose::Kokkos::Array<unsigned int> array(3);
   Moose::Kokkos::Policy policy(0, 3);
-  KokkosTestObject object(array);
+  KokkosDispatcherTestObject object(array);
 
-  auto dispatcher = Moose::Kokkos::DispatcherRegistry::build<KokkosTestObject::TestLoop>(
-      &object, "KokkosTestObject");
+  auto dispatcher = Moose::Kokkos::DispatcherRegistry::build<KokkosDispatcherTestObject::TestLoop>(
+      &object, "KokkosDispatcherTestObject");
   dispatcher->parallelFor(policy);
 
   array.copyToHost();
