@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# * This file is part of the MOOSE framework
+# * https://mooseframework.inl.gov
+# *
+# * All rights reserved, see COPYRIGHT for full restrictions
+# * https://github.com/idaholab/moose/blob/master/COPYRIGHT
+# *
+# * Licensed under LGPL 2.1, please see LICENSE for details
+# * https://www.gnu.org/licenses/lgpl-2.1.html
 
 """
 Python port of env_pre_check.sh with an extended allow-list for Unicode characters.
@@ -26,7 +26,10 @@ from typing import Iterable, List, Tuple, Optional
 
 # --------------------------- Helpers ---------------------------
 
-def run(cmd: List[str], capture=True, text=True, check=False) -> subprocess.CompletedProcess:
+
+def run(
+    cmd: List[str], capture=True, text=True, check=False
+) -> subprocess.CompletedProcess:
     """Execute a shell command and return the result.
 
     Args:
@@ -40,6 +43,7 @@ def run(cmd: List[str], capture=True, text=True, check=False) -> subprocess.Comp
     """
     return subprocess.run(cmd, capture_output=capture, text=text, check=check)
 
+
 def git_files(*patterns: str) -> List[str]:
     """
     Return repo-tracked files matching glob patterns.
@@ -51,14 +55,23 @@ def git_files(*patterns: str) -> List[str]:
         List of file paths, excluding contrib/ directory
     """
     if not patterns:
-        patterns = ('',)
+        patterns = ("",)
     cmd = ["git", "ls-files", "-z", *patterns]
     cp = run(cmd)
     if cp.returncode != 0:
         return []
     items = [p for p in cp.stdout.split("\x00") if p]
-    items = [p for p in items if not (p.startswith("contrib/") or "/contrib/" in p)]
+    items = [
+        p
+        for p in items
+        if not (
+            p.startswith("contrib/")
+            or "/contrib/" in p
+            or p.endswith("/test_pre_check.py")
+        )
+    ]
     return items
+
 
 def read_text_bytes(path: str) -> bytes:
     """Read file as bytes, returning empty bytes on error.
@@ -74,6 +87,7 @@ def read_text_bytes(path: str) -> bytes:
             return f.read()
     except Exception:
         return b""
+
 
 def read_text(path: str) -> str:
     """Read file as UTF-8 text, with fallback for encoding errors.
@@ -91,7 +105,9 @@ def read_text(path: str) -> str:
         # Fallback to bytes decode with replacement
         return read_text_bytes(path).decode("utf-8", errors="replace")
 
+
 # --------------------------- Ticket references ---------------------------
+
 
 def ticket_references(log_from: str, log_to: str) -> str:
     r"""
@@ -118,17 +134,23 @@ def ticket_references(log_from: str, log_to: str) -> str:
             out.append(line)
     return "\n".join(out)
 
+
 # --------------------------- File set helpers ---------------------------
+
 
 def files_for_tabs_except_input() -> List[str]:
     """Get C/C++ and Python files for tab checking, excluding input files."""
     return git_files("*.[Ch]", "*.py")
 
+
 def files_for_tabs() -> List[str]:
     """Get all C/C++, input, and Python files for tab checking."""
     return git_files("*.[Chi]", "*.py")
 
-def files_for_whitespace(check_cpp_whitespace: str, check_f_whitespace: str) -> List[str]:
+
+def files_for_whitespace(
+    check_cpp_whitespace: str, check_f_whitespace: str
+) -> List[str]:
     """Get files to check for trailing whitespace.
 
     Args:
@@ -146,11 +168,14 @@ def files_for_whitespace(check_cpp_whitespace: str, check_f_whitespace: str) -> 
         files += ["*.[FfH]", "*.f90", "*.F90", "*.FF90"]
     return git_files(*files)
 
+
 def files_for_headers() -> List[str]:
     """Get all header files."""
     return git_files("*.h")
 
+
 # --------------------------- Individual checks ---------------------------
+
 
 def find_tabs(files: Iterable[str]) -> List[str]:
     """Check files for tab characters.
@@ -171,6 +196,7 @@ def find_tabs(files: Iterable[str]) -> List[str]:
         if "\t" in data:
             bad.append("\t" + f)
     return bad
+
 
 def banned_keywords() -> List[str]:
     r"""
@@ -207,6 +233,7 @@ def banned_keywords() -> List[str]:
             continue
     return bad
 
+
 def banned_funcs() -> List[str]:
     r"""
     Check for deprecated MOOSE function calls.
@@ -221,7 +248,9 @@ def banned_funcs() -> List[str]:
     seen = set()
     files = git_files("*.[Ch]")
     pat_file_ok = re.compile(r"Moose(Error|Object)\.(h|C)$")
-    pat = re.compile(r"moose(Warning|Error|Deprecated|Info)2\s*\(", re.IGNORECASE | re.DOTALL)
+    pat = re.compile(
+        r"moose(Warning|Error|Deprecated|Info)2\s*\(", re.IGNORECASE | re.DOTALL
+    )
     for f in files:
         if f in seen:
             continue
@@ -232,6 +261,7 @@ def banned_funcs() -> List[str]:
         if pat.search(text):
             bad.append("\t" + f)
     return bad
+
 
 def classified_keywords() -> List[str]:
     r"""
@@ -259,6 +289,7 @@ def classified_keywords() -> List[str]:
         if pat_prop.search(text) or pat_class.search(text):
             bad.append("\t" + f)
     return bad
+
 
 def trailing_whitespace_files(files: Iterable[str]) -> List[str]:
     """Check files for trailing whitespace at line ends.
@@ -288,6 +319,7 @@ def trailing_whitespace_files(files: Iterable[str]) -> List[str]:
             bad.append("\t" + f)
     return bad
 
+
 def no_newline_at_eof_files() -> List[str]:
     """Check for files missing newline at end of file.
 
@@ -310,6 +342,7 @@ def no_newline_at_eof_files() -> List[str]:
         except Exception:
             continue
     return bad
+
 
 def find_bad_executables() -> List[str]:
     """Find files with incorrect executable permissions.
@@ -340,6 +373,7 @@ def find_bad_executables() -> List[str]:
             continue
     return bad
 
+
 def include_guard_files() -> List[str]:
     """Check for old-style C++ include guards.
 
@@ -357,6 +391,7 @@ def include_guard_files() -> List[str]:
             bad.append("\t" + f)
     return bad
 
+
 def windows_line_endings() -> List[str]:
     """Check for Windows-style line endings (CRLF).
 
@@ -371,60 +406,67 @@ def windows_line_endings() -> List[str]:
             bad.append("\t" + f)
     return bad
 
+
 # --------------------------- Unicode allow-list check ---------------------------
 
 # Optional slightly wider variant additions (explicit operators)
 WIDER_EXTRAS = [
-    "PLUS-MINUS SIGN",               # ±
-    "MINUS-OR-PLUS SIGN",            # ∓
-    "EQUALS SIGN",                   # =
-    "NOT EQUAL TO",                  # ≠
-    "ALMOST EQUAL TO",               # ≈
-    "IDENTICAL TO",                  # ≡
-    "PROPORTIONAL TO",               # ∝
-    "INFINITY",                      # ∞
-    "SQUARE ROOT",                   # √
-    "CIRCLED DOT OPERATOR",          # ⊙
-    "CIRCLED PLUS",                  # ⊕
-    "ELEMENT OF",                    # ∈
-    "DOUBLE-STRUCK CAPITAL R",       # ℝ
-    "DOUBLE-STRUCK CAPITAL N",       # ℕ
-    "DOUBLE-STRUCK CAPITAL Z",       # ℤ
-    "DOUBLE-STRUCK CAPITAL Q",       # ℚ
-    "DOUBLE-STRUCK CAPITAL C",       # ℂ
-    "NOT AN ELEMENT OF",             # ∉
-    "CONTAINS AS MEMBER",            # ∋
-    "DOES NOT CONTAIN AS MEMBER",    # ∌
+    "PLUS-MINUS SIGN",  # ±
+    "MINUS-OR-PLUS SIGN",  # ∓
+    "EQUALS SIGN",  # =
+    "NOT EQUAL TO",  # ≠
+    "ALMOST EQUAL TO",  # ≈
+    "IDENTICAL TO",  # ≡
+    "PROPORTIONAL TO",  # ∝
+    "INFINITY",  # ∞
+    "SQUARE ROOT",  # √
+    "CIRCLED DOT OPERATOR",  # ⊙
+    "CIRCLED PLUS",  # ⊕
+    "ELEMENT OF",  # ∈
+    "DOUBLE-STRUCK CAPITAL R",  # ℝ
+    "DOUBLE-STRUCK CAPITAL N",  # ℕ
+    "DOUBLE-STRUCK CAPITAL Z",  # ℤ
+    "DOUBLE-STRUCK CAPITAL Q",  # ℚ
+    "DOUBLE-STRUCK CAPITAL C",  # ℂ
+    "NOT AN ELEMENT OF",  # ∉
+    "CONTAINS AS MEMBER",  # ∋
+    "DOES NOT CONTAIN AS MEMBER",  # ∌
 ]
 
 CORE_NAMES = [
     # Dots / operators
-    "MIDDLE DOT",                    # ·
-    "BULLET OPERATOR",               # ∙
-    "DOT OPERATOR",                  # ⋅
-    "RING OPERATOR",                 # ∘
+    "MIDDLE DOT",  # ·
+    "BULLET OPERATOR",  # ∙
+    "DOT OPERATOR",  # ⋅
+    "RING OPERATOR",  # ∘
     # Calculus / vector
-    "NABLA",                         # ∇
-    "INTEGRAL",                      # ∫
-    "DOUBLE INTEGRAL",               # ∬
-    "TRIPLE INTEGRAL",               # ∭
-    "CONTOUR INTEGRAL",              # ∮
-    "SURFACE INTEGRAL",              # ∯
-    "VOLUME INTEGRAL",               # ∰
-    "PARTIAL DIFFERENTIAL",          # ∂
+    "NABLA",  # ∇
+    "INTEGRAL",  # ∫
+    "DOUBLE INTEGRAL",  # ∬
+    "TRIPLE INTEGRAL",  # ∭
+    "CONTOUR INTEGRAL",  # ∮
+    "SURFACE INTEGRAL",  # ∯
+    "VOLUME INTEGRAL",  # ∰
+    "PARTIAL DIFFERENTIAL",  # ∂
     # Product / cross
-    "MULTIPLICATION SIGN",           # ×
-    "VECTOR OR CROSS PRODUCT",       # ⨯
-    "CIRCLED TIMES",                 # ⊗
+    "MULTIPLICATION SIGN",  # ×
+    "VECTOR OR CROSS PRODUCT",  # ⨯
+    "CIRCLED TIMES",  # ⊗
     "N-ARY CIRCLED TIMES OPERATOR",  # ⨂
 ]
 
-LEGACY_SUPERSCRIPTS = ["SUPERSCRIPT ONE", "SUPERSCRIPT TWO", "SUPERSCRIPT THREE"]  # ¹ ² ³
+LEGACY_SUPERSCRIPTS = [
+    "SUPERSCRIPT ONE",
+    "SUPERSCRIPT TWO",
+    "SUPERSCRIPT THREE",
+]  # ¹ ² ³
 MICRO_SIGN = "MICRO SIGN"  # µ
+
 
 def _named_chars(names: Iterable[str]) -> List[str]:
     out = []
     import unicodedata
+
     for n in names:
         try:
             out.append(unicodedata.lookup(n))
@@ -432,7 +474,10 @@ def _named_chars(names: Iterable[str]) -> List[str]:
             pass
     return out
 
-ALLOWED_NAMED_CHARS = _named_chars(CORE_NAMES + WIDER_EXTRAS + LEGACY_SUPERSCRIPTS + [MICRO_SIGN])
+
+ALLOWED_NAMED_CHARS = _named_chars(
+    CORE_NAMES + WIDER_EXTRAS + LEGACY_SUPERSCRIPTS + [MICRO_SIGN]
+)
 
 
 def _in_greek(ch: str) -> bool:
@@ -440,12 +485,15 @@ def _in_greek(ch: str) -> bool:
     # Greek and Coptic: U+0370 - U+03FF, Greek Extended: U+1F00 - U+1FFF
     return (0x0370 <= cp <= 0x03FF) or (0x1F00 <= cp <= 0x1FFF)
 
+
 def _in_superscripts_subscripts(ch: str) -> bool:
     cp = ord(ch)
     return 0x2070 <= cp <= 0x209F
 
+
 def _is_ascii(ch: str) -> bool:
     return ord(ch) < 128
+
 
 def _in_latin_extended(ch: str) -> bool:
     """Check if character is in Latin-1 Supplement or Latin Extended blocks."""
@@ -467,6 +515,7 @@ def _in_latin_extended(ch: str) -> bool:
     # Uncomment if needed: if 0x0250 <= cp <= 0x02AF: return True
     return False
 
+
 def _is_allowed_manual(ch: str) -> bool:
     # ASCII
     if _is_ascii(ch):
@@ -485,6 +534,7 @@ def _is_allowed_manual(ch: str) -> bool:
         return True
     return False
 
+
 def _disallowed_spans(text: str) -> List[Tuple[int, str]]:
     r"""
     Return list of (index, char) for characters NOT in the allow-list.
@@ -496,6 +546,7 @@ def _disallowed_spans(text: str) -> List[Tuple[int, str]]:
             out.append((i, ch))
     return out
 
+
 def _get_line_col(text: str, index: int) -> Tuple[int, int]:
     """Convert a string index to line and column numbers (1-based)."""
     line = 1
@@ -503,12 +554,13 @@ def _get_line_col(text: str, index: int) -> Tuple[int, int]:
     for i, ch in enumerate(text):
         if i == index:
             return line, col
-        if ch == '\n':
+        if ch == "\n":
             line += 1
             col = 1
         else:
             col += 1
     return line, col
+
 
 def unicode_files() -> Tuple[List[str], List[str]]:
     """Returns (bad_files, detailed_locations)."""
@@ -529,12 +581,14 @@ def unicode_files() -> Tuple[List[str], List[str]]:
                 line, col = _get_line_col(text, idx)
                 # Show the character code point for clarity
                 char_info = f"U+{ord(ch):04X}"
-                if ch.isprintable() and ch not in ['\n', '\r', '\t']:
+                if ch.isprintable() and ch not in ["\n", "\r", "\t"]:
                     char_info += f" '{ch}'"
                 locations.append(f"\t  {f}:{line}:{col}: {char_info}")
     return bad, locations
 
+
 # --------------------------- Main precheck logic ---------------------------
+
 
 def precheck_errors(log_from: str, log_to: str) -> int:
     """Run all precheck validations on git commits.
@@ -583,7 +637,11 @@ def precheck_errors(log_from: str, log_to: str) -> int:
             print(f"TICKET_REFERENCES:\n{TICKET_REFERENCE}")
 
     if check_whitespace == "1":
-        WHITESPACE_FILES = "\n".join(trailing_whitespace_files(files_for_whitespace(check_cpp_whitespace, check_f_whitespace)))
+        WHITESPACE_FILES = "\n".join(
+            trailing_whitespace_files(
+                files_for_whitespace(check_cpp_whitespace, check_f_whitespace)
+            )
+        )
 
     if check_tabs == "1":
         if check_tabs_except_input_files == "1":
@@ -679,14 +737,18 @@ def precheck_errors(log_from: str, log_to: str) -> int:
 
         if check_classified == "1":
             if not CLASSIFIED_FILES:
-                info_msgs.append("Your patch contains no proprietary or classified keywords.")
+                info_msgs.append(
+                    "Your patch contains no proprietary or classified keywords."
+                )
         else:
             info_msgs.append("Classified keyword check disabled.")
 
         if check_tabs == "1":
             if not TAB_FILES:
                 if check_tabs_except_input_files == "1":
-                    info_msgs.append("Your patch contains no tabs (input files not checked).")
+                    info_msgs.append(
+                        "Your patch contains no tabs (input files not checked)."
+                    )
                 else:
                     info_msgs.append("Your patch contains no tabs.")
         else:
@@ -694,7 +756,9 @@ def precheck_errors(log_from: str, log_to: str) -> int:
 
         if check_eof == "1":
             if not EOF_FILES:
-                info_msgs.append("Your patch contains no files without newlines before EOF.")
+                info_msgs.append(
+                    "Your patch contains no files without newlines before EOF."
+                )
         else:
             info_msgs.append("EOF check disabled")
 
@@ -718,7 +782,9 @@ def precheck_errors(log_from: str, log_to: str) -> int:
 
         if check_unicode == "1":
             if not UNICODE_FILES:
-                info_msgs.append("Your patch contains no disallowed unicode characters.")
+                info_msgs.append(
+                    "Your patch contains no disallowed unicode characters."
+                )
         else:
             info_msgs.append("Unicode check disabled")
 
@@ -827,7 +893,9 @@ def precheck_errors(log_from: str, log_to: str) -> int:
 
     return one_failed
 
+
 # --------------------------- Entry point ---------------------------
+
 
 def main(argv: List[str]) -> int:
     """Entry point for the pre-check script.
@@ -841,10 +909,18 @@ def main(argv: List[str]) -> int:
     if len(argv) < 3:
         # Try to use merge-base with upstream/next as default
         try:
-            cp = run(["git", "merge-base", "upstream/next", "HEAD"], capture=True, text=True, check=True)
+            cp = run(
+                ["git", "merge-base", "upstream/next", "HEAD"],
+                capture=True,
+                text=True,
+                check=True,
+            )
             log_from = cp.stdout.strip()
             log_to = "HEAD"
-            print(f"Using merge-base with upstream/next: {log_from[:8]}..{log_to}", file=sys.stderr)
+            print(
+                f"Using merge-base with upstream/next: {log_from[:8]}..{log_to}",
+                file=sys.stderr,
+            )
         except subprocess.CalledProcessError:
             error_msg = textwrap.dedent("""\
                 ERROR: Could not determine merge-base with upstream/next
@@ -863,6 +939,7 @@ def main(argv: List[str]) -> int:
     else:
         log_from, log_to = argv[1], argv[2]
     return precheck_errors(log_from, log_to)
+
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv))
