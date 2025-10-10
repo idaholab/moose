@@ -157,11 +157,17 @@ class CIVETStore:
         assert isinstance(env, dict)
 
         ssh_repo = None
+
+        # This variable will always be set, but will be empty in the
+        # case of a scheduled event
         base_ssh_url = env.get('CIVET_BASE_SSH_URL')
         if base_ssh_url is None:
             raise KeyError('Environment variable CIVET_BASE_SSH_URL not set')
+        # Is set, so we're on a push or a pull request
         if base_ssh_url:
             ssh_repo = base_ssh_url
+        # Base repo is not set, so use APPLICATION_REPO, which
+        # should be set on a scheduled event
         else:
             if (application_repo := env.get('APPLICATION_REPO')):
                 ssh_repo = application_repo
