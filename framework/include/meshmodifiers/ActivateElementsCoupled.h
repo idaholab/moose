@@ -27,5 +27,5 @@ protected:
   /// variable value to decide wether an element whould be activated
   const Real _activate_value;
   /// type of activation - blow or above
-  const enum class ActivateType { BELOW, EQUAL, ABOVE } _activate_type;
+  CreateMooseEnumClass(ActivateType, BELOW, EQUAL, ABOVE) _activate_type;
 };

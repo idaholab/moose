@@ -11,6 +11,7 @@
 
 // MOOSE includes
 #include "GenericNodeElemConstraint.h"
+#include "MooseEnum.h"
 
 class DisplacedProblem;
 class FEProblemBase;
@@ -53,7 +54,7 @@ protected:
   FEProblem & _fe_problem;
 
   /// Formulations, currently only supports KINEMATIC and PENALTY
-  const enum class Formulation { KINEMATIC, PENALTY } _formulation;
+  CreateMooseEnumClass(Formulation, KINEMATIC, PENALTY) _formulation;
   /// Penalty parameter used in constraint enforcement for kinematic and penalty formulations
   const Real _penalty;
   /// copy of the residual before the constraint is applied

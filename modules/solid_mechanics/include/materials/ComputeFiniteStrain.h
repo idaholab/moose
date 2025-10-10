@@ -24,13 +24,7 @@ public:
 
   void computeProperties() override;
 
-  enum class DecompMethod
-  {
-    TaylorExpansion,
-    EigenSolution,
-    HughesWinget
-  };
-
+  CreateMooseEnumClass(DecompMethod, TaylorExpansion, EigenSolution, HughesWinget);
   static MooseEnum decompositionType();
 
 protected:

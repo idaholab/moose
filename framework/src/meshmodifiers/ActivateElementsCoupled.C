@@ -21,7 +21,7 @@ ActivateElementsCoupled::validParams()
       "coupled_var",
       "The variable value will be used to decide wether an element whould be activated.");
   params.addParam<MooseEnum>("activate_type",
-                             MooseEnum("below equal above", "above"),
+                             MooseEnum(getActivateTypeOptions(), "above"),
                              "Activate element when below or above the activate_value");
   return params;
 }
