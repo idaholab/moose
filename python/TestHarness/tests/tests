@@ -346,4 +346,10 @@
     requirement = 'The system shall be able to import python utilities when running tests.'
     issues = '#31457'
   []
+  [resultssummary]
+    type = PythonUnitTest
+    input = test_resultssummary.py
+    requirement = 'The system shall provide summary of test results compared to base for pr event'
+    issues = '#31645'
+  []
 []
