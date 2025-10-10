@@ -102,11 +102,11 @@ AuxiliarySystem::initialSetup()
   }
 
 #ifdef MOOSE_KOKKOS_ENABLED
-  _kokkos_nodal_aux_storage.sort(0);
-  _kokkos_nodal_aux_storage.initialSetup(0);
+  _kokkos_nodal_aux_storage.sort(/*tid=*/0);
+  _kokkos_nodal_aux_storage.initialSetup(/*tid=*/0);
 
-  _kokkos_elemental_aux_storage.sort(0);
-  _kokkos_elemental_aux_storage.initialSetup(0);
+  _kokkos_elemental_aux_storage.sort(/*tid=*/0);
+  _kokkos_elemental_aux_storage.initialSetup(/*tid=*/0);
 #endif
 }
 
@@ -128,8 +128,8 @@ AuxiliarySystem::timestepSetup()
   }
 
 #ifdef MOOSE_KOKKOS_ENABLED
-  _kokkos_nodal_aux_storage.timestepSetup(0);
-  _kokkos_elemental_aux_storage.timestepSetup(0);
+  _kokkos_nodal_aux_storage.timestepSetup(/*tid=*/0);
+  _kokkos_elemental_aux_storage.timestepSetup(/*tid=*/0);
 #endif
 }
 
@@ -151,8 +151,8 @@ AuxiliarySystem::customSetup(const ExecFlagType & exec_type)
   }
 
 #ifdef MOOSE_KOKKOS_ENABLED
-  _kokkos_nodal_aux_storage.customSetup(exec_type, 0);
-  _kokkos_elemental_aux_storage.customSetup(exec_type, 0);
+  _kokkos_nodal_aux_storage.customSetup(exec_type, /*tid=*/0);
+  _kokkos_elemental_aux_storage.customSetup(exec_type, /*tid=*/0);
 #endif
 }
 
@@ -192,8 +192,8 @@ AuxiliarySystem::jacobianSetup()
   }
 
 #ifdef MOOSE_KOKKOS_ENABLED
-  _kokkos_nodal_aux_storage.jacobianSetup(0);
-  _kokkos_elemental_aux_storage.jacobianSetup(0);
+  _kokkos_nodal_aux_storage.jacobianSetup(/*tid=*/0);
+  _kokkos_elemental_aux_storage.jacobianSetup(/*tid=*/0);
 #endif
 }
 
@@ -215,8 +215,8 @@ AuxiliarySystem::residualSetup()
   }
 
 #ifdef MOOSE_KOKKOS_ENABLED
-  _kokkos_nodal_aux_storage.residualSetup(0);
-  _kokkos_elemental_aux_storage.residualSetup(0);
+  _kokkos_nodal_aux_storage.residualSetup(/*tid=*/0);
+  _kokkos_elemental_aux_storage.residualSetup(/*tid=*/0);
 #endif
 }
 
@@ -235,8 +235,8 @@ AuxiliarySystem::updateActive(THREAD_ID tid)
 #ifdef MOOSE_KOKKOS_ENABLED
   if (tid == 0)
   {
-    _kokkos_nodal_aux_storage.updateActive(0);
-    _kokkos_elemental_aux_storage.updateActive(0);
+    _kokkos_nodal_aux_storage.updateActive(/*tid=*/0);
+    _kokkos_elemental_aux_storage.updateActive(/*tid=*/0);
   }
 #endif
 }

@@ -13,7 +13,7 @@
     type = 'CSVDiff'
     input = 'kokkos_copy_old_aux.i'
     csvdiff = 'kokkos_copy_old_aux_out.csv'
-    requirement = 'The Kokkos system shall be able to copy from a variable OLD and OLDER state to an AuxVariable.'
+    requirement = 'The Kokkos system shall be able to copy from the old and older state of a variable to an auxiliary variable.'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda'
   []

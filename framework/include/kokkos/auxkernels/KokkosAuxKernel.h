@@ -26,7 +26,7 @@ namespace Kokkos
  * The base class for a user to derive their own Kokkos auxiliary kernels.
  *
  * The user should define computeValue() as inlined public method in their derived class (not
- * virtual override). The signature of computeQpResidual() expected to be defined in the derived
+ * virtual override). The signature of computeValue() expected to be defined in the derived
  * class is as follows:
  *
  * @param qp The local quadrature point index
@@ -238,43 +238,42 @@ template <typename Derived>
 KOKKOS_FUNCTION void
 AuxKernel::computeElementInternal(const Derived & auxkernel, ResidualDatum & datum) const
 {
-  Real solution[MAX_CACHED_DOF];
-  Real load[MAX_CACHED_DOF];
-  Real mass[MAX_CACHED_DOF * MAX_CACHED_DOF];
+  Real x[MAX_CACHED_DOF];
+  Real b[MAX_CACHED_DOF];
+  Real A[MAX_CACHED_DOF * MAX_CACHED_DOF];
 
   for (unsigned int i = 0; i < datum.n_dofs(); ++i)
   {
-    solution[i] = 0;
-    load[i] = 0;
+    x[i] = 0;
+    b[i] = 0;
 
     for (unsigned int j = 0; j < datum.n_dofs(); ++j)
-      mass[j + datum.n_dofs() * i] = 0;
+      A[j + datum.n_dofs() * i] = 0;
   }
 
   for (unsigned int qp = 0; qp < datum.n_qps(); ++qp)
   {
-    auto value = auxkernel.computeValue(qp, datum);
+    const auto value = auxkernel.computeValue(qp, datum);
 
     datum.reinit();
 
     for (unsigned int i = 0; i < datum.n_dofs(); ++i)
     {
-      auto t = datum.JxW(qp) * _test(datum, i, qp);
+      const auto t = datum.JxW(qp) * _test(datum, i, qp);
 
-      load[i] += t * value;
+      b[i] += t * value;
 
       for (unsigned int j = 0; j < datum.n_dofs(); ++j)
-        mass[j + datum.n_dofs() * i] += t * _test(datum, j, qp);
+        A[j + datum.n_dofs() * i] += t * _test(datum, j, qp);
     }
   }
 
   if (datum.n_dofs() == 1)
-    // Mass matrix is simply the volume
-    solution[0] = load[0] / mass[0];
+    x[0] = b[0] / A[0];
   else
-    Utils::choleskySolve(mass, solution, load, datum.n_dofs());
+    Utils::choleskySolve(A, x, b, datum.n_dofs());
 
-  setElementSolution(solution, datum);
+  setElementSolution(x, datum);
 }
 
 template <typename Derived>
@@ -292,12 +291,12 @@ AuxKernel::setElementSolution(const Real * const values,
                               const unsigned int comp) const
 {
   auto & sys = kokkosSystem(_kokkos_var.sys(comp));
-  auto var = _kokkos_var.var(comp);
+  auto var_num = _kokkos_var.var(comp);
   auto tag = _kokkos_var.tag();
   auto elem = datum.elem().id;
 
   for (unsigned int i = 0; i < datum.n_dofs(); ++i)
-    sys.getVectorDofValue(sys.getElemLocalDofIndex(elem, i, var), tag) = values[i];
+    sys.getVectorDofValue(sys.getElemLocalDofIndex(elem, i, var_num), tag) = values[i];
 }
 
 KOKKOS_FUNCTION inline void
@@ -306,11 +305,11 @@ AuxKernel::setNodeSolution(const Real value,
                            const unsigned int comp) const
 {
   auto & sys = kokkosSystem(_kokkos_var.sys(comp));
-  auto var = _kokkos_var.var(comp);
+  auto var_num = _kokkos_var.var(comp);
   auto tag = _kokkos_var.tag();
   auto node = datum.node();
 
-  sys.getVectorDofValue(sys.getNodeLocalDofIndex(node, var), tag) = value;
+  sys.getVectorDofValue(sys.getNodeLocalDofIndex(node, var_num), tag) = value;
 }
 
 } // namespace Kokkos

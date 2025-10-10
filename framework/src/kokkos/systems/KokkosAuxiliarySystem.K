@@ -120,11 +120,11 @@ AuxiliarySystem::kokkosCompute(ExecFlagType type)
 
     // Compute auxiliary kernels
 
-    for (auto elemental : _kokkos_elemental_aux_storage[type].getActiveObjects())
-      elemental->compute();
-
     for (auto nodal : _kokkos_nodal_aux_storage[type].getActiveObjects())
       nodal->compute();
+
+    for (auto elemental : _kokkos_elemental_aux_storage[type].getActiveObjects())
+      elemental->compute();
   }
 
   // Close and restore vectors

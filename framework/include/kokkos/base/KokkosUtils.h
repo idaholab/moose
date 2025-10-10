@@ -59,7 +59,7 @@ find(const T & target, const T * const begin, const T * const end)
  * @param n The system size
  */
 KOKKOS_INLINE_FUNCTION void
-choleskySolve(Real * A, Real * x, Real * b, const unsigned int n)
+choleskySolve(Real * const A, Real * const x, Real * const b, const unsigned int n)
 {
   for (unsigned int i = 0; i < n; ++i)
   {
