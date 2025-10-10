@@ -22,40 +22,13 @@ P_out = 1.0e5 # Pa
   []
 []
 
-[AuxVariables]
-  [mdot]
-  []
-  [SumWij]
-  []
-  [P]
-  []
-  [DP]
-  []
-  [h]
-  []
-  [T]
-  []
-  [rho]
-  []
-  [S]
-  []
-  [w_perim]
-  []
-  [q_prime]
-  []
-  [mu]
-  []
-  [displacement]
-  []
-[]
-
 [FluidProperties]
   [LBE]
     type = LeadBismuthFluidProperties
   []
 []
 
-[Problem]
+[SubChannel]
   type = TriSubChannel1PhaseProblem
   fp = LBE
   n_blocks = 1

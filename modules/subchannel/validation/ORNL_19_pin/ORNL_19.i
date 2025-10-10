@@ -54,7 +54,7 @@ P_out = 2.0e5 # Pa
   []
 []
 
-[Problem]
+[SubChannel]
   type = TriSubChannel1PhaseProblem
   fp = sodium
   n_blocks = 1

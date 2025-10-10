@@ -43,12 +43,14 @@ public:
 protected:
   struct FrictionStruct
   {
-    int i_ch;
+    unsigned int i_ch, iz;
     Real Re, S, w_perim;
   } _friction_args;
 
-  /// Returns friction factor
-  virtual Real computeFrictionFactor(FrictionStruct friction_args) = 0;
+  /// populates friction factor at specific subchannel node: fi = ai*Rei^bi
+  void computeFrictionFactor(FrictionStruct friction_args);
+  /// populates friction factor parameters at specific subchannel node
+  virtual void computeFrictionFactorParameters(FrictionStruct friction_args) = 0;
   /// Computes diversion crossflow per gap for block iblock
   void computeWijFromSolve(int iblock);
   /// Computes net diversion crossflow per channel for block iblock
@@ -168,6 +170,8 @@ protected:
   /// The direction of gravity
   const MooseEnum _gravity_direction;
   const Real _dir_grav;
+  /// The friction model used
+  const MooseEnum _friction_model;
   /// Flag to define the usage of a implicit or explicit solution
   const bool _implicit_bool;
   /// Flag to define the usage of staggered or collocated pressure
@@ -199,6 +203,9 @@ protected:
   std::unique_ptr<SolutionHandle> _duct_heat_flux_soln; // Only used for ducted assemblies
   std::unique_ptr<SolutionHandle> _Tduct_soln;          // Only used for ducted assemblies
   std::unique_ptr<SolutionHandle> _displacement_soln;
+  std::unique_ptr<SolutionHandle> _ff_soln;
+  std::unique_ptr<SolutionHandle> _ff_a_soln;
+  std::unique_ptr<SolutionHandle> _ff_b_soln;
 
   /// Petsc Functions
   inline PetscErrorCode createPetscVector(Vec & v, PetscInt n)

@@ -57,6 +57,7 @@ SubChannel1PhaseProblem::validParams()
 {
   MooseEnum schemes("upwind downwind central_difference exponential", "central_difference");
   MooseEnum gravity_direction("counter_flow co_flow none", "counter_flow");
+  MooseEnum friction_models("default non_default user_ab user_ff", "default");
   InputParameters params = ExternalProblem::validParams();
   params += PostprocessorInterface::validParams();
   params.addClassDescription("Base class of the subchannel solvers");
@@ -74,6 +75,16 @@ SubChannel1PhaseProblem::validParams()
                              "Interpolation scheme used for the method. Default is exponential");
   params.addParam<MooseEnum>(
       "gravity", gravity_direction, "Direction of gravity. Default is counter_flow");
+  params.addParam<MooseEnum>(
+      "friction_model",
+      friction_models,
+      "Options are: default, non_default, user_ab, user_ff. The default model is Pang, B. et al. "
+      "KIT, 2013 for quad problems and the upgraded Cheng and Todreas correlation for tri "
+      "problems. There is no non-default model for the tri problems. The non-default model for "
+      "quad problens is the upgraded Cheng and Todreas. Additionally, the user must manually "
+      "define the aux variables ff_a, ff_b if they choose the model user_ab. In this case the "
+      "friction factor is (ff = ff_a * Re ^ ff_b). Last if the user chooses user_ff they must "
+      "manually define the auxvariable ff");
   params.addParam<bool>(
       "implicit", false, "Boolean to define the use of explicit or implicit solution.");
   params.addParam<bool>(
@@ -126,6 +137,7 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _interpolation_scheme(getParam<MooseEnum>("interpolation_scheme")),
     _gravity_direction(getParam<MooseEnum>("gravity")),
     _dir_grav(computeGravityDir(_gravity_direction)),
+    _friction_model(getParam<MooseEnum>("friction_model")),
     _implicit_bool(getParam<bool>("implicit")),
     _staggered_pressure_bool(getParam<bool>("staggered_pressure")),
     _segregated_bool(getParam<bool>("segregated")),
@@ -257,6 +269,9 @@ SubChannel1PhaseProblem::initialSetup()
   _q_prime_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::LINEAR_HEAT_RATE));
   _displacement_soln =
       std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::DISPLACEMENT));
+  _ff_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::FRICTION_FACTOR));
+  _ff_a_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::FF_PARAMETER_A));
+  _ff_b_soln = std::make_unique<SolutionHandle>(getVariable(0, SubChannelApp::FF_PARAMETER_B));
   if (_duct_mesh_exist)
   {
     _duct_heat_flux_soln =
@@ -572,6 +587,24 @@ SubChannel1PhaseProblem::computeMdot(int iblock)
 }
 
 void
+SubChannel1PhaseProblem::computeFrictionFactor(FrictionStruct friction_args)
+{
+  if (_friction_model == 3)
+  {
+    // Do nothing the user should populate the aux variable ff.
+  }
+  else
+  {
+    computeFrictionFactorParameters(friction_args);
+    auto Re = friction_args.Re;
+    auto i_ch = friction_args.i_ch;
+    auto iz = friction_args.iz;
+    auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
+    _ff_soln->set(node, (*_ff_a_soln)(node)*std::pow(Re, (*_ff_b_soln)(node)));
+  }
+}
+
+void
 SubChannel1PhaseProblem::computeDP(int iblock)
 {
   unsigned int last_node = (iblock + 1) * _block_size;
@@ -636,14 +669,15 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         _friction_args.i_ch = i_ch;
         _friction_args.S = S;
         _friction_args.w_perim = w_perim;
-        auto fi = computeFrictionFactor(_friction_args);
+        _friction_args.iz = iz;
+        computeFrictionFactor(_friction_args);
         /// Upwind local form loss
         auto ki = 0.0;
         if ((*_mdot_soln)(node_out) >= 0)
           ki = k_grid[i_ch][iz - 1];
         else
           ki = k_grid[i_ch][iz];
-        auto friction_term = (fi * dz / Dh_i + ki) * 0.5 *
+        auto friction_term = ((*_ff_soln)(node_out)*dz / Dh_i + ki) * 0.5 *
                              (*_mdot_soln)(node_out)*std::abs((*_mdot_soln)(node_out)) /
                              (S * (*_rho_soln)(node_out));
         auto gravity_term = _dir_grav * _g_grav * (*_rho_soln)(node_out)*dz * S;
@@ -700,14 +734,15 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           _friction_args.i_ch = i_ch;
           _friction_args.S = S_interp;
           _friction_args.w_perim = w_perim_interp;
-          auto fi = computeFrictionFactor(_friction_args);
+          _friction_args.iz = iz;
+          computeFrictionFactor(_friction_args);
           /// Upwind local form loss
           auto ki = 0.0;
           if ((*_mdot_soln)(node_out) >= 0)
             ki = k_grid[i_ch][iz - 1];
           else
             ki = k_grid[i_ch][iz];
-          Pe = 1.0 / ((fi * dz / Dh_i + ki) * 0.5) * mdot_loc / std::abs(mdot_loc);
+          Pe = 1.0 / (((*_ff_soln)(node_out)*dz / Dh_i + ki) * 0.5) * mdot_loc / std::abs(mdot_loc);
         }
         auto alpha = computeInterpolationCoefficients(Pe);
 
@@ -938,15 +973,16 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         _friction_args.i_ch = i_ch;
         _friction_args.S = S_interp;
         _friction_args.w_perim = w_perim_interp;
-        auto fi = computeFrictionFactor(_friction_args);
+        _friction_args.iz = iz;
+        computeFrictionFactor(_friction_args);
         /// Upwind local form loss
         auto ki = 0.0;
         if ((*_mdot_soln)(node_out) >= 0)
           ki = k_grid[i_ch][iz - 1];
         else
           ki = k_grid[i_ch][iz];
-        auto coef = (fi * dz / Dh_i + ki) * 0.5 * std::abs((*_mdot_soln)(node_out)) /
-                    (S_interp * rho_interp);
+        auto coef = ((*_ff_soln)(node_out)*dz / Dh_i + ki) * 0.5 *
+                    std::abs((*_mdot_soln)(node_out)) / (S_interp * rho_interp);
         if (iz == first_node)
         {
           PetscScalar value_vec = -1.0 * alpha * coef * (*_mdot_soln)(node_in);
