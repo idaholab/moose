@@ -1,1 +1,0 @@
-../../2d_diffusion/gold/matdiffusion_out.e

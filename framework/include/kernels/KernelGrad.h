@@ -48,5 +48,7 @@ protected:
    */
   virtual RealGradient precomputeQpJacobian();
 
-  virtual Real computeQpResidual() override;
+  virtual Real computeQpResidual() override final;
+
+  virtual Real computeQpJacobian() override final;
 };

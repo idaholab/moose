@@ -11,15 +11,23 @@
 
 #include "MatDiffusionBase.h"
 
+template <bool is_ad>
+using MatDiffusionBaseParent = typename std::
+    conditional<is_ad, MatDiffusionBaseTempl<Real, true>, MatDiffusionBase<Real>>::type;
+
 /**
  * Isotropic diffusion kernel that takes a diffusion coefficient of type
  * Real. All logic is implemnted in the MatDiffusionBase class
  * template.
  */
-class MatDiffusion : public MatDiffusionBase<Real>
+template <bool is_ad>
+class MatDiffusionTempl : public MatDiffusionBaseParent<is_ad>
 {
 public:
   static InputParameters validParams();
 
-  MatDiffusion(const InputParameters & parameters);
+  MatDiffusionTempl(const InputParameters & parameters);
 };
+
+typedef MatDiffusionTempl<false> MatDiffusion;
+typedef MatDiffusionTempl<true> ADMatDiffusion;

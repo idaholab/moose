@@ -93,7 +93,13 @@ KernelGrad::computeOffDiagJacobian(const unsigned int jvar_num)
 Real
 KernelGrad::computeQpResidual()
 {
-  return 0.0;
+  mooseError("Override precomputeQpResidual() in your KernelGrad derived class!");
+}
+
+Real
+KernelGrad::computeQpJacobian()
+{
+  mooseError("Override precomputeQpJacobian() in your KernelGrad derived class!");
 }
 
 RealGradient

@@ -10,17 +10,23 @@
 #include "MatAnisoDiffusion.h"
 
 registerMooseObject("PhaseFieldApp", MatAnisoDiffusion);
+registerMooseObject("PhaseFieldApp", ADMatAnisoDiffusion);
 
+template <bool is_ad>
 InputParameters
-MatAnisoDiffusion::validParams()
+MatAnisoDiffusionTempl<is_ad>::validParams()
 {
-  InputParameters params = MatDiffusionBase<RealTensorValue>::validParams();
+  InputParameters params = MatAnisoDiffusionBaseParent<is_ad>::validParams();
   params.addClassDescription(
       "Diffusion equation Kernel that takes an anisotropic Diffusivity from a material property");
   return params;
 }
 
-MatAnisoDiffusion::MatAnisoDiffusion(const InputParameters & parameters)
-  : MatDiffusionBase<RealTensorValue>(parameters)
+template <bool is_ad>
+MatAnisoDiffusionTempl<is_ad>::MatAnisoDiffusionTempl(const InputParameters & parameters)
+  : MatAnisoDiffusionBaseParent<is_ad>(parameters)
 {
 }
+
+template class MatAnisoDiffusionTempl<false>;
+template class MatAnisoDiffusionTempl<true>;
