@@ -237,3 +237,144 @@ TEST_F(KokkosArrayTest, jaggedArraySparse)
         EXPECT_EQ(array(I, J, K).size(), 0);
       }
 }
+
+TEST_F(KokkosArrayTest, blasAxby)
+{
+  Moose::Kokkos::Array<Real> x(3);
+  Moose::Kokkos::Array<Real> y(3);
+  Moose::Kokkos::Array<Real> array(3);
+
+  x[0] = 1.0;
+  x[1] = 3.0;
+  x[2] = 5.0;
+
+  y[0] = 2.0;
+  y[1] = 4.0;
+  y[2] = 6.0;
+
+  x.copyToDevice();
+  y.copyToDevice();
+
+  array.axby(2.0, x, '+', 3.0, y);
+  array.copyToHost();
+
+  EXPECT_EQ(array[0], 2.0 * 1.0 + 3.0 * 2.0);
+  EXPECT_EQ(array[1], 2.0 * 3.0 + 3.0 * 4.0);
+  EXPECT_EQ(array[2], 2.0 * 5.0 + 3.0 * 6.0);
+
+  array.axby(2.0, x, '-', 3.0, y);
+  array.copyToHost();
+
+  EXPECT_EQ(array[0], 2.0 * 1.0 - 3.0 * 2.0);
+  EXPECT_EQ(array[1], 2.0 * 3.0 - 3.0 * 4.0);
+  EXPECT_EQ(array[2], 2.0 * 5.0 - 3.0 * 6.0);
+
+  array.axby(2.0, x, '*', 3.0, y);
+  array.copyToHost();
+
+  EXPECT_EQ(array[0], 2.0 * 1.0 * 3.0 * 2.0);
+  EXPECT_EQ(array[1], 2.0 * 3.0 * 3.0 * 4.0);
+  EXPECT_EQ(array[2], 2.0 * 5.0 * 3.0 * 6.0);
+
+  array.axby(2.0, x, '/', 3.0, y);
+  array.copyToHost();
+
+  EXPECT_EQ(array[0], (2.0 * 1.0) / (3.0 * 2.0));
+  EXPECT_EQ(array[1], (2.0 * 3.0) / (3.0 * 4.0));
+  EXPECT_EQ(array[2], (2.0 * 5.0) / (3.0 * 6.0));
+}
+
+TEST_F(KokkosArrayTest, blasAxbyAccumulate)
+{
+  Moose::Kokkos::Array<Real> x(3);
+  Moose::Kokkos::Array<Real> y(3);
+  Moose::Kokkos::Array<Real> array(3);
+
+  x[0] = 1.0;
+  x[1] = 3.0;
+  x[2] = 5.0;
+
+  y[0] = 2.0;
+  y[1] = 4.0;
+  y[2] = 6.0;
+
+  x.copyToDevice();
+  y.copyToDevice();
+
+  array = 1.0;
+  array.axby(2.0, x, '+', 3.0, y, true);
+  array.copyToHost();
+
+  EXPECT_EQ(array[0], 1.0 + 2.0 * 1.0 + 3.0 * 2.0);
+  EXPECT_EQ(array[1], 1.0 + 2.0 * 3.0 + 3.0 * 4.0);
+  EXPECT_EQ(array[2], 1.0 + 2.0 * 5.0 + 3.0 * 6.0);
+
+  array = 1.0;
+  array.axby(2.0, x, '-', 3.0, y, true);
+  array.copyToHost();
+
+  EXPECT_EQ(array[0], 1.0 + 2.0 * 1.0 - 3.0 * 2.0);
+  EXPECT_EQ(array[1], 1.0 + 2.0 * 3.0 - 3.0 * 4.0);
+  EXPECT_EQ(array[2], 1.0 + 2.0 * 5.0 - 3.0 * 6.0);
+
+  array = 1.0;
+  array.axby(2.0, x, '*', 3.0, y, true);
+  array.copyToHost();
+
+  EXPECT_EQ(array[0], 1.0 + 2.0 * 1.0 * 3.0 * 2.0);
+  EXPECT_EQ(array[1], 1.0 + 2.0 * 3.0 * 3.0 * 4.0);
+  EXPECT_EQ(array[2], 1.0 + 2.0 * 5.0 * 3.0 * 6.0);
+
+  array = 1.0;
+  array.axby(2.0, x, '/', 3.0, y, true);
+  array.copyToHost();
+
+  EXPECT_EQ(array[0], 1.0 + (2.0 * 1.0) / (3.0 * 2.0));
+  EXPECT_EQ(array[1], 1.0 + (2.0 * 3.0) / (3.0 * 4.0));
+  EXPECT_EQ(array[2], 1.0 + (2.0 * 5.0) / (3.0 * 6.0));
+}
+
+TEST_F(KokkosArrayTest, blasScal)
+{
+  Moose::Kokkos::Array<Real> array(3);
+
+  array[0] = 1.0;
+  array[1] = 2.0;
+  array[2] = 3.0;
+
+  array.copyToDevice();
+  array.scal(2.0);
+  array.copyToHost();
+
+  EXPECT_EQ(array[0], 2.0 * 1.0);
+  EXPECT_EQ(array[1], 2.0 * 2.0);
+  EXPECT_EQ(array[2], 2.0 * 3.0);
+}
+
+TEST_F(KokkosArrayTest, blasDot)
+{
+  Moose::Kokkos::Array<Real> array(3);
+
+  array[0] = 1.0;
+  array[1] = 2.0;
+  array[2] = 3.0;
+
+  array.copyToDevice();
+  Real dot = array.dot(array);
+
+  EXPECT_EQ(dot, 1.0 * 1.0 + 2.0 * 2.0 + 3.0 * 3.0);
+}
+
+TEST_F(KokkosArrayTest, blasNrm2)
+{
+  Moose::Kokkos::Array<Real> array(3);
+
+  array[0] = 1.0;
+  array[1] = 2.0;
+  array[2] = 3.0;
+
+  array.copyToDevice();
+  Real nrm2 = array.nrm2();
+
+  EXPECT_EQ(nrm2, std::sqrt(1.0 * 1.0 + 2.0 * 2.0 + 3.0 * 3.0));
+}
