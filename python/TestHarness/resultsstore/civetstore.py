@@ -143,7 +143,7 @@ class CIVETStore:
             search = re.search(r'^git@([a-zA-Z._\-]+):([a-zA-Z0-9._\-]+)\/([a-zA-Z0-9._\-]+)$',
                                 repo)
         if search is None:
-            raise ValueError(f'Failed to parse SSH repo from {"value"}')
+            raise ValueError(f'Failed to parse SSH repo from {repo}')
         return search.group(1), search.group(2), search.group(3)
 
     @staticmethod
@@ -156,9 +156,23 @@ class CIVETStore:
         """
         assert isinstance(env, dict)
 
-        ssh_repo = env.get('CIVET_BASE_SSH_URL', env.get('APPLICATION_REPO'))
-        if ssh_repo is None:
-            raise ValueError('Failed to obtain repo from CIVET_BASE_SSH_URL or APPLICATION_REPO')
+        ssh_repo = None
+
+        # This variable will always be set, but will be empty in the
+        # case of a scheduled event
+        base_ssh_url = env.get('CIVET_BASE_SSH_URL')
+        if base_ssh_url is None:
+            raise KeyError('Environment variable CIVET_BASE_SSH_URL not set')
+        # Is set, so we're on a push or a pull request
+        if base_ssh_url:
+            ssh_repo = base_ssh_url
+        # Base repo is not set, so use APPLICATION_REPO, which
+        # should be set on a scheduled event
+        else:
+            if (application_repo := env.get('APPLICATION_REPO')):
+                ssh_repo = application_repo
+            else:
+                raise ValueError('Failed to obtain repo from CIVET_BASE_SSH_URL or APPLICATION_REPO')
 
         server, org, repo = CIVETStore.parse_ssh_repo(ssh_repo)
         return f'{server}/{org}/{repo}'
