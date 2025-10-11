@@ -54,7 +54,7 @@ public:
    */
   void sync(const std::set<TagID> & tags, const MemcpyKind dir);
   /**
-   * Allocate the quadrature point solution vectors for active variable and tags and cache
+   * Allocate the quadrature point vectors for active variable and tags and cache
    * quadrature point values
    */
   void reinit();
@@ -64,10 +64,15 @@ public:
    */
   void setActiveVariables(const std::set<MooseVariableFieldBase *> & vars);
   /**
+   * Set the active variable tags
+   * @param tags The active variable tags
+   */
+  void setActiveVariableTags(const std::set<TagID> & tags);
+  /**
    * Set the active solution tags
    * @param tags The active solution tags
    */
-  void setActiveVariableTags(const std::set<TagID> & tags);
+  void setActiveSolutionTags(const std::set<TagID> & tags);
   /**
    * Set the active residual tags
    * @param tags The active residual tags
@@ -83,9 +88,13 @@ public:
    */
   void clearActiveVariables() { _active_variables.destroy(); }
   /**
-   * Clear the cached active solution tags
+   * Clear the cached active variable tags
    */
   void clearActiveVariableTags() { _active_variable_tags.destroy(); }
+  /**
+   * Clear the cached active solution tags
+   */
+  void clearActiveSolutionTags() { _active_solution_tags.destroy(); }
   /**
    * Clear the cached active residual tags
    */
@@ -497,6 +506,7 @@ private:
    */
   ///@{
   Array<TagID> _active_variable_tags;
+  Array<TagID> _active_solution_tags;
   Array<TagID> _active_residual_tags;
   Array<TagID> _active_matrix_tags;
   ///@}

@@ -20,11 +20,11 @@ public:
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
-                                         ResidualDatum & datum) const;
+                                         AssemblyDatum & datum) const;
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
                                          const unsigned int j,
                                          const unsigned int qp,
-                                         ResidualDatum & datum) const;
+                                         AssemblyDatum & datum) const;
 
 private:
   Moose::Kokkos::MaterialProperty<Real> _diffusion_coefficient;
@@ -34,7 +34,7 @@ private:
 KOKKOS_FUNCTION inline Real
 KokkosHeatConduction::computeQpResidual(const unsigned int i,
                                         const unsigned int qp,
-                                        ResidualDatum & datum) const
+                                        AssemblyDatum & datum) const
 {
   return _diffusion_coefficient(datum, qp) * KokkosDiffusion::computeQpResidual(i, qp, datum);
 }
@@ -43,7 +43,7 @@ KOKKOS_FUNCTION inline Real
 KokkosHeatConduction::computeQpJacobian(const unsigned int i,
                                         const unsigned int j,
                                         const unsigned int qp,
-                                        ResidualDatum & datum) const
+                                        AssemblyDatum & datum) const
 {
   Real jac =
       _diffusion_coefficient(datum, qp) * KokkosDiffusion::computeQpJacobian(i, j, qp, datum);

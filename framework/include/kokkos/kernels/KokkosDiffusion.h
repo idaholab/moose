@@ -24,17 +24,17 @@ public:
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
-                                         ResidualDatum & datum) const;
+                                         AssemblyDatum & datum) const;
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
                                          const unsigned int j,
                                          const unsigned int qp,
-                                         ResidualDatum & datum) const;
+                                         AssemblyDatum & datum) const;
 };
 
 KOKKOS_FUNCTION inline Real
 KokkosDiffusion::computeQpResidual(const unsigned int i,
                                    const unsigned int qp,
-                                   ResidualDatum & datum) const
+                                   AssemblyDatum & datum) const
 {
   return _grad_u(datum, qp) * _grad_test(datum, i, qp);
 }
@@ -43,7 +43,7 @@ KOKKOS_FUNCTION inline Real
 KokkosDiffusion::computeQpJacobian(const unsigned int i,
                                    const unsigned int j,
                                    const unsigned int qp,
-                                   ResidualDatum & datum) const
+                                   AssemblyDatum & datum) const
 {
   return _grad_phi(datum, j, qp) * _grad_test(datum, i, qp);
 }

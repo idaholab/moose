@@ -20,17 +20,17 @@ public:
 
   KokkosConvectionPrecompute(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int j,
                                          const unsigned int qp,
-                                         ResidualDatum & datum) const;
+                                         AssemblyDatum & datum) const;
 
 private:
   const Real3 _velocity;
 };
 
 KOKKOS_FUNCTION inline Real
-KokkosConvectionPrecompute::computeQpResidual(const unsigned int qp, ResidualDatum & datum) const
+KokkosConvectionPrecompute::computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
 {
   return _velocity * _grad_u(datum, qp);
 }
@@ -38,7 +38,7 @@ KokkosConvectionPrecompute::computeQpResidual(const unsigned int qp, ResidualDat
 KOKKOS_FUNCTION inline Real
 KokkosConvectionPrecompute::computeQpJacobian(const unsigned int j,
                                               const unsigned int qp,
-                                              ResidualDatum & datum) const
+                                              AssemblyDatum & datum) const
 {
   return _velocity * _grad_phi(datum, j, qp);
 }

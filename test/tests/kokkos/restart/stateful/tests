@@ -30,7 +30,8 @@
       expect_err = 'The stateful material properties in KokkosStatefulSpatialTest \"stateful\" that are being restarted do not match the stored properties in the same material object from the checkpoint.'
       cli_args = 'KokkosKernels/heat/prop_name=other
                   KokkosBCs/right/prop_name=other
-                  KokkosMaterials/stateful/prop_name=other'
+                  KokkosMaterials/stateful/prop_name=other
+                  KokkosAuxKernels/active=\'\''
       detail = 'a restarted material declares a stateful material property that was not stored.'
       capabilities = 'kokkos'
       compute_devices = 'cpu cuda'
@@ -64,7 +65,8 @@
     cli_args = 'KokkosKernels/heat/prop_name=other
                 KokkosBCs/right/prop_name=other
                 KokkosMaterials/another_stateful/prop_name=other
-                KokkosMaterials/active=another_stateful'
+                KokkosMaterials/active=another_stateful
+                KokkosAuxKernels/active=\'\''
     requirement = 'In a restarted calculation, the Kokkos system shall not error when a new material declares a new stateful property.'
     capabilities = 'kokkos'
     compute_devices = 'cpu cuda'

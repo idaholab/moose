@@ -25,11 +25,11 @@ public:
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
-                                         ResidualDatum & datum) const;
+                                         AssemblyDatum & datum) const;
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
                                          const unsigned int j,
                                          const unsigned int qp,
-                                         ResidualDatum & datum) const;
+                                         AssemblyDatum & datum) const;
 
 protected:
   /// Stefan-Boltzmann constant
@@ -64,7 +64,7 @@ template <typename RadiativeHeatFluxBC>
 KOKKOS_FUNCTION Real
 KokkosRadiativeHeatFluxBCBase<RadiativeHeatFluxBC>::computeQpResidual(const unsigned int i,
                                                                       const unsigned int qp,
-                                                                      ResidualDatum & datum) const
+                                                                      AssemblyDatum & datum) const
 {
   auto bc = static_cast<const RadiativeHeatFluxBC *>(this);
 
@@ -79,7 +79,7 @@ KOKKOS_FUNCTION Real
 KokkosRadiativeHeatFluxBCBase<RadiativeHeatFluxBC>::computeQpJacobian(const unsigned int i,
                                                                       const unsigned int j,
                                                                       const unsigned int qp,
-                                                                      ResidualDatum & datum) const
+                                                                      AssemblyDatum & datum) const
 {
   auto bc = static_cast<const RadiativeHeatFluxBC *>(this);
 

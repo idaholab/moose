@@ -21,11 +21,11 @@ public:
 
   KokkosLowerBoundNodalKernel(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real getResidual(const unsigned int qp, ResidualDatum & datum) const;
-  KOKKOS_FUNCTION Real getJacobian(const unsigned int qp, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION Real getResidual(const unsigned int qp, AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real getJacobian(const unsigned int qp, AssemblyDatum & datum) const;
   KOKKOS_FUNCTION Real getOffDiagJacobian(const unsigned int jvar,
                                           const unsigned int qp,
-                                          ResidualDatum & datum) const;
+                                          AssemblyDatum & datum) const;
 
 private:
   /// The lower bound on the coupled variable
@@ -33,13 +33,13 @@ private:
 };
 
 KOKKOS_FUNCTION inline Real
-KokkosLowerBoundNodalKernel::getResidual(const unsigned int qp, ResidualDatum & datum) const
+KokkosLowerBoundNodalKernel::getResidual(const unsigned int qp, AssemblyDatum & datum) const
 {
   return ::Kokkos::min(_u(datum, qp), _v(datum, qp) - _lower_bound);
 }
 
 KOKKOS_FUNCTION inline Real
-KokkosLowerBoundNodalKernel::getJacobian(const unsigned int qp, ResidualDatum & datum) const
+KokkosLowerBoundNodalKernel::getJacobian(const unsigned int qp, AssemblyDatum & datum) const
 {
   if (_u(datum, qp) <= _v(datum, qp) - _lower_bound)
     return 1;
@@ -50,7 +50,7 @@ KokkosLowerBoundNodalKernel::getJacobian(const unsigned int qp, ResidualDatum & 
 KOKKOS_FUNCTION inline Real
 KokkosLowerBoundNodalKernel::getOffDiagJacobian(const unsigned int jvar,
                                                 const unsigned int qp,
-                                                ResidualDatum & datum) const
+                                                AssemblyDatum & datum) const
 {
   if (jvar == _v_var)
     if (_v(datum, qp) - _lower_bound < _u(datum, qp))

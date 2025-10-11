@@ -27,12 +27,12 @@ public:
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
-                                         ResidualDatum & datum) const;
+                                         AssemblyDatum & datum) const;
   KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int i,
                                                 const unsigned int j,
                                                 const unsigned int jvar,
                                                 const unsigned int qp,
-                                                ResidualDatum & datum) const;
+                                                AssemblyDatum & datum) const;
 
 private:
   const unsigned int _n_coupled;
@@ -47,7 +47,7 @@ private:
 KOKKOS_FUNCTION inline Real
 KokkosMatCoupledForce::computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
-                                         ResidualDatum & datum) const
+                                         AssemblyDatum & datum) const
 {
   Real r = 0;
   if (_coupled_props)
@@ -64,7 +64,7 @@ KokkosMatCoupledForce::computeQpOffDiagJacobian(const unsigned int i,
                                                 const unsigned int j,
                                                 const unsigned int jvar,
                                                 const unsigned int qp,
-                                                ResidualDatum & datum) const
+                                                AssemblyDatum & datum) const
 {
   if (!_v_var_to_index.exists(jvar))
     return 0;

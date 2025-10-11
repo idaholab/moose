@@ -1,0 +1,12 @@
+[Tests]
+  issues = '#30655'
+  design = 'syntax/KokkosAuxKernels/index.md'
+  [test]
+    type = 'Exodiff'
+    input = 'kokkos_pp_depend.i'
+    exodiff = 'kokkos_pp_depend_out.e'
+    requirement = 'The Kokkos system shall be able to execute user objects before the execution of an auxiliary kernel if the latter depends on the former.'
+    capabilities = 'kokkos'
+    compute_devices = 'cpu cuda'
+  []
+[]

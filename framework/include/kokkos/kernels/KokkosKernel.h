@@ -25,18 +25,17 @@ namespace Kokkos
  *
  * @param i The element-local DOF index
  * @param qp The local quadrature point index
- * @param datum The ResidualDatum object of the current thread
+ * @param datum The AssemblyDatum object of the current thread
  * @returns The residual contribution
  *
  * KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
  *                                        const unsigned int qp,
- *                                        ResidualDatum & datum) const;
+ *                                        AssemblyDatum & datum) const;
  *
  * The signatures of computeQpJacobian() and computeOffDiagQpJacobian() can be found in the code
  * below, and their definition in the derived class is optional. If they are defined in the derived
  * class, they will hide the default definitions in the base class.
  */
-
 class Kernel : public KernelBase
 {
 public:
@@ -66,13 +65,13 @@ public:
    * @param i The test function DOF index
    * @param j The trial function DOF index
    * @param qp The local quadrature point index
-   * @param datum The ResidualDatum object of the current thread
+   * @param datum The AssemblyDatum object of the current thread
    * @returns The diagonal Jacobian contribution
    */
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int /* i */,
                                          const unsigned int /* j */,
                                          const unsigned int /* qp */,
-                                         ResidualDatum & /* datum */) const
+                                         AssemblyDatum & /* datum */) const
   {
     return 0;
   }
@@ -82,14 +81,14 @@ public:
    * @param j The trial function DOF index
    * @param jvar The variable number for column
    * @param qp The local quadrature point index
-   * @param datum The ResidualDatum object of the current thread
+   * @param datum The AssemblyDatum object of the current thread
    * @returns The off-diagonal Jacobian contribution
    */
   KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int /* i */,
                                                 const unsigned int /* j */,
                                                 const unsigned int /* jvar */,
                                                 const unsigned int /* qp */,
-                                                ResidualDatum & /* datum */) const
+                                                AssemblyDatum & /* datum */) const
   {
     return 0;
   }
@@ -127,25 +126,25 @@ public:
   /**
    * Compute residual
    * @param kernel The kernel object of the final derived type
-   * @param datum The ResidualDatum object of the current thread
+   * @param datum The AssemblyDatum object of the current thread
    */
   template <typename Derived>
-  KOKKOS_FUNCTION void computeResidualInternal(const Derived & kernel, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION void computeResidualInternal(const Derived & kernel, AssemblyDatum & datum) const;
   /**
    * Compute diagonal Jacobian
    * @param kernel The kernel object of the final derived type
-   * @param datum The ResidualDatum object of the current thread
+   * @param datum The AssemblyDatum object of the current thread
    */
   template <typename Derived>
-  KOKKOS_FUNCTION void computeJacobianInternal(const Derived & kernel, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION void computeJacobianInternal(const Derived & kernel, AssemblyDatum & datum) const;
   /**
    * Compute off-diagonal Jacobian
    * @param kernel The kernel object of the final derived type
-   * @param datum The ResidualDatum object of the current thread
+   * @param datum The AssemblyDatum object of the current thread
    */
   template <typename Derived>
   KOKKOS_FUNCTION void computeOffDiagJacobianInternal(const Derived & kernel,
-                                                      ResidualDatum & datum) const;
+                                                      AssemblyDatum & datum) const;
   ///@}
 
 protected:
@@ -181,7 +180,7 @@ Kernel::operator()(ResidualLoop, const ThreadID tid, const Derived & kernel) con
 {
   auto elem = kokkosBlockElementID(tid);
 
-  ResidualDatum datum(elem,
+  AssemblyDatum datum(elem,
                       libMesh::invalid_uint,
                       kokkosAssembly(),
                       kokkosSystems(),
@@ -197,7 +196,7 @@ Kernel::operator()(JacobianLoop, const ThreadID tid, const Derived & kernel) con
 {
   auto elem = kokkosBlockElementID(tid);
 
-  ResidualDatum datum(elem,
+  AssemblyDatum datum(elem,
                       libMesh::invalid_uint,
                       kokkosAssembly(),
                       kokkosSystems(),
@@ -219,7 +218,7 @@ Kernel::operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & kern
   if (!sys.isVariableActive(jvar, kokkosMesh().getElementInfo(elem).subdomain))
     return;
 
-  ResidualDatum datum(
+  AssemblyDatum datum(
       elem, libMesh::invalid_uint, kokkosAssembly(), kokkosSystems(), _kokkos_var, jvar);
 
   kernel.computeOffDiagJacobianInternal(kernel, datum);
@@ -227,7 +226,7 @@ Kernel::operator()(OffDiagJacobianLoop, const ThreadID tid, const Derived & kern
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-Kernel::computeResidualInternal(const Derived & kernel, ResidualDatum & datum) const
+Kernel::computeResidualInternal(const Derived & kernel, AssemblyDatum & datum) const
 {
   ResidualObject::computeResidualInternal(
       datum,
@@ -245,7 +244,7 @@ Kernel::computeResidualInternal(const Derived & kernel, ResidualDatum & datum) c
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-Kernel::computeJacobianInternal(const Derived & kernel, ResidualDatum & datum) const
+Kernel::computeJacobianInternal(const Derived & kernel, AssemblyDatum & datum) const
 {
   ResidualObject::computeJacobianInternal(
       datum,
@@ -268,7 +267,7 @@ Kernel::computeJacobianInternal(const Derived & kernel, ResidualDatum & datum) c
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-Kernel::computeOffDiagJacobianInternal(const Derived & kernel, ResidualDatum & datum) const
+Kernel::computeOffDiagJacobianInternal(const Derived & kernel, AssemblyDatum & datum) const
 {
   ResidualObject::computeJacobianInternal(
       datum,

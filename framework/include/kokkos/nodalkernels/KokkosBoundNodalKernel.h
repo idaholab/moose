@@ -19,11 +19,11 @@ public:
 
   KokkosBoundNodalKernel(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, ResidualDatum & datum) const;
-  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int qp, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int qp, AssemblyDatum & datum) const;
   KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int jvar,
                                                 const unsigned int qp,
-                                                ResidualDatum & datum) const;
+                                                AssemblyDatum & datum) const;
 
 protected:
   /// The number of the coupled variable
@@ -85,7 +85,7 @@ KokkosBoundNodalKernel<Derived>::skipOnBoundary(const ContiguousNodeID node) con
 template <typename Derived>
 KOKKOS_FUNCTION Real
 KokkosBoundNodalKernel<Derived>::computeQpResidual(const unsigned int qp,
-                                                   ResidualDatum & datum) const
+                                                   AssemblyDatum & datum) const
 {
   if (skipOnBoundary(datum.node()))
     return _u(datum, qp);
@@ -96,7 +96,7 @@ KokkosBoundNodalKernel<Derived>::computeQpResidual(const unsigned int qp,
 template <typename Derived>
 KOKKOS_FUNCTION Real
 KokkosBoundNodalKernel<Derived>::computeQpJacobian(const unsigned int qp,
-                                                   ResidualDatum & datum) const
+                                                   AssemblyDatum & datum) const
 {
   if (skipOnBoundary(datum.node()))
     return 1;
@@ -108,7 +108,7 @@ template <typename Derived>
 KOKKOS_FUNCTION Real
 KokkosBoundNodalKernel<Derived>::computeQpOffDiagJacobian(const unsigned int jvar,
                                                           const unsigned int qp,
-                                                          ResidualDatum & datum) const
+                                                          AssemblyDatum & datum) const
 {
   if (skipOnBoundary(datum.node()))
     return 0;
