@@ -795,6 +795,16 @@ public:
     return _kokkos_systems;
   }
   ///@}
+  /**
+   * Get the Kokkos system of a specified number that is associated with MOOSE nonlinear and
+   * auxiliary systems
+   * @param sys_num The system number
+   * @returns The Kokkos system
+   */
+  ///{@
+  Moose::Kokkos::System & getKokkosSystem(const unsigned int sys_num);
+  const Moose::Kokkos::System & getKokkosSystem(const unsigned int sys_num) const;
+  ///@}
 #endif
 
   /**

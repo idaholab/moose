@@ -120,20 +120,29 @@ class TestCIVETStore(TestHarnessTestCase):
         """
         Tests get_civet_repo_url()
         """
+        # Normal PR or push event
         env = {'CIVET_BASE_SSH_URL': APPLICATION_REPO}
         self.assertEqual(
             CIVETStore.get_civet_repo_url(env),
             'github.com/idaholab/moose'
         )
 
-        env = {'APPLICATION_REPO': APPLICATION_REPO}
+        # Base will be empty on a scheduled event
+        env = {'CIVET_BASE_SSH_URL': '',
+               'APPLICATION_REPO': APPLICATION_REPO}
         self.assertEqual(
             CIVETStore.get_civet_repo_url(env),
             'github.com/idaholab/moose'
         )
 
-        with self.assertRaises(ValueError):
+        # Base not set at all
+        with self.assertRaisesRegex(KeyError, 'CIVET_BASE_SSH_URL not set'):
             CIVETStore.get_civet_repo_url({})
+
+        # Empty base and no APPLICATION_REPO
+        env = {'CIVET_BASE_SSH_URL': ''}
+        with self.assertRaisesRegex(ValueError, 'Failed to obtain repo'):
+            CIVETStore.get_civet_repo_url(env)
 
     def testGetCIVETServer(self):
         """
