@@ -1933,13 +1933,10 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   //
   // Problem sizing & storage
   //
-  // Number of coupled fields (mass, axial momentum, crossflow momentum, enthalpy?)
-  const PetscInt Q = _monolithic_thermal_bool ? 4 : 3;
+  // Number of coupled fields in the NEST (mass, axial momentum, crossflow momentum)
+  const PetscInt Q = 3;
   std::vector<Mat> mat_array(Q * Q, nullptr); // Block matrix entries (row-major by field)
   std::vector<Vec> vec_array(Q, nullptr);     // Block RHS entries per field
-
-  // Coupling control flags (lag enthalpy solve)
-  const bool kLagBlockThermalSolve = true;
 
   // Block index range
   const unsigned int first_node = iblock * _block_size + 1;
@@ -1975,10 +1972,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     // A(field,2): sumWij (tight coupled)
     DuplicateAndAssemble(_mc_sumWij_mat, mat_array[Q * field + 2]);
 
-    // A(field,3): enthalpy coupling (none here)
-    if (_monolithic_thermal_bool)
-      mat_array[Q * field + 3] = nullptr;
-
     // b(field)
     DuplicateAndCopy(_mc_axial_convection_rhs, vec_array[field]);
 
@@ -1999,10 +1992,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
 
     // A(field,2): unused
     mat_array[Q * field + 2] = nullptr;
-
-    // A(field,3): enthalpy coupling (none here)
-    if (_monolithic_thermal_bool)
-      mat_array[Q * field + 3] = nullptr;
 
     // b(field)
     DuplicateAndCopy(_amc_pressure_force_rhs, vec_array[field]);
@@ -2026,48 +2015,11 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     // A(field,2): system Wij
     DuplicateAndAssemble(_cmc_sys_Wij_mat, mat_array[Q * field + 2]);
 
-    // A(field,3): enthalpy coupling (none here)
-    if (_monolithic_thermal_bool)
-      mat_array[Q * field + 3] = nullptr;
-
     // b(field)
     DuplicateAndCopy(_cmc_sys_Wij_rhs, vec_array[field]);
     LibmeshPetscCall(VecAXPY(vec_array[field], 1.0, _cmc_pressure_force_rhs));
 
     verbose("Cross mom OK.");
-  }
-
-  //
-  // 4) Energy conservation (field 3, only if monolithic)
-  //
-  if (_monolithic_thermal_bool)
-  {
-    PetscInt field = 3;
-
-    // A(field,0..2): unused
-    mat_array[Q * field + 0] = nullptr;
-    mat_array[Q * field + 1] = nullptr;
-    mat_array[Q * field + 2] = nullptr;
-
-    // A(field,3): enthalpy block (optionally lagged)
-    LibmeshPetscCall(MatDuplicate(_hc_sys_h_mat, MAT_COPY_VALUES, &mat_array[Q * field + 3]));
-    if (kLagBlockThermalSolve)
-    {
-      LibmeshPetscCall(MatZeroEntries(mat_array[Q * field + 3]));
-      LibmeshPetscCall(MatShift(mat_array[Q * field + 3], 1.0));
-    }
-    LibmeshPetscCall(MatAssemblyBegin(mat_array[Q * field + 3], MAT_FINAL_ASSEMBLY));
-    LibmeshPetscCall(MatAssemblyEnd(mat_array[Q * field + 3], MAT_FINAL_ASSEMBLY));
-
-    // b(field)
-    DuplicateAndCopy(_hc_sys_h_rhs, vec_array[field]);
-    if (kLagBlockThermalSolve)
-    {
-      LibmeshPetscCall(VecZeroEntries(vec_array[field]));
-      LibmeshPetscCall(VecShift(vec_array[field], 1.0));
-    }
-
-    verbose("Energy OK.");
   }
 
   //
@@ -2370,7 +2322,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   // Recover block solutions from x_nest
   //
   Vec sol_mdot = nullptr, sol_p = nullptr, sol_Wij = nullptr;
-  Vec sol_h_coupled = nullptr; // only used if !_lag and monolithic
 
   verbose("Vectors to hold solution created");
 
@@ -2397,12 +2348,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
 
   LibmeshPetscCall(VecDuplicate(_cmc_sys_Wij_rhs, &sol_Wij));
   LibmeshPetscCall(VecCopy(subvecs[2], sol_Wij));
-
-  if (_monolithic_thermal_bool && !kLagBlockThermalSolve)
-  {
-    LibmeshPetscCall(VecDuplicate(_hc_sys_h_rhs, &sol_h_coupled));
-    LibmeshPetscCall(VecCopy(subvecs[3], sol_h_coupled));
-  }
 
   // Done with the nest container
   LibmeshPetscCall(VecDestroy(&x_nest));
@@ -2438,79 +2383,43 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   // Enthalpy
   if (_monolithic_thermal_bool)
   {
-    if (kLagBlockThermalSolve)
+    // Local solve with _hc_sys_h_mat
+    KSP ksploc = nullptr;
+    PC pcloc = nullptr;
+    Vec sol = nullptr;
+
+    LibmeshPetscCall(VecDuplicate(_hc_sys_h_rhs, &sol));
+    LibmeshPetscCall(KSPCreate(PETSC_COMM_SELF, &ksploc));
+    LibmeshPetscCall(KSPSetOperators(ksploc, _hc_sys_h_mat, _hc_sys_h_mat));
+    LibmeshPetscCall(KSPGetPC(ksploc, &pcloc));
+    LibmeshPetscCall(PCSetType(pcloc, PCJACOBI));
+    LibmeshPetscCall(KSPSetTolerances(ksploc, _rtol, _atol, _dtol, _maxit));
+    LibmeshPetscCall(KSPSetFromOptions(ksploc));
+    LibmeshPetscCall(KSPSolve(ksploc, _hc_sys_h_rhs, sol));
+
+    PetscScalar * xx = nullptr;
+    LibmeshPetscCall(VecGetArray(sol, &xx));
+    for (unsigned int iz = first_node; iz <= last_node; ++iz)
     {
-      // Local solve with _hc_sys_h_mat
-      KSP ksploc = nullptr;
-      PC pcloc = nullptr;
-      Vec sol = nullptr;
-
-      LibmeshPetscCall(VecDuplicate(_hc_sys_h_rhs, &sol));
-      LibmeshPetscCall(KSPCreate(PETSC_COMM_SELF, &ksploc));
-      LibmeshPetscCall(KSPSetOperators(ksploc, _hc_sys_h_mat, _hc_sys_h_mat));
-      LibmeshPetscCall(KSPGetPC(ksploc, &pcloc));
-      LibmeshPetscCall(PCSetType(pcloc, PCJACOBI));
-      LibmeshPetscCall(KSPSetTolerances(ksploc, _rtol, _atol, _dtol, _maxit));
-      LibmeshPetscCall(KSPSetFromOptions(ksploc));
-      LibmeshPetscCall(KSPSolve(ksploc, _hc_sys_h_rhs, sol));
-
-      PetscScalar * xx = nullptr;
-      LibmeshPetscCall(VecGetArray(sol, &xx));
-      for (unsigned int iz = first_node; iz <= last_node; ++iz)
+      const unsigned int iz_ind = iz - first_node;
+      for (unsigned int i_ch = 0; i_ch < _n_channels; ++i_ch)
       {
-        const unsigned int iz_ind = iz - first_node;
-        for (unsigned int i_ch = 0; i_ch < _n_channels; ++i_ch)
+        auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
+        const auto h_out = xx[iz_ind * _n_channels + i_ch];
+        if (h_out < 0)
         {
-          auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-          const auto h_out = xx[iz_ind * _n_channels + i_ch];
-          if (h_out < 0)
-          {
-            mooseError(name(),
-                       " : Calculation of negative Enthalpy h_out = : ",
-                       h_out,
-                       " Axial Level= : ",
-                       iz);
-          }
-          _h_soln->set(node_out, h_out);
+          mooseError(name(),
+                     " : Calculation of negative Enthalpy h_out = : ",
+                     h_out,
+                     " Axial Level= : ",
+                     iz);
         }
+        _h_soln->set(node_out, h_out);
       }
-      LibmeshPetscCall(VecRestoreArray(sol, &xx));
-      LibmeshPetscCall(KSPDestroy(&ksploc));
-      LibmeshPetscCall(VecDestroy(&sol));
     }
-    else
-    {
-      if (!sol_h_coupled)
-      {
-        mooseError(
-            name(),
-            " : Expected coupled enthalpy vector (sol_h_coupled) to be set, but it is NULL.");
-      }
-
-      Vec sol_h = sol_h_coupled;
-      PetscScalar * sol_h_array = nullptr;
-      LibmeshPetscCall(VecGetArray(sol_h, &sol_h_array));
-      for (unsigned int iz = first_node; iz <= last_node; ++iz)
-      {
-        const unsigned int iz_ind = iz - first_node;
-        for (unsigned int i_ch = 0; i_ch < _n_channels; ++i_ch)
-        {
-          auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-          const auto h_out = sol_h_array[iz_ind * _n_channels + i_ch];
-          if (h_out < 0)
-          {
-            mooseError(name(),
-                       " : Calculation of negative Enthalpy h_out = : ",
-                       h_out,
-                       " Axial Level= : ",
-                       iz);
-          }
-          _h_soln->set(node_out, h_out);
-        }
-      }
-      LibmeshPetscCall(VecRestoreArray(sol_h, &sol_h_array));
-      LibmeshPetscCall(VecDestroy(&sol_h));
-    }
+    LibmeshPetscCall(VecRestoreArray(sol, &xx));
+    LibmeshPetscCall(KSPDestroy(&ksploc));
+    LibmeshPetscCall(VecDestroy(&sol));
   }
 
   // sum_Wij
