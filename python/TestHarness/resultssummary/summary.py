@@ -144,7 +144,7 @@ class TestHarnessResultsSummary:
         # If no base, display message and return None for base
         if not isinstance(base_results, StoredResult):
             no_base = f"Base results not available for {base_sha}"
-            print(no_base)
+            # Write no base message in out_file path
             self.write_output(no_base, out_file)
             return None, head_results, None, test_names
 
@@ -517,7 +517,7 @@ class TestHarnessResultsSummary:
             **kwargs
         )
         summary_result = self.build_summary(removed_table, added_table, same_table)
-        print(summary_result)
+        # Write results in out_file path
         self.write_output(summary_result, out_file)
         return summary_result
 

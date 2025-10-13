@@ -701,17 +701,14 @@ class TestResultsSummary(TestHarnessTestCase):
 
         with tempfile.NamedTemporaryFile() as out_file:
             summary = TestHarnessResultsSummary(None)
-            stdout = StringIO()
-            with redirect_stdout(stdout):
-                summary_result = summary.pr(
-                    event_id = EVENT_ID, out_file = out_file.name
-                )
-                self.assertIsNone(summary_result)
-                self.assertIn('Base results not available', stdout.getvalue())
-                # Check skip message is displayed in output file
-                with open(out_file.name, 'r') as f:
-                    output = f.read()
-                    self.assertIn('Base results not available', output)
+            summary.pr(
+                event_id = EVENT_ID, out_file = out_file.name
+            )
+
+            # Check skip message is displayed in output file
+            with open(out_file.name, 'r') as f:
+                output = f.read()
+                self.assertIn('Base results not available', output)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
@@ -748,25 +745,15 @@ class TestResultsSummary(TestHarnessTestCase):
 
         with tempfile.NamedTemporaryFile() as out_file:
             summary = TestHarnessResultsSummary(None)
-            stdout = StringIO()
-            with redirect_stdout(stdout):
-                summary.main(out_file = out_file.name, action = 'pr', event_id = EVENT_ID)
-                summary_result = stdout.getvalue()
-                self.assertIn('Removed Tests:', summary_result)
-                self.assertIn('No Removed Tests', summary_result)
-                self.assertIn('New Tests:', summary_result)
-                self.assertIn('No New Tests', summary_result)
-                self.assertIn('Same Tests', summary_result)
-                self.assertIn('No Tests', summary_result)
-
-                with open(out_file.name, 'r') as f:
-                    output = f.read()
-                    self.assertIn('Removed Tests:', output)
-                    self.assertIn('No Removed Tests', output)
-                    self.assertIn('New Tests:', output)
-                    self.assertIn('No New Tests', output)
-                    self.assertIn('Same Tests', output)
-                    self.assertIn('No Tests', output)
+            summary.main(out_file = out_file.name, action = 'pr', event_id = EVENT_ID)
+            with open(out_file.name, 'r') as f:
+                output = f.read()
+                self.assertIn('Removed Tests:', output)
+                self.assertIn('No Removed Tests', output)
+                self.assertIn('New Tests:', output)
+                self.assertIn('No New Tests', output)
+                self.assertIn('Same Tests', output)
+                self.assertIn('No Tests', output)
 
 if __name__ == '__main__':
     unittest.main()
