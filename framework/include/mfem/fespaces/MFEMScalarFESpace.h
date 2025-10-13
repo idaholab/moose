@@ -30,10 +30,12 @@ protected:
   /// Get the number of degrees of freedom per basis function needed
   /// in this finite element space.
   virtual int getVDim() const override;
-
+  
 private:
   /// Name of the family of finite element collections to use
   const std::string _fec_type;
+  /// Name of the map types to use VALUE OR INTEGRAL (meaningfull only for L2)  
+  const std::string _fec_map;
 };
 
 #endif
