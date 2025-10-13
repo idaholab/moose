@@ -180,6 +180,8 @@ GenericReal<is_ad>
 CombinedNonlinearHardeningPlasticityTempl<is_ad>::computeIsotropicHardeningValue(
     const GenericReal<is_ad> & scalar)
 {
+  using std::exp;
+
   const Real _q = this->template getParam<Real>("q");
   const Real _b = this->template getParam<Real>("b");
   if (_isotropic_hardening_function)
@@ -188,7 +190,7 @@ CombinedNonlinearHardeningPlasticityTempl<is_ad>::computeIsotropicHardeningValue
     return _isotropic_hardening_function->value(strain_old + scalar) - _yield_stress;
   }
 
-  _isotropic_hardening_variable[_qp] = _q * (1.0 - std::exp(-_b * scalar));
+  _isotropic_hardening_variable[_qp] = _q * (1.0 - exp(-_b * scalar));
 
   return (_isotropic_hardening_variable_old[_qp] + _isotropic_hardening_slope * scalar +
           _b * (_q - _isotropic_hardening_variable_old[_qp]) *

@@ -100,5 +100,6 @@ ADCheckGlobalToDerivativeMap::computeProperties()
 void
 ADCheckGlobalToDerivativeMap::computeQpProperties()
 {
-  _mat_prop[_qp] = 1. + std::pow(_u[_qp], 2) * std::pow(_v[_qp], 3);
+  using std::pow;
+  _mat_prop[_qp] = 1. + pow(_u[_qp], 2) * pow(_v[_qp], 3);
 }

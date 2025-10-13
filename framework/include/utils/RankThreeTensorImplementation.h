@@ -246,7 +246,8 @@ RankThreeTensorTempl<T>::L2norm() const
   for (auto i : make_range(N3))
     l2 += Utility::pow<2>(_vals[i]);
 
-  return std::sqrt(l2);
+  using std::sqrt;
+  return sqrt(l2);
 }
 
 template <typename T>

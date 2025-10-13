@@ -74,10 +74,12 @@ GenericReal<is_ad>
 IsotropicPowerLawHardeningStressUpdateTempl<is_ad>::computeHardeningDerivative(
     const GenericReal<is_ad> & scalar)
 {
+  using std::pow;
+
   const GenericReal<is_ad> stress_delta = _effective_trial_stress - _three_shear_modulus * scalar;
-  GenericReal<is_ad> slope = std::pow(stress_delta, (1.0 / _strain_hardening_exponent - 1.0)) /
+  GenericReal<is_ad> slope = pow(stress_delta, (1.0 / _strain_hardening_exponent - 1.0)) /
                              _strain_hardening_exponent * 1.0 /
-                             std::pow(_K, 1.0 / _strain_hardening_exponent);
+                             pow(_K, 1.0 / _strain_hardening_exponent);
   slope -= 1.0 / _youngs_modulus;
 
   return 1.0 / slope;
@@ -88,6 +90,8 @@ void
 IsotropicPowerLawHardeningStressUpdateTempl<is_ad>::computeYieldStress(
     const GenericRankFourTensor<is_ad> & elasticity_tensor)
 {
+  using std::pow;
+
   // Pull in the Lam\`{e} lambda, and caculate E
   const GenericReal<is_ad> lambda = getIsotropicLameLambda(elasticity_tensor);
   const GenericReal<is_ad> shear_modulus = _three_shear_modulus / 3.0;
@@ -95,8 +99,8 @@ IsotropicPowerLawHardeningStressUpdateTempl<is_ad>::computeYieldStress(
   _youngs_modulus = shear_modulus * (3.0 * lambda + 2 * shear_modulus) / (lambda + shear_modulus);
 
   // Then solve for yield stress using equation from the header file
-  this->_yield_stress = std::pow(_K / std::pow(_youngs_modulus, _strain_hardening_exponent),
-                                 1.0 / (1.0 - _strain_hardening_exponent));
+  this->_yield_stress = pow(_K / pow(_youngs_modulus, _strain_hardening_exponent),
+                            1.0 / (1.0 - _strain_hardening_exponent));
   if (this->_yield_stress <= 0.0)
     mooseError("The yield stress must be greater than zero, but during the simulation your yield "
                "stress became less than zero.");

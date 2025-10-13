@@ -272,7 +272,8 @@ GeneralizedReturnMappingSolutionTempl<is_ad>::internalSolve(
     _residual_history[_iteration % _num_resids] = MetaPhysicL::raw_value(_residual);
   }
 
-  if (std::isnan(_residual) || std::isinf(MetaPhysicL::raw_value(_residual)))
+  using std::isnan, std::isinf;
+  if (isnan(_residual) || isinf(MetaPhysicL::raw_value(_residual)))
     return SolveState::NAN_INF;
 
   if (_iteration == _max_its)
@@ -296,6 +297,8 @@ bool
 GeneralizedReturnMappingSolutionTempl<is_ad>::convergedAcceptable(const unsigned int it,
                                                                   const Real & reference)
 {
+  using std::abs;
+
   // Require that we have at least done _num_resids evaluations before we allow for
   // acceptable convergence
   if (it < _num_resids)
@@ -305,8 +308,7 @@ GeneralizedReturnMappingSolutionTempl<is_ad>::convergedAcceptable(const unsigned
   // the last _num_resids iterations. If it has (which means it's still making progress),
   // don't consider it to be converged within the acceptable limits.
   const Real convergence_history_factor = 10.0;
-  if (std::abs(_residual * convergence_history_factor) <
-      std::abs(_residual_history[(it + 1) % _num_resids]))
+  if (abs(_residual * convergence_history_factor) < abs(_residual_history[(it + 1) % _num_resids]))
     return false;
 
   // Now that it's determined that progress is not being made, treat it as converged if

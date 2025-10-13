@@ -1073,9 +1073,9 @@ libMesh::BoundingBox buildBoundingBox(const Point & p1, const Point & p2);
  * using the third template parameter if uninitialized storage is acceptable,
  */
 template <typename T, std::size_t N, bool value_init = true>
-class SemidynamicVector : public MetaPhysicL::DynamicStdArrayWrapper<T, MetaPhysicL::NWrapper<N>>
+class SemidynamicVector : public MetaPhysicL::DynamicStdArrayWrapper<T, N>
 {
-  typedef MetaPhysicL::DynamicStdArrayWrapper<T, MetaPhysicL::NWrapper<N>> Parent;
+  typedef MetaPhysicL::DynamicStdArrayWrapper<T, N> Parent;
 
 public:
   SemidynamicVector(std::size_t size) : Parent()

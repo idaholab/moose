@@ -347,8 +347,9 @@ template <typename T>
 RankTwoTensorTempl<T>
 RankTwoTensorTempl<T>::rotateXyPlane(T a)
 {
-  T c = std::cos(a);
-  T s = std::sin(a);
+  using std::cos, std::sin;
+  T c = cos(a);
+  T s = sin(a);
   T x = (*this)(0, 0) * c * c + (*this)(1, 1) * s * s + 2.0 * (*this)(0, 1) * c * s;
   T y = (*this)(0, 0) * s * s + (*this)(1, 1) * c * c - 2.0 * (*this)(0, 1) * c * s;
   T xy = ((*this)(1, 1) - (*this)(0, 0)) * c * s + (*this)(0, 1) * (c * c - s * s);
@@ -748,7 +749,8 @@ RankTwoTensorTempl<T>::L2norm() const
     T v = _coords[i];
     norm += v * v;
   }
-  return norm == 0.0 ? 0.0 : std::sqrt(norm);
+  using std::sqrt;
+  return norm == 0.0 ? 0.0 : sqrt(norm);
 }
 
 template <typename T>

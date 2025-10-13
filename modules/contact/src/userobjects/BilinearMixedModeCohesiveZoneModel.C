@@ -232,6 +232,8 @@ BilinearMixedModeCohesiveZoneModel::prepareJumpKinematicQuantities()
 void
 BilinearMixedModeCohesiveZoneModel::computeFandR(const Node * const node)
 {
+  using std::isfinite;
+
   // First call does not have maps available
   const bool return_boolean = _dof_to_F.find(node) == _dof_to_F.end();
   if (return_boolean)
@@ -245,7 +247,7 @@ BilinearMixedModeCohesiveZoneModel::computeFandR(const Node * const node)
 
   for (const auto i : make_range(3))
     for (const auto j : make_range(3))
-      if (!std::isfinite(MetaPhysicL::raw_value(normalized_F(i, j))))
+      if (!isfinite(MetaPhysicL::raw_value(normalized_F(i, j))))
         throw MooseException(
             "The deformation gradient on the secondary surface is not finite in "
             "PenaltySimpleCohesiveZoneModel. MOOSE needs to cut the time step size.");
@@ -266,6 +268,8 @@ BilinearMixedModeCohesiveZoneModel::computeFandR(const Node * const node)
 void
 BilinearMixedModeCohesiveZoneModel::computeBilinearMixedModeTraction(const Node * const node)
 {
+  using std::max, std::min;
+
   // First call does not have maps available
   const bool return_boolean = _dof_to_weighted_gap.find(node) == _dof_to_weighted_gap.end();
   if (return_boolean)
@@ -281,10 +285,10 @@ BilinearMixedModeCohesiveZoneModel::computeBilinearMixedModeTraction(const Node 
   const auto interface_displacement_jump =
       normalizeQuantity(_dof_to_interface_displacement_jump, node);
 
-  const ADRealVectorValue delta_active(std::max(interface_displacement_jump(0), 0.0),
+  const ADRealVectorValue delta_active(max(interface_displacement_jump(0), 0.0),
                                        interface_displacement_jump(1),
                                        interface_displacement_jump(2));
-  const ADRealVectorValue delta_inactive(std::min(interface_displacement_jump(0), 0.0), 0.0, 0.0);
+  const ADRealVectorValue delta_inactive(min(interface_displacement_jump(0), 0.0), 0.0, 0.0);
 
   // This traction vector is local at this point.
   _dof_to_czm_traction[node] =
@@ -309,14 +313,16 @@ BilinearMixedModeCohesiveZoneModel::computeGlobalTraction(const Node * const nod
 void
 BilinearMixedModeCohesiveZoneModel::computeModeMixity(const Node * const node)
 {
+  using std::sqrt;
+
   const auto interface_displacement_jump =
       normalizeQuantity(_dof_to_interface_displacement_jump, node);
 
   if (interface_displacement_jump(0) > _epsilon_tolerance)
   {
-    const auto delta_s = std::sqrt(interface_displacement_jump(1) * interface_displacement_jump(1) +
-                                   interface_displacement_jump(2) * interface_displacement_jump(2) +
-                                   _epsilon_tolerance);
+    const auto delta_s =
+        sqrt(interface_displacement_jump(1) * interface_displacement_jump(1) +
+             interface_displacement_jump(2) * interface_displacement_jump(2) + _epsilon_tolerance);
 
     _dof_to_mode_mixity_ratio[node] = delta_s / interface_displacement_jump(0);
   }
@@ -327,6 +333,8 @@ BilinearMixedModeCohesiveZoneModel::computeModeMixity(const Node * const node)
 void
 BilinearMixedModeCohesiveZoneModel::computeCriticalDisplacementJump(const Node * const node)
 {
+  using std::sqrt;
+
   const auto interface_displacement_jump =
       normalizeQuantity(_dof_to_interface_displacement_jump, node);
 
@@ -341,17 +349,19 @@ BilinearMixedModeCohesiveZoneModel::computeCriticalDisplacementJump(const Node *
 
   if (interface_displacement_jump(0) > _epsilon_tolerance)
   {
-    const auto delta_mixed = std::sqrt(delta_shear_knot * delta_shear_knot +
-                                       Utility::pow<2>(mixity_ratio * delta_normal_knot));
+    const auto delta_mixed = sqrt(delta_shear_knot * delta_shear_knot +
+                                  Utility::pow<2>(mixity_ratio * delta_normal_knot));
 
     _dof_to_delta_initial[node] = delta_normal_knot * delta_shear_knot *
-                                  std::sqrt(1.0 + mixity_ratio * mixity_ratio) / delta_mixed;
+                                  sqrt(1.0 + mixity_ratio * mixity_ratio) / delta_mixed;
   }
 }
 
 void
 BilinearMixedModeCohesiveZoneModel::computeFinalDisplacementJump(const Node * const node)
 {
+  using std::sqrt, std::pow;
+
   const auto interface_displacement_jump =
       normalizeQuantity(_dof_to_interface_displacement_jump, node);
 
@@ -361,7 +371,7 @@ BilinearMixedModeCohesiveZoneModel::computeFinalDisplacementJump(const Node * co
   const auto normalized_GII_c = normalizeQuantity(_dof_to_GII_c, node);
 
   _dof_to_delta_final[node] =
-      std::sqrt(2.0) * 2.0 * normalized_GII_c / normalizeQuantity(_dof_to_shear_strength, node);
+      sqrt(2.0) * 2.0 * normalized_GII_c / normalizeQuantity(_dof_to_shear_strength, node);
 
   if (interface_displacement_jump(0) > _epsilon_tolerance)
   {
@@ -371,18 +381,18 @@ BilinearMixedModeCohesiveZoneModel::computeFinalDisplacementJump(const Node * co
           2.0 / _penalty_stiffness_czm / libmesh_map_find(_dof_to_delta_initial, node) *
           (normalized_GI_c +
            (normalized_GII_c - normalized_GI_c) *
-               std::pow(mixity_ratio * mixity_ratio / (1 + mixity_ratio * mixity_ratio),
-                        _power_law_parameter));
+               pow(mixity_ratio * mixity_ratio / (1 + mixity_ratio * mixity_ratio),
+                   _power_law_parameter));
     }
     else if (_mix_mode_criterion == MixedModeCriterion::POWER_LAW)
     {
       const auto Gc_mixed =
-          std::pow(1.0 / normalized_GI_c, _power_law_parameter) +
-          std::pow(mixity_ratio * mixity_ratio / normalized_GII_c, _power_law_parameter);
+          pow(1.0 / normalized_GI_c, _power_law_parameter) +
+          pow(mixity_ratio * mixity_ratio / normalized_GII_c, _power_law_parameter);
       _dof_to_delta_final[node] = (2.0 + 2.0 * mixity_ratio * mixity_ratio) /
                                   _penalty_stiffness_czm /
                                   libmesh_map_find(_dof_to_delta_initial, node) *
-                                  std::pow(Gc_mixed, -1.0 / _power_law_parameter);
+                                  pow(Gc_mixed, -1.0 / _power_law_parameter);
     }
   }
 }
@@ -390,6 +400,8 @@ BilinearMixedModeCohesiveZoneModel::computeFinalDisplacementJump(const Node * co
 void
 BilinearMixedModeCohesiveZoneModel::computeEffectiveDisplacementJump(const Node * const node)
 {
+  using std::sqrt;
+
   const auto interface_displacement_jump =
       normalizeQuantity(_dof_to_interface_displacement_jump, node);
 
@@ -397,9 +409,9 @@ BilinearMixedModeCohesiveZoneModel::computeEffectiveDisplacementJump(const Node 
       MathUtils::regularizedHeavyside(interface_displacement_jump(0), _regularization_alpha) *
       interface_displacement_jump(0);
 
-  _dof_to_delta_max[node] = std::sqrt(Utility::pow<2>(interface_displacement_jump(1)) +
-                                      Utility::pow<2>(interface_displacement_jump(2)) +
-                                      Utility::pow<2>(delta_normal_pos) + _epsilon_tolerance);
+  _dof_to_delta_max[node] = sqrt(Utility::pow<2>(interface_displacement_jump(1)) +
+                                 Utility::pow<2>(interface_displacement_jump(2)) +
+                                 Utility::pow<2>(delta_normal_pos) + _epsilon_tolerance);
 }
 
 void

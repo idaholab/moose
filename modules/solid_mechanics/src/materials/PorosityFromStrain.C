@@ -71,6 +71,7 @@ PorosityFromStrainTempl<is_ad>::computeQpProperties()
       mooseException("In ", _name, ": porosity is negative.");
   }
 
-  if (std::isnan(_porosity[_qp]))
+  using std::isnan;
+  if (isnan(_porosity[_qp]))
     mooseException("In ", _name, ": porosity is nan. Cutting timestep.");
 }

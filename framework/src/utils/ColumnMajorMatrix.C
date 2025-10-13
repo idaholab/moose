@@ -237,6 +237,7 @@ template <typename T>
 void
 ColumnMajorMatrixTempl<T>::exp(ColumnMajorMatrixTempl<T> & z) const
 {
+  using std::exp;
   this->checkSquareness();
 
   ColumnMajorMatrixTempl<T> a(*this);
@@ -248,7 +249,7 @@ ColumnMajorMatrixTempl<T>::exp(ColumnMajorMatrixTempl<T> & z) const
   a.eigenNonsym(evals_real, evals_img, evec_right, evec_left);
 
   for (unsigned int i = 0; i < _n_rows; i++)
-    evals_real2(i, i) = std::exp(evals_real(i, 0));
+    evals_real2(i, i) = exp(evals_real(i, 0));
 
   evec_right.inverse(evec_right_inverse);
 
@@ -309,13 +310,14 @@ template <typename T>
 inline ColumnMajorMatrixTempl<T>
 ColumnMajorMatrixTempl<T>::abs()
 {
+  using std::abs;
   ColumnMajorMatrixTempl<T> & s = (*this);
 
   ColumnMajorMatrixTempl<T> ret_matrix(_n_rows, _n_cols);
 
   for (unsigned int j = 0; j < _n_cols; j++)
     for (unsigned int i = 0; i < _n_rows; i++)
-      ret_matrix(i, j) = std::abs(s(i, j));
+      ret_matrix(i, j) = abs(s(i, j));
 
   return ret_matrix;
 }
@@ -324,7 +326,8 @@ template <typename T>
 inline T
 ColumnMajorMatrixTempl<T>::norm()
 {
-  return std::sqrt(doubleContraction(*this));
+  using std::sqrt;
+  return sqrt(doubleContraction(*this));
 }
 
 template class ColumnMajorMatrixTempl<Real>;

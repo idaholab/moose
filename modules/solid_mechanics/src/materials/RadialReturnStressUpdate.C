@@ -245,6 +245,7 @@ RadialReturnStressUpdateTempl<is_ad>::updateState(
     bool compute_full_tangent_operator,
     RankFourTensor & tangent_operator)
 {
+  using std::sqrt;
 
   // compute the deviatoric trial stress and trial strain from the current intermediate
   // configuration
@@ -254,7 +255,7 @@ RadialReturnStressUpdateTempl<is_ad>::updateState(
   GenericReal<is_ad> dev_trial_stress_squared =
       deviatoric_trial_stress.doubleContraction(deviatoric_trial_stress);
   GenericReal<is_ad> effective_trial_stress = MetaPhysicL::raw_value(dev_trial_stress_squared)
-                                                  ? std::sqrt(3.0 / 2.0 * dev_trial_stress_squared)
+                                                  ? sqrt(3.0 / 2.0 * dev_trial_stress_squared)
                                                   : 0.0;
 
   computeStressInitialize(effective_trial_stress, elasticity_tensor);
@@ -318,6 +319,8 @@ RadialReturnStressUpdateTempl<is_ad>::updateStateSubstepInternal(
     bool compute_full_tangent_operator,
     RankFourTensor & tangent_operator)
 {
+  using std::sqrt;
+
   // if only one substep is needed, then call the original update state method
   if (total_number_substeps == 1)
   {
@@ -368,7 +371,7 @@ RadialReturnStressUpdateTempl<is_ad>::updateStateSubstepInternal(
       const RankTwoTensor deviatoric_sub_stress_new = sub_stress_new.deviatoric();
       const Real dev_sub_stress_new_squared =
           deviatoric_sub_stress_new.doubleContraction(deviatoric_sub_stress_new);
-      effective_sub_stress_new = std::sqrt(3.0 / 2.0 * dev_sub_stress_new_squared);
+      effective_sub_stress_new = sqrt(3.0 / 2.0 * dev_sub_stress_new_squared);
     }
     else
       libmesh_ignore(effective_sub_stress_new);

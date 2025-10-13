@@ -20,28 +20,30 @@ template <typename V, typename D, bool asd>
 inline bool
 isinf_impl(const MetaPhysicL::DualNumber<V, D, asd> & a)
 {
-  return std::isinf(a);
+  using std::isinf;
+  return isinf(a);
 }
 
 template <typename V, typename D, bool asd>
 inline bool
 isnan_impl(const MetaPhysicL::DualNumber<V, D, asd> & a)
 {
-  return std::isnan(a);
+  using std::isnan;
+  return isnan(a);
 }
 
 template <typename V, typename D, bool asd>
 inline MetaPhysicL::DualNumber<V, D, asd>
 sqrt(const MetaPhysicL::DualNumber<V, D, asd> & a)
 {
-  return std::sqrt(a);
+  return MetaPhysicL::sqrt(a);
 }
 
 template <typename V, typename D, bool asd>
 inline MetaPhysicL::DualNumber<V, D, asd>
 abs(const MetaPhysicL::DualNumber<V, D, asd> & a)
 {
-  return std::abs(a);
+  return MetaPhysicL::abs(a);
 }
 }
 } // namespace Eigen

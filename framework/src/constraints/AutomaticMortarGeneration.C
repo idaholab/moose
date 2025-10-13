@@ -440,6 +440,8 @@ AutomaticMortarGeneration::getNormals(const Elem & secondary_elem,
 void
 AutomaticMortarGeneration::buildMortarSegmentMesh()
 {
+  using std::abs;
+
   dof_id_type local_id_index = 0;
   std::size_t node_unique_id_offset = 0;
 
@@ -561,7 +563,7 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
     const Elem * secondary_elem = val.second;
 
     // If this is an aligned node, we don't need to do anything.
-    if (std::abs(std::abs(xi1) - 1.) < _xi_tolerance)
+    if (abs(abs(xi1) - 1.) < _xi_tolerance)
       continue;
 
     auto && order = secondary_elem->default_order();
@@ -864,8 +866,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh()
   {
     MortarSegmentInfo & msinfo = libmesh_map_find(_msm_elem_to_info, msm_elem);
     Elem * primary_elem = const_cast<Elem *>(msinfo.primary_elem);
-    if (primary_elem == nullptr || std::abs(msinfo.xi2_a) > 1.0 + TOLERANCE ||
-        std::abs(msinfo.xi2_b) > 1.0 + TOLERANCE)
+    if (primary_elem == nullptr || abs(msinfo.xi2_a) > 1.0 + TOLERANCE ||
+        abs(msinfo.xi2_b) > 1.0 + TOLERANCE)
     {
       // Erase from secondary to msms map
       auto it = _secondary_elems_to_mortar_segments.find(msinfo.secondary_elem->id());
@@ -1140,8 +1142,8 @@ AutomaticMortarGeneration::buildMortarSegmentMesh3d()
       for (auto r : make_range(result_set.size()))
       {
         // Verify that the squared distance we compute is the same as nanoflann's
-        mooseAssert(std::abs((_mesh.point(ret_index[r]) - center_point).norm_sq() -
-                             out_dist_sqr[r]) <= TOLERANCE,
+        mooseAssert(abs((_mesh.point(ret_index[r]) - center_point).norm_sq() - out_dist_sqr[r]) <=
+                        TOLERANCE,
                     "Lower-dimensional element squared distance verification failed.");
 
         // Get list of elems connected to node
@@ -1492,6 +1494,8 @@ AutomaticMortarGeneration::msmStatistics()
 void
 AutomaticMortarGeneration::computeIncorrectEdgeDroppingInactiveLMNodes()
 {
+  using std::abs;
+
   // Note that in 3D our trick to check whether an element has edge dropping needs loose tolerances
   // since the mortar segments are on the linearized element and comparing the volume of the
   // linearized element does not have the same volume as the warped element
@@ -1523,7 +1527,7 @@ AutomaticMortarGeneration::computeIncorrectEdgeDroppingInactiveLMNodes()
     // Loop through all elements on my processor
     for (const auto el : _mesh.active_local_subdomain_elements_ptr_range(pr.second))
       // If elem fully or partially dropped
-      if (std::abs(active_volume[el] / el->volume() - 1.0) > tol)
+      if (abs(active_volume[el] / el->volume() - 1.0) > tol)
       {
         // Add all nodes to list of inactive
         for (auto n : make_range(el->n_nodes()))
@@ -1697,7 +1701,7 @@ AutomaticMortarGeneration::computeInactiveLMElems()
 
     //****
     if (!_correct_edge_dropping)
-      if (std::abs(active_volume[secondary_elem] / secondary_elem->volume() - 1.0) > tol)
+      if (abs(active_volume[secondary_elem] / secondary_elem->volume() - 1.0) > tol)
         continue;
     //****
 
@@ -1811,6 +1815,8 @@ AutomaticMortarGeneration::householderOrthogolization(const Point & nodal_normal
                                                       Point & nodal_tangent_one,
                                                       Point & nodal_tangent_two) const
 {
+  using std::abs;
+
   mooseAssert(MooseUtils::absoluteFuzzyEqual(nodal_normal.norm(), 1),
               "The input nodal normal should have unity norm");
 
@@ -1826,7 +1832,7 @@ AutomaticMortarGeneration::householderOrthogolization(const Point & nodal_normal
   // Avoid singularity of the equations at the end of routine by providing the solution to
   // (nx,ny,nz)=(-1,0,0) Normal/tangent fields can be visualized by outputting nodal geometry mesh
   // on a spherical problem.
-  if (std::abs(h_vector(0)) < TOLERANCE)
+  if (abs(h_vector(0)) < TOLERANCE)
   {
     nodal_tangent_one(0) = 0;
     nodal_tangent_one(1) = 1;
@@ -1982,6 +1988,8 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
     SubdomainID lower_dimensional_primary_subdomain_id,
     SubdomainID lower_dimensional_secondary_subdomain_id)
 {
+  using std::abs;
+
   // Build the "subdomain" adaptor based KD Tree.
   NanoflannMeshSubdomainAdaptor<3> mesh_adaptor(_mesh, lower_dimensional_primary_subdomain_id);
   subdomain_kd_tree_t kd_tree(
@@ -2067,8 +2075,8 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
       for (MooseIndex(result_set) r = 0; r < result_set.size(); ++r)
       {
         // Verify that the squared distance we compute is the same as nanoflann'sFss
-        mooseAssert(std::abs((_mesh.point(ret_index[r]) - *secondary_node).norm_sq() -
-                             out_dist_sqr[r]) <= TOLERANCE,
+        mooseAssert(abs((_mesh.point(ret_index[r]) - *secondary_node).norm_sq() -
+                        out_dist_sqr[r]) <= TOLERANCE,
                     "Lower-dimensional element squared distance verification failed.");
 
         // Get a reference to the vector of lower dimensional elements from the
@@ -2102,7 +2110,7 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
             const auto u = x2 - (*secondary_node);
             const auto F = u(0) * nodal_normal(1) - u(1) * nodal_normal(0);
 
-            if (std::abs(F) < _newton_tolerance)
+            if (abs(F) < _newton_tolerance)
               break;
 
             if (F.derivatives())
@@ -2132,8 +2140,7 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
           // coordinates. But I believe making the tolerance uniformly larger or smaller won't do
           // the trick here.
           if ((current_iterate < max_iterates) && (std::abs(xi2) <= 1. + 5 * _xi_tolerance) &&
-              (std::abs(
-                   (primary_elem_candidate->point(0) - primary_elem_candidate->point(1)).unit() *
+              (abs((primary_elem_candidate->point(0) - primary_elem_candidate->point(1)).unit() *
                    nodal_normal) < std::cos(_minimum_projection_angle * libMesh::pi / 180)))
           {
             // If xi2 == +1 or -1 then this secondary node mapped directly to a node on the primary
@@ -2141,7 +2148,7 @@ AutomaticMortarGeneration::projectSecondaryNodesSinglePair(
             // on the interface start off being perfectly aligned. In this situation, we need to
             // associate the secondary node with two different elements (and two corresponding
             // xi^(2) values.
-            if (std::abs(std::abs(xi2) - 1.) <= _xi_tolerance * 5.0)
+            if (abs(abs(xi2) - 1.) <= _xi_tolerance * 5.0)
             {
               const Node * primary_node = (xi2 < 0) ? primary_elem_candidate->node_ptr(0)
                                                     : primary_elem_candidate->node_ptr(1);
@@ -2235,6 +2242,8 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
     SubdomainID lower_dimensional_primary_subdomain_id,
     SubdomainID lower_dimensional_secondary_subdomain_id)
 {
+  using std::abs;
+
   // Build a Nanoflann object on the lower-dimensional secondary elements of the Mesh.
   NanoflannMeshSubdomainAdaptor<3> mesh_adaptor(_mesh, lower_dimensional_secondary_subdomain_id);
   subdomain_kd_tree_t kd_tree(
@@ -2302,8 +2311,8 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
       for (MooseIndex(result_set) r = 0; r < result_set.size(); ++r)
       {
         // Verify that the squared distance we compute is the same as nanoflann's
-        mooseAssert(std::abs((_mesh.point(ret_index[r]) - *primary_node).norm_sq() -
-                             out_dist_sqr[r]) <= TOLERANCE,
+        mooseAssert(abs((_mesh.point(ret_index[r]) - *primary_node).norm_sq() - out_dist_sqr[r]) <=
+                        TOLERANCE,
                     "Lower-dimensional element squared distance verification failed.");
 
         // Get a reference to the vector of lower dimensional elements from the
@@ -2354,7 +2363,7 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
 
             const auto F = u(0) * normals(1) - u(1) * normals(0);
 
-            if (std::abs(F) < _newton_tolerance)
+            if (abs(F) < _newton_tolerance)
               break;
 
             // Unlike for projection of nodal normals onto primary surfaces, we should never have a
@@ -2371,12 +2380,12 @@ AutomaticMortarGeneration::projectPrimaryNodesSinglePair(
 
           // Check for convergence to a valid solution... The last condition checks for obliqueness
           // of the projection
-          if ((current_iterate < max_iterates) && (std::abs(xi1) <= 1. + _xi_tolerance) &&
-              (std::abs((primary_side_elem->point(0) - primary_side_elem->point(1)).unit() *
-                        MetaPhysicL::raw_value(normals).unit()) <
+          if ((current_iterate < max_iterates) && (abs(xi1) <= 1. + _xi_tolerance) &&
+              (abs((primary_side_elem->point(0) - primary_side_elem->point(1)).unit() *
+                   MetaPhysicL::raw_value(normals).unit()) <
                std::cos(_minimum_projection_angle * libMesh::pi / 180.0)))
           {
-            if (std::abs(std::abs(xi1) - 1.) < _xi_tolerance)
+            if (abs(abs(xi1) - 1.) < _xi_tolerance)
             {
               // Special case: xi1=+/-1.
               // It is unlikely that we get here, because this primary node should already
