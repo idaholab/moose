@@ -261,8 +261,9 @@ class TestHarnessResultsSummary:
         assert isinstance(same_names, set)
         assert isinstance(base_results, StoredResult)
         assert isinstance(head_results, StoredResult)
-        assert isinstance(head_run_time_floor, float)
-        assert isinstance(run_time_rate_floor, float)
+        assert isinstance(head_run_time_floor, (float, int))
+        assert isinstance(run_time_rate_floor, (float, int))
+
         same_table = []
         #disable run time comparison
         for test_name in same_names:
