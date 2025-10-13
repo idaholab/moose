@@ -201,9 +201,11 @@ class TestHarnessResultsSummary:
 
         Returns
         -------
-        list of list or None
-            A list of lists containing formatted test names and optionally their runtime.
-            Returns None if no valid runtimes are found.
+        list of list
+        A sorted list of lists where each sublist contains:
+        - the formatted test name (str)
+        - the runtime as a string formatted to two decimal places, or "None" if not available.
+        If `no_run_time_comparison` is True, only test names are included.
         """
         assert isinstance(add_names, set)
         assert isinstance(head_results, StoredResult)
@@ -216,17 +218,18 @@ class TestHarnessResultsSummary:
             #with run time
             for test_name in add_names:
                 test_result = head_results.get_test(test_name.folder, test_name.name)
-                if  test_result.run_time is None:
-                    continue
+                test_result_run_time = (
+                f'{test_result.run_time:.2f}' if test_result.run_time is not None else "None"
+                )
                 added_table.append([
                     self._format_test_name(test_name),
-                    f'{test_result.run_time:.2f}',
+                    test_result_run_time,
                 ])
-            if not added_table:
-                added_table = None
-            else:
-                #sorted based on run time
-                added_table.sort(key=lambda row: float(row[1]), reverse=True)
+            #sorted based on run time
+            added_table.sort(
+                key=lambda row: float(row[1]) if row[1] != "None" else float('-inf'),
+                reverse=True
+            )
         return added_table
 
     def _build_same_table(self, same_names: set[TestName],
