@@ -10,6 +10,7 @@
 #include "ParisLaw.h"
 #include "VectorPostprocessorInterface.h"
 #include "MathUtils.h"
+#include <limits>
 
 registerMooseObject("XFEMApp", ParisLaw);
 
@@ -60,9 +61,17 @@ ParisLaw::compute_growth(std::vector<int> & index)
       effective_k[i] = std::sqrt(Utility::pow<2>(_ki_vpp[i]) + 2 * Utility::pow<2>(_kii_vpp[i]));
 
   Real _max_k = *std::max_element(effective_k.begin(), effective_k.end());
-  _dn = _max_growth_size / (_paris_law_c * std::pow(_max_k, _paris_law_m));
+  if (_max_k == 0)
+    _dn = std::numeric_limits<Real>::max();
+  else
+    _dn = _max_growth_size / (_paris_law_c * std::pow(_max_k, _paris_law_m));
 
   for (std::size_t i = 0; i < _ki_vpp.size(); ++i)
     if (index[i] != -1)
-      _growth_increment[i] = _max_growth_size * std::pow(effective_k[i] / _max_k, _paris_law_m);
+    {
+      if (_max_k == 0)
+        _growth_increment[i] = 0;
+      else
+        _growth_increment[i] = _max_growth_size * std::pow(effective_k[i] / _max_k, _paris_law_m);
+    }
 }

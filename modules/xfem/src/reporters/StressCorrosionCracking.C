@@ -21,11 +21,15 @@ StressCorrosionCracking::validParams()
       "in the CrackMeshCut3DUserObject.  This reporter is in the same order as "
       "ki_vectorpostprocessor.");
 
-  params.addRequiredParam<Real>(
-      "k_low", "K1 integral below this value has constant growth rate of growth_rate_low");
+  params.addRequiredRangeCheckedParam<Real>(
+      "k_low",
+      "k_low>0",
+      "K1 integral below this value has constant growth rate of growth_rate_low");
   params.addRequiredParam<Real>("growth_rate_low", "growth rate when K1 is below k_low");
-  params.addRequiredParam<Real>(
-      "k_high", "K1 integral above this value has constant growth rate of growth_rate_high");
+  params.addRequiredRangeCheckedParam<Real>(
+      "k_high",
+      "k_high>0",
+      "K1 integral above this value has constant growth rate of growth_rate_high");
   params.addRequiredParam<Real>("growth_rate_high", "growth rate when K1 is above k_high");
   params.addRequiredParam<Real>("growth_rate_mid_multiplier",
                                 "Growth rate multiplier when K1 is between k_low and k_high");
@@ -58,6 +62,8 @@ StressCorrosionCracking::StressCorrosionCracking(const InputParameters & paramet
     _growth_increment(declareValueByName<std::vector<Real>>(
         getParam<ReporterValueName>("growth_increment_name"), REPORTER_MODE_ROOT))
 {
+  if (_k_low > _k_high)
+    paramError("k_high", "k_high must be larger than k_low");
 }
 
 void
@@ -65,6 +71,7 @@ StressCorrosionCracking::compute_growth(std::vector<int> & index)
 {
   _growth_increment.resize(_ki_x.size(), 0.0);
   std::vector<Real> growth_rate(_ki_x.size(), 0.0);
+
   for (std::size_t i = 0; i < _ki_vpp.size(); ++i)
   {
     if (index[i] != -1)
