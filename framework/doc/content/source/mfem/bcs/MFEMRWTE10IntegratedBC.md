@@ -37,7 +37,7 @@ with $\vec a_2$ being the port width vector, $\vec k_a=\vec a_2 \times \vec k_c$
 
 ## Example Input File Syntax
 
-!listing test/tests/mfem/kernels/complex_ermes.i block=BCs
+!listing test/tests/mfem/kernels/complex_waveguide.i block=BCs
 
 !syntax parameters /BCs/MFEMRWTE10IntegratedBC
 
