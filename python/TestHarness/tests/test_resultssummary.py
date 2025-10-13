@@ -135,8 +135,7 @@ class TestResultsSummary(TestHarnessTestCase):
         summary = TestHarnessResultsSummary(None)
         added_table = summary._build_added_table(
             head_test_names,
-            head_result_with_tests,
-            no_run_time_comparison=False)
+            head_result_with_tests)
 
         self.assertEqual(len(added_table), head_result_with_tests.num_tests)
         self.assertEqual(len(added_table[0]), 2)
@@ -161,35 +160,12 @@ class TestResultsSummary(TestHarnessTestCase):
         summary = TestHarnessResultsSummary(None)
         added_table = summary._build_added_table(
             head_test_names,
-            head_result_with_tests,
-            no_run_time_comparison=False)
+            head_result_with_tests)
 
         self.assertEqual(len(added_table), head_result_with_tests.num_tests)
         self.assertEqual(len(added_table[0]), 2)
         self.assertIn(str(MOCKED_TEST_NAME), added_table[0][0])
         self.assertEqual(added_table[0][1], "None")
-
-    @patch.object(TestHarnessResultsSummary, 'init_reader')
-    @patch.object(TestHarnessResultsSummary, 'get_event_results')
-    def testBuildAddedTableDisableRunTimeOption(self, mock_get_event_results, mock_init_reader):
-        """
-        Tests _build_added_table() when test is newly added test but disable runtime comparison
-        """
-        head_result_with_tests = self.getResult()
-        head_test_names = set(head_result_with_tests.test_names)
-
-        mock_get_event_results.return_value = head_result_with_tests
-        mock_init_reader.return_value = None
-
-        summary = TestHarnessResultsSummary(None)
-        added_table = summary._build_added_table(
-            head_test_names,
-            head_result_with_tests,
-            no_run_time_comparison=True)
-
-        self.assertEqual(len(added_table), head_result_with_tests.num_tests)
-        self.assertIn(str(MOCKED_TEST_NAME), added_table[0][0])
-        self.assertEqual(len(added_table[0]), 1)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
@@ -465,37 +441,6 @@ class TestResultsSummary(TestHarnessTestCase):
         self.assertEqual(len(added_table[0]), 2)
         self.assertIn(str(MOCKED_TEST_NAME), added_table[0][0])
         self.assertEqual(added_table[0][1], f'{head_test.run_time:.2f}')
-        self.assertIsNone(removed_table)
-        self.assertIsNone(same_table)
-
-    @patch.object(TestHarnessResultsSummary, 'init_reader')
-    @patch.object(TestHarnessResultsSummary, 'get_event_results')
-    @patch.object(TestHarnessResultsSummary, 'get_commit_results')
-    def testDiffTableAddedTestDisableRunTimeOption(self, mock_get_commit_results, mock_get_event_results, mock_init_reader):
-        """
-        Tests diff_table() when test is newly added but disable run time comparison
-        """
-        base_result_no_tests = self.getResult(no_tests = True)
-        head_result_with_tests = self.getResult()
-        base_test_no_names = set(base_result_no_tests.test_names)
-        head_test_names = set(head_result_with_tests.test_names)
-
-        mock_get_commit_results.return_value = base_result_no_tests
-        mock_get_event_results.return_value = head_result_with_tests
-        mock_init_reader.return_value = None
-
-        summary = TestHarnessResultsSummary(None)
-        removed_table, added_table, same_table = summary.diff_table(
-            base_result_no_tests,
-            head_result_with_tests,
-            base_test_no_names,
-            head_test_names,
-            no_run_time_comparison = True
-        )
-
-        self.assertEqual(len(added_table), head_result_with_tests.num_tests)
-        self.assertEqual(len(added_table[0]), 1)
-        self.assertIn(str(MOCKED_TEST_NAME), added_table[0][0])
         self.assertIsNone(removed_table)
         self.assertIsNone(same_table)
 

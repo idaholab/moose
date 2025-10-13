@@ -175,8 +175,7 @@ class TestHarnessResultsSummary:
         assert isinstance(removed_names, set)
         return [[self._format_test_name(test_name)] for test_name in removed_names]
 
-    def _build_added_table(self, add_names: set[TestName], head_results: StoredResult,
-            no_run_time_comparison: bool) -> Optional[List[List]]:
+    def _build_added_table(self, add_names: set[TestName], head_results: StoredResult) -> Optional[List[List]]:
         """
         Build a table of newly added test names, optionally including runtime.
 
@@ -186,8 +185,6 @@ class TestHarnessResultsSummary:
             Set of test names that are present in the head but not in the base.
         head_results : StoredResult
             An object that provides access to test results for the head
-        no_run_time_comparison : bool
-            If True, skip runtime comparison and only include test names.
 
         Returns
         -------
@@ -195,31 +192,26 @@ class TestHarnessResultsSummary:
             A sorted list of lists where each sublist contains:
                 - the formatted test name (str)
                 - the runtime as a string formatted to two decimal places, or "None" if not available.
-            If `no_run_time_comparison` is True, only test names are included.
         """
         assert isinstance(add_names, set)
         assert isinstance(head_results, StoredResult)
-        assert isinstance(no_run_time_comparison, bool)
+
         added_table = []
-        if no_run_time_comparison:
-            # No run time
-            added_table = [[self._format_test_name(test_name)] for test_name in add_names]
-        else:
-            # With run time
-            for test_name in add_names:
-                test_result = head_results.get_test(test_name.folder, test_name.name)
-                test_result_run_time = (
-                f'{test_result.run_time:.2f}' if test_result.run_time is not None else "None"
-                )
-                added_table.append([
-                    self._format_test_name(test_name),
-                    test_result_run_time,
-                ])
-            # Sorted based on run time
-            added_table.sort(
-                key=lambda row: float(row[1]) if row[1] != "None" else float('-inf'),
-                reverse=True
+        for test_name in add_names:
+            test_result = head_results.get_test(test_name.folder, test_name.name)
+            # if run time is None, it will display as None
+            test_result_run_time = (
+            f'{test_result.run_time:.2f}' if test_result.run_time is not None else "None"
             )
+            added_table.append([
+                self._format_test_name(test_name),
+                test_result_run_time,
+            ])
+        # Sorted based on run time
+        added_table.sort(
+            key=lambda row: float(row[1]) if row[1] != "None" else float('-inf'),
+            reverse=True
+        )
         return added_table
 
     def _build_same_table(self, same_names: set[TestName],
@@ -317,7 +309,7 @@ class TestHarnessResultsSummary:
         removed_table : Optional[List[List]]
             A list of removed test name, each containing a formatted test name.
         added_table : Optional[List[List]]
-            A sorted list of newly added test names and their optional runtime.
+            A sorted list of newly added test names and their runtime.
             - the formatted test name (str)
             - the runtime as a string formatted to two decimal places, or "None" if not available.
         same_table : Optional[List[List]]
@@ -326,7 +318,7 @@ class TestHarnessResultsSummary:
             - Base runtime (str, formatted to 2 decimal places)
             - Head runtime (str, formatted to 2 decimal places)
             - Relative runtime change (str, formatted as percentage with sign)
-            Returns None if no tests meet the criteria.
+            Returns None if no-run-time-comparison is True or no tests meet the criteria
         """
         assert isinstance(base_results, StoredResult)
         assert isinstance(head_results, StoredResult)
@@ -338,8 +330,9 @@ class TestHarnessResultsSummary:
         assert isinstance(head_run_time_floor, (float, int))
         run_time_rate_floor = kwargs.pop('run_time_rate_floor', 0.5)
         assert isinstance(run_time_rate_floor, (float, int))
-        # Check disable run time comparison option, it will display only test name and skip run time
+        # Check disable run time comparison option, if True, skip run time comparison
         no_run_time_comparison = kwargs.pop('no_run_time_comparison', False)
+        assert isinstance(no_run_time_comparison, bool)
 
         # Extract removed tests
         removed_names = base_names - head_names
@@ -352,8 +345,8 @@ class TestHarnessResultsSummary:
 
         added_table = self._build_added_table(
             added_names,
-            head_results,
-            no_run_time_comparison) if added_names else None
+            head_results
+        ) if added_names else None
         # Check there is same test name and not disable run time comparison option
         if same_names and not no_run_time_comparison:
             same_table = self._build_same_table(
@@ -361,7 +354,8 @@ class TestHarnessResultsSummary:
                 base_results,
                 head_results,
                 head_run_time_floor,
-                run_time_rate_floor)
+                run_time_rate_floor
+            )
         else:
             same_table = None
         return removed_table, added_table, same_table
