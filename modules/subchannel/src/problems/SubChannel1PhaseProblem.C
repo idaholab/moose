@@ -2261,6 +2261,8 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   LibmeshPetscCall(KSPCreate(PETSC_COMM_SELF, &ksp));
   LibmeshPetscCall(KSPSetType(ksp, KSPFGMRES));
   LibmeshPetscCall(KSPSetOperators(ksp, A_nest, A_nest));
+  // Read PETSc options early; we'll enforce a safe PC after this
+  LibmeshPetscCall(KSPSetFromOptions(ksp));
   LibmeshPetscCall(KSPGetPC(ksp, &pc));
   LibmeshPetscCall(PCSetType(pc, PCFIELDSPLIT));
   LibmeshPetscCall(KSPSetTolerances(ksp, _rtol, _atol, _dtol, _maxit));
@@ -2282,7 +2284,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   //
   // Solve
   //
-  LibmeshPetscCall(KSPSetFromOptions(ksp));
   LibmeshPetscCall(VecDuplicate(b_nest, &x_nest));
   LibmeshPetscCall(VecSet(x_nest, 0.0));
   LibmeshPetscCall(KSPSolve(ksp, b_nest, x_nest));
