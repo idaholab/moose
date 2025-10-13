@@ -181,7 +181,10 @@ class TestHarnessResultsSummary:
                 ])
             # added_table.append(['`lessaddedtesting.test`',0.001])
             # added_table.append(['`plusaddedtesting.test`',10])
-            added_table.sort(key=lambda row: float(row[1]), reverse=True)
+            if not added_table:
+                added_table = None
+            else:
+                added_table.sort(key=lambda row: float(row[1]), reverse=True)
         return added_table
 
     def _build_same_table(self, same_names: set[TestName], base_results: StoredResult, head_results: StoredResult,
