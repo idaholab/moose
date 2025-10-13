@@ -71,7 +71,7 @@ class TestResultsSummary(TestHarnessTestCase):
         Tests pr_test_names() when no base is available to compare.
         """
         head_result_with_tests = self.getResult()
-        #set no base
+        # Mock as no base
         mock_get_commit_results.return_value = None
         mock_get_event_results.return_value = head_result_with_tests
         mock_init_reader.return_value = None
@@ -214,7 +214,7 @@ class TestResultsSummary(TestHarnessTestCase):
 
         base_test = base_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
         head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
-        #mock base and head runtime, so that absoluate relative run time rate is higher than fake_run_time_rate_floor
+        # Mock base and head runtime, so that absoluate relative run time rate is higher than fake_run_time_rate_floor
         base_test._data['timing']['runner_run'] = 10.00
         head_test._data['timing']['runner_run'] = 4.0
 
@@ -233,7 +233,7 @@ class TestResultsSummary(TestHarnessTestCase):
         self.assertEqual(same_table[0][1], f'{base_test.run_time:.2f}')
         self.assertEqual(same_table[0][2], f'{head_test.run_time:.2f}')
         self.assertGreater(same_table[0][2], f'{fake_run_time_floor:.2f}')
-        #compare absoulate relative run time rate is higher than floor rate
+        # Compare absoulate relative run time rate is higher than floor rate
         self.assertGreater(abs(float(same_table[0][3].strip('%'))), fake_run_time_rate_floor * 100)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
@@ -257,7 +257,7 @@ class TestResultsSummary(TestHarnessTestCase):
         mock_init_reader.return_value = None
 
         head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
-        #mock head run time as None
+        # Mock head run time as None
         head_test._data['timing']['runner_run'] = None
 
         summary = TestHarnessResultsSummary(None)
@@ -292,7 +292,7 @@ class TestResultsSummary(TestHarnessTestCase):
         mock_init_reader.return_value = None
 
         base_test = base_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
-        #mock base run time as None
+        # Mock base run time as None
         base_test._data['timing']['runner_run'] = None
 
         summary = TestHarnessResultsSummary(None)
@@ -327,7 +327,7 @@ class TestResultsSummary(TestHarnessTestCase):
         mock_init_reader.return_value = None
 
         head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
-        #mock head run time is lower than the head run time threadshold (fake_run_time_floor)
+        # Mock head run time is lower than the head run time threadshold (fake_run_time_floor)
         head_test._data['timing']['runner_run'] = 0.5
 
         summary = TestHarnessResultsSummary(None)
@@ -363,7 +363,7 @@ class TestResultsSummary(TestHarnessTestCase):
         mock_init_reader.return_value = None
         base_test = base_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
         head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
-        #mock base and head runtime, so that relative run time rate is less than fake_run_time_rate_floor
+        # Mock base and head runtime, so that relative run time rate is less than fake_run_time_rate_floor
         base_test._data['timing']['runner_run'] = 10
         head_test._data['timing']['runner_run'] = 13
 
@@ -506,8 +506,8 @@ class TestResultsSummary(TestHarnessTestCase):
             mock_get_event_results, mock_init_reader):
         """
         Tests diff_table() when same test name exit in both base and head, where:
-        -the head runtime exceeds a predefined threshold and
-        -the relative runtime increase exceeds a defined rate.
+            -the head runtime exceeds a predefined threshold and
+            -the relative runtime increase exceeds a defined rate.
         """
         fake_run_time_floor = 1.0
         fake_run_time_rate_floor = 0.5
@@ -522,7 +522,7 @@ class TestResultsSummary(TestHarnessTestCase):
         mock_init_reader.return_value = None
         base_test = base_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
         head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
-        #mock base and head runtime, so that relative run time rate is higher than fake_run_time_rate_floor
+        # Mock base and head runtime, so that relative run time rate is higher than fake_run_time_rate_floor
         base_test._data['timing']['runner_run'] = 10.00
         head_test._data['timing']['runner_run'] = 17.00
 
@@ -543,7 +543,7 @@ class TestResultsSummary(TestHarnessTestCase):
         self.assertEqual(same_table[0][1], f'{base_test.run_time:.2f}')
         self.assertEqual(same_table[0][2], f'{head_test.run_time:.2f}')
         self.assertGreater(same_table[0][2], f'{fake_run_time_floor:.2f}')
-        #compare absolute relative run time is higher than floor rate
+        # Compare absolute relative run time is higher than floor rate
         self.assertGreater(abs(float(same_table[0][3].strip('%'))), fake_run_time_rate_floor * 100)
         self.assertIsNone(removed_table)
         self.assertIsNone(added_table)
@@ -585,12 +585,12 @@ class TestResultsSummary(TestHarnessTestCase):
         Tests formatting table when there is data
         """
         mock_init_reader.return_value = None
-        #Mock the table title, data, header, no_data_message
+        # Mock the table title, data, header, no_data_message
         test_title = "### Tests with Data:"
         test_table_data = [[str(MOCKED_TEST_NAME), 10.00, 17.00, '70.00%']]
         test_headers = ["Test Name", "Base Run Time", "Head Run Time", "Relative Run Time Rate"]
         test_no_data_message = "No New Tests"
-        #Expected format table with data
+        # Expected format table with data
         expected_table = tabulate(
             test_table_data,
             headers = test_headers,
@@ -610,12 +610,12 @@ class TestResultsSummary(TestHarnessTestCase):
         Tests formatting table when there is no data
         """
         mock_init_reader.return_value = None
-        #Mock the table title, data as None, header, no_data_message
+        # Mock the table title, data as None, header, no_data_message
         test_title = "### Tests with No Data:"
         test_table_data = None
         test_headers = ["Test Name", "Run Time"]
         test_no_data_message = "No New Tests"
-        #Expected format table with nodata
+        # Expected format table with nodata
         expected_output = test_title + "\n" + test_no_data_message
 
         summary = TestHarnessResultsSummary(None)
@@ -653,7 +653,7 @@ class TestResultsSummary(TestHarnessTestCase):
         newly added and same tests with high runtime
         """
         mock_init_reader.return_value = None
-        #Mocked table data
+        # Mocked table data
         removed_table =[[str(MOCKED_TEST_NAME)]]
         added_table =[[str(MOCKED_TEST_NAME), 10.00]]
         same_table =[[str(MOCKED_TEST_NAME), 10.00, 17.00, '70.00%']]
@@ -682,7 +682,7 @@ class TestResultsSummary(TestHarnessTestCase):
         with tempfile.NamedTemporaryFile() as out_file:
             output_result = 'File Path Exist and able to write file'
             summary.write_output(output_result, out_file.name)
-            #check output file is able to read
+            # Check output file is able to read
             with open(out_file.name, 'r') as f:
                 output = f.read()
                 self.assertEqual(output_result, output)
@@ -701,7 +701,7 @@ class TestResultsSummary(TestHarnessTestCase):
         stdout = StringIO()
         with redirect_stdout(stdout):
             summary.write_output(output_result, invalid_path)
-            #check error message when file path is invalid
+            # Check error message when file path is invalid
             output = stdout.getvalue()
             self.assertIn("Failed to write to", output)
 
@@ -749,7 +749,7 @@ class TestResultsSummary(TestHarnessTestCase):
         Tests pr() when no base is available to compare.
         """
         head_result_with_tests = self.getResult()
-        #set no base
+        # Mock as no base
         mock_get_commit_results.return_value = None
         mock_get_event_results.return_value = head_result_with_tests
         mock_init_reader.return_value = None
@@ -763,7 +763,7 @@ class TestResultsSummary(TestHarnessTestCase):
                 )
                 self.assertIsNone(summary_result)
                 self.assertIn('Base results not available', stdout.getvalue())
-                #check skip message is displayed in output file
+                # Check skip message is displayed in output file
                 with open(out_file.name, 'r') as f:
                     output = f.read()
                     self.assertIn('Base results not available', output)
@@ -783,7 +783,7 @@ class TestResultsSummary(TestHarnessTestCase):
             with redirect_stdout(stdout):
                 with self.assertRaisesRegex(SystemExit, 'Results do not exist for event'):
                     summary.pr(event_id = EVENT_ID,out_file = out_file.name)
-                #check error message is displayed in output file
+                # Check error message is displayed in output file
                     with open(out_file.name, 'r') as f:
                         output = f.read()
                         self.assertIn('Results do not exist for event', output)
