@@ -269,9 +269,10 @@ ComplexEquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
 }
 
 void
-ComplexEquationSystem::RecoverFEMSolution(mfem::BlockVector & trueX,
-                                          Moose::MFEM::GridFunctions & /*gridfunctions*/,
-                                          Moose::MFEM::ComplexGridFunctions & cpx_gridfunctions)
+ComplexEquationSystem::RecoverComplexFEMSolution(
+    mfem::BlockVector & trueX,
+    Moose::MFEM::GridFunctions & /*gridfunctions*/,
+    Moose::MFEM::ComplexGridFunctions & cpx_gridfunctions)
 {
   for (const auto i : index_range(_trial_var_names))
   {
