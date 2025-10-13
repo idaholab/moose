@@ -165,7 +165,7 @@ class TestResultsSummary(TestHarnessTestCase):
             no_run_time_comparison=True)
 
         self.assertEqual(len(added_table), head_result_with_tests.num_tests)
-        self.assertIn(str(MOCKED_TEST_NAME),added_table[0][0])
+        self.assertIn(str(MOCKED_TEST_NAME), added_table[0][0])
         self.assertEqual(len(added_table[0]), 1)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
@@ -286,7 +286,7 @@ class TestResultsSummary(TestHarnessTestCase):
             head_test_names,
             base_result_with_tests,
             head_result_with_tests,
-            head_run_time_floor= fake_run_time_floor,
+            head_run_time_floor = fake_run_time_floor,
             run_time_rate_floor = fake_run_time_rate_floor
         )
 
@@ -376,8 +376,8 @@ class TestResultsSummary(TestHarnessTestCase):
         head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
 
         self.assertEqual(len(added_table), head_result_with_tests.num_tests)
-        self.assertEqual(len(added_table[0]),2)
-        self.assertIn(str(MOCKED_TEST_NAME),added_table[0][0])
+        self.assertEqual(len(added_table[0]), 2)
+        self.assertIn(str(MOCKED_TEST_NAME), added_table[0][0])
         self.assertEqual(added_table[0][1], f'{head_test.run_time:.2f}')
         self.assertIsNone(removed_table)
         self.assertIsNone(same_table)
@@ -408,8 +408,8 @@ class TestResultsSummary(TestHarnessTestCase):
         )
 
         self.assertEqual(len(added_table), head_result_with_tests.num_tests)
-        self.assertEqual(len(added_table[0]),1)
-        self.assertIn(str(MOCKED_TEST_NAME),added_table[0][0])
+        self.assertEqual(len(added_table[0]), 1)
+        self.assertIn(str(MOCKED_TEST_NAME), added_table[0][0])
         self.assertIsNone(removed_table)
         self.assertIsNone(same_table)
 
@@ -455,7 +455,7 @@ class TestResultsSummary(TestHarnessTestCase):
 
         self.assertEqual(len(same_table), 1)
         self.assertEqual(len(same_table[0]), 4)
-        self.assertIn(str(MOCKED_TEST_NAME),same_table[0][0])
+        self.assertIn(str(MOCKED_TEST_NAME), same_table[0][0])
         self.assertEqual(same_table[0][1], f'{base_test.run_time:.2f}')
         self.assertEqual(same_table[0][2], f'{head_test.run_time:.2f}')
         self.assertGreater(same_table[0][2], f'{fake_run_time_floor:+.2f}')
@@ -720,12 +720,12 @@ class TestResultsSummary(TestHarnessTestCase):
             with redirect_stdout(stdout):
                 summary.main(out_file = out_file.name, action = 'pr', event_id = EVENT_ID)
                 summary_result = stdout.getvalue()
-                self.assertIn('Removed Tests:',summary_result)
-                self.assertIn('No Removed Tests',summary_result)
-                self.assertIn('New Tests:',summary_result)
-                self.assertIn('No New Tests',summary_result)
-                self.assertIn('Same Tests',summary_result)
-                self.assertIn('No Tests',summary_result)
+                self.assertIn('Removed Tests:', summary_result)
+                self.assertIn('No Removed Tests', summary_result)
+                self.assertIn('New Tests:', summary_result)
+                self.assertIn('No New Tests', summary_result)
+                self.assertIn('Same Tests', summary_result)
+                self.assertIn('No Tests', summary_result)
 
                 with open(out_file.name, 'r') as f:
                     output = f.read()
