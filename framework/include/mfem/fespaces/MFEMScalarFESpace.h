@@ -34,7 +34,7 @@ protected:
 private:
   /// Name of the family of finite element collections to use
   const std::string _fec_type;
-  /// Name of the map types to use VALUE OR INTEGRAL (meaningfull only for L2)  
+  /// Name of the map types VALUE OR INTEGRAL to use (meaningfull only for L2)  
   const std::string _fec_map;
 };
 

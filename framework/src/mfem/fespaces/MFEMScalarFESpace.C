@@ -28,7 +28,6 @@ MFEMScalarFESpace::validParams()
       basis_types,
       "Specifies the basis used for scalar elements. H1 spaces require a closed basis "
       "(GaussLobatto Positive ClosedUniform Serendipity ClosedGL)");
-  
   MooseEnum fec_maps("VALUE INTEGRAL","VALUE",true);
   params.addParam<MooseEnum>("fec_map", fec_maps, "Specify the FE map type used VALUE or INTEGRAL (meaningfull for L2 only)");
 
@@ -37,7 +36,7 @@ MFEMScalarFESpace::validParams()
 
 MFEMScalarFESpace::MFEMScalarFESpace(const InputParameters & parameters)
   : MFEMSimplifiedFESpace(parameters), _fec_type(getParam<MooseEnum>("fec_type")),
-  _fec_map(parameters.get<MooseEnum>("fec_map"))
+  _fec_map(getParam<MooseEnum>("fec_map"))
 {
 }
 
@@ -53,8 +52,8 @@ MFEMScalarFESpace::getFECName() const
   basis = (basis == "@G" || basis == "_T0") ? "" : basis;
 
   if (_fec_map == "INTEGRAL")
-      return "L2Int" + basis + "_" + std::to_string(getProblemDim()) + "D_P" +
-         std::to_string(_fec_order);
+    return "L2Int" + basis + "_" + std::to_string(getProblemDim()) + "D_P" +
+    std::to_string(_fec_order);
 
   return _fec_type + basis + "_" + std::to_string(getProblemDim()) + "D_P" +
          std::to_string(_fec_order);
