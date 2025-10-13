@@ -154,11 +154,11 @@ class TestHarnessResultsSummary:
     @staticmethod
     def _format_test_name(test_name):
         return f'`{str(test_name)}`'
-    
+
     def _build_removed_table(self, removed_names: set[TestName]) -> Optional[list]:
         assert isinstance(removed_names,set)
         return [[self._format_test_name(test_name)] for test_name in removed_names]
-   
+
     def _build_added_table(self, add_names: set[TestName], head_results: StoredResult, no_run_time_comparison: bool) -> Optional[list]:
         assert isinstance(add_names, set)
         assert isinstance(head_results, StoredResult)
@@ -166,7 +166,7 @@ class TestHarnessResultsSummary:
         added_table = []
         if no_run_time_comparison:
             #no run time
-            added_table = [[self._format_test_name(test_name)] for test_name in add_names] 
+            added_table = [[self._format_test_name(test_name)] for test_name in add_names]
             # added_table.append(['`lessaddedtesting.test`'])
             # added_table.append(['`plusaddedtesting.test`'])
         else:
@@ -280,7 +280,7 @@ class TestHarnessResultsSummary:
         added_names = head_names - base_names
         #Extract same tests
         same_names = base_names & head_names
-        
+
         removed_table = self._build_removed_table(removed_names) if removed_names else None
         added_table = self._build_added_table(added_names, head_results, no_run_time_comparison) if added_names else None
 
@@ -329,7 +329,7 @@ class TestHarnessResultsSummary:
         removed_table : list
             A list of removed test names.
         added_table : list
-            A list of newly added testnames and its runtime 
+            A list of newly added testnames and its runtime
         same_table : list
             A list of test names, runtime and relative runtime rate that exist in both base and head, where:
             - The head runtime exceeds a predefined threshold (run-time-floor).
