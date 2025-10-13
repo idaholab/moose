@@ -2433,7 +2433,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
 
   // Crossflow
   LibmeshPetscCall(populateDenseFromVector<libMesh::DenseMatrix<Real>>(
-      sol_Wij, _Wij, first_node, last_node - 1, _n_gaps));
+      sol_Wij, _Wij, first_node, last_node, _n_gaps));
 
   // Enthalpy
   if (_monolithic_thermal_bool)
