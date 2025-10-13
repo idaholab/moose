@@ -1449,8 +1449,7 @@ MooseVariableData<OutputType>::reinitAux()
     _dof_map.dof_indices(_elem, _dof_indices, _var_num);
     if (_elem->n_dofs(_sys.number(), _var_num) > 0)
     {
-      // FIXME: check if the following is equivalent with '_nodal_dof_index = _dof_indices[0];'?
-      _nodal_dof_index = _elem->dof_number(_sys.number(), _var_num, 0);
+      _nodal_dof_index = _dof_indices[0];
 
       fetchDoFValues();
 
