@@ -3,12 +3,12 @@ mpi:
   - openmpi
 
 moose_petsc:
-  - moose-petsc 3.23.4 mpich_1
-  - moose-petsc 3.23.4 openmpi_1
+  - moose-petsc 3.23.4 mpich_2
+  - moose-petsc 3.23.4 openmpi_2
 
 moose_libmesh_vtk:
-  - moose-libmesh-vtk 9.4.2 mpich_6
-  - moose-libmesh-vtk 9.4.2 openmpi_6
+  - moose-libmesh-vtk 9.4.2 mpich_7
+  - moose-libmesh-vtk 9.4.2 openmpi_7
 
 zip_keys:
   - mpi
