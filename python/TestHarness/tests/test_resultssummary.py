@@ -102,9 +102,202 @@ class TestResultsSummary(TestHarnessTestCase):
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
     @patch.object(TestHarnessResultsSummary, 'get_commit_results')
+    def testBuildRemovedTable(self, mock_get_commit_results, mock_get_event_results, mock_init_reader):
+        """
+        Tests  _build_removed_table() when there is removed test
+        """
+        base_result_with_tests = self.getResult()
+        base_test_names = set(base_result_with_tests.test_names)
+
+        mock_get_commit_results.return_value = base_result_with_tests
+        mock_init_reader.return_value = None
+
+        summary = TestHarnessResultsSummary(None)
+        removed_table = summary._build_removed_table(base_test_names)
+
+        self.assertEqual(len(removed_table), base_result_with_tests.num_tests)
+        self.assertIsInstance(removed_table[0],list)
+        self.assertIn(str(MOCKED_TEST_NAME),removed_table[0][0])
+
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    @patch.object(TestHarnessResultsSummary, 'get_event_results')
+    @patch.object(TestHarnessResultsSummary, 'get_commit_results')
+    def testBuildAddedTable(self, mock_get_commit_results, mock_get_event_results, mock_init_reader):
+        """
+        Tests _build_added_table() when test is newly added test
+        """
+        head_result_with_tests = self.getResult()
+        head_test_names = set(head_result_with_tests.test_names)
+
+        mock_get_event_results.return_value = head_result_with_tests
+        mock_init_reader.return_value = None
+
+        summary = TestHarnessResultsSummary(None)
+        added_table = summary._build_added_table(
+            head_test_names,
+            head_result_with_tests,
+            no_run_time_comparison=False)
+
+        head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
+
+        self.assertEqual(len(added_table), head_result_with_tests.num_tests)
+        self.assertEqual(len(added_table[0]), 2)
+        self.assertIn(str(MOCKED_TEST_NAME),added_table[0][0])
+        self.assertEqual(added_table[0][1], f'{head_test.run_time:.2f}')
+
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    @patch.object(TestHarnessResultsSummary, 'get_event_results')
+    @patch.object(TestHarnessResultsSummary, 'get_commit_results')
+    def testBuildAddedTableNoRunTime(self, mock_get_commit_results, mock_get_event_results, mock_init_reader):
+        """
+        Tests _build_added_table() when test is newly added test but disable runtime comparison
+        """
+        head_result_with_tests = self.getResult()
+        head_test_names = set(head_result_with_tests.test_names)
+
+        mock_get_event_results.return_value = head_result_with_tests
+        mock_init_reader.return_value = None
+
+        summary = TestHarnessResultsSummary(None)
+        added_table = summary._build_added_table(
+            head_test_names,
+            head_result_with_tests,
+            no_run_time_comparison=True)
+
+        self.assertEqual(len(added_table), head_result_with_tests.num_tests)
+        self.assertIn(str(MOCKED_TEST_NAME),added_table[0][0])
+        self.assertEqual(len(added_table[0]), 1)
+
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    @patch.object(TestHarnessResultsSummary, 'get_event_results')
+    @patch.object(TestHarnessResultsSummary, 'get_commit_results')
+    def testBuildSameTable(self, mock_get_commit_results,
+            mock_get_event_results, mock_init_reader):
+        """
+        Tests _build_same_table() when same test name exit in both base and head, where:
+        -the head runtime exceeds a predefined threshold and
+        -the relative runtime increase exceeds a defined rate.
+        """
+        fake_run_time_floor = 1.0
+        fake_run_time_rate_floor = 0.5
+
+        base_result_with_tests = self.getResult()
+        head_result_with_tests = self.getResult()
+        base_test_names = set(head_result_with_tests.test_names)
+        head_test_names = set(head_result_with_tests.test_names)
+
+        mock_get_commit_results.return_value = head_result_with_tests
+        mock_get_event_results.return_value = head_result_with_tests
+        mock_init_reader.return_value = None
+
+        summary = TestHarnessResultsSummary(None)
+
+        base_test = base_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
+        head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
+        #mock base and head runtime, so that relative run time rate is higher than fake_run_time_rate_floor
+        base_test._data['timing']['runner_run'] = 10.00
+        head_test._data['timing']['runner_run'] = 17.00
+
+        same_table = summary._build_same_table(
+            head_test_names,
+            base_result_with_tests,
+            head_result_with_tests,
+            head_run_time_floor= fake_run_time_floor,
+            run_time_rate_floor = fake_run_time_rate_floor
+        )
+
+        self.assertEqual(len(same_table), 1)
+        self.assertEqual(len(same_table[0]),4)
+        self.assertIn(str(MOCKED_TEST_NAME),same_table[0][0])
+        self.assertEqual(same_table[0][1], f'{base_test.run_time:.2f}')
+        self.assertEqual(same_table[0][2], f'{head_test.run_time:.2f}')
+        self.assertGreater(same_table[0][2], f'{fake_run_time_floor:+.2f}')
+        #compare relative run time is higher than floor rate
+        self.assertGreater(float(same_table[0][3].strip('%')), fake_run_time_rate_floor * 100)
+
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    @patch.object(TestHarnessResultsSummary, 'get_event_results')
+    @patch.object(TestHarnessResultsSummary, 'get_commit_results')
+    def BuildSameTableLowHeadRunTime(self, mock_get_commit_results,
+            mock_get_event_results, mock_init_reader):
+        """
+        Tests _build_same_table() when same test name exit in both base and head but
+        head runtime is lower than threadshold
+        It will skip same test name runtime comparison
+        """
+        fake_run_time_floor = 1.0
+        fake_run_time_rate_floor = 0.5
+        base_result_with_tests = self.getResult()
+        head_result_with_tests = self.getResult()
+        base_test_names = set(head_result_with_tests.test_names)
+        head_test_names = set(head_result_with_tests.test_names)
+
+        mock_get_commit_results.return_value = head_result_with_tests
+        mock_get_event_results.return_value = head_result_with_tests
+        mock_init_reader.return_value = None
+
+        summary = TestHarnessResultsSummary(None)
+
+        head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
+        #mock head run time is lower than the head run time threadshold (fake_run_time_floor)
+        head_test._data['timing']['runner_run'] = 0.5
+
+        same_table = summary._build_same_table(
+            head_test_names,
+            base_result_with_tests,
+            head_result_with_tests,
+            head_run_time_floor= fake_run_time_floor,
+            run_time_rate_floor = fake_run_time_rate_floor
+        )
+
+        self.assertIsNone(same_table)
+
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    @patch.object(TestHarnessResultsSummary, 'get_event_results')
+    @patch.object(TestHarnessResultsSummary, 'get_commit_results')
+    def BuildSameTableLowRelativeRunTime(self, mock_get_commit_results,
+            mock_get_event_results, mock_init_reader):
+        """
+        Tests _build_same_table() when same test name exit in both base and head and
+        relative run time rate is lower than threadshold.
+        That testname will not be included in same_table
+        """
+        fake_run_time_floor = 1.0
+        fake_run_time_rate_floor = 0.5
+
+        base_result_with_tests = self.getResult()
+        head_result_with_tests = self.getResult()
+        base_test_names = set(head_result_with_tests.test_names)
+        head_test_names = set(head_result_with_tests.test_names)
+
+        mock_get_commit_results.return_value = head_result_with_tests
+        mock_get_event_results.return_value = head_result_with_tests
+        mock_init_reader.return_value = None
+
+        summary = TestHarnessResultsSummary(None)
+
+        base_test = base_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
+        head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
+        #mock base and head runtime, so that relative run time rate is less than fake_run_time_rate_floor
+        base_test._data['timing']['runner_run'] = 10
+        head_test._data['timing']['runner_run'] = 13
+
+        same_table = summary.same_table = summary._build_same_table(
+            head_test_names,
+            base_result_with_tests,
+            head_result_with_tests,
+            head_run_time_floor= fake_run_time_floor,
+            run_time_rate_floor = fake_run_time_rate_floor
+        )
+
+        self.assertIsNone(same_table)
+
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    @patch.object(TestHarnessResultsSummary, 'get_event_results')
+    @patch.object(TestHarnessResultsSummary, 'get_commit_results')
     def testDiffTableNoChanges(self, mock_get_commit_results, mock_get_event_results, mock_init_reader):
         """
-        Tests  diff_table() when there are no changes between base and head test names.
+        Tests diff_table() when there are no changes between base and head test names.
         """
         base_result_with_tests = self.getResult()
         head_result_with_tests = self.getResult()
@@ -173,7 +366,6 @@ class TestResultsSummary(TestHarnessTestCase):
         mock_init_reader.return_value = None
 
         summary = TestHarnessResultsSummary(None)
-
         removed_table, added_table, same_table = summary.diff_table(
             base_result_no_tests,
             head_result_with_tests,
@@ -184,104 +376,54 @@ class TestResultsSummary(TestHarnessTestCase):
         head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
 
         self.assertEqual(len(added_table), head_result_with_tests.num_tests)
+        self.assertEqual(len(added_table[0]),2)
         self.assertIn(str(MOCKED_TEST_NAME),added_table[0][0])
-        self.assertEqual(added_table[0][1], head_test.run_time)
+        self.assertEqual(added_table[0][1], f'{head_test.run_time:.2f}')
         self.assertIsNone(removed_table)
         self.assertIsNone(same_table)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
     @patch.object(TestHarnessResultsSummary, 'get_commit_results')
-    def testDiffTableSameTestLowHeadRunTime(self, mock_get_commit_results,
-            mock_get_event_results, mock_init_reader):
+    def testDiffTableAddedTestNoRunTime(self, mock_get_commit_results, mock_get_event_results, mock_init_reader):
         """
-        Tests diff_table() when same test name exit in both base and head but
-        head runtime is lower than threadshold
-        It will skip same test name runtime comparison
+        Tests diff_table() when test is newly added but disable run time comparison
         """
-        fake_run_time_floor = 1
-
-        base_result_with_tests = self.getResult()
+        base_result_no_tests = self.getResult(no_tests = True)
         head_result_with_tests = self.getResult()
-        base_test_names = set(head_result_with_tests.test_names)
+        base_test_no_names = set(base_result_no_tests.test_names)
         head_test_names = set(head_result_with_tests.test_names)
 
-        mock_get_commit_results.return_value = head_result_with_tests
+        mock_get_commit_results.return_value = base_result_no_tests
         mock_get_event_results.return_value = head_result_with_tests
         mock_init_reader.return_value = None
 
         summary = TestHarnessResultsSummary(None)
-
-        head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
-        #mock head run time is lower than the head run time threadshold (fake_run_time_floor)
-        head_test._data['timing']['runner_run'] = 0.5
-
         removed_table, added_table, same_table = summary.diff_table(
-            base_result_with_tests,
+            base_result_no_tests,
             head_result_with_tests,
-            base_test_names,
+            base_test_no_names,
             head_test_names,
-            run_time_floor = fake_run_time_floor
+            no_run_time_comparison = True
         )
 
-        self.assertIsNone(same_table)
+        self.assertEqual(len(added_table), head_result_with_tests.num_tests)
+        self.assertEqual(len(added_table[0]),1)
+        self.assertIn(str(MOCKED_TEST_NAME),added_table[0][0])
         self.assertIsNone(removed_table)
-        self.assertIsNone(added_table)
+        self.assertIsNone(same_table)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
     @patch.object(TestHarnessResultsSummary, 'get_commit_results')
-    def testDiffTableSameTestLowRelativeRunTime(self, mock_get_commit_results,
-            mock_get_event_results, mock_init_reader):
-        """
-        Tests diff_table() when same test name exit in both base and head and
-        relative run time rate is lower than threadshold.
-        That testname will not be included in same_table
-        """
-        fake_run_time_floor = 1
-        fake_run_time_rate_floor = 0.5
-
-        base_result_with_tests = self.getResult()
-        head_result_with_tests = self.getResult()
-        base_test_names = set(head_result_with_tests.test_names)
-        head_test_names = set(head_result_with_tests.test_names)
-
-        mock_get_commit_results.return_value = head_result_with_tests
-        mock_get_event_results.return_value = head_result_with_tests
-        mock_init_reader.return_value = None
-
-        summary = TestHarnessResultsSummary(None)
-
-        base_test = base_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
-        head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
-        #mock base and head runtime, so that relative run time rate is less than fake_run_time_rate_floor
-        base_test._data['timing']['runner_run'] = 10
-        head_test._data['timing']['runner_run'] = 13
-
-        removed_table, added_table, same_table = summary.diff_table(
-            base_result_with_tests,
-            head_result_with_tests,
-            base_test_names,
-            head_test_names,
-            run_time_floor = fake_run_time_floor,
-            run_time_rate_floor = fake_run_time_rate_floor
-        )
-
-        self.assertIsNone(same_table)
-        self.assertIsNone(removed_table)
-        self.assertIsNone(added_table)
-
-    @patch.object(TestHarnessResultsSummary, 'init_reader')
-    @patch.object(TestHarnessResultsSummary, 'get_event_results')
-    @patch.object(TestHarnessResultsSummary, 'get_commit_results')
-    def testDiffTableSameTestHighRelativeRunTime(self, mock_get_commit_results,
+    def testDiffTableSameTest(self, mock_get_commit_results,
             mock_get_event_results, mock_init_reader):
         """
         Tests diff_table() when same test name exit in both base and head, where:
         -the head runtime exceeds a predefined threshold and
         -the relative runtime increase exceeds a defined rate.
         """
-        fake_run_time_floor = 1
+        fake_run_time_floor = 1.0
         fake_run_time_rate_floor = 0.5
 
         base_result_with_tests = self.getResult()
@@ -298,8 +440,8 @@ class TestResultsSummary(TestHarnessTestCase):
         base_test = base_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
         head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
         #mock base and head runtime, so that relative run time rate is higher than fake_run_time_rate_floor
-        base_test._data['timing']['runner_run'] = 10
-        head_test._data['timing']['runner_run'] = 17
+        base_test._data['timing']['runner_run'] = 10.00
+        head_test._data['timing']['runner_run'] = 17.00
 
         removed_table, added_table, same_table = summary.diff_table(
             base_result_with_tests,
@@ -307,124 +449,99 @@ class TestResultsSummary(TestHarnessTestCase):
             base_test_names,
             head_test_names,
             run_time_floor=fake_run_time_floor,
-            run_time_rate_floor=fake_run_time_rate_floor
+            run_time_rate_floor=fake_run_time_rate_floor,
+            no_run_time_comparison = False
         )
 
         self.assertEqual(len(same_table), 1)
+        self.assertEqual(len(same_table[0]), 4)
         self.assertIn(str(MOCKED_TEST_NAME),same_table[0][0])
-        self.assertEqual(same_table[0][1], base_test.run_time)
-        self.assertEqual(same_table[0][2], head_test.run_time)
-        self.assertGreater(same_table[0][2], fake_run_time_floor)
+        self.assertEqual(same_table[0][1], f'{base_test.run_time:.2f}')
+        self.assertEqual(same_table[0][2], f'{head_test.run_time:.2f}')
+        self.assertGreater(same_table[0][2], f'{fake_run_time_floor:+.2f}')
         #compare relative run time is higher than floor rate
         self.assertGreater(float(same_table[0][3].strip('%')), fake_run_time_rate_floor * 100)
         self.assertIsNone(removed_table)
         self.assertIsNone(added_table)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
-    def testFormatRemovedTableNoRemovedTest(self, mock_init_reader):
+    @patch.object(TestHarnessResultsSummary, 'get_event_results')
+    @patch.object(TestHarnessResultsSummary, 'get_commit_results')
+    def testDiffTableSameTestNoRunTime(self, mock_get_commit_results,
+            mock_get_event_results, mock_init_reader):
+        """
+        Tests diff_table() when same test name exit in both base and head but
+        disable run time comparison
+        """
+        base_result_with_tests = self.getResult()
+        head_result_with_tests = self.getResult()
+        base_test_names = set(head_result_with_tests.test_names)
+        head_test_names = set(head_result_with_tests.test_names)
+
+        mock_get_commit_results.return_value = head_result_with_tests
+        mock_get_event_results.return_value = head_result_with_tests
+        mock_init_reader.return_value = None
+
+        summary = TestHarnessResultsSummary(None)
+
+        removed_table, added_table, same_table = summary.diff_table(
+            base_result_with_tests,
+            head_result_with_tests,
+            base_test_names,
+            head_test_names,
+            no_run_time_comparison = False
+        )
+
+        self.assertIsNone(same_table)
+        self.assertIsNone(removed_table)
+        self.assertIsNone(added_table)
+
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    def testFormatTableWithData(self, mock_init_reader):
         """
         Tests formatting remove table when there is no removed tests.
         """
         mock_init_reader.return_value = None
-        removed_table = None
         summary = TestHarnessResultsSummary(None)
-        format_removed_table = summary._format_removed_table(removed_table)
-        expected_output = (
-            '### Removed Tests:\n'
-            'No Removed Tests'
-        )
 
-        self.assertIn('Removed Tests:', format_removed_table)
-        self.assertIn('No Removed Tests', format_removed_table)
-        self.assertEqual(expected_output, format_removed_table)
-
-    @patch.object(TestHarnessResultsSummary, 'init_reader')
-    def testFormatRemovedTableHasRemovedTest(self, mock_init_reader):
-        """
-        Tests formatting remove table when there is removed tests.
-        """
-        mock_init_reader.return_value = None
-        removed_table = [[str(MOCKED_TEST_NAME)]]
-        summary = TestHarnessResultsSummary(None)
-        format_removed_table = summary._format_removed_table(removed_table)
+        test_title = "### Tests with Data:"
+        test_table_data = [[str(MOCKED_TEST_NAME), 10.00, 17.00, '70.00%']]
+        test_headers = ["Test Name", "Base Run Time", "Head Run Time", "Relative Run Time Rate"]
+        test_no_data_message = "No New Tests"
+        format_table = summary._format_table(test_title,test_table_data,test_headers,test_no_data_message)
         expected_table = tabulate(
-            removed_table,
-            headers = ["Test Name"],
+            test_table_data,
+            headers = test_headers,
             tablefmt = "github"
         )
-        expected_output = f"### Removed Tests:\n{expected_table}"
-        self.assertEqual(expected_output, format_removed_table)
+        expected_output = f'{test_title}\n{expected_table}'
+
+        self.assertIn(test_title, format_table)
+        self.assertEqual(format_table, expected_output)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
-    def testFormatAddedTableNoAddedTest(self, mock_init_reader):
+    def testFormatTableNoData(self, mock_init_reader):
         """
-        Tests formatting added table when there is no added tests.
+        Tests formatting table when there is no data
         """
+        test_title = "### Tests with No Data:"
+        test_table_data = None
+        test_headers = ["Test Name", "Run Time"]
+        test_no_data_message = "No New Tests"
+
         mock_init_reader.return_value = None
-        added_table = None
         summary = TestHarnessResultsSummary(None)
-        format_added_table = summary._format_added_table(added_table)
-        expected_output = (
-            '### New Tests:\n'
-            'No New Tests'
-        )
-        self.assertIn('New Tests:', format_added_table)
-        self.assertIn('No New Tests', format_added_table)
-        self.assertEqual(expected_output, format_added_table)
+        format_table = summary._format_table(
+            title = test_title,
+            table_data = test_table_data,
+            headers = test_headers,
+            no_data_message = test_no_data_message)
 
-    @patch.object(TestHarnessResultsSummary, 'init_reader')
-    def testFormatAddedTableHasAddedTest(self, mock_init_reader):
-        """
-        Tests formatting added table when there is added tests.
-        """
-        mock_init_reader.return_value = None
-        #fake added_table list
-        added_table = [[str(MOCKED_TEST_NAME),10]]
-        summary = TestHarnessResultsSummary(None)
-        format_added_table = summary._format_added_table(added_table)
-        expected_table = tabulate(
-            added_table,
-            headers = ["Test Name", "Run Time"],
-            tablefmt = "github"
-        )
-        expected_output = f"### New Tests:\n{expected_table}"
-        self.assertEqual(expected_output, format_added_table)
+        expected_output = test_title + "\n" + test_no_data_message
 
-    @patch.object(TestHarnessResultsSummary, 'init_reader')
-    def testFormatSameTableNoSameTest(self, mock_init_reader):
-        """
-        Tests formatting same table when there is no tests.
-        """
-        mock_init_reader.return_value = None
-        same_table = None
-        summary = TestHarnessResultsSummary(None)
-        format_same_table = summary._format_same_table(same_table)
-        expected_output = (
-            '### Same Tests that exceed relative run time rate:\n'
-            'No Tests'
-        )
-        self.assertIn('Same Tests', format_same_table)
-        self.assertIn('No Tests', format_same_table)
-        self.assertEqual(expected_output, format_same_table)
-
-    @patch.object(TestHarnessResultsSummary, 'init_reader')
-    def testFormatSameTableHasSameTest(self, mock_init_reader):
-        """
-        Tests formatting same table when there is same tests with high relative runtime
-        """
-        mock_init_reader.return_value = None
-        same_table =[[str(MOCKED_TEST_NAME), 10, 17, '70.00%']]
-        summary = TestHarnessResultsSummary(None)
-        format_same_table = summary._format_same_table(same_table)
-
-        expected_table = tabulate(
-            same_table,
-            headers = ["Test Name", "Base Run Time", "Head Run Time", "Relative Run Time Rate"],
-            tablefmt = "github"
-        )
-        expected_output = f"### Same Tests that exceed relative run time rate:\n{expected_table}"
-
-        self.assertEqual(format_same_table, expected_output)
+        self.assertIn(test_title, format_table)
+        self.assertIn(test_no_data_message, format_table)
+        self.assertEqual(expected_output, format_table)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     def testBuildSummaryNoChanges(self, mock_init_reader):
@@ -452,8 +569,8 @@ class TestResultsSummary(TestHarnessTestCase):
         mock_init_reader.return_value = None
         summary = TestHarnessResultsSummary(None)
         removed_table =[[str(MOCKED_TEST_NAME)]]
-        added_table =[[str(MOCKED_TEST_NAME), 10]]
-        same_table =[[str(MOCKED_TEST_NAME), 10, 17, '70.00%']]
+        added_table =[[str(MOCKED_TEST_NAME), 10.00]]
+        same_table =[[str(MOCKED_TEST_NAME), 10.00, 17.00, '70.00%']]
 
         has_test_build_summary = summary.build_summary(removed_table, added_table, same_table)
 
