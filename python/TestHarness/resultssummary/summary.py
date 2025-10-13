@@ -367,7 +367,7 @@ class TestHarnessResultsSummary:
         Parameters
         ----------
         title : str
-            The section title to display above the table (e.g., "### Removed Tests:").
+            The section title to display above the table (e.g., "### Removed Tests").
         table_data : list of list or None
             The table content, where each inner list represents a row.
         headers : list of str
@@ -419,7 +419,7 @@ class TestHarnessResultsSummary:
                 - Removed tests
                 - Newly added tests with runtime
                 - Same tests with high relative runtime rate
-            If no tests are present in a category, a default message is shown (e.g., "No Removed Tests").
+            If no tests are present in a category, None is displayed
         """
         assert isinstance(removed_table, (list, NoneType))
         assert isinstance(added_table, (list, NoneType))
@@ -429,28 +429,28 @@ class TestHarnessResultsSummary:
         # Format removed table
         summary.append(
             self._format_table(
-                "### Removed Tests:",
+                "### Removed Tests",
                 removed_table,
-                ["Test Name"],
-                "No Removed Tests"
+                ["Test"],
+                "None"
             )
         )
         # Format added table
         summary.append(
             self._format_table(
-                "### New Tests:",
+                "### New Tests",
                 added_table,
-                ["Test Name", "Run Time"],
-                "No New Tests"
+                ["Test", "Head(s)"],
+                "None"
             )
         )
         # Format same table
         summary.append(
             self._format_table(
-                "### Same Tests that exceed relative run time rate:",
+                "### Run time changes",
                 same_table,
-                ["Test Name", "Base Run Time", "Head Run Time", "Relative Run Time Rate"],
-                "No Tests"
+                ["Test", "Base(s)", "Head(s)", "+/-"],
+                "None"
             )
         )
         return "\n".join(summary)

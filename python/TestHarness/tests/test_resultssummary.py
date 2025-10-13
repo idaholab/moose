@@ -585,11 +585,9 @@ class TestResultsSummary(TestHarnessTestCase):
         no_change_buid_summary = summary.build_summary(None, None, None)
 
         self.assertIn('Removed Tests', no_change_buid_summary)
-        self.assertIn('No Removed Tests', no_change_buid_summary)
+        self.assertIn('None', no_change_buid_summary)
         self.assertIn('New Tests', no_change_buid_summary)
-        self.assertIn('No New Tests', no_change_buid_summary)
-        self.assertIn('Same Tests', no_change_buid_summary)
-        self.assertIn('No Tests', no_change_buid_summary)
+        self.assertIn('Run time changes', no_change_buid_summary)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     def testBuildSummaryHasTests(self, mock_init_reader):
@@ -608,9 +606,11 @@ class TestResultsSummary(TestHarnessTestCase):
 
         self.assertIn('Removed Tests', has_test_build_summary)
         self.assertIn('New Tests', has_test_build_summary)
-        self.assertIn('Same Tests', has_test_build_summary)
-        self.assertIn('Test Name', has_test_build_summary)
-        self.assertIn('Run Time', has_test_build_summary)
+        self.assertIn('Run time changes', has_test_build_summary)
+        self.assertIn('Test', has_test_build_summary)
+        self.assertIn('Base(s)', has_test_build_summary)
+        self.assertIn('Head(s)', has_test_build_summary)
+        self.assertIn('+/-', has_test_build_summary)
         self.assertIn(str(MOCKED_TEST_NAME), has_test_build_summary)
         self.assertIn(str(10), has_test_build_summary)
         self.assertIn(str(17), has_test_build_summary)
@@ -665,26 +665,15 @@ class TestResultsSummary(TestHarnessTestCase):
 
         with tempfile.NamedTemporaryFile() as out_file:
             summary = TestHarnessResultsSummary(None)
-            stdout = StringIO()
-            with redirect_stdout(stdout):
-                summary_result = summary.pr(
-                    event_id = EVENT_ID, out_file = out_file.name
-                )
-                self.assertIn('Removed Tests:', summary_result)
-                self.assertIn('No Removed Tests', summary_result)
-                self.assertIn('New Tests:', summary_result)
-                self.assertIn('No New Tests', summary_result)
-                self.assertIn('Same Tests', summary_result)
-                self.assertIn('No Tests', summary_result)
-
-                with open(out_file.name, 'r') as f:
-                    output = f.read()
-                    self.assertIn('Removed Tests:', output)
-                    self.assertIn('No Removed Tests', output)
-                    self.assertIn('New Tests:', output)
-                    self.assertIn('No New Tests', output)
-                    self.assertIn('Same Tests', output)
-                    self.assertIn('No Tests', output)
+            summary.pr(
+                event_id = EVENT_ID, out_file = out_file.name
+            )
+            with open(out_file.name, 'r') as f:
+                output = f.read()
+                self.assertIn('Removed Tests', output)
+                self.assertIn('None', output)
+                self.assertIn('New Tests', output)
+                self.assertIn('Run time changes', output)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
@@ -748,12 +737,10 @@ class TestResultsSummary(TestHarnessTestCase):
             summary.main(out_file = out_file.name, action = 'pr', event_id = EVENT_ID)
             with open(out_file.name, 'r') as f:
                 output = f.read()
-                self.assertIn('Removed Tests:', output)
-                self.assertIn('No Removed Tests', output)
-                self.assertIn('New Tests:', output)
-                self.assertIn('No New Tests', output)
-                self.assertIn('Same Tests', output)
-                self.assertIn('No Tests', output)
+                self.assertIn('Removed Tests', output)
+                self.assertIn('None', output)
+                self.assertIn('New Tests', output)
+                self.assertIn('Run time changes', output)
 
 if __name__ == '__main__':
     unittest.main()
