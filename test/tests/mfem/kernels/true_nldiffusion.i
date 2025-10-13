@@ -47,7 +47,7 @@
   []
   [different]
     type = ParsedFunction
-    expression = y
+    expression = 2*y+1
   []
 []
 
@@ -105,7 +105,7 @@
 [Solver]
   type = MFEMHypreGMRES
   preconditioner = boomeramg
-  print_level = 0
+  print_level = 1
   l_tol = 1e-16
   l_max_its = 1000
 []

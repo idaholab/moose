@@ -273,7 +273,7 @@ EquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
     mfem::Vector aux_x, aux_rhs;
     mfem::HypreParMatrix * aux_a = new mfem::HypreParMatrix;
     blf->FormLinearSystem(
-        _ess_tdof_lists.at(i), *(_var_ess_constraints.at(i)), *lf, *aux_a, aux_x, aux_rhs);
+        _ess_tdof_lists.at(i), *(_var_ess_constraints.at(i)), *lf, *aux_a, aux_x, aux_rhs, true);
     _h_blocks(i, i) = aux_a;
     trueX.GetBlock(i) = aux_x;
     trueRHS.GetBlock(i) = aux_rhs;
@@ -329,7 +329,7 @@ void
 EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
 {
   const_cast<EquationSystem*>(this)->CopyVec(sol,_trueBlockSol);
-  
+
   for (int i = 0; i < _trial_var_names.size(); i++)
   {
     auto & trial_var_name = _trial_var_names.at(i);
@@ -345,17 +345,17 @@ EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
     auto & test_var_name = _test_var_names.at(i);
 
     int offset = _BlockResidual.GetBlock(i).Size();
-    mfem::Vector aux(offset);
+    mfem::Vector b(offset);
 
     auto lf = _lfs.GetShared(test_var_name);
     lf->Assemble();
-    lf->ParallelAssemble(aux);
+    lf->ParallelAssemble(b);
 
     auto nlf = _nlfs.GetShared(test_var_name);
     nlf->Assemble();
     nlf->ParallelAssemble(_BlockResidual.GetBlock(i));
 
-    _BlockResidual.GetBlock(i) -= aux;
+    _BlockResidual.GetBlock(i) -= b;
     _BlockResidual.GetBlock(i) *= -1;
 
     if(_non_linear)

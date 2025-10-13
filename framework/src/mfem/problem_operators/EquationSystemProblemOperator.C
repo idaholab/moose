@@ -32,6 +32,13 @@ EquationSystemProblemOperator::Init(mfem::BlockVector & X)
 void
 EquationSystemProblemOperator::Solve()
 {
+
+  for (const auto i : index_range(_test_var_names))
+  {
+     auto & test_var_name = _test_var_names.at(i);
+     *(GetEquationSystem()->_var_ess_constraints.at(i)) = *(_problem_data.gridfunctions.GetShared(test_var_name));
+  }
+  
   GetEquationSystem()->ApplyEssentialBCs();
   GetEquationSystem()->BuildJacobian(_true_x, _true_rhs);
 
@@ -44,7 +51,6 @@ EquationSystemProblemOperator::Solve()
 
   mfem::Vector zero_vec(_true_rhs.Size());
   zero_vec = 0.0;
-
   _problem_data.nonlinear_solver->SetSolver(_problem_data.jacobian_solver->getSolver());
   _problem_data.nonlinear_solver->SetOperator(*GetEquationSystem());
   _problem_data.nonlinear_solver->Mult(zero_vec, _true_x);
