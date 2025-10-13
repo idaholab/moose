@@ -154,21 +154,11 @@ class TestHarnessResultsSummary:
     @staticmethod
     def _format_test_name(test_name):
         """
-        Format a test name for display.
-
-        Parameters
-        ----------
-        test_name : TestName
-            The test name object to format.
-
-        Returns
-        -------
-        str
-            A string representation of the test name, wrapped in backticks.
+        Format a test name for display, wrapped in backticks.
         """
         return f'`{str(test_name)}`'
 
-    def _build_removed_table(self, removed_names: set[TestName]) -> Optional[list]:
+    def _build_removed_table(self, removed_names: set[TestName]) -> Optional[List[List]]:
         """
         Build a table of removed test names.
 
@@ -186,7 +176,7 @@ class TestHarnessResultsSummary:
         return [[self._format_test_name(test_name)] for test_name in removed_names]
 
     def _build_added_table(self, add_names: set[TestName], head_results: StoredResult,
-            no_run_time_comparison: bool) -> Optional[list]:
+            no_run_time_comparison: bool) -> Optional[List[List]]:
         """
         Build a table of newly added test names, optionally including runtime.
 
@@ -234,7 +224,7 @@ class TestHarnessResultsSummary:
 
     def _build_same_table(self, same_names: set[TestName],
             base_results: StoredResult, head_results: StoredResult,
-            head_run_time_floor: float, run_time_rate_floor: float)-> Optional[list]:
+            head_run_time_floor: float, run_time_rate_floor: float)-> Optional[List[List]]:
         """
         Build a table of tests present in both base and head with significant runtime changes.
 
@@ -297,7 +287,7 @@ class TestHarnessResultsSummary:
         return same_table
 
     def diff_table(self, base_results: StoredResult, head_results: StoredResult, base_names: set[TestName],
-            head_names: set[TestName], **kwargs) -> Tuple[Optional[list], Optional[list], Optional[list]]:
+            head_names: set[TestName], **kwargs) -> Tuple[Optional[List[List]], Optional[List[List]], Optional[List[List]]]:
         """
         Compare test names between the base and current head, and return
         the difference
@@ -321,18 +311,24 @@ class TestHarnessResultsSummary:
         run-time-rate-floor : float
             The runtime rate at which to not attach in same_table summary
             (default: 0.5 i.e 50%)
-        no-run-time-comparison
-            if has this parameter, skip run time comparison
+        no-run-time-comparison : bool
+            If True, skip runtime comparison
         Returns
         -------
-        removed_table : list or None
-            A list of test names that were present in the base but not in the head.
+        removed_table : list of list or None
+            A list of removed test name, each containing a formatted test name.
         added_table : list or None
-            A list of newly added test names along with their runtime.
-        same_table : list or None
-            A list of test names, runtime and relative runtime rate that exist in both base and head, where:
-            - The head runtime exceeds a predefined threshold (run-time-floor).
-            - The relative runtime increase exceeds a defined rate (run-time-rate-floor).
+            A sorted list of lists where each sublist contains:
+            - the formatted test name (str)
+            - the runtime as a string formatted to two decimal places, or "None" if not available.
+            If `no_run_time_comparison` is True, only test names are included.
+        same_table : list of list or None
+            A sorted list of lists based on relative runtime containing:
+            - Formatted test name
+            - Base runtime (str, formatted to 2 decimal places)
+            - Head runtime (str, formatted to 2 decimal places)
+            - Relative runtime change (str, formatted as percentage with sign)
+            Returns None if no tests meet the criteria.
         """
         assert isinstance(base_results, StoredResult)
         assert isinstance(head_results, StoredResult)
@@ -407,25 +403,31 @@ class TestHarnessResultsSummary:
 
     def build_summary(self, removed_table: list, added_table: list, same_table: list) -> str:
         """
-        Build a summary report of removed, newly added tests, same test and Optional (Runtime result)
+        Build a summary report of removed, newly added, and same tests with optional runtime results.
 
         Parameters
         ----------
-        removed_table : list
-            A list of removed test names.
-        added_table : list
-            A list of newly added testnames and its runtime
-        same_table : list
-            A list of test names, runtime and relative runtime rate that exist in both base and head, where:
-            - The head runtime exceeds a predefined threshold (run-time-floor).
-            - The relative runtime increase exceeds a defined rate (run-time-rate-floor).
+        removed_table : list of list or None
+            A list of removed test name, each containing a formatted test name.
+        added_table : list or None
+            A sorted list of newly added test names and their optional runtime.
+            - the formatted test name (str)
+            - the runtime as a string formatted to two decimal places, or "None" if not available.
+        same_table : list of list or None
+            A sorted of tests that exist in both base and head, and their optional runtime.
+            - Formatted test name
+            - Base runtime (str, formatted to 2 decimal places)
+            - Head runtime (str, formatted to 2 decimal places)
+            - Relative runtime change (str, formatted as percentage with sign)
 
         Returns
         -------
         summary : str
-            A formatted string summarizing removed and new tests,
-            same tests with high relative runtime rate
-            using GitHub-style format
+            A formatted string using GitHub-style markdown that summarizes:
+                - Removed tests
+                - Newly added tests with runtime
+                - Same tests with high relative runtime rate
+            If no tests are present in a category, a default message is shown (e.g., "No Removed Tests").
         """
         assert isinstance(removed_table, (list, NoneType))
         assert isinstance(added_table, (list, NoneType))
