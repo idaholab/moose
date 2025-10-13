@@ -232,7 +232,7 @@ class TestResultsSummary(TestHarnessTestCase):
         self.assertIn(str(MOCKED_TEST_NAME),same_table[0][0])
         self.assertEqual(same_table[0][1], f'{base_test.run_time:.2f}')
         self.assertEqual(same_table[0][2], f'{head_test.run_time:.2f}')
-        self.assertGreater(same_table[0][2], f'{fake_run_time_floor:+.2f}')
+        self.assertGreater(same_table[0][2], f'{fake_run_time_floor:.2f}')
         #compare absoulate relative run time rate is higher than floor rate
         self.assertGreater(abs(float(same_table[0][3].strip('%'))), fake_run_time_rate_floor * 100)
 
@@ -542,7 +542,7 @@ class TestResultsSummary(TestHarnessTestCase):
         self.assertIn(str(MOCKED_TEST_NAME), same_table[0][0])
         self.assertEqual(same_table[0][1], f'{base_test.run_time:.2f}')
         self.assertEqual(same_table[0][2], f'{head_test.run_time:.2f}')
-        self.assertGreater(same_table[0][2], f'{fake_run_time_floor:+.2f}')
+        self.assertGreater(same_table[0][2], f'{fake_run_time_floor:.2f}')
         #compare absolute relative run time is higher than floor rate
         self.assertGreater(abs(float(same_table[0][3].strip('%'))), fake_run_time_rate_floor * 100)
         self.assertIsNone(removed_table)

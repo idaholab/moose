@@ -318,12 +318,11 @@ class TestHarnessResultsSummary:
         removed_table : list of list or None
             A list of removed test name, each containing a formatted test name.
         added_table : list or None
-            A sorted list of lists where each sublist contains:
+            A sorted list of newly added test names and their optional runtime.
             - the formatted test name (str)
             - the runtime as a string formatted to two decimal places, or "None" if not available.
-            If `no_run_time_comparison` is True, only test names are included.
         same_table : list of list or None
-            A sorted list of lists based on relative runtime containing:
+            A sorted of tests that exist in both base and head, and their optional runtime.
             - Formatted test name
             - Base runtime (str, formatted to 2 decimal places)
             - Head runtime (str, formatted to 2 decimal places)
