@@ -177,7 +177,7 @@ class TestHarnessResultsSummary:
                     continue
                 added_table.append([
                     self._format_test_name(test_name),
-                    self._format_run_time(test_result.run_time)
+                    f'{test_result.run_time:.2f}',
                 ])
             # added_table.append(['`lessaddedtesting.test`',0.001])
             # added_table.append(['`plusaddedtesting.test`',10])
