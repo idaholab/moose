@@ -51,7 +51,7 @@ CSGRegion::CSGRegion(const CSGRegion & region_a,
 }
 
 // complement or explicitly empty constructor
-CSGRegion::CSGRegion(const CSGRegion & region, std::string region_type)
+CSGRegion::CSGRegion(const CSGRegion & region, const std::string & region_type)
 {
   _region_type = region_type;
   if (getRegionType() != RegionType::COMPLEMENT && getRegionType() != RegionType::EMPTY)
