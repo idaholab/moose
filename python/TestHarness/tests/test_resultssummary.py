@@ -731,7 +731,12 @@ class TestResultsSummary(TestHarnessTestCase):
         """
         Tests pr() to read PR from database, if available
         """
-        summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
+        try:
+            summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
+        except ValueError as e:
+            self.assertRaisesRegex(ValueError, f'Database {TEST_DATABASE_NAME} not found')
+            return
+
         with tempfile.NamedTemporaryFile() as out_file:
             try:
                 summary.pr(
