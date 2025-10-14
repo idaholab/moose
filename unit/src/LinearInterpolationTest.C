@@ -15,6 +15,10 @@
 
 #include <cmath>
 
+#ifdef LIBMESH_HAVE_FENV_H
+#include <fenv.h>
+#endif
+
 TEST(LinearInterpolationTest, getSampleSize)
 {
   std::vector<Real> x = {1, 2, 3, 5};
@@ -44,12 +48,21 @@ TEST(LinearInterpolationTest, sample)
   EXPECT_DOUBLE_EQ(interp.sampleDerivative(2.), 1.);
   EXPECT_DOUBLE_EQ(interp.sampleDerivative(2.1), 1.);
 
+#ifdef LIBMESH_HAVE_FENV_H
+  auto traps = fegetexcept();
+  fedisableexcept(FE_ALL_EXCEPT);
+#endif
+
   // For NaN input, output should also be NaN; use property NaN != NaN to test
   const Real x_nan = std::sqrt(-1.0);
   const Real y_nan = interp.sample(x_nan);
   const Real dydx_nan = interp.sampleDerivative(x_nan);
   EXPECT_TRUE(y_nan != y_nan);
   EXPECT_TRUE(dydx_nan != dydx_nan);
+
+#ifdef LIBMESH_HAVE_FENV_H
+  feenableexcept(traps);
+#endif
 }
 
 TEST(LinearInterpolationTest, automatic_differentiation_sample)
