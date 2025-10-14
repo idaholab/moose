@@ -349,7 +349,7 @@
   [resultssummary]
     type = PythonUnitTest
     input = test_resultssummary.py
-    requirement = 'The system shall provide summary of test results compared to base for pr event'
+    requirement = 'The system shall provide a system that summaries the changes in tests within a pull request event`
     issues = '#31645'
   []
 []
