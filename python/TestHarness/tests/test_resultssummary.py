@@ -46,7 +46,7 @@ class TestResultsSummary(TestHarnessTestCase):
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
     @patch.object(TestHarnessResultsSummary, 'get_commit_results')
-    def testPRTestNamesNoChanges(self, mock_get_commit_results,
+    def testPRTestNamesNoChange(self, mock_get_commit_results,
             mock_get_event_results,mock_init_reader):
         """
         Tests pr_test_names() when there are no changes between base and head test names.
@@ -106,30 +106,31 @@ class TestResultsSummary(TestHarnessTestCase):
                 summary.pr_test_names(event_id = EVENT_ID, out_file = out_file.name)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
-    @patch.object(TestHarnessResultsSummary, 'get_event_results')
     @patch.object(TestHarnessResultsSummary, 'get_commit_results')
-    def testBuildRemovedTable(self, mock_get_commit_results, mock_get_event_results, mock_init_reader):
+    def testBuildDiffTableRemovedTest(self, mock_get_commit_results, mock_init_reader):
         """
-        Tests  _build_removed_table() when test is removed
+        Tests  _build_diff_table() when test is removed
         """
         base_result_with_tests = self.getResult()
         base_test_names = set(base_result_with_tests.test_names)
 
         mock_get_commit_results.return_value = base_result_with_tests
         mock_init_reader.return_value = None
+        base_test = base_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
 
         summary = TestHarnessResultsSummary(None)
-        removed_table = summary._build_removed_table(base_test_names)
+        removed_table = summary._build_diff_table(base_test_names,base_result_with_tests)
 
         self.assertEqual(len(removed_table), base_result_with_tests.num_tests)
         self.assertIsInstance(removed_table[0], list)
         self.assertIn(str(MOCKED_TEST_NAME), removed_table[0][0])
+        self.assertEqual(removed_table[0][1], f'{base_test.run_time:.2f}')
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
-    def testBuildAddedTable(self, mock_get_event_results, mock_init_reader):
+    def testBuildDiffTableAddedTest(self, mock_get_event_results, mock_init_reader):
         """
-        Tests _build_added_table() when test is added
+        Tests _build_diff_table() when test is added
         """
         head_result_with_tests = self.getResult()
         head_test_names = set(head_result_with_tests.test_names)
@@ -139,7 +140,7 @@ class TestResultsSummary(TestHarnessTestCase):
         head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
 
         summary = TestHarnessResultsSummary(None)
-        added_table = summary._build_added_table(
+        added_table = summary._build_diff_table(
             head_test_names,
             head_result_with_tests)
 
@@ -150,10 +151,10 @@ class TestResultsSummary(TestHarnessTestCase):
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
-    def testBuildAddedTableNoRunTime(self, mock_get_event_results, mock_init_reader):
+    def testBuildDiffTableAddedTestNoRunTime(self, mock_get_event_results, mock_init_reader):
         """
-        Tests _build_added_table() when test is added but there is no runtime
-        It will put "None" for it's runtime
+        Tests _build_diff_table() when test is added but there is no runtime
+        It will put "" for it's runtime
         """
         head_result_with_tests = self.getResult()
         head_test_names = set(head_result_with_tests.test_names)
@@ -164,14 +165,14 @@ class TestResultsSummary(TestHarnessTestCase):
         head_test._data['timing']['runner_run'] = None
 
         summary = TestHarnessResultsSummary(None)
-        added_table = summary._build_added_table(
+        added_table = summary._build_diff_table(
             head_test_names,
             head_result_with_tests)
 
         self.assertEqual(len(added_table), head_result_with_tests.num_tests)
         self.assertEqual(len(added_table[0]), 2)
         self.assertIn(str(MOCKED_TEST_NAME), added_table[0][0])
-        self.assertEqual(added_table[0][1], "None")
+        self.assertEqual(added_table[0][1], "")
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
@@ -221,7 +222,7 @@ class TestResultsSummary(TestHarnessTestCase):
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
     @patch.object(TestHarnessResultsSummary, 'get_commit_results')
-    def BuildSameTableNoHeadRunTime(self, mock_get_commit_results,
+    def testBuildSameTableNoHeadRunTime(self, mock_get_commit_results,
             mock_get_event_results, mock_init_reader):
         """
         Tests _build_same_table() when same test name exit in both base and head but
@@ -256,7 +257,7 @@ class TestResultsSummary(TestHarnessTestCase):
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
     @patch.object(TestHarnessResultsSummary, 'get_commit_results')
-    def BuildSameTableNoBaseRunTime(self, mock_get_commit_results,
+    def testBuildSameTableNoBaseRunTime(self, mock_get_commit_results,
             mock_get_event_results, mock_init_reader):
         """
         Tests _build_same_table() when same test name exit in both base and head but
@@ -291,7 +292,7 @@ class TestResultsSummary(TestHarnessTestCase):
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
     @patch.object(TestHarnessResultsSummary, 'get_commit_results')
-    def BuildSameTableLowHeadRunTime(self, mock_get_commit_results,
+    def testBuildSameTableLowHeadRunTime(self, mock_get_commit_results,
             mock_get_event_results, mock_init_reader):
         """
         Tests _build_same_table() when same test name exit in both base and head but
@@ -326,7 +327,7 @@ class TestResultsSummary(TestHarnessTestCase):
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
     @patch.object(TestHarnessResultsSummary, 'get_commit_results')
-    def BuildSameTableLowRelativeRunTime(self, mock_get_commit_results,
+    def testBuildSameTableLowRelativeRunTime(self, mock_get_commit_results,
             mock_get_event_results, mock_init_reader):
         """
         Tests _build_same_table() when same test name exit in both base and head and
@@ -403,6 +404,8 @@ class TestResultsSummary(TestHarnessTestCase):
         mock_get_event_results.return_value = head_result_no_tests
         mock_init_reader.return_value = None
 
+        base_test = base_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
+
         summary = TestHarnessResultsSummary(None)
         removed_table, added_table, same_table = summary.diff_table(
             base_result_with_tests,
@@ -414,6 +417,7 @@ class TestResultsSummary(TestHarnessTestCase):
         self.assertEqual(len(removed_table), base_result_with_tests.num_tests)
         self.assertIsInstance(removed_table[0], list)
         self.assertIn(str(MOCKED_TEST_NAME), removed_table[0][0])
+        self.assertEqual(removed_table[0][1], f'{base_test.run_time:.2f}')
         self.assertIsNone(added_table)
         self.assertIsNone(same_table)
 
@@ -433,6 +437,8 @@ class TestResultsSummary(TestHarnessTestCase):
         mock_get_event_results.return_value = head_result_with_tests
         mock_init_reader.return_value = None
 
+        head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
+
         summary = TestHarnessResultsSummary(None)
         removed_table, added_table, same_table = summary.diff_table(
             base_result_no_tests,
@@ -440,8 +446,6 @@ class TestResultsSummary(TestHarnessTestCase):
             base_test_no_names,
             head_test_names
         )
-
-        head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
 
         self.assertEqual(len(added_table), head_result_with_tests.num_tests)
         self.assertEqual(len(added_table[0]), 2)
@@ -603,7 +607,7 @@ class TestResultsSummary(TestHarnessTestCase):
         """
         mock_init_reader.return_value = None
         # Mocked table data
-        removed_table =[[str(MOCKED_TEST_NAME)]]
+        removed_table =[[str(MOCKED_TEST_NAME),12.00]]
         added_table =[[str(MOCKED_TEST_NAME), 15.00]]
         same_table =[[str(MOCKED_TEST_NAME), 10.00, 17.00, '70.00%']]
 
@@ -612,14 +616,15 @@ class TestResultsSummary(TestHarnessTestCase):
 
         self.assertIn('Removed tests', has_test_build_summary)
         self.assertIn('Added tests', has_test_build_summary)
+        self.assertIn('Time (s)', has_test_build_summary)
+        self.assertIn('12', has_test_build_summary)
+        self.assertIn('15', has_test_build_summary)
         self.assertIn('Run time changes', has_test_build_summary)
         self.assertIn('Test', has_test_build_summary)
-        self.assertIn('Time (s)', has_test_build_summary)
         self.assertIn('Base (s)', has_test_build_summary)
         self.assertIn('Head (s)', has_test_build_summary)
         self.assertIn('+/-', has_test_build_summary)
         self.assertIn(str(MOCKED_TEST_NAME), has_test_build_summary)
-        self.assertIn('15', has_test_build_summary)
         self.assertIn('10', has_test_build_summary)
         self.assertIn('17', has_test_build_summary)
         self.assertIn('70.00%', has_test_build_summary)
@@ -661,7 +666,7 @@ class TestResultsSummary(TestHarnessTestCase):
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
     @patch.object(TestHarnessResultsSummary, 'get_commit_results')
-    def testPRNoChange(self, mock_get_commit_results, mock_get_event_results, mock_init_reader):
+    def testPRNoChanges(self, mock_get_commit_results, mock_get_event_results, mock_init_reader):
         """
         Tests pr() when there are no changes between base and head test names.
         """
@@ -767,16 +772,16 @@ class TestResultsSummary(TestHarnessTestCase):
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
     @patch.object(TestHarnessResultsSummary, 'get_commit_results')
-    def testMain(self, mock_get_commit_results, mock_get_event_results, mock_init_reader):
+    def testMainNoChanges(self, mock_get_commit_results, mock_get_event_results, mock_init_reader):
         """
-        Tests main() output for a PR event, verifying summary messages are printed in output file path.
+        Tests main() output for a PR event, verifying summary messages are printed in output file path
+        when there is no change
         """
         base_result_with_tests = self.getResult()
         head_result_with_tests = self.getResult()
         mock_get_commit_results.return_value = base_result_with_tests
         mock_get_event_results.return_value = head_result_with_tests
         mock_init_reader.return_value = None
-
         with tempfile.NamedTemporaryFile() as out_file:
             summary = TestHarnessResultsSummary(None)
             summary.main(out_file = out_file.name, action = 'pr', event_id = EVENT_ID)
@@ -786,6 +791,51 @@ class TestResultsSummary(TestHarnessTestCase):
                 self.assertIn('Added tests', output)
                 self.assertIn('Run time changes', output)
                 self.assertIn('None', output)
+
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    @patch.object(TestHarnessResultsSummary, 'get_event_results')
+    @patch.object(TestHarnessResultsSummary, 'get_commit_results')
+    def testMainRunTimeChanges(self, mock_get_commit_results, mock_get_event_results, mock_init_reader):
+        """
+        Tests main() output for a PR event, verifying summary messages are printed in output file path
+        when there is run time changes for same test and absolute relative run time is higher than threadshold
+        """
+        fake_run_time_floor = 1.0
+        fake_run_time_rate_floor = 0.3
+
+        base_result_with_tests = self.getResult()
+        head_result_with_tests = self.getResult()
+
+        mock_get_commit_results.return_value = base_result_with_tests
+        mock_get_event_results.return_value = head_result_with_tests
+        mock_init_reader.return_value = None
+        base_test = base_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
+        head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
+        # Mock base and head runtime, so that abs relative run time rate is higher than fake_run_time_rate_floor
+        base_test._data['timing']['runner_run'] = 15.00
+        head_test._data['timing']['runner_run'] = 10.00
+
+        with tempfile.NamedTemporaryFile() as out_file:
+            summary = TestHarnessResultsSummary(None)
+            summary.main(out_file = out_file.name,
+                action = 'pr',
+                event_id = EVENT_ID,
+                run_time_floor = fake_run_time_floor,
+                run_time_rate_floor = fake_run_time_rate_floor)
+            with open(out_file.name, 'r') as f:
+                output = f.read()
+                self.assertIn('Removed tests', output)
+                self.assertIn('Added tests', output)
+                self.assertIn('Run time changes', output)
+                self.assertIn('None', output)
+                self.assertIn('Test', output)
+                self.assertIn('Base (s)', output)
+                self.assertIn('Head (s)', output)
+                self.assertIn('+/-', output)
+                self.assertIn(str(MOCKED_TEST_NAME), output)
+                self.assertIn('15', output)
+                self.assertIn('10', output)
+                self.assertIn('-33.33%', output)
 
 if __name__ == '__main__':
     unittest.main()
