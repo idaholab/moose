@@ -154,6 +154,9 @@ LineSegment::intersect(const LineSegment & l, Point & intersect_p) const
   if (std::abs(concur) > 1.e-10)
     return false;
 
+  if (v.is_zero())
+    return false;
+
   Real s = (c.cross(b) * v) / (v * v);
   Real t = (c.cross(a) * v) / (v * v);
 
