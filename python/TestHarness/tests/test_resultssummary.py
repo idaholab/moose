@@ -104,7 +104,7 @@ class TestResultsSummary(TestHarnessTestCase):
     @patch.object(TestHarnessResultsSummary, 'get_commit_results')
     def testBuildRemovedTable(self, mock_get_commit_results, mock_get_event_results, mock_init_reader):
         """
-        Tests  _build_removed_table() when there is removed test
+        Tests  _build_removed_table() when test is removed
         """
         base_result_with_tests = self.getResult()
         base_test_names = set(base_result_with_tests.test_names)
@@ -123,7 +123,7 @@ class TestResultsSummary(TestHarnessTestCase):
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
     def testBuildAddedTable(self, mock_get_event_results, mock_init_reader):
         """
-        Tests _build_added_table() when test is newly added test
+        Tests _build_added_table() when test is added
         """
         head_result_with_tests = self.getResult()
         head_test_names = set(head_result_with_tests.test_names)
@@ -146,7 +146,7 @@ class TestResultsSummary(TestHarnessTestCase):
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
     def testBuildAddedTableNoRunTime(self, mock_get_event_results, mock_init_reader):
         """
-        Tests _build_added_table() when test is newly added test but there is no runtime
+        Tests _build_added_table() when test is added but there is no runtime
         It will put "None" for it's runtime
         """
         head_result_with_tests = self.getResult()
@@ -174,8 +174,8 @@ class TestResultsSummary(TestHarnessTestCase):
             mock_get_event_results, mock_init_reader):
         """
         Tests _build_same_table() when same test name exit in both base and head, where:
-        -the head runtime exceeds a predefined threshold and
-        -the relative runtime increase exceeds a defined rate.
+            -the head runtime exceeds a predefined threshold and
+            -the relative runtime increase exceeds a defined rate.
         """
         fake_run_time_floor = 1.0
         fake_run_time_rate_floor = 0.5
@@ -416,7 +416,7 @@ class TestResultsSummary(TestHarnessTestCase):
     @patch.object(TestHarnessResultsSummary, 'get_commit_results')
     def testDiffTableAddedTest(self, mock_get_commit_results, mock_get_event_results, mock_init_reader):
         """
-        Tests diff_table() when test is newly added.
+        Tests diff_table() when test is added.
         """
         base_result_no_tests = self.getResult(no_tests = True)
         head_result_with_tests = self.getResult()
@@ -533,8 +533,8 @@ class TestResultsSummary(TestHarnessTestCase):
         # Mock the table title, data, header, no_data_message
         test_title = "### Tests with Data:"
         test_table_data = [[str(MOCKED_TEST_NAME), 10.00, 17.00, '70.00%']]
-        test_headers = ["Test Name", "Base Run Time", "Head Run Time", "Relative Run Time Rate"]
-        test_no_data_message = "No New Tests"
+        test_headers = ["Test", "Base (s)", "Head (s)", "+/-"]
+        test_no_data_message = "Nome"
         # Expected format table with data
         expected_table = tabulate(
             test_table_data,
@@ -558,8 +558,8 @@ class TestResultsSummary(TestHarnessTestCase):
         # Mock the table title, data as None, header, no_data_message
         test_title = "### Tests with No Data:"
         test_table_data = None
-        test_headers = ["Test Name", "Run Time"]
-        test_no_data_message = "No New Tests"
+        test_headers = ["Test", "Time (s)"]
+        test_no_data_message = "None"
         # Expected format table with nodata
         expected_output = test_title + "\n" + test_no_data_message
 
@@ -584,36 +584,38 @@ class TestResultsSummary(TestHarnessTestCase):
         summary = TestHarnessResultsSummary(None)
         no_change_buid_summary = summary.build_summary(None, None, None)
 
-        self.assertIn('Removed Tests', no_change_buid_summary)
+        self.assertIn('Removed tests', no_change_buid_summary)
         self.assertIn('None', no_change_buid_summary)
-        self.assertIn('New Tests', no_change_buid_summary)
+        self.assertIn('Added tests', no_change_buid_summary)
         self.assertIn('Run time changes', no_change_buid_summary)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     def testBuildSummaryHasTests(self, mock_init_reader):
         """
-        Tests building a summary when a test are removed from base,
-        newly added and same tests with high runtime
+        Tests building a summary when there are removed test, added test
+        and same test with high runtime
         """
         mock_init_reader.return_value = None
         # Mocked table data
         removed_table =[[str(MOCKED_TEST_NAME)]]
-        added_table =[[str(MOCKED_TEST_NAME), 10.00]]
+        added_table =[[str(MOCKED_TEST_NAME), 15.00]]
         same_table =[[str(MOCKED_TEST_NAME), 10.00, 17.00, '70.00%']]
 
         summary = TestHarnessResultsSummary(None)
         has_test_build_summary = summary.build_summary(removed_table, added_table, same_table)
 
-        self.assertIn('Removed Tests', has_test_build_summary)
-        self.assertIn('New Tests', has_test_build_summary)
+        self.assertIn('Removed tests', has_test_build_summary)
+        self.assertIn('Added tests', has_test_build_summary)
         self.assertIn('Run time changes', has_test_build_summary)
         self.assertIn('Test', has_test_build_summary)
-        self.assertIn('Base(s)', has_test_build_summary)
-        self.assertIn('Head(s)', has_test_build_summary)
+        self.assertIn('Time (s)', has_test_build_summary)
+        self.assertIn('Base (s)', has_test_build_summary)
+        self.assertIn('Head (s)', has_test_build_summary)
         self.assertIn('+/-', has_test_build_summary)
         self.assertIn(str(MOCKED_TEST_NAME), has_test_build_summary)
-        self.assertIn(str(10), has_test_build_summary)
-        self.assertIn(str(17), has_test_build_summary)
+        self.assertIn('15', has_test_build_summary)
+        self.assertIn('10', has_test_build_summary)
+        self.assertIn('17', has_test_build_summary)
         self.assertIn('70.00%', has_test_build_summary)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
@@ -670,10 +672,10 @@ class TestResultsSummary(TestHarnessTestCase):
             )
             with open(out_file.name, 'r') as f:
                 output = f.read()
-                self.assertIn('Removed Tests', output)
-                self.assertIn('None', output)
-                self.assertIn('New Tests', output)
+                self.assertIn('Removed tests', output)
+                self.assertIn('Added tests', output)
                 self.assertIn('Run time changes', output)
+                self.assertIn('None', output)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
@@ -737,10 +739,10 @@ class TestResultsSummary(TestHarnessTestCase):
             summary.main(out_file = out_file.name, action = 'pr', event_id = EVENT_ID)
             with open(out_file.name, 'r') as f:
                 output = f.read()
-                self.assertIn('Removed Tests', output)
-                self.assertIn('None', output)
-                self.assertIn('New Tests', output)
+                self.assertIn('Removed tests', output)
+                self.assertIn('Added tests', output)
                 self.assertIn('Run time changes', output)
+                self.assertIn('None', output)
 
 if __name__ == '__main__':
     unittest.main()

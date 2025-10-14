@@ -177,7 +177,7 @@ class TestHarnessResultsSummary:
 
     def _build_added_table(self, add_names: set[TestName], head_results: StoredResult) -> Optional[List[List]]:
         """
-        Build a table of newly added test names, optionally including runtime.
+        Build a table of added test names, optionally including runtime.
 
         Parameters
         ----------
@@ -309,7 +309,7 @@ class TestHarnessResultsSummary:
         removed_table : Optional[List[List]]
             A list of removed test name, each containing a formatted test name.
         added_table : Optional[List[List]]
-            A sorted list of newly added test names and their runtime.
+            A sorted list of added test names and their runtime.
             - the formatted test name (str)
             - the runtime as a string formatted to two decimal places, or "None" if not available.
         same_table : Optional[List[List]]
@@ -367,7 +367,7 @@ class TestHarnessResultsSummary:
         Parameters
         ----------
         title : str
-            The section title to display above the table (e.g., "### Removed Tests").
+            The section title to display above the table (e.g., "### Removed tests").
         table_data : list of list or None
             The table content, where each inner list represents a row.
         headers : list of str
@@ -395,14 +395,14 @@ class TestHarnessResultsSummary:
 
     def build_summary(self, removed_table: list, added_table: list, same_table: list) -> str:
         """
-        Build a summary report of removed, newly added, and same tests with optional runtime results.
+        Build a summary report of removed, added, and same tests with optional runtime results.
 
         Parameters
         ----------
         removed_table : list of list or None
             A list of removed test name, each containing a formatted test name.
         added_table : list or None
-            A sorted list of newly added test names and their optional runtime.
+            A sorted list of added test names and their optional runtime.
             - the formatted test name (str)
             - the runtime as a string formatted to two decimal places, or "None" if not available.
         same_table : list of list or None
@@ -417,7 +417,7 @@ class TestHarnessResultsSummary:
         summary : str
             A formatted string using GitHub-style markdown that summarizes:
                 - Removed tests
-                - Newly added tests with runtime
+                - Added tests with runtime
                 - Same tests with high relative runtime rate
             If no tests are present in a category, None is displayed
         """
@@ -429,7 +429,7 @@ class TestHarnessResultsSummary:
         # Format removed table
         summary.append(
             self._format_table(
-                "### Removed Tests",
+                "### Removed tests",
                 removed_table,
                 ["Test"],
                 "None"
@@ -438,9 +438,9 @@ class TestHarnessResultsSummary:
         # Format added table
         summary.append(
             self._format_table(
-                "### New Tests",
+                "### Added tests",
                 added_table,
-                ["Test", "Head(s)"],
+                ["Test", "Time (s)"],
                 "None"
             )
         )
@@ -449,7 +449,7 @@ class TestHarnessResultsSummary:
             self._format_table(
                 "### Run time changes",
                 same_table,
-                ["Test", "Base(s)", "Head(s)", "+/-"],
+                ["Test", "Base (s)", "Head (s)", "+/-"],
                 "None"
             )
         )
@@ -493,7 +493,7 @@ class TestHarnessResultsSummary:
         Returns
         -------
         summary_result : str
-            A formatted summary string of removed, new, and runtime-sensitive tests.
+            A formatted summary string of removed, added, and runtime-sensitive tests.
             If `base_names` is None, returns None.
         """
         assert isinstance(event_id, int)
@@ -531,7 +531,7 @@ class TestHarnessResultsSummary:
                 **kwargs
             )
         else:
-            getattr(self, action)(**kwargs)
+            raise NotImplementedError(f'Action {action} not implemented')
 
 if __name__ == '__main__':
     args = TestHarnessResultsSummary.parseArgs()
