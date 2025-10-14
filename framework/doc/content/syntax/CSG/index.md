@@ -3,7 +3,7 @@
 [!ac](CSG) is a geometry representation in which models are created through boolean combinations of surfaces, cells, and universes.
 [!ac](CSG) models are most commonly used for [!ac](MC) neutronics simulations.
 While each [!ac](MC) code has their own syntax for defining the [!ac](CSG) model, the underlying theory for creating [!ac](CSG) representations is the same throughout.
-The `CSGBase` class provides the framework in MOOSE for creating these generic [!ac](CSG) representations of mesh generators that can then be used by [!ac](MC) codes.
+The `CSGBase` class provides the framework in MOOSE for creating these generic [!ac](CSG) representations of geometries through MOOSE mesh generators. These can then be used by [!ac](MC) codes.
 
 ## Theory
 

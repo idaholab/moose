@@ -34,7 +34,7 @@ The following sections explain in detail how to do this as a part of the `genera
 Surfaces are used to define the spatial extent of the region of a `CSGCell`.
 To create a `CSGSurface` object, the surface constructor must be called directly to create a unique pointer.
 This pointer then has to be passed to the current `CSGBase` instance with `addSurface` which will then return a const reference to that generated surface (`const & CSGSurface`).
-The syntax to do this is as follows, where `SurfaceType` should be replaced with they specific type of surface being created (e.g., `CSG::CSGPlane`):
+The syntax to do this is as follows, where `SurfaceType` should be replaced with the specific type of surface being created (e.g., `CSG::CSGPlane`):
 
 ```cpp
 // the unique surface pointer is made first, creating the surface object
@@ -170,7 +170,7 @@ Examples:
 #### Root Universe
 
 All universes in a model should be able to be traced back, through the hierarchical tree of cells and universes, to a singular overarching universe known as the root universe.
-Because universes are a collection of cells and cells can be filled with universe, a tree of universes can be constructed such that the root universe is the collection of all cells in the model.
+Because universes are a collection of cells and cells can be filled with universe, a tree of universes can be constructed such that the root universe contains the collection of all cells in the model.
 When a `CSGBase` object is first [initialized](#initialization), a root `CSGUniverse` called `ROOT_UNIVERSE` is created by default.
 Every `CSGCell` that is created will be added to the root universe unless otherwise specified (as described [below](#adding-or-removing-cells)).
 The root universe exists by default, and which universe is set as the root cannot be changed, except when joining `CSGBase` objects, as described [below](#updating-existing-csgbase-objects).
@@ -186,6 +186,8 @@ Methods available for managing the root universe:
 There are multiple ways in which cells can be added to a universe:
 
 1. At the time of universe creation, a vector of references to `CSGCell` objects can be passed into `createUniverse` (as described [above](#universes)). Example:
+
+!listing CSGBaseTest.C start=create a list of cells to be added to the universe end=createUniverse include-end=true
 
 2. When a `CSGCell` is created with `createCell`, a pointer to a `CSGUniverse` can be passed as the final argument to indicate that the cell will be created and added directly to that specified universe. In this case, the cell will *not* be added to the root universe. A cell that has a universe fill type cannot be added to the same universe that is being used for the fill. For example, the two snippets below come from the same file where a new universe is initialized and passed by reference to the cell when it is created:
 
@@ -203,14 +205,14 @@ Doing this in multiple steps has the same outcome as that of method 2 for adding
 
 !alert! note title=Maintaining Connectivity
 
-When adding and removing cells to/from universes, it is important to maintain the connectivity of all universes meaning all universes should be able to be traced back to the root universe at the end of the generation process, in order to have a consistent model.
+When adding and removing cells to/from universes, it is important to maintain the connectivity of all universes meaning all universes should be nested under the root universe at the end of the generation process, in order to have a consistent model.
 
 !alert-end!
 
 ## Updating Existing CSGBase Objects
 
 An empty `CSGBase` object can be [initialized](#initialization) on its own in each `generateCSG` method for each mesh generator.
-However, in most cases, it is necessary to update an existing `CSGBase` object from a previous `MeshGenerator` or join multiple together such that only one `CSGBase` object is ultimately produced at the end of the full generation process.
+However, in most cases, it is necessary to update an existing `CSGBase` object from a previous `MeshGenerator` or join multiple `CSGBase` together such that only one `CSGBase` object is ultimately produced at the end of the mesh/CSG generation process.
 There are two main ways to handle this: passing and joining.
 
 ### Passing between Mesh Generators

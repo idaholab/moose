@@ -1,7 +1,7 @@
 # CSGSurface
 
 This is an abstract class for any surface definition for [constructive solid geometry (CSG)](syntax/CSG/index.md) representations.
-The [source/csg/CSGBase.md] framework already contains definitions for some basic surfaces (planes, spheres, and cylinders), but developers of modules or MOOSE-based application can define additional custom surfaces using this abstract class.
+The [source/csg/CSGBase.md] framework already contains definitions for some basic surfaces (planes, spheres, and cylinders), but developers of modules or MOOSE-based application can define additional custom surfaces by deriving from this abstract `CSGBase` class.
 General information about implementing [!ac](CSG)-related methods can be found in [source/csg/CSGBase.md].
 
 ## Defining a New Surface Type

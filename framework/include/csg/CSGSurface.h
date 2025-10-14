@@ -69,9 +69,9 @@ public:
 
   /**
    * @brief given a point, determine its evaluation based on the surface equation. A positive value
-   * indicates a point that lies in the positive value of the surface, a negative value
-   * indicates a point that lies in the negative value of the surface, and a value of 0 indicates
-   * that the point lies on the surface.
+   * indicates a point that lies in the positive half-space with regards to the surface, a negative
+   * value indicates a point that lies in the negative side of the surface, and a value of 0
+   * indicates that the point lies on the surface.
    *
    * @param p point
    * @return evaluation of point based on surface equation

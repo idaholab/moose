@@ -39,7 +39,7 @@ public:
    * Constructor for Material Cell
    *
    * @param name name of cell
-   * @param mat_name name of material to use as the cell fill
+   * @param mat_name name of the CSG material (not a MOOSE material) to use as the cell fill
    * @param region cell region
    */
   CSGCell(const std::string & name, const std::string & mat_name, const CSGRegion & region);
@@ -75,12 +75,12 @@ public:
   /**
    * @brief Get the cell fill material name if fill fype is CSG_MATERIAL
    *
-   * @return const std::string
+   * @return name of the cell's CSG material fill
    */
   const std::string & getFillMaterial() const;
 
   /**
-   * @brief Get the name of the fill
+   * @brief Get the name of the fill, regardless of its type
    *
    * @return std::string fill name
    */

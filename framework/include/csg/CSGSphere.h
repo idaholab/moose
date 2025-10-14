@@ -36,7 +36,6 @@ public:
    * @brief Construct a new CSGSphere surface
    *
    * @param name unique name for the sphere surface
-   * @param center center point of sphere
    * @param r radius of sphere
    */
   CSGSphere(const std::string & name, const Real r);

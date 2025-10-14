@@ -97,10 +97,10 @@ public:
     return _surfaces;
   }
 
-  /// Operator overload for &= add an intersection to the current region
+  /// Operator overload for &= which creates an intersection between the current region and the other_region
   CSGRegion & operator&=(const CSGRegion & other_region);
 
-  /// Operator overload for |= add a union to the current region
+  /// Operator overload for |= which creates a union of the current region with the other_region
   CSGRegion & operator|=(const CSGRegion & other_region);
 
   /// Operator overload for checking if two CSGRegion objects are equal
@@ -132,19 +132,19 @@ const std::string stripRegionString(std::string region_str, std::string op);
 
 /// Operation overloads for operation based region construction
 
-// positive half-space (+)
+/// Overload for creating a region from the positive half-space (+) of a surface
 const CSGRegion operator+(const CSGSurface & surf);
 
-// negative half-space (-)
+/// Overload for creating a region from the negative half-space (-) of a surface
 const CSGRegion operator-(const CSGSurface & surf);
 
-// intersection (&)
+/// Overload for creating a region from the the intersection (&) of two regions
 const CSGRegion operator&(const CSGRegion & region_a, const CSGRegion & region_b);
 
-// union (|)
+/// Overload for creating a region from the union (|) of two regions
 const CSGRegion operator|(const CSGRegion & region_a, const CSGRegion & region_b);
 
-// complement (~)
+/// Overload for creating a region from the complement (~) of another region
 const CSGRegion operator~(const CSGRegion & region);
 
 } // namespace CSG
