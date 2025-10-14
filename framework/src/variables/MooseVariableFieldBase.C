@@ -11,6 +11,7 @@
 #include "SubProblem.h"
 #include "SystemBase.h"
 #include "libmesh/system.h"
+#include "libmesh/variable.h"
 
 InputParameters
 MooseVariableFieldBase::validParams()
