@@ -158,33 +158,16 @@ class TestHarnessResultsSummary:
         """
         return f'`{str(test_name)}`'
 
-    def _build_removed_table(self, removed_names: set[TestName]) -> Optional[List[List]]:
+    def _build_diff_table(self, test_names: set[TestName], test_results: StoredResult) -> Optional[List[List]]:
         """
-        Build a table of removed test names.
+        Build a table of test names that are either removed or added, optionally including runtime.
 
         Parameters
         ----------
-        removed_names : set of TestName
-            Set of test names that were present in the base but not in the head.
-
-        Returns
-        -------
-        Optional[List[List]]
-            A list of lists, each containing a formatted test name.
-        """
-        assert isinstance(removed_names, set)
-        return [[self._format_test_name(test_name)] for test_name in removed_names]
-
-    def _build_added_table(self, add_names: set[TestName], head_results: StoredResult) -> Optional[List[List]]:
-        """
-        Build a table of added test names, optionally including runtime.
-
-        Parameters
-        ----------
-        add_names : set of TestName
-            Set of test names that are present in the head but not in the base.
-        head_results : StoredResult
-            An object that provides access to test results for the head
+        test_names : set of TestName
+            Set of test names
+        test_results : StoredResult
+            An object that provides access to test results
 
         Returns
         -------
@@ -193,26 +176,26 @@ class TestHarnessResultsSummary:
                 - the formatted test name (str)
                 - the runtime as a string formatted to two decimal places, or "None" if not available.
         """
-        assert isinstance(add_names, set)
-        assert isinstance(head_results, StoredResult)
+        assert isinstance(test_names, set)
+        assert isinstance(test_results, StoredResult)
 
-        added_table = []
-        for test_name in add_names:
-            test_result = head_results.get_test(test_name.folder, test_name.name)
-            # if run time is None, it will display as None
+        test_table = []
+        for test_name in test_names:
+            test_result = test_results.get_test(test_name.folder, test_name.name)
+            # if run time is None, it will display "" in Time column
             test_result_run_time = (
-            f'{test_result.run_time:.2f}' if test_result.run_time is not None else "None"
+            f'{test_result.run_time:.2f}' if test_result.run_time is not None else ""
             )
-            added_table.append([
+            test_table.append([
                 self._format_test_name(test_name),
                 test_result_run_time,
             ])
         # Sorted based on run time
-        added_table.sort(
-            key=lambda row: float(row[1]) if row[1] != "None" else float('-inf'),
+        test_table.sort(
+            key=lambda row: float(row[1]) if row[1] != "" else float('-inf'),
             reverse=True
         )
-        return added_table
+        return test_table
 
     def _build_same_table(self, same_names: set[TestName],
             base_results: StoredResult, head_results: StoredResult,
@@ -307,7 +290,9 @@ class TestHarnessResultsSummary:
         Returns
         -------
         removed_table : Optional[List[List]]
-            A list of removed test name, each containing a formatted test name.
+            A sorted list of removed test names and their runtime.
+            - the formatted test name (str)
+            - the runtime as a string formatted to two decimal places, or "None" if not available.
         added_table : Optional[List[List]]
             A sorted list of added test names and their runtime.
             - the formatted test name (str)
@@ -341,9 +326,12 @@ class TestHarnessResultsSummary:
         # Extract same tests
         same_names = base_names & head_names
 
-        removed_table = self._build_removed_table(removed_names) if removed_names else None
+        removed_table = self._build_diff_table(
+            removed_names,
+            base_results
+        ) if removed_names else None
 
-        added_table = self._build_added_table(
+        added_table = self._build_diff_table(
             added_names,
             head_results
         ) if added_names else None
@@ -431,7 +419,7 @@ class TestHarnessResultsSummary:
             self._format_table(
                 "### Removed tests",
                 removed_table,
-                ["Test"],
+                ["Test","Time (s)"],
                 "None"
             )
         )
