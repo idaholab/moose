@@ -45,7 +45,6 @@
                ray_mesh_output_transient_rays.e-s0001
                ray_mesh_output_transient_rays.e-s0002
                ray_mesh_output_transient_rays.e-s0003'
-    allow_test_objects = true
     requirement = 'The system shall support the mesh output of traced rays into the exodus format for a transient simulation'
     design = 'RayTracingExodus.md RayTracingMeshOutput.md'
   []
@@ -89,7 +88,6 @@
                ray_mesh_output_transient_nemesis_rays.e-s0003.4.1
                ray_mesh_output_transient_nemesis_rays.e-s0003.4.2
                ray_mesh_output_transient_nemesis_rays.e-s0003.4.3'
-    allow_test_objects = true
     min_parallel = 4
     max_parallel = 4
     requirement = 'The system shall support the mesh output of traced rays into the nemesis format for a transient simulation'
@@ -282,7 +280,6 @@
     type = Exodiff
     input = 'stationary.i'
     exodiff = 'stationary_rays.e stationary_rays.e-s0001 stationary_rays.e-s0002'
-    allow_test_objects = true
     design = 'RayTracingMeshOutput.md'
     requirement = 'The system shall support the mesh output of stationary rays'
   []

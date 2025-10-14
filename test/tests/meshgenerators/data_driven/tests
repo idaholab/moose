@@ -57,7 +57,7 @@
     [disabled]
       type = RunException
       input = 'data_driven.i'
-      cli_args = '--disallow-test-objects'
+      cli_args = 'Application/allow_data_driven_mesh_generation=false'
       detail = 'the application does not allow data-driven generation'
       expect_err = "This application does not support data-driven mesh generation."
     []

@@ -6,7 +6,6 @@
     type = 'Exodiff'
     input = 'ray_distance_aux.i'
     exodiff = 'ray_distance_aux_out.e'
-    allow_test_objects = true
     requirement = 'The system shall be able to store the distance traversed by a ray in each element in an auxiliary field.'
   []
 []

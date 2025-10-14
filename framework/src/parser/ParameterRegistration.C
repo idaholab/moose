@@ -37,8 +37,8 @@ setScalarValue(bool & value, const hit::Field & field)
     else if (strval == "0")
       value = false;
     else if (!hit::toBool(strval, &value))
-      throw std::invalid_argument("invalid boolean syntax for parameter: " + field.path() + "='" +
-                                  strval + "'");
+      throw std::invalid_argument("invalid boolean syntax for parameter: " + field.fullpath() +
+                                  "='" + strval + "'");
   }
 }
 
