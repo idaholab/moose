@@ -22,6 +22,11 @@ from TestHarness.resultsstore.storedresults import TestName, StoredResult
 from TestHarnessTestCase import TestHarnessTestCase
 from test_resultsstore_storedresults import TestResultsStoredResults
 
+# Whether or not authentication is available from env var RESULTS_READER_AUTH_FILE
+HAS_AUTH = ResultsReader.hasEnvironmentAuthentication()
+# Test database name for testing pull request results
+TEST_DATABASE_NAME = 'civet_tests_moose'
+
 MOCKED_TEST_NAME = TestName('tests/test_harness', 'always_ok')
 
 EVENT_ID = os.environ.get('CIVET_EVENT_ID')
@@ -720,6 +725,28 @@ class TestResultsSummary(TestHarnessTestCase):
                     with open(out_file.name, 'r') as f:
                         output = f.read()
                         self.assertIn('Results do not exist for event', output)
+
+    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
+    def testPRReadDataBase(self):
+        """
+        Tests pr() to read PR from database, if available
+        """
+        summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
+        with tempfile.NamedTemporaryFile() as out_file:
+            try:
+                summary.pr(
+                event_id = EVENT_ID, out_file = out_file.name
+                )
+                with open(out_file.name, 'r') as f:
+                    output = f.read()
+                    if 'Base results' in output:
+                        self.assertIn('Base results not available', output)
+                    else:
+                        self.assertIn('Removed tests', output)
+                        self.assertIn('Added tests', output)
+                        self.assertIn('Run time changes', output)
+            except SystemExit as e:
+                self.assertRaisesRegex(SystemExit, 'Results do not exist for event')
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
