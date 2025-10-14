@@ -11,7 +11,9 @@ In this example, the mesh block is 3D.
 
 The results below show the final design for the 3D MBB problem.
 
-!media large_media/optimization/3d_mbb.mp4 style=width:100%; controls=False autoplay=True loop=True
+!media large_media/optimization/3d_mbb.mp4
+       style=width:100%; controls=False autoplay=True loop=True
+       alt=Rotating view of the 3D design.
 
 
 

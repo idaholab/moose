@@ -13,4 +13,5 @@ MARMOT is a mesoscale fuel performance code. As such, it can predict the evoluti
 
 !col small=8 medium=4 large=4
 !media application_logos/marmot_description.png style=width:100%;
+       alt=Example output from a MARMOT simulation.
 !row-end!

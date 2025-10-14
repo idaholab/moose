@@ -25,4 +25,6 @@ k(u) \equiv \frac{1}{\sqrt{1 + |\nabla u|^2}} \\
 
 ## Laplace-Young Solution
 
-!media darcy_thermo_mech/laplaceyoung.png style=width:70%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/laplaceyoung.png
+       style=width:70%;margin-left:auto;margin-right:auto;display:block;
+       alt=Solution u to the Laplace-Young problem.

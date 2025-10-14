@@ -9,6 +9,8 @@ This tutorial is the focus of the live hosted [examples_and_tutorials/index.md#w
 
 !media tutorial01_app_development/moose_intro.png
        style=width:80%;display:block;margin-left:auto;margin-right:auto;
+       alt=Illustration of some of the physics which MOOSE can use to model a reactor core.
+
 
 ## Tutorial Contents id=contents
 

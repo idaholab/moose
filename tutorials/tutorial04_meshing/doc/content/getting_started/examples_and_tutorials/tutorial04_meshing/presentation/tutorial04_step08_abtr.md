@@ -23,6 +23,7 @@
 
 !media tutorial04_meshing/hom_abtr_stepbystep.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The process of building up a 3D core from homogenized assemblies.
 
 !col-end!
 
@@ -53,6 +54,7 @@
 
 !media tutorial04_meshing/hom_abtr_assembly_quads.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=Homogeneous hexagonal assemblies represented using quads.
 
 !col-end!
 
@@ -83,6 +85,7 @@
 
 !media tutorial04_meshing/hom_abtr_assembly_quads.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=Homogeneous hexagonal assemblies represented using quads.
 
 !col-end!
 
@@ -115,6 +118,7 @@
 
 !media tutorial04_meshing/hom_abtr_2d_core_with_dummies.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=A full core, including dummy assemblies at the edges.
 
 !col-end!
 !row-end!
@@ -138,6 +142,7 @@
 
 !media tutorial04_meshing/hom_abtr_2d_core.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The full core with dummy assemblies removed.
 
 !col-end!
 
@@ -173,6 +178,7 @@
 
 !media tutorial04_meshing/hom_abtr_3d_core.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The core extruded into 3D.
 
 !col-end!
 
@@ -195,6 +201,7 @@
 
 !media tutorial04_meshing/hom_abtr_3d_core_with_plane_id.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The 3D core with plane-level reporting IDs.
 
 !col-end!
 
@@ -221,6 +228,7 @@
 
 !media tutorial04_meshing/hom_abtr_3d_sidesets.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=Boundary names on the core.
 
 !col-end!
 
@@ -299,6 +307,7 @@ So far, the example shown in this section has relied on explicit region ID mappi
 
 !media tutorial04_meshing/hom_abtr_vpp_csv.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=CSV files describing integral variable quantities as a function of each combination of input reporting IDs.
 
 !col-end!
 
@@ -306,6 +315,7 @@ So far, the example shown in this section has relied on explicit region ID mappi
 
 !media tutorial04_meshing/hom_abtr_script_vis.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=Integrated values in some parts of the mesh.
 
 !col-end!
 

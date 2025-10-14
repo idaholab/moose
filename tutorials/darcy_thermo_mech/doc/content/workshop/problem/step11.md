@@ -56,3 +56,4 @@ cd problems
 ## Step 11: Results
 
 !media darcy_thermo_mech/step09_result.mp4
+       alt=Temperature and Von Mises stress values produced by the simulation above.

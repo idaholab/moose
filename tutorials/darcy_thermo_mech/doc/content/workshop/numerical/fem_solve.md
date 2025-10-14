@@ -23,7 +23,9 @@ where $\mathcal{J}_e$ is the Jacobian of the map from the physical element to th
 
 ## Reference Element (Quad9)
 
-!media darcy_thermo_mech/fem_quad9_ref.png style=width:100%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/fem_quad9_ref.png
+       style=width:100%;margin-left:auto;margin-right:auto;display:block;
+       alt=The mapping between reference-space and real-space for a second-order quadrilateral element.
 
 !---
 
@@ -101,7 +103,9 @@ f'(x_n) \delta x_{n+1} &= -f(x_n) \\
 x_{n+1} &= x_n + \delta x_{n+1}
 \end{aligned}
 
-!media darcy_thermo_mech/newtons_method.png style=width:50%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/newtons_method.png
+       style=width:50%;margin-left:auto;margin-right:auto;display:block;
+       alt=Plot demonstrating Newton's method for iteratively finding a solution by projecting along the tangents of a curve.
 
 !---
 

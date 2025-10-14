@@ -137,13 +137,17 @@ Flow in a lid-driven cavity with Re=417 (left) and Re=833 (right).
 !row!
 !col! width=50%
 
-!media darcy_thermo_mech/ns-re-417.png style=width:80%;background:white;
+!media darcy_thermo_mech/ns-re-417.png
+       style=width:80%;background:white;
+       alt=Fluid speed in a lid-driven cavity with a Reynold's number of 417.
 
 !col-end!
 
 !col! width=50%
 
-!media darcy_thermo_mech/ns-re-833.png style=width:82%;background:white;
+!media darcy_thermo_mech/ns-re-833.png
+       style=width:82%;background:white;
+       alt=Fluid speed in a lid-driven cavity with a Reynold's number of 833.
 
 !col-end!
 !row-end!
@@ -247,7 +251,9 @@ applications. Capabilities include:
 
 !col! width=40%
 
-!media darcy_thermo_mech/stochastic_tools.png style=width:100%;background:white;
+!media darcy_thermo_mech/stochastic_tools.png
+       style=width:100%;background:white;
+       alt=A histogram exhibiting a Gaussian distribution of temperatures.
 
 !col-end!
 !row-end!

@@ -56,6 +56,7 @@ consequence of failure of the software:
 
 !style halign=center
 !media training/waterfall.png
+       alt=A summary image of the "waterfall" software development model.
 
 !---
 
@@ -66,6 +67,7 @@ consequence of failure of the software:
 
 !style halign=center
 !media training/agile2.png style=width:50%;
+       alt=A summary image of the "agile" software development model.
 
 !---
 

@@ -41,9 +41,11 @@ Here are solution snapshots from the beginning and end times from running `ex06-
 
 !media large_media/examples/ex6-1-out.png
        style=width:47%;display:inline-flex;
+       alt=The distribution of the diffused quantity at the start of the simulation.
 
 !media large_media/examples/ex6-2-out.png
        style=width:47%;display:inline-flex;margin-left:3%
+       alt=The distribution of the diffused quantity at the end of the simulation.
 
 ## Complete Source Files
 

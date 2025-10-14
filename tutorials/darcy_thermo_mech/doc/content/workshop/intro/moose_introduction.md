@@ -5,7 +5,9 @@ Multi-physics Object Oriented Simulation Environment
 
 !---
 
-!media darcy_thermo_mech/moose_intro.png style=width:75%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/moose_intro.png
+       style=width:75%;margin-left:auto;margin-right:auto;display:block;
+       alt=Promotional image showing some of the different types of physics MOOSE can capture when simulating a nuclear reactor core.
 
 !---
 
@@ -39,7 +41,9 @@ Multi-physics Object Oriented Simulation Environment
 
 !---
 
-!media darcy_thermo_mech/moose_design.png style=width:75%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/moose_design.png
+       style=width:75%;margin-left:auto;margin-right:auto;display:block;
+       alt=The MOOSE technology stack.
 
 !---
 
@@ -64,13 +68,17 @@ Multi-physics Object Oriented Simulation Environment
 
 ## Object-oriented, pluggable system
 
-!media darcy_thermo_mech/moose_systems.png style=width:75%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/moose_systems.png
+       style=width:75%;margin-left:auto;margin-right:auto;display:block;
+       alt=The components of MOOSE.
 
 !---
 
 ## Example Code
 
-!media darcy_thermo_mech/moose_code.png style=width:100%;margin-left:auto;margin-right:auto;display:block;box-shadow:none;
+!media darcy_thermo_mech/moose_code.png
+       style=width:100%;margin-left:auto;margin-right:auto;display:block;box-shadow:none;
+       alt=The relationship between the strong form of an equation, the weak form, and the code for one of the terms.
 
 !---
 
@@ -88,7 +96,9 @@ Multi-physics Object Oriented Simulation Environment
 
 ## Development Process
 
-!media darcy_thermo_mech/civet_flow.png style=width:100%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/civet_flow.png
+       style=width:100%;margin-left:auto;margin-right:auto;display:block;
+       alt=Flowchart for developing MOOSE, including continuous integration.
 
 !---
 
@@ -96,11 +106,15 @@ Multi-physics Object Oriented Simulation Environment
 
 ###### https://github.com/idaholab/moose/discussions
 
-!media darcy_thermo_mech/moose_users.png style=width:50%;margin-left:auto;margin-right:auto;display:block;
+!media darcy_thermo_mech/moose_users.png
+       style=width:50%;margin-left:auto;margin-right:auto;display:block;
+       alt=Screenshot of MOOSE discussions on GitHub.
 
 !---
 
-!media darcy_thermo_mech/moose_contributors.png style=width:80%;margin-left:auto;margin-right:auto;display:block;background:white;
+!media darcy_thermo_mech/moose_contributors.png
+       style=width:80%;margin-left:auto;margin-right:auto;display:block;background:white;
+       alt=Plot of the total number of contributions and unique contributors to MOOSE, from 2008 to 2023.
 
 !---
 

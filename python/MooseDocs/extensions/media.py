@@ -10,7 +10,7 @@ import os
 import subprocess
 import logging
 import mooseutils
-from ..common import exceptions
+from ..common import exceptions, report_error
 from ..base import components, Extension, LatexRenderer
 from ..tree import tokens, html, latex, pages
 from . import command, floats
@@ -20,9 +20,10 @@ LOG = logging.getLogger(__name__)
 def make_extension(**kwargs):
     return MediaExtension(**kwargs)
 
-Image = tokens.newToken('Image', src='', tex='', dark='', href='')
+Image = tokens.newToken('Image', src='', tex='', dark='', href='', alt='')
 Video = tokens.newToken('Video', src='', tex='', quicktime='', youtube=False, dark='',
-                        controls=True, poster=None, autoplay=True, loop=True, tstart=None, tstop=None)
+                        controls=True, poster=None, autoplay=True, loop=True,
+                        tstart=None, tstop=None, alt='')
 
 class MediaExtension(command.CommandExtension):
     """
@@ -100,6 +101,7 @@ class ImageCommand(command.CommandComponent):
         settings['latex_src'] = (None, "Image to utilize when rendering with LaTeX")
         settings['dark_src'] = (None, "Image to utilize with dark HTML theme")
         settings['link'] = (None, "Anchor URL to navigate to upon being clicked")
+        settings['alt'] = (None, "Alt text describing image (defaults to caption)")
         settings.update(floats.caption_settings())
         return settings
 
@@ -108,7 +110,12 @@ class ImageCommand(command.CommandComponent):
         flt = floats.create_float(parent, self.extension, self.reader, page, settings,
                                   bottom=True, **self.attributes(settings))
         img = Image(flt, src=info['subcommand'], dark=settings['dark_src'],
-                    tex=settings['latex_src'], href=settings['link'])
+                    tex=settings['latex_src'], href=settings['link'],
+                    alt=settings['alt'] or settings['caption'])
+        if not (settings['alt'] or settings['caption']):
+            msg = "Image has no 'caption' or 'alt' text. Provide 'alt' text to improve accessibility of website."
+            LOG.warning(report_error(msg, page.source, info.line, info[0], prefix='WARNING'))
+
         if flt is parent:
             img.attributes.update(**self.attributes(settings))
         return parent
@@ -121,6 +128,7 @@ class ScriptCommand(ImageCommand):
     def defaultSettings():
         settings = ImageCommand.defaultSettings()
         settings['image_name'] = (None, "Name of image created by the Python plot script, defaults to the name of the script with .png extension")
+        settings['alt'] = (None, "Alt text describing image (defaults to caption)")
         settings.update(floats.caption_settings())
         return settings
 
@@ -161,7 +169,11 @@ class ScriptCommand(ImageCommand):
         flt = floats.create_float(parent, self.extension, self.reader, page, settings,
                                   bottom=True, **self.attributes(settings))
         img = Image(flt, src=plot_name, dark=settings['dark_src'],
-                    tex=settings['latex_src'])
+                    tex=settings['latex_src'],
+                    alt=settings['alt'] or settings['caption'])
+        if not (settings['alt'] or settings['caption']):
+            msg = "Image has no 'caption' or 'alt' text. Provide 'alt' text to improve accessibility of website."
+            LOG.warning(report_error(msg, page.source, info.line, info[0], prefix='WARNING'))
         if flt is parent:
             img.attributes.update(**self.attributes(settings))
         return parent
@@ -182,6 +194,7 @@ class VideoCommand(command.CommandComponent):
         settings['poster'] = (None, "Add a 'poster' image the the video")
         settings['quicktime'] = (None, "Video to utilize Macintosh codecs (for alpha transparencies)")
         settings['dark_src'] = (None, "Image to utilize with dark HTML theme")
+        settings['alt'] = (None, "Alt text describing image (defaults to caption)")
         settings.update(floats.caption_settings())
         return settings
 
@@ -200,7 +213,11 @@ class VideoCommand(command.CommandComponent):
                     tstart=settings['tstart'],
                     tstop=settings['tstop'],
                     dark=settings['dark_src'],
-                    quicktime=settings['quicktime'])
+                    quicktime=settings['quicktime'],
+                    alt=settings['alt'] or settings['caption'])
+        if not (settings['alt'] or settings['caption']):
+            msg = "Video has no 'caption' or 'alt' text. Provide 'alt' text to improve accessibility of website."
+            LOG.warning(report_error(msg, page.source, info.line, info[0], prefix='WARNING'))
 
         if flt is parent:
             vid.attributes.update(**self.attributes(settings))
@@ -225,7 +242,10 @@ class RenderImage(components.RenderComponent):
             pic = html.Tag(parent, 'picture')
         if token['dark']:
             html.Tag(pic, 'source', srcset=token['dark'], media='(prefers-color-scheme: dark)')
-        html.Tag(pic, 'img', token, src=src)
+        if token['alt']:
+            html.Tag(pic, 'img', token, src=src, alt=token['alt'])
+        else:
+            html.Tag(pic, 'img', token, src=src)
         return pic
 
     def createMaterialize(self, parent, token, page):
@@ -330,6 +350,8 @@ class RenderVideo(components.RenderComponent):
         if video['autoplay']:
             video['muted'] = True
 
+        if token['alt']:
+            video['aria-label'] = token['alt']
         return video
 
 

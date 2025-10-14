@@ -45,3 +45,4 @@ moose-opt -i step7.i
 Displacements are exaggerated to be visible.
 
 !media results/step07.png
+       alt=Stress fields for the aluminum and concrete components of the reactor vessel. The displacement to the material is also illustrated (in exaggerated form) by deformation to the mesh.
