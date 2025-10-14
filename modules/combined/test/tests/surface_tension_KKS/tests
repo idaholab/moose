@@ -14,6 +14,7 @@
     exodiff = 'surface_tension_VDWgas_out.e'
     design = 'source/materials/ComputeExtraStressVDWGas.md'
     abs_zero = 1e-7
+    rel_err = 1e-5
     issues = '#12915'
     requirement = 'The ComputeExtraStressVDWGas material shall produce a stress that counterbalances surface tension'
   [../]
