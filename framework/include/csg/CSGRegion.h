@@ -51,7 +51,7 @@ public:
    * @param region_b reference to second region to union or intersect
    * @param region_type type of region operation (UNION or INTERSECTION)
    */
-  CSGRegion(const CSGRegion & region_a, const CSGRegion & region_b, std::string region_type);
+  CSGRegion(const CSGRegion & region_a, const CSGRegion & region_b, const std::string & region_type);
 
   /**
    * @brief Constructor for complement or empty region (clear the region)
@@ -59,7 +59,7 @@ public:
    * @param region reference to region to apply complement
    * @param region_type type of region to apply (COMPLEMENT or EMPTY)
    */
-  CSGRegion(const CSGRegion & region, std::string region_type);
+  CSGRegion(const CSGRegion & region, const std::string & region_type);
 
   /**
    * Destructor
@@ -85,7 +85,7 @@ public:
    *
    * @return region type string
    */
-  const std::string getRegionTypeString() const { return _region_type; }
+  const std::string & getRegionTypeString() const { return _region_type; }
 
   /**
    * @brief Get the list of surfaces associated with the region
@@ -128,7 +128,7 @@ protected:
  * @param op operator to consider
  * @return region string with () removed if applicable
  */
-const std::string stripRegionString(std::string region_str, std::string op);
+const std::string stripRegionString(const std::string & region_str, const std::string & op);
 
 /// Operation overloads for operation based region construction
 

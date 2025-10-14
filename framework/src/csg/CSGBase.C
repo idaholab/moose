@@ -156,8 +156,8 @@ CSGBase::joinOtherBase(std::unique_ptr<CSGBase> base, std::string & new_root_nam
 
 void
 CSGBase::joinOtherBase(std::unique_ptr<CSGBase> base,
-                       std::string & new_root_name_base,
-                       std::string & new_root_name_join)
+                       const std::string & new_root_name_base,
+                       const std::string & new_root_name_join)
 {
   joinSurfaceList(base->getSurfaceList());
   joinCellList(base->getCellList());
@@ -204,7 +204,7 @@ CSGBase::joinUniverseList(CSGUniverseList & univ_list)
 }
 
 void
-CSGBase::joinUniverseList(CSGUniverseList & univ_list, std::string & new_root_name_incoming)
+CSGBase::joinUniverseList(CSGUniverseList & univ_list, const std::string & new_root_name_incoming)
 {
   // case 2: incoming root is turned into new universe and existing root remains root
 
@@ -225,8 +225,8 @@ CSGBase::joinUniverseList(CSGUniverseList & univ_list, std::string & new_root_na
 
 void
 CSGBase::joinUniverseList(CSGUniverseList & univ_list,
-                          std::string & new_root_name_base,
-                          std::string & new_root_name_incoming)
+                          const std::string & new_root_name_base,
+                          const std::string & new_root_name_incoming)
 {
   // case 3: each root universe becomes a new universe and a new root is created
 

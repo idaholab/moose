@@ -29,7 +29,7 @@ CSGRegion::CSGRegion(const CSGSurface & surf, const CSGSurface::Halfspace halfsp
 // intersection and union constructor
 CSGRegion::CSGRegion(const CSGRegion & region_a,
                      const CSGRegion & region_b,
-                     std::string region_type)
+                     const std::string & region_type)
 {
   _region_type = region_type;
   if (getRegionType() != RegionType::INTERSECTION && getRegionType() != RegionType::UNION)
@@ -172,7 +172,7 @@ CSGRegion::operator==(const CSGRegion & other) const
     const bool num_cells_eq = all_surfs.size() == other_surfs.size();
     if (num_cells_eq)
     {
-      for (unsigned int i = 0; i < all_surfs.size(); ++i)
+      for (const auto i : index_range(all_surfs))
         if (all_surfs[i].get() != other_surfs[i].get())
           return false;
       return true;

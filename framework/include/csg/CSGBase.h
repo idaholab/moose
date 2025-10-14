@@ -301,8 +301,8 @@ public:
    * @param new_root_name_join new name for the universe generated from the incoming root universe
    */
   void joinOtherBase(std::unique_ptr<CSGBase> base,
-                     std::string & new_root_name_base,
-                     std::string & new_root_name_join);
+                     const std::string & new_root_name_base,
+                     const std::string & new_root_name_join);
 
   /**
    * @brief generate the JSON representation output for the CSG object
@@ -386,7 +386,7 @@ private:
    * @param new_root_name_incoming new name for the universe generated from the incoming root
    * universe
    */
-  void joinUniverseList(CSGUniverseList & univ_list, std::string & new_root_name_incoming);
+  void joinUniverseList(CSGUniverseList & univ_list, const std::string & new_root_name_incoming);
 
   /**
    * @brief join a separate CSGUniverseList object to this one;
@@ -400,8 +400,8 @@ private:
    * universe
    */
   void joinUniverseList(CSGUniverseList & univ_list,
-                        std::string & new_root_name_base,
-                        std::string & new_root_name_incoming);
+                        const std::string & new_root_name_base,
+                        const std::string & new_root_name_incoming);
 
   // check that surfaces used in this region are a part of this CSGBase instance
   void checkRegionSurfaces(const CSGRegion & region) const;
