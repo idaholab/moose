@@ -9,6 +9,7 @@ detailed in the theory manual:
 
 - [XFEM Theory Manual](xfem/theory/theory.md)
 - [Embedded Interface](xfem/theory/embedded_interface.md)
+- [Examples](xfem/theory/examples/index.md)
 
 Tables provided in the [Objects, Actions, and Syntax](#objects-actions-and-syntax) section list
 objects contained within the XFEM module followed by short explanations of the objects' purposes.
