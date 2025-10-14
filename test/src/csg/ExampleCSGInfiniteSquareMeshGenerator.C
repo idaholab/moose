@@ -19,8 +19,6 @@ ExampleCSGInfiniteSquareMeshGenerator::validParams()
   InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<Real>("side_length", "Side length of infinite square.");
-  // Declare that this generator has a generateData method
-  MeshGenerator::setHasGenerateData(params);
   // Declare that this generator has a generateCSG method
   MeshGenerator::setHasGenerateCSG(params);
   return params;

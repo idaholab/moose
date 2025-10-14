@@ -21,8 +21,6 @@ TestCSGAxialSurfaceMeshGenerator::validParams()
   params.addRequiredParam<MeshGeneratorName>("input", "The input MeshGenerator.");
   // additional params for this specific mesh generator
   params.addRequiredParam<Real>("axial_height", "Axial height of the model.");
-  // Declare that this generator has a generateData method
-  MeshGenerator::setHasGenerateData(params);
   // Declare that this generator has a generateCSG method
   MeshGenerator::setHasGenerateCSG(params);
   return params;

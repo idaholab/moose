@@ -18,8 +18,6 @@ TestCSGInputNotMovedMeshGenerator::validParams()
   InputParameters params = MeshGenerator::validParams();
 
   params.addRequiredParam<MeshGeneratorName>("input", "The input MeshGenerator.");
-  // Declare that this generator has a generateData method
-  MeshGenerator::setHasGenerateData(params);
   // Declare that this generator has a generateCSG method
   MeshGenerator::setHasGenerateCSG(params);
   return params;
