@@ -420,10 +420,9 @@ BreakMeshByBlockGenerator::generate()
       _factory.releaseSharedObjects(*rm);
   }
 
-  // Prepare the new IDs
-  mesh->prepare_for_use();
-
   addDisconnectedNeighborsFromMap(elem_side_to_fake_neighbor_elem_side, *mesh);
+
+  mesh->set_isnt_prepared();
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
@@ -656,5 +655,5 @@ BreakMeshByBlockGenerator::addDisconnectedNeighborsFromMap(
   }
 
   // Update the neighbor information in the mesh
-  mesh.find_neighbors();
+  mesh.find_disconnected_neighbors();
 }
