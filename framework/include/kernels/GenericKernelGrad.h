@@ -22,19 +22,6 @@ using GenericKernelGrad = std::conditional_t<is_ad, ADKernelGrad, KernelGrad>;
   usingTransientInterfaceMembers;                                                                  \
   usingTaggingInterfaceMembers;                                                                    \
   usingBlockRestrictableMembers;                                                                   \
+  usingCoupleableMembers;                                                                          \
   using GenericKernelGrad<is_ad>::_qp;                                                             \
-  using GenericKernelGrad<is_ad>::_i;                                                              \
-  using GenericKernelGrad<is_ad>::_j;                                                              \
-  using GenericKernelGrad<is_ad>::_u;                                                              \
-  using GenericKernelGrad<is_ad>::_phi;                                                            \
-  using GenericKernelGrad<is_ad>::_test;                                                           \
-  using GenericKernelGrad<is_ad>::_grad_test;                                                      \
-  using GenericKernelGrad<is_ad>::_q_point;                                                        \
-  using GenericKernelGrad<is_ad>::_var;                                                            \
-  using GenericKernelGrad<is_ad>::_coupled_moose_vars;                                             \
-  using GenericKernelGrad<is_ad>::_grad_u;                                                         \
-  using GenericKernelGrad<is_ad>::_grad_phi;                                                       \
-  using GenericKernelGrad<is_ad>::getVar;                                                          \
-  using Coupleable::coupled;                                                                       \
-  using Coupleable::isCoupled;                                                                     \
-  using Coupleable::coupledComponents
+  using GenericKernelGrad<is_ad>::_grad_u
