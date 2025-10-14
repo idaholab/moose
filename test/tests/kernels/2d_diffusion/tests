@@ -119,7 +119,7 @@
   []
   [matdiffusion]
     requirement = 'The system shall provide a diffusion kernel that obtains the diffusion coefficient from a material property'
-    design = '/MatDiffusion.md /ADMatDiffusion.md'
+    design = '/MatDiffusion.md'
     issues = '#12074 #13260'
     [nonad]
       type = 'Exodiff'
@@ -139,7 +139,7 @@
   [matdiffusion_coupled]
     requirement = 'The system shall provide a diffusion kernel that obtains the diffusion coefficient from a material property coupled with two variables'
     issues = '#12074 #15915'
-    design = '/MatDiffusion.md /ADMatDiffusion.md'
+    design = '/MatDiffusion.md'
     [nonad]
       type = 'Exodiff'
       input = 'matdiffusion_coupled.i'
