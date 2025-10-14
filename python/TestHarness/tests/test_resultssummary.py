@@ -25,7 +25,8 @@ from test_resultsstore_storedresults import TestResultsStoredResults
 # Whether or not authentication is available from env var RESULTS_READER_AUTH_FILE
 HAS_AUTH = ResultsReader.hasEnvironmentAuthentication()
 # Test database name for testing pull request results
-TEST_DATABASE_NAME = 'civet_tests_moose'
+LIVE_DATABASE_NAME = 'civet_tests_moose_store_results_live'
+LIVE_TEST_NAME = TestName('tests/test_harness', 'ok')
 
 MOCKED_TEST_NAME = TestName('tests/test_harness', 'always_ok')
 
@@ -726,32 +727,42 @@ class TestResultsSummary(TestHarnessTestCase):
                         output = f.read()
                         self.assertIn('Results do not exist for event', output)
 
-    @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
-    def testPRReadDataBase(self):
+    @unittest.skipUnless(os.environ.get('TEST_RESULTSSUMMARY'), "Skipping because TEST_RESULTSSUMMARY not set")
+    @unittest.skipUnless(os.environ.get('CIVET_EVENT_CAUSE', '').startswith('Pull'), 'Skipping because not on a pull request')
+    def testPRLive(self):
         """
-        Tests pr() to read PR from database, if available
+        Tests pr() to read PR from live database
         """
-        try:
-            summary = TestHarnessResultsSummary(TEST_DATABASE_NAME)
-        except ValueError as e:
-            self.assertRaisesRegex(ValueError, f'Database {TEST_DATABASE_NAME} not found')
-            return
+        # Set the run time and run time rate to zero, so that run time changes show in summary table
+        fake_run_time_floor = 0.00
+        fake_run_time_rate_floor = 0.00
+        # Connect to database and get data from live database
+        summary = TestHarnessResultsSummary(LIVE_DATABASE_NAME)
+        head_results = summary.get_event_results(EVENT_ID)
+        base_results = summary.get_commit_results(head_results.base_sha)
+        base_test = base_results.get_test(LIVE_TEST_NAME.folder, LIVE_TEST_NAME.name)
+        head_test = head_results.get_test(LIVE_TEST_NAME.folder, LIVE_TEST_NAME.name)
 
         with tempfile.NamedTemporaryFile() as out_file:
-            try:
-                summary.pr(
-                event_id = EVENT_ID, out_file = out_file.name
-                )
-                with open(out_file.name, 'r') as f:
-                    output = f.read()
-                    if 'Base results' in output:
-                        self.assertIn('Base results not available', output)
-                    else:
-                        self.assertIn('Removed tests', output)
-                        self.assertIn('Added tests', output)
-                        self.assertIn('Run time changes', output)
-            except SystemExit as e:
-                self.assertRaisesRegex(SystemExit, 'Results do not exist for event')
+            summary.pr(
+                event_id = EVENT_ID,
+                out_file = out_file.name,
+                run_time_floor = fake_run_time_floor,
+                run_time_rate_floor = fake_run_time_rate_floor
+            )
+            # There is run time changes, so check the format of summary result
+            with open(out_file.name, 'r') as f:
+                output = f.read()
+                self.assertIn('Removed tests', output)
+                self.assertIn('Added tests', output)
+                self.assertIn('Run time changes', output)
+                self.assertIn('Test', output)
+                self.assertIn(str(LIVE_TEST_NAME), output)
+                self.assertIn('Base (s)', output)
+                self.assertIn(f'{base_test.run_time:.2f}',output)
+                self.assertIn('Head (s)', output)
+                self.assertIn(f'{head_test.run_time:.2f}',output)
+                self.assertIn('+/-', output)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
