@@ -1144,6 +1144,45 @@ public:
 
     return this->operator[](i0 - _d[0]);
   }
+
+  /**
+   * Device BLAS operations
+   */
+  ///@{
+  /**
+   * Perform \p a * \p x \p op \p b * \p y and write the result to this array
+   * @param accumulate Whether to accumulate or overwrite the result
+   */
+  template <typename U = T>
+  typename std::enable_if<std::is_same<U, Real>::value, void>::type
+  axby(const U a,
+       const Array<U, 1> & x,
+       const char op,
+       const U b,
+       const Array<U, 1> & y,
+       const bool accumulate = false);
+  /**
+   * Scale \p x with \p a and write the result to this array
+   */
+  template <typename U = T>
+  typename std::enable_if<std::is_same<U, Real>::value, void>::type scal(const U a,
+                                                                         const Array<U, 1> & x);
+  /**
+   * Scale this array with \p a
+   */
+  template <typename U = T>
+  typename std::enable_if<std::is_same<U, Real>::value, void>::type scal(const U a);
+  /**
+   * Perform dot product between this array and \p x
+   */
+  template <typename U = T>
+  typename std::enable_if<std::is_same<U, Real>::value, Real>::type dot(const Array<U, 1> & x);
+  /**
+   * Compute 2-norm of this array
+   */
+  template <typename U = T>
+  typename std::enable_if<std::is_same<U, Real>::value, Real>::type nrm2();
+  ///}@
 #endif
 };
 
