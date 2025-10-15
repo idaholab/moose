@@ -211,8 +211,17 @@ public:
    */
   std::shared_ptr<mfem::ParGridFunction> getGridFunction(const std::string & name);
 
+  /**
+   * set newton solver parameters
+   */
+  void setNewtonParamaters(unsigned int nl_max_its, mfem::real_t nl_abs_tol, mfem::real_t nl_rel_tol, unsigned int print_level);
+
 protected:
   MFEMProblemData _problem_data;
+  unsigned int _nl_max_its;
+  mfem::real_t _nl_abs_tol;
+  mfem::real_t _nl_rel_tol;
+  unsigned int _print_level;
 };
 
 #endif

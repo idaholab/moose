@@ -113,6 +113,10 @@
 [Executioner]
   type = MFEMSteady
   device = cpu
+  nl_max_its = 100
+  nl_abs_tol = 1.0e-10
+  nl_rel_tol = 1.0e-9
+  print_level = 1
 []
 
 [Outputs]
