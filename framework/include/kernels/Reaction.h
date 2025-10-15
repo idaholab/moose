@@ -24,7 +24,6 @@ public:
 
 protected:
   virtual GenericReal<is_ad> computeQpResidual() override;
-  virtual Real computeQpJacobian() override;
 
   /// Scalar coefficient representing the relative amount consumed per unit time
   const Real & _rate;
@@ -32,5 +31,17 @@ protected:
   usingGenericKernelMembers;
 };
 
-typedef ReactionTempl<false> Reaction;
+class Reaction : public ReactionTempl<false>
+{
+public:
+  static InputParameters validParams();
+
+  Reaction(const InputParameters & parameters);
+
+  using ReactionTempl<false>::ReactionTempl;
+
+protected:
+  virtual Real computeQpJacobian() override;
+};
+
 typedef ReactionTempl<true> ADReaction;

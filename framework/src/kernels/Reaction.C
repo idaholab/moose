@@ -38,16 +38,17 @@ ReactionTempl<is_ad>::computeQpResidual()
   return _test[_i][_qp] * _rate * _u[_qp];
 }
 
-template <bool is_ad>
-Real
-ReactionTempl<is_ad>::computeQpJacobian()
+InputParameters
+Reaction::validParams()
 {
-  // This function will never be called for the AD version. But because C++ does
-  // not support an optional function declaration based on a template parameter,
-  // we must keep this template for all cases.
-  mooseAssert(!is_ad,
-              "In ADReaction, computeQpJacobian should not be called. Check computeJacobian "
-              "implementation.");
+  return ReactionTempl<false>::validParams();
+}
+
+Reaction::Reaction(const InputParameters & parameters) : ReactionTempl<false>(parameters) {}
+
+Real
+Reaction::computeQpJacobian()
+{
   return _test[_i][_qp] * _rate * _phi[_j][_qp];
 }
 
