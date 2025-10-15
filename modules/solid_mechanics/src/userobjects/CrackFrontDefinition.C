@@ -353,16 +353,16 @@ CrackFrontDefinition::initialSetup()
 void
 CrackFrontDefinition::updateCrackFrontPoints()
 {
-    _crack_front_points =
-        _crack_front_points_provider->getCrackFrontPoints(_num_points_from_provider);
-    updateCrackFrontGeometry();
-    std::size_t num_crack_front_points = getNumCrackFrontPoints();
-    if (_q_function_type == "GEOMETRY")
-      for (std::size_t i = 0; i < num_crack_front_points; ++i)
-      {
-        bool is_point_on_intersecting_boundary = isPointWithIndexOnIntersectingBoundary(i);
-        _is_point_on_intersecting_boundary.push_back(is_point_on_intersecting_boundary);
-      }
+  _crack_front_points =
+      _crack_front_points_provider->getCrackFrontPoints(_num_points_from_provider);
+  updateCrackFrontGeometry();
+  std::size_t num_crack_front_points = getNumCrackFrontPoints();
+  if (_q_function_type == "GEOMETRY")
+    for (std::size_t i = 0; i < num_crack_front_points; ++i)
+    {
+      bool is_point_on_intersecting_boundary = isPointWithIndexOnIntersectingBoundary(i);
+      _is_point_on_intersecting_boundary.push_back(is_point_on_intersecting_boundary);
+    }
 }
 
 void

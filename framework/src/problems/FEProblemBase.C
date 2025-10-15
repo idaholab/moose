@@ -8296,7 +8296,7 @@ FEProblemBase::updateMeshXFEM()
     else
       _console << "\nXFEM update complete: Mesh not modified" << std::endl;
   }
-  return (updated | crack_front_advanced);
+  return (updated || crack_front_advanced);
 }
 
 void
