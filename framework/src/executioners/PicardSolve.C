@@ -29,22 +29,28 @@ PicardSolve::allocateStorage(const bool primary)
 {
   if (!performingRelaxation(primary))
     return;
+  findTransformedSystem(primary);
 
   const std::vector<PostprocessorName> * transformed_pps;
   std::vector<std::vector<PostprocessorValue>> * transformed_pps_values;
   if (primary)
   {
-    _old_tag_id =
-        _problem.addVectorTag(Moose::PREVIOUS_FP_SOLUTION_TAG, Moose::VECTOR_TAG_SOLUTION);
-    _solver_sys.needSolutionState(1, Moose::SolutionIterationType::FixedPoint, PARALLEL);
-
+    if (_transformed_sys)
+    {
+      _old_tag_id =
+          _problem.addVectorTag(Moose::PREVIOUS_FP_SOLUTION_TAG, Moose::VECTOR_TAG_SOLUTION);
+      _transformed_sys->needSolutionState(1, Moose::SolutionIterationType::FixedPoint, PARALLEL);
+    }
     transformed_pps = &_transformed_pps;
     transformed_pps_values = &_transformed_pps_values;
   }
   else
   {
-    _secondary_old_tag_id = _problem.addVectorTag("secondary_xn_m1", Moose::VECTOR_TAG_SOLUTION);
-    _solver_sys.addVector(_secondary_old_tag_id, false, PARALLEL);
+    if (_transformed_sys)
+    {
+      _secondary_old_tag_id = _problem.addVectorTag("secondary_xn_m1", Moose::VECTOR_TAG_SOLUTION);
+      _transformed_sys->addVector(_secondary_old_tag_id, false, PARALLEL);
+    }
 
     transformed_pps = &_secondary_transformed_pps;
     transformed_pps_values = &_secondary_transformed_pps_values;
@@ -59,7 +65,7 @@ PicardSolve::allocateStorage(const bool primary)
 void
 PicardSolve::saveVariableValues(const bool primary)
 {
-  // Primary is copied back by _solver_sys.copyPreviousFixedPointSolutions()
+  // Primary is copied back by _transformed_sys->copyPreviousFixedPointSolutions()
   if (!performingRelaxation(primary) || primary)
     return;
 
@@ -68,8 +74,8 @@ PicardSolve::saveVariableValues(const bool primary)
               "allocateStorage has not been called with primary = " + Moose::stringify(primary));
 
   // Save variable previous values
-  NumericVector<Number> & solution = _solver_sys.solution();
-  NumericVector<Number> & transformed_old = _solver_sys.getVector(_secondary_old_tag_id);
+  NumericVector<Number> & solution = _transformed_sys->solution();
+  NumericVector<Number> & transformed_old = _transformed_sys->getVector(_secondary_old_tag_id);
   transformed_old = solution;
 }
 
@@ -155,8 +161,8 @@ PicardSolve::transformVariables(const std::set<dof_id_type> & transformed_dofs, 
     old_tag_id = _secondary_old_tag_id;
   }
 
-  NumericVector<Number> & solution = _solver_sys.solution();
-  NumericVector<Number> & transformed_old = _solver_sys.getVector(old_tag_id);
+  NumericVector<Number> & solution = _transformed_sys->solution();
+  NumericVector<Number> & transformed_old = _transformed_sys->getVector(old_tag_id);
 
   for (const auto & dof : transformed_dofs)
     solution.set(dof,
@@ -164,7 +170,7 @@ PicardSolve::transformVariables(const std::set<dof_id_type> & transformed_dofs, 
                      (solution(dof) * relaxation_factor));
 
   solution.close();
-  _solver_sys.update();
+  _transformed_sys->update();
 }
 
 void
