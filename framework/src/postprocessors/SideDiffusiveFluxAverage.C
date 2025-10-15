@@ -25,6 +25,8 @@ InputParameters
 SideDiffusiveFluxAverageTempl<is_ad>::validParams()
 {
   InputParameters params = SideDiffusiveFluxIntegralTempl<is_ad, Real>::validParams();
+  params.addClassDescription(
+      "Computes the average of the integral of the diffusive flux over the specified boundary");
   return params;
 }
 
