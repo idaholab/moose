@@ -105,19 +105,11 @@ private:
    * Template method containing the element loop for regularization computations
    * @param parameter_values  vector of parameter values
    * @param reg_type  type of regularization
-   * @param compute_func  lambda function to perform computation at each quadrature point
    * @return result of type T (Real for objective, std::vector<Real> for gradient)
    */
   template <typename T>
-  T
-  computeRegularizationLoop(const std::vector<Real> & parameter_values,
-                            RegularizationType reg_type,
-                            const std::function<void(const std::vector<std::vector<Real>> &,
-                                                     const std::vector<std::vector<RealGradient>> &,
-                                                     const unsigned int,
-                                                     const std::vector<dof_id_type> &,
-                                                     const std::vector<Real> &,
-                                                     T &)> & compute_func) const;
+  T computeRegularizationLoop(const std::vector<Real> & parameter_values,
+                              RegularizationType reg_type) const;
 
 protected:
   libMesh::Parallel::Communicator _communicator;

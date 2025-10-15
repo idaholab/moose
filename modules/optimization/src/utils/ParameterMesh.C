@@ -318,15 +318,8 @@ ParameterMesh::closestPoint(const Elem & elem, const Point & p) const
 
 template <typename T>
 T
-ParameterMesh::computeRegularizationLoop(
-    const std::vector<Real> & parameter_values,
-    RegularizationType /*reg_type*/,
-    const std::function<void(const std::vector<std::vector<Real>> &,
-                             const std::vector<std::vector<RealGradient>> &,
-                             const unsigned int,
-                             const std::vector<dof_id_type> &,
-                             const std::vector<Real> &,
-                             T &)> & compute_func) const
+ParameterMesh::computeRegularizationLoop(const std::vector<Real> & parameter_values,
+                                         RegularizationType reg_type) const
 {
   if (parameter_values.size() != _param_dofs)
     mooseError("Parameter values size (",
@@ -364,9 +357,15 @@ ParameterMesh::computeRegularizationLoop(
     // Reinitialize for current element
     fe->reinit(elem);
 
-    // Loop over quadrature points
     for (const auto qp : make_range(qrule.n_points()))
-      compute_func(phi, dphi, qp, dof_indices, JxW, result);
+    {
+      if constexpr (std::is_same_v<T, Real>)
+        result +=
+            computeRegularizationQp(parameter_values, phi, dphi, qp, dof_indices, JxW, reg_type);
+      else if constexpr (std::is_same_v<T, std::vector<Real>>)
+        computeRegularizationGradientQp(
+            parameter_values, phi, dphi, qp, dof_indices, JxW, reg_type, result);
+    }
   }
 
   return result;
@@ -376,60 +375,15 @@ Real
 ParameterMesh::computeRegularizationObjective(const std::vector<Real> & parameter_values,
                                               RegularizationType reg_type) const
 {
-  return computeRegularizationLoop<Real>(
-      parameter_values,
-      reg_type,
-      [this, &parameter_values, reg_type](const std::vector<std::vector<Real>> & phi,
-                                          const std::vector<std::vector<RealGradient>> & dphi,
-                                          const unsigned int qp,
-                                          const std::vector<dof_id_type> & dof_indices,
-                                          const std::vector<Real> & JxW,
-                                          Real & result)
-      {
-        result +=
-            computeRegularizationQp(parameter_values, phi, dphi, qp, dof_indices, JxW, reg_type);
-      });
+  return computeRegularizationLoop<Real>(parameter_values, reg_type);
 }
 
 std::vector<Real>
 ParameterMesh::computeRegularizationGradient(const std::vector<Real> & parameter_values,
                                              RegularizationType reg_type) const
 {
-  return computeRegularizationLoop<std::vector<Real>>(
-      parameter_values,
-      reg_type,
-      [this, &parameter_values, reg_type](const std::vector<std::vector<Real>> & phi,
-                                          const std::vector<std::vector<RealGradient>> & dphi,
-                                          const unsigned int qp,
-                                          const std::vector<dof_id_type> & dof_indices,
-                                          const std::vector<Real> & JxW,
-                                          std::vector<Real> & result)
-      {
-        computeRegularizationGradientQp(
-            parameter_values, phi, dphi, qp, dof_indices, JxW, reg_type, result);
-      });
+  return computeRegularizationLoop<std::vector<Real>>(parameter_values, reg_type);
 }
-
-// Explicit template instantiations
-template Real ParameterMesh::computeRegularizationLoop<Real>(
-    const std::vector<Real> &,
-    RegularizationType,
-    const std::function<void(const std::vector<std::vector<Real>> &,
-                             const std::vector<std::vector<RealGradient>> &,
-                             const unsigned int,
-                             const std::vector<dof_id_type> &,
-                             const std::vector<Real> &,
-                             Real &)> &) const;
-
-template std::vector<Real> ParameterMesh::computeRegularizationLoop<std::vector<Real>>(
-    const std::vector<Real> &,
-    RegularizationType,
-    const std::function<void(const std::vector<std::vector<Real>> &,
-                             const std::vector<std::vector<RealGradient>> &,
-                             const unsigned int,
-                             const std::vector<dof_id_type> &,
-                             const std::vector<Real> &,
-                             std::vector<Real> &)> &) const;
 
 Real
 ParameterMesh::computeRegularizationQp(const std::vector<Real> & parameter_values,
