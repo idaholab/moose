@@ -2245,14 +2245,14 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
 
   //
   // Create nested system (A_nest, b_nest)
-  // ─────────────────────────────────────────────────────────────────────────────
+  //
   LibmeshPetscCall(MatCreateNest(PETSC_COMM_SELF, Q, NULL, Q, NULL, mat_array.data(), &A_nest));
   LibmeshPetscCall(VecCreateNest(PETSC_COMM_SELF, Q, NULL, vec_array.data(), &b_nest));
   V("Nested system created");
 
   //
   // Linear solver setup (FGMRES + PCFIELDSPLIT)
-  // ─────────────────────────────────────────────────────────────────────────────
+  //
   LibmeshPetscCall(KSPCreate(PETSC_COMM_SELF, &ksp));
   LibmeshPetscCall(KSPSetType(ksp, KSPFGMRES));
   LibmeshPetscCall(KSPSetOperators(ksp, A_nest, A_nest));
