@@ -89,8 +89,9 @@ ParameterMeshOptimization::validParams()
 
 ParameterMeshOptimization::ParameterMeshOptimization(const InputParameters & parameters)
   : GeneralOptimization(parameters),
-    _regularization_types(getParam<MultiMooseEnum>("regularization_types")),
-    _regularization_coeffs(getParam<std::vector<Real>>("regularization_coeffs"))
+    _regularization_coeffs(getParam<std::vector<Real>>("regularization_coeffs")),
+    _regularization_types(getParam<MultiMooseEnum>("regularization_types")
+                              .getSetValueIDs<ParameterMesh::RegularizationType>())
 {
   // Validate that regularization coefficients match types
   if (_regularization_coeffs.size() != _regularization_types.size())
@@ -264,7 +265,7 @@ ParameterMeshOptimization::computeObjective()
       Real regularization_value = 0.0;
 
       // Convert MultiMooseEnum to RegularizationType using get() method
-      auto reg_type = static_cast<RegularizationType>(_regularization_types.get(reg_idx));
+      ParameterMesh::RegularizationType reg_type = _regularization_types[reg_idx];
 
       for (const auto & param_id : make_range(_nparams))
       {
@@ -292,7 +293,7 @@ ParameterMeshOptimization::computeGradient(libMesh::PetscVector<Number> & gradie
     if (_regularization_coeffs[reg_idx] > 0.0)
     {
       // Convert MultiMooseEnum to RegularizationType using get() method
-      auto reg_type = static_cast<RegularizationType>(_regularization_types.get(reg_idx));
+      ParameterMesh::RegularizationType reg_type = _regularization_types[reg_idx];
 
       for (const auto & param_id : make_range(_nparams))
       {

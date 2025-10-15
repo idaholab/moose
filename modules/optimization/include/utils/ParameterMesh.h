@@ -33,18 +33,6 @@ class DofMap;
 using libMesh::RealGradient;
 
 /**
- * Enumerations for regularization computations
- */
-enum class RegularizationType
-{
-  L2_GRADIENT,
-  // Future regularization types can be added here:
-  // L1,
-  // H1,
-  // TV (Total Variation)
-};
-
-/**
  * Utility class to use an Exodus mesh to define controllable parameters for optimization problems
  * This class will:
  *  - Ensure that controllable parameters defined by the mesh are correctly ordered on optimiation
@@ -59,6 +47,16 @@ public:
                 const std::string & exodus_mesh,
                 const bool find_closest = false,
                 const unsigned int kdtree_candidates = 5);
+
+  /// Enumerations for regularization computations
+  enum class RegularizationType
+  {
+    L2_GRADIENT,
+    // Future regularization types can be added here:
+    // L1,
+    // H1,
+    // TV (Total Variation)
+  };
 
   /**
    * @return the number of parameters read from the mesh for a single timestep

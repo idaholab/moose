@@ -10,8 +10,7 @@
 #pragma once
 
 #include "GeneralOptimization.h"
-
-class ParameterMesh;
+#include "ParameterMesh.h"
 
 /**
  * Mesh-based parameter optimization
@@ -42,9 +41,9 @@ private:
   /// Store parameter meshes for regularization computation
   std::vector<std::unique_ptr<ParameterMesh>> _parameter_meshes;
 
-  /// Regularization types to apply
-  const MultiMooseEnum & _regularization_types;
-
   /// Vector of regularization coefficients corresponding to each type
   const std::vector<Real> _regularization_coeffs;
+
+  /// Regularization types to apply
+  const std::vector<ParameterMesh::RegularizationType> _regularization_types;
 };
