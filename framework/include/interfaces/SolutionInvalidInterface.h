@@ -31,6 +31,15 @@ class FEProblemBase;
     this->flagInvalidSolutionInternal<true>(__invalid_id);                                         \
   } while (0)
 
+// This macro is useful when we have different messages but appearing in the same place in the code
+// for example when nesting a solution warning creation under the mooseWarning
+#define flagSolutionWarningMultipleRegistration(message)                                           \
+  do                                                                                               \
+  {                                                                                                \
+    const auto __invalid_id = this->registerInvalidSolutionInternal(message, true);                \
+    this->flagInvalidSolutionInternal<true>(__invalid_id);                                         \
+  } while (0)
+
 // Every class using this interface must specify either
 // 'usingCombinedWarningSolutionWarnings' or 'usingMooseBaseWarnings'
 #define usingCombinedWarningSolutionWarnings                                                       \
@@ -72,28 +81,29 @@ protected:
   void mooseWarning(Args &&... args) const
   {
     _si_moose_object.MooseBase::mooseWarning(std::forward<Args>(args)...);
-    flagSolutionWarning(_si_moose_object.name() + ": warning");
+    flagSolutionWarningMultipleRegistration(_si_moose_object.name() + ": warning");
   }
 
   template <typename... Args>
   void mooseWarningNonPrefixed(Args &&... args) const
   {
     _si_moose_object.MooseBase::mooseWarningNonPrefixed(std::forward<Args>(args)...);
-    flagSolutionWarning(_si_moose_object.name() + ": warning");
+    flagSolutionWarningMultipleRegistration(_si_moose_object.name() + ": warning");
   }
 
   template <typename... Args>
   void mooseDeprecated(Args &&... args) const
   {
     _si_moose_object.MooseBase::mooseDeprecated(std::forward<Args>(args)...);
-    flagSolutionWarning(_si_moose_object.name() + ": deprecation");
+    flagSolutionWarningMultipleRegistration(_si_moose_object.name() + ": deprecation");
   }
 
   template <typename... Args>
   void paramWarning(const std::string & param, Args... args) const
   {
     _si_moose_object.MooseBase::paramWarning(param, std::forward<Args>(args)...);
-    flagSolutionWarning(_si_moose_object.name() + ": parameter '" + param + "' warning");
+    flagSolutionWarningMultipleRegistration(_si_moose_object.name() + ": warning for parameter '" +
+                                            param + "'");
   }
 
 private:
