@@ -1,0 +1,103 @@
+{
+  "cells": {
+    "pin1_cell_radial0": {
+      "fill": "rgmb_region_1",
+      "filltype": "CSG_MATERIAL",
+      "region": "-pin1_radial_ring0"
+    },
+    "pin1_cell_radial1": {
+      "fill": "rgmb_region_2",
+      "filltype": "CSG_MATERIAL",
+      "region": "(-pin1_radial_ring1 & ~(-pin1_radial_ring0))"
+    },
+    "pin1_cell_radial2": {
+      "fill": "rgmb_region_3",
+      "filltype": "CSG_MATERIAL",
+      "region": "(-pin1_radial_ring2 & ~(-pin1_radial_ring1))"
+    },
+    "pin1_cell_radial3": {
+      "fill": "rgmb_region_4",
+      "filltype": "CSG_MATERIAL",
+      "region": "(+pin1_radial_duct3_surf0 & +pin1_radial_duct3_surf1 & +pin1_radial_duct3_surf2 & +pin1_radial_duct3_surf3 & ~(-pin1_radial_ring2))"
+    },
+    "pin1_void_cell": {
+      "fill": "",
+      "filltype": "VOID",
+      "region": "~(+pin1_radial_duct3_surf0 & +pin1_radial_duct3_surf1 & +pin1_radial_duct3_surf2 & +pin1_radial_duct3_surf3)"
+    }
+  },
+  "surfaces": {
+    "pin1_radial_duct3_surf0": {
+      "coefficients": {
+        "a": -4.9960036108132044e-15,
+        "b": -63.92835,
+        "c": 7.886080677366181e-17,
+        "d": -45.409265930249994
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct3_surf1": {
+      "coefficients": {
+        "a": 63.92835,
+        "b": -9.992007221626409e-15,
+        "c": 0.0,
+        "d": -45.40926593025
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct3_surf2": {
+      "coefficients": {
+        "a": 9.992007221626409e-15,
+        "b": 63.92835,
+        "c": 0.0,
+        "d": -45.40926593025
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_duct3_surf3": {
+      "coefficients": {
+        "a": -63.92835,
+        "b": 1.4988010832439613e-14,
+        "c": 7.886080677366181e-17,
+        "d": -45.40926593025
+      },
+      "type": "CSG::CSGPlane"
+    },
+    "pin1_radial_ring0": {
+      "coefficients": {
+        "r": 0.3385,
+        "x0": 0.0,
+        "y0": 0.0
+      },
+      "type": "CSG::CSGZCylinder"
+    },
+    "pin1_radial_ring1": {
+      "coefficients": {
+        "r": 0.3705,
+        "x0": 0.0,
+        "y0": 0.0
+      },
+      "type": "CSG::CSGZCylinder"
+    },
+    "pin1_radial_ring2": {
+      "coefficients": {
+        "r": 0.4665,
+        "x0": 0.0,
+        "y0": 0.0
+      },
+      "type": "CSG::CSGZCylinder"
+    }
+  },
+  "universes": {
+    "ROOT_UNIVERSE": {
+      "cells": [
+        "pin1_cell_radial0",
+        "pin1_cell_radial1",
+        "pin1_cell_radial2",
+        "pin1_cell_radial3",
+        "pin1_void_cell"
+      ],
+      "root": true
+    }
+  }
+}
