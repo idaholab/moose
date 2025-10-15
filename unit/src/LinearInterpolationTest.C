@@ -48,7 +48,7 @@ TEST(LinearInterpolationTest, sample)
   EXPECT_DOUBLE_EQ(interp.sampleDerivative(2.), 1.);
   EXPECT_DOUBLE_EQ(interp.sampleDerivative(2.1), 1.);
 
-#ifdef LIBMESH_HAVE_FENV_H
+#if defined(LIBMESH_HAVE_FEENABLEEXCEPT) && defined(LIBMESH_HAVE_FEDISABLEEXCEPT)
   auto traps = fegetexcept();
   fedisableexcept(FE_ALL_EXCEPT);
 #endif
@@ -60,7 +60,7 @@ TEST(LinearInterpolationTest, sample)
   EXPECT_TRUE(y_nan != y_nan);
   EXPECT_TRUE(dydx_nan != dydx_nan);
 
-#ifdef LIBMESH_HAVE_FENV_H
+#if defined(LIBMESH_HAVE_FEENABLEEXCEPT) && defined(LIBMESH_HAVE_FEDISABLEEXCEPT)
   feenableexcept(traps);
 #endif
 }
