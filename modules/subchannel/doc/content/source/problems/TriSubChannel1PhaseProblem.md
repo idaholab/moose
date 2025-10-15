@@ -34,12 +34,12 @@ T_{s,d}(z) = T_{bulk,d}(z) + \frac{q''_d(z)}{h_d(z)},
 \end{equation}
 
 where:
-- $T_{s,d}(z)$ is the surface temperature for the duct at a height $z$
-- $T_{bulk,d}(z)$ is the bulk temperature the subchannel next to the duct node $d$
+- $T_{s,d}(z)$ is the duct surface temperature at a height $z$
+- $T_{bulk,d}(z)$ is the bulk temperature of the subchannel next to the duct node $d$
 - $q''_d(z)$ is the heat flux at the duct at a height $z$
-- $h_d(z)$ is the heat exchange coefficient for for the subchannel next to the duct node at a height $z$
+- $h_d(z)$ is the heat exchange coefficient for the subchannel next to the duct node at a height $z$
 
-In both cases, the heat exchange coefficients are computed using the the Nusselt number (Nu) as follows:
+In both cases, the heat exchange coefficients are computed using the Nusselt number (Nu) as follows:
 
 \begin{equation}
 h = \frac{\text{Nu} \times k}{D_h}
@@ -47,7 +47,7 @@ h = \frac{\text{Nu} \times k}{D_h}
 
 where:
 - $k$ is the thermal conductivity of the subchannel neighboring the structure
-- $D_h$ is the hydraulics diamter of the subchannel neighboring the structure
+- $D_h$ is the hydraulics diameter of the subchannel neighboring the structure
 
 The following correlations have been implemented for the Nusselt number
 which can be selected via the [!param](/Problem/TriSubChannel1PhaseProblem/pin_htc_correlation) parameter
@@ -74,7 +74,7 @@ The modeling of each regime is explained below.
 
 #### Laminar Nusselt Number
 
-The following relation is used dependeing on the subchannel type~\cite{Todreas}:
+The following relation is used depending on the subchannel type~\cite{Todreas}:
 
 \begin{equation}
 \text{Nu}_{\text{laminar}} = 
@@ -132,13 +132,13 @@ The code will error out if 'Kazimi-Carelli' is used in [!param](/Problem/TriSubC
 
 ### Transition Regime
 
-A linear interplation weight is defined as follows:
+A linear interpolation weight is defined as follows:
 
 \begin{equation}
 w_T = \frac{Re - Re_L}{Re_T - Re_L}.
 \end{equation}
 
-Then, the Nusselt is defined by linearly interpolating the laminar Nusselt number and ther turbulent one,
+Then, the Nusselt number in the transition regime is defined by linearly interpolating the laminar Nusselt number and the turbulent one,
 which is defined with the chosen correlation for the pin or duct, as follows:
 
 \begin{equation}

@@ -65,7 +65,7 @@ protected:
   NusseltStruct _nusselt_args;
 
   /// Function that computes the Nusselt number given a heat exchange correlation
-  Real computeNusseltNumber(NusseltStruct nusselt_args);
+  Real computeNusseltNumber(const NusseltStruct & nusselt_args);
 
   /// Computes diversion crossflow per gap for block iblock
   void computeWijFromSolve(int iblock);
@@ -183,9 +183,9 @@ protected:
   const PetscInt & _maxit;
   /// The interpolation method used in constructing the systems
   const MooseEnum _interpolation_scheme;
-  /// The correlation used for computing the heat transfer correlation for the pin
+  /// The correlation used for computing the heat transfer correlation near the pin
   const MooseEnum _pin_htc_correlation;
-  /// The correlation used for computing the heat transfer correlation for the duct
+  /// The correlation used for computing the heat transfer correlation near the duct
   const MooseEnum _duct_htc_correlation;
   /// The direction of gravity
   const MooseEnum _gravity_direction;
