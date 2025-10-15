@@ -62,5 +62,5 @@ KokkosCopyValueAux::computeNodeInternal(const Derived & /* auxkernel */,
   auto tag = _kokkos_var.tag();
   auto node = datum.node();
 
-  sys.getVectorDofValue(sys.getNodeLocalDofIndex(node, var), tag) = _v(datum, 0);
+  sys.getVectorDofValue(sys.getNodeLocalDofIndex(node, 0, var), tag) = _v(datum, 0);
 }

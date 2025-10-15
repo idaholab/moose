@@ -232,7 +232,7 @@ VariableValue::operator()(Datum & datum, unsigned int idx, unsigned int comp) co
       if (datum.isNodal())
       {
         auto node = datum.node();
-        dof = sys.getNodeLocalDofIndex(node, var);
+        dof = sys.getNodeLocalDofIndex(node, 0, var);
       }
       else
       {

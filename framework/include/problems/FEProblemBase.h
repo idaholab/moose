@@ -2762,10 +2762,22 @@ private:
    */
   void setResidualObjectParamsAndLog(const std::string & ro_name,
                                      const std::string & name,
-                                     InputParameters & params,
+                                     InputParameters & parameters,
                                      const unsigned int nl_sys_num,
                                      const std::string & base_name,
                                      bool & reinit_displaced);
+
+  /**
+   * Set the subproblem and system parameters for auxiliary kernels and log their addition
+   * @param ak_name The type of the auxiliary kernel
+   * @param name The name of the auxiliary kernel
+   * @param parameters The auxiliary kernel parameters
+   * @param base_name The base type of the auxiliary kernel, i.e. AuxKernel or KokkosAuxKernel
+   */
+  void setAuxKernelParamsAndLog(const std::string & ak_name,
+                                const std::string & name,
+                                InputParameters & parameters,
+                                const std::string & base_name);
 
   /**
    * Make basic solver params for linear solves

@@ -150,7 +150,14 @@ System::setupDofs()
         _dof_map.dof_indices(node, dof_indices, var);
 
         if (dof_indices.size())
+        {
+          for (unsigned int i = 1; i < dof_indices.size(); ++i)
+            if (dof_indices[i] != dof_indices[i - 1] + 1)
+              mooseError("Kokkos system error: a variable has multiple DOFs on a node, but the DOF "
+                         "indices are discontiguous. This is not supported.");
+
           _local_node_dof_index[var][id] = solution->map_global_to_local_index(dof_indices[0]);
+        }
       }
   }
 

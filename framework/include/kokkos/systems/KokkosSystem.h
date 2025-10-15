@@ -243,12 +243,15 @@ public:
   /**
    * Get the local DOF index of a variable for a node
    * @param node The contiguous node ID
+   * @param idx The node-local DOF index
    * @param var The variable number
    * @returns The local DOF index
    */
-  KOKKOS_FUNCTION dof_id_type getNodeLocalDofIndex(ContiguousNodeID node, unsigned int var) const
+  KOKKOS_FUNCTION dof_id_type getNodeLocalDofIndex(ContiguousNodeID node,
+                                                   unsigned int i,
+                                                   unsigned int var) const
   {
-    return _local_node_dof_index[var][node];
+    return _local_node_dof_index[var][node] + i;
   }
   /**
    * Get the global DOF index of a variable for an element
@@ -503,6 +506,12 @@ private:
   Array<unsigned int> _active_variables;
   /**
    * List of active tags
+   * Variable tags are vector tags associated with coupled variables whose quadrature point values
+   * need to be computed
+   * Solution tags are vector tags associated with solution vectors to be written - required by
+   * auxiliary kernels
+   * Residual tags are vector tags associated with residual vectors to be written - required by
+   * residual objects
    */
   ///@{
   Array<TagID> _active_variable_tags;

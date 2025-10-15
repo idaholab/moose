@@ -100,7 +100,7 @@ DirichletBCBase<Derived>::operator()(const ThreadID tid) const
   auto bc = static_cast<const Derived *>(this);
   auto node = kokkosBoundaryNodeID(tid);
   auto & sys = kokkosSystem(_kokkos_var.sys());
-  auto dof = sys.getNodeLocalDofIndex(node, _kokkos_var.var());
+  auto dof = sys.getNodeLocalDofIndex(node, 0, _kokkos_var.var());
 
   if (dof == libMesh::DofObject::invalid_id)
     return;

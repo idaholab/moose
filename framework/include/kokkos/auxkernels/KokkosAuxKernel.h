@@ -309,7 +309,7 @@ AuxKernel::setNodeSolution(const Real value,
   auto tag = _kokkos_var.tag();
   auto node = datum.node();
 
-  sys.getVectorDofValue(sys.getNodeLocalDofIndex(node, var_num), tag) = value;
+  sys.getVectorDofValue(sys.getNodeLocalDofIndex(node, 0, var_num), tag) = value;
 }
 
 } // namespace Kokkos
