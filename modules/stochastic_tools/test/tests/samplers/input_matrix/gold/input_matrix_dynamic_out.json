@@ -1,0 +1,139 @@
+{
+    "reporters": {
+        "data": {
+            "type": "StochasticMatrix",
+            "values": {
+                "sample_0": {
+                    "row_begin": 0,
+                    "row_end": 1,
+                    "type": "std::vector<double>"
+                },
+                "sample_1": {
+                    "row_begin": 0,
+                    "row_end": 1,
+                    "type": "std::vector<double>"
+                },
+                "sample_2": {
+                    "row_begin": 0,
+                    "row_end": 1,
+                    "type": "std::vector<double>"
+                },
+                "sample_3": {
+                    "row_begin": 0,
+                    "row_end": 1,
+                    "type": "std::vector<double>"
+                }
+            }
+        }
+    },
+    "time_steps": [
+        {
+            "data": {
+                "sample_0": [
+                    0.0
+                ],
+                "sample_1": [
+                    1.0
+                ],
+                "sample_2": [
+                    2.0
+                ],
+                "sample_3": [
+                    3.0
+                ]
+            },
+            "time": 0.0,
+            "time_step": 0
+        },
+        {
+            "data": {
+                "sample_0": [
+                    100.0,
+                    104.0
+                ],
+                "sample_1": [
+                    101.0,
+                    105.0
+                ],
+                "sample_2": [
+                    102.0,
+                    106.0
+                ],
+                "sample_3": [
+                    103.0,
+                    107.0
+                ]
+            },
+            "time": 1.0,
+            "time_step": 1
+        },
+        {
+            "data": {
+                "sample_0": [
+                    200.0,
+                    204.0,
+                    208.0,
+                    212.0
+                ],
+                "sample_1": [
+                    201.0,
+                    205.0,
+                    209.0,
+                    213.0
+                ],
+                "sample_2": [
+                    202.0,
+                    206.0,
+                    210.0,
+                    214.0
+                ],
+                "sample_3": [
+                    203.0,
+                    207.0,
+                    211.0,
+                    215.0
+                ]
+            },
+            "time": 2.0,
+            "time_step": 2
+        },
+        {
+            "data": {
+                "sample_0": [
+                    300.0,
+                    304.0,
+                    308.0,
+                    312.0,
+                    316.0,
+                    320.0
+                ],
+                "sample_1": [
+                    301.0,
+                    305.0,
+                    309.0,
+                    313.0,
+                    317.0,
+                    321.0
+                ],
+                "sample_2": [
+                    302.0,
+                    306.0,
+                    310.0,
+                    314.0,
+                    318.0,
+                    322.0
+                ],
+                "sample_3": [
+                    303.0,
+                    307.0,
+                    311.0,
+                    315.0,
+                    319.0,
+                    323.0
+                ]
+            },
+            "time": 3.0,
+            "time_step": 3
+        }
+    ]
+}

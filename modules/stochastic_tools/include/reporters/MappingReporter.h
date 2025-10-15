@@ -24,7 +24,6 @@ public:
   static InputParameters validParams();
   MappingReporter(const InputParameters & parameters);
 
-  virtual void initialize() override {}
   void initialSetup() override;
   virtual void execute() override;
   virtual void finalize() override {}

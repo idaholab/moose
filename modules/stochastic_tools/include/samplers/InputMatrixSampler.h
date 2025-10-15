@@ -21,6 +21,11 @@ public:
 
   InputMatrixSampler(const InputParameters & parameters);
 
+  /**
+   * Update number of rows if the controllable parameter has changed
+   */
+  void executeSetUp() override;
+
 protected:
   /// Return the sample for the given row and column
   virtual Real computeSample(dof_id_type row_index, dof_id_type col_index) override;
