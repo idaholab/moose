@@ -21,11 +21,22 @@ public:
 
 protected:
   virtual GenericReal<is_ad> computeQpResidual() override;
-  virtual Real computeQpJacobian() override;
 
   /// input parameter multiplied by the reaction kernel
   const Real _coef;
 };
 
-typedef CoefReactionTempl<false> CoefReaction;
+class CoefReaction : public CoefReactionTempl<false>
+{
+public:
+  static InputParameters validParams();
+
+  CoefReaction(const InputParameters & parameters);
+
+  using CoefReactionTempl<false>::CoefReactionTempl;
+
+protected:
+  virtual Real computeQpJacobian() override;
+};
+
 typedef CoefReactionTempl<true> ADCoefReaction;

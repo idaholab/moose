@@ -9,8 +9,8 @@
 
 #include "CoefReaction.h"
 
-registerMooseObject("MooseApp", CoefReaction);
-registerMooseObject("MooseApp", ADCoefReaction);
+registerMooseObjectReplaced("MooseApp", CoefReaction, "01/01/2027 00:00", Reaction);
+registerMooseObjectReplaced("MooseApp", ADCoefReaction, "01/21/2027 00:00", ADReaction);
 
 template <bool is_ad>
 InputParameters
@@ -35,17 +35,21 @@ CoefReactionTempl<is_ad>::computeQpResidual()
   return _coef * ReactionTempl<is_ad>::computeQpResidual();
 }
 
-template <bool is_ad>
-Real
-CoefReactionTempl<is_ad>::computeQpJacobian()
+InputParameters
+CoefReaction::validParams()
 {
-  // This function will never be called for the AD version. But because C++ does
-  // not support an optional function declaration based on a template parameter,
-  // we must keep this template for all cases.
-  mooseAssert(!is_ad,
-              "In ADCoefReaction, computeQpJacobian should not be called. Check computeJacobian "
-              "implementation.");
-  return _coef * ReactionTempl<is_ad>::computeQpJacobian();
+  return CoefReactionTempl<false>::validParams();
+}
+
+CoefReaction::CoefReaction(const InputParameters & parameters)
+  : CoefReactionTempl<false>(parameters)
+{
+}
+
+Real
+CoefReaction::computeQpJacobian()
+{
+  return _coef * _test[_i][_qp] * _rate * _phi[_j][_qp];
 }
 
 template class CoefReactionTempl<false>;
