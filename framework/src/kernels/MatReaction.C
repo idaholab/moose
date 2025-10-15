@@ -32,6 +32,8 @@ MatReactionTempl<is_ad>::MatReactionTempl(const InputParameters & parameters)
     _rate(this->template getGenericMaterialProperty<Real, is_ad>("reaction_rate")),
     _v(this->isCoupled("v") ? this->template coupledGenericValue<is_ad>("v") : this->_u)
 {
+  if (this->isCoupled("v") && coupled("v") == _var.number())
+    paramError("v", "In order to correctly couple the primal variable, leave 'v' blank");
 }
 
 template <bool is_ad>
@@ -58,8 +60,6 @@ MatReaction::MatReaction(const InputParameters & parameters)
     _drate_dv(getMaterialPropertyDerivative<Real>("reaction_rate", _v_name)),
     _drate_darg(_n_args)
 {
-  if (_v_var == _var.number())
-    paramError("v", "In order to correctly couple the primal variable, leave 'v' blank");
   // Get reaction rate derivatives
   for (unsigned int i = 0; i < _n_args; ++i)
     _drate_darg[i] = &getMaterialPropertyDerivative<Real>("reaction_rate", i);
