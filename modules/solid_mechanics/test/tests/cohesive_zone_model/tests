@@ -389,7 +389,6 @@
       input = 'ad_czm.i'
       cli_args = 'Outputs/file_base=ad_czm_small_strain'
       exodiff = 'ad_czm_small_strain.e'
-      mesh_mode = REPLICATED
       recover = false
       detail = "The solution obtained using AD CZM shall match"
       abs_zero = 1e-6
@@ -400,7 +399,6 @@
       input = 'ad_czm.i'
       cli_args = 'Outputs/file_base=ad_czm_small_strain Physics/SolidMechanics/CohesiveZone/interface/use_automatic_differentiation=false Materials/czm_mat/type=PureElasticTractionSeparation'
       exodiff = 'ad_czm_small_strain.e'
-      mesh_mode = REPLICATED
       recover = false
       detail = "the non-AD solution"
       abs_zero = 1e-6
@@ -417,7 +415,6 @@
       input = 'ad_czm.i'
       cli_args = 'Outputs/file_base=ad_czm_total_lagrangian Physics/SolidMechanics/CohesiveZone/interface/strain=FINITE'
       exodiff = 'ad_czm_total_lagrangian.e'
-      mesh_mode = REPLICATED
       recover = false
       detail = "The solution obtained using AD CZM shall match"
       abs_zero = 1e-6
@@ -428,7 +425,6 @@
       input = 'ad_czm.i'
       cli_args = 'Outputs/file_base=ad_czm_total_lagrangian Physics/SolidMechanics/CohesiveZone/interface/strain=FINITE Physics/SolidMechanics/CohesiveZone/interface/use_automatic_differentiation=false Materials/czm_mat/type=PureElasticTractionSeparation'
       exodiff = 'ad_czm_total_lagrangian.e'
-      mesh_mode = REPLICATED
       recover = false
       detail = "the non-AD solution"
       abs_zero = 1e-6
