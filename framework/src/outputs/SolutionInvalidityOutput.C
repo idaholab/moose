@@ -48,7 +48,7 @@ SolutionInvalidityOutput::shouldOutput()
   // Note: if this happens in other cases, we should just sync if solutionInvalidity is not synced
   if (_problem_ptr->getCurrentExecuteOnFlag() == EXEC_FAILED)
     _solution_invalidity.syncIteration();
-  return Output::shouldOutput() && (_solution_invalidity.hasInvalidSolution());
+  return Output::shouldOutput() && _solution_invalidity.hasInvalidSolution();
 }
 
 void

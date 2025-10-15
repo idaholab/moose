@@ -401,6 +401,13 @@ FEProblemSolve::initialSetup()
 {
   MultiSystemSolveObject::initialSetup();
   convergenceSetup();
+  // Keep track of the solution warnings from the setup
+  if (!_app.isRecovering())
+  {
+    _app.solutionInvalidity().syncIteration();
+    _app.solutionInvalidity().solutionInvalidAccumulation();
+    _app.solutionInvalidity().solutionInvalidAccumulationTimeStep(0);
+  }
 }
 
 void
