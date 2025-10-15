@@ -55,6 +55,34 @@ protected:
   InvalidSolutionID registerInvalidSolutionInternal(const std::string & message,
                                                     const bool warning) const;
 
+  template <typename... Args>
+  void mooseWarning(Args &&... args) const
+  {
+    _si_moose_object.MooseBase::mooseWarning(std::forward<Args>(args)...);
+    flagSolutionWarning(_si_moose_object.name() + ": warning");
+  }
+
+  template <typename... Args>
+  void mooseWarningNonPrefixed(Args &&... args) const
+  {
+    _si_moose_object.MooseBase::mooseWarningNonPrefixed(std::forward<Args>(args)...);
+    flagSolutionWarning(_si_moose_object.name() + ": warning");
+  }
+
+  template <typename... Args>
+  void mooseDeprecated(Args &&... args) const
+  {
+    _si_moose_object.MooseBase::mooseDeprecated(std::forward<Args>(args)...);
+    flagSolutionWarning(_si_moose_object.name() + ": deprecation");
+  }
+
+  template <typename... Args>
+  void paramWarning(const std::string & param, Args... args) const
+  {
+    _si_moose_object.MooseBase::paramWarning(param, std::forward<Args>(args)...);
+    flagSolutionWarning(_si_moose_object.name() + ": parameter '" + param + "' warning");
+  }
+
 private:
   /// The MooseObject that owns this interface
   const MooseObject & _si_moose_object;
