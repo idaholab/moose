@@ -376,7 +376,7 @@ SubChannel1PhaseProblem::computeInterpolatedValue(PetscScalar topValue,
 }
 
 Real
-SubChannel1PhaseProblem::computeNusseltNumber(NusseltStruct nusselt_args)
+SubChannel1PhaseProblem::computeNusseltNumber(const NusseltStruct & nusselt_args)
 {
   // Correlation Specific Parameters
   const auto htc_correlation = nusselt_args.htc_correlation;
@@ -441,7 +441,7 @@ SubChannel1PhaseProblem::computeNusseltNumber(NusseltStruct nusselt_args)
     {
       if (Pr < 0.7 || Pr > 1.6e2)
         mooseDoOnce(mooseWarning("Pr number out of range in the Dittus Bolter correlation for "
-                                 "pin or duct surface temperture calculation."));
+                                 "pin or duct surface temperature calculation."));
 
       const auto NuT = 0.023 * std::pow(Re, 0.8) * std::pow(Pr, 0.4);
       return blended_Nu(NuT);
@@ -451,7 +451,7 @@ SubChannel1PhaseProblem::computeNusseltNumber(NusseltStruct nusselt_args)
     {
       if (Pr < 1e-5 || Pr > 2e3)
         mooseDoOnce(mooseWarning("Pr number out of range in the Gnielinski correlation for "
-                                 "pin or duct surface temperture calculation."));
+                                 "pin or duct surface temperature calculation."));
 
       const auto iz = nusselt_args.iz;
       const auto i_ch = nusselt_args.i_ch;
@@ -2782,13 +2782,7 @@ SubChannel1PhaseProblem::externalSolve()
           auto Pr = (*_mu_soln)(node)*cp / k;
 
           // Create nusselt number structure
-          NusseltStruct nusselt_struct;
-          nusselt_struct.Re = Re;
-          nusselt_struct.Pr = Pr;
-          nusselt_struct.i_pin = i_pin;
-          nusselt_struct.iz = iz;
-          nusselt_struct.i_ch = i_ch;
-          nusselt_struct.htc_correlation = _pin_htc_correlation;
+          NusseltStruct nusselt_struct(Re, Pr, i_pin, iz, i_ch, _pin_htc_correlation);
 
           // Compute Nusselt number
           auto Nu = this->computeNusseltNumber(nusselt_struct);
@@ -2825,7 +2819,7 @@ SubChannel1PhaseProblem::externalSolve()
       auto cp = _fp->cp_from_p_T((*_P_soln)(node_chan) + _P_out, (*_T_soln)(node_chan));
       auto Pr = (*_mu_soln)(node_chan)*cp / k;
 
-      // Check that kazimi-carelli is not used for the duct (not supporeted yet)
+      // Check that kazimi-carelli is not used for the duct (not supported yet)
       if (_duct_htc_correlation == "kazimi-carelli")
         mooseError("'kazimi-carelli' is not yet supported for the 'duct_htc_correlation'.");
 
