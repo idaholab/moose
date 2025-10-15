@@ -22,6 +22,7 @@
 
 !media tutorial04_meshing/base_ex_hmt.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=Illustration of lines along which a mesh can be trimmed.
 
 !col-end!
 
@@ -36,6 +37,7 @@
 
 !media tutorial04_meshing/base_ex_peripheral_trim.png
        style=width:70%;display:block;margin-left:auto;margin-right:auto;
+       alt=A mesh which has undergone peripheral trimming.
 
 !col-end!
 
@@ -43,6 +45,7 @@
 
 !media tutorial04_meshing/base_ex_center_trim.png
        style=width:75%;display:block;margin-left:auto;margin-right:auto;
+       alt=A mesh which has undergone through-the-center trimming.
 
 !col-end!
 
@@ -87,6 +90,7 @@
 
 !media tutorial04_meshing/base_ex_phpm.png
        style=width:80%;display:block;margin-left:auto;margin-right:auto;
+       alt=An assembly mesh with its periphery modified.
 
 !col-end!
 
@@ -116,6 +120,7 @@
 
 !media tutorial04_meshing/base_ex_aeg.png
        style=width:80%;display:block;margin-left:auto;margin-right:auto;
+       alt=A mesh for a wedge of a reactor core, extruded into 3D.
 
 !col-end!
 

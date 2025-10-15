@@ -10,21 +10,25 @@ Jump around page sections by using the header links provided on the right table:
 
 !media tutorial01_app_development/scrollspy.png
        style=width:25%;display:block;height:auto;margin-left:auto;margin-right:auto;
+       alt=Example of a table of contents on the side of a page of MOOSE documentation.
 
 Flip through pages with the "[!icon!arrow_back] +Previous+" and "+Next+ [!icon!arrow_forward]" buttons located at the start and end of the page:
 
 !media tutorial01_app_development/pagination.png
        style=width:84%;display:block;margin-left:auto;margin-right:auto;
+       alt=Example of the "back" and "next" buttons at the bottom of a page of MOOSE documentation.
 
 Head back to the index page by following the "=tutorial01_app_development=" link located at the top of the page:
 
 !media tutorial01_app_development/breadcrumbs.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=An example of the hierarchical page navigation menu at the top of a page of MOOSE documentation.
 
 Go to any section of the tutorial from the [tutorial01_app_development/index.md#contents] section of the index page:
 
 !media tutorial01_app_development/outline.png
        style=width:61%;display:block;margin-left:auto;margin-right:auto;
+       alt=Image of the table of contents for this tutorial.
 
 !!!
 NOTE: These screenshots were captured with the Shutter application (shutter-project.org)

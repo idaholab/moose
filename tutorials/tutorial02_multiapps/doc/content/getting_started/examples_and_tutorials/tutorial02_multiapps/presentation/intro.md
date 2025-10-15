@@ -14,6 +14,7 @@
 
 !media images/moose.png
        style=width:40%;margin-left:auto;margin-right:auto;display:block;background:white;
+       alt=Promotional image showing some of the different types of physics MOOSE can capture when simulating a nuclear reactor core.
 
 !---
 
@@ -40,6 +41,7 @@
 !col width=50%
 !media images/coupling.png
        style=width:80%;margin-left:auto;margin-right:auto;display:block;box-shadow:none;
+       alt=Diagram showing the different levels of coupling possible between apps.
 
 !row-end!
 
@@ -80,6 +82,7 @@
 !col width=50%
 !media images/multiapp_hierarchy.png
        style=width:100%;margin-left:auto;margin-right:auto;display:block;
+       alt=Graph showing the multiple levels of nested apps that can make up a MOOSE simulation.
 
 !row-end!
 

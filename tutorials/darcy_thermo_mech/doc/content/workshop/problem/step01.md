@@ -64,3 +64,4 @@ cd problems
 ## Step 1: Result
 
 !media darcy_thermo_mech/step01_result.png
+       alt=Pressure field result for the simulation above.

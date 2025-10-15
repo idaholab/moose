@@ -8,6 +8,7 @@
 !col! width=50%
 
 !media large_media/tutorials/darcy_thermo_mech/moose_intro.png
+       alt=Promotional image showing some of the different types of physics MOOSE can capture when simulating a nuclear reactor core.
 
 !col-end!
 
@@ -32,6 +33,7 @@
 !col! width=50%
 
 !media large_media/tutorials/darcy_thermo_mech/moose_intro.png
+       alt=Promotional image showing some of the different types of physics MOOSE can capture when simulating a nuclear reactor core.
 
 !col-end!
 
@@ -50,7 +52,9 @@
 
 # MOOSE Framework: Applications
 
-!media large_media/tutorials/darcy_thermo_mech/moose_herd_2019.png style=width:100%;margin-left:auto;margin-right:auto;display:block;
+!media large_media/tutorials/darcy_thermo_mech/moose_herd_2019.png
+       style=width:100%;margin-left:auto;margin-right:auto;display:block;
+       alt=Graph showing the ecosystem of MOOSE apps and how they depend on each other.
 
 !---
 
@@ -60,6 +64,7 @@
 !col! width=70%
 
 !media large_media/tutorials/darcy_thermo_mech/moose_code.png
+       alt=The relationship between the strong form of an equation, the weak form, and the code for one of the terms.
 
 !col-end!
 

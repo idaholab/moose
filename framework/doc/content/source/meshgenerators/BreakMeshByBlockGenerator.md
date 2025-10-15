@@ -36,6 +36,7 @@ interface will be named `wood_Block2`.
 For `block_pair` option, only the nodes that are shared by specific block pairs will be newly created. In the example below, three different cases are shown, where one, two and three new nodes are created, respectively.
 
 !media media/meshgenerators/3_blocks_example.png style=width:100%;
+       alt=Illustration of the effect of using different values for the block_pairs parameter.
 
 !listing test/tests/meshgenerators/break_mesh_by_block_generator/break_mesh_block_pairs_restricted_3blocks.i
          block=Mesh

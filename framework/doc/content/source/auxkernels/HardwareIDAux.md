@@ -37,6 +37,7 @@ mpiexec -n 16 -host lemhi0002,lemhi0003,lemhi0004,lemhi0005 -ppn 4 ../../../moos
 It should be immediately apparent that the bottom right partitioning is best (will reduce the amount of inter-node communication).  That result was achieved by using hierarchical partitioning and using `-ppn 4` to tell `mpiexec` to put `4` processes on each compute node... which will cause those four processes to be contiguous on each node.  The top two examples, which omit the `-ppn` option, end up getting "striped" mpi processes (one process is placed on each node and then it wraps around) causing a jumbly mess of partitioning which will increase the communication cost for the job (and decrease scalability).
 
 !media media/auxkernels/hardware_id_aux.png style=width:75%
+       alt=Visualization of the partitioning of a mesh using the four commands above.
 
 !syntax parameters /AuxKernels/HardwareIDAux
 
