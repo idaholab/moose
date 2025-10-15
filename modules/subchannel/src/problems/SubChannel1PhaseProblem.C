@@ -81,8 +81,6 @@ SubChannel1PhaseProblem::validParams()
   params.addParam<bool>(
       "segregated", true, "Boolean to define whether to use a segregated solution.");
   params.addParam<bool>(
-      "monolithic_thermal", false, "Boolean to define whether to use thermal monolithic solve.");
-  params.addParam<bool>(
       "verbose_subchannel", false, "Boolean to print out information related to subchannel solve.");
   params.addParam<bool>(
       "deformation",
@@ -129,7 +127,6 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _implicit_bool(getParam<bool>("implicit")),
     _staggered_pressure_bool(getParam<bool>("staggered_pressure")),
     _segregated_bool(getParam<bool>("segregated")),
-    _monolithic_thermal_bool(getParam<bool>("monolithic_thermal")),
     _verbose_subchannel(getParam<bool>("verbose_subchannel")),
     _deformation(getParam<bool>("deformation")),
     _fp(nullptr),
@@ -1945,14 +1942,12 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   //
   // Assemble base (single-physics) matrices/vectors
   //
-  computeSumWij(iblock);        // Sum of crossflows (from previous iteration)
-  computeMdot(iblock);          // Axial flux matrix
-  computeWijPrime(iblock);      // Turbulent crossflow (previous-step axial mass flows)
-  computeDP(iblock);            // Pressure drop matrix
-  computeP(iblock);             // Pressure matrix
-  computeWijResidual(iblock);   // Cross fluxes matrix
-  if (_monolithic_thermal_bool) // Enthalpy matrix (if monolithic)
-    computeh(iblock);
+  computeSumWij(iblock);      // Sum of crossflows (from previous iteration)
+  computeMdot(iblock);        // Axial flux matrix
+  computeWijPrime(iblock);    // Turbulent crossflow (previous-step axial mass flows)
+  computeDP(iblock);          // Pressure drop matrix
+  computeP(iblock);           // Pressure matrix
+  computeWijResidual(iblock); // Cross fluxes matrix
 
   verbose("Starting nested system.");
   verbose("Number of simultaneous variables: " + std::to_string(Q));
@@ -2381,48 +2376,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   LibmeshPetscCall(populateDenseFromVector<libMesh::DenseMatrix<Real>>(
       sol_Wij, _Wij, first_node, last_node, _n_gaps));
 
-  // Enthalpy
-  if (_monolithic_thermal_bool)
-  {
-    // Local solve with _hc_sys_h_mat
-    KSP ksploc = nullptr;
-    PC pcloc = nullptr;
-    Vec sol = nullptr;
-
-    LibmeshPetscCall(VecDuplicate(_hc_sys_h_rhs, &sol));
-    LibmeshPetscCall(KSPCreate(PETSC_COMM_SELF, &ksploc));
-    LibmeshPetscCall(KSPSetOperators(ksploc, _hc_sys_h_mat, _hc_sys_h_mat));
-    LibmeshPetscCall(KSPGetPC(ksploc, &pcloc));
-    LibmeshPetscCall(PCSetType(pcloc, PCJACOBI));
-    LibmeshPetscCall(KSPSetTolerances(ksploc, _rtol, _atol, _dtol, _maxit));
-    LibmeshPetscCall(KSPSetFromOptions(ksploc));
-    LibmeshPetscCall(KSPSolve(ksploc, _hc_sys_h_rhs, sol));
-
-    PetscScalar * xx = nullptr;
-    LibmeshPetscCall(VecGetArray(sol, &xx));
-    for (unsigned int iz = first_node; iz <= last_node; ++iz)
-    {
-      const unsigned int iz_ind = iz - first_node;
-      for (unsigned int i_ch = 0; i_ch < _n_channels; ++i_ch)
-      {
-        auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-        const auto h_out = xx[iz_ind * _n_channels + i_ch];
-        if (h_out < 0)
-        {
-          mooseError(name(),
-                     " : Calculation of negative Enthalpy h_out = : ",
-                     h_out,
-                     " Axial Level= : ",
-                     iz);
-        }
-        _h_soln->set(node_out, h_out);
-      }
-    }
-    LibmeshPetscCall(VecRestoreArray(sol, &xx));
-    LibmeshPetscCall(KSPDestroy(&ksploc));
-    LibmeshPetscCall(VecDestroy(&sol));
-  }
-
   // sum_Wij
   LibmeshPetscCall(MatMult(_mc_sumWij_mat, sol_Wij, _prod));
   LibmeshPetscCall(populateSolutionChan<SolutionHandle>(
@@ -2505,21 +2458,13 @@ SubChannel1PhaseProblem::externalSolve()
           LibmeshPetscCall(implicitPetscSolve(iblock));
           computeWijPrime(iblock);
           verbose("Done with main solve.");
-          if (_monolithic_thermal_bool)
+          verbose("Starting thermal solve.");
+          if (_compute_power)
           {
-            // Enthalpy is already solved from the monolithic solve
+            computeh(iblock);
             computeT(iblock);
           }
-          else
-          {
-            verbose("Starting thermal solve.");
-            if (_compute_power)
-            {
-              computeh(iblock);
-              computeT(iblock);
-            }
-            verbose("Done with thermal solve.");
-          }
+          verbose("Done with thermal solve.");
         }
         verbose("Start updating thermophysical properties.");
         if (_compute_density)
