@@ -26,6 +26,9 @@ public:
   static InputParameters validParams();
   PINSFVEnergyDiffusion(const InputParameters & params);
 
+  // To get warnings tracked in the SolutionInvalidityOutput
+  usingCombinedWarningSolutionWarnings;
+
 protected:
   ADReal computeQpResidual() override;
 

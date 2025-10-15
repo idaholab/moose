@@ -26,6 +26,9 @@ public:
   using INSFVFluxKernel::gatherRCData;
   void gatherRCData(const FaceInfo & fi) override final;
 
+  // To get warnings tracked in the SolutionInvalidityOutput
+  usingCombinedWarningSolutionWarnings;
+
 protected:
   /**
    * Routine to compute this object's strong residual (e.g. not multiplied by area). This routine

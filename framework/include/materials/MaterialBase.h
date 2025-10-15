@@ -93,6 +93,9 @@ public:
   MaterialBase(const MaterialBase & object, const Moose::Kokkos::FunctorCopy & key);
 #endif
 
+  // To get warnings tracked in the SolutionInvalidityOutput
+  usingCombinedWarningSolutionWarnings;
+
   /**
    * Initialize stateful properties (if material has some)
    *

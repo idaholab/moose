@@ -19,6 +19,9 @@ public:
 
   SolidProperties(const InputParameters & parameters);
 
+  // To get warnings tracked in the SolutionInvalidityOutput
+  usingCombinedWarningSolutionWarnings;
+
   virtual void execute() final {}
   virtual void initialize() final {}
   virtual void finalize() final {}

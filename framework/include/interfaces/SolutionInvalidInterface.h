@@ -31,6 +31,19 @@ class FEProblemBase;
     this->flagInvalidSolutionInternal<true>(__invalid_id);                                         \
   } while (0)
 
+// Every class using this interface must specify either
+// 'usingCombinedWarningSolutionWarnings' or 'usingMooseBaseWarnings'
+#define usingCombinedWarningSolutionWarnings                                                       \
+  using SolutionInvalidInterface::mooseWarning;                                                    \
+  using SolutionInvalidInterface::mooseWarningNonPrefixed;                                         \
+  using SolutionInvalidInterface::mooseDeprecated;                                                 \
+  using SolutionInvalidInterface::paramWarning
+#define usingMooseBaseWarnings                                                                     \
+  using MooseBase::mooseWarning;                                                                   \
+  using MooseBase::mooseWarningNonPrefixed;                                                        \
+  using MooseBase::mooseDeprecated;                                                                \
+  using MooseBase::paramWarning
+
 /**
  * An interface that allows the marking of invalid solutions during a solve
  */

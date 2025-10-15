@@ -28,6 +28,9 @@ public:
 
   void initialSetup() override;
 
+  // Use solution invalid output for these warnings
+  usingCombinedWarningSolutionWarnings;
+
 protected:
   virtual void prepareEvaluationOfInterpValues(const unsigned int var_index) override;
 
