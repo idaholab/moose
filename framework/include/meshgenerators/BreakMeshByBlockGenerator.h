@@ -58,8 +58,6 @@ protected:
   const BoundaryName _interface_transition_name;
   /// whether to add two sides interface boundaries
   const bool _add_interface_on_two_sides;
-  /// whether to generate boundary pairs between blocks
-  const bool _generate_boundary_pairs;
 
 private:
   // Typedef for a single message entry: (node_id, vector of connected block_ids)
@@ -77,6 +75,9 @@ private:
   std::unordered_map<std::pair<const Elem *, unsigned int>, std::pair<const Elem *, unsigned int>>
       _elem_side_to_fake_neighbor_elem_side;
 
+  /// @brief Maps a pair of subdomain ids to the corresponding boundary id.
+  std::unordered_map<std::pair<subdomain_id_type, subdomain_id_type>, boundary_id_type> _subid_pairs_to_boundary_id;
+
   /// generate the new boundary interface
   void addInterface(MeshBase & mesh);
 
@@ -93,13 +94,4 @@ private:
       const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map,
       MeshBase & mesh,
       std::map<dof_id_type, std::set<subdomain_id_type>> & nodeid_to_connected_blocks);
-
-  /**
-   * @brief Add disconnected neighbors to the MooseMesh from a map of element-side pairs.
-   */
-  void
-  addDisconnectedNeighborsFromMap(const std::unordered_map<std::pair<const Elem *, unsigned int>,
-                                                           std::pair<const Elem *, unsigned int>> &
-                                      elem_side_to_fake_neighbor_elem_side,
-                                  MeshBase & mesh);
 };

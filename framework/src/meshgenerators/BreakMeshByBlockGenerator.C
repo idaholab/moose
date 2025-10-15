@@ -47,11 +47,6 @@ BreakMeshByBlockGenerator::validParams()
       "interface_transition",
       "the name of the interface transition boundary created when blocks are provided");
 
-  params.addParam<bool>(
-      "generate_boundary_pairs", true, "Whether to generate boundary pairs between blocks.");
-
-  params.addParam<bool>("prepare_end", true, "Whether to call prepare_for_use at the end.");
-
   params.addRelationshipManager("ElementSideNeighborLayers",
                                 Moose::RelationshipManagerType::GEOMETRIC |
                                     Moose::RelationshipManagerType::ALGEBRAIC |
@@ -70,8 +65,7 @@ BreakMeshByBlockGenerator::BreakMeshByBlockGenerator(const InputParameters & par
     _add_transition_interface(getParam<bool>("add_transition_interface")),
     _split_transition_interface(getParam<bool>("split_transition_interface")),
     _interface_transition_name(getParam<BoundaryName>("interface_transition_name")),
-    _add_interface_on_two_sides(getParam<bool>("add_interface_on_two_sides")),
-    _generate_boundary_pairs(getParam<bool>("generate_boundary_pairs"))
+    _add_interface_on_two_sides(getParam<bool>("add_interface_on_two_sides"))
 {
   if (_block_pairs_restricted && _surrounding_blocks_restricted)
     paramError("block_pairs_restricted",
@@ -314,8 +308,7 @@ BreakMeshByBlockGenerator::generate()
               unsigned int side = current_elem->which_neighbor_am_i(connected_elem);
               unsigned int connected_elem_side = connected_elem->which_neighbor_am_i(current_elem);
 
-              if (_generate_boundary_pairs)
-                elem_side_to_fake_neighbor_elem_side.emplace(
+              elem_side_to_fake_neighbor_elem_side.emplace(
                     std::make_pair(current_elem, side),
                     std::make_pair(connected_elem, connected_elem_side));
 
@@ -420,8 +413,6 @@ BreakMeshByBlockGenerator::generate()
       _factory.releaseSharedObjects(*rm);
   }
 
-  addDisconnectedNeighborsFromMap(elem_side_to_fake_neighbor_elem_side, *mesh);
-
   mesh->set_isnt_prepared();
 
   return dynamic_pointer_cast<MeshBase>(mesh);
@@ -519,6 +510,11 @@ BreakMeshByBlockGenerator::addInterface(MeshBase & mesh)
       }
     }
 
+
+    // Map the block pair (subdomain_id_A, subdomain_id_B) to the generated boundary_id
+    // This makes it easy to look up or create boundary pairs later
+    _subid_pairs_to_boundary_id[boundary_side] = boundary_id;
+
     // loop over all the side belonging to each pair and add it to the proper interface
     auto boundary_side_map = _new_boundary_sides_map.find(boundary_side);
     if (boundary_side_map != _new_boundary_sides_map.end())
@@ -527,6 +523,21 @@ BreakMeshByBlockGenerator::addInterface(MeshBase & mesh)
             element_side.first /*elem*/, element_side.second /*side*/, boundary_id);
     new_boundaryID++;
   }
+
+// Generate boundary_id pairs mapping based on _subid_pairs_to_boundary_id
+for (auto & entry : _subid_pairs_to_boundary_id)
+{
+  // Get the reversed pair, e.g., (1,2) -> (2,1)
+  auto rev_entry = std::make_pair(entry.first.second, entry.first.first);
+
+  // If the reversed pair exists, it means interfaces are generated on both sides
+  if (_subid_pairs_to_boundary_id.find(rev_entry) != _subid_pairs_to_boundary_id.end())
+    // pair = (own, opposite)
+    mesh.add_disconnected_boundaries(entry.second, _subid_pairs_to_boundary_id[rev_entry]);
+  else
+    // If the opposite side does not exist: pair = (own, own)
+    mesh.add_disconnected_boundaries(entry.second, entry.second);
+}
 }
 
 subdomain_id_type
@@ -634,26 +645,3 @@ BreakMeshByBlockGenerator::syncConnectedBlocks(
       });
 }
 
-void
-BreakMeshByBlockGenerator::addDisconnectedNeighborsFromMap(
-    const std::unordered_map<std::pair<const Elem *, unsigned int>,
-                             std::pair<const Elem *, unsigned int>> &
-        elem_side_to_fake_neighbor_elem_side,
-    MeshBase & mesh)
-{
-  // Loop over elem_side_to_fake_neighbor_elem_side to add disconnected neighbors to the MOOSE mesh
-  for (const auto & entry : elem_side_to_fake_neighbor_elem_side)
-  {
-    const auto elem_id = entry.first.first->id();
-    const auto side = entry.first.second;
-    const auto connected_elem_id = entry.second.first->id();
-    const auto connected_side = entry.second.second;
-
-    // Register as disconnected neighbors in MooseMesh
-    mesh.add_disconnected_neighbors(std::make_pair(elem_id, side),
-                                    std::make_pair(connected_elem_id, connected_side));
-  }
-
-  // Update the neighbor information in the mesh
-  mesh.find_disconnected_neighbors();
-}
