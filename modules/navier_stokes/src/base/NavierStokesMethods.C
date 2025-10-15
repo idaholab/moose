@@ -252,7 +252,7 @@ getWallBoundedElements(const std::vector<BoundaryName> & wall_boundary_names,
   // processors.
   auto gather_functor = [&subproblem, &wall_bounded](const processor_id_type libmesh_dbg_var(pid),
                                                      const std::vector<dof_id_type> & elem_ids,
-                                                     std::vector<dof_id_type> & data_to_fill)
+                                                     std::vector<unsigned char> & data_to_fill)
   {
     mooseAssert(pid != subproblem.processor_id(), "We shouldn't be gathering from ourselves.");
     data_to_fill.resize(elem_ids.size());
@@ -268,7 +268,7 @@ getWallBoundedElements(const std::vector<BoundaryName> & wall_boundary_names,
 
   auto action_functor = [&subproblem, &wall_bounded](const processor_id_type libmesh_dbg_var(pid),
                                                      const std::vector<dof_id_type> & elem_ids,
-                                                     const std::vector<dof_id_type> & filled_data)
+                                                     const std::vector<unsigned char> & filled_data)
   {
     mooseAssert(pid != subproblem.processor_id(),
                 "The request filler shouldn't have been ourselves");
@@ -317,7 +317,7 @@ getWallBoundedElements(const std::vector<BoundaryName> & wall_boundary_names,
           }
       }
 
-  dof_id_type * bool_ex = nullptr;
+  unsigned char * bool_ex = nullptr;
   TIMPI::pull_parallel_vector_data(
       subproblem.comm(), elem_ids_requested, gather_functor, action_functor, bool_ex);
 }
