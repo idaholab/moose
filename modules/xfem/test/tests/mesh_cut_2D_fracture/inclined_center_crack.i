@@ -1,4 +1,5 @@
-# Center inclined crack.
+# Center inclined crack. To run convergence study, run angles for theta=0-90 and refinement mesh_h=201,401,801
+#
 # @article{moes1999finite,
 #   title={A finite element method for crack growth without remeshing},
 #   author={Mo{\"e}s, Nicolas and Dolbow, John and Belytschko, Ted},
@@ -54,13 +55,13 @@ mesh_h=201
     ymax = ${fparse H/2}
     elem_type = QUAD4
   []
-  # [center_block]
-  #   type = SubdomainBoundingBoxGenerator
-  #   input = gen
-  #   block_id = 10
-  #   bottom_left = '-${fparse 1.5*a} -${fparse 1.5*a} 0'
-  #   top_right = '${fparse 1.5*a} ${fparse 1.5*a} 0'
-  # []
+  [center_block]
+    type = SubdomainBoundingBoxGenerator
+    input = gen
+    block_id = 10
+    bottom_left = '-${fparse 1.5*a} -${fparse 1.5*a} 0'
+    top_right = '${fparse 1.5*a} ${fparse 1.5*a} 0'
+  []
   [center_left_node]
     type = ExtraNodesetGenerator
     coord = '-${fparse W/2} 0 0'
@@ -78,7 +79,7 @@ mesh_h=201
   final_generator = 'center_right_node'
 []
 
-#### - adaptivity causes segfault
+#### - adaptivity causes segfault, see #31714
 # [AuxVariables]
 #   [constant_refine]
 #     initial_condition = 2
@@ -87,7 +88,6 @@ mesh_h=201
 #     block = 10
 #   []
 # []
-
 # [Adaptivity]
 #   initial_marker = constant_refine
 #   max_h_level = 2
@@ -214,5 +214,6 @@ mesh_h=201
 
 [Outputs]
   csv = true
+  # uncomment for convergence study
   # file_base = inclined_crack/results_theta_${theta}_h_${mesh_h}
 []
