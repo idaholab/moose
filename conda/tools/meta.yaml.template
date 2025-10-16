@@ -32,6 +32,7 @@ requirements:
     - {{ clang_format }}
     - {{ clang_tools }}
     - deepdiff
+    - fmpy
     - git-lfs <3.5.1
     - gitpython
     - graphviz
@@ -75,6 +76,7 @@ test:
   imports:
     - bs4
     - deepdiff
+    - fmpy
     - git
     - jinja2
     - livereload
