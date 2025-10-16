@@ -17,6 +17,7 @@ InputMatrixSampler::validParams()
   InputParameters params = Sampler::validParams();
   params.addClassDescription("Sampler that utilizes a sampling matrix defined at input.");
   params.addRequiredParam<RealEigenMatrix>("matrix", "Sampling matrix.");
+  params.declareControllable("matrix");
   return params;
 }
 
@@ -25,6 +26,20 @@ InputMatrixSampler::InputMatrixSampler(const InputParameters & parameters)
 {
   setNumberOfRows(_data.rows());
   setNumberOfCols(_data.cols());
+}
+
+void
+InputMatrixSampler::executeSetUp()
+{
+  if ((dof_id_type)_data.cols() != getNumberOfCols())
+    paramError("matrix",
+               "Input matrix changed the number of columns from ",
+               getNumberOfCols(),
+               " to ",
+               _data.cols());
+
+  if ((dof_id_type)_data.rows() != getNumberOfRows())
+    setNumberOfRows(_data.rows());
 }
 
 Real
