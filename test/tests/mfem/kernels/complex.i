@@ -8,7 +8,7 @@ kappa_i = -7.86151377757423297509831172647
 [Mesh]
   type = MFEMMesh
   file = ../mesh/inline-quad.mesh
-  dim = 3
+  dim = 2
 []
 
 [Problem]
@@ -58,7 +58,6 @@ kappa_i = -7.86151377757423297509831172647
   [dbc]
     type = MFEMComplexScalarDirichletBC
     variable = u
-    boundary = '1 2 3 4'
     coefficient_real = u0_r
     coefficient_imag = u0_i
   []
@@ -103,7 +102,7 @@ kappa_i = -7.86151377757423297509831172647
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/Complex
+    file_base = OutputData/Complex2DQuad
     vtk_format = ASCII
   []
 []
