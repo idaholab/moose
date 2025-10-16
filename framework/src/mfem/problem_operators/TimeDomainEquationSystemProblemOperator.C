@@ -26,7 +26,7 @@ void
 TimeDomainEquationSystemProblemOperator::Init(mfem::BlockVector & X)
 {
   TimeDomainProblemOperator::Init(X);
-  GetEquationSystem()->BuildEquationSystem();
+  GetEquationSystem()->BuildEquationSystem(_problem_data.gridfunctions, _block_true_offsets);
   // Set timestepper
   auto & ode_solver = _problem_data.ode_solver;
   ode_solver = std::make_unique<mfem::BackwardEulerSolver>();
@@ -77,7 +77,7 @@ void
 TimeDomainEquationSystemProblemOperator::BuildEquationSystemOperator(mfem::real_t dt)
 {
   GetEquationSystem()->SetTimeStep(dt);
-  GetEquationSystem()->UpdateEquationSystem();
+  GetEquationSystem()->UpdateEquationSystem(_problem_data.gridfunctions, _block_true_offsets);
   GetEquationSystem()->BuildJacobian(_true_x, _true_rhs);
 }
 
