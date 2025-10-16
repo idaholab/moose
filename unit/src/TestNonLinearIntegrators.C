@@ -177,6 +177,7 @@ public:
 
 TEST(CheckData, NonlinearIntegratorTest)
 {
+  mfem::Hypre::Init();
   mfem::Mesh mesh("../test/tests/mfem/mesh/cylinder-hex-q2.gen", 1, 1);
   auto pmesh = std::make_shared<mfem::ParMesh>(MPI_COMM_WORLD, mesh);
 
