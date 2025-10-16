@@ -257,7 +257,10 @@ class TestHarnessResultsSummary:
                 head_result.run_time < head_run_time_floor:
                 continue
             # Calculate relative runtime ratio between base and head
-            relative_runtime = (head_result.run_time - base_result.run_time) / base_result.run_time
+            elif base_result.run_time == 0:
+                relative_runtime = head_result.run_time
+            else:
+                relative_runtime = float((head_result.run_time - base_result.run_time) / base_result.run_time)
             # Check if relative run time rate is higher than threadshold, then it will put in the result
             if abs(relative_runtime) >= run_time_rate_floor:
                 same_table.append(

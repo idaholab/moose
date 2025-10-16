@@ -268,6 +268,51 @@ class TestResultsSummary(TestHarnessTestCase):
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
     @patch.object(TestHarnessResultsSummary, 'get_commit_results')
+    def testBuildSameTableBaseTimeZero(self, mock_get_commit_results,
+            mock_get_event_results, mock_init_reader):
+        """
+        Tests _build_same_table() when same test name exit in both base and head, where:
+            -the head runtime exceeds a predefined threshold and
+            -the relative runtime increase exceeds a defined rate.
+        """
+        fake_run_time_floor = 1.0
+        fake_run_time_rate_floor = 0.5
+
+        base_result_with_tests = self.getResult()
+        head_result_with_tests = self.getResult()
+        head_test_names = set(head_result_with_tests.test_names)
+
+        mock_get_commit_results.return_value = head_result_with_tests
+        mock_get_event_results.return_value = head_result_with_tests
+        mock_init_reader.return_value = None
+
+        base_test = base_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
+        head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
+        # Mock base and head runtime, so that absoluate relative run time rate is higher than fake_run_time_rate_floor
+        base_test._data['timing']['runner_run'] = 0.00
+        head_test._data['timing']['runner_run'] = 4.0
+
+        summary = TestHarnessResultsSummary(None)
+        same_table = summary._build_same_table(
+            head_test_names,
+            base_result_with_tests,
+            head_result_with_tests,
+            head_run_time_floor = fake_run_time_floor,
+            run_time_rate_floor = fake_run_time_rate_floor
+        )
+
+        self.assertEqual(len(same_table), 1)
+        self.assertEqual(len(same_table[0]), 4)
+        self.assertIn(str(MOCKED_TEST_NAME),same_table[0][0])
+        self.assertEqual(same_table[0][1], f'{base_test.run_time:.2f}')
+        self.assertEqual(same_table[0][2], f'{head_test.run_time:.2f}')
+        self.assertGreater(same_table[0][2], f'{fake_run_time_floor:.2f}')
+        # Compare absoulate relative run time rate is higher than floor rate
+        self.assertGreater(abs(float(same_table[0][3].strip('%'))), fake_run_time_rate_floor * 100)
+
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    @patch.object(TestHarnessResultsSummary, 'get_event_results')
+    @patch.object(TestHarnessResultsSummary, 'get_commit_results')
     def testBuildSameTableNoHeadRunTime(self, mock_get_commit_results,
             mock_get_event_results, mock_init_reader):
         """
