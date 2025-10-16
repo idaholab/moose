@@ -286,7 +286,7 @@ class TestHarnessResultsSummary:
         -------------------
         run-time-floor : float
             The runtime at which to not check for a difference
-            (default: 1 s)
+            (default: 2 s)
         run-time-rate-floor : float
             The runtime rate at which to not attach in same_table summary
             (default: 0.5 i.e 50%)
@@ -316,7 +316,7 @@ class TestHarnessResultsSummary:
         assert isinstance(base_names,(set, NoneType))
 
         # Extract potional parameters
-        head_run_time_floor = kwargs.pop('run_time_floor', 1.0)
+        head_run_time_floor = kwargs.pop('run_time_floor', 2.0)
         assert isinstance(head_run_time_floor, (float, int))
         run_time_rate_floor = kwargs.pop('run_time_rate_floor', 0.5)
         assert isinstance(run_time_rate_floor, (float, int))
