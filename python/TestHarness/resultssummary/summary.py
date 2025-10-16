@@ -159,6 +159,13 @@ class TestHarnessResultsSummary:
         return f'`{str(test_name)}`'
 
     def _sort_key(self, column_index):
+        """
+        Generate a sorting key function for rows based on the specified column index.
+        The returned key function categorizes values into three groups for sorting:
+        1. Numeric values (sorted in descending order).
+        2. The string 'SKIP' (sorted after numeric values).
+        3. All other values (sorted last).
+        """
         def __sort_key(row):
             value = row[column_index]
             if value.replace('.', '', 1).isdigit():
@@ -168,7 +175,6 @@ class TestHarnessResultsSummary:
             else:
                 return (2, 0)
         return __sort_key
-
 
     def _build_diff_table(self, test_names: set[TestName], test_results: StoredResult) -> Optional[List[List]]:
         """

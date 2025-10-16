@@ -111,10 +111,10 @@ class TestResultsSummary(TestHarnessTestCase):
         Tests _sort_key() to sort with the sequence of runtime value, SKIP then ''
         """
         mock_init_reader.return_value = None
-        a = ['testa', '2.00']
-        b = ['testb', '1.00']
-        c = ['testc', 'SKIP']
-        d = ['testd', '']
+        a = ['`testa.test1`', '2.00']
+        b = ['`testb.test2`', '1.00']
+        c = ['`testc.test3`', 'SKIP']
+        d = ['`testd.test4`', '']
         # unsorted table
         test_table = [c, d, b, a ]
         # sort table
