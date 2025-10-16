@@ -158,23 +158,58 @@ class TestHarnessResultsSummary:
         """
         return f'`{str(test_name)}`'
 
-    def _sort_key(self, column_index):
+    def _sort_test_time_key(test_table_row: list, test_time_col_index: int) -> tuple:
         """
-        Generate a sorting key function for rows based on the specified column index.
-        The returned key function categorizes values into three groups for sorting:
-        1. Numeric values (sorted in descending order).
-        2. The string 'SKIP' (sorted after numeric values).
-        3. All other values (sorted last).
+        Generate a sorting key for a row based on column index which test time is located
+        Parameters:
+        ----------
+        test_table_row : list
+            A list representing a row of data from the test table
+        test_time_col_index : int
+            The index of the column containing the test time value
+
+        Returns:
+        ----------
+        sorting_key : tuple 
+            A tempory sorting key:
+            - (0, -value) for numeric values (to sort in descending order),
+            - (1, 0) for the string 'SKIP',
+            - (2, 0) for all other values
         """
-        def __sort_key(row):
-            value = row[column_index]
-            if value.replace('.', '', 1).isdigit():
-                return (0, -float(value))
-            elif value == 'SKIP':
-                return (1, 0)
-            else:
-                return (2, 0)
-        return __sort_key
+        assert isinstance(test_table_row, (list))
+        assert isinstance(test_time_col_index, (int))
+        value = test_table_row[test_time_col_index]
+        if value.replace('.', '', 1).isdigit():
+            sorting_key = (0, -float(value))
+        elif value == 'SKIP':
+            sorting_key = (1, 0)
+        else:
+            sorting_key = (2, 0)
+        return sorting_key
+
+    def sort_test_times(self, test_table: list[list], test_time_col_index: int) -> list[list]:
+        """
+        Sort a list of test results rows based on the test time column using custom sort.
+        The sorting logic priorities as follow:
+            1. Numeric values (sorted in descending order).
+            2. The string 'SKIP' (sorted after numeric values).
+            3. All other values (sorted last).
+
+        Parameters
+        ----------
+        test_table : list[list]
+            The test table dataset to sort, where each inner list represents a row of test data.
+        test_time_col_index : int
+            The index of the column containing test time values.
+
+        Returns
+        -------
+        list[list]
+            The sorted test table dataset, ordered according to the custom sorting logic.
+        """
+        assert isinstance(test_table, (list))
+        assert isinstance(test_time_col_index, (int))
+        return sorted(test_table, key=lambda test_table_row: self._sort_test_time_key(test_table_row, test_time_col_index))
 
     def _build_diff_table(self, test_names: set[TestName], test_results: StoredResult) -> Optional[List[List]]:
         """
@@ -189,7 +224,7 @@ class TestHarnessResultsSummary:
 
         Returns
         -------
-        Optional[List[List]]
+        sorted_test_table: Optional[List[List]]
             A sorted list of lists where each sublist contains:
                 - the formatted test name (str)
                 - the runtime as a string formatted to two decimal places, or "None" if not available.
@@ -200,21 +235,23 @@ class TestHarnessResultsSummary:
         test_table = []
         for test_name in test_names:
             test_result = test_results.get_test(test_name.folder, test_name.name)
-            # Test_result status is SKIP, run time will show as SKIP
-            # Run time is None, run time will show ''
+            # Test is skipped, so show time as SKIP
             if test_result.status is not None and \
                 test_result.status_value == 'SKIP':
                 run_time = 'SKIP'
+            # Test has a run time
             elif test_result.run_time is not None:
                 run_time = f'{test_result.run_time:.2f}'
+            # Test does not have a run time
             else:
                 run_time = ''
             test_table.append([
                 self._format_test_name(test_name),
                 run_time,
             ])
-        # Table will be sorted by runtime value, SKIP then empty
-        test_table.sort(key=self._sort_key(1))
+        if not test_table:
+            # Table will be sorted by runtime value, SKIP then empty
+            test_table = self.sort_test_times(test_table, 1)
 
         return test_table
 
@@ -239,7 +276,7 @@ class TestHarnessResultsSummary:
 
         Returns
         -------
-        Optional[List[List]]
+        same_table: Optional[List[List]]
             A sorted list of lists based on relative runtime containing:
             - Formatted test name
             - Base runtime (str, formatted to 2 decimal places)
@@ -260,13 +297,12 @@ class TestHarnessResultsSummary:
             # Skip to check relative run time if run time is None or below the threadshold
             if  head_result.run_time is None or \
                 base_result.run_time is None or \
+                base_result.run_time == 0 or \
+                head_result.run_time == 0 or \
                 head_result.run_time < head_run_time_floor:
                 continue
             # Calculate relative runtime ratio between base and head
-            elif base_result.run_time == 0:
-                relative_runtime = head_result.run_time
-            else:
-                relative_runtime = float((head_result.run_time - base_result.run_time) / base_result.run_time)
+            relative_runtime = float((head_result.run_time - base_result.run_time) / base_result.run_time)
             # Check if relative run time rate is higher than threadshold, then it will put in the result
             if abs(relative_runtime) >= run_time_rate_floor:
                 same_table.append(
