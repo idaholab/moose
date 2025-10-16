@@ -182,14 +182,19 @@ class TestHarnessResultsSummary:
         test_table = []
         for test_name in test_names:
             test_result = test_results.get_test(test_name.folder, test_name.name)
-            # if run time is None, it will display "" in Time column
-            test_result_run_time = (
-            f'{test_result.run_time:.2f}' if test_result.run_time is not None else ""
-            )
+            # Test_result status is SKIP, run time will show as SKIP
+            # Run time is None, run time will show ''
+            if test_result.status_value == 'SKIP':
+                run_time = 'SKIP'
+            elif test_result.run_time is not None:
+                run_time = f'{test_result.run_time:.2f}'
+            else:
+                run_time = ''
             test_table.append([
                 self._format_test_name(test_name),
-                test_result_run_time,
+                run_time,
             ])
+
         # Sorted based on run time
         test_table.sort(
             key=lambda row: float(row[1]) if row[1] != "" else float('-inf'),
