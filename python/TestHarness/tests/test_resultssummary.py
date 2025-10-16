@@ -106,10 +106,31 @@ class TestResultsSummary(TestHarnessTestCase):
                 summary.pr_test_names(event_id = EVENT_ID, out_file = out_file.name)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
+    def testsortkey(self, mock_init_reader):
+        """
+        Tests _sort_key() to sort with the sequence of runtime value, SKIP then ''
+        """
+        mock_init_reader.return_value = None
+        a = ['testa', '2.00']
+        b = ['testb', '1.00']
+        c = ['testc', 'SKIP']
+        d = ['testd', '']
+        # unsorted table
+        test_table = [c, d, b, a ]
+        # sort table
+        summary = TestHarnessResultsSummary(None)
+        test_table.sort(key=summary._sort_key(1))
+
+        self.assertEqual(test_table[0], a)
+        self.assertEqual(test_table[1], b)
+        self.assertEqual(test_table[2], c)
+        self.assertEqual(test_table[3], d)
+
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_commit_results')
     def testBuildDiffTableRemovedTest(self, mock_get_commit_results, mock_init_reader):
         """
-        Tests  _build_diff_table() when test is removed
+        Tests _build_diff_table() when test is removed
         """
         base_result_with_tests = self.getResult()
         base_test_names = set(base_result_with_tests.test_names)
@@ -173,6 +194,31 @@ class TestResultsSummary(TestHarnessTestCase):
         self.assertEqual(len(added_table[0]), 2)
         self.assertIn(str(MOCKED_TEST_NAME), added_table[0][0])
         self.assertEqual(added_table[0][1], "")
+
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    @patch.object(TestHarnessResultsSummary, 'get_event_results')
+    def testBuildDiffTableStatusValueSKIP(self, mock_get_event_results, mock_init_reader):
+        """
+        Tests _build_diff_table() when test is added but there is no runtime
+        It will put "" for it's runtime
+        """
+        head_result_with_tests = self.getResult()
+        head_test_names = set(head_result_with_tests.test_names)
+
+        mock_get_event_results.return_value = head_result_with_tests
+        mock_init_reader.return_value = None
+        head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
+        head_test._data['status']['status'] = 'SKIP'
+
+        summary = TestHarnessResultsSummary(None)
+        added_table = summary._build_diff_table(
+            head_test_names,
+            head_result_with_tests)
+
+        self.assertEqual(len(added_table), head_result_with_tests.num_tests)
+        self.assertEqual(len(added_table[0]), 2)
+        self.assertIn(str(MOCKED_TEST_NAME), added_table[0][0])
+        self.assertEqual(added_table[0][1], 'SKIP')
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
@@ -347,8 +393,8 @@ class TestResultsSummary(TestHarnessTestCase):
         base_test = base_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
         head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
         # Mock base and head runtime, so that relative run time rate is less than fake_run_time_rate_floor
-        base_test._data['timing']['runner_run'] = 10
-        head_test._data['timing']['runner_run'] = 13
+        base_test._data['timing']['runner_run'] = 10.00
+        head_test._data['timing']['runner_run'] = 13.00
 
         summary = TestHarnessResultsSummary(None)
         same_table = summary._build_same_table(
@@ -478,8 +524,8 @@ class TestResultsSummary(TestHarnessTestCase):
         base_test = base_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
         head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
         # Mock base and head runtime, so that relative run time rate is higher than fake_run_time_rate_floor
-        base_test._data['timing']['runner_run'] = 10.00
-        head_test._data['timing']['runner_run'] = 17.00
+        base_test._data['timing']['runner_run'] = 10.0
+        head_test._data['timing']['runner_run'] = 17.0
 
         summary = TestHarnessResultsSummary(None)
         removed_table, added_table, same_table = summary.diff_table(
@@ -541,15 +587,18 @@ class TestResultsSummary(TestHarnessTestCase):
         """
         mock_init_reader.return_value = None
         # Mock the table title, data, header, no_data_message
+        base_run_time = 10.0
+        head_run_time = 17.0
         test_title = "### Tests with Data:"
-        test_table_data = [[str(MOCKED_TEST_NAME), 10.00, 17.00, '70.00%']]
+        test_table_data = [[str(MOCKED_TEST_NAME), f'{base_run_time:.2f}', f'{head_run_time:.2f}', '+70.00%']]
         test_headers = ["Test", "Base (s)", "Head (s)", "+/-"]
         test_no_data_message = "Nome"
         # Expected format table with data
         expected_table = tabulate(
             test_table_data,
             headers = test_headers,
-            tablefmt = "github"
+            tablefmt = "github",
+            disable_numparse=True
         )
         expected_output = f'{test_title}\n{expected_table}'
 
@@ -569,7 +618,7 @@ class TestResultsSummary(TestHarnessTestCase):
         test_title = "### Tests with No Data:"
         test_table_data = None
         test_headers = ["Test", "Time (s)"]
-        test_no_data_message = "None"
+        test_no_data_message = ""
         # Expected format table with nodata
         expected_output = test_title + "\n" + test_no_data_message
 
@@ -595,7 +644,6 @@ class TestResultsSummary(TestHarnessTestCase):
         no_change_buid_summary = summary.build_summary(None, None, None)
 
         self.assertIn('Removed tests', no_change_buid_summary)
-        self.assertIn('None', no_change_buid_summary)
         self.assertIn('Added tests', no_change_buid_summary)
         self.assertIn('Run time changes', no_change_buid_summary)
 
@@ -607,9 +655,9 @@ class TestResultsSummary(TestHarnessTestCase):
         """
         mock_init_reader.return_value = None
         # Mocked table data
-        removed_table =[[str(MOCKED_TEST_NAME),12.00]]
-        added_table =[[str(MOCKED_TEST_NAME), 15.00]]
-        same_table =[[str(MOCKED_TEST_NAME), 10.00, 17.00, '70.00%']]
+        removed_table =[[str(MOCKED_TEST_NAME), '12.00']]
+        added_table =[[str(MOCKED_TEST_NAME), '15.00']]
+        same_table =[[str(MOCKED_TEST_NAME), '10.00', '17.00', '70.00%']]
 
         summary = TestHarnessResultsSummary(None)
         has_test_build_summary = summary.build_summary(removed_table, added_table, same_table)
@@ -617,16 +665,16 @@ class TestResultsSummary(TestHarnessTestCase):
         self.assertIn('Removed tests', has_test_build_summary)
         self.assertIn('Added tests', has_test_build_summary)
         self.assertIn('Time (s)', has_test_build_summary)
-        self.assertIn('12', has_test_build_summary)
-        self.assertIn('15', has_test_build_summary)
+        self.assertIn('12.00', has_test_build_summary)
+        self.assertIn('15.00', has_test_build_summary)
         self.assertIn('Run time changes', has_test_build_summary)
         self.assertIn('Test', has_test_build_summary)
         self.assertIn('Base (s)', has_test_build_summary)
         self.assertIn('Head (s)', has_test_build_summary)
         self.assertIn('+/-', has_test_build_summary)
         self.assertIn(str(MOCKED_TEST_NAME), has_test_build_summary)
-        self.assertIn('10', has_test_build_summary)
-        self.assertIn('17', has_test_build_summary)
+        self.assertIn('10.00', has_test_build_summary)
+        self.assertIn('17.00', has_test_build_summary)
         self.assertIn('70.00%', has_test_build_summary)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
@@ -683,10 +731,10 @@ class TestResultsSummary(TestHarnessTestCase):
             )
             with open(out_file.name, 'r') as f:
                 output = f.read()
+                self.assertIn('Compared against', output)
                 self.assertIn('Removed tests', output)
                 self.assertIn('Added tests', output)
                 self.assertIn('Run time changes', output)
-                self.assertIn('None', output)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
@@ -758,6 +806,7 @@ class TestResultsSummary(TestHarnessTestCase):
             # There is run time changes, so check the format of summary result
             with open(out_file.name, 'r') as f:
                 output = f.read()
+                self.assertIn('Compared against', output)
                 self.assertIn('Removed tests', output)
                 self.assertIn('Added tests', output)
                 self.assertIn('Run time changes', output)
@@ -787,10 +836,12 @@ class TestResultsSummary(TestHarnessTestCase):
             summary.main(out_file = out_file.name, action = 'pr', event_id = EVENT_ID)
             with open(out_file.name, 'r') as f:
                 output = f.read()
+                self.assertIn('Compared against', output)
+                self.assertIn(base_result_with_tests.event_sha[:7], output)
+                self.assertIn(base_result_with_tests.civet_job_url, output)
                 self.assertIn('Removed tests', output)
                 self.assertIn('Added tests', output)
                 self.assertIn('Run time changes', output)
-                self.assertIn('None', output)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
@@ -824,17 +875,19 @@ class TestResultsSummary(TestHarnessTestCase):
                 run_time_rate_floor = fake_run_time_rate_floor)
             with open(out_file.name, 'r') as f:
                 output = f.read()
+                self.assertIn('Compared against', output)
+                self.assertIn(base_result_with_tests.event_sha[:7], output)
+                self.assertIn(base_result_with_tests.civet_job_url, output)
                 self.assertIn('Removed tests', output)
                 self.assertIn('Added tests', output)
                 self.assertIn('Run time changes', output)
-                self.assertIn('None', output)
                 self.assertIn('Test', output)
                 self.assertIn('Base (s)', output)
                 self.assertIn('Head (s)', output)
                 self.assertIn('+/-', output)
                 self.assertIn(str(MOCKED_TEST_NAME), output)
-                self.assertIn('15', output)
-                self.assertIn('10', output)
+                self.assertIn('15.00', output)
+                self.assertIn('10.00', output)
                 self.assertIn('-33.33%', output)
 
 if __name__ == '__main__':
