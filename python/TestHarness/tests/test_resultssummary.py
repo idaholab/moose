@@ -804,6 +804,7 @@ class TestResultsSummary(TestHarnessTestCase):
             with open(out_file.name, 'r') as f:
                 output = f.read()
                 self.assertIn('Base results not available', output)
+                self.assertIn(head_result_with_tests.base_sha[:7], output)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')

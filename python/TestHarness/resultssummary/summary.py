@@ -60,7 +60,7 @@ class TestHarnessResultsSummary:
         pr_parser.add_argument(
             '--run-time-floor',
             type = float,
-            default = 2,
+            default = 2.0,
             help = 'The minimum threshold for a test to checked for a run time difference'
         )
 
@@ -143,7 +143,7 @@ class TestHarnessResultsSummary:
         base_results = self.get_commit_results(base_sha)
         # If no base, display message and return None for base
         if not isinstance(base_results, StoredResult):
-            no_base = f"Base results not available for {base_sha}"
+            no_base = f"Base results not available for {base_sha[:7]}"
             # Write no base message in out_file path
             self.write_output(no_base, out_file)
             return None, head_results, None, test_names
