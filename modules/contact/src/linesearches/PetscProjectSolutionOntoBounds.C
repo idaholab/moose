@@ -98,7 +98,7 @@ PetscProjectSolutionOntoBounds::lineSearch()
       auto pen_info = pinfo_pair.second;
 
       // We have penetration
-      if (pen_info->_distance > 0)
+      if (pen_info && pen_info->_distance > 0)
       {
 // Avoid warning in optimized modes about unused variables
 #ifndef NDEBUG
