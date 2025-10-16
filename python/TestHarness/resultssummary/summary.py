@@ -60,7 +60,7 @@ class TestHarnessResultsSummary:
         pr_parser.add_argument(
             '--run-time-floor',
             type = float,
-            default = 1,
+            default = 2,
             help = 'The minimum threshold for a test to checked for a run time difference'
         )
 
@@ -158,8 +158,7 @@ class TestHarnessResultsSummary:
         """
         return f'`{str(test_name)}`'
 
-    @staticmethod
-    def _sort_key(column_index):
+    def _sort_key(self, column_index):
         def __sort_key(row):
             value = row[column_index]
             if value.replace('.', '', 1).isdigit():
@@ -210,7 +209,6 @@ class TestHarnessResultsSummary:
             ])
         # Table will be sorted by runtime value, SKIP then empty
         test_table.sort(key=self._sort_key(1))
-        print(test_table)
 
         return test_table
 
