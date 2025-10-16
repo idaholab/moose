@@ -1,7 +1,7 @@
 AD = ''
 
-ic = 1
-rate = 1e-5
+ic = 5
+rate = 1e-4
 
 [Mesh]
   type = GeneratedMesh
@@ -30,7 +30,7 @@ rate = 1e-5
 [Executioner]
   type = Transient
   solve_type = NEWTON
-  num_steps = 1000
+  num_steps = 10
 []
 
 [Postprocessors]
@@ -47,6 +47,5 @@ rate = 1e-5
 
 [Outputs]
   csv = true
-  time_step_interval = 100
   file_base = '${AD}exact_out'
 []
