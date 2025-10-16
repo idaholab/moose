@@ -1827,9 +1827,9 @@ MooseMesh::setBoundaryName(BoundaryID boundary_id, BoundaryName name)
 }
 
 const std::string &
-MooseMesh::getBoundaryName(BoundaryID boundary_id)
+MooseMesh::getBoundaryName(BoundaryID boundary_id) const
 {
-  BoundaryInfo & boundary_info = getMesh().get_boundary_info();
+  const BoundaryInfo & boundary_info = getMesh().get_boundary_info();
 
   // We need to figure out if this boundary is a sideset or nodeset
   if (boundary_info.get_side_boundary_ids().count(boundary_id))
