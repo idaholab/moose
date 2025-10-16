@@ -218,7 +218,7 @@ LinearFVAnisotropicDiffusion::computeBoundaryRHSContribution(const LinearFVBound
 
   // We add the nonorthogonal corrector for the face here. Potential idea: we could do
   // this in the boundary condition too. For now, however, we keep it like this.
-  if (_use_nonorthogonal_correction_on_boundary)
+  if (_use_nonorthogonal_correction_on_boundary && diff_bc->useBoundaryGradientExtrapolation())
   {
     const auto elem_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
                                ? _current_face_info->elemInfo()
