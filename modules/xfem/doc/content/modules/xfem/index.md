@@ -42,7 +42,8 @@ interface. Examples of the types of problems XFEM can solve include:
 
   - Stationary cracks
   - Cracks that propagate in a manner directly prescribed by the user
-  - Cracks that propagate based on the solution (stress, stress intensity factor, etc.)
+  - Cracks that propagate based on the solution (stress, stress intensity factor, etc.).
+  - [Examples](xfem/theory/examples/index.md)
 
 - Interfaces
 
