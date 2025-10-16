@@ -3026,19 +3026,6 @@ MooseMesh::buildNodeListFromSideList()
     getMesh().get_boundary_info().build_node_list_from_side_list();
 }
 
-void
-MooseMesh::buildSideList(std::vector<dof_id_type> & el,
-                         std::vector<unsigned short int> & sl,
-                         std::vector<boundary_id_type> & il)
-{
-  libmesh_ignore(el);
-  libmesh_ignore(sl);
-  libmesh_ignore(il);
-  mooseError("The version of MooseMesh::buildSideList() taking three "
-             "arguments is not available in your version of libmesh, call the "
-             "version that returns a vector of tuples instead.");
-}
-
 std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>>
 MooseMesh::buildSideList()
 {
