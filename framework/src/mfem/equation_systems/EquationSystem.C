@@ -503,25 +503,20 @@ TimeDependentEquationSystem::SetTrialVariableNames()
     AddCoupledVariableNameIfMissing(_time_derivative_map.getTimeDerivativeName(test_var_name));
   }
 
-  // If a coupled variable has an equation associated with it,
-  // add it to the set of trial variables.
-  for (const auto & coupled_var_name : _coupled_var_names)
+  // If a coupled variable does not have an equation associated with it,
+  // add it to the set of eliminated variables.
+  for (const auto & test_var_name : _test_var_names)
   {
-    for (const auto & test_var_name : _test_var_names)
+    const auto time_derivative_test_var_name =
+        _time_derivative_map.getTimeDerivativeName(test_var_name);
+    for (const auto & coupled_var_name : _coupled_var_names)
     {
-      const auto time_derivative_test_var_name =
-          _time_derivative_map.getTimeDerivativeName(test_var_name);
-      if (time_derivative_test_var_name == coupled_var_name)
-      {
-        if (!VectorContainsName(_trial_var_names, coupled_var_name))
-          _trial_var_names.push_back(coupled_var_name);
-      }
-      else
-      {
-        if (!VectorContainsName(_eliminated_var_names, coupled_var_name))
-          _eliminated_var_names.push_back(coupled_var_name);
-      }
+      if (time_derivative_test_var_name != coupled_var_name &&
+          !VectorContainsName(_eliminated_var_names, coupled_var_name))
+        _eliminated_var_names.push_back(coupled_var_name);
     }
+    if (!VectorContainsName(_trial_var_names, time_derivative_test_var_name))
+      _trial_var_names.push_back(time_derivative_test_var_name);
   }
 }
 
