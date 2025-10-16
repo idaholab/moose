@@ -422,28 +422,28 @@ class TestHarnessResultsSummary:
         # Format removed table
         summary.append(
             self._format_table(
-                "### Removed tests",
+                "\n### Removed tests\n",
                 removed_table,
                 ["Test","Time (s)"],
-                "None"
+                ""
             )
         )
         # Format added table
         summary.append(
             self._format_table(
-                "### Added tests",
+                "\n### Added tests\n",
                 added_table,
                 ["Test", "Time (s)"],
-                "None"
+                ""
             )
         )
         # Format same table
         summary.append(
             self._format_table(
-                "### Run time changes",
+                "\n### Run time changes\n",
                 same_table,
                 ["Test", "Base (s)", "Head (s)", "+/-"],
-                "None"
+                ""
             )
         )
         return "\n".join(summary)
@@ -509,7 +509,9 @@ class TestHarnessResultsSummary:
             head_names,
             **kwargs
         )
-        summary_result = self.build_summary(removed_table, added_table, same_table)
+        # Display base commit and url
+        summary_result = f'Compared against `{base_results.event_sha[:7]}` in job [{base_results.civet_job_url}](https://{base_results.civet_job_url}).\n'
+        summary_result+= self.build_summary(removed_table, added_table, same_table)
         # Write results in out_file path
         self.write_output(summary_result, out_file)
         return summary_result
