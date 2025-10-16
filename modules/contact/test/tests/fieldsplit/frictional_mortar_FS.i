@@ -137,6 +137,8 @@ refine = 1
     []
     [contact]
       vars = 'leftright_normal_lm leftright_tangential_lm'
+      petsc_options_iname = '-pc_type -pc_factor_shift_type -pc_factor_mat_solver_type'
+      petsc_options_value = 'lu       NONZERO               mumps'
     []
   []
 []
