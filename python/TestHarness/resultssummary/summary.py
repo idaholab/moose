@@ -158,6 +158,19 @@ class TestHarnessResultsSummary:
         """
         return f'`{str(test_name)}`'
 
+    @staticmethod
+    def _sort_key(column_index):
+        def __sort_key(row):
+            value = row[column_index]
+            if value.replace('.', '', 1).isdigit():
+                return (0, -float(value))
+            elif value == 'SKIP':
+                return (1, 0)
+            else:
+                return (2, 0)
+        return __sort_key
+
+
     def _build_diff_table(self, test_names: set[TestName], test_results: StoredResult) -> Optional[List[List]]:
         """
         Build a table of test names that are either removed or added, optionally including runtime.
@@ -184,7 +197,8 @@ class TestHarnessResultsSummary:
             test_result = test_results.get_test(test_name.folder, test_name.name)
             # Test_result status is SKIP, run time will show as SKIP
             # Run time is None, run time will show ''
-            if test_result.status_value == 'SKIP':
+            if test_result.status is not None and \
+                test_result.status_value == 'SKIP':
                 run_time = 'SKIP'
             elif test_result.run_time is not None:
                 run_time = f'{test_result.run_time:.2f}'
@@ -194,12 +208,10 @@ class TestHarnessResultsSummary:
                 self._format_test_name(test_name),
                 run_time,
             ])
+        # Table will be sorted by runtime value, SKIP then empty
+        test_table.sort(key=self._sort_key(1))
+        print(test_table)
 
-        # Sorted based on run time
-        test_table.sort(
-            key=lambda row: float(row[1]) if row[1] != "" else float('-inf'),
-            reverse=True
-        )
         return test_table
 
     def _build_same_table(self, same_names: set[TestName],
@@ -510,7 +522,7 @@ class TestHarnessResultsSummary:
             **kwargs
         )
         # Display base commit and url
-        summary_result = f'Compared against `{base_results.event_sha[:7]}` in job [{base_results.civet_job_url}](https://{base_results.civet_job_url}).\n'
+        summary_result = f'Compared against {base_results.event_sha[:7]} in job [{base_results.civet_job_url}](https://{base_results.civet_job_url}).\n'
         summary_result+= self.build_summary(removed_table, added_table, same_table)
         # Write results in out_file path
         self.write_output(summary_result, out_file)
