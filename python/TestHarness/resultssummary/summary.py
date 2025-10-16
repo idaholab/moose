@@ -380,7 +380,7 @@ class TestHarnessResultsSummary:
         formatted_table = [title]
         if table_data:
             assert all(isinstance(row, list) for row in table_data)
-            formatted_table.append(tabulate(table_data, headers=headers, tablefmt="github"))
+            formatted_table.append(tabulate(table_data, headers=headers, tablefmt="github", disable_numparse=True))
         else:
             formatted_table.append(no_data_message)
 
