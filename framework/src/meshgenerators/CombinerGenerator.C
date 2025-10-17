@@ -12,6 +12,7 @@
 #include "CastUniquePointer.h"
 #include "MooseUtils.h"
 #include "DelimitedFileReader.h"
+#include "MooseMeshUtils.h"
 
 #include "libmesh/replicated_mesh.h"
 #include "libmesh/unstructured_mesh.h"
@@ -235,134 +236,16 @@ CombinerGenerator::generate()
 void
 CombinerGenerator::copyIntoMesh(UnstructuredMesh & destination, const UnstructuredMesh & source)
 {
-  dof_id_type node_delta = destination.max_node_id();
-  dof_id_type elem_delta = destination.max_elem_id();
-
-  unique_id_type unique_delta =
-#ifdef LIBMESH_ENABLE_UNIQUE_ID
-      destination.parallel_max_unique_id();
-#else
-      0;
-#endif
-
-  // Prevent overlaps by offsetting the subdomains in
-  std::unordered_map<subdomain_id_type, subdomain_id_type> id_remapping;
-  unsigned int block_offset = 0;
-  if (_avoid_merging_subdomains)
+  try
   {
-    // Note: if performance becomes an issue, this is overkill for just getting the max node id
-    std::set<subdomain_id_type> source_ids;
-    std::set<subdomain_id_type> dest_ids;
-    source.subdomain_ids(source_ids, true);
-    destination.subdomain_ids(dest_ids, true);
-    mooseAssert(source_ids.size(), "Should have a subdomain");
-    mooseAssert(dest_ids.size(), "Should have a subdomain");
-    unsigned int max_dest_bid = *dest_ids.rbegin();
-    unsigned int min_source_bid = *source_ids.begin();
-    _communicator.max(max_dest_bid);
-    _communicator.min(min_source_bid);
-    block_offset = 1 + max_dest_bid - min_source_bid;
-    for (const auto bid : source_ids)
-      id_remapping[bid] = block_offset + bid;
+    MooseMeshUtils::copyIntoMesh(
+        destination, source, _avoid_merging_subdomains, _avoid_merging_boundaries, _communicator);
   }
-
-  // Copy mesh data over from the other mesh
-  destination.copy_nodes_and_elements(source,
-                                      // Skipping this should cause the neighbors
-                                      // to simply be copied from the other mesh
-                                      // (which makes sense and is way faster)
-                                      /*skip_find_neighbors = */ true,
-                                      elem_delta,
-                                      node_delta,
-                                      unique_delta,
-                                      _avoid_merging_subdomains ? &id_remapping : nullptr);
-
-  // Get an offset to prevent overlaps / wild merging between boundaries
-  BoundaryInfo & boundary = destination.get_boundary_info();
-  const BoundaryInfo & other_boundary = source.get_boundary_info();
-
-  unsigned int bid_offset = 0;
-  if (_avoid_merging_boundaries)
+  catch (const MooseException & e)
   {
-    const auto boundary_ids = boundary.get_boundary_ids();
-    const auto other_boundary_ids = other_boundary.get_boundary_ids();
-    unsigned int max_dest_bid = boundary_ids.size() ? *boundary_ids.rbegin() : 0;
-    unsigned int min_source_bid = other_boundary_ids.size() ? *other_boundary_ids.begin() : 0;
-    _communicator.max(max_dest_bid);
-    _communicator.min(min_source_bid);
-    bid_offset = 1 + max_dest_bid - min_source_bid;
+    if (((std::string)e.what()).compare(12, 10, "boundaries") == 0)
+      paramError("avoid_merging_boundaries", e.what());
+    else
+      paramError("avoid_merging_subdomains", e.what());
   }
-
-  // Note: the code below originally came from ReplicatedMesh::stitch_mesh_helper()
-  // in libMesh replicated_mesh.C around line 1203
-
-  // Copy BoundaryInfo from other_mesh too.  We do this via the
-  // list APIs rather than element-by-element for speed.
-  for (const auto & t : other_boundary.build_node_list())
-    boundary.add_node(std::get<0>(t) + node_delta, bid_offset + std::get<1>(t));
-
-  for (const auto & t : other_boundary.build_side_list())
-    boundary.add_side(std::get<0>(t) + elem_delta, std::get<1>(t), bid_offset + std::get<2>(t));
-
-  for (const auto & t : other_boundary.build_edge_list())
-    boundary.add_edge(std::get<0>(t) + elem_delta, std::get<1>(t), bid_offset + std::get<2>(t));
-
-  for (const auto & t : other_boundary.build_shellface_list())
-    boundary.add_shellface(
-        std::get<0>(t) + elem_delta, std::get<1>(t), bid_offset + std::get<2>(t));
-
-  // Check for the case with two block ids sharing the same name
-  if (_avoid_merging_subdomains)
-  {
-    for (const auto & [block_id, block_name] : destination.get_subdomain_name_map())
-      for (const auto & [source_id, source_name] : source.get_subdomain_name_map())
-        if (block_name == source_name)
-          paramWarning("avoid_merging_subdomains",
-                       "Not merging subdomains is creating two subdomains with the same name '" +
-                           block_name + "' but different ids: " + std::to_string(source_id) +
-                           " & " + std::to_string(block_id + block_offset) +
-                           ".\n We recommend using a RenameBlockGenerator to prevent this as you "
-                           "will get errors reading the Exodus output later.");
-  }
-
-  for (const auto & [block_id, block_name] : source.get_subdomain_name_map())
-    destination.set_subdomain_name_map().insert(
-        std::make_pair<SubdomainID, SubdomainName>(block_id + block_offset, block_name));
-
-  // Check for the case with two boundary ids sharing the same name
-  if (_avoid_merging_boundaries)
-  {
-    for (const auto & [b_id, b_name] : other_boundary.get_sideset_name_map())
-      for (const auto & [source_id, source_name] : boundary.get_sideset_name_map())
-        if (b_name == source_name)
-          paramWarning(
-              "avoid_merging_boundaries",
-              "Not merging boundaries is creating two sidesets with the same name '" + b_name +
-                  "' but different ids: " + std::to_string(source_id) + " & " +
-                  std::to_string(b_id + bid_offset) +
-                  ".\n We recommend using a RenameBoundaryGenerator to prevent this as you "
-                  "will get errors reading the Exodus output later.");
-    for (const auto & [b_id, b_name] : other_boundary.get_nodeset_name_map())
-      for (const auto & [source_id, source_name] : boundary.get_nodeset_name_map())
-        if (b_name == source_name)
-          paramWarning(
-              "avoid_merging_boundaries",
-              "Not merging boundaries is creating two nodesets with the same name '" + b_name +
-                  "' but different ids: " + std::to_string(source_id) + " & " +
-                  std::to_string(b_id + bid_offset) +
-                  ".\n We recommend using a RenameBoundaryGenerator to prevent this as you "
-                  "will get errors reading the Exodus output later.");
-  }
-
-  for (const auto & [nodeset_id, nodeset_name] : other_boundary.get_nodeset_name_map())
-    boundary.set_nodeset_name_map().insert(
-        std::make_pair<BoundaryID, BoundaryName>(nodeset_id + bid_offset, nodeset_name));
-
-  for (const auto & [sideset_id, sideset_name] : other_boundary.get_sideset_name_map())
-    boundary.set_sideset_name_map().insert(
-        std::make_pair<BoundaryID, BoundaryName>(sideset_id + bid_offset, sideset_name));
-
-  for (const auto & [edgeset_id, edgeset_name] : other_boundary.get_edgeset_name_map())
-    boundary.set_edgeset_name_map().insert(
-        std::make_pair<BoundaryID, BoundaryName>(edgeset_id + bid_offset, edgeset_name));
 }
