@@ -27,14 +27,19 @@ that may serve as a useful starting point for users to adapt:
   using $H(\mathrm{curl})$ conforming Nédélec elements. This example is based on
   [MFEM Example 3](https://mfem.org/examples/#ex3).
 
-- [Magnetostatic (closed coil)](syntax/MFEM/ClosedCoilMagnetostatic.md): Solves for the magnetic
-  field around a topologically closed toroidal conductor carrying a net current, using a magnetic
-  vector potential discretized using $H(\mathrm{curl})$ conforming Nédélec elements.
-
 - [Grad-div](syntax/MFEM/Grad-Div.md): Solves a diffusion problem for a vector field
   on a cuboid domain, discretized using $H(\mathrm{div})$ conforming Raviart-Thomas
   elements. This example is based on [MFEM Example 4](https://mfem.org/examples/#ex4) and
   is relevant for solving Maxwell's equations using potentials without the Coulomb gauge.
+
+- [Magnetostatic (closed coil)](syntax/MFEM/ClosedCoilMagnetostatic.md): Solves for the magnetic
+  field around a topologically closed toroidal conductor carrying a net current, using a magnetic
+  vector potential discretized using $H(\mathrm{curl})$ conforming Nédélec elements.
+
+- [Magnetodynamic (open coil)](syntax/MFEM/OpenWireMagnetodynamic.md): Solves for the magnetic field
+  around a conducting wire carrying a net current that passes through the boundary of the
+  computational domain, using a magnetic vector potential discretized using $H(\mathrm{curl})$
+  conforming Nédélec elements.
 
 ## Fluid Problems
 
