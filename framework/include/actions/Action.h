@@ -15,6 +15,7 @@
 #include "Registry.h"
 #include "PerfGraphInterface.h"
 #include "MooseObjectParameterName.h"
+#include "SolutionInvalidInterface.h"
 
 #include <string>
 #include <ostream>
@@ -30,7 +31,10 @@ class Factory;
 /**
  * Base class for actions.
  */
-class Action : public ParallelParamObject, public MeshMetaDataInterface, public PerfGraphInterface
+class Action : public ParallelParamObject,
+               public MeshMetaDataInterface,
+               public PerfGraphInterface,
+               public SolutionInvalidInterface
 {
 public:
   /// The name of the parameter that contains the unique action name
@@ -46,6 +50,9 @@ public:
    * The method called externally that causes the action to act()
    */
   void timedAct();
+
+  // To get warnings tracked in the SolutionInvalidityOutput
+  usingCombinedWarningSolutionWarnings;
 
 private:
   /**

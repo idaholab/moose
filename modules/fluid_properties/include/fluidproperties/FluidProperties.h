@@ -22,16 +22,13 @@
 // rather than hand-coding them in derived classes.
 typedef DualNumber<Real, DNDerivativeSize<5>> FPADReal;
 
-class FluidProperties : public ThreadedGeneralUserObject, public SolutionInvalidInterface
+class FluidProperties : public ThreadedGeneralUserObject
 {
 public:
   static InputParameters validParams();
 
   FluidProperties(const InputParameters & parameters);
   virtual ~FluidProperties();
-
-  // To get warnings tracked in the SolutionInvalidityOutput
-  usingCombinedWarningSolutionWarnings;
 
   virtual void execute() final {}
   virtual void initialize() final {}

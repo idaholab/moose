@@ -12,15 +12,12 @@
 #include "ThreadedGeneralUserObject.h"
 #include "SolutionInvalidInterface.h"
 
-class SolidProperties : public ThreadedGeneralUserObject, public SolutionInvalidInterface
+class SolidProperties : public ThreadedGeneralUserObject
 {
 public:
   static InputParameters validParams();
 
   SolidProperties(const InputParameters & parameters);
-
-  // To get warnings tracked in the SolutionInvalidityOutput
-  usingCombinedWarningSolutionWarnings;
 
   virtual void execute() final {}
   virtual void initialize() final {}

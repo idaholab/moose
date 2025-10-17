@@ -59,7 +59,6 @@ INSFVMomentumDiffusion::validParams()
 
 INSFVMomentumDiffusion::INSFVMomentumDiffusion(const InputParameters & params)
   : INSFVFluxKernel(params),
-    SolutionInvalidInterface(this),
     FVDiffusionInterpolationInterface(params),
     _mu(getFunctor<ADReal>(NS::mu)),
     _mu_interp_method(

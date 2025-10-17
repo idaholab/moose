@@ -18,9 +18,7 @@
  * A flux kernel for diffusing energy in porous media across cell faces, using a scalar
  * isotropic diffusion coefficient, using functor material properties
  */
-class PINSFVEnergyDiffusion : public FVFluxKernel,
-                              protected SolutionInvalidInterface,
-                              public FVDiffusionInterpolationInterface
+class PINSFVEnergyDiffusion : public FVFluxKernel, public FVDiffusionInterpolationInterface
 {
 public:
   static InputParameters validParams();

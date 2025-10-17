@@ -78,8 +78,7 @@ class MaterialBase : public MooseObject,
                      public RandomInterface,
                      public ElementIDInterface,
                      protected GeometricSearchInterface,
-                     protected ADFunctorInterface,
-                     protected SolutionInvalidInterface
+                     protected ADFunctorInterface
 {
 public:
   static InputParameters validParams();
@@ -92,9 +91,6 @@ public:
    */
   MaterialBase(const MaterialBase & object, const Moose::Kokkos::FunctorCopy & key);
 #endif
-
-  // To get warnings tracked in the SolutionInvalidityOutput
-  usingCombinedWarningSolutionWarnings;
 
   /**
    * Initialize stateful properties (if material has some)

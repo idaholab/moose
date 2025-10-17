@@ -17,8 +17,7 @@
  * Performs a geometric interpolation based on the values at the nearest nodes to a target location
  * in the origin mesh.
  */
-class MultiAppGeneralFieldNearestLocationTransfer : public MultiAppGeneralFieldTransfer,
-                                                    public SolutionInvalidInterface
+class MultiAppGeneralFieldNearestLocationTransfer : public MultiAppGeneralFieldTransfer
 
 {
 public:

@@ -49,7 +49,6 @@ PINSFVEnergyDiffusion::validParams()
 
 PINSFVEnergyDiffusion::PINSFVEnergyDiffusion(const InputParameters & params)
   : FVFluxKernel(params),
-    SolutionInvalidInterface(this),
     FVDiffusionInterpolationInterface(params),
     _k(getFunctor<ADReal>(NS::k)),
     _eps(getFunctor<ADReal>(NS::porosity)),

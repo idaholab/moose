@@ -16,9 +16,7 @@
 #include "SolutionInvalidInterface.h"
 #include "FVDiffusionInterpolationInterface.h"
 
-class INSFVMomentumDiffusion : public INSFVFluxKernel,
-                               public SolutionInvalidInterface,
-                               public FVDiffusionInterpolationInterface
+class INSFVMomentumDiffusion : public INSFVFluxKernel, public FVDiffusionInterpolationInterface
 {
 public:
   static InputParameters validParams();
