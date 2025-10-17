@@ -221,9 +221,9 @@ source_current_density = 1.e6
   type = MFEMTransient
   device = cpu
   assembly_level = legacy
-  dt = 5.0
+  dt = 2.0
   start_time = 0.0
-  end_time = 60.0
+  end_time = 6.0
 []
 
 [Transfers]
