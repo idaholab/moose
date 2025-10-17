@@ -51,7 +51,7 @@ public:
 
   /// Initialise
   virtual void Init(GridFunctions & gridfunctions,
-                    ComplexGridFunctions & cpx_gridfunctions,
+                    ComplexGridFunctions & cmplx_gridfunctions,
                     const FESpaces & fespaces,
                     mfem::AssemblyLevel assembly_level);
 
@@ -112,7 +112,7 @@ public:
   /// Update variable from solution vector after solve
   virtual void RecoverFEMSolution(mfem::BlockVector & trueX,
                                   GridFunctions & gridfunctions,
-                                  ComplexGridFunctions & cpx_gridfunctions);
+                                  ComplexGridFunctions & cmplx_gridfunctions);
 
   std::vector<mfem::Array<int>> _ess_tdof_lists;
 

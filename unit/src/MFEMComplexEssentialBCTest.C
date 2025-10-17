@@ -48,7 +48,7 @@ public:
     _vector_hdiv_gridfunc.ProjectCoefficient(_vector_zero, _vector_zero);
     // Register a dummy (Par)GridFunction for the variable the BCs apply to
     auto pcgf = std::make_shared<mfem::ParComplexGridFunction>(&_scalar_fes);
-    _mfem_problem->getProblemData().cpx_gridfunctions.Register("test_cpx_variable_name", pcgf);
+    _mfem_problem->getProblemData().cmplx_gridfunctions.Register("test_cmplx_variable_name", pcgf);
   }
 
   void check_boundary(int /*bound*/,
@@ -94,15 +94,15 @@ TEST_F(MFEMComplexEssentialBCTest, MFEMComplexScalarDirichletConstantBC)
 {
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMComplexScalarDirichletBC");
-  bc_params.set<VariableName>("variable") = "test_cpx_variable_name";
+  bc_params.set<VariableName>("variable") = "test_cmplx_variable_name";
   bc_params.set<MFEMScalarCoefficientName>("coefficient_real") = "1.";
   bc_params.set<MFEMScalarCoefficientName>("coefficient_imag") = "1.";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
   auto & essential_bc =
       addObject<MFEMComplexScalarDirichletBC>("MFEMComplexScalarDirichletBC", "bc1", bc_params);
 
-  EXPECT_EQ(essential_bc.getTrialVariableName(), "test_cpx_variable_name");
-  EXPECT_EQ(essential_bc.getTestVariableName(), "test_cpx_variable_name");
+  EXPECT_EQ(essential_bc.getTrialVariableName(), "test_cmplx_variable_name");
+  EXPECT_EQ(essential_bc.getTestVariableName(), "test_cmplx_variable_name");
 
   // Test applying the BC
   essential_bc.ApplyBC(_scalar_gridfunc);
@@ -134,15 +134,15 @@ TEST_F(MFEMComplexEssentialBCTest, MFEMComplexScalarDirichletBC)
 {
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMComplexScalarDirichletBC");
-  bc_params.set<VariableName>("variable") = "test_cpx_variable_name";
+  bc_params.set<VariableName>("variable") = "test_cmplx_variable_name";
   bc_params.set<MFEMScalarCoefficientName>("coefficient_real") = "func1";
   bc_params.set<MFEMScalarCoefficientName>("coefficient_imag") = "func1";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
   auto & essential_bc =
       addObject<MFEMComplexScalarDirichletBC>("MFEMComplexScalarDirichletBC", "bc1", bc_params);
 
-  EXPECT_EQ(essential_bc.getTrialVariableName(), "test_cpx_variable_name");
-  EXPECT_EQ(essential_bc.getTestVariableName(), "test_cpx_variable_name");
+  EXPECT_EQ(essential_bc.getTrialVariableName(), "test_cmplx_variable_name");
+  EXPECT_EQ(essential_bc.getTestVariableName(), "test_cmplx_variable_name");
 
   // Test applying the BC
   essential_bc.ApplyBC(_scalar_gridfunc);
@@ -175,15 +175,15 @@ TEST_F(MFEMComplexEssentialBCTest, MFEMComplexVectorNormalDirichletConstantBC)
 {
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMComplexVectorNormalDirichletBC");
-  bc_params.set<VariableName>("variable") = "test_cpx_variable_name";
+  bc_params.set<VariableName>("variable") = "test_cmplx_variable_name";
   bc_params.set<MFEMVectorCoefficientName>("vector_coefficient_real") = "1. 2. 3.";
   bc_params.set<MFEMVectorCoefficientName>("vector_coefficient_imag") = "1. 2. 3.";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
   auto & essential_bc = addObject<MFEMComplexVectorNormalDirichletBC>(
       "MFEMComplexVectorNormalDirichletBC", "bc1", bc_params);
 
-  EXPECT_EQ(essential_bc.getTrialVariableName(), "test_cpx_variable_name");
-  EXPECT_EQ(essential_bc.getTestVariableName(), "test_cpx_variable_name");
+  EXPECT_EQ(essential_bc.getTrialVariableName(), "test_cmplx_variable_name");
+  EXPECT_EQ(essential_bc.getTestVariableName(), "test_cmplx_variable_name");
 
   // Test applying the BC
   essential_bc.ApplyBC(_vector_hdiv_gridfunc);
@@ -229,15 +229,15 @@ TEST_F(MFEMComplexEssentialBCTest, MFEMComplexVectorNormalDirichletBC)
 {
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMComplexVectorNormalDirichletBC");
-  bc_params.set<VariableName>("variable") = "test_cpx_variable_name";
+  bc_params.set<VariableName>("variable") = "test_cmplx_variable_name";
   bc_params.set<MFEMVectorCoefficientName>("vector_coefficient_real") = "func2";
   bc_params.set<MFEMVectorCoefficientName>("vector_coefficient_imag") = "func2";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
   auto & essential_bc = addObject<MFEMComplexVectorNormalDirichletBC>(
       "MFEMComplexVectorNormalDirichletBC", "bc1", bc_params);
 
-  EXPECT_EQ(essential_bc.getTrialVariableName(), "test_cpx_variable_name");
-  EXPECT_EQ(essential_bc.getTestVariableName(), "test_cpx_variable_name");
+  EXPECT_EQ(essential_bc.getTrialVariableName(), "test_cmplx_variable_name");
+  EXPECT_EQ(essential_bc.getTestVariableName(), "test_cmplx_variable_name");
 
   // Test applying the BC
   essential_bc.ApplyBC(_vector_hdiv_gridfunc);
@@ -285,15 +285,15 @@ TEST_F(MFEMComplexEssentialBCTest, MFEMComplexVectorTangentialDirichletConstantB
 {
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMComplexVectorTangentialDirichletBC");
-  bc_params.set<VariableName>("variable") = "test_cpx_variable_name";
+  bc_params.set<VariableName>("variable") = "test_cmplx_variable_name";
   bc_params.set<MFEMVectorCoefficientName>("vector_coefficient_real") = "1. 2. 3.";
   bc_params.set<MFEMVectorCoefficientName>("vector_coefficient_imag") = "1. 2. 3.";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
   auto & essential_bc = addObject<MFEMComplexVectorTangentialDirichletBC>(
       "MFEMComplexVectorTangentialDirichletBC", "bc1", bc_params);
 
-  EXPECT_EQ(essential_bc.getTrialVariableName(), "test_cpx_variable_name");
-  EXPECT_EQ(essential_bc.getTestVariableName(), "test_cpx_variable_name");
+  EXPECT_EQ(essential_bc.getTrialVariableName(), "test_cmplx_variable_name");
+  EXPECT_EQ(essential_bc.getTestVariableName(), "test_cmplx_variable_name");
 
   // Test applying the BC
   essential_bc.ApplyBC(_vector_hcurl_gridfunc);
@@ -342,15 +342,15 @@ TEST_F(MFEMComplexEssentialBCTest, MFEMComplexVectorTangentialDirichletBC)
 {
   // Construct boundary condition
   InputParameters bc_params = _factory.getValidParams("MFEMComplexVectorTangentialDirichletBC");
-  bc_params.set<VariableName>("variable") = "test_cpx_variable_name";
+  bc_params.set<VariableName>("variable") = "test_cmplx_variable_name";
   bc_params.set<MFEMVectorCoefficientName>("vector_coefficient_imag") = "func2";
   bc_params.set<MFEMVectorCoefficientName>("vector_coefficient_real") = "func2";
   bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
   auto & essential_bc = addObject<MFEMComplexVectorTangentialDirichletBC>(
       "MFEMComplexVectorTangentialDirichletBC", "bc1", bc_params);
 
-  EXPECT_EQ(essential_bc.getTrialVariableName(), "test_cpx_variable_name");
-  EXPECT_EQ(essential_bc.getTestVariableName(), "test_cpx_variable_name");
+  EXPECT_EQ(essential_bc.getTrialVariableName(), "test_cmplx_variable_name");
+  EXPECT_EQ(essential_bc.getTestVariableName(), "test_cmplx_variable_name");
 
   // Test applying the BC
   essential_bc.ApplyBC(_vector_hcurl_gridfunc);

@@ -39,7 +39,7 @@ MFEMBoundaryCondition::MFEMBoundaryCondition(const InputParameters & parameters)
                    ->GetParMesh()
             : *getMFEMProblem()
                    .getProblemData()
-                   .cpx_gridfunctions.GetRef(getParam<VariableName>("variable"))
+                   .cmplx_gridfunctions.GetRef(getParam<VariableName>("variable"))
                    .ParFESpace()
                    ->GetParMesh()),
     _test_var_name(getParam<VariableName>("variable"))

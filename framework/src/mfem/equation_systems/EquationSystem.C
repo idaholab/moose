@@ -122,13 +122,13 @@ EquationSystem::AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc)
 
 void
 EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
-                     ComplexGridFunctions & cpx_gridfunctions,
+                     ComplexGridFunctions & cmplx_gridfunctions,
                      const Moose::MFEM::FESpaces & /*fespaces*/,
                      mfem::AssemblyLevel assembly_level)
 {
   _assembly_level = assembly_level;
 
-  if (cpx_gridfunctions.size())
+  if (cmplx_gridfunctions.size())
     mooseError("Complex variables have been created but the executioner numeric type has not been "
                "set to complex. Please set Executioner/numeric_type = complex.");
 
@@ -362,7 +362,7 @@ EquationSystem::GetGradient(const mfem::Vector &) const
 void
 EquationSystem::RecoverFEMSolution(mfem::BlockVector & trueX,
                                    Moose::MFEM::GridFunctions & gridfunctions,
-                                   Moose::MFEM::ComplexGridFunctions & /*cpx_gridfunctions*/)
+                                   Moose::MFEM::ComplexGridFunctions & /*cmplx_gridfunctions*/)
 {
   for (const auto i : index_range(_trial_var_names))
   {

@@ -55,17 +55,6 @@ public:
   /// Defaults to the name of the test variable labelling the weak form.
   virtual const VariableName & getTrialVariableName() const { return _test_var_name; }
 
-  // virtual mfem::LinearFormIntegrator * createLFIntegrator() override
-  //{
-  //   mooseError("MFEMComplexKernel does not support createLFIntegrator(). Please use "
-  //              "getRealLFIntegrator() and getImagLFIntegrator()");
-  // }
-  // virtual mfem::BilinearFormIntegrator * createBFIntegrator() override
-  //{
-  //   mooseError("MFEMComplexKernel does not support createBFIntegrator(). Please use "
-  //              "getRealBFIntegrator() and getImagBFIntegrator()");
-  // }
-
 protected:
   /// Name of (the test variable associated with) the weak form that the kernel is applied to.
   const VariableName & _test_var_name;

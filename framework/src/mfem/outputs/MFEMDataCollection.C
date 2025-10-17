@@ -46,7 +46,7 @@ MFEMDataCollection::registerFields()
   }
 
   // Save complex fields
-  for (auto const & [gf_name, gf_ptr] : _problem_data.cpx_gridfunctions)
+  for (auto const & [gf_name, gf_ptr] : _problem_data.cmplx_gridfunctions)
   {
     if (dc.GetMesh() == gf_ptr->FESpace()->GetMesh())
     {

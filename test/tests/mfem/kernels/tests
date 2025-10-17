@@ -174,7 +174,7 @@
     xmldiff = 'OutputData/ComplexWaveguide/Run0/Run0.pvd
                 OutputData/ComplexWaveguide/Run0/Cycle000001/proc000000.vtu'
     ignored_items = "root['VTKFile']['@version']"
-    requirement = 'The system shall have the ability to solve a complex-valued problem with integrated boundary conditions.'
+    requirement = 'The system shall have the ability to solve a complex-valued problem using MFEM with integrated boundary conditions on a rectangular waveguide with an obstruction.'
     capabilities = 'mfem'
     max_parallel = 1
     recover = false

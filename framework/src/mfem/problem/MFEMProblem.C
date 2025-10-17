@@ -236,7 +236,7 @@ MFEMProblem::addGridFunction(const std::string & var_type,
   if (var_type == "MFEMComplexVariable")
   {
     MFEMComplexVariable & mfem_variable = getUserObject<MFEMComplexVariable>(var_name);
-    getProblemData().cpx_gridfunctions.Register(var_name, mfem_variable.getComplexGridFunction());
+    getProblemData().cmplx_gridfunctions.Register(var_name, mfem_variable.getComplexGridFunction());
     if (mfem_variable.getFESpace().isScalar())
     {
       getCoefficients().declareScalar<mfem::GridFunctionCoefficient>(
