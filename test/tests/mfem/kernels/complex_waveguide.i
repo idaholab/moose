@@ -8,7 +8,7 @@ elec_cond_air = 0.0
 
 [Mesh]
   type = MFEMMesh
-  file = ../mesh/ermes_mouse_coarse.g
+  file = ../mesh/waveguide.g
   dim = 3
 []
 

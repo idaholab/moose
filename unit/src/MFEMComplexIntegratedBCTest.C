@@ -14,7 +14,7 @@ public:
     auto pm = _mfem_mesh_ptr->getMFEMParMeshPtr().get();
     auto pgf = std::make_shared<mfem::ParComplexGridFunction>(
         new mfem::ParFiniteElementSpace(pm, new mfem::H1_FECollection(1, pm->Dimension())));
-    _mfem_problem->getProblemData().cpx_gridfunctions.Register("test_cpx_variable_name", pgf);
+    _mfem_problem->getProblemData().cmplx_gridfunctions.Register("test_cmplx_variable_name", pgf);
   }
 };
 
@@ -28,8 +28,8 @@ TEST_F(MFEMComplexIntegratedBCTest, MFEMComplexIntegratedLinearFormBC)
   InputParameters bc_normal_params = _factory.getValidParams("MFEMBoundaryNormalIntegratedBC");
   InputParameters bc_complex_params = _factory.getValidParams("MFEMComplexIntegratedBC");
 
-  bc_complex_params.set<VariableName>("variable") = "test_cpx_variable_name";
-  bc_normal_params.set<VariableName>("variable") = "test_cpx_variable_name";
+  bc_complex_params.set<VariableName>("variable") = "test_cmplx_variable_name";
+  bc_normal_params.set<VariableName>("variable") = "test_cmplx_variable_name";
   bc_normal_params.set<MFEMVectorCoefficientName>("vector_coefficient") = "1. 2. 3.";
   bc_normal_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
 
@@ -78,13 +78,13 @@ TEST_F(MFEMComplexIntegratedBCTest, MFEMComplexIntegratedBilinearFormBC)
 
   // Construct boundary condition
   InputParameters flux_bc_params = _factory.getValidParams("MFEMConvectiveHeatFluxBC");
-  flux_bc_params.set<VariableName>("variable") = "test_cpx_variable_name";
+  flux_bc_params.set<VariableName>("variable") = "test_cmplx_variable_name";
   flux_bc_params.set<MFEMScalarCoefficientName>("heat_transfer_coefficient") = "htc";
   flux_bc_params.set<MFEMScalarCoefficientName>("T_infinity") = "Tinf";
   flux_bc_params.set<std::vector<BoundaryName>>("boundary") = {"1"};
 
   InputParameters bc_complex_params = _factory.getValidParams("MFEMComplexIntegratedBC");
-  bc_complex_params.set<VariableName>("variable") = "test_cpx_variable_name";
+  bc_complex_params.set<VariableName>("variable") = "test_cmplx_variable_name";
 
   MFEMConvectiveHeatFluxBC & flux_bc =
       addObject<MFEMConvectiveHeatFluxBC>("MFEMConvectiveHeatFluxBC", "bc1", flux_bc_params);

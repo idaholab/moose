@@ -41,7 +41,7 @@ public:
   Moose::MFEM::FECollections fecs;
   Moose::MFEM::FESpaces fespaces;
   Moose::MFEM::GridFunctions gridfunctions;
-  Moose::MFEM::ComplexGridFunctions cpx_gridfunctions;
+  Moose::MFEM::ComplexGridFunctions cmplx_gridfunctions;
 
   MPI_Comm comm;
   int myid;

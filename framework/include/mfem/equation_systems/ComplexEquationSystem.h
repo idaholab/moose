@@ -24,7 +24,7 @@ public:
 
   // Build forms
   virtual void Init(GridFunctions & gridfunctions,
-                    ComplexGridFunctions & cpx_gridfunctions,
+                    ComplexGridFunctions & cmplx_gridfunctions,
                     const FESpaces & fespaces,
                     mfem::AssemblyLevel assembly_level) override;
 
@@ -45,7 +45,7 @@ public:
                                 mfem::BlockVector & trueRHS) override;
   void RecoverComplexFEMSolution(mfem::BlockVector & trueX,
                                  Moose::MFEM::GridFunctions & gridfunctions,
-                                 Moose::MFEM::ComplexGridFunctions & cpx_gridfunctions);
+                                 Moose::MFEM::ComplexGridFunctions & cmplx_gridfunctions);
 
   template <class FormType>
   void ApplyDomainBLFIntegrators(
@@ -80,18 +80,18 @@ public:
   NamedFieldsMap<mfem::ParComplexLinearForm> _clfs;
 
   // Complex kernels and integrated BCs
-  NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>> _cpx_kernels_map;
+  NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>> _cmplx_kernels_map;
   NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>>
-      _cpx_integrated_bc_map;
+      _cmplx_integrated_bc_map;
 
   // Complex essential BCs
-  NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexEssentialBC>>> _cpx_essential_bc_map;
+  NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexEssentialBC>>> _cmplx_essential_bc_map;
 
   /// Pointers to coupled variables not part of the reduced EquationSystem.
-  ComplexGridFunctions _cpx_eliminated_variables;
+  ComplexGridFunctions _cmplx_eliminated_variables;
 
   /// Complex Gridfunctions holding essential constraints from Dirichlet BCs
-  std::vector<std::unique_ptr<mfem::ParComplexGridFunction>> _cpx_var_ess_constraints;
+  std::vector<std::unique_ptr<mfem::ParComplexGridFunction>> _cmplx_var_ess_constraints;
 };
 
 template <class FormType>

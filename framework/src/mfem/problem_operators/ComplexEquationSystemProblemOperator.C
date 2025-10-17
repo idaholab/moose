@@ -18,21 +18,21 @@ ComplexEquationSystemProblemOperator::SetGridFunctions()
 {
   _trial_var_names = GetEquationSystem()->TrialVarNames();
 
-  _cpx_trial_variables = _problem_data.cpx_gridfunctions.Get(_trial_var_names);
+  _cmplx_trial_variables = _problem_data.cmplx_gridfunctions.Get(_trial_var_names);
 
   // Set operator size and block structure
-  _block_true_offsets.SetSize(_cpx_trial_variables.size() + 1);
+  _block_true_offsets.SetSize(_cmplx_trial_variables.size() + 1);
   _block_true_offsets[0] = 0;
-  for (unsigned int ind = 0; ind < _cpx_trial_variables.size(); ++ind)
+  for (unsigned int ind = 0; ind < _cmplx_trial_variables.size(); ++ind)
   {
-    _block_true_offsets[ind + 1] = 2 * _cpx_trial_variables.at(ind)->ParFESpace()->TrueVSize();
+    _block_true_offsets[ind + 1] = 2 * _cmplx_trial_variables.at(ind)->ParFESpace()->TrueVSize();
   }
   _block_true_offsets.PartialSum();
 
   _true_x.Update(_block_true_offsets);
   _true_rhs.Update(_block_true_offsets);
 
-  width = height = _block_true_offsets[_cpx_trial_variables.size()];
+  width = height = _block_true_offsets[_cmplx_trial_variables.size()];
 }
 
 void
@@ -56,7 +56,7 @@ ComplexEquationSystemProblemOperator::Solve()
   _problem_data.nonlinear_solver->Mult(_true_rhs, _true_x);
 
   _equation_system->RecoverComplexFEMSolution(
-      _true_x, _problem_data.gridfunctions, _problem_data.cpx_gridfunctions);
+      _true_x, _problem_data.gridfunctions, _problem_data.cmplx_gridfunctions);
 }
 
 } // namespace Moose::MFEM
