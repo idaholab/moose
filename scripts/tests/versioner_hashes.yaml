@@ -1453,3 +1453,31 @@ cf8fabc2a0944313bb3e5bf720972ba27d1a2a8b: #31560: update libmesh, wasp and add i
   wasp:
     full_version: 2025.09.18_0
     hash: 67c57c5
+4ce995026805816dbc0c272d66c7b8b6633a9958: #31632: Fix dropped arguments bug
+  libmesh:
+    full_version: 2025.09.18_1
+    hash: 70cf981
+  libmesh-vtk:
+    full_version: 9.4.2_7
+    hash: 3d548b7
+  moose-dev:
+    full_version: 2025.10.13
+    hash: 40ac75b
+  mpi:
+    full_version: 2025.10.13
+    hash: 0ead4e3
+  petsc:
+    full_version: 3.23.4_2
+    hash: 3aeaa84
+  pprof:
+    full_version: 2025.06.13
+    hash: 3d296db
+  seacas:
+    full_version: 2025.05.22_0
+    hash: '1278418'
+  tools:
+    full_version: 2025.06.26
+    hash: d73012a
+  wasp:
+    full_version: 2025.09.18_0
+    hash: 67c57c5
