@@ -571,6 +571,10 @@ SolutionUserObjectBase::initialSetup()
     _local_variable_index[name] = i;
   }
 
+  // If the start time is not the same as in the exodus file, we may need this on INITIAL
+  if (_file_type == 1 && _interpolate_times)
+    updateExodusTimeInterpolation();
+
   // Set initialization flag
   _initialized = true;
 }
