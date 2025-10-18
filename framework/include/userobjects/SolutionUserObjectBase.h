@@ -512,6 +512,17 @@ protected:
   /// Map from block names to block IDs. Read from the ExodusII file
   std::map<SubdomainID, SubdomainName> _block_id_to_name;
 
+  // All the caches are duplicated between the before-timestep and after-timestep mesh functions
+  /// Cached points
+  mutable Point _cached_p = Point(std::numeric_limits<Real>::max(), 0., 0.);
+  mutable Point _cached_p2 = Point(std::numeric_limits<Real>::max(), 0., 0.);
+  /// Cached subdomain ids
+  mutable std::set<subdomain_id_type> _cached_subdomain_ids;
+  mutable std::set<subdomain_id_type> _cached_subdomain_ids2;
+  /// Cached values
+  mutable DenseVector<Number> _cached_values;
+  mutable DenseVector<Number> _cached_values2;
+
 private:
   static Threads::spin_mutex _solution_user_object_mutex;
 };
