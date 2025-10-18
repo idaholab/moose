@@ -35,19 +35,9 @@ CoefReactionTempl<is_ad>::computeQpResidual()
   return _coef * ReactionTempl<is_ad>::computeQpResidual();
 }
 
-InputParameters
-CoefReaction::validParams()
-{
-  return CoefReactionTempl<false>::validParams();
-}
-
-CoefReaction::CoefReaction(const InputParameters & parameters)
-  : CoefReactionTempl<false>(parameters)
-{
-}
-
+template <bool is_ad>
 Real
-CoefReaction::computeQpJacobian()
+CoefReactionTempl<is_ad>::computeQpJacobian()
 {
   return _coef * _test[_i][_qp] * _rate * _phi[_j][_qp];
 }
