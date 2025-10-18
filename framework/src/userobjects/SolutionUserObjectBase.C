@@ -292,17 +292,15 @@ SolutionUserObjectBase::readExodusII()
     {
       if (std::find(all_nodal.begin(), all_nodal.end(), var_name) != all_nodal.end())
         _nodal_variables.push_back(var_name);
-      if (std::find(all_elemental.begin(), all_elemental.end(), var_name) != all_elemental.end())
+      else if (std::find(all_elemental.begin(), all_elemental.end(), var_name) !=
+               all_elemental.end())
         _elemental_variables.push_back(var_name);
-      if (std::find(all_scalar.begin(), all_scalar.end(), var_name) != all_scalar.end())
-        // Check if the scalar matches any field variables, and ignore the var if it does. This
-        // means its a Postprocessor.
-        if (std::find(begin(_nodal_variables), end(_nodal_variables), var_name) ==
-                _nodal_variables.end() &&
-            std::find(begin(_elemental_variables), end(_elemental_variables), var_name) ==
-                _elemental_variables.end())
-          _scalar_variables.push_back(var_name);
-    }
+      else if (std::find(all_scalar.begin(), all_scalar.end(), var_name) != all_scalar.end())
+        // We checked other variables types first, so if a postprocessor has the same name as a
+        // field variable, it won't get loaded as a scalar variable
+        _scalar_variables.push_back(var_name);
+      else
+        paramError("system_variables", "Variable '" + var_name + "' was not found in Exodus file");
   }
   else
   {
