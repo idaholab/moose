@@ -301,6 +301,7 @@ SolutionUserObjectBase::readExodusII()
         _scalar_variables.push_back(var_name);
       else
         paramError("system_variables", "Variable '" + var_name + "' was not found in Exodus file");
+    }
   }
   else
   {
@@ -1059,13 +1060,37 @@ SolutionUserObjectBase::evalMeshFunction(const Point & p,
   // Extract a value from the _mesh_function
   {
     Threads::spin_mutex::scoped_lock lock(_solution_user_object_mutex);
+
     if (func_num == 1)
+    {
+      // Check the cache
+      if (p == _cached_p && (!subdomain_ids || (*subdomain_ids == _cached_subdomain_ids)))
+        return _cached_values(local_var_index);
+
+      // else get a new value
       (*_mesh_function)(p, 0.0, output, subdomain_ids);
+      // and cache it
+      _cached_p = p;
+      if (subdomain_ids)
+        _cached_subdomain_ids = *subdomain_ids;
+      _cached_values = output;
+    }
 
     // Extract a value from _mesh_function2
     else if (func_num == 2)
-      (*_mesh_function2)(p, 0.0, output, subdomain_ids);
+    {
+      // Check the cache
+      // if (p == _cached_p2 && (!subdomain_ids || (*subdomain_ids == _cached_subdomain_ids2)))
+      //   return _cached_values2(local_var_index);
 
+      // else get a new value
+      (*_mesh_function2)(p, 0.0, output, subdomain_ids);
+      // and cache it
+      _cached_p2 = p;
+      if (subdomain_ids)
+        _cached_subdomain_ids2 = *subdomain_ids;
+      _cached_values2 = output;
+    }
     else
       mooseError("The func_num must be 1 or 2");
   }
