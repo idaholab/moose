@@ -205,6 +205,11 @@ public:
                                          const unsigned short int side) const;
 
   /**
+   * Returns a vector of vector of boundary IDs for the requested element on each of its sides
+   */
+  std::vector<std::vector<BoundaryID>> getBoundaryIDs(const Elem * const elem) const;
+
+  /**
    * Returns a const pointer to a lower dimensional element that
    * corresponds to a side of a higher dimensional element. This
    * relationship is established through an internal_parent; if there is
