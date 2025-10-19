@@ -29,3 +29,21 @@ ChainControlDataSystem::getChainControlDataMap() const
 {
   return _chain_control_data_map;
 }
+
+std::string
+ChainControlDataSystem::outputChainControlMap() const
+{
+  std::string map_str = "";
+  for (const auto & item : _chain_control_data_map)
+  {
+    map_str += item.first + " (" + item.second->type() + ") declared? " +
+               (item.second->getDeclared() ? "true" : "false");
+    if (const auto ctl_real = dynamic_cast<ChainControlData<Real> *>(item.second.get()))
+      map_str += ". Current value: " + std::to_string(ctl_real->get());
+    if (const auto ctl_bool = dynamic_cast<ChainControlData<bool> *>(item.second.get()))
+      map_str += ". Current value: " + std::to_string(ctl_bool->get());
+    map_str += "\n";
+  }
+
+  return map_str;
+}

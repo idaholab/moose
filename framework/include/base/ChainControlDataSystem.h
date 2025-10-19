@@ -81,6 +81,9 @@ public:
   const std::map<std::string, std::unique_ptr<ChainControlDataBase>> &
   getChainControlDataMap() const;
 
+  /// Output the chain control map to a string
+  std::string outputChainControlMap() const;
+
 private:
   /// The MooseApp that owns this system
   MooseApp & _app;
