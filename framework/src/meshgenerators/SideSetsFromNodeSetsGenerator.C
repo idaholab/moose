@@ -40,8 +40,27 @@ SideSetsFromNodeSetsGenerator::generate()
   if (!isParamValid("nodesets_to_convert"))
     _input->get_boundary_info().build_side_list_from_node_list();
   else
-    _input->get_boundary_info().build_side_list_from_node_list(
-        getParam<std::vector<BoundaryName>>("nodesets_to_convert"));
+  {
+    const auto & nodeset_names = getParam<std::vector<BoundaryName>>("nodesets_to_convert");
+    auto & binfo = _input->get_boundary_info();
+
+    std::set<BoundaryID> nodeset_ids;
+    for (const auto & nodeset_name : nodeset_names)
+    {
+      // Look through the nodeset map.
+      BoundaryID nodeset_id = std::numeric_limits<BoundaryID>::max();
+      for (const auto & [id, name] : binfo.get_nodeset_name_map())
+        if (name == nodeset_name)
+          nodeset_id = id;
+      if (MooseUtils::isDigits(nodeset_name))
+        nodeset_id = std::stoi(nodeset_name);
+      if (nodeset_id == std::numeric_limits<BoundaryID>::max())
+        paramError("nodesets_to_convert",
+                   "Nodeset '" + nodeset_name + "' does not exist in the input mesh");
+      nodeset_ids.insert(nodeset_id);
+    }
+    _input->get_boundary_info().build_side_list_from_node_list(nodeset_ids);
+  }
 
   return dynamic_pointer_cast<MeshBase>(_input);
 }
