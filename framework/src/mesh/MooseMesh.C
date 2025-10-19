@@ -3866,26 +3866,12 @@ MooseMesh::buildFiniteVolumeInfo() const
 
   // Used to speed up FaceInfo creation:
   // - element side builder that caches per type of element
-  // - prebuild side quadratures and element FEs (to get normals, volume, centroid )
   libMesh::ElemSideBuilder side_builder;
-  std::vector<std::vector<std::unique_ptr<libMesh::FEBase>>> fe_at_dim(getMesh().mesh_dimension());
-  std::vector<libMesh::QGauss> q_faces;
-  for (const auto d : make_range(1, int(getMesh().mesh_dimension() + 1)))
-  {
-    q_faces.emplace_back(libMesh::QGauss(d - 1, libMesh::CONSTANT));
-    for (const auto o : make_range(/*max_elem_order + 1*/ 4))
-    {
-      fe_at_dim[d - 1].emplace_back(
-          libMesh::FEBase::build(d, libMesh::FEType(/*order*/ o, libMesh::MONOMIAL)));
-      fe_at_dim[d - 1][o]->attach_quadrature_rule(&q_faces[d - 1]);
-    }
-  }
 
   _all_face_info.reserve(num_sides / 2);
   dof_id_type face_index = 0;
   for (const Elem * elem : as_range(begin, end))
   {
-    const auto elem_dim = elem->dim();
     for (unsigned int side = 0; side < elem->n_sides(); ++side)
     {
       // get the neighbor element
@@ -3902,11 +3888,8 @@ MooseMesh::buildFiniteVolumeInfo() const
 
         // We construct the faceInfo using the elementinfo and side index
         mooseAssert(elem->default_order() < 4, "Did not expect such high element orders in FV");
-        _all_face_info.emplace_back(&_elem_to_elem_info[elem->id()],
-                                    side,
-                                    face_index++,
-                                    side_builder,
-                                    *fe_at_dim[elem_dim - 1][elem->default_order()]);
+        _all_face_info.emplace_back(
+            &_elem_to_elem_info[elem->id()], side, face_index++, side_builder);
 
         auto & fi = _all_face_info.back();
 
