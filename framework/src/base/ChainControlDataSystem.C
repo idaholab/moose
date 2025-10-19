@@ -33,7 +33,7 @@ ChainControlDataSystem::getChainControlDataMap() const
 std::string
 ChainControlDataSystem::outputChainControlMap() const
 {
-  std::string map_str = "";
+  std::string map_str = "Chain control data:\n";
   for (const auto & item : _chain_control_data_map)
   {
     map_str += item.first + " (" + item.second->type() + ") declared? " +

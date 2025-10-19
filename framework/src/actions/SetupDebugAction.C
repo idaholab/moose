@@ -41,6 +41,9 @@ SetupDebugAction::validParams()
       "show_material_props",
       false,
       "Print out the material properties supplied for each block, face, neighbor, and/or sideset");
+  params.addParam<bool>("show_chain_control_data",
+                        false,
+                        "Print out the chain control data on every time step setup");
   params.addParam<bool>("show_controllable",
                         false,
                         "Print out the controllable parameters from all input parameters");
@@ -162,6 +165,10 @@ SetupDebugAction::act()
   // Add functor output
   if (getParam<bool>("show_functors"))
     _problem->setFunctorOutput(getParam<bool>("show_functors"));
+
+  // Add chain control data output
+  if (getParam<bool>("show_chain_control_data"))
+    _problem->setChainControlDataOutput(true);
 
   // Block-restriction
   const MultiMooseEnum & block_restriction_scope =
