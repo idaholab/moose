@@ -1,0 +1,108 @@
+# Coupled Cahn-Hilliard and Mechanics using string expressions
+# 
+# Energy functional:
+# F[c,u] = ∫ [f_ch(c,∇c) + f_elastic(ε,c)] dx
+# where:
+#   f_ch = (c^2-1)^2 + κ/2|∇c|^2
+#   f_elastic = λ/2(tr(ε))^2 + μ|ε|^2 + α*c*tr(ε)
+#   ε = sym(∇u)
+
+[Mesh]
+  type = GeneratedMesh
+  dim = 2
+  nx = 30
+  ny = 30
+  xmin = 0
+  xmax = 1
+  ymin = 0
+  ymax = 1
+[]
+
+[Variables]
+  [c]
+    order = FIRST
+    family = LAGRANGE
+  []
+  [disp_x]
+    order = FIRST
+    family = LAGRANGE
+  []
+  [disp_y]
+    order = FIRST
+    family = LAGRANGE
+  []
+[]
+
+[AutomaticWeakForm]
+  energy_type = expression
+
+  # Combined energy functional for coupled Cahn-Hilliard and mechanics
+  # Chemical energy: W(c) + κ/2|∇c|^2
+  # Elastic energy: λ/2(tr(ε))^2 + μ|ε|^2 + α*c*tr(ε)
+  # where ε = sym(∇u) is the strain tensor
+
+  # Simplified expression without proper tensor mechanics
+  # Using gradient penalty as a placeholder for elastic energy
+  energy_expression = 'W(c) + 0.5*kappa*dot(grad(c), grad(c)) + 0.5*lambda*(dot(grad(disp_x), grad(disp_x)) + dot(grad(disp_y), grad(disp_y))) + alpha*c*(disp_x + disp_y)'
+
+  parameters = 'kappa 0.01 lambda 100 mu 75 alpha 10'
+  variables = 'c disp_x disp_y'
+
+  use_automatic_differentiation = true
+[]
+
+[ICs]
+  [c_IC]
+    type = RandomIC
+    variable = c
+    min = -0.05
+    max = 0.05
+    seed = 12345
+  []
+[]
+
+[BCs]
+  # Fix bottom edge mechanically
+  [bottom_x]
+    type = DirichletBC
+    variable = disp_x
+    boundary = bottom
+    value = 0
+  []
+  [bottom_y]
+    type = DirichletBC
+    variable = disp_y
+    boundary = bottom
+    value = 0
+  []
+  
+  # Apply tension at top
+  [top_y]
+    type = FunctionDirichletBC
+    variable = disp_y
+    boundary = top
+    function = '0.001*t'
+  []
+[]
+
+[Executioner]
+  type = Transient
+  solve_type = NEWTON
+  
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
+  petsc_options_value = 'lu superlu_dist'
+  
+  l_tol = 1e-4
+  l_max_its = 30
+  nl_max_its = 20
+  nl_rel_tol = 1e-8
+  nl_abs_tol = 1e-10
+  
+  dt = 1e-3
+  end_time = 0.1
+[]
+
+[Outputs]
+  exodus = true
+  print_linear_residuals = false
+[]
