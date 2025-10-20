@@ -3456,9 +3456,12 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
     // calling stopSolve(), it is now up to PETSc to return a
     // "diverged" reason during the next solve.
   }
-  catch (libMesh::LogicError & e)
+  catch (std::exception & e)
   {
-    // Catch the libmesh error on negative jacobian
+    // Allow the libmesh error/exception on negative jacobian
+    const std::string & message = e.what();
+    if (message.find("Jacobian") == std::string::npos)
+      mooseException(message);
   }
 
   _communicator.min(damping);
