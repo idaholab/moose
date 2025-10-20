@@ -112,10 +112,10 @@ class TestResultsSummary(TestHarnessTestCase):
         """
         mock_init_reader.return_value = None
         test_table_row = ['`testa.test1`', '4.20']
-        test_table_col_index = 1
+        test_time_col_index = 1
 
         summary = TestHarnessResultsSummary(None)
-        sorting_key = summary._sort_test_time_key(test_table_row, test_table_col_index)
+        sorting_key = summary._sort_test_times_key(test_table_row, test_time_col_index)
 
         self.assertEqual(sorting_key, (0, -4.20))
 
@@ -126,10 +126,10 @@ class TestResultsSummary(TestHarnessTestCase):
         """
         mock_init_reader.return_value = None
         test_table_row = ['`testa.test1`', 'SKIP']
-        test_table_col_index = 1
+        test_time_col_index = 1
 
         summary = TestHarnessResultsSummary(None)
-        sorting_key = summary._sort_test_time_key(test_table_row, test_table_col_index)
+        sorting_key = summary._sort_test_times_key(test_table_row, test_time_col_index)
 
         self.assertEqual(sorting_key, (1, 0))
 
@@ -140,10 +140,10 @@ class TestResultsSummary(TestHarnessTestCase):
         """
         mock_init_reader.return_value = None
         test_table_row = ['`testa.test1`', '']
-        test_table_col_index = 1
+        test_time_col_index = 1
 
         summary = TestHarnessResultsSummary(None)
-        sorting_key = summary._sort_test_time_key(test_table_row, test_table_col_index)
+        sorting_key = summary._sort_test_times_key(test_table_row, test_time_col_index)
 
         self.assertEqual(sorting_key, (2, 0))
 
@@ -165,11 +165,11 @@ class TestResultsSummary(TestHarnessTestCase):
             test_table_row_empty,
             test_table_row_num_low
         ]
-        test_table_col_index = 1
+        test_time_col_index = 1
 
         summary = TestHarnessResultsSummary(None)
         # Sorted table
-        test_table = summary.sort_test_times(test_table, test_table_col_index)
+        test_table = summary.sort_test_times(test_table, test_time_col_index)
         # Check to ensure the correct sorting sequence
         self.assertEqual(test_table[0], test_table_row_num_high)
         self.assertEqual(test_table[1], test_table_row_num_low)
