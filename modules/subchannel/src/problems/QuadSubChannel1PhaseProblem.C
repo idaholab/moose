@@ -276,9 +276,9 @@ QuadSubChannel1PhaseProblem::computeFrictionFactorParameters(FrictionStruct fric
         b2T = -0.09926;
       }
       // laminar flow friction factor for bare Pin bundle - Center subchannel
-      cL = aL + b1L * (p_over_d - 1) + b2L * std::pow((p_over_d - 1), 2);
+      cL = aL + b1L * (p_over_d - 1) + b2L * Utility::pow<2>((p_over_d - 1));
       // turbulent flow friction factor for bare Pin bundle - Center subchannel
-      cT = aT + b1T * (p_over_d - 1) + b2T * std::pow((p_over_d - 1), 2);
+      cT = aT + b1T * (p_over_d - 1) + b2T * Utility::pow<2>((p_over_d - 1));
     }
     else if (subch_type == EChannelType::EDGE)
     {
@@ -301,9 +301,9 @@ QuadSubChannel1PhaseProblem::computeFrictionFactorParameters(FrictionStruct fric
         b2T = -0.04428;
       }
       // laminar flow friction factor for bare Pin bundle - Edge subchannel
-      cL = aL + b1L * (w_over_d - 1) + b2L * std::pow((w_over_d - 1), 2);
+      cL = aL + b1L * (w_over_d - 1) + b2L * Utility::pow<2>((w_over_d - 1));
       // turbulent flow friction factor for bare Pin bundle - Edge subchannel
-      cT = aT + b1T * (w_over_d - 1) + b2T * std::pow((w_over_d - 1), 2);
+      cT = aT + b1T * (w_over_d - 1) + b2T * Utility::pow<2>((w_over_d - 1));
     }
     else
     {
@@ -326,9 +326,9 @@ QuadSubChannel1PhaseProblem::computeFrictionFactorParameters(FrictionStruct fric
         b2T = -0.03411;
       }
       // laminar flow friction factor for bare Pin bundle - Corner subchannel
-      cL = aL + b1L * (w_over_d - 1) + b2L * std::pow((w_over_d - 1), 2);
+      cL = aL + b1L * (w_over_d - 1) + b2L * Utility::pow<2>((w_over_d - 1));
       // turbulent flow friction factor for bare Pin bundle - Corner subchannel
-      cT = aT + b1T * (w_over_d - 1) + b2T * std::pow((w_over_d - 1), 2);
+      cT = aT + b1T * (w_over_d - 1) + b2T * Utility::pow<2>((w_over_d - 1));
     }
     // laminar friction factor and turbulent friction factor coefficients (power-law form)
     const Real bL = -1.0;
@@ -348,10 +348,6 @@ QuadSubChannel1PhaseProblem::computeFrictionFactorParameters(FrictionStruct fric
     }
     else
     {
-      // transient flow: psi definition uses a Bulk ReT/ReL number, same for all channels
-      // _ff_soln->set(node,
-      //               fL * std::pow((1 - psi), 1.0 / 3.0) * (1 - std::pow(psi, lambda)) +
-      //                   fT * std::pow(psi, 1.0 / 3.0));
       // transitional regime: enforce f = a * Re^{b} with log-space blending
       const Real b_eff = (1.0 - psi) * bL + psi * bT;
       const Real a_eff = std::exp((1.0 - psi) * std::log(cL) + psi * std::log(cT));
@@ -428,7 +424,7 @@ QuadSubChannel1PhaseProblem::computeBeta(unsigned int i_gap, unsigned int iz, bo
     auto z_FP_over_D = (2.0 * L_x / pin_diameter) *
                        (1 + (-0.5 * std::log(lamda) + 0.5 * std::log(4.0) - 0.25) * lamda * lamda);
     auto Str = 1.0 / (0.822 * (gap / pin_diameter) + 0.144); // Strouhal number (Wu & Trupp 1994)
-    auto freq_factor = 2.0 / std::pow(gamma, 2) * std::sqrt(a / 8.0) * (avg_hD / gap);
+    auto freq_factor = 2.0 / Utility::pow<2>(gamma) * std::sqrt(a / 8.0) * (avg_hD / gap);
     auto rod_mixing = (1 / Pr_t) * lamda;
     auto axial_mixing = a_x * z_FP_over_D * Str;
     // Mixing Stanton number: Stg (eq 25,Kim and Chung (2001), eq 19 (Jeong et. al 2005)
