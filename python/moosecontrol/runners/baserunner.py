@@ -8,28 +8,18 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from logging import getLogger
 from numbers import Number
-from requests import Session, Response
+from requests import Session
 from requests.exceptions import ConnectionError
 from time import sleep
 from typing import Callable, Optional
 
-from moosecontrol.exceptions import BadStatus, InitializeTimeout, WebServerControlError
+from moosecontrol.exceptions import InitializeTimeout
 from moosecontrol.runners.utils import Poker, TimedPollHelper
+from moosecontrol.validation import WebServerControlResponse, process_response
 
 logger = getLogger('BaseRunner')
-
-@dataclass(frozen=True)
-class WebServerControlResponse:
-    """
-    Combined response for a POST or GET to the web server.
-    """
-    # The Response
-    response: Response
-    # The underlying data in the response (if any)
-    data: Optional[dict]
 
 # Default value for 'poll_time' in BaseRunner
 DEFAULT_POLL_TIME: float = 0.01
@@ -273,47 +263,8 @@ class BaseRunner(ABC):
             self._session.close()
             self._session = None
 
-    @staticmethod
-    def process_response(response: Response,
-                         require_status: Optional[int] = None) -> WebServerControlResponse:
-        """
-        Processes a response (a GET or a POST request).
-
-        Performs additional checking, parsing the JSON
-        response (if any) and checking for an error.
-
-        Parameters
-        ----------
-        response : Response
-            The built response from the request.
-
-        Optional Parameters
-        -------------------
-        require_status : Optional[int]
-            Check that the status code is this if set.
-
-        Returns
-        -------
-        WebServerControlResponse:
-            The combined response, along with the JSON data if any.
-        """
-        # Parse the JSON response, if any, also checking for an error
-        data = None
-        if response.headers.get('content-type') == 'application/json':
-            data = response.json()
-            if (error := data.get('error')):
-                raise WebServerControlError(response, error)
-
-        # Force the required status code if any
-        if require_status is not None and require_status != response.status_code:
-            raise BadStatus(response, require_status)
-
-        # Check for bad statuses
-        response.raise_for_status()
-
-        return WebServerControlResponse(response=response, data=data)
-
-    def post(self, path: str, data: dict, **kwargs) -> WebServerControlResponse:
+    def post(self,path: str, data: dict,
+             require_status: Optional[int] = None) -> WebServerControlResponse:
         """
         Send a POST request to the server.
 
@@ -326,7 +277,8 @@ class BaseRunner(ABC):
 
         Optional Parameters
         -------------------
-        See process_response().
+        require_status : Optional[int]
+            Check that the status code is this if set.
 
         Returns
         -------
@@ -335,9 +287,9 @@ class BaseRunner(ABC):
         """
         assert self._session is not None
         with self._session.post(f'{self.url}/{path}', json=data) as response:
-            return self.process_response(response, **kwargs)
+            return process_response(response, require_status=require_status)
 
-    def get(self, path: str, **kwargs) -> WebServerControlResponse:
+    def get(self, path: str, require_status: Optional[int] = None) -> WebServerControlResponse:
         """
         Send a GET request to the server.
 
@@ -347,8 +299,9 @@ class BaseRunner(ABC):
             The path to GET to.
 
         Optional Parameters
-        ------------------
-        See process_response().
+        -------------------
+        require_status : Optional[int]
+            Check that the status code is this if set.
 
         Returns
         -------
@@ -357,7 +310,7 @@ class BaseRunner(ABC):
         """
         assert self._session is not None
         with self._session.get(f'{self.url}/{path}') as response:
-            return self.process_response(response, **kwargs)
+            return process_response(response, require_status=require_status)
 
     def _build_poker(self) -> Poker:
         """

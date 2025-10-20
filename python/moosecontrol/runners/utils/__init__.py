@@ -7,7 +7,6 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from .moosecontrol import MooseControl
-from .moosecontrolnew import MooseControlNew
-from .runners import PortRunner, SocketRunner, SubprocessPortRunner, \
-    SubprocessSocketRunner
+from .poker import Poker
+from .subprocessreader import SubprocessReader
+from .timedpollhelper import TimedPollHelper

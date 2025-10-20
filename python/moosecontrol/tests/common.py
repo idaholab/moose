@@ -11,13 +11,17 @@ import os
 import sys
 from contextlib import ExitStack
 from importlib.util import find_spec
-from requests import Session
+from json import dumps
+from requests import Response, Session
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 from tempfile import TemporaryDirectory
 from typing import Callable, Optional
 
 import pytest
+
+# A fake URL to use for testing
+FAKE_URL = 'http://127.0.0.1:13579'
 
 def setup_moose_python_path():
     """
@@ -31,6 +35,7 @@ def setup_moose_python_path():
         this_dir = os.path.dirname(__file__)
         moose_python = os.path.join(this_dir, '..', '..')
         sys.path.append(moose_python)
+        assert find_spec('moosecontrol')
 
 class CaptureLogTestCase(TestCase):
     """
@@ -167,20 +172,62 @@ class MooseControlTestCase(CaptureLogTestCase):
 
         self.assertEqual(order, methods)
 
+def set_fake_response(response: Response | MagicMock,
+                      status_code: int = 200,
+                      data: Optional[dict] = None,
+                      url: str = FAKE_URL):
+    """
+    Internal helper for setting the state of a Response for testing.
+
+    Parameters
+    ----------
+    response : Response | MagicMock
+        The Response, or a mocked one.
+
+    Additional Parameters
+    ---------------------
+    status_code : int
+        The status code to return; default is 200.
+    data : Optional[dict]
+        Data to add to the response; defaults to no data.
+    url : str
+        The URL to associate with the response; defaults to FAKE_URL.
+    """
+    response.status_code = status_code
+    response.url = FAKE_URL
+    if data is not None:
+        response.headers = {'content-type': 'application/json'}
+        if isinstance(response, Response):
+            response._content = dumps(data).encode('utf-8')
+        else:
+            response.json.return_value = data
+
 @staticmethod
-def mock_response(status_code: int = 200):
+def mock_response(**kwargs) -> MagicMock:
     """
     Creates a mocked Response.
 
-    Optional Parameters
-    -------------------
-    status_code : int
-        The status code; defaults to 200 (success).
+    Additional Parameters
+    ---------------------
+    See set_fake_response().
     """
     mock_response = MagicMock()
     mock_response.__enter__.return_value = mock_response
-    mock_response.status_code = status_code
+    set_fake_response(mock_response, **kwargs)
     return mock_response
+
+@staticmethod
+def fake_response(**kwargs) -> Response:
+    """
+    Creates a faked Response.
+
+    Additional Parameters
+    ---------------------
+    See set_fake_response().
+    """
+    response = Response()
+    set_fake_response(response, **kwargs)
+    return response
 
 class FakeSession(Session):
     """
@@ -222,6 +269,3 @@ BASE_INPUT = """
 # Environment variable that represents the MOOSE executable
 # to run if it is available.
 MOOSE_EXE = os.environ.get('MOOSE_EXE')
-
-# A fake URL to use for testing
-FAKE_URL = 'http://127.0.0.1:13579'

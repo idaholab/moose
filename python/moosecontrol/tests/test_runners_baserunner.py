@@ -13,7 +13,7 @@ from requests import Response, Session
 from requests.exceptions import ConnectionError, HTTPError
 
 from common import FAKE_URL, CaptureLogTestCase, FakeSession, \
-    mock_response, setup_moose_python_path
+    fake_response, mock_response, setup_moose_python_path
 setup_moose_python_path()
 
 from moosecontrol.exceptions import BadStatus, InitializeTimeout, WebServerControlError
@@ -345,88 +345,6 @@ class TestBaseRunner(CaptureLogTestCase):
         patch_is_listening.assert_called_once()
         patch_kill.assert_called_once()
 
-    def test_process_response_no_data(self):
-        """
-        Tests process_response() with a success and no data.
-        """
-        response = Response()
-        response.status_code = 200
-
-        ws_response = BaseRunnerTest().process_response(response)
-
-        self.assertEqual(ws_response.response.status_code, 200)
-        self.assertIsNone(ws_response.data)
-
-    def test_process_response_with_data(self):
-        """
-        Tests process_response() with a success with data.
-        """
-        data = {'foo': 'bar'}
-
-        response = Response()
-        response.status_code = 200
-        response.headers = {'content-type': 'application/json'}
-        response._content = dumps(data).encode('utf-8')
-
-        response = BaseRunnerTest().process_response(response)
-
-        self.assertEqual(response.response.status_code, 200)
-        self.assertEqual(response.data, data)
-
-    def test_process_response_require_status(self):
-        """
-        Tests process_response() with require_status set.
-        """
-        response = Response()
-        response.status_code = 404
-        response.url = FAKE_URL
-
-        with self.assertRaises(BadStatus) as e:
-            BaseRunnerTest().process_response(response, require_status=200)
-
-        self.assertEqual(str(e.exception), f'Request {FAKE_URL} status 404 != expected 200')
-        self.assertEqual(e.exception.response.status_code, 404)
-
-    def test_process_response_error(self):
-        """
-        Tests process_response() with the 'error' field set in the
-        JSON data.
-        """
-        error = 'foo'
-        data = {'error': error}
-
-        response = Response()
-        response.status_code = 200
-        response.headers = {'content-type': 'application/json'}
-        response._content = dumps(data).encode('utf-8')
-        response.url = FAKE_URL
-
-        with self.assertRaises(WebServerControlError) as e:
-            BaseRunnerTest().process_response(response)
-
-        self.assertEqual(str(e.exception), f'Request to {FAKE_URL}: {error}')
-        self.assertEqual(e.exception.error, error)
-
-    def test_process_response_raise_for_status(self):
-        """
-        Tests process_response() throwing via raise_for_status().
-        """
-        response = Response()
-        response.status_code = 404
-
-        with self.assertRaises(HTTPError):
-            BaseRunnerTest().process_response(response)
-
-    def test_process_response_raise_for_status(self):
-        """
-        Tests process_response() throwing via raise_for_status().
-        """
-        response = Response()
-        response.status_code = 404
-
-        with self.assertRaises(HTTPError):
-            BaseRunnerTest().process_response(response)
-
     def test_post(self):
         """
         Tests post().
@@ -436,10 +354,7 @@ class TestBaseRunner(CaptureLogTestCase):
 
         url = 'foo'
         data = {'foo': 'bar'}
-
-        mock_post = mock_response()
-        mock_post.headers = {'content-type': 'application/json'}
-        mock_post.json.return_value = data
+        mock_post = mock_response(data=data)
 
         with patch.object(runner._session, 'post', return_value=mock_post) as patch_post:
             response = runner.post(url, data)
