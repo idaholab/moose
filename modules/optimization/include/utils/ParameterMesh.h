@@ -22,10 +22,12 @@
 #include "libmesh/point_locator_base.h"
 #include "libmesh/exodusII_io.h"
 #include <vector>
+#include <functional>
 
 namespace libMesh
 {
 class System;
+class DofMap;
 }
 
 using libMesh::RealGradient;
@@ -35,7 +37,6 @@ using libMesh::RealGradient;
  * This class will:
  *  - Ensure that controllable parameters defined by the mesh are correctly ordered on optimiation
  * main app and forward or adjoint sub-apps
- *  - Read initial conditions and bounds from an exodus file
  *  - Define the parameter space (nodal/elemental and shape function)
  *  - Interpolate parameter values to the forward problem mesh using nodal/elemental shape function
  */
@@ -44,9 +45,18 @@ class ParameterMesh
 public:
   ParameterMesh(const libMesh::FEType & param_type,
                 const std::string & exodus_mesh,
-                const std::vector<std::string> & var_names = {},
                 const bool find_closest = false,
                 const unsigned int kdtree_candidates = 5);
+
+  /// Enumerations for regularization computations
+  enum class RegularizationType
+  {
+    L2_GRADIENT,
+    // Future regularization types can be added here:
+    // L1,
+    // H1,
+    // TV (Total Variation)
+  };
 
   /**
    * @return the number of parameters read from the mesh for a single timestep
@@ -73,13 +83,33 @@ public:
                          std::vector<dof_id_type> & dof_indices,
                          std::vector<RealGradient> & weights) const;
   /**
-   * Initializes parameter data and sets bounds in the main optmiization application
-   * getParameterValues is only used by ParameterMeshOptimization
-   * @param var_name  variable to read off mesh
-   * @param timestep  timestep to read variable off mesh
-   * @return vector of variables read off mesh at timestep
+   * Computes regularization objective value for a given regularization type
+   * @param parameter_values  vector of parameter values to compute regularization for
+   * @param reg_type  type of regularization (L2_GRADIENT, etc.)
+   * @return scalar objective value
    */
-  std::vector<Real> getParameterValues(std::string var_name, unsigned int timestep) const;
+  Real computeRegularizationObjective(const std::vector<Real> & parameter_values,
+                                      RegularizationType reg_type) const;
+
+  /**
+   * Computes regularization gradient for a given regularization type
+   * @param parameter_values  vector of parameter values to compute gradient for
+   * @param reg_type  type of regularization (L2_GRADIENT, etc.)
+   * @return vector of gradient values (same size as parameter_values)
+   */
+  std::vector<Real> computeRegularizationGradient(const std::vector<Real> & parameter_values,
+                                                  RegularizationType reg_type) const;
+
+private:
+  /**
+   * Template method containing the element loop for regularization computations
+   * @param parameter_values  vector of parameter values
+   * @param reg_type  type of regularization
+   * @return result of type T (Real for objective, std::vector<Real> for gradient)
+   */
+  template <typename T>
+  T computeRegularizationLoop(const std::vector<Real> & parameter_values,
+                              RegularizationType reg_type) const;
 
 protected:
   libMesh::Parallel::Communicator _communicator;
@@ -114,4 +144,49 @@ private:
    * @return Point
    */
   Point closestPoint(const Elem & elem, const Point & p) const;
+
+  /**
+   * Compute regularization objective for a single quadrature point
+   * This is the main function users should modify to add new regularization types for objectives
+   * @param parameter_values  all parameter values
+   * @param phi  shape function values (full array)
+   * @param dphi  shape function gradients (full array)
+   * @param qp  quadrature point index
+   * @param dof_indices  element DOF indices
+   * @param JxW  quadrature weights array
+   * @param reg_type  type of regularization to compute
+   * @return contribution to objective function
+   */
+  Real computeRegularizationQp(const std::vector<Real> & parameter_values,
+                               const std::vector<std::vector<Real>> & phi,
+                               const std::vector<std::vector<RealGradient>> & dphi,
+                               const unsigned int qp,
+                               const std::vector<dof_id_type> & dof_indices,
+                               const std::vector<Real> & JxW,
+                               RegularizationType reg_type) const;
+
+  /**
+   * Compute regularization gradient for a single quadrature point
+   * This is the main function users should modify to add new regularization types for gradients
+   * @param parameter_values  all parameter values
+   * @param phi  shape function values (full array)
+   * @param dphi  shape function gradients (full array)
+   * @param qp  quadrature point index
+   * @param dof_indices  element DOF indices
+   * @param JxW  quadrature weights array
+   * @param reg_type  type of regularization to compute
+   * @param gradient  gradient vector to update
+   */
+  void computeRegularizationGradientQp(const std::vector<Real> & parameter_values,
+                                       const std::vector<std::vector<Real>> & phi,
+                                       const std::vector<std::vector<RealGradient>> & dphi,
+                                       const unsigned int qp,
+                                       const std::vector<dof_id_type> & dof_indices,
+                                       const std::vector<Real> & JxW,
+                                       RegularizationType reg_type,
+                                       std::vector<Real> & gradient) const;
+  // Cached values for gradient computations
+  const unsigned short int _param_var_id;
+  const libMesh::DofMap * _dof_map;
+  const libMesh::FEType _fe_type;
 };
