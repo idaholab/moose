@@ -158,7 +158,7 @@ class TestHarnessResultsSummary:
         """
         return f'`{str(test_name)}`'
 
-    def _sort_test_times_key(test_table_row: list, test_time_col_index: int) -> tuple:
+    def _sort_test_times_key(self, test_table_row: list, test_time_col_index: int) -> tuple:
         """
         Generate a sorting key for each test table row based on test time value
         Parameters:
@@ -213,7 +213,7 @@ class TestHarnessResultsSummary:
 
         sorted_test_table = sorted(
             test_table,
-            key=lambda test_table_row: self._sort_test_time_key(test_table_row, test_time_col_index)
+            key=lambda test_table_row: self._sort_test_times_key(test_table_row, test_time_col_index)
         )
         return sorted_test_table
 
@@ -256,9 +256,8 @@ class TestHarnessResultsSummary:
                 self._format_test_name(test_name),
                 run_time,
             ])
-
-            # Table will be sorted by runtime value, SKIP then empty
-            test_table = self.sort_test_times(test_table, 1)
+        # Table will be sorted by runtime value, SKIP then empty
+        test_table = self.sort_test_times(test_table, 1)
 
         return test_table
 
