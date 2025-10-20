@@ -40,7 +40,7 @@ def patch_baserunner(name: str, **kwargs):
 
 class TestBaseRunner(CaptureLogTestCase):
     """
-    Tests moosecontrol.runners.BaseRunner.
+    Tests moosecontrol.runners.baserunner.BaseRunner.
     """
     def test_init(self):
         """

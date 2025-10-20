@@ -18,7 +18,7 @@ from common import BASE_INPUT, MOOSE_EXE, MooseControlTestCase, \
 setup_moose_python_path()
 
 from moosecontrol import SubprocessSocketRunner
-from moosecontrol.runners.utils.subprocessreader import SubprocessReader
+from moosecontrol.runners.utils import SubprocessReader
 
 from test_runners_subprocessrunnerbase import ARGS, COMMAND, MOOSE_CONTROL_NAME
 
@@ -36,7 +36,7 @@ def patch_runner(name: str, **kwargs):
 
 class TestSubprocessSocketRunner(MooseControlTestCase):
     """
-    Tests moosecontrol.SubprocessSocketRunner.
+    Tests moosecontrol.runners.subprocesssocketrunner.SubprocessSocketRunner.
     """
     def test_init(self):
         """

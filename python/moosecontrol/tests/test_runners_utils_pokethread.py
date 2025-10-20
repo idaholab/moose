@@ -16,11 +16,11 @@ from common import CaptureLogTestCase, FakeSession, mock_response, \
     setup_moose_python_path
 setup_moose_python_path()
 
-from moosecontrol.runners.utils.poker import Poker
+from moosecontrol.runners.utils import Poker
 
 class TestPoker(CaptureLogTestCase):
     """
-    Tests for moosecontrol.runners.poker.Poker.
+    Tests moosecontrol.runners.utils.poker.Poker.
     """
     def test(self):
         """

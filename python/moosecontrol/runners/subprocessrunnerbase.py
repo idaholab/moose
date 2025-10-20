@@ -13,7 +13,7 @@ from logging import getLogger
 from subprocess import Popen, PIPE, STDOUT
 from typing import Optional
 
-from moosecontrol.runners.utils.subprocessreader import SubprocessReader
+from moosecontrol.runners.utils import SubprocessReader
 
 logger = getLogger('SubprocessRunnerBase')
 

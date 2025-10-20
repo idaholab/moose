@@ -24,7 +24,7 @@ DUMMY_PORT = 13579
 
 class TestSubprocessSocketRunner(MooseControlTestCase):
     """
-    Tests moosecontrol.runners.PortRunner.
+    Tests moosecontrol.runners.portrunner.PortRunner.
     """
     def test_init(self):
         """

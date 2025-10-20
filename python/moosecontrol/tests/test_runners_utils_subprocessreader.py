@@ -13,11 +13,11 @@ from unittest import main
 from common import CaptureLogTestCase, setup_moose_python_path
 setup_moose_python_path()
 
-from moosecontrol.runners.utils.subprocessreader import SubprocessReader
+from moosecontrol.runners.utils import SubprocessReader
 
 class TestSubprocessReader(CaptureLogTestCase):
     """
-    Tests for moosecontrol.utils.subprocessreader.SubprocessReader.
+    Tests moosecontrol.runners.utils.subprocessreader.SubprocessReader.
     """
     def test(self):
         """

@@ -14,7 +14,7 @@ from common import MooseControlTestCase, setup_moose_python_path
 setup_moose_python_path()
 
 from moosecontrol.runners.subprocessrunnerbase import SubprocessRunnerBase
-from moosecontrol.runners.utils.subprocessreader import SubprocessReader
+from moosecontrol.runners.utils import SubprocessReader
 
 COMMAND = ['/path/to/moose-opt', '-i', 'input.i']
 ADDITIONAL_COMMAND = ['--color=off']

@@ -34,7 +34,10 @@ def patch_base(name: str, **kwargs):
     """
     return patch(f'moosecontrol.runners.BaseRunner.{name}', **kwargs)
 
-class TestBaseRunner(CaptureLogTestCase):
+class TestSocketRunner(CaptureLogTestCase):
+    """
+    Tests moosecontrol.runners.socketrunner.SocketRunner.
+    """
     def test_init_no_socket_path(self):
         """
         Tests __init__() with a None socket_path.
