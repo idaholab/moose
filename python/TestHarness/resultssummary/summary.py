@@ -60,14 +60,14 @@ class TestHarnessResultsSummary:
         pr_parser.add_argument(
             '--run-time-floor',
             type = float,
-            default = 2.0,
+            default = 2.00,
             help = 'The minimum threshold for a test to checked for a run time difference'
         )
 
         pr_parser.add_argument(
             '--run-time-rate-floor',
             type = float,
-            default = 0.5,
+            default = 0.50,
             help = "The ratio by which to report a test's difference in run time"
         )
 
@@ -158,7 +158,7 @@ class TestHarnessResultsSummary:
         """
         return f'`{str(test_name)}`'
 
-    def _sort_test_time_key(test_table_row: list, test_time_col_index: int) -> tuple:
+    def _sort_test_times_key(test_table_row: list, test_time_col_index: int) -> tuple:
         """
         Generate a sorting key for a row based on column index which test time is located
         Parameters:
@@ -170,14 +170,15 @@ class TestHarnessResultsSummary:
 
         Returns:
         ----------
-        sorting_key : tuple 
+        sorting_key : tuple
             A tempory sorting key:
-            - (0, -value) for numeric values (to sort in descending order),
-            - (1, 0) for the string 'SKIP',
-            - (2, 0) for all other values
+            (0, -value) for numeric values (to sort in descending order)
+            (1, 0) for the string 'SKIP'
+            (2, 0) for the empty string
         """
-        assert isinstance(test_table_row, (list))
-        assert isinstance(test_time_col_index, (int))
+        assert isinstance(test_table_row, list)
+        assert isinstance(test_time_col_index, int)
+
         value = test_table_row[test_time_col_index]
         if value.replace('.', '', 1).isdigit():
             sorting_key = (0, -float(value))
@@ -193,7 +194,7 @@ class TestHarnessResultsSummary:
         The sorting logic priorities as follow:
             1. Numeric values (sorted in descending order).
             2. The string 'SKIP' (sorted after numeric values).
-            3. All other values (sorted last).
+            3. The empty string (sorted last).
 
         Parameters
         ----------
@@ -204,12 +205,17 @@ class TestHarnessResultsSummary:
 
         Returns
         -------
-        list[list]
+        sorted_test_table: list[list]
             The sorted test table dataset, ordered according to the custom sorting logic.
         """
-        assert isinstance(test_table, (list))
-        assert isinstance(test_time_col_index, (int))
-        return sorted(test_table, key=lambda test_table_row: self._sort_test_time_key(test_table_row, test_time_col_index))
+        assert isinstance(test_table, list)
+        assert isinstance(test_time_col_index, int)
+
+        sorted_test_table = sorted(
+            test_table,
+            key=lambda test_table_row: self._sort_test_time_key(test_table_row, test_time_col_index)
+        )
+        return sorted_test_table
 
     def _build_diff_table(self, test_names: set[TestName], test_results: StoredResult) -> Optional[List[List]]:
         """
@@ -224,10 +230,11 @@ class TestHarnessResultsSummary:
 
         Returns
         -------
-        sorted_test_table: Optional[List[List]]
+        test_table: List[List]
             A sorted list of lists where each sublist contains:
                 - the formatted test name (str)
-                - the runtime as a string formatted to two decimal places, or "None" if not available.
+                - the run time (str, if numeric value, formatted to 2 decimal places)
+            The table is sorted by runtime value,  'SKIP' and empty strings sorted accordingly.
         """
         assert isinstance(test_names, set)
         assert isinstance(test_results, StoredResult)
@@ -249,7 +256,7 @@ class TestHarnessResultsSummary:
                 self._format_test_name(test_name),
                 run_time,
             ])
-        if not test_table:
+
             # Table will be sorted by runtime value, SKIP then empty
             test_table = self.sort_test_times(test_table, 1)
 
@@ -277,8 +284,8 @@ class TestHarnessResultsSummary:
         Returns
         -------
         same_table: Optional[List[List]]
-            A sorted list of lists based on relative runtime containing:
-            - Formatted test name
+            A sorted list of lists based on relative runtime and each sublist contains:
+            - Formatted test name (str)
             - Base runtime (str, formatted to 2 decimal places)
             - Head runtime (str, formatted to 2 decimal places)
             - Relative runtime change (str, formatted as percentage with sign)
@@ -302,7 +309,7 @@ class TestHarnessResultsSummary:
                 head_result.run_time < head_run_time_floor:
                 continue
             # Calculate relative runtime ratio between base and head
-            relative_runtime = float((head_result.run_time - base_result.run_time) / base_result.run_time)
+            relative_runtime = (head_result.run_time - base_result.run_time) / base_result.run_time
             # Check if relative run time rate is higher than threadshold, then it will put in the result
             if abs(relative_runtime) >= run_time_rate_floor:
                 same_table.append(
@@ -341,10 +348,10 @@ class TestHarnessResultsSummary:
         -------------------
         run-time-floor : float
             The runtime at which to not check for a difference
-            (default: 2 s)
+            (default: 2.00 s)
         run-time-rate-floor : float
             The runtime rate at which to not attach in same_table summary
-            (default: 0.5 i.e 50%)
+            (default: 0.50 i.e 50%)
         no-run-time-comparison : bool
             If True, skip runtime comparison
         Returns
@@ -371,9 +378,9 @@ class TestHarnessResultsSummary:
         assert isinstance(base_names,(set, NoneType))
 
         # Extract potional parameters
-        head_run_time_floor = kwargs.pop('run_time_floor', 2.0)
+        head_run_time_floor = kwargs.pop('run_time_floor', 2.00)
         assert isinstance(head_run_time_floor, (float, int))
-        run_time_rate_floor = kwargs.pop('run_time_rate_floor', 0.5)
+        run_time_rate_floor = kwargs.pop('run_time_rate_floor', 0.50)
         assert isinstance(run_time_rate_floor, (float, int))
         # Check disable run time comparison option, if True, skip run time comparison
         no_run_time_comparison = kwargs.pop('no_run_time_comparison', False)

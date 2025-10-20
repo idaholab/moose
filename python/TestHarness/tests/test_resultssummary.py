@@ -111,13 +111,13 @@ class TestResultsSummary(TestHarnessTestCase):
         Test _sort_test_time_key() returns correct key for numeric value.
         """
         mock_init_reader.return_value = None
-        test_table_row = ['`testa.test1`', '4.2']
+        test_table_row = ['`testa.test1`', '4.20']
         test_table_col_index = 1
 
         summary = TestHarnessResultsSummary(None)
         sorting_key = summary._sort_test_time_key(test_table_row,1)
 
-        self.assertEqual(sorting_key, (0, -4.2))
+        self.assertEqual(sorting_key, (0, -4.20))
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     def testSortTestTimesKeySKIP(self, mock_init_reader):
@@ -134,7 +134,7 @@ class TestResultsSummary(TestHarnessTestCase):
         self.assertEqual(sorting_key, (1, 0))
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
-    def testSortTestTimesKeySKIP(self, mock_init_reader):
+    def testSortTestTimesKeyEmpty(self, mock_init_reader):
         """
         Test _sort_test_time_key() returns correct key for empty string.
         """
@@ -153,8 +153,8 @@ class TestResultsSummary(TestHarnessTestCase):
         Tests sort_test_times() to sort with the sequence of runtime value, SKIP then ''
         """
         mock_init_reader.return_value = None
-        test_table_row_num_high = ['`testa.test1`', '4.2']
-        test_table_row_num_low = ['`testb.test2`', '1.7']
+        test_table_row_num_high = ['`testa.test1`', '4.20']
+        test_table_row_num_low = ['`testb.test2`', '1.70']
         test_table_row_skip = ['`testc.test3`', 'SKIP']
         test_table_row_empty = ['`testd.test4`', '']
         # unsorted table
@@ -164,9 +164,10 @@ class TestResultsSummary(TestHarnessTestCase):
             test_table_row_empty,
             test_table_row_num_low
         ]
+        test_table_col_index = 1
         # sort table
         summary = TestHarnessResultsSummary(None)
-        test_table = summary.sort_test_times(test_table,1)
+        test_table = summary.sort_test_times(test_table, test_table_col_index)
 
         self.assertEqual(test_table[0], test_table_row_num_high)
         self.assertEqual(test_table[1], test_table_row_num_low)
@@ -277,8 +278,8 @@ class TestResultsSummary(TestHarnessTestCase):
             -the head runtime exceeds a predefined threshold and
             -the relative runtime increase exceeds a defined rate.
         """
-        fake_run_time_floor = 1.0
-        fake_run_time_rate_floor = 0.5
+        fake_run_time_floor = 1.00
+        fake_run_time_rate_floor = 0.50
 
         base_result_with_tests = self.getResult()
         head_result_with_tests = self.getResult()
