@@ -445,7 +445,6 @@ WCNSFVTurbulencePhysicsBase::addMaterials()
     }
     if (!getParam<bool>("mu_t_as_aux_variable"))
     {
-      // TODO: suppress this for linearFV
       InputParameters params = getFactory().getValidParams("INSFVkEpsilonViscosityFunctorMaterial");
       params.set<MooseFunctorName>(NS::TKE) = _tke_name;
       params.set<MooseFunctorName>(NS::TKED) = _tked_name;
