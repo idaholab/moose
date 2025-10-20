@@ -192,16 +192,24 @@ private:
    */
   bool currentlyWaiting() const { return _currently_waiting.load(); }
 
+  /// How long to allow the client to communicate before timing out
+  const Real _client_timeout;
+
   /// Whether or not the Control is currently waiting
   std::atomic<bool> _currently_waiting;
-
-  // Whether or not the solve should be terminated in the next execute() call
+  /// Whether or not the solve should be terminated in the next execute() call
   std::atomic<bool> _terminate_requested;
+  /// The last time we've heard from the client
+  std::atomic<int64_t> _last_client_message;
+  /// Whether or not to kill the client timeout thread
+  std::atomic<bool> _kill_client_timeout_thread;
 
   /// The server
   std::unique_ptr<HttpServer> _server;
   /// The server thread
   std::unique_ptr<std::thread> _server_thread;
+  /// The client timeout thread
+  std::unique_ptr<std::thread> _client_timeout_thread;
 
   /// The values received to control; filled on rank 0 from the server and then broadcast
   std::vector<std::unique_ptr<ValueBase>> _controlled_values;

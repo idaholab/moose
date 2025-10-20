@@ -58,11 +58,20 @@ WebServerControl::validParams()
   params.addParam<FileName>(
       "file_socket",
       "The path to the unix file socket to listen on; must provide either this or 'port'");
+  params.addParam<Real>("client_timeout",
+                        300,
+                        "Time in seconds to allow the client to communicate; if this time is "
+                        "surpassed the run will be killed");
   return params;
 }
 
 WebServerControl::WebServerControl(const InputParameters & parameters)
-  : Control(parameters), _currently_waiting(false), _terminate_requested(false)
+  : Control(parameters),
+    _client_timeout(getParam<Real>("client_timeout")),
+    _currently_waiting(false),
+    _terminate_requested(false),
+    _last_client_message(0),
+    _kill_client_timeout_thread(false)
 {
   const auto has_port = isParamValid("port");
   const auto has_file_socket = isParamValid("file_socket");
@@ -82,6 +91,11 @@ WebServerControl::~WebServerControl()
   {
     _server->shutdown();
     _server_thread->join();
+  }
+  if (_client_timeout_thread)
+  {
+    _kill_client_timeout_thread.store(true);
+    _client_timeout_thread->join();
   }
 }
 
@@ -141,7 +155,17 @@ WebServerControl::startServer()
   _server = std::make_unique<HttpServer>();
 
   // GET /check, returns code 200
-  _server->when("/check")->requested([](const HttpRequest & /*req*/) { return HttpResponse{200}; });
+  _server->when("/check")->requested([](const HttpRequest &) { return HttpResponse{200}; });
+
+  // GET /poke, returns code 200
+  _server->when("/poke")->requested(
+      [this](const HttpRequest &)
+      {
+        const auto now = std::chrono::steady_clock::now().time_since_epoch();
+        const auto now_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now).count();
+        this->_last_client_message.store(now_ms);
+        return HttpResponse{200};
+      });
 
   // GET /waiting, returns code 200 on success and JSON:
   //  'waiting' (bool): Whether or not the control is waiting
@@ -359,6 +383,34 @@ WebServerControl::startServer()
             // Not currently waiting
             return error("The control is not currently waiting");
           });
+
+  // GET /kill, calls mooseError to kill the solve
+  _server->when("/kill")->requested(
+      [this](const HttpRequest &)
+      {
+        ::mooseError(this->typeAndName(), ": Kill requested");
+        return HttpResponse{200};
+      });
+
+  // Setup the timeout thread before starting the server
+  _client_timeout_thread = std::make_unique<std::thread>(
+      [this]
+      {
+        do
+        {
+          const auto last = this->_last_client_message.load();
+          if (last != 0)
+          {
+            const auto now_time = std::chrono::steady_clock::now().time_since_epoch();
+            const auto last_time = std::chrono::milliseconds(last);
+            const auto elapsed = std::chrono::duration<float>(now_time - last_time).count();
+            if (elapsed > this->_client_timeout)
+              ::mooseError(this->typeAndName(), ": Client timed out");
+          }
+          std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+        } while (!this->_kill_client_timeout_thread.load());
+      });
 
   _server_thread = std::make_unique<std::thread>(
       [this]
