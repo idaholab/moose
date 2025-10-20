@@ -115,7 +115,7 @@ class TestResultsSummary(TestHarnessTestCase):
         test_table_col_index = 1
 
         summary = TestHarnessResultsSummary(None)
-        sorting_key = summary._sort_test_time_key(test_table_row,1)
+        sorting_key = summary._sort_test_time_key(test_table_row, test_table_col_index)
 
         self.assertEqual(sorting_key, (0, -4.20))
 
@@ -129,7 +129,7 @@ class TestResultsSummary(TestHarnessTestCase):
         test_table_col_index = 1
 
         summary = TestHarnessResultsSummary(None)
-        sorting_key = summary._sort_test_time_key(test_table_row,1)
+        sorting_key = summary._sort_test_time_key(test_table_row, test_table_col_index)
 
         self.assertEqual(sorting_key, (1, 0))
 
@@ -143,7 +143,7 @@ class TestResultsSummary(TestHarnessTestCase):
         test_table_col_index = 1
 
         summary = TestHarnessResultsSummary(None)
-        sorting_key = summary._sort_test_time_key(test_table_row,1)
+        sorting_key = summary._sort_test_time_key(test_table_row, test_table_col_index)
 
         self.assertEqual(sorting_key, (2, 0))
 
@@ -153,11 +153,12 @@ class TestResultsSummary(TestHarnessTestCase):
         Tests sort_test_times() to sort with the sequence of runtime value, SKIP then ''
         """
         mock_init_reader.return_value = None
+        # Mock data for test table
         test_table_row_num_high = ['`testa.test1`', '4.20']
         test_table_row_num_low = ['`testb.test2`', '1.70']
         test_table_row_skip = ['`testc.test3`', 'SKIP']
         test_table_row_empty = ['`testd.test4`', '']
-        # unsorted table
+        # Unsorted table
         test_table = [
             test_table_row_skip,
             test_table_row_num_high,
@@ -165,10 +166,11 @@ class TestResultsSummary(TestHarnessTestCase):
             test_table_row_num_low
         ]
         test_table_col_index = 1
-        # sort table
-        summary = TestHarnessResultsSummary(None)
-        test_table = summary.sort_test_times(test_table, test_table_col_index)
 
+        summary = TestHarnessResultsSummary(None)
+        # Sorted table
+        test_table = summary.sort_test_times(test_table, test_table_col_index)
+        # Check to ensure the correct sorting sequence
         self.assertEqual(test_table[0], test_table_row_num_high)
         self.assertEqual(test_table[1], test_table_row_num_low)
         self.assertEqual(test_table[2], test_table_row_skip)

@@ -160,7 +160,7 @@ class TestHarnessResultsSummary:
 
     def _sort_test_times_key(test_table_row: list, test_time_col_index: int) -> tuple:
         """
-        Generate a sorting key for a row based on column index which test time is located
+        Generate a sorting key for each test table row based on test time value
         Parameters:
         ----------
         test_table_row : list
@@ -190,7 +190,7 @@ class TestHarnessResultsSummary:
 
     def sort_test_times(self, test_table: list[list], test_time_col_index: int) -> list[list]:
         """
-        Sort a list of test results rows based on the test time column using custom sort.
+        Sort a list of test table based on the test time values using custom sort.
         The sorting logic priorities as follow:
             1. Numeric values (sorted in descending order).
             2. The string 'SKIP' (sorted after numeric values).
