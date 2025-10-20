@@ -754,7 +754,7 @@ SubChannel1PhaseProblem::computeDP(int iblock)
                          dz * 2.0 * (*_mdot_soln)(node_out) * (rho_out - _rho_soln->old(node_out)) /
                              rho_in / _dt;
         auto mass_term1 =
-            std::pow((*_mdot_soln)(node_out), 2.0) * (1.0 / S / rho_out - 1.0 / S / rho_in);
+            Utility::pow<2>((*_mdot_soln)(node_out)) * (1.0 / S / rho_out - 1.0 / S / rho_in);
         auto mass_term2 = -2.0 * (*_mdot_soln)(node_out) * (*_SumWij_soln)(node_out) / S / rho_in;
         auto crossflow_term = 0.0;
         auto turbulent_term = 0.0;
@@ -805,8 +805,8 @@ SubChannel1PhaseProblem::computeDP(int iblock)
                              (*_mdot_soln)(node_out)*std::abs((*_mdot_soln)(node_out)) /
                              (S * (*_rho_soln)(node_out));
         auto gravity_term = _dir_grav * _g_grav * (*_rho_soln)(node_out)*dz * S;
-        auto DP = std::pow(S, -1.0) * (time_term + mass_term1 + mass_term2 + crossflow_term +
-                                       turbulent_term + friction_term + gravity_term); // Pa
+        auto DP = (1 / S) * (time_term + mass_term1 + mass_term2 + crossflow_term + turbulent_term +
+                             friction_term + gravity_term); // Pa
         _DP_soln->set(node_out, DP);
       }
     }
@@ -928,7 +928,7 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         /// Advective derivative term
         if (iz == first_node)
         {
-          PetscScalar value_vec_at = std::pow((*_mdot_soln)(node_in), 2.0) / (S_in * rho_in);
+          PetscScalar value_vec_at = Utility::pow<2>((*_mdot_soln)(node_in)) / (S_in * rho_in);
           PetscInt row_vec_at = i_ch + _n_channels * iz_ind;
           LibmeshPetscCall(VecSetValues(
               _amc_advective_derivative_rhs, 1, &row_vec_at, &value_vec_at, ADD_VALUES));
@@ -1217,7 +1217,7 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           // Setting solutions
           if (S_interp != 0)
           {
-            auto DP = std::pow(S_interp, -1.0) * xx[iz_ind * _n_channels + i_ch];
+            auto DP = (1 / S_interp) * xx[iz_ind * _n_channels + i_ch];
             _DP_soln->set(node_out, DP);
           }
           else
@@ -1571,7 +1571,7 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
         auto term_out = Sij * rho_star * (Lij / dz) * mass_term_out * _Wij(i_gap, iz);
         auto term_in = Sij * rho_star * (Lij / dz) * mass_term_in * _Wij(i_gap, iz - 1);
         auto inertia_term = term_out - term_in;
-        auto pressure_term = 2 * std::pow(Sij, 2.0) * DPij * rho_star;
+        auto pressure_term = 2 * Sij * Sij * DPij * rho_star;
         auto time_term =
             _TR * 2.0 * (_Wij(i_gap, iz) - _Wij_old(i_gap, iz)) * Lij * Sij * rho_star / _dt;
 
@@ -1721,7 +1721,7 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
 
         if (!_staggered_pressure_bool)
         {
-          PetscScalar pressure_factor = std::pow(Sij, 2.0) * rho_star;
+          PetscScalar pressure_factor = Sij * Sij * rho_star;
           PetscInt row_pf = i_gap + _n_gaps * iz_ind;
           PetscInt col_pf = i_ch + _n_channels * iz_ind;
           PetscScalar value_pf = -1.0 * alpha * pressure_factor;
@@ -1757,7 +1757,7 @@ SubChannel1PhaseProblem::computeWijResidual(int iblock)
         }
         else
         {
-          PetscScalar pressure_factor = std::pow(Sij, 2.0) * rho_star;
+          PetscScalar pressure_factor = Sij * Sij * rho_star;
           PetscInt row_pf = i_gap + _n_gaps * iz_ind;
           PetscInt col_pf = i_ch + _n_channels * iz_ind;
           PetscScalar value_pf = -1.0 * pressure_factor;
