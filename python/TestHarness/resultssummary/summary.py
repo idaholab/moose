@@ -300,7 +300,7 @@ class TestHarnessResultsSummary:
         for test_name in same_names:
             base_result = base_results.get_test(test_name.folder, test_name.name)
             head_result = head_results.get_test(test_name.folder, test_name.name)
-            # Skip to check relative run time if run time is None or below the threadshold
+            # Skip to check relative run time if run time is None, Zero or below the threadshold
             if  head_result.run_time is None or \
                 base_result.run_time is None or \
                 base_result.run_time == 0 or \
