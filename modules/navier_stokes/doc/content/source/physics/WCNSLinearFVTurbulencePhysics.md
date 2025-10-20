@@ -9,7 +9,7 @@ The `WCNSLinearFVTurbulencePhysics` can be set to create the standard k-epsilon 
 The turbulent viscosity is then computed with a [kEpsilonViscosityAux.md].
 
 
-The k equation is created with:
+The k (turbulent kinetic energy, TKE) equation is created with:
 
 - a [LinearFVTimeDerivative.md] for the time derivative if simulating a transient
 - a [LinearFVTurbulentAdvection.md] for the turbulent kinetic energy advection term
@@ -17,7 +17,7 @@ The k equation is created with:
 - a [LinearFVTKESourceSink.md] for the turbulent kinetic energy source and dissipation (sink) terms
 
 
-The epsilon equation is created with:
+The epsilon (turbulent kinetic energy dissipation, TKED) equation is created with:
 
 - a [LinearFVTimeDerivative.md] for the time derivative if simulating a transient
 - a [LinearFVTurbulentAdvection.md] for the turbulent kinetic energy dissipation rate advection term
@@ -34,6 +34,9 @@ viscosity when using an auxiliary variable, with a [LinearFVTurbulentViscosityWa
 
 A turbulence model can be added to a heat advection solve by using both a `WCNSLinearFVTurbulencePhysics` and a [WCNSLinearFVFluidHeatTransferPhysics.md].
 The following input performs this coupling for incompressible flow for the standard k-epsilon turbulence model in a 2D channel.
+
+!alert warning title=Temperature wall functions
+The temperature wall functions have not been implemented for any turbulence model in the linear finite volume discretization.
 
 !listing test/tests/finite_volume/ins/turbulence/channel/linear-segregated/channel_heated-physics.i block=Physics
 

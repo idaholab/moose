@@ -36,7 +36,9 @@ private:
    * Functions adding kernels for turbulence in the other equation(s)
    */
   void addFlowTurbulenceKernels();
-  void addFluidEnergyTurbulenceKernels();
+  // Simpler to add the kernel in the fluid heat transfer physics with k + k_t instead of two
+  // kernels one with k, one with k_t
+  void addFluidEnergyTurbulenceKernels() {};
   void addScalarAdvectionTurbulenceKernels();
 
   /**

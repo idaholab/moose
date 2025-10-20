@@ -23,7 +23,7 @@ WCNSLinearFVTurbulencePhysics::validParams()
 {
   InputParameters params = WCNSFVTurbulencePhysicsBase::validParams();
   params.addClassDescription(
-      "Define a turbulence model for a incompressible or weakly-compressible Navier Stokes "
+      "Define a turbulence model for an incompressible or weakly-compressible Navier Stokes "
       "flow with a linear finite volume discretization");
 
   params.addParam<std::vector<SolverSystemName>>(
@@ -44,6 +44,11 @@ WCNSLinearFVTurbulencePhysics::validParams()
   params.suppressParameter<bool>("tke_two_term_bc_expansion");
   params.suppressParameter<bool>("tked_two_term_bc_expansion");
 
+  // Not implemented
+  params.suppressParameter<MooseEnum>("wall_treatment_T");
+  params.suppressParameter<MooseEnum>("tke_face_interpolation");
+  params.suppressParameter<MooseEnum>("tked_face_interpolation");
+
   // LinearFV-specific parameters
   params.addParam<bool>(
       "use_nonorthogonal_correction",
@@ -60,6 +65,9 @@ WCNSLinearFVTurbulencePhysics::WCNSLinearFVTurbulencePhysics(const InputParamete
 {
   if (_turbulence_model != "k-epsilon")
     errorDependentParameter("turbulence_handling", "k-epsilon", {"use_nonorthogonal_correction"});
+  if (_turbulence_model == "mixing-length")
+    paramError("turbulence_handling",
+               "Mixing length is not implemented for the linear finite volume discretization");
 }
 
 void
@@ -155,16 +163,6 @@ WCNSLinearFVTurbulencePhysics::addFlowTurbulenceKernels()
 }
 
 void
-WCNSLinearFVTurbulencePhysics::addFluidEnergyTurbulenceKernels()
-{
-  if (_turbulence_model == "k-epsilon")
-  {
-    // Simpler to add the kernel in the fluid heat transfer physics with k + k_t instead of two
-    // kernels one with k, one with k_t
-  }
-}
-
-void
 WCNSLinearFVTurbulencePhysics::addScalarAdvectionTurbulenceKernels()
 {
   const auto & passive_scalar_names = _scalar_transport_physics->getAdvectedScalarNames();
@@ -202,6 +200,7 @@ WCNSLinearFVTurbulencePhysics::addKEpsilonTimeDerivatives()
   assignBlocks(params, _blocks);
 
   params.set<LinearVariableName>("variable") = _tke_name;
+  params.set<MooseFunctorName>("factor") = _flow_equations_physics->densityName();
   if (shouldCreateTimeDerivative(_tke_name, _blocks, /*error if already defined*/ false))
     getProblem().addLinearFVKernel(kernel_type, prefix() + "tke_time", params);
   params.set<LinearVariableName>("variable") = _tked_name;
