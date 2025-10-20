@@ -249,8 +249,8 @@ class TestResultsSummary(TestHarnessTestCase):
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
     def testBuildDiffTableStatusValueSKIP(self, mock_get_event_results, mock_init_reader):
         """
-        Tests _build_diff_table() when test is added but there is no runtime
-        It will put "" for it's runtime
+        Tests _build_diff_table() when the test result status_value is 'SKIP'
+        It will put 'SKIP' for it's runtime
         """
         head_result_with_tests = self.getResult()
         head_test_names = set(head_result_with_tests.test_names)
