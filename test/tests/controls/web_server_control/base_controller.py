@@ -1,5 +1,5 @@
 import os, shlex, sys
-from MooseControl import MooseControl
+from moosecontrol import MooseControl
 
 # Helper for testing the WebServerControl via the RunApp command_proxy option
 def base_controller(control_name, run_control, use_port=False):

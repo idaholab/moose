@@ -16,9 +16,9 @@ from requests.exceptions import ConnectionError
 from time import sleep
 from typing import Callable, Optional
 
-from MooseControl.exceptions import BadStatus, InitializeTimeout, WebServerControlError
-from MooseControl.runners.utils.poker import Poker
-from MooseControl.runners.utils.timedpollhelper import TimedPollHelper
+from moosecontrol.exceptions import BadStatus, InitializeTimeout, WebServerControlError
+from moosecontrol.runners.utils.poker import Poker
+from moosecontrol.runners.utils.timedpollhelper import TimedPollHelper
 
 logger = getLogger('BaseRunner')
 

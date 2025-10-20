@@ -17,14 +17,14 @@ from unittest.mock import patch
 from common import BASE_INPUT, MOOSE_EXE, MooseControlTestCase, setup_moose_python_path
 setup_moose_python_path()
 
-from MooseControl import PortRunner
-from MooseControl.runners.portrunner import DEFAULT_HOST
+from moosecontrol import PortRunner
+from moosecontrol.runners.portrunner import DEFAULT_HOST
 
 DUMMY_PORT = 13579
 
 class TestSubprocessSocketRunner(MooseControlTestCase):
     """
-    Tests MooseControl.runners.PortRunner.
+    Tests moosecontrol.runners.PortRunner.
     """
     def test_init(self):
         """

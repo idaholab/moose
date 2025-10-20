@@ -48,4 +48,4 @@ control.finalize()
 
 ## Class methods
 
-!pysyntax class name=MooseControl.MooseControl heading-level=3 show-internal=False show-private=False show-protected=False
+!pysyntax class name=moosecontrol.MooseControl heading-level=3 show-internal=False show-private=False show-protected=False

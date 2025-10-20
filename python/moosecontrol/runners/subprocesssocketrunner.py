@@ -9,23 +9,20 @@
 
 import os
 from logging import getLogger
+from random import choice
+from string import ascii_lowercase, digits
 from typing import Optional
 
-from MooseControl.runners import PortRunner
-from MooseControl.runners.subprocessrunnerbase import SubprocessRunnerBase, DEFAULT_DIRECTORY
+from moosecontrol.runners import SocketRunner
+from moosecontrol.runners.subprocessrunnerbase import SubprocessRunnerBase, DEFAULT_DIRECTORY
 
-logger = getLogger('SubprocessPortRunner')
+logger = getLogger('SubprocessSocketRunner')
 
-class SubprocessPortRunner(SubprocessRunnerBase, PortRunner):
-    """
-    Runner to be used with the MooseControl that
-    spawns a MOOSE process and connects to the
-    webserver over a port.
-    """
+class SubprocessSocketRunner(SubprocessRunnerBase, SocketRunner):
     def __init__(self,
                  command: list[str],
                  moose_control_name: str,
-                 port: Optional[int] = None,
+                 socket_path: Optional[os.PathLike] = None,
                  directory: os.PathLike = DEFAULT_DIRECTORY,
                  use_subprocess_reader: bool = True,
                  **kwargs):
@@ -39,9 +36,9 @@ class SubprocessPortRunner(SubprocessRunnerBase, PortRunner):
 
         Optional Parameters
         -------------------
-        port : Optional[int]
-            The port to connect to. If unset, find
-            a random available port.
+        socket_path : Optional[os.PathLike]
+            The socket path to use. If unset, build
+            a random onw in the directory.
         directory : os.PathLike
             Directory to run in. Defaults to the current
             working directory.
@@ -51,8 +48,6 @@ class SubprocessPortRunner(SubprocessRunnerBase, PortRunner):
 
         See BaseRunner.__init__() for additional parameters.
         """
-        assert isinstance(port, (int, type(None)))
-
         SubprocessRunnerBase.__init__(
             self,
             command=command,
@@ -61,26 +56,37 @@ class SubprocessPortRunner(SubprocessRunnerBase, PortRunner):
             use_subprocess_reader=use_subprocess_reader
         )
 
-        # Find an available port if one was not provided
-        if port is None:
-            port = PortRunner.find_available_port()
+        # Build a random socket name if one was not provided
+        if socket_path is None:
+            socket_path = os.path.join(self.directory, self.random_socket_name())
+        else:
+            socket_path = os.path.abspath(socket_path)
 
-        PortRunner.__init__(
+        SocketRunner.__init__(
             self,
-            port=port,
+            socket_path=socket_path,
             **kwargs
         )
+
+    @staticmethod
+    def random_socket_name() -> str:
+        """
+        Generates a randoms socket name.
+        """
+        characters = ascii_lowercase + digits
+        random_string = ''.join(choice(characters) for i in range(5))
+        return f'subprocess_runner_{random_string}.sock'
 
     def get_additional_command(self) -> list[str]:
         """
         Gets the full command to run.
 
         Takes the user's command and also:
-            - Sets the port for the control
+            - Sets the file socket for the control
             - Disables color in output
         """
         control_path = f'Controls/{self.moose_control_name}'
-        control_socket = f'{control_path}/port={self.port}'
+        control_socket = f'{control_path}/file_socket={self.socket_path}'
         return [control_socket, '--color=off']
 
     def initialize(self):
@@ -89,13 +95,13 @@ class SubprocessPortRunner(SubprocessRunnerBase, PortRunner):
         """
         self.initialize_start()
 
-        if not self.port_is_available(self.port):
-            raise ConnectionRefusedError(f'Port {self.port} is already used')
+        if os.path.exists(self.socket_path):
+            raise FileExistsError(f'Socket {self.socket_path} already exists')
 
         # Start the subprocess
         SubprocessRunnerBase.initialize(self)
         # And then wait for a connection
-        PortRunner.initialize(self)
+        SocketRunner.initialize(self)
 
     def finalize(self):
         """
@@ -103,8 +109,8 @@ class SubprocessPortRunner(SubprocessRunnerBase, PortRunner):
         """
         # Wait for process to finish
         SubprocessRunnerBase.finalize(self)
-        # And then close the connection
-        PortRunner.finalize(self)
+        # And then delete the socket
+        SocketRunner.finalize(self)
 
     def cleanup(self):
         """
@@ -114,6 +120,6 @@ class SubprocessPortRunner(SubprocessRunnerBase, PortRunner):
         """
         # Kill process if needed
         SubprocessRunnerBase.cleanup(self)
-        # And then cleanup the connection
-        PortRunner.cleanup(self)
+        # And then cleanup the socket
+        SocketRunner.cleanup(self)
 

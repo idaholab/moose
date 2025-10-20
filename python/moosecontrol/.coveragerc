@@ -3,7 +3,7 @@ concurrency = thread
 branch = True
 omit =
     requests_unixsocket/*
-    */MooseControl.py
+    */moosecontrol.py
 parallel = False
 
 [report]

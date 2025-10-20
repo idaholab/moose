@@ -13,8 +13,8 @@ from unittest.mock import patch
 from common import MooseControlTestCase, setup_moose_python_path
 setup_moose_python_path()
 
-from MooseControl.runners.subprocessrunnerbase import SubprocessRunnerBase
-from MooseControl.runners.utils.subprocessreader import SubprocessReader
+from moosecontrol.runners.subprocessrunnerbase import SubprocessRunnerBase
+from moosecontrol.runners.utils.subprocessreader import SubprocessReader
 
 COMMAND = ['/path/to/moose-opt', '-i', 'input.i']
 ADDITIONAL_COMMAND = ['--color=off']
@@ -32,11 +32,11 @@ def patch_runner(name: str, **kwargs):
     """
     Convenience method for patching the SubprocessRunnerBase.
     """
-    return patch(f'MooseControl.runners.subprocessrunnerbase.SubprocessRunnerBase.{name}', **kwargs)
+    return patch(f'moosecontrol.runners.subprocessrunnerbase.SubprocessRunnerBase.{name}', **kwargs)
 
 class TestSubprocessRunnerBase(MooseControlTestCase):
     """
-    Tests MooseControl.runners.subprocessrunnerbase.SubprocessRunnerBase.
+    Tests moosecontrol.runners.subprocessrunnerbase.SubprocessRunnerBase.
     """
     def test_init(self):
         """

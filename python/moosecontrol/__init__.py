@@ -7,7 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from .MooseControl import MooseControl
-from .MooseControlNew import MooseControlNew
+from .moosecontrol import MooseControl
+# from .moosecontrolnew import MooseControlNew
 from .runners import PortRunner, SocketRunner, SubprocessPortRunner, \
     SubprocessSocketRunner

@@ -17,8 +17,8 @@ from common import BASE_INPUT, MOOSE_EXE, CaptureLogTestCase, \
     mock_response, setup_moose_python_path
 setup_moose_python_path()
 
-from MooseControl import SocketRunner
-from MooseControl.requests_unixsocket import Session
+from moosecontrol import SocketRunner
+from moosecontrol.requests_unixsocket import Session
 
 DUMMY_SOCKET_PATH = '/foo/bar.sock'
 
@@ -26,13 +26,13 @@ def patch_runner(name: str, **kwargs):
     """
     Convenience method for patching the SocketRunner.
     """
-    return patch(f'MooseControl.SocketRunner.{name}', **kwargs)
+    return patch(f'moosecontrol.SocketRunner.{name}', **kwargs)
 
 def patch_base(name: str, **kwargs):
     """
     Convenience method for patching the BaseRunner.
     """
-    return patch(f'MooseControl.runners.BaseRunner.{name}', **kwargs)
+    return patch(f'moosecontrol.runners.BaseRunner.{name}', **kwargs)
 
 class TestBaseRunner(CaptureLogTestCase):
     def test_init_no_socket_path(self):
@@ -196,7 +196,7 @@ class TestBaseRunner(CaptureLogTestCase):
         with NamedTemporaryFile() as f:
             runner = SocketRunner(f.name)
 
-            with patch('MooseControl.requests_unixsocket.Session.get', return_value=mock_response()):
+            with patch('moosecontrol.requests_unixsocket.Session.get', return_value=mock_response()):
                 with patch_runner('socket_exists', return_value=True):
                     runner.initialize()
 

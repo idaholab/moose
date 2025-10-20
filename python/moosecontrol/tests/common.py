@@ -22,12 +22,12 @@ import pytest
 def setup_moose_python_path():
     """
     Helper for adding the moose python path to the
-    PYTHONPATH if we fail to import the MooseControl.
+    PYTHONPATH if we fail to import the moosecontrol.
 
     Used in each unit test to avoid having to set
     PYTHONPATH at test time.
     """
-    if find_spec('MooseControl') is None:
+    if find_spec('moosecontrol') is None:
         this_dir = os.path.dirname(__file__)
         moose_python = os.path.join(this_dir, '..', '..')
         sys.path.append(moose_python)

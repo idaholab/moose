@@ -8,23 +8,25 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
+from re import match
 from unittest import main, skipUnless
 from unittest.mock import patch
+from tempfile import NamedTemporaryFile
 
 from common import BASE_INPUT, MOOSE_EXE, MooseControlTestCase, \
     setup_moose_python_path
 setup_moose_python_path()
 
-from MooseControl import SubprocessPortRunner
-from MooseControl.runners.utils.subprocessreader import SubprocessReader
+from moosecontrol import SubprocessSocketRunner
+from moosecontrol.runners.utils.subprocessreader import SubprocessReader
 
 from test_runners_subprocessrunnerbase import ARGS, COMMAND, MOOSE_CONTROL_NAME
 
-FAKE_PORT = 60000
+RUNNER = 'moosecontrol.SubprocessSocketRunner'
+RUNNER_BASE = 'moosecontrol.runners.subprocessrunnerbase.SubprocessRunnerBase'
+SOCKET_RUNNER = 'moosecontrol.SocketRunner'
 
-RUNNER = 'MooseControl.SubprocessPortRunner'
-RUNNER_BASE = 'MooseControl.runners.subprocessrunnerbase.SubprocessRunnerBase'
-PORT_RUNNER = 'MooseControl.PortRunner'
+FAKE_SOCKET_PATH = '/path/to/foo.sock'
 
 def patch_runner(name: str, **kwargs):
     """
@@ -32,81 +34,88 @@ def patch_runner(name: str, **kwargs):
     """
     return patch(f'{RUNNER}.{name}', **kwargs)
 
-class TestSubprocessPortRunner(MooseControlTestCase):
+class TestSubprocessSocketRunner(MooseControlTestCase):
     """
-    Tests MooseControl.runners.SubprocessPortRunner.
+    Tests moosecontrol.SubprocessSocketRunner.
     """
     def test_init(self):
         """
         Tests __init__() with the required arguments.
         """
-        runner = SubprocessPortRunner(**ARGS)
+        runner = SubprocessSocketRunner(**ARGS)
         self.assertEqual(runner.command, COMMAND)
         self.assertEqual(runner.moose_control_name, MOOSE_CONTROL_NAME)
         self.assertEqual(runner.directory, os.getcwd())
-        self.assertIsInstance(runner.port, int)
+        self.assertEqual(os.path.dirname(runner.socket_path), runner.directory)
         self.assertTrue(runner.use_subprocess_reader)
 
     def test_init_socket_path(self):
         """
-        Tests __init__() with a port provided.
+        Tests __init__() with a socket_path provided.
         """
-        runner = SubprocessPortRunner(**ARGS, port=FAKE_PORT)
-        self.assertEqual(runner.port, FAKE_PORT)
+        runner = SubprocessSocketRunner(**ARGS, socket_path=FAKE_SOCKET_PATH)
+        self.assertEqual(runner.socket_path, FAKE_SOCKET_PATH)
+
+    def test_random_socket_name(self):
+        """
+        Tests random_socket_name().
+        """
+        name = SubprocessSocketRunner.random_socket_name()
+        self.assertIsNotNone(match(r'[a-z0-9]{5}', name))
 
     def test_get_additional_command(self):
         """
         Tests get_additional_command()
         """
-        runner = SubprocessPortRunner(**ARGS, port=FAKE_PORT)
+        runner = SubprocessSocketRunner(**ARGS, socket_path=FAKE_SOCKET_PATH)
         result = runner.get_additional_command()
         self.assertEqual(
             result,
             [
-                f'Controls/{runner.moose_control_name}/port={FAKE_PORT}',
+                f'Controls/{runner.moose_control_name}/file_socket={FAKE_SOCKET_PATH}',
                 '--color=off'
             ]
         )
 
-    def test_initialize_port_unavailable(self):
+    def test_initialize_socket_exists(self):
         """
-        Tests initialize() when the port is not available.
+        Tests initialize() when the socket already exists.
         """
-        runner = SubprocessPortRunner(**ARGS, port=FAKE_PORT)
-        with patch_runner('port_is_available', return_value=False):
-            regex = f'Port {FAKE_PORT} is already used'
-            with self.assertRaisesRegex(ConnectionRefusedError, regex):
+        with NamedTemporaryFile() as f:
+            runner = SubprocessSocketRunner(**ARGS, socket_path=f.name)
+            regex = f'Socket {runner.socket_path} already exists'
+            with self.assertRaisesRegex(FileExistsError, regex):
                 runner.initialize()
 
     def test_initialize(self):
         """
         Tests initialize(), which should call initialize() on the parent
-        SubprocessRunnerBase and PortRunner.
+        SubprocessRunnerBase and SocketRunner.
         """
-        runner = SubprocessPortRunner(**ARGS)
+        runner = SubprocessSocketRunner(**ARGS)
         methods = [
             RUNNER + '.initialize_start',
             RUNNER_BASE + '.initialize',
-            PORT_RUNNER + '.initialize'
+            SOCKET_RUNNER + '.initialize'
         ]
         self.assertMethodsCalledInOrder(methods, lambda: runner.initialize())
 
     def test_finalize(self):
         """
         Tests finalize(), which should call finalize() on the parent
-        SubprocessRunnerBase and PortRunner.
+        SubprocessRunnerBase and SocketRunner.
         """
-        runner = SubprocessPortRunner(**ARGS)
-        methods = [RUNNER_BASE + '.finalize', PORT_RUNNER + '.finalize']
+        runner = SubprocessSocketRunner(**ARGS)
+        methods = [RUNNER_BASE + '.finalize', SOCKET_RUNNER + '.finalize']
         self.assertMethodsCalledInOrder(methods, lambda: runner.finalize())
 
     def test_cleanup(self):
         """
         Tests cleanup(), which should call cleanup() on the parent
-        SubprocessRunnerBase and PortRunner.
+        SubprocessRunnerBase and SocketRunner.
         """
-        runner = SubprocessPortRunner(**ARGS)
-        methods = [RUNNER_BASE + '.cleanup', PORT_RUNNER + '.cleanup']
+        runner = SubprocessSocketRunner(**ARGS)
+        methods = [RUNNER_BASE + '.cleanup', SOCKET_RUNNER + '.cleanup']
         self.assertMethodsCalledInOrder(methods, lambda: runner.cleanup())
 
     @skipUnless(MOOSE_EXE is not None, 'MOOSE_EXE is not set')
@@ -119,7 +128,7 @@ class TestSubprocessPortRunner(MooseControlTestCase):
             f.write(BASE_INPUT)
 
         command = [MOOSE_EXE, '-i', input_file]
-        runner = SubprocessPortRunner(
+        runner = SubprocessSocketRunner(
             command=command,
             moose_control_name='web_server',
             directory=self.directory.name

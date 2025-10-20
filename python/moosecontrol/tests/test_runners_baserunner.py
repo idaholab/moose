@@ -17,11 +17,11 @@ from common import FAKE_URL, CaptureLogTestCase, FakeSession, \
     mock_response, setup_moose_python_path
 setup_moose_python_path()
 
-from MooseControl.exceptions import BadStatus, InitializeTimeout, WebServerControlError
-from MooseControl.runners import BaseRunner
-from MooseControl.runners.baserunner import DEFAULT_POLL_TIME, DEFAULT_POKE_POLL_TIME, DEFAULT_INITIALIZE_TIMEOUT
+from moosecontrol.exceptions import BadStatus, InitializeTimeout, WebServerControlError
+from moosecontrol.runners import BaseRunner
+from moosecontrol.runners.baserunner import DEFAULT_POLL_TIME, DEFAULT_POKE_POLL_TIME, DEFAULT_INITIALIZE_TIMEOUT
 
-BASERUNNER = 'MooseControl.runners.BaseRunner'
+BASERUNNER = 'moosecontrol.runners.BaseRunner'
 
 class BaseRunnerTest(BaseRunner):
     @property
@@ -36,11 +36,11 @@ def patch_baserunner(name: str, **kwargs):
     """
     Convenience method for patching the BaseRunner.
     """
-    return patch(f'MooseControl.runners.BaseRunner.{name}', **kwargs)
+    return patch(f'moosecontrol.runners.BaseRunner.{name}', **kwargs)
 
 class TestBaseRunner(CaptureLogTestCase):
     """
-    Tests MooseControl.runners.BaseRunner.
+    Tests moosecontrol.runners.BaseRunner.
     """
     def test_init(self):
         """

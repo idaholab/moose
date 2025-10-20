@@ -12,8 +12,8 @@ import stat
 from logging import getLogger
 from typing import Optional
 
-from MooseControl.requests_unixsocket import Session
-from MooseControl.runners import BaseRunner
+from moosecontrol.requests_unixsocket import Session
+from moosecontrol.runners import BaseRunner
 
 logger = getLogger('SocketRunner')
 

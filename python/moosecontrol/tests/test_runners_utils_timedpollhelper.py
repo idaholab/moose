@@ -12,7 +12,7 @@ from unittest import main, TestCase
 from common import setup_moose_python_path
 setup_moose_python_path()
 
-from MooseControl.runners.utils.timedpollhelper import TimedPollHelper
+from moosecontrol.runners.utils.timedpollhelper import TimedPollHelper
 
 DEFAULT_POLL_TIME = 0.001
 DEFAULT_TIMEOUT_TIME = 0.005
@@ -23,7 +23,7 @@ DEFAULT_ARGS = {
 
 class TestTimedPollHelper(TestCase):
     """
-    Tests for MooseControl.runners.timedpollhelper.TimedPollHelper
+    Tests for moosecontrol.runners.utils.timedpollhelper.TimedPollHelper
     """
     def test_init(self):
         """
