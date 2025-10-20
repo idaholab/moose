@@ -106,25 +106,72 @@ class TestResultsSummary(TestHarnessTestCase):
                 summary.pr_test_names(event_id = EVENT_ID, out_file = out_file.name)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
-    def testsortkey(self, mock_init_reader):
+    def testSortTestTimesKeyNumeric(self, mock_init_reader):
         """
-        Tests _sort_key() to sort with the sequence of runtime value, SKIP then ''
+        Test _sort_test_time_key() returns correct key for numeric value.
         """
         mock_init_reader.return_value = None
-        a = ['`testa.test1`', '2.00']
-        b = ['`testb.test2`', '1.00']
-        c = ['`testc.test3`', 'SKIP']
-        d = ['`testd.test4`', '']
+        test_table_row = ['`testa.test1`', '4.2']
+        test_table_col_index = 1
+
+        summary = TestHarnessResultsSummary(None)
+        sorting_key = summary._sort_test_time_key(test_table_row,1)
+
+        self.assertEqual(sorting_key, (0, -4.2))
+
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    def testSortTestTimesKeySKIP(self, mock_init_reader):
+        """
+        Test _sort_test_time_key() returns correct key for SKIP.
+        """
+        mock_init_reader.return_value = None
+        test_table_row = ['`testa.test1`', 'SKIP']
+        test_table_col_index = 1
+
+        summary = TestHarnessResultsSummary(None)
+        sorting_key = summary._sort_test_time_key(test_table_row,1)
+
+        self.assertEqual(sorting_key, (1, 0))
+
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    def testSortTestTimesKeySKIP(self, mock_init_reader):
+        """
+        Test _sort_test_time_key() returns correct key for empty string.
+        """
+        mock_init_reader.return_value = None
+        test_table_row = ['`testa.test1`', '']
+        test_table_col_index = 1
+
+        summary = TestHarnessResultsSummary(None)
+        sorting_key = summary._sort_test_time_key(test_table_row,1)
+
+        self.assertEqual(sorting_key, (2, 0))
+
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    def testSortTestTimes(self, mock_init_reader):
+        """
+        Tests sort_test_times() to sort with the sequence of runtime value, SKIP then ''
+        """
+        mock_init_reader.return_value = None
+        test_table_row_num_high = ['`testa.test1`', '4.2']
+        test_table_row_num_low = ['`testb.test2`', '1.7']
+        test_table_row_skip = ['`testc.test3`', 'SKIP']
+        test_table_row_empty = ['`testd.test4`', '']
         # unsorted table
-        test_table = [c, d, b, a ]
+        test_table = [
+            test_table_row_skip,
+            test_table_row_num_high,
+            test_table_row_empty,
+            test_table_row_num_low
+        ]
         # sort table
         summary = TestHarnessResultsSummary(None)
-        test_table.sort(key=summary._sort_key(1))
+        test_table = summary.sort_test_times(test_table,1)
 
-        self.assertEqual(test_table[0], a)
-        self.assertEqual(test_table[1], b)
-        self.assertEqual(test_table[2], c)
-        self.assertEqual(test_table[3], d)
+        self.assertEqual(test_table[0], test_table_row_num_high)
+        self.assertEqual(test_table[1], test_table_row_num_low)
+        self.assertEqual(test_table[2], test_table_row_skip)
+        self.assertEqual(test_table[3], test_table_row_empty)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_commit_results')
