@@ -352,6 +352,9 @@ MFEMProblem::addFunction(const std::string & type,
           }
         });
   }
+  else if ("MFEMParsedFunction" == type)
+  {
+  }
   else
   {
     mooseWarning("Could not identify whether function ",
