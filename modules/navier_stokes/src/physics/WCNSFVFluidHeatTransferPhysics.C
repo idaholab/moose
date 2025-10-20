@@ -21,10 +21,11 @@ WCNSFVFluidHeatTransferPhysics::validParams()
   InputParameters params = WCNSFVFluidHeatTransferPhysicsBase::validParams();
   params.transferParam<MooseEnum>(NSFVBase::validParams(), "energy_face_interpolation");
   params.transferParam<Real>(NSFVBase::validParams(), "energy_scaling");
-  params.addParam<bool>("check_bc_compatibility",
-                        true,
-                        "Whether to check for known incompatiblity between boundary conditions for "
-                        "the heat transport equation physics and other physics");
+  params.addParam<bool>(
+      "check_bc_compatibility",
+      true,
+      "Whether to check for known incompatibility between boundary conditions for "
+      "the heat transport equation physics and other physics");
   params.addParamNamesToGroup("check_bc_compatibility", "Advanced");
 
   params.addParamNamesToGroup("energy_face_interpolation energy_scaling", "Numerical scheme");
