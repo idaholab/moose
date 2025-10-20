@@ -3456,6 +3456,10 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
     // calling stopSolve(), it is now up to PETSc to return a
     // "diverged" reason during the next solve.
   }
+  catch (libMesh::LogicError & e)
+  {
+    // Catch the libmesh error on negative jacobian
+  }
 
   _communicator.min(damping);
 
