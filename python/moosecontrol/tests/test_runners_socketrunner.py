@@ -10,7 +10,7 @@
 import os
 from subprocess import Popen, PIPE
 from tempfile import NamedTemporaryFile, TemporaryDirectory
-from unittest import main, skipUnless
+from unittest import skipUnless
 from unittest.mock import patch
 
 from common import BASE_INPUT, MOOSE_EXE, CaptureLogTestCase, \
@@ -247,6 +247,3 @@ class TestSocketRunner(CaptureLogTestCase):
             self.assertEqual(process.returncode, 0)
             self.assertIn('Solve Skipped!', stdout)
             self.assertFalse(os.path.exists(socket_path))
-
-if __name__ == '__main__':
-    main()

@@ -8,7 +8,6 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from subprocess import Popen, PIPE
-from unittest import main
 
 from common import CaptureLogTestCase, setup_moose_python_path
 setup_moose_python_path()
@@ -45,6 +44,3 @@ class TestSubprocessReader(CaptureLogTestCase):
         for i, line in enumerate(output):
             self.assertLogMessage(i + 1, SubprocessReader.OUTPUT_PREFIX + output[i])
         self.assertLogMessage(log_size - 1, 'Subprocess reader ending')
-
-if __name__ == '__main__':
-    main()

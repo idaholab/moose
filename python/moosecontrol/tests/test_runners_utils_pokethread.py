@@ -9,7 +9,6 @@
 
 from requests import ConnectionError, HTTPError
 from time import sleep
-from unittest import main
 from unittest.mock import patch
 
 from common import CaptureLogTestCase, FakeSession, mock_response, \
@@ -141,6 +140,3 @@ class TestPoker(CaptureLogTestCase):
             poke_thread.start()
             poke_thread.join()
         self.assertEqual(poke_thread.num_poked, allow_successful_pokes)
-
-if __name__ == '__main__':
-    main()

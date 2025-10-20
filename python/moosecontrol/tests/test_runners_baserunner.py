@@ -8,7 +8,6 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from json import dumps
-from unittest import main
 from unittest.mock import patch
 from requests import Response, Session
 from requests.exceptions import ConnectionError, HTTPError
@@ -519,6 +518,3 @@ class TestBaseRunner(CaptureLogTestCase):
 
         is_listening.assert_called_once()
         get.assert_not_called()
-
-if __name__ == '__main__':
-    main()

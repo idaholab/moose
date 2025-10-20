@@ -8,7 +8,7 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 import os
-from unittest import main, skipUnless
+from unittest import skipUnless
 from unittest.mock import patch
 
 from common import BASE_INPUT, MOOSE_EXE, MooseControlTestCase, \
@@ -143,6 +143,3 @@ class TestSubprocessPortRunner(MooseControlTestCase):
         process_output = [v.message for v in self._caplog.records if v.name == 'SubprocessReader']
         self.assertIn(SubprocessReader.OUTPUT_PREFIX + ' Solve Skipped!', process_output)
         self.assertEqual(runner._process.returncode, 0)
-
-if __name__ == '__main__':
-    main()

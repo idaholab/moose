@@ -9,7 +9,7 @@
 
 import os
 from re import match
-from unittest import main, skipUnless
+from unittest import skipUnless
 from unittest.mock import patch
 from tempfile import NamedTemporaryFile
 
@@ -152,6 +152,3 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
         process_output = [v.message for v in self._caplog.records if v.name == 'SubprocessReader']
         self.assertIn(SubprocessReader.OUTPUT_PREFIX + ' Solve Skipped!', process_output)
         self.assertEqual(runner._process.returncode, 0)
-
-if __name__ == '__main__':
-    main()

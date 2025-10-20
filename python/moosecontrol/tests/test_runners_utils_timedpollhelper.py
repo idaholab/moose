@@ -7,7 +7,7 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from unittest import main, TestCase
+from unittest import TestCase
 
 from common import setup_moose_python_path
 setup_moose_python_path()
@@ -108,6 +108,3 @@ class TestTimedPollHelper(TestCase):
         helper = TimedPollHelper(**DEFAULT_ARGS)
         with self.assertRaises(TimedPollHelper.StartNotCalled):
             helper.poll(lambda: False)
-
-if __name__ == '__main__':
-    main()

@@ -11,7 +11,7 @@ import os
 from requests import Session
 from subprocess import Popen, PIPE
 from tempfile import TemporaryDirectory
-from unittest import main, skipUnless
+from unittest import skipUnless
 from unittest.mock import patch
 
 from common import BASE_INPUT, MOOSE_EXE, MooseControlTestCase, setup_moose_python_path
@@ -111,6 +111,3 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
             self.assertNoWarningLogs()
             self.assertEqual(process.returncode, 0)
             self.assertIn('Solve Skipped!', stdout)
-
-if __name__ == '__main__':
-    main()
