@@ -7,7 +7,10 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from .moosecontrol import MooseControl
+"""
+Provides MooseControl, an interface for controlling a
+running MOOSE process using the MOOSE WebServerControl.
+"""
 from .moosecontrol import MooseControl
 from .runners import BaseRunner, PortRunner, SocketRunner, \
     SubprocessPortRunner, SubprocessSocketRunner

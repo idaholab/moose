@@ -9,6 +9,8 @@
 
 # pylint: disable=logging-fstring-interpolation
 
+"""Defines the Poker."""
+
 from logging import getLogger
 from numbers import Number
 from threading import Event, Thread

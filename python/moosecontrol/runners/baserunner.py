@@ -7,6 +7,8 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+"""Defines the BaseRunner."""
+
 from abc import ABC, abstractmethod
 from logging import getLogger
 from numbers import Number
@@ -17,8 +19,8 @@ from requests import Session
 from requests.exceptions import ConnectionError # pylint: disable=redefined-builtin
 
 from moosecontrol.exceptions import InitializeTimeout
-from moosecontrol.runners.utils import Poker, TimedPollHelper
 from moosecontrol.validation import WebServerControlResponse, process_response
+from .utils import Poker, TimedPollHelper
 
 logger = getLogger('BaseRunner')
 

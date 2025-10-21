@@ -9,13 +9,15 @@
 
 # pylint: disable=logging-fstring-interpolation
 
+"""Defines the SubprocessRunnerBase."""
+
 import os
 from abc import ABC, abstractmethod
 from logging import getLogger
 from subprocess import Popen, PIPE, STDOUT
 from typing import Optional
 
-from moosecontrol.runners.utils import SubprocessReader
+from .utils import SubprocessReader
 
 logger = getLogger('SubprocessRunnerBase')
 

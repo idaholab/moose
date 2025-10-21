@@ -7,11 +7,13 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+"""Defines the SubprocessPortRunner."""
+
 from logging import getLogger
 from typing import Optional
 
-from moosecontrol.runners import PortRunner
-from moosecontrol.runners.subprocessrunnerbase import SubprocessRunnerBase, DEFAULT_DIRECTORY
+from .portrunner import PortRunner
+from .subprocessrunnerbase import SubprocessRunnerBase, DEFAULT_DIRECTORY
 
 logger = getLogger('SubprocessPortRunner')
 
@@ -21,6 +23,7 @@ class SubprocessPortRunner(SubprocessRunnerBase, PortRunner):
     spawns a MOOSE process and connects to the
     webserver over a port.
     """
+    # pylint: disable=too-many-arguments,too-many-positional-arguments,R0801
     def __init__(self,
                  command: list[str],
                  moose_control_name: str,
@@ -115,4 +118,3 @@ class SubprocessPortRunner(SubprocessRunnerBase, PortRunner):
         SubprocessRunnerBase.cleanup(self)
         # And then cleanup the connection
         PortRunner.cleanup(self)
-

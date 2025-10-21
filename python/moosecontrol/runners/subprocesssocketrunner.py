@@ -7,6 +7,8 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+"""Defines the SubprocessSocketRunner."""
+
 import os
 from logging import getLogger
 from random import choice
@@ -14,8 +16,8 @@ from string import ascii_lowercase, digits
 from tempfile import gettempdir
 from typing import Optional
 
-from moosecontrol.runners import SocketRunner
-from moosecontrol.runners.subprocessrunnerbase import SubprocessRunnerBase, DEFAULT_DIRECTORY
+from .socketrunner import SocketRunner
+from .subprocessrunnerbase import SubprocessRunnerBase, DEFAULT_DIRECTORY
 
 logger = getLogger('SubprocessSocketRunner')
 
@@ -25,6 +27,7 @@ class SubprocessSocketRunner(SubprocessRunnerBase, SocketRunner):
     spawns a MOOSE process and connects to the
     webserver over a socket.
     """
+    # pylint: disable=too-many-arguments,too-many-positional-arguments,R0801
     def __init__(self,
                  command: list[str],
                  moose_control_name: str,
@@ -128,4 +131,3 @@ class SubprocessSocketRunner(SubprocessRunnerBase, SocketRunner):
         SubprocessRunnerBase.cleanup(self)
         # And then cleanup the socket
         SocketRunner.cleanup(self)
-

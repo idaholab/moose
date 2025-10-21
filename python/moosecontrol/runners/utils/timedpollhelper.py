@@ -7,6 +7,8 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+"""Defines the TimedPollHelper."""
+
 from numbers import Number
 from typing import Callable, Optional
 from time import monotonic, sleep

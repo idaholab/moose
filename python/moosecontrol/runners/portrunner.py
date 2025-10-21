@@ -7,11 +7,13 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+"""Defines the PortRunner."""
+
 import socket
 
 from requests import Session
 
-from moosecontrol.runners import BaseRunner
+from .baserunner import BaseRunner
 
 DEFAULT_HOST = 'http://localhost'
 

@@ -7,6 +7,8 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+"""Defines the runners used to initialize and finalize MOOSE for the MooseControl."""
+
 from .baserunner import BaseRunner
 from .portrunner import PortRunner
 from .socketrunner import SocketRunner

@@ -7,6 +7,8 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+"""Defines structures and methods for validating WebServerControl responses."""
+
 from dataclasses import dataclass
 from typing import Any, Optional, Tuple, Type
 

@@ -9,6 +9,8 @@
 
 # pylint: disable=logging-not-lazy
 
+"""Defines the SubprocessReader."""
+
 from logging import getLogger
 from threading import Thread
 from subprocess import Popen

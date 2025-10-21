@@ -9,12 +9,14 @@
 
 # pylint: disable=logging-fstring-interpolation
 
+"""Defines the SocketRunner."""
+
 import os
 import stat
 from logging import getLogger
 
 from moosecontrol.requests_unixsocket import Session
-from moosecontrol.runners import BaseRunner
+from .baserunner import BaseRunner
 
 logger = getLogger('SocketRunner')
 
