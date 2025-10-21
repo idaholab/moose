@@ -302,7 +302,7 @@ class TestResultsSummary(TestHarnessTestCase):
             head_test_names,
             base_result_with_tests,
             head_result_with_tests,
-            head_run_time_floor = fake_run_time_floor,
+            run_time_floor = fake_run_time_floor,
             run_time_rate_floor = fake_run_time_rate_floor
         )
 
@@ -338,7 +338,7 @@ class TestResultsSummary(TestHarnessTestCase):
 
         base_test = base_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
         head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
-        # Mock base and head runtime, so that absoluate relative run time rate is higher than fake_run_time_rate_floor
+        # Mock base and head runtime, so that absolute relative run time rate is higher than fake_run_time_rate_floor
         base_test._data['timing']['runner_run'] = 0.00
         head_test._data['timing']['runner_run'] = 4.0
 
@@ -347,7 +347,7 @@ class TestResultsSummary(TestHarnessTestCase):
             head_test_names,
             base_result_with_tests,
             head_result_with_tests,
-            head_run_time_floor = fake_run_time_floor,
+            run_time_floor = fake_run_time_floor,
             run_time_rate_floor = fake_run_time_rate_floor
         )
 
@@ -361,7 +361,7 @@ class TestResultsSummary(TestHarnessTestCase):
         """
         Tests _build_same_table() when same test name exit in both base and head but
         there is no head run time
-        That testname will not be included in same_table
+        That test name will not be included in same_table
         """
         fake_run_time_floor = 1.0
         fake_run_time_rate_floor = 0.5
@@ -382,7 +382,7 @@ class TestResultsSummary(TestHarnessTestCase):
             head_test_names,
             base_result_with_tests,
             head_result_with_tests,
-            head_run_time_floor = fake_run_time_floor,
+            run_time_floor = fake_run_time_floor,
             run_time_rate_floor = fake_run_time_rate_floor
         )
 
@@ -396,7 +396,7 @@ class TestResultsSummary(TestHarnessTestCase):
         """
         Tests _build_same_table() when same test name exit in both base and head but
         there is no base run time
-        That testname will not be included in same_table
+        That test name will not be included in same_table
         """
         fake_run_time_floor = 1.0
         fake_run_time_rate_floor = 0.5
@@ -417,7 +417,42 @@ class TestResultsSummary(TestHarnessTestCase):
             head_test_names,
             base_result_with_tests,
             head_result_with_tests,
-            head_run_time_floor = fake_run_time_floor,
+            run_time_floor = fake_run_time_floor,
+            run_time_rate_floor = fake_run_time_rate_floor
+        )
+
+        self.assertIsNone(same_table)
+
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    @patch.object(TestHarnessResultsSummary, 'get_event_results')
+    @patch.object(TestHarnessResultsSummary, 'get_commit_results')
+    def testBuildSameTableLowBaseRunTime(self, mock_get_commit_results,
+            mock_get_event_results, mock_init_reader):
+        """
+        Tests _build_same_table() when same test name exit in both base and head but
+        base runtime is lower than threshold
+        That test name will not be included in same_table
+        """
+        fake_run_time_floor = 1.0
+        fake_run_time_rate_floor = 0.5
+        base_result_with_tests = self.getResult()
+        head_result_with_tests = self.getResult()
+        head_test_names = set(head_result_with_tests.test_names)
+
+        mock_get_commit_results.return_value = head_result_with_tests
+        mock_get_event_results.return_value = head_result_with_tests
+        mock_init_reader.return_value = 0.5
+
+        base_test = base_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
+        # Mock head run time is lower than the head run time threshold (fake_run_time_floor)
+        base_test._data['timing']['runner_run'] = None
+
+        summary = TestHarnessResultsSummary(None)
+        same_table = summary._build_same_table(
+            head_test_names,
+            base_result_with_tests,
+            head_result_with_tests,
+            run_time_floor = fake_run_time_floor,
             run_time_rate_floor = fake_run_time_rate_floor
         )
 
@@ -430,8 +465,8 @@ class TestResultsSummary(TestHarnessTestCase):
             mock_get_event_results, mock_init_reader):
         """
         Tests _build_same_table() when same test name exit in both base and head but
-        head runtime is lower than threadshold
-        That testname will not be included in same_table
+        head runtime is lower than threshold
+        That test name will not be included in same_table
         """
         fake_run_time_floor = 1.0
         fake_run_time_rate_floor = 0.5
@@ -444,7 +479,7 @@ class TestResultsSummary(TestHarnessTestCase):
         mock_init_reader.return_value = None
 
         head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
-        # Mock head run time is lower than the head run time threadshold (fake_run_time_floor)
+        # Mock head run time is lower than the head run time threshold (fake_run_time_floor)
         head_test._data['timing']['runner_run'] = 0.5
 
         summary = TestHarnessResultsSummary(None)
@@ -452,7 +487,7 @@ class TestResultsSummary(TestHarnessTestCase):
             head_test_names,
             base_result_with_tests,
             head_result_with_tests,
-            head_run_time_floor = fake_run_time_floor,
+            run_time_floor = fake_run_time_floor,
             run_time_rate_floor = fake_run_time_rate_floor
         )
 
@@ -465,8 +500,8 @@ class TestResultsSummary(TestHarnessTestCase):
             mock_get_event_results, mock_init_reader):
         """
         Tests _build_same_table() when same test name exit in both base and head and
-        relative run time rate is lower than threadshold.
-        That testname will not be included in same_table
+        relative run time rate is lower than threshold.
+        That test name will not be included in same_table
         """
         fake_run_time_floor = 1.0
         fake_run_time_rate_floor = 0.5
@@ -489,7 +524,7 @@ class TestResultsSummary(TestHarnessTestCase):
             head_test_names,
             base_result_with_tests,
             head_result_with_tests,
-            head_run_time_floor = fake_run_time_floor,
+            run_time_floor = fake_run_time_floor,
             run_time_rate_floor = fake_run_time_rate_floor
         )
 
@@ -729,11 +764,11 @@ class TestResultsSummary(TestHarnessTestCase):
         mock_init_reader.return_value = None
 
         summary = TestHarnessResultsSummary(None)
-        no_change_buid_summary = summary.build_summary(None, None, None)
+        no_change_build_summary = summary.build_summary(None, None, None)
 
-        self.assertIn('Removed tests', no_change_buid_summary)
-        self.assertIn('Added tests', no_change_buid_summary)
-        self.assertIn('Run time changes', no_change_buid_summary)
+        self.assertIn('Removed tests', no_change_build_summary)
+        self.assertIn('Added tests', no_change_build_summary)
+        self.assertIn('Run time changes', no_change_build_summary)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     def testBuildSummaryHasTests(self, mock_init_reader):
@@ -782,7 +817,7 @@ class TestResultsSummary(TestHarnessTestCase):
                 self.assertEqual(output_result, output)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
-    def testWriteutputFileInvalidPath(self, mock_init_reader):
+    def testWriteOutputFileInvalidPath(self, mock_init_reader):
         """
         Tests that write_output when output file path is invalid.
         """
@@ -938,7 +973,7 @@ class TestResultsSummary(TestHarnessTestCase):
     def testMainRunTimeChanges(self, mock_get_commit_results, mock_get_event_results, mock_init_reader):
         """
         Tests main() output for a PR event, verifying summary messages are printed in output file path
-        when there is run time changes for same test and absolute relative run time is higher than threadshold
+        when there is run time changes for same test and absolute relative run time is higher than threshold
         """
         fake_run_time_floor = 1.0
         fake_run_time_rate_floor = 0.3

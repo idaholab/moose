@@ -263,7 +263,7 @@ class TestHarnessResultsSummary:
 
     def _build_same_table(self, same_names: set[TestName],
             base_results: StoredResult, head_results: StoredResult,
-            head_run_time_floor: float, run_time_rate_floor: float)-> Optional[List[List]]:
+            run_time_floor: float, run_time_rate_floor: float)-> Optional[List[List]]:
         """
         Build a table of tests present in both base and head with significant runtime changes.
 
@@ -275,8 +275,8 @@ class TestHarnessResultsSummary:
             Object providing access to test results for the base.
         head_results : StoredResult
             Object providing access to test results for the head.
-        head_run_time_floor : float
-            Minimum runtime in the head commit to consider for comparison.
+        run_time_floor : float
+            Minimum runtime in the base and head commit to consider for comparison.
         run_time_rate_floor : float
             Minimum relative runtime change (as a fraction) to include in the table.
 
@@ -293,23 +293,24 @@ class TestHarnessResultsSummary:
         assert isinstance(same_names, set)
         assert isinstance(base_results, StoredResult)
         assert isinstance(head_results, StoredResult)
-        assert isinstance(head_run_time_floor, (float, int))
+        assert isinstance(run_time_floor, (float, int))
         assert isinstance(run_time_rate_floor, (float, int))
 
         same_table = []
         for test_name in same_names:
             base_result = base_results.get_test(test_name.folder, test_name.name)
             head_result = head_results.get_test(test_name.folder, test_name.name)
-            # Skip to check relative run time if run time is None, Zero or below the threadshold
-            if  head_result.run_time is None or \
-                base_result.run_time is None or \
+            # Skip to check relative run time if run time is None, Zero or below the threshold
+            if  base_result.run_time is None or \
+                head_result.run_time is None or \
                 base_result.run_time == 0 or \
                 head_result.run_time == 0 or \
-                head_result.run_time < head_run_time_floor:
+                base_result.run_time < run_time_floor or \
+                head_result.run_time < run_time_floor:
                 continue
             # Calculate relative runtime ratio between base and head
             relative_runtime = (head_result.run_time - base_result.run_time) / base_result.run_time
-            # Check if relative run time rate is higher than threadshold, then it will put in the result
+            # Check if relative run time rate is higher than threshold, then it will put in the result
             if abs(relative_runtime) >= run_time_rate_floor:
                 same_table.append(
                     [
