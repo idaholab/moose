@@ -377,9 +377,9 @@ class TestHarnessResultsSummary:
         assert isinstance(head_names,(set, NoneType))
         assert isinstance(base_names,(set, NoneType))
 
-        # Extract potional parameters
-        head_run_time_floor = kwargs.pop('run_time_floor', 2.00)
-        assert isinstance(head_run_time_floor, (float, int))
+        # Extract optional parameters
+        run_time_floor = kwargs.pop('run_time_floor', 2.00)
+        assert isinstance(run_time_floor, (float, int))
         run_time_rate_floor = kwargs.pop('run_time_rate_floor', 0.50)
         assert isinstance(run_time_rate_floor, (float, int))
         # Check disable run time comparison option, if True, skip run time comparison
@@ -408,7 +408,7 @@ class TestHarnessResultsSummary:
                 same_names,
                 base_results,
                 head_results,
-                head_run_time_floor,
+                run_time_floor,
                 run_time_rate_floor
             )
         else:

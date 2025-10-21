@@ -293,7 +293,7 @@ class TestResultsSummary(TestHarnessTestCase):
 
         base_test = base_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
         head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
-        # Mock base and head runtime, so that absoluate relative run time rate is higher than fake_run_time_rate_floor
+        # Mock base and head runtime, so that absolute relative run time rate is higher than fake_run_time_rate_floor
         base_test._data['timing']['runner_run'] = 10.00
         head_test._data['timing']['runner_run'] = 4.0
 
@@ -312,7 +312,7 @@ class TestResultsSummary(TestHarnessTestCase):
         self.assertEqual(same_table[0][1], f'{base_test.run_time:.2f}')
         self.assertEqual(same_table[0][2], f'{head_test.run_time:.2f}')
         self.assertGreater(same_table[0][2], f'{fake_run_time_floor:.2f}')
-        # Compare absoulate relative run time rate is higher than floor rate
+        # Compare absolute relative run time rate is higher than floor rate
         self.assertGreater(abs(float(same_table[0][3].strip('%'))), fake_run_time_rate_floor * 100)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
