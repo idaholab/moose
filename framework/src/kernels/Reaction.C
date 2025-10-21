@@ -38,16 +38,9 @@ ReactionTempl<is_ad>::computeQpResidual()
   return _test[_i][_qp] * _rate * _u[_qp];
 }
 
-InputParameters
-Reaction::validParams()
-{
-  return ReactionTempl<false>::validParams();
-}
-
-Reaction::Reaction(const InputParameters & parameters) : ReactionTempl<false>(parameters) {}
-
+template <bool is_ad>
 Real
-Reaction::computeQpJacobian()
+ReactionTempl<is_ad>::computeQpJacobian()
 {
   return _test[_i][_qp] * _rate * _phi[_j][_qp];
 }
