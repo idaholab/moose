@@ -29,7 +29,7 @@ CSGLattice::setUniverses(
 
 void
 CSGLattice::setUniverseAtIndex(std::reference_wrapper<const CSGUniverse> universe,
-                               const std::pair<unsigned int, unsigned int> index)
+                               const std::pair<int, int> index)
 {
   std::string base_msg = "Cannot set universe at location (" + std::to_string(index.first) + ", " +
                          std::to_string(index.second) + ") for lattice " + getName() + ". ";
@@ -63,7 +63,7 @@ CSGLattice::checkDimensions() const
 }
 
 std::reference_wrapper<const CSGUniverse>
-CSGLattice::getUniverseAtIndex(const std::pair<unsigned int, unsigned int> index)
+CSGLattice::getUniverseAtIndex(const std::pair<int, int> index)
 {
   if (!isValidIndex(index))
     mooseError("Index ()" + std::to_string(index.first) + ", " + std::to_string(index.second) +
@@ -72,13 +72,13 @@ CSGLattice::getUniverseAtIndex(const std::pair<unsigned int, unsigned int> index
     return _universe_map[index.first][index.second];
 }
 
-const std::vector<std::pair<unsigned int, unsigned int>>
+const std::vector<std::pair<int, int>>
 CSGLattice::getUniverseIndices(const std::string & univ_name) const
 {
   if (!hasUniverse(univ_name))
     mooseError("Universe " + univ_name + " does not exist in lattice " + getName());
 
-  std::vector<std::pair<unsigned int, unsigned int>> indices;
+  std::vector<std::pair<int, int>> indices;
   for (auto i : make_range(_universe_map.size()))
   {
     for (auto j : make_range(_universe_map[i].size()))

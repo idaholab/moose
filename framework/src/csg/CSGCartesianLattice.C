@@ -28,8 +28,8 @@ CSGCartesianLattice::CSGCartesianLattice(
 }
 
 CSGCartesianLattice::CSGCartesianLattice(const std::string & name,
-                                         const unsigned int nx0,
-                                         const unsigned int nx1,
+                                         const int nx0,
+                                         const int nx1,
                                          const Real pitch)
   : CSGLattice(name, MooseUtils::prettyCppType<CSGCartesianLattice>()),
     _nx0(nx0),
@@ -52,13 +52,13 @@ CSGCartesianLattice::isValidUniverseMap(
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes) const
 {
   // make sure universes exist at all and the right number of sublists are present (_nx0)
-  if (universes.size() != _nx0)
+  if (universes.size() != static_cast<size_t>(_nx0))
     return false;
 
   // check that each sublist is same size and equal to _nx1
   for (auto univ_list : universes)
   {
-    if (univ_list.size() != _nx1)
+    if (univ_list.size() != static_cast<size_t>(_nx1))
       return false;
   }
 
@@ -76,7 +76,7 @@ CSGCartesianLattice::getDimensions() const
 }
 
 bool
-CSGCartesianLattice::isValidIndex(const std::pair<unsigned int, unsigned int> index) const
+CSGCartesianLattice::isValidIndex(const std::pair<int, int> index) const
 {
   auto x0 = index.first;  // must be (0 <= x0 < _nx0)
   auto x1 = index.second; // must be (0 <= x1 < _nx1)

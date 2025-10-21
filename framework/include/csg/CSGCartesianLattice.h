@@ -41,10 +41,7 @@ public:
    * @param nx1 number of elements in the second dimension of the lattice
    * @param pitch pitch of lattice elements
    */
-  CSGCartesianLattice(const std::string & name,
-                      const unsigned int nx0,
-                      const unsigned int nx1,
-                      const Real pitch);
+  CSGCartesianLattice(const std::string & name, const int nx0, const int nx1, const Real pitch);
 
   /**
    * Destructor
@@ -67,7 +64,7 @@ public:
    * @param index location
    * @return true if index is valid for the lattice
    */
-  virtual bool isValidIndex(const std::pair<unsigned int, unsigned int> index) const override;
+  virtual bool isValidIndex(const std::pair<int, int> index) const override;
 
   /**
    * @brief check that any provided list of list of CSGUniverses are the correct dimensions. Must
@@ -88,10 +85,10 @@ protected:
   virtual bool hasValidDimensions() const override;
 
   /// number of elements in the first dimension
-  const unsigned int _nx0;
+  const int _nx0;
 
   /// number of elements in the second direction
-  const unsigned int _nx1;
+  const int _nx1;
 
   /// pitch
   const Real _pitch;
