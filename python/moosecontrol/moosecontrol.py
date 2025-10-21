@@ -33,7 +33,7 @@ DEFAULT_LOG_FORMAT = '%(message)s'
 DEBUG_LOG_FORMAT = '%(asctime)s:%(levelname)s:%(name)s: %(message)s'
 
 @dataclass
-class MooseControlManager:
+class MooseControlContextManager:
     """
     Context manager for MooseControl.
     """
@@ -123,14 +123,29 @@ class MooseControl:
         """
         self.runner.cleanup()
 
-    def __enter__(self) -> MooseControlManager:
+    def __enter__(self) -> MooseControlContextManager:
+        """
+        Enter a context manager for the MooseControl.
+
+        Will initialize on enter and finalize on exit
+        if an exception is not raised, otherwise will
+        cleanup on exit.
+        """
         self.initialize()
-        return MooseControlManager(control=self)
+        return MooseControlContextManager(control=self)
 
     def __exit__(self, exc_type, exc_value, exc_traceback):
-        # if exc_type is not None:
-        #     logger.warning('')
-        self.finalize()
+        """
+        Exit for the context manager.
+
+        Will finalize if an exception is not raised,
+        otherwise will cleanup.
+        """
+        if exc_type is not None:
+            logger.warning(f'Encountered {exc_type.__name__} on exit; running cleanup')
+            self.cleanup()
+        else:
+            self.finalize()
 
     def get_waiting_flag(self) -> Optional[str]:
         """

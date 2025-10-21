@@ -24,6 +24,7 @@ setup_moose_python_path()
 from test_runners_baserunner import BaseRunnerTest
 
 from moosecontrol import MooseControl
+from moosecontrol.moosecontrol import MooseControlContextManager
 from moosecontrol.exceptions import ControlNotWaiting, UnexpectedFlag
 from moosecontrol.moosecontrol import DEFAULT_LOG_FORMAT, DEBUG_LOG_FORMAT, STREAM_HANDLER
 
@@ -88,13 +89,70 @@ class TestMooseControl(MooseControlTestCase):
             datefmt='%H:%M:%S'
         )
 
+    def test_enter(self):
+        """
+        Tests __enter__(), which should call initialize()
+        and return a MooseControlContextManager.
+        """
+        control = MooseControl(BaseRunnerTest())
+        with patch(f'{MOOSECONTROL}.initialize') as initialize:
+            result = control.__enter__()
+        self.assertIsInstance(result, MooseControlContextManager)
+        self.assertEqual(result.control, control)
+        initialize.assert_called_once()
+
+    def test_exit(self):
+        """
+        Tests __exit__(), which should call finalize() and not cleanup().
+        """
+        control = MooseControl(BaseRunnerTest())
+        with patch(f'{MOOSECONTROL}.cleanup') as cleanup:
+            with patch(f'{MOOSECONTROL}.finalize') as finalize:
+                control.__exit__(None, None, None)
+        self.assert_log_size(0)
+        cleanup.assert_not_called()
+        finalize.assert_called_once()
+
+    def test_exit_raise(self):
+        """
+        Tests __exit__() when an exception is raised, which
+        should call cleanup() instead of finalize.
+        """
+        control = MooseControl(BaseRunnerTest())
+        with patch(f'{MOOSECONTROL}.cleanup') as cleanup:
+            with patch(f'{MOOSECONTROL}.finalize') as finalize:
+                control.__exit__(RuntimeError, None, None)
+        self.assert_log_size(1)
+        self.assert_log_message(
+            0,
+            'Encountered RuntimeError on exit; running cleanup',
+            levelname='WARNING'
+        )
+        cleanup.assert_called_once()
+        finalize.assert_not_called()
+
+    def test_context_manager(self):
+        """
+        Tests __enter__() and __exit__ together() on success.
+        """
+        control = MooseControl(BaseRunnerTest())
+        with patch(f'{MOOSECONTROL}.initialize') as initialize:
+            with patch(f'{MOOSECONTROL}.cleanup') as cleanup:
+                with patch(f'{MOOSECONTROL}.finalize') as finalize:
+                    with control as cm:
+                        pass
+        self.assertIsInstance(cm, MooseControlContextManager)
+        self.assert_log_size(0)
+        initialize.assert_called_once()
+        finalize.assert_called_once()
+        cleanup.assert_not_called()
+
     def test_initialize(self):
         """
         Tests that initialize() calls the underlying runner's initialize()
         and calls wait().
         """
-        runner = BaseRunnerTest()
-        control = MooseControl(runner)
+        control = MooseControl(BaseRunnerTest())
         with patch(f'{BASERUNNER}.initialize') as runner_initialize:
             with patch(f'{MOOSECONTROL}.wait') as wait:
                 control.initialize()
