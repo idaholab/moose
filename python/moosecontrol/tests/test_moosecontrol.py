@@ -15,7 +15,7 @@ import os
 
 from copy import deepcopy
 from numbers import Number
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 from typing import Any, Optional, Tuple
 
 import pytest
@@ -36,12 +36,6 @@ BASERUNNER = 'moosecontrol.runners.BaseRunner'
 
 FAKE_EXECUTE_ON_FLAG = 'foo'
 FAKE_NAME = 'cool_name'
-
-def patch_runner(name: str, **kwargs):
-    """
-    Convenience method for patching the BaseRunner.
-    """
-    return patch(f'moosecontrol.runners.BaseRunner.{name}', **kwargs)
 
 class TestMooseControl(MooseControlTestCase):
     """
@@ -99,23 +93,27 @@ class TestMooseControl(MooseControlTestCase):
         and return a MooseControlContextManager.
         """
         control = MooseControl(BaseRunnerTest())
-        with patch(f'{MOOSECONTROL}.initialize') as initialize:
-            result = control.__enter__()
+        control.initialize = MagicMock()
+
+        result = control.__enter__()
+
         self.assertIsInstance(result, MooseControlContextManager)
         self.assertEqual(result.control, control)
-        initialize.assert_called_once()
+        control.initialize.assert_called_once()
 
     def test_exit(self):
         """
         Tests __exit__(), which should call finalize() and not cleanup().
         """
         control = MooseControl(BaseRunnerTest())
-        with patch(f'{MOOSECONTROL}.cleanup') as cleanup:
-            with patch(f'{MOOSECONTROL}.finalize') as finalize:
-                control.__exit__(None, None, None)
+        control.cleanup = MagicMock()
+        control.finalize = MagicMock()
+
+        control.__exit__(None, None, None)
+
         self.assert_log_size(0)
-        cleanup.assert_not_called()
-        finalize.assert_called_once()
+        control.cleanup.assert_not_called()
+        control.finalize.assert_called_once()
 
     def test_exit_raise(self):
         """
@@ -123,33 +121,38 @@ class TestMooseControl(MooseControlTestCase):
         should call cleanup() instead of finalize.
         """
         control = MooseControl(BaseRunnerTest())
-        with patch(f'{MOOSECONTROL}.cleanup') as cleanup:
-            with patch(f'{MOOSECONTROL}.finalize') as finalize:
-                control.__exit__(RuntimeError, None, None)
+        control.cleanup = MagicMock()
+        control.finalize = MagicMock()
+
+        control.__exit__(RuntimeError, None, None)
+
         self.assert_log_size(1)
         self.assert_log_message(
             0,
             'Encountered RuntimeError on exit; running cleanup',
             levelname='WARNING'
         )
-        cleanup.assert_called_once()
-        finalize.assert_not_called()
+
+        control.cleanup.assert_called_once()
+        control.finalize.assert_not_called()
 
     def test_context_manager(self):
         """
         Tests __enter__() and __exit__ together() on success.
         """
         control = MooseControl(BaseRunnerTest())
-        with patch(f'{MOOSECONTROL}.initialize') as initialize:
-            with patch(f'{MOOSECONTROL}.cleanup') as cleanup:
-                with patch(f'{MOOSECONTROL}.finalize') as finalize:
-                    with control as cm:
-                        pass
+        control.initialize = MagicMock()
+        control.cleanup = MagicMock()
+        control.finalize = MagicMock()
+
+        with control as cm:
+            pass
+
         self.assertIsInstance(cm, MooseControlContextManager)
         self.assert_log_size(0)
-        initialize.assert_called_once()
-        finalize.assert_called_once()
-        cleanup.assert_not_called()
+        control.initialize.assert_called_once()
+        control.finalize.assert_called_once()
+        control.cleanup.assert_not_called()
 
     def test_initialize(self):
         """
@@ -159,11 +162,13 @@ class TestMooseControl(MooseControlTestCase):
         control = MooseControl(BaseRunnerTest())
         def set_initialize():
             control.runner._initialized = True
-        with patch(f'{BASERUNNER}.initialize', side_effect=set_initialize) as runner_initialize:
-            with patch(f'{MOOSECONTROL}.wait') as wait:
-                control.initialize()
-        runner_initialize.assert_called_once()
-        wait.assert_called_once()
+        control.runner.initialize = MagicMock(side_effect=set_initialize)
+        control.wait = MagicMock()
+
+        control.initialize()
+
+        control.runner.initialize.assert_called_once()
+        control.wait.assert_called_once()
 
     def test_finalize(self):
         """
@@ -171,9 +176,11 @@ class TestMooseControl(MooseControlTestCase):
         """
         runner = BaseRunnerTest()
         control = MooseControl(runner)
-        with patch(f'{BASERUNNER}.finalize') as runner_finalize:
-            control.finalize()
-        runner_finalize.assert_called_once()
+        runner.finalize = MagicMock()
+
+        control.finalize()
+
+        runner.finalize.assert_called_once()
 
     def test_cleanup(self):
         """
@@ -181,9 +188,11 @@ class TestMooseControl(MooseControlTestCase):
         """
         runner = BaseRunnerTest()
         control = MooseControl(runner)
-        with patch(f'{BASERUNNER}.cleanup') as runner_cleanup:
-            control.cleanup()
-        runner_cleanup.assert_called_once()
+        runner.cleanup = MagicMock()
+
+        control.cleanup()
+
+        runner.cleanup.assert_called_once()
 
     def test_context_manager(self):
         """
