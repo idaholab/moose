@@ -10,6 +10,8 @@
 # pylint: skip-file
 # type: ignore
 
+import logging
+
 from copy import deepcopy
 from numbers import Number
 from unittest.mock import patch
@@ -23,6 +25,7 @@ from test_runners_baserunner import BaseRunnerTest
 
 from moosecontrol import MooseControlNew
 from moosecontrol.exceptions import ControlNotWaiting, UnexpectedFlag
+from moosecontrol.moosecontrolnew import DEFAULT_LOG_FORMAT, DEBUG_LOG_FORMAT, STREAM_HANDLER
 
 MOOSECONTROL = 'moosecontrol.MooseControlNew'
 BASERUNNER = 'moosecontrol.runners.BaseRunner'
@@ -45,9 +48,45 @@ class TestMooseControl(MooseControlTestCase):
         Test __init__() with the required and default arguments.
         """
         runner = BaseRunnerTest()
-        control = MooseControlNew(runner)
-        self.assertEqual(control.runner, runner)
-        self.assertEqual(control.poll_time, control.runner.poll_time)
+        with patch(f'moosecontrol.moosecontrolnew.logging.basicConfig') as basic_config:
+            control = MooseControlNew(runner)
+            basic_config.assert_called_once_with(
+                level=logging.INFO,
+                handlers=[STREAM_HANDLER],
+                format=DEFAULT_LOG_FORMAT,
+                datefmt='%H:%M:%S'
+            )
+            self.assertEqual(control.runner, runner)
+            self.assertEqual(control.poll_time, control.runner.poll_time)
+
+    def test_init_quiet_and_verbose(self):
+        """
+        Test __init__() with quiet and verbose set.
+        """
+        with self.assertRaises(ValueError) as e:
+            MooseControlNew(BaseRunnerTest(), quiet=True, verbose=True)
+        self.assertEqual(str(e.exception), 'Cannot set quiet=True and verbose=True')
+
+    def test_init_quiet(self):
+        """
+        Tests __init__() with quiet=True, which does not add a logging handler.
+        """
+        with patch(f'moosecontrol.moosecontrolnew.logging.basicConfig') as basic_config:
+            MooseControlNew(BaseRunnerTest(), quiet=True)
+        basic_config.assert_not_called()
+
+    def test_init_verbose(self):
+        """
+        Tests __init__() with verbose=True, which adds a debug log handler.
+        """
+        with patch(f'moosecontrol.moosecontrolnew.logging.basicConfig') as basic_config:
+            MooseControlNew(BaseRunnerTest(), verbose=True)
+        basic_config.assert_called_once_with(
+            level=logging.DEBUG,
+            handlers=[STREAM_HANDLER],
+            format=DEBUG_LOG_FORMAT,
+            datefmt='%H:%M:%S'
+        )
 
     def test_initialize(self):
         """
@@ -101,7 +140,7 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
     def setUp(self):
         # The control for this test
         runner = BaseRunnerTest(poll_time=0.001)
-        self.control: MooseControlNew = MooseControlNew(runner)
+        self.control: MooseControlNew = MooseControlNew(runner, quiet=True)
 
         # Paths in order that were called using mocked Session.get
         self.get_paths: list[str] = []

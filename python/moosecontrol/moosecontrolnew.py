@@ -25,6 +25,12 @@ from moosecontrol.runners.baserunner import WebServerControlResponse
 
 # Common logger for the MooseControl
 logger = logging.getLogger('MooseControl')
+# The stream handler for logging
+STREAM_HANDLER = logging.StreamHandler()
+# Default format to use for logs
+DEFAULT_LOG_FORMAT = '%(message)s'
+# Format to use for debug logs (when verbose=True)
+DEBUG_LOG_FORMAT = '%(asctime)s:%(levelname)s:%(name)s: %(message)s'
 
 @dataclass
 class MooseControlManager:
@@ -38,11 +44,43 @@ class MooseControlNew:
     """
     Helper for interacting with the MOOSE WebServerControl.
     """
-    def __init__(self, runner: BaseRunner):
+    def __init__(self,
+                 runner: BaseRunner,
+                 quiet: bool = False,
+                 verbose: bool = False):
+        """
+        Arguments
+        ---------
+        runner : BaseRunner
+            The runner used to connect to the server.
+
+        Additional Arguments
+        --------------------
+        quiet : bool
+            Disables on-screen logging output if True.
+        verbose : bool
+            Enables on-screen debugging output if True.
+        """
         assert isinstance(runner, BaseRunner)
+        assert isinstance(quiet, bool)
+        assert isinstance(verbose, bool)
+        if quiet and verbose:
+            raise ValueError('Cannot set quiet=True and verbose=True')
 
         # The underlying runner
         self._runner: BaseRunner = runner
+
+        # Setup logger
+        if not quiet:
+            logging.basicConfig(
+                level=logging.DEBUG if verbose else logging.INFO,
+                handlers=[STREAM_HANDLER],
+                format=DEBUG_LOG_FORMAT if verbose else DEFAULT_LOG_FORMAT,
+                datefmt='%H:%M:%S'
+            )
+            if verbose:
+                logging.getLogger().setLevel(logging.DEBUG)
+                logging.getLogger('urllib3.connectionpool').setLevel(logging.INFO)
 
     @property
     def runner(self) -> BaseRunner:
