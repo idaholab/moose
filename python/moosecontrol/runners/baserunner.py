@@ -182,6 +182,8 @@ class BaseRunner(ABC):
         this implementation of initialize() last and should call
         initialize_start() first.
         """
+        assert not self._initialized
+
         # Derived classes should also call this if they override initialize()
         self.initialize_start()
 
