@@ -2,8 +2,9 @@
 concurrency = thread
 branch = True
 omit =
+    conftest.py
     requests_unixsocket/*
-    */moosecontrol.py
+    moosecontrol.py
 parallel = False
 
 [report]

@@ -14,9 +14,10 @@ import os
 from requests import Session
 from subprocess import Popen, PIPE
 from tempfile import TemporaryDirectory
-from unittest import skipUnless
 
-from common import BASE_INPUT, MOOSE_EXE, MooseControlTestCase, setup_moose_python_path
+import pytest
+
+from common import BASE_INPUT, MooseControlTestCase, get_moose_exe, setup_moose_python_path
 setup_moose_python_path()
 
 from moosecontrol import PortRunner
@@ -75,7 +76,7 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
         port = PortRunner.find_available_port()
         self.assertTrue(PortRunner.port_is_available(port))
 
-    @skipUnless(MOOSE_EXE is not None, 'MOOSE_EXE is not set')
+    @pytest.mark.moose
     def test_live(self):
         """
         Tests running a MOOSE input live.
@@ -88,7 +89,7 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
             with open(input_path, 'w') as f:
                 f.write(BASE_INPUT)
             command = [
-                MOOSE_EXE,
+                get_moose_exe(),
                 '-i',
                 input_path,
                 f'Controls/web_server/port={port}',

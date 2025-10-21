@@ -16,7 +16,9 @@ from unittest import skipUnless
 from unittest.mock import patch
 from tempfile import NamedTemporaryFile
 
-from common import BASE_INPUT, MOOSE_EXE, MooseControlTestCase, \
+import pytest
+
+from common import BASE_INPUT, MooseControlTestCase, get_moose_exe, \
     setup_moose_python_path
 setup_moose_python_path()
 
@@ -121,7 +123,7 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
         methods = [RUNNER_BASE + '.cleanup', SOCKET_RUNNER + '.cleanup']
         self.assert_methods_called_in_order(methods, lambda: runner.cleanup())
 
-    @skipUnless(MOOSE_EXE is not None, 'MOOSE_EXE is not set')
+    @pytest.mark.moose
     def test_live(self):
         """
         Tests running a MOOSE input live.
@@ -130,7 +132,7 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
         with open(input_file, 'w') as f:
             f.write(BASE_INPUT)
 
-        command = [MOOSE_EXE, '-i', input_file]
+        command = [get_moose_exe(), '-i', input_file]
         runner = SubprocessSocketRunner(
             command=command,
             moose_control_name='web_server',

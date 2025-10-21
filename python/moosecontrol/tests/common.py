@@ -274,13 +274,26 @@ BASE_INPUT = """
 []
 """
 
-# Try to find a moose executable to run tests with
-MOOSE_EXE = os.environ.get('MOOSE_EXE')
-if MOOSE_EXE is None:
-    this_dir = os.path.dirname(__file__)
-    moose_dir = os.path.join(this_dir, '..', '..', '..')
-    for method in ['dbg', 'devel', 'oprof', 'opt']:
-        exe = os.path.abspath(os.path.join(moose_dir, 'moose_test-{method}'))
-        if os.path.exists(exe):
-            MOOSE_EXE = exe
-            break
+def get_moose_exe() -> str:
+    """
+    Helper for finding a MOOSE executable to run.
+
+    Will first use MOOSE_EXE if it is set. Will
+    then search for moose_test-<METHOD> for all
+    of the valid methods in the test folder.
+
+    Will raise an exception if one was not found.
+    """
+    MOOSE_EXE = os.environ.get('MOOSE_EXE')
+    if MOOSE_EXE is not None:
+        if not os.path.exists(MOOSE_EXE):
+            raise FileNotFoundError(f'MOOSE_EXE={MOOSE_EXE} does not exist')
+        return MOOSE_EXE
+    else:
+        this_dir = os.path.dirname(__file__)
+        moose_dir = os.path.join(this_dir, '..', '..', '..', 'test')
+        for method in ['dbg', 'devel', 'oprof', 'opt']:
+            exe = os.path.abspath(os.path.join(moose_dir, f'moose_test-{method}'))
+            if os.path.exists(exe):
+                return exe
+    raise FileNotFoundError('Failed to find a MOOSE executable')

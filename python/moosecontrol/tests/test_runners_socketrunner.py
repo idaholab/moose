@@ -13,11 +13,12 @@
 import os
 from pathlib import Path
 from subprocess import Popen, PIPE
-from tempfile import NamedTemporaryFile, TemporaryDirectory
-from unittest import skipUnless
+from tempfile import NamedTemporaryFile
 from unittest.mock import patch
 
-from common import BASE_INPUT, MOOSE_EXE, MooseControlTestCase, \
+import pytest
+
+from common import BASE_INPUT, MooseControlTestCase, get_moose_exe, \
     mock_response, setup_moose_python_path
 setup_moose_python_path()
 
@@ -225,7 +226,7 @@ class TestSocketRunner(MooseControlTestCase):
         runner.finalize()
         self.assertFalse(os.path.exists(socket))
 
-    @skipUnless(MOOSE_EXE is not None, 'MOOSE_EXE is not set')
+    @pytest.mark.moose
     def test_live(self):
         """
         Tests running a MOOSE input live.
@@ -237,7 +238,7 @@ class TestSocketRunner(MooseControlTestCase):
         with open(input_path, 'w') as f:
             f.write(BASE_INPUT)
         command = [
-            MOOSE_EXE,
+            get_moose_exe(),
             '-i',
             input_path,
             f'Controls/web_server/file_socket={socket_path}',
