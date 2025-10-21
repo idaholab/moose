@@ -65,14 +65,14 @@
                 AuxKernels/v2/type=FunctionAux AuxKernels/v2/variable=var2 AuxKernels/v2/function='1+t'
                 Executioner/type=Transient Executioner/num_steps=10"
     issues = "#31238"
-    requirement = "The system shall be capable of writing out a constant monomial function on initial time."
+    requirement = "The system shall be capable of writing out an exodus file with multiple variables."
   []
   [read_exodus_multiple_vars]
     type = Exodiff
     input = "read_exodus_multiple_vars.i"
     exodiff = "read_exodus_multiple_vars_out.e"
     prereq = "write_exodus_multiple_vars"
-    issues = "#31238 sssss"
-    requirement = "The system shall be able to read in a variable from a previous exodus file, leveraging caching and time step interpolation."
+    issues = "#31238 #31747 #31767"
+    requirement = "The system shall be able to read in multiple variables from a previous exodus file, leveraging caching and time step interpolation."
   []
 []
