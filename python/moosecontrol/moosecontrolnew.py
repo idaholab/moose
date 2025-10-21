@@ -14,6 +14,9 @@ from numbers import Number
 from typing import Any, Iterable, Optional, Tuple, Type
 import logging
 
+import numpy as np
+import numpy.typing as npt
+
 from moosecontrol.exceptions import ControlNotWaiting
 from moosecontrol.validation import check_response_data
 from moosecontrol.runners import BaseRunner
@@ -240,7 +243,7 @@ class MooseControlNew:
         python_types : Tuple[Type, ...]
             Allowed types for the input values.
         value : Any
-            The input vector.
+            The value to set.
         """
         assert isinstance(path, str)
         assert isinstance(cpp_type, str)
@@ -266,7 +269,7 @@ class MooseControlNew:
         python_types : Tuple[Type, ...]
             Allowed types for the input values.
         value : Any
-            The input vector.
+            The value to set.
 
         Additional Parameters
         ---------------------
@@ -295,7 +298,7 @@ class MooseControlNew:
         path : str
             The path to the controllable value.
         value : bool
-            The boolean value.
+            The value to set.
         """
         self._set_controllable_scalar(path, 'bool', (bool,), value)
 
@@ -308,7 +311,7 @@ class MooseControlNew:
         path : str
             The path to the controllable value.
         value : int
-            The integer value.
+            The value to set.
         """
         self._set_controllable_scalar(path, 'int', (int,), value)
 
@@ -321,7 +324,7 @@ class MooseControlNew:
         path : str
             The path to the controllable value.
         value : Number
-            The Real value.
+            The value to set.
         """
         self._set_controllable_scalar(path, 'Real', (Number,), value, float)
 
@@ -336,7 +339,7 @@ class MooseControlNew:
         path : str
             The path to the controllable value.
         value : str
-            The std::string value.
+            The value to set.
         """
         self._set_controllable_scalar(path, 'std::string', (str,), value)
 
@@ -356,7 +359,7 @@ class MooseControlNew:
         python_types : Tuple[Type, ...]
             Allowed types for the input values.
         value : Iterable[Any]
-            The input vector.
+            The value to set.
 
         Additional Parameters
         ---------------------
@@ -389,7 +392,7 @@ class MooseControlNew:
         path : str
             The path to the controllable value.
         value : Iterable[int]
-            The std::vector<int> value.
+            The value to set.
         """
         self._set_controllable_vector(path, 'int', (int,), value)
 
@@ -402,7 +405,7 @@ class MooseControlNew:
         path : str
             The path to the controllable value.
         value : Iterable[Number]
-            The std::vector<Real> value.
+            The value to set.
         """
         self._set_controllable_vector(path, 'Real', (Number,), value, float)
 
@@ -415,6 +418,31 @@ class MooseControlNew:
         path : str
             The path to the controllable value.
         value : Iterable[str]
-            The std::vector<std::string> value.
+            The value to set.
         """
         self._set_controllable_vector(path, 'std::string', (str,), value)
+
+    def set_controllable_matrix(self, path: str, value: npt.ArrayLike):
+        """
+        Sets a controllable RealEigenMatrix parameter.
+
+        Parameters
+        ----------
+        path : str
+            The path to the controllable value.
+        value : npt.ArrayLike
+            The value to set.
+        """
+        try:
+            array = np.array(value, dtype=np.float64)
+            if len(array.shape) == 1:
+                array = array.reshape((1, -1))
+            assert len(array.shape) == 2
+        except Exception as e:
+            raise ValueError('Value not convertible to a 1- or 2-D array') from e
+        self._set_controllable_scalar(
+            path,
+            'RealEigenMatrix',
+            (list,),
+            array.tolist()
+        )

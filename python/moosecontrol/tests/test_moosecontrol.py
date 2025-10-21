@@ -367,10 +367,16 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
         post_value = self.post_paths[0][1]['value']
         self.assertIsInstance(post_value, float)
 
-    def run_test_set_controllable(self, value: Any, cpp_type: str, method_type: str):
+    def run_test_set_controllable(self,
+                                  value: Any,
+                                  cpp_type: str,
+                                  method_type: str,
+                                  expected_value: Optional[Any] = None):
         """
         Helper for testing the various set_controllable_XXX() routines.
         """
+        if expected_value is None:
+            expected_value = value
         with self.mock_get(waiting=True):
             with self.mock_post([('set/controllable', {'status_code': 201})]):
                 method = getattr(self.control, f'set_controllable_{method_type}')
@@ -378,7 +384,7 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
         self.assertGetPaths(['waiting'])
         self.assertPostPaths([(
             'set/controllable',
-            {'name': FAKE_NAME, 'value': value, 'type': cpp_type}
+            {'name': FAKE_NAME, 'value': expected_value, 'type': cpp_type}
         )])
         self.assert_log_size(1)
         self.assert_log_message(
@@ -489,4 +495,44 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
             ['foo', 'bar'],
             'std::vector<std::string>',
             'vector_string'
+        )
+
+    def test_set_controllable_matrix(self):
+        """
+        Tests test_set_controllable_matrix().
+        """
+        value = [[1, 2], [3.0, 4.0]]
+        self.run_test_set_controllable(
+            value,
+            'RealEigenMatrix',
+            'matrix'
+        )
+
+    def test_set_controllable_matrix_1D(self):
+        """
+        Tests test_set_controllable_matrix() with a 1D array.
+        """
+        value = [1]
+        self.run_test_set_controllable(
+            value,
+            'RealEigenMatrix',
+            'matrix',
+            [[1]]
+        )
+
+    def test_set_controllable_matrix_non_1D_2D(self):
+        """
+        Tests test_set_controllable_matrix() when the value
+        is not 1D or 2D
+        """
+        value = [[[1]]]
+        with self.assertRaises(ValueError) as e:
+            self.run_test_set_controllable(
+                value,
+                'RealEigenMatrix',
+                'matrix',
+            )
+        self.assertEqual(
+            str(e.exception),
+            'Value not convertible to a 1- or 2-D array'
         )
