@@ -18,7 +18,10 @@ from moosecontrol.runners.subprocessrunnerbase import SubprocessRunnerBase
 
 class TestMooseControl:
     """
-    Foo
+    Helper for testing the MooseControl within TestHarness
+    python unit tests with the command_proxy test spec option,
+    which sets the proxy command in the RUNAPP_COMMAND
+    environment variable.
     """
     def __init__(self, control_name: str, use_port: bool = False):
         """
