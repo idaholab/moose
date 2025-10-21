@@ -223,7 +223,18 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
                  paths: Optional[list[Tuple[str, dict]]] = None,
                  waiting: Optional[bool] = None):
         """
-        Mocks Session.get for the runner.
+        Helper for mocking Session.get for the runner, simplifying
+        fake GET responses from the server.
+
+        Parameters
+        ----------
+        paths : Optional[list[Tuple[str, dict]]]
+            List of URL -> kwargs to pass to fake_response().
+        waiting : Optional[bool]
+            If True, sets up a fake GET for the server to be
+            waiting on FAKE_EXECUTE_ON_FLAG. If False, sets
+            up a fake GET for the server to return that it
+            is not waiting.
         """
         self.get_paths.clear()
 
