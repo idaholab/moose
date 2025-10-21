@@ -31,6 +31,7 @@ private:
   virtual void addSolverVariables() override;
   virtual void addFVKernels() override;
   virtual void addFVBCs() override;
+  virtual void addFunctorMaterials() override;
 
   /**
    * Functions adding kernels for turbulence in the other equation(s)
