@@ -45,17 +45,47 @@ class CaptureLogTestCase(TestCase):
     Base TestCase that captures logs in _caplog.
     """
     @pytest.fixture(autouse=True)
-    def inject_fixtures(self, caplog):
+    def inject_fixtures(self, caplog, moose_exe):
         """
         Inject the caplog with pytest.
         """
+        # Allow unittest access to the caplog
         self._caplog: pytest.LogCaptureFixture = caplog
+        # Allow unittest access to the --moose-exe arg
+        self._moose_exe_arg = moose_exe
 
     def setUp(self):
         self._caplog.clear()
 
     def tearDown(self):
         self._caplog.clear()
+
+    def get_moose_exe(self) -> str:
+        """
+        Helper for finding a MOOSE executable to run.
+
+        Will first use the --moose-exe command line option
+        if it is set. Will then search for moose_test-<METHOD>
+        for all of the valid methods in the relative test folder.
+
+        Will raise an exception if one was not found.
+        """
+        arg = self._moose_exe_arg
+        if arg is not None:
+            if not os.path.exists(arg):
+                raise FileNotFoundError(f'--moose-exe={arg} does not exist')
+            return arg
+
+        this_dir = os.path.dirname(__file__)
+        moose_dir = os.path.join(this_dir, '..', '..', '..', 'test')
+        for method in ['dbg', 'devel', 'oprof', 'opt']:
+            exe = os.path.abspath(os.path.join(moose_dir, f'moose_test-{method}'))
+            if os.path.exists(exe):
+                return exe
+
+        raise FileNotFoundError(
+            'Failed to find a MOOSE executable; either set --moose-exe '
+            ' to a moose executable or skip moose tests with --no-moose')
 
     def assert_log_size(self, num: int):
         """
@@ -273,27 +303,3 @@ BASE_INPUT = """
   type = Steady
 []
 """
-
-def get_moose_exe() -> str:
-    """
-    Helper for finding a MOOSE executable to run.
-
-    Will first use MOOSE_EXE if it is set. Will
-    then search for moose_test-<METHOD> for all
-    of the valid methods in the test folder.
-
-    Will raise an exception if one was not found.
-    """
-    MOOSE_EXE = os.environ.get('MOOSE_EXE')
-    if MOOSE_EXE is not None:
-        if not os.path.exists(MOOSE_EXE):
-            raise FileNotFoundError(f'MOOSE_EXE={MOOSE_EXE} does not exist')
-        return MOOSE_EXE
-    else:
-        this_dir = os.path.dirname(__file__)
-        moose_dir = os.path.join(this_dir, '..', '..', '..', 'test')
-        for method in ['dbg', 'devel', 'oprof', 'opt']:
-            exe = os.path.abspath(os.path.join(moose_dir, f'moose_test-{method}'))
-            if os.path.exists(exe):
-                return exe
-    raise FileNotFoundError('Failed to find a MOOSE executable')

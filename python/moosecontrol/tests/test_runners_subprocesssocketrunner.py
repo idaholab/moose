@@ -18,8 +18,7 @@ from tempfile import NamedTemporaryFile
 
 import pytest
 
-from common import BASE_INPUT, MooseControlTestCase, get_moose_exe, \
-    setup_moose_python_path
+from common import BASE_INPUT, MooseControlTestCase, setup_moose_python_path
 setup_moose_python_path()
 
 from moosecontrol import SubprocessSocketRunner
@@ -132,7 +131,7 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
         with open(input_file, 'w') as f:
             f.write(BASE_INPUT)
 
-        command = [get_moose_exe(), '-i', input_file]
+        command = [self.get_moose_exe(), '-i', input_file]
         runner = SubprocessSocketRunner(
             command=command,
             moose_control_name='web_server',

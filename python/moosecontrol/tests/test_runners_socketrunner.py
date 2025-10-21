@@ -18,8 +18,7 @@ from unittest.mock import patch
 
 import pytest
 
-from common import BASE_INPUT, MooseControlTestCase, get_moose_exe, \
-    mock_response, setup_moose_python_path
+from common import BASE_INPUT, MooseControlTestCase, mock_response, setup_moose_python_path
 setup_moose_python_path()
 
 from moosecontrol import SocketRunner
@@ -238,7 +237,7 @@ class TestSocketRunner(MooseControlTestCase):
         with open(input_path, 'w') as f:
             f.write(BASE_INPUT)
         command = [
-            get_moose_exe(),
+            self.get_moose_exe(),
             '-i',
             input_path,
             f'Controls/web_server/file_socket={socket_path}',

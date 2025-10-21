@@ -7,6 +7,8 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+from typing import Optional
+
 import pytest
 
 def pytest_addoption(parser):
@@ -19,6 +21,11 @@ def pytest_addoption(parser):
         default=False,
         help="Skip tests that require a moose executable"
     )
+    parser.addoption(
+        '--moose-exe',
+        type=str,
+        help='Specify the path to the moose executable instead of searching'
+    )
 
 def pytest_collection_modifyitems(config, items):
     """
@@ -30,3 +37,10 @@ def pytest_collection_modifyitems(config, items):
         for item in items:
             if "moose" in item.keywords:
                 item.add_marker(marker)
+
+@pytest.fixture(scope="session")
+def moose_exe(request) -> Optional[str]:
+    """
+    Gets the --moose-exe command line argument.
+    """
+    return request.config.getoption("--moose-exe")
