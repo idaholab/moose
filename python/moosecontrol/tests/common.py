@@ -14,11 +14,12 @@ import sys
 from contextlib import ExitStack
 from importlib.util import find_spec
 from json import dumps
-from requests import Response, Session
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 from tempfile import TemporaryDirectory
 from typing import Callable, Optional
+
+from requests import Response, Session
 
 import pytest
 
@@ -273,6 +274,13 @@ BASE_INPUT = """
 []
 """
 
-# Environment variable that represents the MOOSE executable
-# to run if it is available.
+# Try to find a moose executable to run tests with
 MOOSE_EXE = os.environ.get('MOOSE_EXE')
+if MOOSE_EXE is None:
+    this_dir = os.path.dirname(__file__)
+    moose_dir = os.path.join(this_dir, '..', '..', '..')
+    for method in ['dbg', 'devel', 'oprof', 'opt']:
+        exe = os.path.abspath(os.path.join(moose_dir, 'moose_test-{method}'))
+        if os.path.exists(exe):
+            MOOSE_EXE = exe
+            break
