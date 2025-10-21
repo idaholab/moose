@@ -23,20 +23,20 @@ class CSGLattice
 {
 public:
   /**
-   * Default constructor
-   *
-   * @param name unique name of lattice
-   */
-  CSGLattice(const std::string & name);
-
-  /**
-   * @brief Construct a new CSGLattice
+   * @brief Construct a new CSGLattice of specific type without universes defined
    *
    * @param name unique name of lattice
    * @param lattice_type type of lattice
    */
   CSGLattice(const std::string & name, const std::string & lattice_type);
 
+  /**
+   * @brief Construct a new CSGLattice of specified type from the lists of universes provided
+   *
+   * @param name unique name of lattice
+   * @param universes list of lists of CSGUniverses to define the lattice map
+   * @param lattice_type type of lattice
+   */
   CSGLattice(const std::string & name,
              std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes,
              const std::string & lattice_type);
@@ -73,14 +73,14 @@ public:
   /**
    * @brief whether or not the universe of the specified name exists in the lattice
    *
-   * @param name of universe
+   * @param name of universe to search for
    *
    * @return true if universe of that name exists in lattice
    */
   bool hasUniverse(const std::string & name) const;
 
   /**
-   * @brief check if dimensions of the universe map are valid, raise error if not
+   * @brief check if the speficied dimensions of the lattice are valid, raise error if not
    *
    */
   void checkDimensions() const;
@@ -88,9 +88,10 @@ public:
   /**
    * @brief get the map of data that defines the geometric dimensions of the lattice
    *
-   * @return map of string to any value
+   * @return map of string dimension name to value of that dimension
    */
-  std::unordered_map<std::string, std::any> getDimensions() { return _dimensions; }
+  virtual std::unordered_map<std::string, std::any>
+  getDimensions() const = 0; // pure virtual function
 
   /**
    * @brief Checks if the given index location is a valid index for the lattice
@@ -98,15 +99,17 @@ public:
    * @param index location
    * @return true if index is valid for the lattice
    */
-  virtual bool isValidIndex(const std::pair<int, int> index) const = 0; // Pure virtual function
+  virtual bool isValidIndex(
+      const std::pair<unsigned int, unsigned int> index) const = 0; // Pure virtual function
 
   /**
    * @brief Get the universe located at the given index
    *
-   * @param index location in lattice
+   * @param index pair of ints that specify the location in lattice
    * @return universe at the specified location
    */
-  std::reference_wrapper<const CSGUniverse> getUniverseAtIndex(const std::pair<int, int> index);
+  std::reference_wrapper<const CSGUniverse>
+  getUniverseAtIndex(const std::pair<unsigned int, unsigned int> index);
 
   /**
    * @brief get all locations in lattice where universe of the specified name exists
@@ -114,24 +117,19 @@ public:
    * @param univ_name name of universe
    * @return vector of locations (pairs of ints)
    */
-  const std::vector<std::pair<int, int>> getUniverseIndices(const std::string & univ_name) const;
+  const std::vector<std::pair<unsigned int, unsigned int>>
+  getUniverseIndices(const std::string & univ_name) const;
 
   /**
-   * @brief given a point, check if it is within the bounds of the specified lattice
+   * @brief check that any provided list of list of CSGUniverses are the correct dimensions for the
+   * type of lattice
    *
-   * @param point to check
-   * @return true if within lattice bounds
+   * @param universes list of list of universes to be used to define the lattice structure
+   * @return true if universe dimensions are valid
    */
-  virtual bool isPointInLattice(Point point) const = 0; // pure virtual function
-
-  /**
-   * @brief given a point, get the index of the lattice universe in which it lies; raises an
-   * error if point is not within the bounds of the lattice
-   *
-   * @param point
-   * @return index of universe where point is located
-   */
-  std::pair<int, int> getIndexAtPoint(Point point);
+  virtual bool
+  isValidUniverseMap(std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes)
+      const = 0; // pure virtual function
 
   /// Operator overload for checking if two CSGLattice objects are equal
   // bool operator==(const CSGLattice & other) const;
@@ -144,15 +142,22 @@ protected:
   // name needs to be managed at the CSGLatticeList level
   void setName(const std::string & name) { _name = name; }
 
-  /// given a point, get the index of the lattice element that contains it (assumes point is within bounds)
-  virtual std::pair<int, int> getIndex(Point point) const = 0; // pure virtual function
-
   /// @brief assign the vectors of universes as the lattice elements
   /// @param universes
   void setUniverses(std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes);
 
   /**
-   * @brief For the lattice type, check that the dimension of _universe_map are valid
+   * @brief replace the element at specified index in the lattice with the provided CSGUniverse.
+   * This will check that the _universe_map has been initialized and that the index is valid.
+   *
+   * @param universe universe to add to the lattice at the location index
+   * @param index location in lattice replace with provided universe
+   */
+  void setUniverseAtIndex(std::reference_wrapper<const CSGUniverse> universe,
+                          const std::pair<unsigned int, unsigned int> index);
+
+  /**
+   * @brief For the lattice type, check that any values in the _dimensions variable are valid
    *
    * @return true if valid, otherwise false
    */
@@ -166,8 +171,5 @@ protected:
 
   /// Universes in the arrangement of how they appear in the lattice; dimensions depends on lattice type
   std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> _universe_map;
-
-  /// Dimensional data: maps a string to the value to define necessary lattice dimensions
-  const std::unordered_map<std::string, std::any> _dimensions;
 };
 }

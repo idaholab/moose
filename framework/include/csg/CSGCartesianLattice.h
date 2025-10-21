@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "CSLattice.h"
+#include "CSGLattice.h"
 
 namespace CSG
 {
@@ -21,26 +21,45 @@ class CSGCartesianLattice : public CSGLattice
 {
 public:
   /**
-   * @brief Construct a new empty Cartesian Lattice
+   * @brief Construct a new CSGCartesianLattice object from the map of universes provided
    *
-   * @param name unique name of lattice
-   * @param lattice_type type of lattice
+   * @param name unique identifying name of lattice
+   * @param pitch pitch of lattice elements
+   * @param universes list of list of universes to set as the lattice map
    */
-  CSGCartesianLattice(const std::string & name);
-
   CSGCartesianLattice(
       const std::string & name,
       const Real pitch,
       std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes);
 
-  CSGCartesianLattice(
-    const std::string & name, const int nx0, const int nx1, const Real pitch
-  )
+  /**
+   * @brief Construct a new CSGCartesianLattice object with specified dimensions. Note, this will
+   * NOT initialize a _universe_map of the specified size. That must be provided using setUniverses.
+   *
+   * @param name unique identifying name of lattice
+   * @param nx0 number of elements in the first dimension of the lattice
+   * @param nx1 number of elements in the second dimension of the lattice
+   * @param pitch pitch of lattice elements
+   */
+  CSGCartesianLattice(const std::string & name,
+                      const unsigned int nx0,
+                      const unsigned int nx1,
+                      const Real pitch);
 
   /**
    * Destructor
    */
-  virtual ~CSGLattice() = default;
+  virtual ~CSGCartesianLattice() = default;
+
+  /**
+   * @brief get the map of data that defines the geometric dimensions of the lattice:
+   *  - nx0: number of mesh elements in the first dimension (int)
+   *  - nx1: number of mesh elements in the second dimension (int)
+   *  - pitch: pitch of the mesh element (Real)
+   *
+   * @return map of string dimension name to value of that dimension
+   */
+  virtual std::unordered_map<std::string, std::any> getDimensions() const override;
 
   /**
    * @brief Checks if the given index location is a valid index for the lattice
@@ -48,26 +67,19 @@ public:
    * @param index location
    * @return true if index is valid for the lattice
    */
-  virtual bool isValidIndex(const std::pair<int, int> index) const override;
+  virtual bool isValidIndex(const std::pair<unsigned int, unsigned int> index) const override;
 
   /**
-   * @brief given a point, check if it is within the bounds of the specified lattice
+   * @brief check that any provided list of list of CSGUniverses are the correct dimensions. Must
+   * have number of lists within universes equal to _nx0. And each sublist must be size _nx1.
    *
-   * @param point to check
-   * @return true if within lattice bounds
+   * @param universes list of list of universes to be used to define the lattice structure
+   * @return true if universe dimensions are valid
    */
-  virtual bool isPointInLattice(Point point) const override;
-
-  /// Operator overload for checking if two CSGLattice objects are equal
-  // bool operator==(const CSGLattice & other) const;
-
-  /// Operator overload for checking if two CSGLattice objects are not equal
-  // bool operator!=(const CSGLattice & other) const;
+  virtual bool isValidUniverseMap(
+      std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes) const override;
 
 protected:
-  /// given a point, get the index of the lattice element that contains it (assumes point is within bounds)
-  virtual std::pair<int, int> getIndex(Point point) const override;
-
   /**
    * @brief For the lattice type, check that the dimension of _universe_map are valid
    *
@@ -76,10 +88,10 @@ protected:
   virtual bool hasValidDimensions() const override;
 
   /// number of elements in the first dimension
-  const int _nx0;
+  const unsigned int _nx0;
 
   /// number of elements in the second direction
-  const int _nx1;
+  const unsigned int _nx1;
 
   /// pitch
   const Real _pitch;
