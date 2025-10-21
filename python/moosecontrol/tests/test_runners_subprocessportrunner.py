@@ -16,7 +16,7 @@ from unittest.mock import patch
 
 import pytest
 
-from common import BASE_INPUT, MooseControlTestCase, setup_moose_python_path
+from common import BASE_INPUT, LIVE_BASERUNNER_KWARGS, MooseControlTestCase, setup_moose_python_path
 setup_moose_python_path()
 
 from moosecontrol import SubprocessPortRunner
@@ -125,8 +125,9 @@ class TestSubprocessPortRunner(MooseControlTestCase):
         command = [self.get_moose_exe(), '-i', input_file]
         runner = SubprocessPortRunner(
             command=command,
+            directory=self.directory.name,
             moose_control_name='web_server',
-            directory=self.directory.name
+            **LIVE_BASERUNNER_KWARGS,
         )
         full_command = runner.get_full_command()
 

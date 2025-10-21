@@ -19,7 +19,7 @@ from unittest.mock import patch
 
 import pytest
 
-from common import BASE_INPUT, MooseControlTestCase, mock_response, setup_moose_python_path
+from common import BASE_INPUT, LIVE_BASERUNNER_KWARGS, MooseControlTestCase, mock_response, setup_moose_python_path
 setup_moose_python_path()
 
 from moosecontrol import SocketRunner
@@ -247,7 +247,7 @@ class TestSocketRunner(MooseControlTestCase):
         process = Popen(command, stdout=PIPE, text=True)
 
         # Initialize; wait for socket and connection
-        runner = SocketRunner(socket_path)
+        runner = SocketRunner(socket_path, **LIVE_BASERUNNER_KWARGS)
         runner.initialize()
         socket_i = self.assert_in_log(f'Found connection socket {socket_path}')
         self.assert_in_log(f'MOOSE webserver is listening', after_index=socket_i)

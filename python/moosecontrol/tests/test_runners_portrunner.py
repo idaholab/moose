@@ -17,7 +17,7 @@ from time import sleep
 
 import pytest
 
-from common import BASE_INPUT, MooseControlTestCase, setup_moose_python_path
+from common import BASE_INPUT, LIVE_BASERUNNER_KWARGS, MooseControlTestCase, setup_moose_python_path
 setup_moose_python_path()
 
 from moosecontrol import PortRunner
@@ -97,7 +97,7 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
         process = Popen(command, stdout=PIPE, text=True)
 
         # Initialize; wait for connection
-        runner = PortRunner(port)
+        runner = PortRunner(port, **LIVE_BASERUNNER_KWARGS)
         runner.initialize()
         self.assert_in_log('MOOSE webserver is listening')
 

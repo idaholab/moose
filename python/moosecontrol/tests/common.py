@@ -287,6 +287,7 @@ BASE_INPUT = """
 [Controls/web_server]
   type = WebServerControl
   execute_on = INITIAL
+  client_timeout = 1
 []
 
 [Problem]
@@ -297,3 +298,10 @@ BASE_INPUT = """
   type = Steady
 []
 """
+
+# Keyword arguments to pass to the BaseRunner for live tests
+LIVE_BASERUNNER_KWARGS = {
+    'initialize_timeout': 1,
+    'poll_time': 0.01,
+    'poke_poll_time': 0.01
+}
