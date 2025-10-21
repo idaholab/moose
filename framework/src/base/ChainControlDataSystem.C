@@ -40,8 +40,11 @@ ChainControlDataSystem::outputChainControlMap() const
                (item.second->getDeclared() ? "true" : "false");
     if (const auto ctl_real = dynamic_cast<ChainControlData<Real> *>(item.second.get()))
       map_str += ". Current value: " + std::to_string(ctl_real->get());
-    if (const auto ctl_bool = dynamic_cast<ChainControlData<bool> *>(item.second.get()))
+    else if (const auto ctl_bool = dynamic_cast<ChainControlData<bool> *>(item.second.get()))
       map_str += ". Current value: " + std::to_string(ctl_bool->get());
+    else
+      mooseWarning("Chain control data output has not been enabled for this this data type: ",
+                   item.second->type());
     map_str += "\n";
   }
 

@@ -1189,10 +1189,7 @@ SubProblem::timestepSetup()
     for (auto & pr : map)
       pr.second->timestepSetup();
   if (_show_chain_control_data)
-  {
-    _console << _app.getChainControlDataSystem().outputChainControlMap();
-    _console << std::flush;
-  }
+    _console << _app.getChainControlDataSystem().outputChainControlMap() << std::flush;
 }
 
 void
@@ -1228,7 +1225,7 @@ SubProblem::initialSetup()
     showFunctorRequestors();
   }
   if (_show_chain_control_data)
-    _console << _app.getChainControlDataSystem().outputChainControlMap();
+    _console << _app.getChainControlDataSystem().outputChainControlMap() << std::flush;
 
   for (const auto & functors : _functors)
     for (const auto & [functor_wrapper_name, functor_wrapper] : functors)
