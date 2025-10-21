@@ -10,7 +10,6 @@
 import math
 import os
 import shlex
-import sys
 from numbers import Number
 
 from moosecontrol import SubprocessPortRunner, SubprocessSocketRunner, MooseControl
