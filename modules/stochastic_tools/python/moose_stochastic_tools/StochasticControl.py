@@ -7,17 +7,19 @@
 # * Licensed under LGPL 2.1, please see LICENSE for details
 # * https://www.gnu.org/licenses/lgpl-2.1.html
 
-from dataclasses import dataclass, field
 import enum
 import os
-import numpy as np
 from collections import OrderedDict
+from dataclasses import dataclass, field
+from logging import getLogger
 from typing import Optional, Callable, Iterable, Generator
 
-import pyhit
-from MooseControl import MooseControl
-from MooseControl.MooseControl import logger
+import numpy as np
 
+import pyhit
+from moosecontrol import MooseControl, SubprocessPortRunner
+
+logger = getLogger('StochasticControl')
 
 @dataclass
 class StochasticRunOptions:
@@ -133,7 +135,6 @@ class StochasticControl(MooseControl):
         physics_cli_args: list[str] = [],
         keep_input: bool = False,
         moose_port: int = None,
-        inherit_environment: bool = True,
         poll_time: float = 0.1,
     ):
         """
@@ -152,8 +153,6 @@ class StochasticControl(MooseControl):
             keep_input (bool): True to not automatically delete the
                                auto-generated stochastic input (default = False)
             moose_port (int): Optional port number for web server control.
-            inherit_environment (bool): Whether or not the MOOSE command will
-                                        inherit the current shell environment.
             poll_time (float): Polling time interval for checking MOOSE status.
         """
         self.physics_input: str = physics_input
@@ -169,19 +168,21 @@ class StochasticControl(MooseControl):
         # Build stochastic input
         self._root: pyhit.Node = self._buildStochasticInput()
 
-        # Initialize base class
+        # Determine command
         moose_command: list[str] = []
         if self._opt.num_procs > 1:
             moose_command += [self._opt.mpi_command, "-n", str(self._opt.num_procs)]
         moose_command += [executable, "-i", self._opt.input_name]
         moose_command += self._opt.cli_args
-        super().__init__(
-            moose_command=moose_command,
+
+        # Initialize runner for base class
+        runner = SubprocessPortRunner(
+            command=moose_command,
             moose_control_name=self.web_server_control_name,
-            moose_port=moose_port,
-            inherit_environment=inherit_environment,
-            poll_time=poll_time,
+            port=moose_port,
+            poll_time=poll_time
         )
+        super().__init__(runner)
 
     def __enter__(self) -> "StochasticRunner":
         """
@@ -205,19 +206,19 @@ class StochasticControl(MooseControl):
         if exc_type is None:
             # If moose is waiting, send a terminate
             try:
-                waiting_flag = self.getWaitingFlag()
+                waiting_flag = self.get_waiting_flag()
             except:
                 waiting_flag = None
             if not waiting_flag is None:
-                self.setTerminate()
+                self.set_terminate()
 
             # Don't finalize if we never started
-            if self._initialized:
+            if self.initialized:
                 self.finalize()
 
-        # Kill the simulation if there was an exception
+        # Kill/cleanup the simulation if there was an exception
         else:
-            self.kill()
+            self.cleanup()
 
         if not self._keep_input and os.path.exists(self._input_file):
             os.remove(self._input_file)
@@ -232,13 +233,13 @@ class StochasticControl(MooseControl):
         Parameters:
             x: A NumPy array containing parameter values to sample.
         """
-        if not self._initialized:
+        if not self.initialized:
             # If we haven't started yet, the input matrix should be set at input
             self._sampler["matrix"] = "'" + self._matrixToParameter(x) + "'"
         # Simulation is already started
         else:
             self.wait("TIMESTEP_END")
-            self.setControllableMatrix(self.controllable_matrix, x)
+            self.set_controllable_matrix(self.controllable_matrix, x)
 
     def run(self):
         """
@@ -246,7 +247,7 @@ class StochasticControl(MooseControl):
         If not initialized, writes the input and starts a new simulation;
         otherwise continues execution.
         """
-        if not self._initialized:
+        if not self.initialized:
             # Write file
             logger.debug(
                 f"Writing input file: {os.path.abspath(self._input_file)}\n{self._root.render()}"
@@ -255,7 +256,7 @@ class StochasticControl(MooseControl):
 
             self.initialize()
         else:
-            self.setContinue()
+            self.set_continue()
 
     def getOutput(self) -> np.ndarray:
         """
@@ -269,7 +270,7 @@ class StochasticControl(MooseControl):
         y = []
         for qoi in self._qois:
             rep = f"{self.qoi_storage_name}/" + qoi.replace("/", ":")
-            y.append(self.getReporterValue(rep))
+            y.append(self.get_reporter_value(rep))
         return np.array(y).T
 
     def _buildStochasticInput(self) -> pyhit.Node:
@@ -690,8 +691,8 @@ class StochasticRunner:
                 - Otherwise, returns a 2D array of shape (num_samples, num_qois).
 
         Raises:
-            ValueError: If the input shape doesn't match expected parameter dimensions.
-            ControlException: If the control's output row count does not match the input row count.
+            ValueError: If the input shape doesn't match expected parameter dimensions
+            or the control's output row count does not match the input row count.
 
         Notes:
             - With caching enabled, each row is looked up in the cache; only misses
@@ -762,7 +763,7 @@ class StochasticRunner:
         # Gather reporters
         y = self._control.getOutput()
         if y.shape[0] != x.shape[0]:
-            raise self._control.ControlException(
+            raise ValueError(
                 f"Output length does not match input length: {y.shape[0]} vs. {x.shape[0]}."
             )
 
