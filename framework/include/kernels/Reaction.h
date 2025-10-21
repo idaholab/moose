@@ -24,7 +24,7 @@ public:
 
 protected:
   virtual GenericReal<is_ad> computeQpResidual() override;
-  Real computeQpJacobian() override;
+  virtual Real computeQpJacobian() override;
 
   /// Scalar coefficient representing the relative amount consumed per unit time
   const Real & _rate;
