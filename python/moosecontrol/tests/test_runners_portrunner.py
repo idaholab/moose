@@ -81,36 +81,35 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
         """
         Tests running a MOOSE input live.
         """
-        with TemporaryDirectory() as dir:
-            input_path = os.path.join(dir, 'input.i')
-            port = PortRunner.find_available_port()
+        input_path = os.path.join(self.directory.name, 'input.i')
+        port = PortRunner.find_available_port()
 
-            # Spawn the MOOSE process
-            with open(input_path, 'w') as f:
-                f.write(BASE_INPUT)
-            command = [
-                self.get_moose_exe(),
-                '-i',
-                input_path,
-                f'Controls/web_server/port={port}',
-                '--color=off'
-            ]
-            process = Popen(command, stdout=PIPE, text=True)
+        # Spawn the MOOSE process
+        with open(input_path, 'w') as f:
+            f.write(BASE_INPUT)
+        command = [
+            self.get_moose_exe(),
+            '-i',
+            input_path,
+            f'Controls/web_server/port={port}',
+            '--color=off'
+        ]
+        process = Popen(command, stdout=PIPE, text=True)
 
-            # Initialize; wait for connection
-            runner = PortRunner(port)
-            runner.initialize()
-            self.assert_in_log('MOOSE webserver is listening')
+        # Initialize; wait for connection
+        runner = PortRunner(port)
+        runner.initialize()
+        self.assert_in_log('MOOSE webserver is listening')
 
-            # Input has one continue on INITIAL
-            runner.get('continue')
+        # Input has one continue on INITIAL
+        runner.get('continue')
 
-            # Finalize; should delete socket
-            runner.finalize()
+        # Finalize; should delete socket
+        runner.finalize()
 
-            # Wait for the MOOSE process to finish up
-            stdout, _ = process.communicate()
+        # Wait for the MOOSE process to finish up
+        stdout, _ = process.communicate()
 
-            self.assert_no_warning_logs()
-            self.assertEqual(process.returncode, 0)
-            self.assertIn('Solve Skipped!', stdout)
+        self.assert_no_warning_logs()
+        self.assertEqual(process.returncode, 0)
+        self.assertIn('Solve Skipped!', stdout)
