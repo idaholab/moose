@@ -1,29 +1,60 @@
 #!/usr/bin/env python3
-from base_controller import *
+#* This file is part of the MOOSE framework
+#* https://mooseframework.inl.gov
+#*
+#* All rights reserved, see COPYRIGHT for full restrictions
+#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#*
+#* Licensed under LGPL 2.1, please see LICENSE for details
+#* https://www.gnu.org/licenses/lgpl-2.1.html
+
+# pylint: disable=protected-access
+
+import sys
+from test_moose_control import TestMooseControl
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        raise Exception('Missing test command line argument')
+        raise ValueError('Missing test command line argument')
     test = sys.argv[1]
 
-    def run_control(control):
-        control.wait()
-
-        if test == 'set_controllable_no_exist':
-            control.setControllableReal('no_exist', 0)
-        elif test == 'postprocessor_no_exist':
-            control.getPostprocessor('no_exist')
-        elif test == 'set_controllable_unregistered_type':
-            control._setControllable('unused', 'BadType', 'unused')
-        elif test == 'set_controllable_bad_convert':
-            control._setControllable('Outputs/json/enable', 'bool', 'foo')
-        elif test == 'set_controllable_vector_non_array':
-            control._setControllable('Reporters/test/vec_real_value', 'std::vector<Real>', 1234)
-        elif test == 'set_controllable_matrix_bad_convert1':
-            control._setControllable('Reporters/test/matrix_value', 'RealEigenMatrix', 1234)
-        elif test == 'set_controllable_matrix_bad_convert2':
-            control._setControllable('Reporters/test/matrix_value', 'RealEigenMatrix', [1234])
-        elif test == 'set_controllable_matrix_jagged':
-            control._setControllable('Reporters/test/matrix_value', 'RealEigenMatrix', [[11, 12], [21]])
-
-    base_controller('web_server', run_control)
+    with TestMooseControl('web_server') as control:
+        match test:
+            case 'set_controllable_no_exist':
+                control.set_controllable_real('no_exist', 0.0)
+            case 'postprocessor_no_exist':
+                control.get_postprocessor('no_exist')
+            case 'set_controllable_unregistered_type':
+                control._set_controllable('unused', 'BadType', (str,), 'unused')
+            case 'set_controllable_bad_convert':
+                control._set_controllable('Outputs/json/enable', 'bool', (str,), 'foo')
+            case 'set_controllable_vector_non_array':
+                control._set_controllable(
+                    'Reporters/test/vec_real_value',
+                    'std::vector<Real>',
+                    (int,),
+                    1234
+                )
+            case 'set_controllable_matrix_bad_convert1':
+                control._set_controllable(
+                    'Reporters/test/matrix_value',
+                    'RealEigenMatrix',
+                    (int,),
+                    1234
+                )
+            case 'set_controllable_matrix_bad_convert2':
+                control._set_controllable(
+                    'Reporters/test/matrix_value',
+                    'RealEigenMatrix',
+                    (int,),
+                    [1234]
+                )
+            case 'set_controllable_matrix_jagged':
+                control._set_controllable(
+                    'Reporters/test/matrix_value',
+                    'RealEigenMatrix',
+                    (list,),
+                    [[11, 12], [21]]
+                )
+            case _:
+                raise ValueError(f'Unknown test {test}')

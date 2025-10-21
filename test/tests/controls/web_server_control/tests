@@ -202,7 +202,7 @@
       input = 'wait_initial.i'
       command_proxy = 'errors.py set_controllable_no_exist'
       required_python_packages = requests
-      expect_err = "WebServerControl error: The controllable parameter 'no_exist' was not found"
+      expect_err = "The controllable parameter 'no_exist' was not found"
       detail = 'setting a controllable parameter that does not exist'
       valgrind = none
     []
@@ -211,7 +211,7 @@
       input = 'wait_initial.i'
       command_proxy = 'errors.py postprocessor_no_exist'
       required_python_packages = requests
-      expect_err = "WebServerControl error: The postprocessor 'no_exist' was not found"
+      expect_err = "The postprocessor 'no_exist' was not found"
       detail = 'getting a postprocessor that does not exist'
       valgrind = none
     []
@@ -220,7 +220,7 @@
       input = 'wait_initial.i'
       command_proxy = 'errors.py set_controllable_unregistered_type'
       required_python_packages = requests
-      expect_err = "WebServerControl error: The type 'BadType' is not registered for setting a controllable parameter"
+      expect_err = "The type 'BadType' is not registered for setting a controllable parameter"
       detail = 'setting a controllable parameter whose type is not supported'
       valgrind = none
     []
