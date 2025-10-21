@@ -1,0 +1,246 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
+#include "gtest/gtest.h"
+
+#include "CSGCartesianLattice.h"
+#include "CSGUniverse.h"
+
+#include "MooseUnitUtils.h"
+
+namespace CSG
+{
+
+/**
+ * Tests associated with CSGLattice class and derived classes
+ */
+
+/// tests valid CSGCartesianLattice construction
+TEST(CSGLatticeTest, testCreateCartLatticeValid)
+{
+  {
+    // initialize without universes: nx0=2, nx1=3, pitch=1.0
+    auto cart_lattice = CSGCartesianLattice("cartlat", 2, 3, 1.0);
+    // check dimensions
+    auto dims_map = cart_lattice.getDimensions();
+    ASSERT_EQ(*std::any_cast<int>(&dims_map["nx0"]), 2);
+    ASSERT_EQ(*std::any_cast<int>(&dims_map["nx1"]), 3);
+    ASSERT_EQ(*std::any_cast<Real>(&dims_map["pitch"]), 1.0);
+    // expect no universe map to be present yet
+    ASSERT_EQ(cart_lattice.getUniverses().size(), 0);
+    // check other attributes
+    ASSERT_TRUE(cart_lattice.getName() == "cartlat");
+    ASSERT_TRUE(cart_lattice.getType() == "CSG::CSGCartesianLattice");
+  }
+  {
+    // initialize with an array of universes, pitch=1.0
+    const auto univ1 = CSGUniverse("univ1", false);
+    const auto univ2 = CSGUniverse("univ2", false);
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
+        {std::cref(univ1), std::cref(univ2), std::cref(univ1)},
+        {std::cref(univ2), std::cref(univ1), std::cref(univ2)}};
+    auto cart_lattice = CSGCartesianLattice("cartlat", 1.0, univ_map);
+    // check dimensions
+    auto dims_map = cart_lattice.getDimensions();
+    ASSERT_EQ(*std::any_cast<int>(&dims_map["nx0"]), 2);
+    ASSERT_EQ(*std::any_cast<int>(&dims_map["nx1"]), 3);
+    ASSERT_EQ(*std::any_cast<Real>(&dims_map["pitch"]), 1.0);
+    // expect 2x3 array
+    ASSERT_EQ(cart_lattice.getUniverses().size(), 2);
+    ASSERT_EQ(cart_lattice.getUniverses()[0].size(), 3);
+    ASSERT_EQ(cart_lattice.getUniverses()[1].size(), 3);
+    // check other attributes
+    ASSERT_TRUE(cart_lattice.getName() == "cartlat");
+    ASSERT_TRUE(cart_lattice.getType() == "CSG::CSGCartesianLattice");
+  }
+}
+
+/// tests invalid CSGCartesianLattice construction
+TEST(CSGLatticeTest, testCreateCartLatticeInvalid)
+{
+  {
+    // try initialize with invalid dimensions for nx0, nx1, and pitch
+    std::string exp_msg = "Lattice cartlat of type CSG::CSGCartesianLattice must have pitch and "
+                          "number of elements in both dimensions greater than 0.";
+    Moose::UnitUtils::assertThrows([]() { CSGCartesianLattice("cartlat", -2, 3, 1.0); },
+                                   exp_msg); // invalid nx0
+    Moose::UnitUtils::assertThrows([]() { CSGCartesianLattice("cartlat", 2, 0, 1.0); },
+                                   exp_msg); // invalid nx1
+    Moose::UnitUtils::assertThrows([]() { CSGCartesianLattice("cartlat", 2, 3, -1.0); },
+                                   exp_msg); // invalid pitch
+  }
+  {
+    // try to initialize with universe array of invalid dimensions (second row is different length)
+    const auto univ1 = CSGUniverse("univ1", false);
+    const auto univ2 = CSGUniverse("univ2", false);
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
+        {std::cref(univ1), std::cref(univ2), std::cref(univ1)},
+        {std::cref(univ2), std::cref(univ1)}};
+    std::string exp_msg = "Cannot set lattice cartlat with universes. Does not have valid "
+                          "dimensions for lattice type CSG::CSGCartesianLattice";
+    Moose::UnitUtils::assertThrows([&univ_map]() { CSGCartesianLattice("cartlat", 1.0, univ_map); },
+                                   exp_msg);
+  }
+}
+
+/// tests CSGCartesianLattice::setUniverses function
+TEST(CSGLatticeTest, testCartSetUniverses)
+{
+  {
+    // create a lattice w/out universe map and then set one w/ correct dimensions - valid
+    const auto univ1 = CSGUniverse("univ1", false);
+    const auto univ2 = CSGUniverse("univ2", false);
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
+        {std::cref(univ1), std::cref(univ2), std::cref(univ1)},
+        {std::cref(univ2), std::cref(univ1), std::cref(univ2)}};
+    auto cart_lattice = CSGCartesianLattice("cartlat", 2, 3, 1.0);
+    // should not have any universe map initially
+    ASSERT_EQ(cart_lattice.getUniverses().size(), 0);
+    ASSERT_NO_THROW(cart_lattice.setUniverses(univ_map););
+    // should have 2x3 map after being set
+    ASSERT_EQ(cart_lattice.getUniverses().size(), 2);
+    ASSERT_EQ(cart_lattice.getUniverses()[0].size(), 3);
+    ASSERT_EQ(cart_lattice.getUniverses()[1].size(), 3);
+  }
+  {
+    // create a lattice w/out universe map and then set one w/ different dimensions - invalid
+    auto cart_lattice = CSGCartesianLattice("cartlat", 2, 3, 1.0);
+    // create universe map with dimensions that differ from the 2x3 as specified
+    const auto univ1 = CSGUniverse("univ1", false);
+    const auto univ2 = CSGUniverse("univ2", false);
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
+        {std::cref(univ1), std::cref(univ2)}, {std::cref(univ2), std::cref(univ1)}};
+    Moose::UnitUtils::assertThrows([&cart_lattice, &univ_map]()
+                                   { cart_lattice.setUniverses(univ_map); },
+                                   "Cannot set lattice cartlat with universes. Does not have valid "
+                                   "dimensions for lattice type");
+  }
+  {
+    // create lattice w/ universe map, overwrite w/ other valid universe map - valid
+    const auto univ1 = CSGUniverse("univ1", false);
+    const auto univ2 = CSGUniverse("univ2", false);
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
+        {std::cref(univ1), std::cref(univ1), std::cref(univ1)},
+        {std::cref(univ1), std::cref(univ1), std::cref(univ1)}};
+    auto cart_lattice = CSGCartesianLattice("cartlat", 1.0, univ_map);
+    // initial map should contain structure matching univ_map (all univ1)
+    for (auto univ_list : cart_lattice.getUniverses())
+    {
+      for (const CSGUniverse & univ : univ_list)
+        ASSERT_EQ(univ, univ1);
+    }
+    // create new map and update lattice
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> new_univ_map = {
+        {std::cref(univ2), std::cref(univ2), std::cref(univ2)},
+        {std::cref(univ2), std::cref(univ2), std::cref(univ2)}};
+    cart_lattice.setUniverses(new_univ_map);
+    // expect map to contain all univ2
+    for (auto univ_list : cart_lattice.getUniverses())
+    {
+      for (const CSGUniverse & univ : univ_list)
+        ASSERT_EQ(univ, univ2);
+    }
+  }
+}
+
+/// tests CSGCartesianLattice::setUniverseAtIndex function
+TEST(CSGLatticeTest, testCartSetUniverseAtIndex)
+{
+  // create initial lattice of all univ1 elements
+  const auto univ1 = CSGUniverse("univ1", false);
+  const auto univ2 = CSGUniverse("univ2", false);
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
+      {std::cref(univ1), std::cref(univ1), std::cref(univ1)},
+      {std::cref(univ1), std::cref(univ1), std::cref(univ1)}};
+  auto cart_lattice = CSGCartesianLattice("cartlat", 1.0, univ_map);
+  // initial map should contain structure matching univ_map (all univ1)
+  for (auto univ_list : cart_lattice.getUniverses())
+  {
+    for (const CSGUniverse & univ : univ_list)
+      ASSERT_EQ(univ, univ1);
+  }
+  {
+    // replace element in universe map with another using setUniverseAtIndex (valid index location)
+    cart_lattice.setUniverseAtIndex(std::cref(univ2), std::make_pair(1, 2));
+    auto univs = cart_lattice.getUniverses();
+    for (auto i : index_range(univs))
+    {
+      for (auto j : index_range(univs[i]))
+      {
+        // all universes should be univ1 except (1, 2) location
+        const CSGUniverse & univ = univs[i][j];
+        if (i == 1 && j == 2)
+          ASSERT_EQ(univ, univ2);
+        else
+          ASSERT_EQ(univ, univ1);
+      }
+    }
+  }
+  {
+    // try replacing element at an invalid index - should raise error
+    Moose::UnitUtils::assertThrows(
+        [&cart_lattice, &univ2]() { cart_lattice.setUniverseAtIndex(univ2, std::make_pair(3, 3)); },
+        "Cannot set universe at location (3, 3) for lattice cartlat. Not a valid location.");
+  }
+  {
+    // create a lattice without any map initialized yet and try setting just one element
+    // should raise error about map not being initialized yet
+    auto cart_lattice = CSGCartesianLattice("cartlat", 2, 3, 1.0);
+    Moose::UnitUtils::assertThrows(
+        [&cart_lattice, &univ2]() { cart_lattice.setUniverseAtIndex(univ2, std::make_pair(0, 0)); },
+        "Cannot set universe at location (0, 0) for lattice cartlat. "
+        "Universe map has not been initialized.");
+  }
+}
+
+/// tests CSGCartesianLattice different methods for retrieving universes or locations of universes
+TEST(CSGLatticeTest, testCartGetMethods)
+{
+  // test get all and get by name (valid and invalid) and get at index (valid and invalid)
+  // create initial lattice of all univ1 elements
+  const auto univ1 = CSGUniverse("univ1", false);
+  const auto univ2 = CSGUniverse("univ2", false);
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
+      {std::cref(univ1), std::cref(univ2), std::cref(univ1)},
+      {std::cref(univ2), std::cref(univ1), std::cref(univ2)}};
+  auto cart_lattice = CSGCartesianLattice("cartlat", 1.0, univ_map);
+  {
+    // get universe indices by name - valid name
+    auto loc_list = cart_lattice.getUniverseIndices("univ1");
+    std::vector<std::pair<int, int>> exp_locs = {
+        std::make_pair(0, 0), std::make_pair(0, 2), std::make_pair(1, 1)};
+    ASSERT_EQ(loc_list, exp_locs);
+  }
+  {
+    // get universe indices by name - invalid name; should raise error
+    Moose::UnitUtils::assertThrows([&cart_lattice]()
+                                   { cart_lattice.getUniverseIndices("fake_name"); },
+                                   "Universe fake_name does not exist in lattice");
+  }
+  {
+    // get universe at index - valid index
+    const CSGUniverse & retr_univ = cart_lattice.getUniverseAtIndex(std::make_pair(0, 1));
+    ASSERT_EQ(retr_univ, univ2);
+  }
+  {
+    // get universe at index - invalid index; should raise error
+    Moose::UnitUtils::assertThrows([&cart_lattice]()
+                                   { cart_lattice.getUniverseAtIndex(std::make_pair(3, 3)); },
+                                   "Index (3, 3) is not a valid index for lattice ");
+  }
+}
+
+// test setName functionality
+TEST(CSGLatticeTest, testSetName)
+{
+  auto cart_lattice = CSGCartesianLattice("cartlat", 2, 3, 1.0);
+  cart_lattice.setName("new_name");
+  ASSERT_EQ(cart_lattice.getName(), "new_name");
+}
+}

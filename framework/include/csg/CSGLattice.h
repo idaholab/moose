@@ -13,6 +13,10 @@
 
 #include "CSGUniverse.h"
 
+#ifdef MOOSE_UNIT_TEST
+#include "gtest/gtest.h"
+#endif
+
 namespace CSG
 {
 
@@ -157,5 +161,14 @@ protected:
 
   /// Universes in the arrangement of how they appear in the lattice; dimensions depends on lattice type
   std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> _universe_map;
+
+#ifdef MOOSE_UNIT_TEST
+  /// Friends for unit testing
+  ///@{
+  FRIEND_TEST(CSGLatticeTest, testCartSetUniverses);
+  FRIEND_TEST(CSGLatticeTest, testCartSetUniverseAtIndex);
+  FRIEND_TEST(CSGLatticeTest, testSetName);
+  ///@}
+#endif
 };
 }
