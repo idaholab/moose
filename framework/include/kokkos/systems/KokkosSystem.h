@@ -52,7 +52,11 @@ public:
    * @param tags The vector tags
    * @param dir Copy direction
    */
+  ///{@
   void sync(const std::set<TagID> & tags, const MemcpyKind dir);
+  void sync(const std::vector<TagID> & tags, const MemcpyKind dir);
+  void sync(const TagID tag, const MemcpyKind dir);
+  ///@}
   /**
    * Allocate the quadrature point vectors for active variable and tags and cache
    * quadrature point values
@@ -63,11 +67,6 @@ public:
    * @param vars The active MOOSE variables
    */
   void setActiveVariables(const std::set<MooseVariableFieldBase *> & vars);
-  /**
-   * Set the active variable tags
-   * @param tags The active variable tags
-   */
-  void setActiveVariableTags(const std::set<TagID> & tags);
   /**
    * Set the active solution tags
    * @param tags The active solution tags
@@ -87,10 +86,6 @@ public:
    * Clear the cached active variables
    */
   void clearActiveVariables() { _active_variables.destroy(); }
-  /**
-   * Clear the cached active variable tags
-   */
-  void clearActiveVariableTags() { _active_variable_tags.destroy(); }
   /**
    * Clear the cached active solution tags
    */
@@ -506,15 +501,8 @@ private:
   Array<unsigned int> _active_variables;
   /**
    * List of active tags
-   * Variable tags are vector tags associated with coupled variables whose quadrature point values
-   * need to be computed
-   * Solution tags are vector tags associated with solution vectors to be written - required by
-   * auxiliary kernels
-   * Residual tags are vector tags associated with residual vectors to be written - required by
-   * residual objects
    */
   ///@{
-  Array<TagID> _active_variable_tags;
   Array<TagID> _active_solution_tags;
   Array<TagID> _active_residual_tags;
   Array<TagID> _active_matrix_tags;

@@ -176,7 +176,7 @@ NonlinearSystemBase::computeKokkosResidual(const std::set<TagID> & tags)
   for (auto & system : systems)
   {
     system.setActiveVariables(needed_moose_vars);
-    system.setActiveVariableTags(needed_fe_var_vector_tags);
+    system.setActiveSolutionTags(needed_fe_var_vector_tags);
 
     {
       TIME_SECTION("KokkosCopy", 1);
@@ -234,7 +234,7 @@ NonlinearSystemBase::computeKokkosResidual(const std::set<TagID> & tags)
   for (auto & system : systems)
   {
     system.clearActiveVariables();
-    system.clearActiveVariableTags();
+    system.clearActiveSolutionTags();
   }
 }
 
@@ -291,7 +291,7 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
   for (auto & system : systems)
   {
     system.setActiveVariables(needed_moose_vars);
-    system.setActiveVariableTags(needed_fe_var_vector_tags);
+    system.setActiveSolutionTags(needed_fe_var_vector_tags);
 
     {
       TIME_SECTION("KokkosPreallocate", 1);
@@ -349,6 +349,6 @@ NonlinearSystemBase::computeKokkosJacobian(const std::set<TagID> & tags)
   for (auto & system : systems)
   {
     system.clearActiveVariables();
-    system.clearActiveVariableTags();
+    system.clearActiveSolutionTags();
   }
 }

@@ -87,12 +87,12 @@ AuxiliarySystem::kokkosCompute(ExecFlagType type)
 
   // Copy data and cache variable values at element quadature points
 
-  systems[number()].setActiveSolutionTags(std::set<TagID>({solution_tag}));
+  systems[number()].sync(solution_tag, Moose::Kokkos::MemcpyKind::HOST_TO_DEVICE);
 
   for (auto & system : systems)
   {
     system.setActiveVariables(needed_moose_vars);
-    system.setActiveVariableTags(needed_fe_var_vector_tags);
+    system.setActiveSolutionTags(needed_fe_var_vector_tags);
 
     {
       TIME_SECTION("KokkosCopy", 1);
@@ -135,17 +135,17 @@ AuxiliarySystem::kokkosCompute(ExecFlagType type)
     for (auto & system : systems)
       system.sync(Moose::Kokkos::MemcpyKind::DEVICE_TO_HOST);
 
+    systems[number()].sync(solution_tag, Moose::Kokkos::MemcpyKind::DEVICE_TO_HOST);
+
     _sys.update();
   }
 
   // Clear
 
-  systems[number()].clearActiveSolutionTags();
-
   for (auto & system : systems)
   {
     system.clearActiveVariables();
-    system.clearActiveVariableTags();
+    system.clearActiveSolutionTags();
   }
 
   disassociateVectorFromTag(solution(), solution_tag);

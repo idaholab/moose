@@ -337,14 +337,6 @@ System::sync(const MemcpyKind dir)
 {
   if (dir == MemcpyKind::HOST_TO_DEVICE)
   {
-    for (auto tag : _active_variable_tags)
-    {
-      auto & vector = _system.getVector(tag);
-
-      _vectors[tag].create(vector, *this, false);
-      _vectors[tag].copyToDevice();
-    }
-
     for (auto tag : _active_solution_tags)
     {
       auto & vector = _system.getVector(tag);
@@ -374,14 +366,8 @@ System::sync(const MemcpyKind dir)
   }
   else if (dir == MemcpyKind::DEVICE_TO_HOST)
   {
-    for (auto tag : _active_variable_tags)
-      _vectors[tag].restore();
-
     for (auto tag : _active_solution_tags)
-    {
-      _vectors[tag].copyToHost();
       _vectors[tag].restore();
-    }
 
     for (auto tag : _active_residual_tags)
       _vectors[tag].close();
@@ -423,6 +409,18 @@ System::sync(const std::set<TagID> & tags, const MemcpyKind dir)
 }
 
 void
+System::sync(const std::vector<TagID> & tags, const MemcpyKind dir)
+{
+  sync(std::set<TagID>(tags.begin(), tags.end()), dir);
+}
+
+void
+System::sync(const TagID tag, const MemcpyKind dir)
+{
+  sync(std::set<TagID>{tag}, dir);
+}
+
+void
 System::setActiveVariables(const std::set<MooseVariableFieldBase *> & vars)
 {
   std::set<unsigned int> active_variables;
@@ -436,23 +434,11 @@ System::setActiveVariables(const std::set<MooseVariableFieldBase *> & vars)
 }
 
 void
-System::setActiveVariableTags(const std::set<TagID> & tags)
+System::setActiveSolutionTags(const std::set<TagID> & tags)
 {
   if (!_active_variables.size())
     return;
 
-  std::set<TagID> active_variable_tags;
-
-  for (auto tag : tags)
-    if (_system.hasVector(tag))
-      active_variable_tags.insert(tag);
-
-  _active_variable_tags = active_variable_tags;
-}
-
-void
-System::setActiveSolutionTags(const std::set<TagID> & tags)
-{
   std::set<TagID> active_solution_tags;
 
   for (auto tag : tags)
@@ -499,7 +485,7 @@ System::setActiveMatrixTags(const std::set<TagID> & tags)
 void
 System::reinit()
 {
-  for (auto tag : _active_variable_tags)
+  for (auto tag : _active_solution_tags)
   {
     if (!_qp_solutions[tag].isAlloc())
       _qp_solutions[tag].create(_mesh.meshSubdomains().size(), _num_vars);
@@ -536,7 +522,7 @@ System::reinit()
   _thread.resize({kokkosAssembly().getMaxQpsPerElem(),
                   num_elems,
                   _active_variables.size(),
-                  _active_variable_tags.size()});
+                  _active_solution_tags.size()});
 
   ::Kokkos::RangePolicy<ExecSpace, ::Kokkos::IndexType<ThreadID>> policy(0, _thread.size());
   ::Kokkos::parallel_for(policy, *this);
@@ -549,7 +535,7 @@ System::operator()(const ThreadID tid) const
   auto qp = _thread(tid, 0);
   auto elem = _thread(tid, 1);
   auto var = _active_variables(_thread(tid, 2));
-  auto tag = _active_variable_tags(_thread(tid, 3));
+  auto tag = _active_solution_tags(_thread(tid, 3));
 
   auto info = kokkosMesh().getElementInfo(elem);
   auto sid = info.subdomain;
