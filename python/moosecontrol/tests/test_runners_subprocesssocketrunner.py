@@ -12,9 +12,8 @@
 
 import os
 from re import match
-from unittest import skipUnless
 from unittest.mock import patch
-from tempfile import NamedTemporaryFile
+from tempfile import NamedTemporaryFile, gettempdir
 
 import pytest
 
@@ -50,7 +49,7 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
         self.assertEqual(runner.command, COMMAND)
         self.assertEqual(runner.moose_control_name, MOOSE_CONTROL_NAME)
         self.assertEqual(runner.directory, os.getcwd())
-        self.assertEqual(os.path.dirname(runner.socket_path), runner.directory)
+        self.assertEqual(os.path.dirname(runner.socket_path), gettempdir())
         self.assertTrue(runner.use_subprocess_reader)
 
     def test_init_socket_path(self):
@@ -60,12 +59,13 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
         runner = SubprocessSocketRunner(**ARGS, socket_path=FAKE_SOCKET_PATH)
         self.assertEqual(runner.socket_path, FAKE_SOCKET_PATH)
 
-    def test_random_socket_name(self):
+    def test_random_socket_path(self):
         """
-        Tests random_socket_name().
+        Tests random_socket_path().
         """
-        name = SubprocessSocketRunner.random_socket_name()
-        self.assertIsNotNone(match(r'[a-z0-9]{5}', name))
+        name = SubprocessSocketRunner.random_socket_path()
+        match_re = fr'{gettempdir()}/moosecontrol_[a-z0-9]{{7}}.sock'
+        self.assertIsNotNone(match(match_re, name))
 
     def test_get_additional_command(self):
         """
