@@ -24,6 +24,13 @@ class UnexpectedResponse(Exception):
         self.response: Response = response
         super().__init__(f'Response from {response.url} {message}')
 
+class UnexpectedFlag(Exception):
+    """
+    Exception when the server is at a different flag than expected.
+    """
+    def __init__(self, flag: str):
+        super().__init__(f'Unexpected execute on flag {flag}')
+
 class BadStatus(Exception):
     """
     Exception for an unexpected Request status code.

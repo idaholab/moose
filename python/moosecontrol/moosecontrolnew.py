@@ -11,13 +11,14 @@
 
 from dataclasses import dataclass
 from numbers import Number
+from time import sleep
 from typing import Any, Iterable, Optional, Tuple, Type
 import logging
 
 import numpy as np
 import numpy.typing as npt
 
-from moosecontrol.exceptions import ControlNotWaiting
+from moosecontrol.exceptions import ControlNotWaiting, UnexpectedFlag
 from moosecontrol.validation import check_response_data
 from moosecontrol.runners import BaseRunner
 from moosecontrol.runners.baserunner import WebServerControlResponse
@@ -49,6 +50,13 @@ class MooseControlNew:
         Get the underlying runner.
         """
         return self._runner
+
+    @property
+    def poll_time(self) -> float:
+        """
+        Get the time between polls in seconds.
+        """
+        return self.runner.poll_time
 
     def initialize(self):
         """
@@ -173,7 +181,7 @@ class MooseControlNew:
         """
         Tells the control to continue.
         """
-        logger.info('Sending continue to webserver')
+        logger.info('Sending continue to server')
 
         ws_response = self.get('continue')
         assert not ws_response.has_data()
@@ -182,10 +190,43 @@ class MooseControlNew:
         """
         Tells the control to terminate gracefully.
         """
-        logger.info('Sending terminate to webserver')
+        logger.info('Sending terminate to server')
 
         ws_response = self.get('terminate')
         assert not ws_response.has_data()
+
+    def wait(self, flag: Optional[str] = None) -> str:
+        """
+        Waits for the webserver and returns once the
+        webserver is waiting.
+
+        Additional Parameters
+        ---------------------
+        flag : Optional[str]
+            The flag to wait for, if any.
+
+        Returns
+        -------
+        str
+            The execute on flag that the server is waiting on.
+        """
+        assert isinstance(flag, (str, type(None)))
+
+        message = 'Waiting for the server'
+        if flag is not None:
+            message += f' to be at flag {flag}'
+        logger.info(message)
+
+        while True:
+            if (current_flag := self.get_waiting_flag()) is not None:
+                logger.info(f'Server is waiting at flag {current_flag}')
+
+                if flag is not None and current_flag != flag:
+                    raise UnexpectedFlag(current_flag)
+
+                return current_flag
+
+            sleep(self.poll_time)
 
     def get_postprocessor(self, name: str) -> float:
         """

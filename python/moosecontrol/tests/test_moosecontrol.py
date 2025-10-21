@@ -22,7 +22,7 @@ setup_moose_python_path()
 from test_runners_baserunner import BaseRunnerTest
 
 from moosecontrol import MooseControlNew
-from moosecontrol.exceptions import ControlNotWaiting
+from moosecontrol.exceptions import ControlNotWaiting, UnexpectedFlag
 
 MOOSECONTROL = 'moosecontrol.MooseControlNew'
 BASERUNNER = 'moosecontrol.runners.BaseRunner'
@@ -47,6 +47,7 @@ class TestMooseControl(MooseControlTestCase):
         runner = BaseRunnerTest()
         control = MooseControlNew(runner)
         self.assertEqual(control.runner, runner)
+        self.assertEqual(control.poll_time, control.runner.poll_time)
 
     def test_initialize(self):
         """
@@ -99,7 +100,8 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
     """
     def setUp(self):
         # The control for this test
-        self.control: MooseControlNew = MooseControlNew(BaseRunnerTest())
+        runner = BaseRunnerTest(poll_time=0.001)
+        self.control: MooseControlNew = MooseControlNew(runner)
 
         # Paths in order that were called using mocked Session.get
         self.get_paths: list[str] = []
@@ -107,7 +109,7 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
         self.post_paths: list[Tuple[str, dict]] = []
 
         # Setup the session for the control (would be done in initialize())
-        self.control.runner._session = self.control.runner.build_session()
+        runner._session = runner.build_session()
 
         super().setUp()
 
@@ -234,17 +236,78 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
             self.control.set_continue()
         self.assertGetPaths(['waiting', 'continue'])
         self.assert_log_size(1)
-        self.assert_log_message(0, 'Sending continue to webserver')
+        self.assert_log_message(0, 'Sending continue to server')
 
     def test_set_terminate(self):
         """
         Tests set_terminate().
         """
-        with self.mock_get(waiting=True, paths=[('terminate', {})]) as thing:
+        with self.mock_get(waiting=True, paths=[('terminate', {})]):
             self.control.set_terminate()
         self.assertEqual(self.get_paths, ['waiting', 'terminate'])
         self.assert_log_size(1)
-        self.assert_log_message(0, 'Sending terminate to webserver')
+        self.assert_log_message(0, 'Sending terminate to server')
+
+    def test_wait_immediate(self):
+        """
+        Tests wait() returning immediately.
+        """
+        with self.mock_get(waiting=True):
+            flag = self.control.wait()
+        self.assertEqual(flag, FAKE_EXECUTE_ON_FLAG)
+        self.assertGetPaths(['waiting'])
+        self.assert_log_size(2)
+        self.assert_log_message(0, 'Waiting for the server')
+        self.assert_log_message(1, f'Server is waiting at flag {FAKE_EXECUTE_ON_FLAG}')
+
+    def test_wait_with_flag(self):
+        """
+        Tests wait() with a flag.
+        """
+        with self.mock_get(waiting=True):
+            flag = self.control.wait(FAKE_EXECUTE_ON_FLAG)
+        self.assertEqual(flag, FAKE_EXECUTE_ON_FLAG)
+        self.assertGetPaths(['waiting'])
+        self.assert_log_size(2)
+        self.assert_log_message(0, f'Waiting for the server to be at flag {FAKE_EXECUTE_ON_FLAG}')
+        self.assert_log_message(1, f'Server is waiting at flag {FAKE_EXECUTE_ON_FLAG}')
+
+    def test_wait_wrong_flag(self):
+        """
+        Tests wait() with a flag and being at the wrong flag.
+        """
+        with self.mock_get(waiting=True):
+            with self.assertRaises(UnexpectedFlag) as e:
+                self.control.wait('abcd')
+        self.assertEqual(str(e.exception), 'Unexpected execute on flag foo')
+        self.assertGetPaths(['waiting'])
+        self.assert_log_size(2)
+        self.assert_log_message(0, f'Waiting for the server to be at flag abcd')
+        self.assert_log_message(1, f'Server is waiting at flag {FAKE_EXECUTE_ON_FLAG}')
+
+    def test_wait_with_poll(self):
+        """
+        Tests wait() not being ready immediately and polling.
+        """
+        # Polls for a little bit
+        get_count = 0
+        waiting_at_num = 2
+        def get(path):
+            nonlocal get_count
+            get_count += 1
+            if get_count == waiting_at_num:
+                return mock_response(
+                    url=path,
+                    data={'waiting': True, 'execute_on_flag': FAKE_EXECUTE_ON_FLAG}
+                )
+            return mock_response(url=path, data={'waiting': False})
+        with patch.object(self.control.runner._session, 'get', new=get):
+            flag = self.control.wait()
+        self.assertEqual(flag, FAKE_EXECUTE_ON_FLAG)
+        self.assertEqual(get_count, 2)
+        self.assert_log_size(2)
+        self.assert_log_message(0, f'Waiting for the server')
+        self.assert_log_message(1, f'Server is waiting at flag {FAKE_EXECUTE_ON_FLAG}')
 
     def test_get_postprocessor(self):
         """
