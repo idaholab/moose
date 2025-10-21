@@ -12,12 +12,12 @@
 
 from subprocess import Popen, PIPE
 
-from common import CaptureLogTestCase, setup_moose_python_path
+from common import MooseControlTestCase, setup_moose_python_path
 setup_moose_python_path()
 
 from moosecontrol.runners.utils import SubprocessReader
 
-class TestSubprocessReader(CaptureLogTestCase):
+class TestSubprocessReader(MooseControlTestCase):
     """
     Tests moosecontrol.runners.utils.subprocessreader.SubprocessReader.
     """

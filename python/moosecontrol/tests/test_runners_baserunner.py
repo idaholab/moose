@@ -14,7 +14,7 @@ from unittest.mock import patch
 from requests import Session
 from requests.exceptions import ConnectionError
 
-from common import FAKE_URL, CaptureLogTestCase, FakeSession, \
+from common import FAKE_URL, MooseControlTestCase, FakeSession, \
     mock_response, setup_moose_python_path
 setup_moose_python_path()
 
@@ -39,7 +39,7 @@ def patch_baserunner(name: str, **kwargs):
     """
     return patch(f'moosecontrol.runners.BaseRunner.{name}', **kwargs)
 
-class TestBaseRunner(CaptureLogTestCase):
+class TestBaseRunner(MooseControlTestCase):
     """
     Tests moosecontrol.runners.baserunner.BaseRunner.
     """

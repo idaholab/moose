@@ -14,13 +14,13 @@ from requests import ConnectionError, HTTPError
 from time import sleep
 from unittest.mock import patch
 
-from common import CaptureLogTestCase, FakeSession, mock_response, \
+from common import MooseControlTestCase, FakeSession, mock_response, \
     setup_moose_python_path
 setup_moose_python_path()
 
 from moosecontrol.runners.utils import Poker
 
-class TestPoker(CaptureLogTestCase):
+class TestPoker(MooseControlTestCase):
     """
     Tests moosecontrol.runners.utils.poker.Poker.
     """

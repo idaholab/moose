@@ -40,14 +40,14 @@ def setup_moose_python_path():
         sys.path.append(moose_python)
         assert find_spec('moosecontrol')
 
-class CaptureLogTestCase(TestCase):
+class MooseControlTestCase(TestCase):
     """
-    Base TestCase that captures logs in _caplog.
+    Base TestCase for MooseControl tests.
     """
     @pytest.fixture(autouse=True)
     def inject_fixtures(self, caplog, moose_exe):
         """
-        Inject the caplog with pytest.
+        Inject pytest fixtures.
         """
         # Allow unittest access to the caplog
         self._caplog: pytest.LogCaptureFixture = caplog
@@ -55,10 +55,16 @@ class CaptureLogTestCase(TestCase):
         self._moose_exe_arg = moose_exe
 
     def setUp(self):
+        super().setUp()
+
         self._caplog.clear()
+        self.directory = TemporaryDirectory()
 
     def tearDown(self):
+        super().setUp()
+
         self._caplog.clear()
+        self.directory.cleanup()
 
     def get_moose_exe(self) -> str:
         """
@@ -176,18 +182,6 @@ class CaptureLogTestCase(TestCase):
                     f'Name: {record.name}\n'
                     f'Message: "{record.message}"'
                 )
-
-class MooseControlTestCase(CaptureLogTestCase):
-    """
-    Base TestCase for most runner tests.
-    """
-    def setUp(self):
-        super().setUp()
-        self.directory = TemporaryDirectory()
-
-    def tearDown(self):
-        super().setUp()
-        self.directory.cleanup()
 
     def assert_methods_called_in_order(self,
                                    methods: list[str],

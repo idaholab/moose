@@ -13,7 +13,6 @@
 import os
 from requests import Session
 from subprocess import Popen, PIPE
-from tempfile import TemporaryDirectory
 
 import pytest
 
