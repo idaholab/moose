@@ -98,12 +98,14 @@ class MooseControlNew:
 
     def initialize(self):
         """
-        Initializes the underlying runner.
+        Initializes the underlying runner and waits
+        for the moose process to start.
 
         Must be called before interacting with the process;
         context manager calls initialize() on enter.
         """
         self.runner.initialize()
+        self.wait()
 
     def finalize(self):
         """

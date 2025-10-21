@@ -90,13 +90,16 @@ class TestMooseControl(MooseControlTestCase):
 
     def test_initialize(self):
         """
-        Tests that initialize() calls the underlying runner's initialize().
+        Tests that initialize() calls the underlying runner's initialize()
+        and calls wait().
         """
         runner = BaseRunnerTest()
         control = MooseControlNew(runner)
         with patch(f'{BASERUNNER}.initialize') as runner_initialize:
-            control.initialize()
+            with patch(f'{MOOSECONTROL}.wait') as wait:
+                control.initialize()
         runner_initialize.assert_called_once()
+        wait.assert_called_once()
 
     def test_finalize(self):
         """
