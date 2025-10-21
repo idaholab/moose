@@ -23,11 +23,11 @@ setup_moose_python_path()
 
 from test_runners_baserunner import BaseRunnerTest
 
-from moosecontrol import MooseControlNew
+from moosecontrol import MooseControl
 from moosecontrol.exceptions import ControlNotWaiting, UnexpectedFlag
-from moosecontrol.moosecontrolnew import DEFAULT_LOG_FORMAT, DEBUG_LOG_FORMAT, STREAM_HANDLER
+from moosecontrol.moosecontrol import DEFAULT_LOG_FORMAT, DEBUG_LOG_FORMAT, STREAM_HANDLER
 
-MOOSECONTROL = 'moosecontrol.MooseControlNew'
+MOOSECONTROL = 'moosecontrol.MooseControl'
 BASERUNNER = 'moosecontrol.runners.BaseRunner'
 
 FAKE_EXECUTE_ON_FLAG = 'foo'
@@ -48,8 +48,8 @@ class TestMooseControl(MooseControlTestCase):
         Test __init__() with the required and default arguments.
         """
         runner = BaseRunnerTest()
-        with patch(f'moosecontrol.moosecontrolnew.logging.basicConfig') as basic_config:
-            control = MooseControlNew(runner)
+        with patch(f'moosecontrol.moosecontrol.logging.basicConfig') as basic_config:
+            control = MooseControl(runner)
             basic_config.assert_called_once_with(
                 level=logging.INFO,
                 handlers=[STREAM_HANDLER],
@@ -64,23 +64,23 @@ class TestMooseControl(MooseControlTestCase):
         Test __init__() with quiet and verbose set.
         """
         with self.assertRaises(ValueError) as e:
-            MooseControlNew(BaseRunnerTest(), quiet=True, verbose=True)
+            MooseControl(BaseRunnerTest(), quiet=True, verbose=True)
         self.assertEqual(str(e.exception), 'Cannot set quiet=True and verbose=True')
 
     def test_init_quiet(self):
         """
         Tests __init__() with quiet=True, which does not add a logging handler.
         """
-        with patch(f'moosecontrol.moosecontrolnew.logging.basicConfig') as basic_config:
-            MooseControlNew(BaseRunnerTest(), quiet=True)
+        with patch(f'moosecontrol.moosecontrol.logging.basicConfig') as basic_config:
+            MooseControl(BaseRunnerTest(), quiet=True)
         basic_config.assert_not_called()
 
     def test_init_verbose(self):
         """
         Tests __init__() with verbose=True, which adds a debug log handler.
         """
-        with patch(f'moosecontrol.moosecontrolnew.logging.basicConfig') as basic_config:
-            MooseControlNew(BaseRunnerTest(), verbose=True)
+        with patch(f'moosecontrol.moosecontrol.logging.basicConfig') as basic_config:
+            MooseControl(BaseRunnerTest(), verbose=True)
         basic_config.assert_called_once_with(
             level=logging.DEBUG,
             handlers=[STREAM_HANDLER],
@@ -94,7 +94,7 @@ class TestMooseControl(MooseControlTestCase):
         and calls wait().
         """
         runner = BaseRunnerTest()
-        control = MooseControlNew(runner)
+        control = MooseControl(runner)
         with patch(f'{BASERUNNER}.initialize') as runner_initialize:
             with patch(f'{MOOSECONTROL}.wait') as wait:
                 control.initialize()
@@ -106,7 +106,7 @@ class TestMooseControl(MooseControlTestCase):
         Tests that finalize() calls the underlying runner's finalize().
         """
         runner = BaseRunnerTest()
-        control = MooseControlNew(runner)
+        control = MooseControl(runner)
         with patch(f'{BASERUNNER}.finalize') as runner_finalize:
             control.finalize()
         runner_finalize.assert_called_once()
@@ -116,7 +116,7 @@ class TestMooseControl(MooseControlTestCase):
         Tests that cleanup() calls the underlying runner's cleanup().
         """
         runner = BaseRunnerTest()
-        control = MooseControlNew(runner)
+        control = MooseControl(runner)
         with patch(f'{BASERUNNER}.cleanup') as runner_cleanup:
             control.cleanup()
         runner_cleanup.assert_called_once()
@@ -129,8 +129,8 @@ class TestMooseControl(MooseControlTestCase):
         runner = BaseRunnerTest()
 
         def action():
-            with MooseControlNew(runner) as cm:
-                self.assertIsInstance(cm.control, MooseControlNew)
+            with MooseControl(runner) as cm:
+                self.assertIsInstance(cm.control, MooseControl)
 
         methods = [f'{MOOSECONTROL}.initialize', f'{MOOSECONTROL}.finalize']
         self.assert_methods_called_in_order(methods, action)
@@ -138,12 +138,12 @@ class TestMooseControl(MooseControlTestCase):
 class TestMooseControlSetUpControl(MooseControlTestCase):
     """
     Tests moosecontrol.moosecontrol.MooseControl, automatically
-    setting up a MooseControlNew for each case.
+    setting up a MooseControl for each case.
     """
     def setUp(self):
         # The control for this test
         runner = BaseRunnerTest(poll_time=0.001)
-        self.control: MooseControlNew = MooseControlNew(runner, quiet=True)
+        self.control: MooseControl = MooseControl(runner, quiet=True)
 
         # Paths in order that were called using mocked Session.get
         self.get_paths: list[str] = []

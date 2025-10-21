@@ -4,7 +4,6 @@ branch = True
 omit =
     conftest.py
     requests_unixsocket/*
-    moosecontrol.py
 parallel = False
 
 [report]

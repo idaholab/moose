@@ -13,7 +13,7 @@ import shlex
 import sys
 from numbers import Number
 
-from moosecontrol import SubprocessPortRunner, SubprocessSocketRunner, MooseControlNew
+from moosecontrol import SubprocessPortRunner, SubprocessSocketRunner, MooseControl
 from moosecontrol.runners.subprocessrunnerbase import SubprocessRunnerBase
 
 class TestMooseControl:
@@ -54,12 +54,12 @@ class TestMooseControl:
             moose_control_name=control_name,
             initialize_timeout=1
         )
-        self._control: MooseControlNew = MooseControlNew(
+        self._control: MooseControl = MooseControl(
             self._runner,
             verbose=True
         )
 
-    def __enter__(self) -> MooseControlNew:
+    def __enter__(self) -> MooseControl:
         self._control.initialize()
         return self._control
 

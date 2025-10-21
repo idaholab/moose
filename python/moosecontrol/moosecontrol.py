@@ -7,554 +7,512 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-# pylint: skip-file
-# type: ignore
+# pylint: disable=logging-fstring-interpolation
 
-import os
-import requests
-import string
-import random
-import subprocess
-import time
+from dataclasses import dataclass
+from numbers import Number
+from time import sleep
+from typing import Any, Iterable, Optional, Tuple, Type
 import logging
-import tempfile
-from threading import Thread
+
 import numpy as np
 import numpy.typing as npt
-from typing import Any
+
+from moosecontrol.exceptions import ControlNotWaiting, UnexpectedFlag
+from moosecontrol.validation import check_response_data
+from moosecontrol.runners import BaseRunner
+from moosecontrol.runners.baserunner import WebServerControlResponse
 
 # Common logger for the MooseControl
 logger = logging.getLogger('MooseControl')
+# The stream handler for logging
+STREAM_HANDLER = logging.StreamHandler()
+# Default format to use for logs
+DEFAULT_LOG_FORMAT = '%(message)s'
+# Format to use for debug logs (when verbose=True)
+DEBUG_LOG_FORMAT = '%(asctime)s:%(levelname)s:%(name)s: %(message)s'
+
+@dataclass
+class MooseControlManager:
+    """
+    Context manager for MooseControl.
+    """
+    # The underlying MooseControl
+    control: 'MooseControl'
 
 class MooseControl:
-    """Helper for interacting with the MOOSE WebServerControl.
-
-    Use this class as follows:
-        control = MooseControl(...)
-        control.initialize()
-        <interact with the process>
-        control.finalize()
-
-    This object is tested primarily by
-    test/tests/controls/web_server_control in the framework."""
-
+    """
+    Helper for interacting with the MOOSE WebServerControl.
+    """
     def __init__(self,
-                 moose_command: list[str] = None,
-                 moose_port: int = None,
-                 moose_control_name: str = None,
-                 inherit_environment: bool = True,
-                 poll_time: float = 0.1):
-        """Constructor
-
-        If "moose_port" is specified without "moose_command": Connect to the webserver at
-        this port and do not spawn a moose process.
-
-        If "moose_command" is specified at all, "moose_control_name" is needed in order
-        to specify a command line argument to set either the port or the file socket.
-
-        If "moose_command" is specified with "moose_port": Spawn a moose process and then
-        connect to it at the specified port.
-
-        If "moose_command" is specified without "moose_port": Spawn a moose process and then
-        determine a file socket to connect to within the current working directory. This is
-        the preferred method of operation.
-
-        Parameters:
-            moose_command (list[str]): The command to use to start the moose process
-            moose_port (int): The webserver port to connect to
-            moose_control_name (str): The name of the input control object
-            inherit_environment (bool): Whether or not the MOOSE command will inherit the current shell environment
-            poll_time (float): Time between successive message polls in seconds
+                 runner: BaseRunner,
+                 quiet: bool = False,
+                 verbose: bool = False):
         """
-        # Setup a basic logger
-        logging.basicConfig(level=logging.INFO,
-                            handlers=[logging.StreamHandler()],
-                            format='%(name)s: %(message)s')
+        Arguments
+        ---------
+        runner : BaseRunner
+            The runner used to connect to the server.
 
-        # Sanity checks on input
-        has_moose_command = moose_command is not None
-        has_moose_port = moose_port is not None
-        has_moose_control_name = moose_control_name is not None
-        if not has_moose_command and not has_moose_port:
-            raise ValueError('One of "moose_command" or "moose_port" must at least be provided')
-        if has_moose_command and not has_moose_control_name:
-            raise ValueError('"moose_control_name" must be specified with "moose_command"')
-        if has_moose_command and not isinstance(moose_command, list):
-            raise ValueError('"moose_command" is not a list')
-
-        # Store inputs
-        self._moose_command = moose_command
-        self._moose_port = moose_port
-        self._moose_control_name = moose_control_name
-        self._inherit_environment = inherit_environment
-
-        # Set defaults
-        self._url = None
-        self._moose_process = None
-        self._moose_reader = None
-
-        # How often we want to poll MOOSE for its availability
-        self._poll_time = poll_time
-
-        # Whether or not we called initialize()
-        self._initialized = False
-
-        # The file socket we created, if any
-        self._file_socket = None
-
-    def __del__(self):
-        self.kill()
-
-    def isProcessRunning(self):
-        """Returns whether or not a moose process is running"""
-        return self._moose_process is not None and self._moose_process.poll() is None
-
-    def possiblyRemoveSocket(self):
-        """Attempts to remove the file socket if one was created
-        and it exists."""
-        if self._file_socket and os.path.exists(self._file_socket):
-            try:
-                os.remove(self._file_socket)
-                self._file_socket = None
-            except:
-                pass
-
-    def kill(self):
-        """Kills the underlying moose process if one is running"""
-        if self.isProcessRunning():
-            self._moose_process.kill()
-            self._moose_process.wait()
-        self.possiblyRemoveSocket()
-
-    class ControlException(Exception):
-        """Basic exception for an error within the MooseControl"""
-        def __init__(self, message):
-            super().__init__(message)
-
-    def _requireMooseProcess(self):
-        """Throws an exception if the moose process is not running (only if one was spwaned)"""
-        if self._moose_process and not self.isProcessRunning():
-            raise self.ControlException('The MOOSE process has ended')
-
-    def _requests_wrapper(self, function_name, *args, **kwargs):
-        """Helper for wrapping a request function with the name function_name
-        that uses a patch for dealing with file socket"""
-        if self._file_socket:
-            from .requests_unixsocket import Session
-            accessor = Session()
-        else:
-            accessor = requests
-        return getattr(accessor, function_name)(*args, **kwargs)
-
-    def _requests_get(self, *args, **kwargs):
-        """Wrapper for requests.get that uses a patch for dealing with a file socket"""
-        return self._requests_wrapper('get', *args, **kwargs)
-
-    def _requests_post(self, *args, **kwargs):
-        """Wrapper for requests.post that uses a patch for dealing with a file socket"""
-        return self._requests_wrapper('post', *args, **kwargs)
-
-    def _get(self, path: str):
-        """Calls GET on the webserver
-
-        Parameters:
-            path (str): The path to call GET on
-        Returns:
-            int: The HTTP status code
-            dict or None: The returned JSON data, if any, otherwise None
+        Additional Arguments
+        --------------------
+        quiet : bool
+            Disables on-screen logging output if True.
+        verbose : bool
+            Enables on-screen debugging output if True.
         """
-        if not self._initialized:
-            raise self.ControlException('Attempting GET without calling initialize()')
-        self._requireMooseProcess()
-        self._requireListening()
+        assert isinstance(runner, BaseRunner)
+        assert isinstance(quiet, bool)
+        assert isinstance(verbose, bool)
+        if quiet and verbose:
+            raise ValueError('Cannot set quiet=True and verbose=True')
 
-        r = self._requests_get(f'{self._url}/{path}')
-        r.raise_for_status()
+        # The underlying runner
+        self._runner: BaseRunner = runner
 
-        r_json = None
-        if r.headers.get('content-type') == 'application/json':
-            r_json = r.json()
+        # Setup logger
+        if not quiet:
+            logging.basicConfig(
+                level=logging.DEBUG if verbose else logging.INFO,
+                handlers=[STREAM_HANDLER],
+                format=DEBUG_LOG_FORMAT if verbose else DEFAULT_LOG_FORMAT,
+                datefmt='%H:%M:%S'
+            )
+            if verbose:
+                logging.getLogger().setLevel(logging.DEBUG)
+                logging.getLogger('urllib3.connectionpool').setLevel(logging.INFO)
 
-        return int(r.status_code), r_json
-
-    def _post(self, path: str, data: dict):
-        """Calls POST on the webserver
-
-        Parameters:
-            path (str): The path to call GET on
-            data (dict): The JSON data to include
-        Returns:
-            int: The HTTP status code
-            dict or None: The returned JSON data, if any, otherwise None
+    @property
+    def runner(self) -> BaseRunner:
         """
-        if not self._initialized:
-            raise self.ControlException('Attempting POST without calling initialize()')
-        self._requireMooseProcess()
-        self._requireListening()
-        self._requireWaiting()
+        Get the underlying runner.
+        """
+        return self._runner
 
-        r = self._requests_post(f'{self._url}/{path}', json=data)
-
-        r_json = None
-        if r.headers.get('content-type') == 'application/json':
-            r_json = r.json()
-            error = r_json.get('error')
-            if error is not None:
-                logger.error(error)
-                raise self.ControlException(f'WebServerControl error: {error}')
-        r.raise_for_status()
-
-        return r.status_code, r_json
-
-    @staticmethod
-    def _checkResponse(expected_keys: list, data: list):
-        """Internal helper for checking the keys in data"""
-        for key in data.keys():
-            if key not in expected_keys:
-                raise self.ControlException(f'Unexpected key "{key}"')
-        for key in expected_keys:
-            if key not in data:
-                raise self.ControlException(f'Missing expected key "{key}"')
-
-    def isListening(self) -> bool:
-        """Returns whether or not the webserver is listening"""
-        try:
-            r = self._requests_get(f'{self._url}/check')
-        except requests.exceptions.ConnectionError:
-            return False
-        return r.status_code == 200
-
-    def _requireListening(self):
-        """Internal helper that throws if the server is not listening"""
-        if not self.isListening():
-            raise self.ControlException('MOOSE is not listening')
+    @property
+    def poll_time(self) -> float:
+        """
+        Get the time between polls in seconds.
+        """
+        return self.runner.poll_time
 
     def initialize(self):
-        """Starts the MOOSE process (if enabled) and waits for
-        the MOOSE webserver to start listening
+        """
+        Initializes the underlying runner and waits
+        for the moose process to start.
 
-        Must be called before doing any other operations"""
-        if self._initialized:
-            raise self.ControlException('Already called initialize()')
-
-        # The port to listen on, if any
-        port = None
-
-        # MOOSE command is provided; start the process
-        if self._moose_command:
-            # The command line argument we'll append to set where to listen in the app
-            listen_command = None
-
-            # Specify the port command
-            if self._moose_port is not None:
-                port = int(self._moose_port)
-                listen_command = f'Controls/{self._moose_control_name}/port={port}'
-            # Specify the socket command, determining a randon socket to connect to
-            else:
-                suffix = ''.join(random.choices(string.ascii_lowercase + string.digits, k=6))
-                self._file_socket = os.path.join(tempfile.gettempdir(), f'moose_control_{suffix}')
-                logger.info(f'Determined file socket {self._file_socket} for communication')
-                listen_command = f'Controls/{self._moose_control_name}/file_socket={self._file_socket}'
-
-            # Append the listen command
-            moose_command = self._moose_command + [listen_command]
-
-            # Spawn the moose process
-            logger.info(f'Spawning MOOSE with command "{moose_command}"')
-            self._moose_process = self.spawnMoose(moose_command, self._inherit_environment)
-
-            # And setup the threaded reader that will pipe the moose process
-            # to the common logger
-            def read_process(pipe):
-                for line in iter(pipe.readline, ""):
-                    logging.getLogger('MooseControl.app').info(line.rstrip())
-            self._moose_reader = Thread(target=read_process,
-                                        args=[self._moose_process.stdout],
-                                        daemon=True)
-            self._moose_reader.start()
-
-            # This should be running now
-            self._requireMooseProcess()
-        # MOOSE command is not provided; just connect via the port
-        else:
-            logger.info(f'Using provided port {self._moose_port} for communication')
-            port = int(self._moose_port)
-
-        # Set the URL for communication
-        if port is not None:
-            self._url = f'http://localhost:{port}'
-        else:
-            self._url = f'http+unix://{self._file_socket.replace("/", "%2F")}'
-
-        # Wait for the webserver to listen
-        url_clean = self._url.replace('%2F', '/') # cleanup %2F for socket listening
-        logger.info(f'Waiting for the webserver to start on "{url_clean}"')
-        while True:
-            time.sleep(self._poll_time)
-            self._requireMooseProcess()
-            if self.isListening():
-                break
-
-        self._initialized = True
-        logger.info(f'Webserver is listening on "{url_clean}"')
+        Must be called before interacting with the process;
+        context manager calls initialize() on enter.
+        """
+        self.runner.initialize()
+        self.wait()
 
     def finalize(self):
-        """Waits for the MOOSE webserver to stop listening and for
-        the MOOSE process to exit (if one was setup)
-
-        Use this when you think MOOSE should be done. This will
-        throw in the event that the webserver is waiting for
-        input when you think it should be done"""
-        if self._moose_process:
-            logger.info('Waiting for the webserver to stop and for the app process to exit')
-        else:
-            logger.info('Waiting for the webserver to stop')
-
-        webserver_stopped = False
-        while True:
-            time.sleep(self._poll_time)
-
-            # If the server is no longer responding, we're good
-            if not self.isListening():
-                if not webserver_stopped:
-                    logger.info('Webserver has stopped listening')
-                    webserver_stopped = True
-                if self._moose_process:
-                    self._moose_process.wait()
-                    return_code = self._moose_process.returncode
-                    logger.info(f'App process has exited with code {return_code}')
-                break
-
-            # Make sure that the control isn't waiting for input
-            # while we think we should be done, because this will
-            # hang forever
-            waiting_flag = None
-            try:
-                waiting_flag = self.getWaitingFlag()
-            except: # could be shutting down; can fil
-                pass
-            if waiting_flag is not None:
-                raise self.ControlException(f'Final wait is stuck because the control is waiting on flag {waiting_flag}')
-
-        # Clean this up if it exists
-        self.possiblyRemoveSocket()
-
-    def returnCode(self):
-        """Gets the return code of the moose process"""
-        if self._moose_process is None:
-            raise self.ControlException('A MOOSE process was not spawned')
-        if self._moose_process.poll() is None:
-            raise self.ControlException('The MOOSE process has not completed')
-        return self._moose_process.returncode
-
-    def wait(self, flag: str = None) -> str:
-        """Waits for the MOOSE webserver and returns once the WebServerControl
-        is waiting for input
-
-        Parameters:
-            flag (str or None): The expected execute on flag, if any, otherwise None
-        Returns:
-            str: The execute on flag
         """
-        if flag:
-            logger.info(f'Waiting for the webserver to be at execute on flag {flag}')
-        else:
-            logger.info(f'Waiting for the webserver')
+        Finalizes the underlying runner.
 
-        # Poll until we're available
-        while True:
-            # Wait every so often
-            time.sleep(self._poll_time)
-
-            # If the process is provided, die if it is no longer running
-            if self._moose_process and self._moose_process.poll() is not None:
-                raise self.ControlException(f'Attached MOOSE process has terminated')
-
-            # Wait for it to be available
-            current_flag = self.getWaitingFlag()
-            if current_flag is None:
-                continue
-
-            logger.info(f'Webserver is waiting at execute on flag {current_flag}')
-            if flag is not None and current_flag != flag:
-                raise self.ControlException(f'Unexpected execute on flag {current_flag}')
-            return current_flag
-
-    def getWaitingFlag(self) -> str:
-        """Gets the current EXECUTE_ON flag that WebServerControl is waiting on
-
-        Returns:
-            str or None: The current EXECUTE_ON flag if waiting, otherwise None
+        Should be called when done to gracefully cleanup;
+        context manager calls finalize() on exit
         """
-        status, r = self._get('waiting')
-        if status != 200:
-            raise self.ControlException(f'Unexpected status {status} from waiting')
+        self.runner.finalize()
 
-        if not r['waiting']:
-            self._checkResponse(['waiting'], r)
+    def cleanup(self):
+        """
+        Performs cleanup when a non-graceful exit is needed
+        such as when an exception is thrown.
+        """
+        self.runner.cleanup()
+
+    def __enter__(self) -> MooseControlManager:
+        self.initialize()
+        return MooseControlManager(control=self)
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        # if exc_type is not None:
+        #     logger.warning('')
+        self.finalize()
+
+    def get_waiting_flag(self) -> Optional[str]:
+        """
+        Get the current EXECUTE_ON flag that the WebServerControl
+        is waiting on, if any.
+        """
+        response = self.runner.get('waiting', require_status=200)
+        check_response_data(
+            response,
+            [('waiting', bool)],
+            [('execute_on_flag', str)]
+        )
+        data = response.data
+
+        # waiting = False; not waiting
+        if not data['waiting']:
+            assert 'execute_on_flag' not in data
             return None
 
-        self._checkResponse(['waiting', 'execute_on_flag'], r)
-        return r['execute_on_flag']
+        # waiting = True; get flag
+        return data['execute_on_flag']
 
-    def isWaiting(self) -> bool:
-        """Checks whether or not the webserver is waiting
-
-        Returns:
-            bool: Whether or not the webserver is waiting
+    def is_waiting(self) -> bool:
         """
-        return self.getWaitingFlag() is not None
-
-    def _requireWaiting(self):
-        """Internal helper that throws if the server is not waiting"""
-        if not self.isWaiting():
-            raise self.ControlException('MOOSE is not waiting')
-
-    def setContinue(self):
-        """Tells the WebServerControl to continue"""
-        logger.info(f'Telling the webserver to continue')
-        self._requireWaiting()
-        status, r_json = self._get('continue')
-        if status != 200:
-            raise self.ControlException(f'Unexpected status {status} from continue')
-        if r_json is not None:
-            raise self.ControlException(f'Unexpected data {r_json} from continue')
-        logger.debug(f'Successfully told the webserver to continue')
-
-    def setTerminate(self):
-        """Tells the WebServerControl to terminate the simulation gracefully."""
-        logger.info(f'Telling the webserver to terminate')
-        self._requireWaiting()
-        status, r_json = self._get('terminate')
-        if status != 200:
-            raise self.ControlException(f'Unexpected status {status} from terminate')
-        if r_json is not None:
-            raise self.ControlException(f'Unexpected data {r_json} from terminate')
-        logger.debug(f'Successfully told the webserver to terminate')
-
-    def _setControllable(self, path: str, type: str, value):
-        """Internal helper for setting a controllable value"""
-        logger.info(f'Setting controllable value {path}')
-        logger.debug(f'Setting controllable {type} value {path}={value}')
-        data = {'name': path, 'value': value, 'type': type}
-        status, _ = self._post('set/controllable', data)
-        if status != 201:
-            raise self.ControlException(f'Unexpected status {status} from setting controllable value')
-        logger.debug(f'Successfully set controllable value {path}')
-
-    @staticmethod
-    def _requireNumeric(value):
-        """Helper for requring that the given value is numeric"""
-        if not isinstance(value, (int, float)):
-            raise self.ControlException(f'Value "{value}" is not numeric')
-
-    @staticmethod
-    def _requireType(value, value_type):
-        """Helper for requring that the given value is a certain type"""
-        if not isinstance(value, value_type):
-            raise self.ControlException(f'value is not a {value_type}; is a {type(value)}')
-
-    def setControllableBool(self, path: str, value: bool):
-        """Sets a controllable bool-valued parameter
-
-        The provided value must be a bool
-
-        Parameters:
-            path (str): The path of the controllable value
-            value (float): The value to set
+        Get whether or not the control is currently waiting.
         """
-        self._requireType(value, bool)
-        self._setControllable(path, 'bool', value)
+        return self.get_waiting_flag() is not None
 
-    def setControllableReal(self, path: str, value: float):
-        """Sets a controllable Real-valued parameter
-
-        The provided value must be numeric
-
-        Parameters:
-            path (str): The path of the controllable value
-            value (float): The value to set
+    def require_waiting(self):
         """
-        self._requireNumeric(value)
-        self._setControllable(path, 'Real', float(value))
-
-    def setControllableInt(self, path: str, value: int):
-        """Sets a controllable int-valued parameter
-
-        The provided value must be numeric
-
-        Parameters:
-            path (str): The path of the controllable value
-            value (int): The value to set
+        Raises ControlNotWaiting if the control is not currently waiting.
         """
-        self._requireNumeric(value)
-        self._setControllable(path, 'int', int(value))
+        if not self.is_waiting():
+            raise ControlNotWaiting
 
-    def setControllableVectorReal(self, path: str, value: list[float]):
-        """Sets a controllable vector-of-Real parameter
-
-        The provided value must be a list of numeric values
-
-        Parameters:
-            path (str): The path of the controllable value
-            value (list): The value to set
+    def get(self, path: str, require_status: int = 200) -> WebServerControlResponse:
         """
-        self._requireType(value, list)
-        value_list = []
-        for entry in value:
-            self._requireNumeric(entry)
-            value_list.append(entry)
-        self._setControllable(path, 'std::vector<Real>', value_list)
+        Send a GET request to the server.
 
-    def setControllableVectorInt(self, path: str, value: list[int]):
-        """Sets a controllable vector-of-int parameter
+        Requires that the server be waiting.
 
-        The provided value must be a list of numeric values
+        Parameters
+        ----------
+        path : str
+            The path to GET to.
 
-        Parameters:
-            path (str): The path of the controllable value
-            value (list): The value to set
+        Optional Parameters
+        -------------------
+        require_status : Optional[int]
+            Check that the status code is this if set; default 200.
+
+        Returns
+        -------
+        WebServerControlResponse:
+            The combined response, along with the JSON data if any.
         """
-        self._requireType(value, list)
-        value_list = []
-        for entry in value:
-            self._requireNumeric(entry)
-            value_list.append(int(entry))
-        self._setControllable(path, 'std::vector<int>', value_list)
+        self.require_waiting()
+        return self.runner.get(path, require_status=require_status)
 
-    def setControllableString(self, path: str, value: str):
-        """Sets a controllable string parameter
-
-        Parameters:
-            path (str): The path of the controllable value
-            value (str): The value to set
+    def post(self, path: str, data: dict,
+             require_status: int = 200) -> WebServerControlResponse:
         """
-        self._setControllable(path, 'std::string', str(value))
+        Send a POST request to the server.
 
-    def setControllableVectorString(self, path: str, value: list[float]):
-        """Sets a controllable vector-of-string parameter
+        Requires that the server be waiting.
 
-        The provided value must be a list
+        Parameters
+        ----------
+        path : str
+            The path to POST to.
+        data : dict
+            The JSON data to send.
 
-        Parameters:
-            path (str): The path of the controllable value
-            value (list): The value to set
+        Optional Parameters
+        -------------------
+        require_status : int
+            Check that the status code is this if set; default 200.
+
+        Returns
+        -------
+        WebServerControlResponse:
+            The combined response, along with the JSON data if any.
         """
-        self._requireType(value, list)
-        for i in range(len(value)):
-            value[i] = str(value[i])
-        self._setControllable(path, 'std::vector<std::string>', value)
+        self.require_waiting()
+        return self.runner.post(path, data, require_status=require_status)
 
-    def setControllableMatrix(self, path: str, value: npt.ArrayLike):
-        """Sets a controllable RealEigenMatrix.
+    def set_continue(self):
+        """
+        Tells the control to continue.
+        """
+        logger.info('Sending continue to server')
 
-        The provided value must be something convertible to a numpy array. If it
-        is a 1-D array, it is converted to a 2-D array with 1 row; otherwise,
-        the array must be 2-D.
+        ws_response = self.get('continue')
+        assert not ws_response.has_data()
 
-        Parameters:
-            path (str): The path of the controllable value
-            value (ArrayLike): The value to set
+    def set_terminate(self):
+        """
+        Tells the control to terminate gracefully.
+        """
+        logger.info('Sending terminate to server')
+
+        ws_response = self.get('terminate')
+        assert not ws_response.has_data()
+
+    def wait(self, flag: Optional[str] = None) -> str:
+        """
+        Waits for the webserver and returns once the
+        webserver is waiting.
+
+        Additional Parameters
+        ---------------------
+        flag : Optional[str]
+            The flag to wait for, if any.
+
+        Returns
+        -------
+        str
+            The execute on flag that the server is waiting on.
+        """
+        assert isinstance(flag, (str, type(None)))
+
+        message = 'Waiting for the server'
+        if flag is not None:
+            message += f' to be at flag {flag}'
+        logger.info(message)
+
+        while True:
+            if (current_flag := self.get_waiting_flag()) is not None:
+                logger.info(f'Server is waiting at flag {current_flag}')
+
+                if flag is not None and current_flag != flag:
+                    raise UnexpectedFlag(current_flag)
+
+                return current_flag
+
+            sleep(self.poll_time)
+
+    def get_postprocessor(self, name: str) -> float:
+        """
+        Gets a postprocessor value.
+        """
+        assert isinstance(name, str)
+        logger.debug(f'Getting postprocessor value for "{name}"')
+
+        response = self.post('get/postprocessor', {'name': name})
+        check_response_data(response, [('value', (int, float))])
+        return float(response.data['value'])
+
+    def get_reporter_value(self, name: str) -> Any:
+        """
+        Gets a reporter value.
+        """
+        assert isinstance(name, str)
+        logger.debug(f'Getting reporter value for "{name}"')
+
+        response = self.post('get/reporter', {'name': name})
+        check_response_data(response, [('value', Any)])
+        return response.data['value']
+
+    def get_time(self) -> float:
+        """
+        Gets the current simulation time.
+        """
+        logger.debug('Getting simulation time')
+
+        response = self.get('get/time')
+        check_response_data(response, [('time', (int, float))])
+        return float(response.data['time'])
+
+    def get_dt(self) -> float:
+        """
+        Gets the current simulation timestep.
+        """
+        logger.debug('Getting simulation timestep')
+
+        response = self.get('get/dt')
+        check_response_data(response, [('dt', (int, float))])
+        return float(response.data['dt'])
+
+    def _set_controllable(self, path: str, cpp_type: str,
+                          python_types: Tuple[Type, ...], value: Any):
+        """
+        Internal method for setting a controllable value.
+
+        Parameters
+        ----------
+        path : str
+            The path to the controllable value.
+        cpp_type : str
+            The C++ type of the value.
+        python_types : Tuple[Type, ...]
+            Allowed types for the input values.
+        value : Any
+            The value to set.
+        """
+        assert isinstance(path, str)
+        assert isinstance(cpp_type, str)
+        assert isinstance(python_types, Tuple)
+        logger.debug(f'Setting controllable value "{path}"')
+
+        data = {'name': path, 'value': value, 'type': cpp_type}
+        self.post('set/controllable', data, require_status=201)
+
+    def _set_controllable_scalar(self, path: str, cpp_type: str,
+                                 python_types: Tuple[Type, ...],
+                                 value: Any,
+                                 python_value_type: Optional[Type] = None):
+        """
+        Internal method for setting a scalar controllable value.
+
+        Parameters
+        ----------
+        path : str
+            The path to the controllable value.
+        cpp_type : str
+            The C++ type of the value.
+        python_types : Tuple[Type, ...]
+            Allowed types for the input values.
+        value : Any
+            The value to set.
+
+        Additional Parameters
+        ---------------------
+        python_value_type : Optional[Type]
+            The type to convert the value to, if any.
+        """
+        assert all(isinstance(v, Type) for v in python_types)
+        assert isinstance(python_value_type, (Type, type(None)))
+        if not isinstance(value, python_types):
+            raise TypeError(
+                f'Type {type(value).__name__}'
+                ' is not of allowed type(s) ' +
+                ", ".join([v.__name__ for v in python_types])
+            )
+
+        if python_value_type is not None:
+            value = python_value_type(value)
+        self._set_controllable(path, cpp_type, python_types, value)
+
+    def set_controllable_bool(self, path: str, value: bool):
+        """
+        Sets a controllable bool parameter.
+
+        Parameters
+        ----------
+        path : str
+            The path to the controllable value.
+        value : bool
+            The value to set.
+        """
+        self._set_controllable_scalar(path, 'bool', (bool,), value)
+
+    def set_controllable_int(self, path: str, value: int):
+        """
+        Sets a controllable int parameter.
+
+        Parameters
+        ----------
+        path : str
+            The path to the controllable value.
+        value : int
+            The value to set.
+        """
+        self._set_controllable_scalar(path, 'int', (int,), value)
+
+    def set_controllable_real(self, path: str, value: float):
+        """
+        Sets a controllable Real parameter.
+
+        Parameters
+        ----------
+        path : str
+            The path to the controllable value.
+        value : float
+            The value to set.
+        """
+        self._set_controllable_scalar(path, 'Real', (Number,), value, float)
+
+    def set_controllable_string(self, path: str, value: str):
+        """
+        Sets a controllable std::string parameter.
+
+        Must be waiting.
+
+        Parameters
+        ----------
+        path : str
+            The path to the controllable value.
+        value : str
+            The value to set.
+        """
+        self._set_controllable_scalar(path, 'std::string', (str,), value)
+
+    def _set_controllable_vector(self, path: str, cpp_type: str,
+                                 python_types: Tuple[Type, ...],
+                                 value: Iterable[Any],
+                                 python_value_type: Optional[Type] = None):
+        """
+        Internal method for setting a std::vector controllable value.
+
+        Parameters
+        ----------
+        path : str
+            The path to the controllable value.
+        cpp_type : str
+            The C++ type of the value in the vector container.
+        python_types : Tuple[Type, ...]
+            Allowed types for the input values.
+        value : Iterable[Any]
+            The value to set.
+
+        Additional Parameters
+        ---------------------
+        python_value_type : Optional[Type]
+            The type to convert the value to, if any.
+        """
+        assert all(isinstance(v, Type) for v in python_types)
+        assert isinstance(python_value_type, (Type, type(None)))
+        for i, v in enumerate(value):
+            if not isinstance(v, python_types):
+                raise TypeError(
+                    f'At index {i}: type {type(value).__name__}'
+                    ' is not of allowed type(s) ' +
+                    ", ".join([v.__name__ for v in python_types])
+                )
+
+        value = [v for v in value]
+        if python_value_type is not None:
+            value = [python_value_type(v) for v in value]
+
+        cpp_type = f'std::vector<{cpp_type}>'
+        self._set_controllable(path, cpp_type, python_types, value)
+
+    def set_controllable_vector_int(self, path: str, value: Iterable[int]):
+        """
+        Sets a controllable std::vector<int> parameter.
+
+        Parameters
+        ----------
+        path : str
+            The path to the controllable value.
+        value : Iterable[int]
+            The value to set.
+        """
+        self._set_controllable_vector(path, 'int', (int,), value)
+
+    def set_controllable_vector_real(self, path: str, value: Iterable[Number]):
+        """
+        Sets a controllable std::vector<Real> parameter.
+
+        Parameters
+        ----------
+        path : str
+            The path to the controllable value.
+        value : Iterable[Number]
+            The value to set.
+        """
+        self._set_controllable_vector(path, 'Real', (Number,), value, float)
+
+    def set_controllable_vector_string(self, path: str, value: Iterable[str]):
+        """
+        Sets a controllable std::vector<std::string> parameter.
+
+        Parameters
+        ----------
+        path : str
+            The path to the controllable value.
+        value : Iterable[str]
+            The value to set.
+        """
+        self._set_controllable_vector(path, 'std::string', (str,), value)
+
+    def set_controllable_matrix(self, path: str, value: npt.ArrayLike):
+        """
+        Sets a controllable RealEigenMatrix parameter.
+
+        Parameters
+        ----------
+        path : str
+            The path to the controllable value.
+        value : npt.ArrayLike
+            The value to set.
         """
         try:
             array = np.array(value, dtype=np.float64)
@@ -562,98 +520,10 @@ class MooseControl:
                 array = array.reshape((1, -1))
             assert len(array.shape) == 2
         except Exception as e:
-            raise self.ControlException('value is not convertible to a 1- or 2-D array.') from e
-        self._setControllable(path, 'RealEigenMatrix', array.tolist())
-
-    def getPostprocessor(self, name: str) -> float:
-        """Gets a postprocessor value
-
-        Parameters:
-            name (str): The name of the postprocessor
-        Returns:
-            float: The value of the postprocessor
-        """
-        logger.debug(f'Getting postprocessor value for "{name}"')
-        self._requireWaiting()
-
-        data = {'name': name}
-        status, r = self._post('get/postprocessor', data)
-
-        if status != 200:
-            raise self.ControlException(f'Unexpected status {status} from getting postprocessor value')
-        self._checkResponse(['value'], r)
-
-        value = float(r['value'])
-        logger.debug(f'Successfully retrieved postprocessor value {name}={value}')
-
-        return value
-
-    def getReporterValue(self, name: str) -> Any:
-        """Gets a reporter value
-
-        Parameters:
-            name (str): The name of the reporter value (object_name/value_name)
-        Returns:
-            Any: The reporter value
-        """
-        logger.debug(f'Getting reporter value for "{name}"')
-        self._requireWaiting()
-
-        data = {'name': name}
-        status, r = self._post('get/reporter', data)
-
-        if status != 200:
-            raise self.ControlException(f'Unexpected status {status} from getting postprocessor value')
-        self._checkResponse(['value'], r)
-
-        value = r['value']
-        logger.debug(f'Successfully retrieved reporter value {name}={value}')
-
-        return value
-
-    def getTime(self) -> float:
-        """Gets a time value
-
-        Returns:
-            float: The MOOSE simulation time
-        """
-        logger.debug(f'Getting the MOOSE simulation time')
-        self._requireWaiting()
-
-        status, r = self._get('get/time')
-
-        if status != 200:
-            raise self.ControlException(f'Unexpected status {status} from getting time value')
-        self._checkResponse(['time'], r)
-        assert isinstance(r['time'], (int, float))
-        return r['time']
-
-    def getDT(self) -> float:
-        """Gets a time step size value
-
-        Returns:
-            float: The current time step size value of MOOSE simulation
-        """
-        logger.debug(f'Getting the MOOSE simulation time step size value')
-        self._requireWaiting()
-
-        status, r = self._get('get/dt')
-
-        if status != 200:
-            raise self.ControlException(f'Unexpected status {status} from getting time step size value')
-        self._checkResponse(['dt'], r)
-        assert isinstance(r['dt'], (int, float))
-        return r['dt']
-
-    @staticmethod
-    def spawnMoose(cmd: list[str], inherit_environment: bool = True) -> subprocess.Popen:
-        """Helper for spawning a MOOSE process that will be cleanly killed"""
-        popen_kwargs = {'stdout': subprocess.PIPE,
-                        'stderr': subprocess.STDOUT,
-                        'text': True,
-                        'universal_newlines': True,
-                        'bufsize': 1,
-                        'env': os.environ if inherit_environment else None,
-                        'preexec_fn': os.setsid}
-
-        return subprocess.Popen(cmd, **popen_kwargs)
+            raise ValueError('Value not convertible to a 1- or 2-D array') from e
+        self._set_controllable_scalar(
+            path,
+            'RealEigenMatrix',
+            (list,),
+            array.tolist()
+        )

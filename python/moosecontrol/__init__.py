@@ -8,6 +8,6 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from .moosecontrol import MooseControl
-from .moosecontrolnew import MooseControlNew
-from .runners import PortRunner, SocketRunner, SubprocessPortRunner, \
-    SubprocessSocketRunner
+from .moosecontrol import MooseControl
+from .runners import BaseRunner, PortRunner, SocketRunner, \
+    SubprocessPortRunner, SubprocessSocketRunner
