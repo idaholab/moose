@@ -1453,3 +1453,31 @@ cf8fabc2a0944313bb3e5bf720972ba27d1a2a8b: #31560: update libmesh, wasp and add i
   wasp:
     full_version: 2025.09.18_0
     hash: 67c57c5
+05e79fdc1ae205324f9774332c207dc5738086ca:
+  libmesh:
+    full_version: 2025.09.18_0
+    hash: 748d6ae
+  libmesh-vtk:
+    full_version: 9.4.2_6
+    hash: d384dc6
+  moose-dev:
+    full_version: 2025.10.02
+    hash: '9371540'
+  mpi:
+    full_version: 2025.09.18
+    hash: 37fd888
+  petsc:
+    full_version: 3.23.4_1
+    hash: 6c94cfc
+  pprof:
+    full_version: 2025.06.13
+    hash: 3d296db
+  seacas:
+    full_version: 2025.05.22_0
+    hash: '1278418'
+  tools:
+    full_version: 2025.06.26
+    hash: d73012a
+  wasp:
+    full_version: 2025.09.18_0
+    hash: 67c57c5
