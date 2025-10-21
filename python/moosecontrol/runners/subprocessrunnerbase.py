@@ -7,8 +7,6 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-# pylint: disable=logging-fstring-interpolation
-
 """Defines the SubprocessRunnerBase."""
 
 import os
@@ -199,7 +197,7 @@ class SubprocessRunnerBase(ABC):
         """
         Get the PID of the underlying process if it is running.
         """
-        return self._process.pid if self.is_process_running() else None # type: ignore
+        return self._process.pid if self.is_process_running() else None
 
     def is_process_running(self) -> bool:
         """

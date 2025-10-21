@@ -7,8 +7,6 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-# pylint: disable=attribute-defined-outside-init
-
 import os
 import sys
 from contextlib import ExitStack
@@ -228,9 +226,9 @@ def set_fake_response(response: Response | MagicMock,
     response.status_code = status_code
     response.url = url
     if data is not None:
-        response.headers = {'content-type': 'application/json'} # type: ignore
+        response.headers = {'content-type': 'application/json'}
         if isinstance(response, Response):
-            response._content = dumps(data).encode('utf-8') # pylint: disable=protected-access
+            response._content = dumps(data).encode('utf-8')
         else:
             response.json.return_value = data
 
@@ -268,7 +266,7 @@ class FakeSession(Session):
 
     Will return code 200 on all GET requests.
     """
-    def __init__(self, *_, **__): # pylint: disable=super-init-not-called
+    def __init__(self, *_, **__):
         pass
 
     def close(self):

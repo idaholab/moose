@@ -27,7 +27,6 @@ class SubprocessSocketRunner(SubprocessRunnerBase, SocketRunner):
     spawns a MOOSE process and connects to the
     webserver over a socket.
     """
-    # pylint: disable=too-many-arguments,too-many-positional-arguments,R0801
     def __init__(self,
                  command: list[str],
                  moose_control_name: str,

@@ -7,8 +7,9 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-# pylint: skip-file
-# type: ignore
+from moosecontrol.exceptions import InitializeTimeout
+from moosecontrol.runners import BaseRunner
+from moosecontrol.runners.baserunner import DEFAULT_POLL_TIME, DEFAULT_POKE_POLL_TIME, DEFAULT_INITIALIZE_TIMEOUT
 
 from unittest.mock import MagicMock, patch
 from requests import Session
@@ -17,10 +18,6 @@ from requests.exceptions import ConnectionError
 from common import FAKE_URL, MooseControlTestCase, FakeSession, \
     mock_response, setup_moose_python_path
 setup_moose_python_path()
-
-from moosecontrol.exceptions import InitializeTimeout
-from moosecontrol.runners import BaseRunner
-from moosecontrol.runners.baserunner import DEFAULT_POLL_TIME, DEFAULT_POKE_POLL_TIME, DEFAULT_INITIALIZE_TIMEOUT
 
 BASERUNNER = 'moosecontrol.runners.BaseRunner'
 

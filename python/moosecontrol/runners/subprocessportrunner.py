@@ -23,7 +23,6 @@ class SubprocessPortRunner(SubprocessRunnerBase, PortRunner):
     spawns a MOOSE process and connects to the
     webserver over a port.
     """
-    # pylint: disable=too-many-arguments,too-many-positional-arguments,R0801
     def __init__(self,
                  command: list[str],
                  moose_control_name: str,

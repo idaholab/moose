@@ -7,9 +7,6 @@
 # * Licensed under LGPL 2.1, please see LICENSE for details
 # * https://www.gnu.org/licenses/lgpl-2.1.html
 
-# pylint: skip-file
-# type: ignore
-
 from requests import HTTPError
 from typing import Any
 from unittest import TestCase

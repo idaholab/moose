@@ -7,8 +7,6 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-# pylint: disable=logging-fstring-interpolation,too-many-public-methods
-
 """Implements the MooseControl."""
 
 from dataclasses import dataclass
@@ -361,7 +359,6 @@ class MooseControl:
         data = {'name': path, 'value': value, 'type': cpp_type}
         self.post('set/controllable', data, require_status=201)
 
-    # pylint: disable=too-many-arguments,too-many-positional-arguments
     def _set_controllable_scalar(self, path: str, cpp_type: str,
                                  python_types: Tuple[Type, ...],
                                  value: Any,
@@ -452,7 +449,6 @@ class MooseControl:
         """
         self._set_controllable_scalar(path, 'std::string', (str,), value)
 
-    # pylint: disable=too-many-arguments,too-many-positional-arguments
     def _set_controllable_vector(self, path: str, cpp_type: str,
                                  python_types: Tuple[Type, ...],
                                  value: Iterable[Any],

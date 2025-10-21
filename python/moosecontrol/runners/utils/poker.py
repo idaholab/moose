@@ -7,8 +7,6 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-# pylint: disable=logging-fstring-interpolation
-
 """Defines the Poker."""
 
 from logging import getLogger
@@ -83,8 +81,8 @@ class Poker(Thread):
             logger.debug('Poking webserver')
             try:
                 request = self.poke()
-            except Exception as e: # pylint: disable=broad-exception-caught
-                logger.debug(f'Poke raised {type(e).__name__}; stopping')
+            except Exception as e:
+                logger.debug(f"Poke raised {type(e).__name__}; stopping")
                 break
             if request.status_code != 200:
                 logger.debug(f'Poke has status code {request.status_code}; stopping')

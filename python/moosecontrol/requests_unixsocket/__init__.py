@@ -5,8 +5,6 @@
 # until we have an easy way to install it (from conda),
 # we will import it on our own.
 
-# pylint: skip-file
-
 import sys
 
 import requests

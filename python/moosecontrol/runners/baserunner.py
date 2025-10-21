@@ -1,11 +1,11 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# * This file is part of the MOOSE framework
+# * https://mooseframework.inl.gov
+# *
+# * All rights reserved, see COPYRIGHT for full restrictions
+# * https://github.com/idaholab/moose/blob/master/COPYRIGHT
+# *
+# * Licensed under LGPL 2.1, please see LICENSE for details
+# * https://www.gnu.org/licenses/lgpl-2.1.html
 
 """Defines the BaseRunner."""
 
@@ -16,13 +16,13 @@ from time import sleep
 from typing import Callable, Optional
 
 from requests import Session
-from requests.exceptions import ConnectionError # pylint: disable=redefined-builtin
+from requests.exceptions import ConnectionError
 
 from moosecontrol.exceptions import InitializeTimeout
 from moosecontrol.validation import WebServerControlResponse, process_response
 from .utils import Poker, TimedPollHelper
 
-logger = getLogger('BaseRunner')
+logger = getLogger("BaseRunner")
 
 # Default value for 'poll_time' in BaseRunner
 DEFAULT_POLL_TIME: float = 0.01
@@ -31,6 +31,7 @@ DEFAULT_POKE_POLL_TIME: float = 1.0
 # Default value for 'initialize_timeout' in BaseRunner
 DEFAULT_INITIALIZE_TIMEOUT: float = 300.0
 
+
 class BaseRunner(ABC):
     """
     Abstract base class for a runner to be paired with the MooseControl.
@@ -38,10 +39,13 @@ class BaseRunner(ABC):
     Is responsible for the initial connection to the running MOOSE
     webserver.
     """
-    def __init__(self,
-                 poll_time: float = DEFAULT_POLL_TIME,
-                 poke_poll_time: Optional[float] = DEFAULT_POKE_POLL_TIME,
-                 initialize_timeout: float = DEFAULT_INITIALIZE_TIMEOUT):
+
+    def __init__(
+        self,
+        poll_time: float = DEFAULT_POLL_TIME,
+        poke_poll_time: Optional[float] = DEFAULT_POKE_POLL_TIME,
+        initialize_timeout: float = DEFAULT_INITIALIZE_TIMEOUT,
+    ):
         """
         Parameters
         -------------------
@@ -66,8 +70,9 @@ class BaseRunner(ABC):
         # Time between polls in seconds
         self._poll_time: float = float(poll_time)
         # How often to "poke" the application; if None, don't poke
-        self._poke_poll_time: Optional[float] = None if poke_poll_time is None \
-            else float(poke_poll_time)
+        self._poke_poll_time: Optional[float] = (
+            None if poke_poll_time is None else float(poke_poll_time)
+        )
 
         # Setup the TimedPollHelper for use in keeping track
         # of timing and polling during initialize()
@@ -122,7 +127,7 @@ class BaseRunner(ABC):
 
         Must be overridden.
         """
-        raise NotImplementedError # pragma: no cover
+        raise NotImplementedError  # pragma: no cover
 
     @staticmethod
     @abstractmethod
@@ -132,7 +137,7 @@ class BaseRunner(ABC):
 
         Must be overridden.
         """
-        raise NotImplementedError # pragma: no cover
+        raise NotImplementedError  # pragma: no cover
 
     def is_listening(self) -> bool:
         """
@@ -145,7 +150,7 @@ class BaseRunner(ABC):
         is 200, True is returned.
         """
         try:
-            response = self.get('check')
+            response = self.get("check")
         except ConnectionError:
             return False
         return response.response.status_code == 200
@@ -171,7 +176,7 @@ class BaseRunner(ABC):
             self._initialize_poller.poll(should_exit)
         except TimedPollHelper.StartNotCalled as e:
             raise NotImplementedError(
-                'initialize_start() was not called within initialize()'
+                "initialize_start() was not called within initialize()"
             ) from e
         except TimedPollHelper.PollTimeout as e:
             raise InitializeTimeout(e.waited_time) from e
@@ -193,10 +198,10 @@ class BaseRunner(ABC):
         self._session = self.build_session()
 
         if not self.is_listening():
-            logger.info('Waiting for MOOSE webserver to be listening...')
+            logger.info("Waiting for MOOSE webserver to be listening...")
             self.initialize_poll(self.is_listening)
 
-        logger.info('MOOSE webserver is listening')
+        logger.info("MOOSE webserver is listening")
 
         # Start the poke thread now that the webserver is listening
         if self.poke_poll_time is not None:
@@ -214,7 +219,7 @@ class BaseRunner(ABC):
         Stops the poke thread if it is running.
         """
         if self._poker is not None and self._poker.is_alive():
-            logger.info('Stopping poke poll thread')
+            logger.info("Stopping poke poll thread")
             self._poker.stop()
             self._poker.join()
             self._poker = None
@@ -231,12 +236,12 @@ class BaseRunner(ABC):
 
         # Wait for the MOOSE webserver to stop listening
         if self.is_listening():
-            logger.info('Waiting for the MOOSE webserver to stop listening...')
+            logger.info("Waiting for the MOOSE webserver to stop listening...")
             while True:
                 sleep(self.poll_time)
                 if not self.is_listening():
                     break
-            logger.info('MOOSE webserver is no longer listening')
+            logger.info("MOOSE webserver is no longer listening")
 
         # Close the session
         self._session.close()
@@ -251,7 +256,7 @@ class BaseRunner(ABC):
         # Stop the poke thread if it's still running (it shouldn't be!)
         if self._poker is not None:
             if self._poker.is_alive():
-                logger.warning('Poke thread is still alive on cleanup; stopping')
+                logger.warning("Poke thread is still alive on cleanup; stopping")
                 self.stop_poker()
             self._poker = None
 
@@ -260,15 +265,16 @@ class BaseRunner(ABC):
             # Can only check is_listening() and call kill() if
             # we have a session
             if self.is_listening():
-                logger.warning('MOOSE webserver is still listening on cleanup; killing')
+                logger.warning("MOOSE webserver is still listening on cleanup; killing")
                 self.kill()
 
-            logger.warning('Request session is still active on cleanup; closing')
+            logger.warning("Request session is still active on cleanup; closing")
             self._session.close()
             self._session = None
 
-    def post(self,path: str, data: dict,
-             require_status: Optional[int] = None) -> WebServerControlResponse:
+    def post(
+        self, path: str, data: dict, require_status: Optional[int] = None
+    ) -> WebServerControlResponse:
         """
         Send a POST request to the server.
 
@@ -290,10 +296,12 @@ class BaseRunner(ABC):
             The combined response, along with the JSON data if any.
         """
         assert self._session is not None
-        with self._session.post(f'{self.url}/{path}', json=data) as response:
+        with self._session.post(f"{self.url}/{path}", json=data) as response:
             return process_response(response, require_status=require_status)
 
-    def get(self, path: str, require_status: Optional[int] = None) -> WebServerControlResponse:
+    def get(
+        self, path: str, require_status: Optional[int] = None
+    ) -> WebServerControlResponse:
         """
         Send a GET request to the server.
 
@@ -313,7 +321,7 @@ class BaseRunner(ABC):
             The combined response, along with the JSON data if any.
         """
         assert self._session is not None
-        with self._session.get(f'{self.url}/{path}') as response:
+        with self._session.get(f"{self.url}/{path}") as response:
             return process_response(response, require_status=require_status)
 
     def _build_poker(self) -> Poker:
@@ -321,22 +329,18 @@ class BaseRunner(ABC):
         Internal method for building the poke thread.
         """
         assert self.poke_poll_time is not None
-        return Poker(
-            self.poke_poll_time,
-            self.build_session(),
-            f'{self.url}/poke'
-        )
+        return Poker(self.poke_poll_time, self.build_session(), f"{self.url}/poke")
 
     def kill(self):
         """
         Sends the kill command via GET /kill if the webserver is listening.
         """
         if self.is_listening():
-            logger.info('Killing MOOSE webserver')
+            logger.info("Killing MOOSE webserver")
 
             # This will trigger a mooseError in MOOSE, so we can't
             # really guarantee any valid response after this
             try:
-                self.get('kill')
-            except: # pylint: disable=bare-except
+                self.get("kill")
+            except:
                 pass
