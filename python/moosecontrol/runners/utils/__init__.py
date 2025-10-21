@@ -11,3 +11,5 @@
 from .poker import Poker
 from .subprocessreader import SubprocessReader
 from .timedpollhelper import TimedPollHelper
+
+__all__ = ["Poker", "SubprocessReader", "TimedPollHelper"]

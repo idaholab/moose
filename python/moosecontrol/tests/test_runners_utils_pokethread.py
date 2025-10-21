@@ -7,6 +7,8 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
+# ruff: noqa: E402
+
 from requests import ConnectionError, HTTPError
 from time import sleep
 from unittest.mock import patch

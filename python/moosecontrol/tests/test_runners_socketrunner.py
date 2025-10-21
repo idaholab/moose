@@ -7,6 +7,8 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
+# ruff: noqa: E402
+
 import os
 from pathlib import Path
 from subprocess import Popen, PIPE
@@ -265,7 +267,7 @@ class TestSocketRunner(MooseControlTestCase):
         runner = SocketRunner(socket_path, **LIVE_BASERUNNER_KWARGS)
         runner.initialize()
         socket_i = self.assert_in_log(f"Found connection socket {socket_path}")
-        self.assert_in_log(f"MOOSE webserver is listening", after_index=socket_i)
+        self.assert_in_log("MOOSE webserver is listening", after_index=socket_i)
 
         # Input has one continue on INITIAL
         while not runner.get("waiting").data["waiting"]:

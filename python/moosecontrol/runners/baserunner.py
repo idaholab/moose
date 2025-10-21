@@ -342,5 +342,5 @@ class BaseRunner(ABC):
             # really guarantee any valid response after this
             try:
                 self.get("kill")
-            except:
+            except:  # noqa: E722
                 pass

@@ -7,6 +7,8 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
+# ruff: noqa: E402
+
 from subprocess import Popen, PIPE
 
 from common import MooseControlTestCase, setup_moose_python_path

@@ -7,6 +7,8 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
+# ruff: noqa: E402
+
 import logging
 import os
 
@@ -55,7 +57,7 @@ class TestMooseControl(MooseControlTestCase):
         Test __init__() with the required and default arguments.
         """
         runner = BaseRunnerTest()
-        with patch(f"moosecontrol.moosecontrol.logging.basicConfig") as basic_config:
+        with patch("moosecontrol.moosecontrol.logging.basicConfig") as basic_config:
             control = MooseControl(runner)
             basic_config.assert_called_once_with(
                 level=logging.INFO,
@@ -79,7 +81,7 @@ class TestMooseControl(MooseControlTestCase):
         """
         Tests __init__() with quiet=True, which does not add a logging handler.
         """
-        with patch(f"moosecontrol.moosecontrol.logging.basicConfig") as basic_config:
+        with patch("moosecontrol.moosecontrol.logging.basicConfig") as basic_config:
             MooseControl(BaseRunnerTest(), quiet=True)
         basic_config.assert_not_called()
 
@@ -87,7 +89,7 @@ class TestMooseControl(MooseControlTestCase):
         """
         Tests __init__() with verbose=True, which adds a debug log handler.
         """
-        with patch(f"moosecontrol.moosecontrol.logging.basicConfig") as basic_config:
+        with patch("moosecontrol.moosecontrol.logging.basicConfig") as basic_config:
             MooseControl(BaseRunnerTest(), verbose=True)
         basic_config.assert_called_once_with(
             level=logging.DEBUG,
@@ -202,20 +204,6 @@ class TestMooseControl(MooseControlTestCase):
         control.cleanup()
 
         runner.cleanup.assert_called_once()
-
-    def test_context_manager(self):
-        """
-        Tests the MooseControl context manager, which should call
-        initialize() on enter and finalize() on exit.
-        """
-        runner = BaseRunnerTest()
-
-        def action():
-            with MooseControl(runner) as cm:
-                self.assertIsInstance(cm.control, MooseControl)
-
-        methods = [f"{MOOSECONTROL}.initialize", f"{MOOSECONTROL}.finalize"]
-        self.assert_methods_called_in_order(methods, action)
 
     @pytest.mark.moose
     def test_live(self):
@@ -355,7 +343,7 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
         """
         Tests get_waiting_flag().
         """
-        with self.mock_get(waiting=False) as get:
+        with self.mock_get(waiting=False):
             self.assertIsNone(self.control.get_waiting_flag())
         self.assertGetPaths(["waiting"])
 
@@ -448,7 +436,7 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
         self.assertEqual(str(e.exception), "Unexpected execute on flag foo")
         self.assertGetPaths(["waiting"])
         self.assert_log_size(2)
-        self.assert_log_message(0, f"Waiting for the server to be at flag abcd")
+        self.assert_log_message(0, "Waiting for the server to be at flag abcd")
         self.assert_log_message(1, f"Server is waiting at flag {FAKE_EXECUTE_ON_FLAG}")
 
     def test_wait_with_poll(self):
@@ -474,7 +462,7 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
         self.assertEqual(flag, FAKE_EXECUTE_ON_FLAG)
         self.assertEqual(get_count, 2)
         self.assert_log_size(2)
-        self.assert_log_message(0, f"Waiting for the server")
+        self.assert_log_message(0, "Waiting for the server")
         self.assert_log_message(1, f"Server is waiting at flag {FAKE_EXECUTE_ON_FLAG}")
 
     def test_get_postprocessor(self):
@@ -650,7 +638,6 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
         """
         value = [1, 2, 3]
         self.assertFalse(all(isinstance(v, float) for v in value))
-        float_value = [float(v) for v in value]
 
         # Converts list[int] -> list[float]
         with self.mock_get(waiting=True):
@@ -666,19 +653,6 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
         Tests set_controllable_vector_int().
         """
         self.run_test_set_controllable([1, 2, 3], "std::vector<int>", "vector_int")
-
-    def test_set_controllable_vector_real(self):
-        """
-        Tests set_controllable_vector_int().
-        """
-        value = [1.0, 2, 3.0]
-        self.assertFalse(all(isinstance(v, float) for v in value))
-
-        self.run_test_set_controllable(value, "std::vector<Real>", "vector_real")
-
-        # Converted all to float
-        post_value = self.post_paths[0][1]["value"]
-        self.assertTrue(all(isinstance(v, float) for v in post_value))
 
     def test_set_controllable_vector_real(self):
         """

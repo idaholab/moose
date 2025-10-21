@@ -133,7 +133,7 @@ class TestBaseRunner(MooseControlTestCase):
         initialize_start() will raise an exception.
         """
         runner = BaseRunnerTest(poll_time=0.001)
-        with self.assertRaises(NotImplementedError) as e_cm:
+        with self.assertRaises(NotImplementedError):
             runner.initialize_poll(lambda: False)
 
     def test_initialize_timeout(self):
@@ -148,7 +148,7 @@ class TestBaseRunner(MooseControlTestCase):
         )
         runner.is_listening = MagicMock(return_value=False)
 
-        with self.assertRaises(InitializeTimeout) as e_cm:
+        with self.assertRaises(InitializeTimeout):
             runner.initialize()
         runner._session = None
 
