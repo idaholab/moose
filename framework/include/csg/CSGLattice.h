@@ -162,6 +162,9 @@ protected:
   /// Universes in the arrangement of how they appear in the lattice; dimensions depends on lattice type
   std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> _universe_map;
 
+  // CSGLatticeList needs to be friend to access setName()
+  friend class CSGLatticeList;
+
 #ifdef MOOSE_UNIT_TEST
   /// Friends for unit testing
   ///@{
