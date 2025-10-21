@@ -394,7 +394,7 @@ class MooseControlNew:
         """
         self._set_controllable_scalar(path, 'int', (int,), value)
 
-    def set_controllable_real(self, path: str, value: Number):
+    def set_controllable_real(self, path: str, value: float):
         """
         Sets a controllable Real parameter.
 
@@ -402,7 +402,7 @@ class MooseControlNew:
         ----------
         path : str
             The path to the controllable value.
-        value : Number
+        value : float
             The value to set.
         """
         self._set_controllable_scalar(path, 'Real', (Number,), value, float)
