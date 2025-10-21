@@ -38,9 +38,6 @@ class TestMooseControl:
         assert isinstance(control_name, str)
         assert isinstance(use_port, bool)
 
-        # The name of the WebServerControl
-        self._control_name: str = control_name
-
         # Get the command to run (from env)
         command_var = 'RUNAPP_COMMAND'
         command = os.environ.get(command_var)
@@ -54,7 +51,7 @@ class TestMooseControl:
         self._runner: SubprocessRunnerBase = runner_type(
             command=command,
             moose_control_name=control_name,
-            initialize_timeout=1
+            initialize_timeout=10
         )
         self._control: MooseControl = MooseControl(
             self._runner,
@@ -62,15 +59,18 @@ class TestMooseControl:
         )
 
     def __enter__(self) -> MooseControl:
-        self._control.initialize()
-        return self._control
+        """
+        Context manager enter; uses the underlying enter
+        from the MooseControl.
+        """
+        return self._control.__enter__().control
 
-    def __exit__(self, exc_type, exc_value, exc_traceback):
-        if exc_type is not None:
-            self._control.cleanup()
-        else:
-            self._control.finalize()
-            sys.exit(self._runner.get_return_code())
+    def __exit__(self, *args):
+        """
+        Context manager exit; uses the underlying exit from
+        the MooseControl.
+        """
+        self._control.__exit__(*args)
 
 def expect_equal(gold: Number, value: Number):
     """
