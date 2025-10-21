@@ -94,11 +94,20 @@ if [ -z "$skip_sub_update" ]; then
 fi
 
 # Set of supported build methods
-SUPPORTED_METHODS="devel dbg opt"
+SUPPORTED_METHODS="oprof devel dbg opt"
 
 # If METHODS is not set by the user, set it to METHOD if set by the user,
 # otherwise default to building all supported methods listed above
 : ${METHODS:=${METHOD:-$SUPPORTED_METHODS}}
+
+# oprof is treated differently, as an alias to devel, and not built separately
+[[ $METHODS =~ oprof ]] && OPROF_REQUESTED=TRUE
+
+# If oprof is requested, build devel instead
+if [ -n $OPROF_REQUESTED ]; then
+  [[ $METHODS =~ devel ]] && METHODS=${METHODS/oprof/}
+  METHODS=${METHODS/oprof/devel}
+fi
 
 # Map from the supported libMesh-like methods to CMake's build types
 typeset -A METHOD_TO_CMAKE_BUILD_TYPE_MAP
@@ -165,3 +174,9 @@ do
   ln -sf _config-$METHOD.hpp "$MFEM_DIR/include/mfem/config/_config.hpp"
   for lib in "$MFEM_DIR"/lib/libmfem*-$METHOD*; do ln -sf $(basename "$lib") "${lib/-$METHOD/}"; done
 done
+
+# If oprof is requested, symlink headers/libraries to its devel counterparts
+if [ -n $OPROF_REQUESTED ]; then
+  ln -sf _config-devel.hpp "$MFEM_DIR/include/mfem/config/_config-oprof.hpp"
+  for lib in "$MFEM_DIR"/lib/libmfem*-devel*; do ln -sf $(basename "$lib") "${lib/-devel/-oprof}"; done
+fi
