@@ -220,14 +220,15 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
         super().tearDown()
 
     def mock_get(self,
-                 paths: list[Tuple[str, dict]] = [],
+                 paths: Optional[list[Tuple[str, dict]]] = None,
                  waiting: Optional[bool] = None):
         """
         Mocks Session.get for the runner.
         """
         self.get_paths.clear()
 
-        paths = deepcopy(paths)
+        if paths is None:
+            paths = []
         runner = self.control.runner
 
         if waiting is not None:
