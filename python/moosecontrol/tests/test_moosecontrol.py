@@ -11,19 +11,22 @@
 # type: ignore
 
 import logging
+import os
 
 from copy import deepcopy
 from numbers import Number
 from unittest.mock import patch
 from typing import Any, Optional, Tuple
 
+import pytest
+
 from common import MooseControlTestCase, setup_moose_python_path, \
-    mock_response, FAKE_URL
+    mock_response, BASE_INPUT, FAKE_URL
 setup_moose_python_path()
 
 from test_runners_baserunner import BaseRunnerTest
 
-from moosecontrol import MooseControl
+from moosecontrol import MooseControl, SubprocessPortRunner
 from moosecontrol.moosecontrol import MooseControlContextManager
 from moosecontrol.exceptions import ControlNotWaiting, UnexpectedFlag
 from moosecontrol.moosecontrol import DEFAULT_LOG_FORMAT, DEBUG_LOG_FORMAT, STREAM_HANDLER
@@ -195,6 +198,28 @@ class TestMooseControl(MooseControlTestCase):
 
         methods = [f'{MOOSECONTROL}.initialize', f'{MOOSECONTROL}.finalize']
         self.assert_methods_called_in_order(methods, action)
+
+    @pytest.mark.moose
+    def test_live(self):
+        """
+        Tests running a MOOSE input live.
+        """
+        input_file = os.path.join(self.directory.name, 'input.i')
+        with open(input_file, 'w') as f:
+            f.write(BASE_INPUT)
+
+        command = [self.get_moose_exe(), '-i', input_file]
+        runner = SubprocessPortRunner(
+            command=command,
+            moose_control_name='web_server',
+            directory=self.directory.name
+        )
+        with MooseControl(runner) as ctx:
+            control = ctx.control
+            control.set_continue()
+
+        self.assert_no_warning_logs()
+        self.assertEqual(runner.get_return_code(), 0)
 
 class TestMooseControlSetUpControl(MooseControlTestCase):
     """
