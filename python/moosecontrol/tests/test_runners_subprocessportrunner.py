@@ -13,7 +13,13 @@ from unittest.mock import patch
 
 import pytest
 
-from common import BASE_INPUT, LIVE_BASERUNNER_KWARGS, MooseControlTestCase, setup_moose_python_path
+from common import (
+    BASE_INPUT,
+    LIVE_BASERUNNER_KWARGS,
+    MooseControlTestCase,
+    setup_moose_python_path,
+)
+
 setup_moose_python_path()
 
 from moosecontrol import SubprocessPortRunner
@@ -23,20 +29,23 @@ from test_runners_subprocessrunnerbase import ARGS, COMMAND, MOOSE_CONTROL_NAME
 
 FAKE_PORT = 60000
 
-RUNNER = 'moosecontrol.SubprocessPortRunner'
-RUNNER_BASE = 'moosecontrol.runners.subprocessrunnerbase.SubprocessRunnerBase'
-PORT_RUNNER = 'moosecontrol.PortRunner'
+RUNNER = "moosecontrol.SubprocessPortRunner"
+RUNNER_BASE = "moosecontrol.runners.subprocessrunnerbase.SubprocessRunnerBase"
+PORT_RUNNER = "moosecontrol.PortRunner"
+
 
 def patch_runner(name: str, **kwargs):
     """
     Convenience method for patching the SubprocessPortRunner.
     """
-    return patch(f'{RUNNER}.{name}', **kwargs)
+    return patch(f"{RUNNER}.{name}", **kwargs)
+
 
 class TestSubprocessPortRunner(MooseControlTestCase):
     """
     Tests moosecontrol.runners.subprocessportrunner.SubprocessPortRunner.
     """
+
     def test_init(self):
         """
         Tests __init__() with the required arguments.
@@ -63,10 +72,7 @@ class TestSubprocessPortRunner(MooseControlTestCase):
         result = runner.get_additional_command()
         self.assertEqual(
             result,
-            [
-                f'Controls/{runner.moose_control_name}/port={FAKE_PORT}',
-                '--color=off'
-            ]
+            [f"Controls/{runner.moose_control_name}/port={FAKE_PORT}", "--color=off"],
         )
 
     def test_initialize_port_unavailable(self):
@@ -74,8 +80,8 @@ class TestSubprocessPortRunner(MooseControlTestCase):
         Tests initialize() when the port is not available.
         """
         runner = SubprocessPortRunner(**ARGS, port=FAKE_PORT)
-        with patch_runner('port_is_available', return_value=False):
-            regex = f'Port {FAKE_PORT} is already used'
+        with patch_runner("port_is_available", return_value=False):
+            regex = f"Port {FAKE_PORT} is already used"
             with self.assertRaisesRegex(ConnectionRefusedError, regex):
                 runner.initialize()
 
@@ -86,9 +92,9 @@ class TestSubprocessPortRunner(MooseControlTestCase):
         """
         runner = SubprocessPortRunner(**ARGS)
         methods = [
-            RUNNER + '.initialize_start',
-            RUNNER_BASE + '.initialize',
-            PORT_RUNNER + '.initialize'
+            RUNNER + ".initialize_start",
+            RUNNER_BASE + ".initialize",
+            PORT_RUNNER + ".initialize",
         ]
         self.assert_methods_called_in_order(methods, lambda: runner.initialize())
 
@@ -98,7 +104,7 @@ class TestSubprocessPortRunner(MooseControlTestCase):
         SubprocessRunnerBase and PortRunner.
         """
         runner = SubprocessPortRunner(**ARGS)
-        methods = [RUNNER_BASE + '.finalize', PORT_RUNNER + '.finalize']
+        methods = [RUNNER_BASE + ".finalize", PORT_RUNNER + ".finalize"]
         self.assert_methods_called_in_order(methods, lambda: runner.finalize())
 
     def test_cleanup(self):
@@ -107,7 +113,7 @@ class TestSubprocessPortRunner(MooseControlTestCase):
         SubprocessRunnerBase and PortRunner.
         """
         runner = SubprocessPortRunner(**ARGS)
-        methods = [RUNNER_BASE + '.cleanup', PORT_RUNNER + '.cleanup']
+        methods = [RUNNER_BASE + ".cleanup", PORT_RUNNER + ".cleanup"]
         self.assert_methods_called_in_order(methods, lambda: runner.cleanup())
 
     @pytest.mark.moose
@@ -115,15 +121,15 @@ class TestSubprocessPortRunner(MooseControlTestCase):
         """
         Tests running a MOOSE input live.
         """
-        input_file = os.path.join(self.directory.name, 'input.i')
-        with open(input_file, 'w') as f:
+        input_file = os.path.join(self.directory.name, "input.i")
+        with open(input_file, "w") as f:
             f.write(BASE_INPUT)
 
-        command = [self.get_moose_exe(), '-i', input_file]
+        command = [self.get_moose_exe(), "-i", input_file]
         runner = SubprocessPortRunner(
             command=command,
             directory=self.directory.name,
-            moose_control_name='web_server',
+            moose_control_name="web_server",
             **LIVE_BASERUNNER_KWARGS,
         )
         full_command = runner.get_full_command()
@@ -131,19 +137,23 @@ class TestSubprocessPortRunner(MooseControlTestCase):
         runner.initialize()
         pid = runner.get_pid()
         self.assertIsNotNone(pid)
-        self.assert_in_log(f'Starting MOOSE process with command {full_command}')
-        self.assert_in_log(f'MOOSE process started with pid {pid}')
+        self.assert_in_log(f"Starting MOOSE process with command {full_command}")
+        self.assert_in_log(f"MOOSE process started with pid {pid}")
 
         self.assertTrue(runner.is_process_running())
-        while not runner.get('waiting').data['waiting']:
+        while not runner.get("waiting").data["waiting"]:
             sleep(0.001)
-        runner.get('continue')
+        runner.get("continue")
 
         runner.finalize()
 
         self.assert_no_warning_logs()
         self.assertFalse(runner.is_process_running())
 
-        process_output = [v.message for v in self._caplog.records if v.name == 'SubprocessReader']
-        self.assertIn(SubprocessReader.OUTPUT_PREFIX + ' Solve Skipped!', process_output)
+        process_output = [
+            v.message for v in self._caplog.records if v.name == "SubprocessReader"
+        ]
+        self.assertIn(
+            SubprocessReader.OUTPUT_PREFIX + " Solve Skipped!", process_output
+        )
         self.assertEqual(runner.get_return_code(), 0)

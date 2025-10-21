@@ -11,33 +11,38 @@ import os
 from unittest.mock import patch
 
 from common import MooseControlTestCase, setup_moose_python_path
+
 setup_moose_python_path()
 
 from moosecontrol.runners.subprocessrunnerbase import SubprocessRunnerBase
 from moosecontrol.runners.utils import SubprocessReader
 
-COMMAND = ['/path/to/moose-opt', '-i', 'input.i']
-ADDITIONAL_COMMAND = ['--color=off']
-MOOSE_CONTROL_NAME = 'web_server'
-ARGS = {
-    'command': COMMAND,
-    'moose_control_name': MOOSE_CONTROL_NAME
-}
+COMMAND = ["/path/to/moose-opt", "-i", "input.i"]
+ADDITIONAL_COMMAND = ["--color=off"]
+MOOSE_CONTROL_NAME = "web_server"
+ARGS = {"command": COMMAND, "moose_control_name": MOOSE_CONTROL_NAME}
+
 
 class SubprocessRunnerBaseTest(SubprocessRunnerBase):
     def get_additional_command(self):
         return ADDITIONAL_COMMAND
 
+
 def patch_runner(name: str, **kwargs):
     """
     Convenience method for patching the SubprocessRunnerBase.
     """
-    return patch(f'moosecontrol.runners.subprocessrunnerbase.SubprocessRunnerBase.{name}', **kwargs)
+    return patch(
+        f"moosecontrol.runners.subprocessrunnerbase.SubprocessRunnerBase.{name}",
+        **kwargs,
+    )
+
 
 class TestSubprocessRunnerBase(MooseControlTestCase):
     """
     Tests moosecontrol.runners.subprocessrunnerbase.SubprocessRunnerBase.
     """
+
     def test_init(self):
         """
         Tests __init__() with the required arguments.
@@ -66,11 +71,11 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
         """
         Tests initialize() when the directory doesn't exist.
         """
-        directory = '/foo/bar'
+        directory = "/foo/bar"
         self.assertFalse(os.path.exists(directory))
         runner = SubprocessRunnerBaseTest(**ARGS, directory=directory)
 
-        regex = f'Directory {directory} does not exist'
+        regex = f"Directory {directory} does not exist"
         with self.assertRaisesRegex(FileNotFoundError, regex):
             runner.initialize()
 
@@ -84,21 +89,22 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
         runner = SubprocessRunnerBaseTest(
             **ARGS,
             directory=self.directory.name,
-            use_subprocess_reader=use_subprocess_reader
+            use_subprocess_reader=use_subprocess_reader,
         )
 
         # Form a fake process that does something briefly
-        output = ['foo', 'bar']
-        joined_output = '\n'.join(output)
+        output = ["foo", "bar"]
+        joined_output = "\n".join(output)
         command = f'sleep 0.1 && echo "{joined_output}" && sleep 0.1'
         start_process_before = runner.start_process
+
         def mock_start_process(*_, **kwargs):
-            kwargs['shell'] = True
+            kwargs["shell"] = True
             return start_process_before(command, **kwargs)
 
         # Call initialize, ignoring the parent initialize() and using our
         # dummy process
-        with patch_runner('start_process', new=mock_start_process):
+        with patch_runner("start_process", new=mock_start_process):
             runner.initialize()
 
         # Process should still be running
@@ -121,21 +127,21 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
         # Process starting
         self.assert_log_message(
             0,
-            f'Starting MOOSE process with command {command}',
-            name='SubprocessRunnerBase'
+            f"Starting MOOSE process with command {command}",
+            name="SubprocessRunnerBase",
         )
         # Reader thread started
         if use_subprocess_reader:
             self.assert_log_message(
                 1,
-                'Subprocess reader started',
-                name='SubprocessReader',
+                "Subprocess reader started",
+                name="SubprocessReader",
             )
         # Process started
         self.assert_log_message(
             2 if use_subprocess_reader else 1,
-            f'MOOSE process started with pid {pid}',
-            name='SubprocessRunnerBase'
+            f"MOOSE process started with pid {pid}",
+            name="SubprocessRunnerBase",
         )
         # Process output should be in the log
         if use_subprocess_reader:
@@ -143,8 +149,8 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
             for val in output:
                 log_i = self.assert_in_log(
                     SubprocessReader.OUTPUT_PREFIX + val,
-                    name='SubprocessReader',
-                    after_index=log_i
+                    name="SubprocessReader",
+                    after_index=log_i,
                 )
 
     def test_initialize_dummy_process(self):
@@ -176,12 +182,10 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
         Tests running a dummy process and waiting for it in finalize().
         """
         runner = SubprocessRunnerBaseTest(
-            **ARGS,
-            directory=self.directory.name,
-            use_subprocess_reader=False
+            **ARGS, directory=self.directory.name, use_subprocess_reader=False
         )
 
-        runner._process = runner.start_process('sleep 0.1', shell=True)
+        runner._process = runner.start_process("sleep 0.1", shell=True)
 
         pid = runner.get_pid()
         self.assertIsNotNone(pid)
@@ -190,26 +194,24 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
         runner.finalize()
 
         self.assert_log_size(2)
-        self.assert_log_message(0, f'Waiting for MOOSE process {pid} to end...')
-        self.assert_log_message(1, 'MOOSE process has ended')
+        self.assert_log_message(0, f"Waiting for MOOSE process {pid} to end...")
+        self.assert_log_message(1, "MOOSE process has ended")
 
     def test_finalize_wait_subprocess_reader(self):
         """
         Tests running a dummy reader thread and waiting for it in finalize().
         """
         runner = SubprocessRunnerBaseTest(
-            **ARGS,
-            directory=self.directory.name,
-            use_subprocess_reader=True
+            **ARGS, directory=self.directory.name, use_subprocess_reader=True
         )
 
-        process = runner.start_process('sleep 0.1', shell=True)
+        process = runner.start_process("sleep 0.1", shell=True)
         runner._subprocess_reader = SubprocessReader(process)
         runner._subprocess_reader.start()
         runner.finalize()
 
-        self.assert_in_log('Waiting for the reader thread to end...', levelname='DEBUG')
-        self.assert_in_log('Reader thread has ended', levelname='DEBUG')
+        self.assert_in_log("Waiting for the reader thread to end...", levelname="DEBUG")
+        self.assert_in_log("Reader thread has ended", levelname="DEBUG")
         self.assertIsNone(runner._subprocess_reader)
 
         process.wait()
@@ -220,12 +222,10 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
         finalize() because it has completed.
         """
         runner = SubprocessRunnerBaseTest(
-            **ARGS,
-            directory=self.directory.name,
-            use_subprocess_reader=True
+            **ARGS, directory=self.directory.name, use_subprocess_reader=True
         )
 
-        process = runner.start_process('exit 0', shell=True)
+        process = runner.start_process("exit 0", shell=True)
         runner._subprocess_reader = SubprocessReader(process)
         runner._subprocess_reader.start()
         runner._subprocess_reader.join()
@@ -243,7 +243,7 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
         """
         runner = SubprocessRunnerBaseTest(**ARGS)
 
-        runner._process = runner.start_process('sleep 10', shell=True)
+        runner._process = runner.start_process("sleep 10", shell=True)
         self.assertTrue(runner.is_process_running())
 
         self._caplog.clear()
@@ -252,7 +252,9 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
         self.assertFalse(runner.is_process_running())
 
         self.assert_log_size(3)
-        self.assert_log_message(0, 'MOOSE process still running on cleanup; killing', levelname='WARNING')
+        self.assert_log_message(
+            0, "MOOSE process still running on cleanup; killing", levelname="WARNING"
+        )
 
     def test_cleanup_wait_subprocess_reader(self):
         """
@@ -260,7 +262,7 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
         """
         runner = SubprocessRunnerBaseTest(**ARGS)
 
-        process = runner.start_process('sleep 0.1', shell=True)
+        process = runner.start_process("sleep 0.1", shell=True)
         runner._subprocess_reader = SubprocessReader(process)
         runner._subprocess_reader.start()
 
@@ -269,8 +271,10 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
         self.assertFalse(runner._subprocess_reader.is_alive())
 
         self.assert_log_size(5)
-        self.assert_log_message(2, 'Reader thread still running on cleanup; waiting', levelname='WARNING')
-        self.assert_log_message(4, 'Reader thread has ended')
+        self.assert_log_message(
+            2, "Reader thread still running on cleanup; waiting", levelname="WARNING"
+        )
+        self.assert_log_message(4, "Reader thread has ended")
 
     def test_kill_process(self):
         """
@@ -281,7 +285,7 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
             directory=self.directory.name,
         )
 
-        runner._process = runner.start_process('sleep 10', shell=True)
+        runner._process = runner.start_process("sleep 10", shell=True)
         pid = runner.get_pid()
         self.assertIsNotNone(pid)
 
@@ -291,8 +295,8 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
         self.assertFalse(runner.is_process_running())
 
         self.assert_log_size(2)
-        self.assert_log_message(0, f'Killing MOOSE process {pid}')
-        self.assert_log_message(1, 'Killed MOOSE process has ended')
+        self.assert_log_message(0, f"Killing MOOSE process {pid}")
+        self.assert_log_message(1, "Killed MOOSE process has ended")
 
     def test_kill_process_no_process(self):
         """
@@ -312,7 +316,7 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
         """
         runner = SubprocessRunnerBaseTest(**ARGS, use_subprocess_reader=False)
 
-        runner._process = runner.start_process('exit 0', shell=True)
+        runner._process = runner.start_process("exit 0", shell=True)
         runner._process.wait()
 
         self.assertEqual(runner._process.returncode, 0)
@@ -324,10 +328,10 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
         """
         runner = SubprocessRunnerBaseTest(**ARGS, use_subprocess_reader=False)
 
-        runner._process = runner.start_process('sleep 10', shell=True)
+        runner._process = runner.start_process("sleep 10", shell=True)
 
         with self.assertRaises(RuntimeError) as e:
             runner.get_return_code()
         runner._process.kill()
-        self.assertEqual(str(e.exception), 'The process is still running')
+        self.assertEqual(str(e.exception), "The process is still running")
         runner._process.wait()

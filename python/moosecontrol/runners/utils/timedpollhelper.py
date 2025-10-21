@@ -13,6 +13,7 @@ from numbers import Number
 from typing import Callable, Optional
 from time import monotonic, sleep
 
+
 class TimedPollHelper:
     """
     Helper for performing an action in a polled fashion,
@@ -35,6 +36,7 @@ class TimedPollHelper:
     >>>> # Finalize timing if it succeeds
     >>>> helper.end()
     """
+
     def __init__(self, poll_time: float, timeout_time: float):
         """
         Parameters
@@ -135,17 +137,19 @@ class TimedPollHelper:
         """
         Exception raised when the timeout is hit during poll()
         """
+
         def __init__(self, waited_time: float):
             self.waited_time: float = waited_time
-            message = f'Timed out after {waited_time:.2f} seconds'
+            message = f"Timed out after {waited_time:.2f} seconds"
             super().__init__(message)
 
     class StartNotCalled(Exception):
         """
         Exception for calling poll() without start() in TimedPollHelper.
         """
+
         def __init__(self):
-            super().__init__('poll() was called without calling start()')
+            super().__init__("poll() was called without calling start()")
 
     def poll(self, should_exit: Callable[[], bool]):
         """

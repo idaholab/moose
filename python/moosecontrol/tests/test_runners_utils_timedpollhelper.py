@@ -9,21 +9,21 @@
 from unittest import TestCase
 
 from common import setup_moose_python_path
+
 setup_moose_python_path()
 
 from moosecontrol.runners.utils import TimedPollHelper
 
 DEFAULT_POLL_TIME = 0.001
 DEFAULT_TIMEOUT_TIME = 0.005
-DEFAULT_ARGS = {
-    'poll_time': DEFAULT_POLL_TIME,
-    'timeout_time': DEFAULT_TIMEOUT_TIME
-}
+DEFAULT_ARGS = {"poll_time": DEFAULT_POLL_TIME, "timeout_time": DEFAULT_TIMEOUT_TIME}
+
 
 class TestTimedPollHelper(TestCase):
     """
     Tests moosecontrol.runners.utils.timedpollhelper.TimedPollHelper.
     """
+
     def test_init(self):
         """
         Tests initializing.
@@ -96,8 +96,7 @@ class TestTimedPollHelper(TestCase):
         self.assertIsNotNone(helper.end_time)
         self.assertGreater(helper.total_time, DEFAULT_TIMEOUT_TIME)
         self.assertEqual(
-            str(e_cm.exception),
-            f'Timed out after {helper.total_time:.2f} seconds'
+            str(e_cm.exception), f"Timed out after {helper.total_time:.2f} seconds"
         )
 
     def test_poll_no_start(self):

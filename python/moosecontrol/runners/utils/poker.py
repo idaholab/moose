@@ -15,7 +15,8 @@ from threading import Event, Thread
 
 from requests import Session
 
-logger = getLogger('Poker')
+logger = getLogger("Poker")
+
 
 class Poker(Thread):
     """
@@ -30,6 +31,7 @@ class Poker(Thread):
     url : str
         The url to call GET to in order to poke.
     """
+
     def __init__(self, poll_time: float, session: Session, url: str):
         assert isinstance(poll_time, Number)
         assert poll_time > 0
@@ -73,19 +75,19 @@ class Poker(Thread):
         return request
 
     def run(self):
-        logger.debug('Poke thread started')
+        logger.debug("Poke thread started")
 
         # Poll until we've been told not to or until
         # a poke fails
         while not self._stop_event.is_set():
-            logger.debug('Poking webserver')
+            logger.debug("Poking webserver")
             try:
                 request = self.poke()
             except Exception as e:
                 logger.debug(f"Poke raised {type(e).__name__}; stopping")
                 break
             if request.status_code != 200:
-                logger.debug(f'Poke has status code {request.status_code}; stopping')
+                logger.debug(f"Poke has status code {request.status_code}; stopping")
                 break
             self._num_poked += 1
             self._stop_event.wait(self.poll_time)
@@ -93,11 +95,11 @@ class Poker(Thread):
         # Close the session
         self._session.close()
 
-        logger.debug('Poke thread stopped')
+        logger.debug("Poke thread stopped")
 
     def stop(self):
         """
         Tell the run thread to stop.
         """
-        logger.debug('Poke thread requested to stop')
+        logger.debug("Poke thread requested to stop")
         self._stop_event.set()

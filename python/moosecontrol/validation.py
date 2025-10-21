@@ -16,11 +16,13 @@ from requests import Response
 
 from moosecontrol.exceptions import BadStatus, UnexpectedResponse, WebServerControlError
 
+
 @dataclass(frozen=True)
 class WebServerControlResponse:
     """
     Combined response for a POST or GET to the web server.
     """
+
     # The Response
     response: Response
     # The underlying data in the response (if any)
@@ -42,9 +44,11 @@ class WebServerControlResponse:
         """
         return self._data is not None
 
+
 @staticmethod
-def process_response(response: Response,
-                     require_status: Optional[int] = None) -> WebServerControlResponse:
+def process_response(
+    response: Response, require_status: Optional[int] = None
+) -> WebServerControlResponse:
     """
     Processes a web server response (a GET or a POST request).
 
@@ -68,9 +72,9 @@ def process_response(response: Response,
     """
     # Parse the JSON response, if any, also checking for an error
     data = None
-    if response.headers.get('content-type') == 'application/json':
+    if response.headers.get("content-type") == "application/json":
         data = response.json()
-        if (error := data.get('error')):
+        if error := data.get("error"):
             raise WebServerControlError(response, error)
 
     # Force the required status code if any
@@ -82,9 +86,12 @@ def process_response(response: Response,
 
     return WebServerControlResponse(response=response, _data=data)
 
-def check_response_data(ws_response: WebServerControlResponse,
-                        expected: list[Tuple[str, Type | Any | Tuple[Type]]],
-                        optional: Optional[list[Tuple[str, Type | Any | Tuple[Type]]]] = None):
+
+def check_response_data(
+    ws_response: WebServerControlResponse,
+    expected: list[Tuple[str, Type | Any | Tuple[Type]]],
+    optional: Optional[list[Tuple[str, Type | Any | Tuple[Type]]]] = None,
+):
     """
     Checks that the given webserver response data contains
     the given keys and associated types.
@@ -107,31 +114,27 @@ def check_response_data(ws_response: WebServerControlResponse,
 
     response = ws_response.response
     if not ws_response.has_data():
-        raise UnexpectedResponse(
-            response=response,
-            message='does not contain data'
-        )
+        raise UnexpectedResponse(response=response, message="does not contain data")
     data = ws_response.data
 
     expected_keys = [v[0] for v in expected]
     optional_keys = [v[0] for v in optional]
     all_keys = expected_keys + optional_keys
+
     def join_keys(keys):
-        return ', '.join(keys)
+        return ", ".join(keys)
 
     # Keys that shouldn't be there
-    if (unexpected := [k for k in data if k not in all_keys]):
+    if unexpected := [k for k in data if k not in all_keys]:
         raise UnexpectedResponse(
-            response=response,
-            message=f'has unexpected key(s): {join_keys(unexpected)}'
+            response=response, message=f"has unexpected key(s): {join_keys(unexpected)}"
         )
 
     # Keys that should be there
     missing = [k for k in expected_keys if k not in data]
     if missing:
         raise UnexpectedResponse(
-            response=response,
-            message=f'has missing key(s): {join_keys(missing)}'
+            response=response, message=f"has missing key(s): {join_keys(missing)}"
         )
 
     # Values with the wrong type
@@ -141,5 +144,5 @@ def check_response_data(ws_response: WebServerControlResponse,
                 raise UnexpectedResponse(
                     response=response,
                     message=f'key "{key}" has unexpected type "'
-                            f'{type(data[key]).__name__}"'
+                    f'{type(data[key]).__name__}"',
                 )

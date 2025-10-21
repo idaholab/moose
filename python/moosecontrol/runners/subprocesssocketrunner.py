@@ -19,7 +19,8 @@ from typing import Optional
 from .socketrunner import SocketRunner
 from .subprocessrunnerbase import SubprocessRunnerBase, DEFAULT_DIRECTORY
 
-logger = getLogger('SubprocessSocketRunner')
+logger = getLogger("SubprocessSocketRunner")
+
 
 class SubprocessSocketRunner(SubprocessRunnerBase, SocketRunner):
     """
@@ -27,13 +28,16 @@ class SubprocessSocketRunner(SubprocessRunnerBase, SocketRunner):
     spawns a MOOSE process and connects to the
     webserver over a socket.
     """
-    def __init__(self,
-                 command: list[str],
-                 moose_control_name: str,
-                 socket_path: Optional[str] = None,
-                 directory: str = DEFAULT_DIRECTORY,
-                 use_subprocess_reader: bool = True,
-                 **kwargs):
+
+    def __init__(
+        self,
+        command: list[str],
+        moose_control_name: str,
+        socket_path: Optional[str] = None,
+        directory: str = DEFAULT_DIRECTORY,
+        use_subprocess_reader: bool = True,
+        **kwargs,
+    ):
         """
         Parameters
         ----------
@@ -61,7 +65,7 @@ class SubprocessSocketRunner(SubprocessRunnerBase, SocketRunner):
             command=command,
             moose_control_name=moose_control_name,
             directory=directory,
-            use_subprocess_reader=use_subprocess_reader
+            use_subprocess_reader=use_subprocess_reader,
         )
 
         # Build a random socket name if one was not provided
@@ -70,11 +74,7 @@ class SubprocessSocketRunner(SubprocessRunnerBase, SocketRunner):
         else:
             socket_path = os.path.abspath(socket_path)
 
-        SocketRunner.__init__(
-            self,
-            socket_path=socket_path,
-            **kwargs
-        )
+        SocketRunner.__init__(self, socket_path=socket_path, **kwargs)
 
     @staticmethod
     def random_socket_path() -> str:
@@ -82,8 +82,8 @@ class SubprocessSocketRunner(SubprocessRunnerBase, SocketRunner):
         Generates a random socket path in the temporary directory.
         """
         characters = ascii_lowercase + digits
-        name = ''.join(choice(characters) for i in range(7))
-        return os.path.join(gettempdir(), f'moosecontrol_{name}.sock')
+        name = "".join(choice(characters) for i in range(7))
+        return os.path.join(gettempdir(), f"moosecontrol_{name}.sock")
 
     def get_additional_command(self) -> list[str]:
         """
@@ -93,9 +93,9 @@ class SubprocessSocketRunner(SubprocessRunnerBase, SocketRunner):
             - Sets the file socket for the control
             - Disables color in output
         """
-        control_path = f'Controls/{self.moose_control_name}'
+        control_path = f"Controls/{self.moose_control_name}"
         control_socket = f'{control_path}/file_socket="{self.socket_path}"'
-        return [control_socket, '--color=off']
+        return [control_socket, "--color=off"]
 
     def initialize(self):
         """
@@ -104,7 +104,7 @@ class SubprocessSocketRunner(SubprocessRunnerBase, SocketRunner):
         self.initialize_start()
 
         if os.path.exists(self.socket_path):
-            raise FileExistsError(f'Socket {self.socket_path} already exists')
+            raise FileExistsError(f"Socket {self.socket_path} already exists")
 
         # Start the subprocess
         SubprocessRunnerBase.initialize(self)

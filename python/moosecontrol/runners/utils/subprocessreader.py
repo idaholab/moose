@@ -13,15 +13,17 @@ from logging import getLogger
 from threading import Thread
 from subprocess import Popen
 
-logger = getLogger('SubprocessReader')
+logger = getLogger("SubprocessReader")
+
 
 class SubprocessReader(Thread):
     """
     Thread that reads stdout from a subprocess
     and pipes it to a log.
     """
+
     # Prefix appended to output
-    OUTPUT_PREFIX: str = 'OUTPUT: '
+    OUTPUT_PREFIX: str = "OUTPUT: "
 
     def __init__(self, process: Popen):
         """
@@ -41,7 +43,7 @@ class SubprocessReader(Thread):
         """
         Run the thread.
         """
-        logger.info('Subprocess reader started')
+        logger.info("Subprocess reader started")
 
         assert self._process.universal_newlines
         assert self._process.poll() is None
@@ -50,7 +52,7 @@ class SubprocessReader(Thread):
         assert pipe is not None
 
         with pipe:
-            for line in iter(pipe.readline, ''):
+            for line in iter(pipe.readline, ""):
                 logger.info(self.OUTPUT_PREFIX + line.rstrip())
 
-        logger.info('Subprocess reader ending')
+        logger.info("Subprocess reader ending")

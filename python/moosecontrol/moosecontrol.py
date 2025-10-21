@@ -24,30 +24,31 @@ from moosecontrol.runners import BaseRunner
 from moosecontrol.runners.baserunner import WebServerControlResponse
 
 # Common logger for the MooseControl
-logger = logging.getLogger('MooseControl')
+logger = logging.getLogger("MooseControl")
 # The stream handler for logging
 STREAM_HANDLER = logging.StreamHandler()
 # Default format to use for logs
-DEFAULT_LOG_FORMAT = '%(message)s'
+DEFAULT_LOG_FORMAT = "%(message)s"
 # Format to use for debug logs (when verbose=True)
-DEBUG_LOG_FORMAT = '%(asctime)s:%(levelname)s:%(name)s: %(message)s'
+DEBUG_LOG_FORMAT = "%(asctime)s:%(levelname)s:%(name)s: %(message)s"
+
 
 @dataclass
 class MooseControlContextManager:
     """
     Context manager for MooseControl.
     """
+
     # The underlying MooseControl
-    control: 'MooseControl'
+    control: "MooseControl"
+
 
 class MooseControl:
     """
     Helper for interacting with the MOOSE WebServerControl.
     """
-    def __init__(self,
-                 runner: BaseRunner,
-                 quiet: bool = False,
-                 verbose: bool = False):
+
+    def __init__(self, runner: BaseRunner, quiet: bool = False, verbose: bool = False):
         """
         Arguments
         ---------
@@ -65,7 +66,7 @@ class MooseControl:
         assert isinstance(quiet, bool)
         assert isinstance(verbose, bool)
         if quiet and verbose:
-            raise ValueError('Cannot set quiet=True and verbose=True')
+            raise ValueError("Cannot set quiet=True and verbose=True")
 
         # The underlying runner
         self._runner: BaseRunner = runner
@@ -76,11 +77,11 @@ class MooseControl:
                 level=logging.DEBUG if verbose else logging.INFO,
                 handlers=[STREAM_HANDLER],
                 format=DEBUG_LOG_FORMAT if verbose else DEFAULT_LOG_FORMAT,
-                datefmt='%H:%M:%S'
+                datefmt="%H:%M:%S",
             )
             if verbose:
                 logging.getLogger().setLevel(logging.DEBUG)
-                logging.getLogger('urllib3.connectionpool').setLevel(logging.INFO)
+                logging.getLogger("urllib3.connectionpool").setLevel(logging.INFO)
 
     @property
     def runner(self) -> BaseRunner:
@@ -152,7 +153,7 @@ class MooseControl:
         otherwise will cleanup.
         """
         if exc_type is not None:
-            logger.warning(f'Encountered {exc_type.__name__} on exit; running cleanup')
+            logger.warning(f"Encountered {exc_type.__name__} on exit; running cleanup")
             self.cleanup()
         else:
             self.finalize()
@@ -162,21 +163,17 @@ class MooseControl:
         Get the current EXECUTE_ON flag that the WebServerControl
         is waiting on, if any.
         """
-        response = self.runner.get('waiting', require_status=200)
-        check_response_data(
-            response,
-            [('waiting', bool)],
-            [('execute_on_flag', str)]
-        )
+        response = self.runner.get("waiting", require_status=200)
+        check_response_data(response, [("waiting", bool)], [("execute_on_flag", str)])
         data = response.data
 
         # waiting = False; not waiting
-        if not data['waiting']:
-            assert 'execute_on_flag' not in data
+        if not data["waiting"]:
+            assert "execute_on_flag" not in data
             return None
 
         # waiting = True; get flag
-        return data['execute_on_flag']
+        return data["execute_on_flag"]
 
     def is_waiting(self) -> bool:
         """
@@ -215,8 +212,9 @@ class MooseControl:
         self.require_waiting()
         return self.runner.get(path, require_status=require_status)
 
-    def post(self, path: str, data: dict,
-             require_status: int = 200) -> WebServerControlResponse:
+    def post(
+        self, path: str, data: dict, require_status: int = 200
+    ) -> WebServerControlResponse:
         """
         Send a POST request to the server.
 
@@ -246,18 +244,18 @@ class MooseControl:
         """
         Tells the control to continue.
         """
-        logger.info('Sending continue to server')
+        logger.info("Sending continue to server")
 
-        ws_response = self.get('continue')
+        ws_response = self.get("continue")
         assert not ws_response.has_data()
 
     def set_terminate(self):
         """
         Tells the control to terminate gracefully.
         """
-        logger.info('Sending terminate to server')
+        logger.info("Sending terminate to server")
 
-        ws_response = self.get('terminate')
+        ws_response = self.get("terminate")
         assert not ws_response.has_data()
 
     def wait(self, flag: Optional[str] = None) -> str:
@@ -277,14 +275,14 @@ class MooseControl:
         """
         assert isinstance(flag, (str, type(None)))
 
-        message = 'Waiting for the server'
+        message = "Waiting for the server"
         if flag is not None:
-            message += f' to be at flag {flag}'
+            message += f" to be at flag {flag}"
         logger.info(message)
 
         while True:
             if (current_flag := self.get_waiting_flag()) is not None:
-                logger.info(f'Server is waiting at flag {current_flag}')
+                logger.info(f"Server is waiting at flag {current_flag}")
 
                 if flag is not None and current_flag != flag:
                     raise UnexpectedFlag(current_flag)
@@ -300,9 +298,9 @@ class MooseControl:
         assert isinstance(name, str)
         logger.debug(f'Getting postprocessor value for "{name}"')
 
-        response = self.post('get/postprocessor', {'name': name})
-        check_response_data(response, [('value', (int, float))])
-        return float(response.data['value'])
+        response = self.post("get/postprocessor", {"name": name})
+        check_response_data(response, [("value", (int, float))])
+        return float(response.data["value"])
 
     def get_reporter_value(self, name: str) -> Any:
         """
@@ -311,32 +309,33 @@ class MooseControl:
         assert isinstance(name, str)
         logger.debug(f'Getting reporter value for "{name}"')
 
-        response = self.post('get/reporter', {'name': name})
-        check_response_data(response, [('value', Any)])
-        return response.data['value']
+        response = self.post("get/reporter", {"name": name})
+        check_response_data(response, [("value", Any)])
+        return response.data["value"]
 
     def get_time(self) -> float:
         """
         Gets the current simulation time.
         """
-        logger.debug('Getting simulation time')
+        logger.debug("Getting simulation time")
 
-        response = self.get('get/time')
-        check_response_data(response, [('time', (int, float))])
-        return float(response.data['time'])
+        response = self.get("get/time")
+        check_response_data(response, [("time", (int, float))])
+        return float(response.data["time"])
 
     def get_dt(self) -> float:
         """
         Gets the current simulation timestep.
         """
-        logger.debug('Getting simulation timestep')
+        logger.debug("Getting simulation timestep")
 
-        response = self.get('get/dt')
-        check_response_data(response, [('dt', (int, float))])
-        return float(response.data['dt'])
+        response = self.get("get/dt")
+        check_response_data(response, [("dt", (int, float))])
+        return float(response.data["dt"])
 
-    def _set_controllable(self, path: str, cpp_type: str,
-                          python_types: Tuple[Type, ...], value: Any):
+    def _set_controllable(
+        self, path: str, cpp_type: str, python_types: Tuple[Type, ...], value: Any
+    ):
         """
         Internal method for setting a controllable value.
 
@@ -356,13 +355,17 @@ class MooseControl:
         assert isinstance(python_types, Tuple)
         logger.debug(f'Setting controllable value "{path}"')
 
-        data = {'name': path, 'value': value, 'type': cpp_type}
-        self.post('set/controllable', data, require_status=201)
+        data = {"name": path, "value": value, "type": cpp_type}
+        self.post("set/controllable", data, require_status=201)
 
-    def _set_controllable_scalar(self, path: str, cpp_type: str,
-                                 python_types: Tuple[Type, ...],
-                                 value: Any,
-                                 python_value_type: Optional[Type] = None):
+    def _set_controllable_scalar(
+        self,
+        path: str,
+        cpp_type: str,
+        python_types: Tuple[Type, ...],
+        value: Any,
+        python_value_type: Optional[Type] = None,
+    ):
         """
         Internal method for setting a scalar controllable value.
 
@@ -386,9 +389,9 @@ class MooseControl:
         assert isinstance(python_value_type, (Type, type(None)))
         if not isinstance(value, python_types):
             raise TypeError(
-                f'Type {type(value).__name__}'
-                ' is not of allowed type(s) ' +
-                ", ".join([v.__name__ for v in python_types])
+                f"Type {type(value).__name__}"
+                " is not of allowed type(s) "
+                + ", ".join([v.__name__ for v in python_types])
             )
 
         if python_value_type is not None:
@@ -406,7 +409,7 @@ class MooseControl:
         value : bool
             The value to set.
         """
-        self._set_controllable_scalar(path, 'bool', (bool,), value)
+        self._set_controllable_scalar(path, "bool", (bool,), value)
 
     def set_controllable_int(self, path: str, value: int):
         """
@@ -419,7 +422,7 @@ class MooseControl:
         value : int
             The value to set.
         """
-        self._set_controllable_scalar(path, 'int', (int,), value)
+        self._set_controllable_scalar(path, "int", (int,), value)
 
     def set_controllable_real(self, path: str, value: float):
         """
@@ -432,7 +435,7 @@ class MooseControl:
         value : float
             The value to set.
         """
-        self._set_controllable_scalar(path, 'Real', (Number,), value, float)
+        self._set_controllable_scalar(path, "Real", (Number,), value, float)
 
     def set_controllable_string(self, path: str, value: str):
         """
@@ -447,12 +450,16 @@ class MooseControl:
         value : str
             The value to set.
         """
-        self._set_controllable_scalar(path, 'std::string', (str,), value)
+        self._set_controllable_scalar(path, "std::string", (str,), value)
 
-    def _set_controllable_vector(self, path: str, cpp_type: str,
-                                 python_types: Tuple[Type, ...],
-                                 value: Iterable[Any],
-                                 python_value_type: Optional[Type] = None):
+    def _set_controllable_vector(
+        self,
+        path: str,
+        cpp_type: str,
+        python_types: Tuple[Type, ...],
+        value: Iterable[Any],
+        python_value_type: Optional[Type] = None,
+    ):
         """
         Internal method for setting a std::vector controllable value.
 
@@ -477,16 +484,16 @@ class MooseControl:
         for i, v in enumerate(value):
             if not isinstance(v, python_types):
                 raise TypeError(
-                    f'At index {i}: type {type(value).__name__}'
-                    ' is not of allowed type(s) ' +
-                    ", ".join([v.__name__ for v in python_types])
+                    f"At index {i}: type {type(value).__name__}"
+                    " is not of allowed type(s) "
+                    + ", ".join([v.__name__ for v in python_types])
                 )
 
         value = list(value)
         if python_value_type is not None:
             value = [python_value_type(v) for v in value]
 
-        cpp_type = f'std::vector<{cpp_type}>'
+        cpp_type = f"std::vector<{cpp_type}>"
         self._set_controllable(path, cpp_type, python_types, value)
 
     def set_controllable_vector_int(self, path: str, value: Iterable[int]):
@@ -500,7 +507,7 @@ class MooseControl:
         value : Iterable[int]
             The value to set.
         """
-        self._set_controllable_vector(path, 'int', (int,), value)
+        self._set_controllable_vector(path, "int", (int,), value)
 
     def set_controllable_vector_real(self, path: str, value: Iterable[Number]):
         """
@@ -513,7 +520,7 @@ class MooseControl:
         value : Iterable[Number]
             The value to set.
         """
-        self._set_controllable_vector(path, 'Real', (Number,), value, float)
+        self._set_controllable_vector(path, "Real", (Number,), value, float)
 
     def set_controllable_vector_string(self, path: str, value: Iterable[str]):
         """
@@ -526,7 +533,7 @@ class MooseControl:
         value : Iterable[str]
             The value to set.
         """
-        self._set_controllable_vector(path, 'std::string', (str,), value)
+        self._set_controllable_vector(path, "std::string", (str,), value)
 
     def set_controllable_matrix(self, path: str, value: npt.ArrayLike):
         """
@@ -545,10 +552,5 @@ class MooseControl:
                 array = array.reshape((1, -1))
             assert len(array.shape) == 2
         except Exception as e:
-            raise ValueError('Value not convertible to a 1- or 2-D array') from e
-        self._set_controllable_scalar(
-            path,
-            'RealEigenMatrix',
-            (list,),
-            array.tolist()
-        )
+            raise ValueError("Value not convertible to a 1- or 2-D array") from e
+        self._set_controllable_scalar(path, "RealEigenMatrix", (list,), array.tolist())

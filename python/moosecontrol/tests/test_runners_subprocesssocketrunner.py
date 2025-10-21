@@ -15,7 +15,13 @@ from time import sleep
 
 import pytest
 
-from common import BASE_INPUT, LIVE_BASERUNNER_KWARGS, MooseControlTestCase, setup_moose_python_path
+from common import (
+    BASE_INPUT,
+    LIVE_BASERUNNER_KWARGS,
+    MooseControlTestCase,
+    setup_moose_python_path,
+)
+
 setup_moose_python_path()
 
 from moosecontrol import SubprocessSocketRunner
@@ -23,22 +29,25 @@ from moosecontrol.runners.utils import SubprocessReader
 
 from test_runners_subprocessrunnerbase import ARGS, COMMAND, MOOSE_CONTROL_NAME
 
-RUNNER = 'moosecontrol.SubprocessSocketRunner'
-RUNNER_BASE = 'moosecontrol.runners.subprocessrunnerbase.SubprocessRunnerBase'
-SOCKET_RUNNER = 'moosecontrol.SocketRunner'
+RUNNER = "moosecontrol.SubprocessSocketRunner"
+RUNNER_BASE = "moosecontrol.runners.subprocessrunnerbase.SubprocessRunnerBase"
+SOCKET_RUNNER = "moosecontrol.SocketRunner"
 
-FAKE_SOCKET_PATH = '/path/to/foo.sock'
+FAKE_SOCKET_PATH = "/path/to/foo.sock"
+
 
 def patch_runner(name: str, **kwargs):
     """
     Convenience method for patching the SubprocessPortRunner.
     """
-    return patch(f'{RUNNER}.{name}', **kwargs)
+    return patch(f"{RUNNER}.{name}", **kwargs)
+
 
 class TestSubprocessSocketRunner(MooseControlTestCase):
     """
     Tests moosecontrol.runners.subprocesssocketrunner.SubprocessSocketRunner.
     """
+
     def test_init(self):
         """
         Tests __init__() with the required arguments.
@@ -62,7 +71,7 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
         Tests random_socket_path().
         """
         name = SubprocessSocketRunner.random_socket_path()
-        match_re = fr'{gettempdir()}/moosecontrol_[a-z0-9]{{7}}.sock'
+        match_re = rf"{gettempdir()}/moosecontrol_[a-z0-9]{{7}}.sock"
         self.assertIsNotNone(match(match_re, name))
 
     def test_get_additional_command(self):
@@ -75,8 +84,8 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
             result,
             [
                 f'Controls/{runner.moose_control_name}/file_socket="{FAKE_SOCKET_PATH}"',
-                '--color=off'
-            ]
+                "--color=off",
+            ],
         )
 
     def test_initialize_socket_exists(self):
@@ -85,7 +94,7 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
         """
         with NamedTemporaryFile() as f:
             runner = SubprocessSocketRunner(**ARGS, socket_path=f.name)
-            regex = f'Socket {runner.socket_path} already exists'
+            regex = f"Socket {runner.socket_path} already exists"
             with self.assertRaisesRegex(FileExistsError, regex):
                 runner.initialize()
 
@@ -96,9 +105,9 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
         """
         runner = SubprocessSocketRunner(**ARGS)
         methods = [
-            RUNNER + '.initialize_start',
-            RUNNER_BASE + '.initialize',
-            SOCKET_RUNNER + '.initialize'
+            RUNNER + ".initialize_start",
+            RUNNER_BASE + ".initialize",
+            SOCKET_RUNNER + ".initialize",
         ]
         self.assert_methods_called_in_order(methods, lambda: runner.initialize())
 
@@ -108,7 +117,7 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
         SubprocessRunnerBase and SocketRunner.
         """
         runner = SubprocessSocketRunner(**ARGS)
-        methods = [RUNNER_BASE + '.finalize', SOCKET_RUNNER + '.finalize']
+        methods = [RUNNER_BASE + ".finalize", SOCKET_RUNNER + ".finalize"]
         self.assert_methods_called_in_order(methods, lambda: runner.finalize())
 
     def test_cleanup(self):
@@ -117,7 +126,7 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
         SubprocessRunnerBase and SocketRunner.
         """
         runner = SubprocessSocketRunner(**ARGS)
-        methods = [RUNNER_BASE + '.cleanup', SOCKET_RUNNER + '.cleanup']
+        methods = [RUNNER_BASE + ".cleanup", SOCKET_RUNNER + ".cleanup"]
         self.assert_methods_called_in_order(methods, lambda: runner.cleanup())
 
     @pytest.mark.moose
@@ -125,35 +134,39 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
         """
         Tests running a MOOSE input live.
         """
-        input_file = os.path.join(self.directory.name, 'input.i')
-        with open(input_file, 'w') as f:
+        input_file = os.path.join(self.directory.name, "input.i")
+        with open(input_file, "w") as f:
             f.write(BASE_INPUT)
 
-        command = [self.get_moose_exe(), '-i', input_file]
+        command = [self.get_moose_exe(), "-i", input_file]
         runner = SubprocessSocketRunner(
             command=command,
             directory=self.directory.name,
-            moose_control_name='web_server',
-            **LIVE_BASERUNNER_KWARGS
+            moose_control_name="web_server",
+            **LIVE_BASERUNNER_KWARGS,
         )
         full_command = runner.get_full_command()
 
         runner.initialize()
         pid = runner.get_pid()
         self.assertIsNotNone(pid)
-        self.assert_in_log(f'Starting MOOSE process with command {full_command}')
-        self.assert_in_log(f'MOOSE process started with pid {pid}')
+        self.assert_in_log(f"Starting MOOSE process with command {full_command}")
+        self.assert_in_log(f"MOOSE process started with pid {pid}")
 
         self.assertTrue(runner.is_process_running())
-        while not runner.get('waiting').data['waiting']:
+        while not runner.get("waiting").data["waiting"]:
             sleep(0.001)
-        runner.get('continue')
+        runner.get("continue")
 
         runner.finalize()
 
         self.assert_no_warning_logs()
         self.assertFalse(runner.is_process_running())
 
-        process_output = [v.message for v in self._caplog.records if v.name == 'SubprocessReader']
-        self.assertIn(SubprocessReader.OUTPUT_PREFIX + ' Solve Skipped!', process_output)
+        process_output = [
+            v.message for v in self._caplog.records if v.name == "SubprocessReader"
+        ]
+        self.assertIn(
+            SubprocessReader.OUTPUT_PREFIX + " Solve Skipped!", process_output
+        )
         self.assertEqual(runner.get_return_code(), 0)

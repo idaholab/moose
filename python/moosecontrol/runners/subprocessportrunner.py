@@ -15,7 +15,8 @@ from typing import Optional
 from .portrunner import PortRunner
 from .subprocessrunnerbase import SubprocessRunnerBase, DEFAULT_DIRECTORY
 
-logger = getLogger('SubprocessPortRunner')
+logger = getLogger("SubprocessPortRunner")
+
 
 class SubprocessPortRunner(SubprocessRunnerBase, PortRunner):
     """
@@ -23,13 +24,16 @@ class SubprocessPortRunner(SubprocessRunnerBase, PortRunner):
     spawns a MOOSE process and connects to the
     webserver over a port.
     """
-    def __init__(self,
-                 command: list[str],
-                 moose_control_name: str,
-                 port: Optional[int] = None,
-                 directory: str = DEFAULT_DIRECTORY,
-                 use_subprocess_reader: bool = True,
-                 **kwargs):
+
+    def __init__(
+        self,
+        command: list[str],
+        moose_control_name: str,
+        port: Optional[int] = None,
+        directory: str = DEFAULT_DIRECTORY,
+        use_subprocess_reader: bool = True,
+        **kwargs,
+    ):
         """
         Parameters
         ----------
@@ -59,18 +63,14 @@ class SubprocessPortRunner(SubprocessRunnerBase, PortRunner):
             command=command,
             moose_control_name=moose_control_name,
             directory=directory,
-            use_subprocess_reader=use_subprocess_reader
+            use_subprocess_reader=use_subprocess_reader,
         )
 
         # Find an available port if one was not provided
         if port is None:
             port = PortRunner.find_available_port()
 
-        PortRunner.__init__(
-            self,
-            port=port,
-            **kwargs
-        )
+        PortRunner.__init__(self, port=port, **kwargs)
 
     def get_additional_command(self) -> list[str]:
         """
@@ -80,9 +80,9 @@ class SubprocessPortRunner(SubprocessRunnerBase, PortRunner):
             - Sets the port for the control
             - Disables color in output
         """
-        control_path = f'Controls/{self.moose_control_name}'
-        control_socket = f'{control_path}/port={self.port}'
-        return [control_socket, '--color=off']
+        control_path = f"Controls/{self.moose_control_name}"
+        control_socket = f"{control_path}/port={self.port}"
+        return [control_socket, "--color=off"]
 
     def initialize(self):
         """
@@ -91,7 +91,7 @@ class SubprocessPortRunner(SubprocessRunnerBase, PortRunner):
         self.initialize_start()
 
         if not self.port_is_available(self.port):
-            raise ConnectionRefusedError(f'Port {self.port} is already used')
+            raise ConnectionRefusedError(f"Port {self.port} is already used")
 
         # Start the subprocess
         SubprocessRunnerBase.initialize(self)

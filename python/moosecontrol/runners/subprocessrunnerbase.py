@@ -17,9 +17,10 @@ from typing import Optional
 
 from .utils import SubprocessReader
 
-logger = getLogger('SubprocessRunnerBase')
+logger = getLogger("SubprocessRunnerBase")
 
 DEFAULT_DIRECTORY = os.getcwd()
+
 
 class SubprocessRunnerBase(ABC):
     """
@@ -28,11 +29,14 @@ class SubprocessRunnerBase(ABC):
     Is an abstract base class and is used in
     SubprocessSocketRunner and SubprocessPortRunner.
     """
-    def __init__(self,
-                 command: list[str],
-                 moose_control_name: str,
-                 directory: str = DEFAULT_DIRECTORY,
-                 use_subprocess_reader: bool = True):
+
+    def __init__(
+        self,
+        command: list[str],
+        moose_control_name: str,
+        directory: str = DEFAULT_DIRECTORY,
+        use_subprocess_reader: bool = True,
+    ):
         """
         Parameters
         ----------
@@ -106,7 +110,7 @@ class SubprocessRunnerBase(ABC):
         Should be called first in derived classes within initialize().
         """
         if not os.path.isdir(self.directory):
-            raise FileNotFoundError(f'Directory {self.directory} does not exist')
+            raise FileNotFoundError(f"Directory {self.directory} does not exist")
 
         # Start the process
         self._process = self.start_process(self.get_full_command())
@@ -119,7 +123,7 @@ class SubprocessRunnerBase(ABC):
         # Report the PID
         pid = self.get_pid()
         assert pid is not None
-        logger.info(f'MOOSE process started with pid {pid}')
+        logger.info(f"MOOSE process started with pid {pid}")
 
     def finalize(self):
         """
@@ -131,15 +135,15 @@ class SubprocessRunnerBase(ABC):
         pid = self.get_pid()
         if pid is not None:
             assert self._process is not None
-            logger.info(f'Waiting for MOOSE process {pid} to end...')
+            logger.info(f"Waiting for MOOSE process {pid} to end...")
             self._process.wait()
-            logger.info('MOOSE process has ended')
+            logger.info("MOOSE process has ended")
 
         if self._subprocess_reader is not None:
             if self._subprocess_reader.is_alive():
-                logger.debug('Waiting for the reader thread to end...')
+                logger.debug("Waiting for the reader thread to end...")
                 self._subprocess_reader.join()
-                logger.debug('Reader thread has ended')
+                logger.debug("Reader thread has ended")
             self._subprocess_reader = None
 
     def cleanup(self):
@@ -148,15 +152,15 @@ class SubprocessRunnerBase(ABC):
 
         Should ideally do nothing unless something went wrong.
         """
-        if hasattr(self, '_process') and self.is_process_running():
-            logger.warning('MOOSE process still running on cleanup; killing')
+        if hasattr(self, "_process") and self.is_process_running():
+            logger.warning("MOOSE process still running on cleanup; killing")
             self.kill_process()
 
-        subprocess_reader = getattr(self, '_subprocess_reader', None)
+        subprocess_reader = getattr(self, "_subprocess_reader", None)
         if subprocess_reader is not None and subprocess_reader.is_alive():
-            logger.warning('Reader thread still running on cleanup; waiting')
+            logger.warning("Reader thread still running on cleanup; waiting")
             subprocess_reader.join()
-            logger.info('Reader thread has ended')
+            logger.info("Reader thread has ended")
 
     @abstractmethod
     def get_additional_command(self) -> list[str]:
@@ -165,7 +169,7 @@ class SubprocessRunnerBase(ABC):
 
         Must be overridden.
         """
-        raise NotImplementedError # pragma: no cover
+        raise NotImplementedError  # pragma: no cover
 
     def get_full_command(self) -> list[str]:
         """
@@ -181,16 +185,18 @@ class SubprocessRunnerBase(ABC):
         """
         Starts a process with the given command.
         """
-        logger.info(f'Starting MOOSE process with command {command}')
+        logger.info(f"Starting MOOSE process with command {command}")
 
-        kwargs.update({
-            'stdout': PIPE,
-            'stderr': STDOUT,
-            'text': True,
-            'universal_newlines': True,
-            'bufsize': 1,
-            'preexec_fn': os.setsid
-        })
+        kwargs.update(
+            {
+                "stdout": PIPE,
+                "stderr": STDOUT,
+                "text": True,
+                "universal_newlines": True,
+                "bufsize": 1,
+                "preexec_fn": os.setsid,
+            }
+        )
         return Popen(command, **kwargs)
 
     def get_pid(self) -> Optional[int]:
@@ -211,10 +217,10 @@ class SubprocessRunnerBase(ABC):
         """
         pid = self.get_pid()
         if self._process is not None and (pid := self.get_pid()) is not None:
-            logger.info(f'Killing MOOSE process {pid}')
+            logger.info(f"Killing MOOSE process {pid}")
             self._process.kill()
             self._process.wait()
-            logger.info('Killed MOOSE process has ended')
+            logger.info("Killed MOOSE process has ended")
 
     def get_return_code(self) -> int:
         """
@@ -222,5 +228,5 @@ class SubprocessRunnerBase(ABC):
         """
         assert self._process is not None
         if self._process.poll() is None:
-            raise RuntimeError('The process is still running')
+            raise RuntimeError("The process is still running")
         return self._process.returncode

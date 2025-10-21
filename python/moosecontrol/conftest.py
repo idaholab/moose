@@ -13,6 +13,7 @@ from typing import Optional
 
 import pytest
 
+
 def pytest_addoption(parser):
     """
     Adds custom options to pytest.
@@ -21,13 +22,14 @@ def pytest_addoption(parser):
         "--no-moose",
         action="store_true",
         default=False,
-        help="Skip tests that require a moose executable"
+        help="Skip tests that require a moose executable",
     )
     parser.addoption(
-        '--moose-exe',
+        "--moose-exe",
         type=str,
-        help='Specify the path to the moose executable instead of searching'
+        help="Specify the path to the moose executable instead of searching",
     )
+
 
 def pytest_collection_modifyitems(config, items):
     """
@@ -39,6 +41,7 @@ def pytest_collection_modifyitems(config, items):
         for item in items:
             if "moose" in item.keywords:
                 item.add_marker(marker)
+
 
 @pytest.fixture(scope="session")
 def moose_exe(request) -> Optional[str]:

@@ -15,17 +15,16 @@ from requests import Session
 
 from .baserunner import BaseRunner
 
-DEFAULT_HOST = 'http://localhost'
+DEFAULT_HOST = "http://localhost"
+
 
 class PortRunner(BaseRunner):
     """
     Runner to be used with the MooseControl to interact
     with an already-running MOOSE webserver over a port.
     """
-    def __init__(self,
-                 port: int,
-                 host: str = DEFAULT_HOST,
-                 **kwargs):
+
+    def __init__(self, port: int, host: str = DEFAULT_HOST, **kwargs):
         """
         Parameters
         ----------
@@ -54,7 +53,7 @@ class PortRunner(BaseRunner):
         """
         Get the URL for interacting with the server.
         """
-        return f'{self.host}:{self.port}'
+        return f"{self.host}:{self.port}"
 
     @staticmethod
     def build_session() -> Session:
@@ -83,7 +82,7 @@ class PortRunner(BaseRunner):
         Finds a random available local port.
         """
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.bind(('', 0))
+            s.bind(("", 0))
             return s.getsockname()[1]
 
     @staticmethod
@@ -94,5 +93,5 @@ class PortRunner(BaseRunner):
         assert isinstance(port, int)
 
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            connect = s.connect_ex(('localhost', port))
+            connect = s.connect_ex(("localhost", port))
         return connect != 0
