@@ -91,7 +91,7 @@ class MooseControlTestCase(TestCase):
 
         raise FileNotFoundError(
             'Failed to find a MOOSE executable; either set --moose-exe '
-            ' to a moose executable or skip moose tests with --no-moose')
+            'to a moose executable or skip moose tests with --no-moose')
 
     def assert_log_size(self, num: int):
         """
