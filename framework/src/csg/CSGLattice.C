@@ -33,10 +33,10 @@ CSGLattice::setUniverseAtIndex(std::reference_wrapper<const CSGUniverse> univers
 {
   std::string base_msg = "Cannot set universe at location (" + std::to_string(index.first) + ", " +
                          std::to_string(index.second) + ") for lattice " + getName() + ". ";
-  if (!isValidIndex(index))
-    mooseError(base_msg + "Not valid location.");
   if (_universe_map.size() == 0)
     mooseError(base_msg + "Universe map has not been initialized.");
+  if (!isValidIndex(index))
+    mooseError(base_msg + "Not a valid location.");
   _universe_map[index.first][index.second] = universe;
 }
 
@@ -66,7 +66,7 @@ std::reference_wrapper<const CSGUniverse>
 CSGLattice::getUniverseAtIndex(const std::pair<int, int> index)
 {
   if (!isValidIndex(index))
-    mooseError("Index ()" + std::to_string(index.first) + ", " + std::to_string(index.second) +
+    mooseError("Index (" + std::to_string(index.first) + ", " + std::to_string(index.second) +
                ") is not a valid index for lattice " + getName());
   else
     return _universe_map[index.first][index.second];
@@ -84,7 +84,7 @@ CSGLattice::getUniverseIndices(const std::string & univ_name) const
     for (auto j : make_range(_universe_map[i].size()))
     {
       const CSGUniverse & univ = _universe_map[i][j];
-      if (univ.getName() == _name)
+      if (univ.getName() == univ_name)
         indices.push_back(std::make_pair(i, j));
     }
   }
