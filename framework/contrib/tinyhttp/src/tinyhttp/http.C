@@ -355,7 +355,7 @@ void HttpServer::startListening(const std::variant<uint16_t, std::string> listen
         const auto filename = std::get<std::string>(listen_on);
         struct sockaddr_un remote;
         remote.sun_family = AF_LOCAL;
-        strncpy (remote.sun_path, filename.c_str(), sizeof (remote.sun_path));
+        strcpy(remote.sun_path, filename.c_str());
         remote.sun_path[sizeof (remote.sun_path) - 1] = '\0';
         const auto remote_size = offsetof (struct sockaddr_un, sun_path) + strlen (remote.sun_path);
         const auto retval = bind(mSocket, reinterpret_cast<struct sockaddr*>(&remote), remote_size);
