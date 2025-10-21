@@ -89,7 +89,8 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
 
         # Form a fake process that does something briefly
         output = ['foo', 'bar']
-        command = f'sleep 0.1 && echo "{"\n".join(output)}" && sleep 0.1'
+        joined_output = '\n'.join(output)
+        command = f'sleep 0.1 && echo "{joined_output}" && sleep 0.1'
         start_process_before = runner.start_process
         def mock_start_process(*_, **kwargs):
             kwargs['shell'] = True

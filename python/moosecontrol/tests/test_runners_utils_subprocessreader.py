@@ -23,7 +23,8 @@ class TestSubprocessReader(CaptureLogTestCase):
         Tests running the SubprocessReader.
         """
         output = ['foo', 'bar']
-        command = f'sleep 0.01 && echo "{"\n".join(output)}"'
+        joined_output = '\n'.join(output)
+        command = f'sleep 0.01 && echo "{joined_output}"'
         process = Popen(
             command,
             shell=True,
