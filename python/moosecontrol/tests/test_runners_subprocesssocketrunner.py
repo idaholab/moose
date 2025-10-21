@@ -76,7 +76,7 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
         self.assertEqual(
             result,
             [
-                f'Controls/{runner.moose_control_name}/file_socket={FAKE_SOCKET_PATH}',
+                f'Controls/{runner.moose_control_name}/file_socket="{FAKE_SOCKET_PATH}"',
                 '--color=off'
             ]
         )

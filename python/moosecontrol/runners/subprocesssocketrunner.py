@@ -76,11 +76,11 @@ class SubprocessSocketRunner(SubprocessRunnerBase, SocketRunner):
     @staticmethod
     def random_socket_name() -> str:
         """
-        Generates a randoms socket name.
+        Generates a random socket name.
         """
         characters = ascii_lowercase + digits
-        random_string = ''.join(choice(characters) for i in range(5))
-        return f'subprocess_runner_{random_string}.sock'
+        random_string = ''.join(choice(characters) for i in range(7))
+        return f'moosecontrol_{random_string}.sock'
 
     def get_additional_command(self) -> list[str]:
         """
@@ -91,7 +91,7 @@ class SubprocessSocketRunner(SubprocessRunnerBase, SocketRunner):
             - Disables color in output
         """
         control_path = f'Controls/{self.moose_control_name}'
-        control_socket = f'{control_path}/file_socket={self.socket_path}'
+        control_socket = f'{control_path}/file_socket="{self.socket_path}"'
         return [control_socket, '--color=off']
 
     def initialize(self):
