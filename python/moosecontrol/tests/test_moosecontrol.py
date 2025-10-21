@@ -7,6 +7,9 @@
 # * Licensed under LGPL 2.1, please see LICENSE for details
 # * https://www.gnu.org/licenses/lgpl-2.1.html
 
+# pylint: skip-file
+# type: ignore
+
 from copy import deepcopy
 from numbers import Number
 from unittest.mock import patch
@@ -87,7 +90,7 @@ class TestMooseControl(MooseControlTestCase):
                 self.assertIsInstance(cm.control, MooseControlNew)
 
         methods = [f'{MOOSECONTROL}.initialize', f'{MOOSECONTROL}.finalize']
-        self.assertMethodsCalledInOrder(methods, action)
+        self.assert_methods_called_in_order(methods, action)
 
 class TestMooseControlSetUpControl(MooseControlTestCase):
     """
@@ -230,8 +233,8 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
         with self.mock_get(waiting=True, paths=[('continue', {})]):
             self.control.set_continue()
         self.assertGetPaths(['waiting', 'continue'])
-        self.assertLogSize(1)
-        self.assertLogMessage(0, 'Sending continue to webserver')
+        self.assert_log_size(1)
+        self.assert_log_message(0, 'Sending continue to webserver')
 
     def test_set_terminate(self):
         """
@@ -240,8 +243,8 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
         with self.mock_get(waiting=True, paths=[('terminate', {})]) as thing:
             self.control.set_terminate()
         self.assertEqual(self.get_paths, ['waiting', 'terminate'])
-        self.assertLogSize(1)
-        self.assertLogMessage(0, 'Sending terminate to webserver')
+        self.assert_log_size(1)
+        self.assert_log_message(0, 'Sending terminate to webserver')
 
     def test_get_postprocessor(self):
         """
@@ -259,8 +262,8 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
             self.assertEqual(value, get_value)
             self.assertGetPaths(['waiting'])
             self.assertPostPaths([('get/postprocessor', {'name': FAKE_NAME})])
-            self.assertLogSize(1)
-            self.assertLogMessage(
+            self.assert_log_size(1)
+            self.assert_log_message(
                 0,
                 f'Getting postprocessor value for "{FAKE_NAME}"',
                 levelname='DEBUG'
@@ -279,8 +282,8 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
         self.assertEqual(value, get_value)
         self.assertGetPaths(['waiting'])
         self.assertPostPaths([('get/reporter', {'name': FAKE_NAME})])
-        self.assertLogSize(1)
-        self.assertLogMessage(
+        self.assert_log_size(1)
+        self.assert_log_message(
             0,
             f'Getting reporter value for "{FAKE_NAME}"',
             levelname='DEBUG'
@@ -300,8 +303,8 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
             self.assertIsInstance(get_value, float)
             self.assertEqual(value, get_value)
             self.assertGetPaths(['waiting', 'get/time'])
-            self.assertLogSize(1)
-            self.assertLogMessage(
+            self.assert_log_size(1)
+            self.assert_log_message(
                 0,
                 'Getting simulation time',
                 levelname='DEBUG'
@@ -321,8 +324,8 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
             self.assertIsInstance(get_value, float)
             self.assertEqual(value, get_value)
             self.assertGetPaths(['waiting', 'get/dt'])
-            self.assertLogSize(1)
-            self.assertLogMessage(
+            self.assert_log_size(1)
+            self.assert_log_message(
                 0,
                 'Getting simulation timestep',
                 levelname='DEBUG'
@@ -377,8 +380,8 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
             'set/controllable',
             {'name': FAKE_NAME, 'value': value, 'type': cpp_type}
         )])
-        self.assertLogSize(1)
-        self.assertLogMessage(
+        self.assert_log_size(1)
+        self.assert_log_message(
             0,
             f'Setting controllable value "{FAKE_NAME}"',
             levelname='DEBUG'

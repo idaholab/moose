@@ -8,8 +8,9 @@
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
 from dataclasses import dataclass
-from requests import Response
 from typing import Any, Optional, Tuple, Type
+
+from requests import Response
 
 from moosecontrol.exceptions import BadStatus, UnexpectedResponse, WebServerControlError
 
@@ -21,7 +22,23 @@ class WebServerControlResponse:
     # The Response
     response: Response
     # The underlying data in the response (if any)
-    data: Optional[dict]
+    _data: Optional[dict]
+
+    @property
+    def data(self) -> dict:
+        """
+        Get the underlying data in the response.
+
+        Data must exist.
+        """
+        assert self._data is not None
+        return self._data
+
+    def has_data(self) -> bool:
+        """
+        Whether or not the response has data.
+        """
+        return self._data is not None
 
 @staticmethod
 def process_response(response: Response,
@@ -61,11 +78,11 @@ def process_response(response: Response,
     # Check for bad statuses
     response.raise_for_status()
 
-    return WebServerControlResponse(response=response, data=data)
+    return WebServerControlResponse(response=response, _data=data)
 
 def check_response_data(ws_response: WebServerControlResponse,
-                        expected: list[Tuple[str, Type | Tuple[Type]]],
-                        optional: list[Tuple[str, Type | Tuple[Type]]] = []):
+                        expected: list[Tuple[str, Type | Any | Tuple[Type]]],
+                        optional: Optional[list[Tuple[str, Type | Any | Tuple[Type]]]] = None):
     """
     Checks that the given webserver response data contains
     the given keys and associated types.
@@ -83,23 +100,22 @@ def check_response_data(ws_response: WebServerControlResponse,
         List of optional key name -> type/types.
     """
     assert isinstance(ws_response, WebServerControlResponse)
-    for entry in [expected, optional]:
-        assert isinstance(entry, list)
-        assert all(isinstance(v[0], str) for v in entry)
-        assert all(isinstance(v[1], (Type, tuple)) for v in entry)
+    if optional is None:
+        optional = []
 
     response = ws_response.response
-    data = ws_response.data
-    if data is None:
+    if not ws_response.has_data():
         raise UnexpectedResponse(
             response=response,
             message='does not contain data'
         )
+    data = ws_response.data
 
     expected_keys = [v[0] for v in expected]
     optional_keys = [v[0] for v in optional]
     all_keys = expected_keys + optional_keys
-    join_keys = lambda keys: ', '.join(keys)
+    def join_keys(keys):
+        return ', '.join(keys)
 
     # Keys that shouldn't be there
     if (unexpected := [k for k in data if k not in all_keys]):

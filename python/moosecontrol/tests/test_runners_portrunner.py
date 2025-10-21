@@ -7,12 +7,14 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+# pylint: skip-file
+# type: ignore
+
 import os
 from requests import Session
 from subprocess import Popen, PIPE
 from tempfile import TemporaryDirectory
 from unittest import skipUnless
-from unittest.mock import patch
 
 from common import BASE_INPUT, MOOSE_EXE, MooseControlTestCase, setup_moose_python_path
 setup_moose_python_path()
@@ -97,7 +99,7 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
             # Initialize; wait for connection
             runner = PortRunner(port)
             runner.initialize()
-            self.assertInLog('MOOSE webserver is listening')
+            self.assert_in_log('MOOSE webserver is listening')
 
             # Input has one continue on INITIAL
             runner.get('continue')
@@ -108,6 +110,6 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
             # Wait for the MOOSE process to finish up
             stdout, _ = process.communicate()
 
-            self.assertNoWarningLogs()
+            self.assert_no_warning_logs()
             self.assertEqual(process.returncode, 0)
             self.assertIn('Solve Skipped!', stdout)

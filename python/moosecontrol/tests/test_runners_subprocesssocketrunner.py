@@ -7,6 +7,9 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+# pylint: skip-file
+# type: ignore
+
 import os
 from re import match
 from unittest import skipUnless
@@ -98,7 +101,7 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
             RUNNER_BASE + '.initialize',
             SOCKET_RUNNER + '.initialize'
         ]
-        self.assertMethodsCalledInOrder(methods, lambda: runner.initialize())
+        self.assert_methods_called_in_order(methods, lambda: runner.initialize())
 
     def test_finalize(self):
         """
@@ -107,7 +110,7 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
         """
         runner = SubprocessSocketRunner(**ARGS)
         methods = [RUNNER_BASE + '.finalize', SOCKET_RUNNER + '.finalize']
-        self.assertMethodsCalledInOrder(methods, lambda: runner.finalize())
+        self.assert_methods_called_in_order(methods, lambda: runner.finalize())
 
     def test_cleanup(self):
         """
@@ -116,7 +119,7 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
         """
         runner = SubprocessSocketRunner(**ARGS)
         methods = [RUNNER_BASE + '.cleanup', SOCKET_RUNNER + '.cleanup']
-        self.assertMethodsCalledInOrder(methods, lambda: runner.cleanup())
+        self.assert_methods_called_in_order(methods, lambda: runner.cleanup())
 
     @skipUnless(MOOSE_EXE is not None, 'MOOSE_EXE is not set')
     def test_live(self):
@@ -138,15 +141,15 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
         runner.initialize()
         pid = runner.get_process_pid()
         self.assertIsNotNone(pid)
-        self.assertInLog(f'Starting MOOSE process with command {full_command}')
-        self.assertInLog(f'MOOSE process started with pid {pid}')
+        self.assert_in_log(f'Starting MOOSE process with command {full_command}')
+        self.assert_in_log(f'MOOSE process started with pid {pid}')
 
         self.assertTrue(runner.is_process_running())
         runner.get('continue')
 
         runner.finalize()
 
-        self.assertNoWarningLogs()
+        self.assert_no_warning_logs()
         self.assertFalse(runner.is_process_running())
 
         process_output = [v.message for v in self._caplog.records if v.name == 'SubprocessReader']

@@ -7,10 +7,11 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+# pylint: disable=logging-fstring-interpolation
+
 import os
 import stat
 from logging import getLogger
-from typing import Optional
 
 from moosecontrol.requests_unixsocket import Session
 from moosecontrol.runners import BaseRunner
@@ -22,11 +23,11 @@ class SocketRunner(BaseRunner):
     Runner to be used with the MooseControl to interact
     with an already-running MOOSE webserver over a socket.
     """
-    def __init__(self, socket_path: os.PathLike, **kwargs):
+    def __init__(self, socket_path: str, **kwargs):
         """
         Parameters
         ----------
-        socket_path : os.PathLike
+        socket_path : str
             The path to the socket.
 
         Optional Parameters
@@ -34,7 +35,7 @@ class SocketRunner(BaseRunner):
         See BaseRunner.__init__() for additional parameters.
         """
         # The path to the socket
-        self._socket_path: str = str(socket_path)
+        self._socket_path: str = socket_path
 
         # Whether or not we've used the socket (used in cleanup())
         self._socket_used: bool = False
@@ -48,7 +49,8 @@ class SocketRunner(BaseRunner):
         """
         return f'http+unix://{self.socket_path.replace("/", "%2F")}'
 
-    def build_session(self) -> Session:
+    @staticmethod
+    def build_session() -> Session:
         """
         Get a Session for interacting with the server.
         """
@@ -62,7 +64,7 @@ class SocketRunner(BaseRunner):
         return self._socket_path
 
     @staticmethod
-    def socket_exists(socket_path: os.PathLike) -> bool:
+    def socket_exists(socket_path: str) -> bool:
         """
         Helper for checking if the given path exists as a socket.
 
@@ -87,7 +89,8 @@ class SocketRunner(BaseRunner):
         self.initialize_start()
 
         socket_path = self.socket_path
-        socket_exists = lambda: self.socket_exists(socket_path)
+        def socket_exists():
+            return self.socket_exists(socket_path)
 
         if not socket_exists():
             logger.info(f'Waiting for connection socket {socket_path}...')

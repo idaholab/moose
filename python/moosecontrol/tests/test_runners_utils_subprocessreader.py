@@ -7,6 +7,9 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+# pylint: skip-file
+# type: ignore
+
 from subprocess import Popen, PIPE
 
 from common import CaptureLogTestCase, setup_moose_python_path
@@ -40,8 +43,8 @@ class TestSubprocessReader(CaptureLogTestCase):
         process.wait()
 
         log_size = 2 + len(output)
-        self.assertLogSize(log_size)
-        self.assertLogMessage(0, 'Subprocess reader started')
+        self.assert_log_size(log_size)
+        self.assert_log_message(0, 'Subprocess reader started')
         for i, line in enumerate(output):
-            self.assertLogMessage(i + 1, SubprocessReader.OUTPUT_PREFIX + output[i])
-        self.assertLogMessage(log_size - 1, 'Subprocess reader ending')
+            self.assert_log_message(i + 1, SubprocessReader.OUTPUT_PREFIX + output[i])
+        self.assert_log_message(log_size - 1, 'Subprocess reader ending')

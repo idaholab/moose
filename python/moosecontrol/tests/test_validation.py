@@ -7,6 +7,9 @@
 # * Licensed under LGPL 2.1, please see LICENSE for details
 # * https://www.gnu.org/licenses/lgpl-2.1.html
 
+# pylint: skip-file
+# type: ignore
+
 from requests import HTTPError
 from typing import Any
 from unittest import TestCase
@@ -31,7 +34,7 @@ class TestValidation(TestCase):
         """
         ws_response = fake_ws_response()
         self.assertEqual(ws_response.response.status_code, 200)
-        self.assertIsNone(ws_response.data)
+        self.assertFalse(ws_response.has_data())
 
     def test_process_response_with_data(self):
         """

@@ -7,7 +7,6 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os
 from logging import getLogger
 from typing import Optional
 
@@ -26,7 +25,7 @@ class SubprocessPortRunner(SubprocessRunnerBase, PortRunner):
                  command: list[str],
                  moose_control_name: str,
                  port: Optional[int] = None,
-                 directory: os.PathLike = DEFAULT_DIRECTORY,
+                 directory: str = DEFAULT_DIRECTORY,
                  use_subprocess_reader: bool = True,
                  **kwargs):
         """
@@ -42,7 +41,7 @@ class SubprocessPortRunner(SubprocessRunnerBase, PortRunner):
         port : Optional[int]
             The port to connect to. If unset, find
             a random available port.
-        directory : os.PathLike
+        directory : str
             Directory to run in. Defaults to the current
             working directory.
         use_subprocess_reader : bool

@@ -10,10 +10,11 @@
 from abc import ABC, abstractmethod
 from logging import getLogger
 from numbers import Number
-from requests import Session
-from requests.exceptions import ConnectionError
 from time import sleep
 from typing import Callable, Optional
+
+from requests import Session
+from requests.exceptions import ConnectionError # pylint: disable=redefined-builtin
 
 from moosecontrol.exceptions import InitializeTimeout
 from moosecontrol.runners.utils import Poker, TimedPollHelper
@@ -36,10 +37,9 @@ class BaseRunner(ABC):
     webserver.
     """
     def __init__(self,
-                 poll_time: Number = DEFAULT_POLL_TIME,
-                 poke_poll_time: Optional[Number] = DEFAULT_POKE_POLL_TIME,
-                 initialize_timeout: Number = DEFAULT_INITIALIZE_TIMEOUT,
-                 **kwargs):
+                 poll_time: float = DEFAULT_POLL_TIME,
+                 poke_poll_time: Optional[float] = DEFAULT_POKE_POLL_TIME,
+                 initialize_timeout: float = DEFAULT_INITIALIZE_TIMEOUT):
         """
         Parameters
         -------------------
@@ -64,7 +64,7 @@ class BaseRunner(ABC):
         # Time between polls in seconds
         self._poll_time: float = float(poll_time)
         # How often to "poke" the application; if None, don't poke
-        self._poke_poll_time: float = None if poke_poll_time is None \
+        self._poke_poll_time: Optional[float] = None if poke_poll_time is None \
             else float(poke_poll_time)
 
         # Setup the TimedPollHelper for use in keeping track
@@ -92,9 +92,9 @@ class BaseRunner(ABC):
         return self._poll_time
 
     @property
-    def poke_poll_time(self) -> float:
+    def poke_poll_time(self) -> Optional[float]:
         """
-        Get the time between pokes in seconds.
+        Get the time between pokes in seconds, if enabled.
         """
         return self._poke_poll_time
 
@@ -124,7 +124,7 @@ class BaseRunner(ABC):
 
     @staticmethod
     @abstractmethod
-    def build_session(self) -> Session:
+    def build_session() -> Session:
         """
         Build a Session for interacting with the server.
 
@@ -167,12 +167,12 @@ class BaseRunner(ABC):
         """
         try:
             self._initialize_poller.poll(should_exit)
-        except TimedPollHelper.StartNotCalled:
+        except TimedPollHelper.StartNotCalled as e:
             raise NotImplementedError(
                 'initialize_start() was not called within initialize()'
-            )
+            ) from e
         except TimedPollHelper.PollTimeout as e:
-            raise InitializeTimeout(e.waited_time)
+            raise InitializeTimeout(e.waited_time) from e
 
     def initialize(self):
         """
@@ -259,7 +259,7 @@ class BaseRunner(ABC):
                 logger.warning('MOOSE webserver is still listening on cleanup; killing')
                 self.kill()
 
-            logger.warning(f'Request session is still active on cleanup; closing')
+            logger.warning('Request session is still active on cleanup; closing')
             self._session.close()
             self._session = None
 
@@ -316,9 +316,9 @@ class BaseRunner(ABC):
         """
         Internal method for building the poke thread.
         """
-        assert self._poke_poll_time is not None
+        assert self.poke_poll_time is not None
         return Poker(
-            self._poke_poll_time,
+            self.poke_poll_time,
             self.build_session(),
             f'{self.url}/poke'
         )
@@ -334,5 +334,5 @@ class BaseRunner(ABC):
             # really guarantee any valid response after this
             try:
                 self.get('kill')
-            except:
+            except: # pylint: disable=bare-except
                 pass

@@ -7,6 +7,8 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+# pylint: disable=attribute-defined-outside-init
+
 import os
 import sys
 from contextlib import ExitStack
@@ -43,6 +45,9 @@ class CaptureLogTestCase(TestCase):
     """
     @pytest.fixture(autouse=True)
     def inject_fixtures(self, caplog):
+        """
+        Inject the caplog with pytest.
+        """
         self._caplog: pytest.LogCaptureFixture = caplog
 
     def setUp(self):
@@ -51,19 +56,21 @@ class CaptureLogTestCase(TestCase):
     def tearDown(self):
         self._caplog.clear()
 
-    def assertLogSize(self, num: int):
+    def assert_log_size(self, num: int):
         """
         Assert that there are exactly num logs.
         """
         records = self._caplog.records
         num_records = len(records)
         if num_records != num:
+            joined = '\n'.join([str(v) for v in records])
             raise AssertionError(
-                f'Num logs {num_records} != {num}; present logs:\n'
-                + '\n'.join([str(v) for v in records])
+                f'Num logs {num_records} != {num}; present logs:'
+                f'\n{joined}'
             )
 
-    def assertLogMessage(self, i: int, message: str, levelname: str = 'INFO', name: Optional[str] = None):
+    def assert_log_message(self, i: int, message: str,levelname: str = 'INFO',
+                           name: Optional[str] = None):
         """
         Assert that a log message exists in the log at the given index.
 
@@ -87,7 +94,7 @@ class CaptureLogTestCase(TestCase):
         self.assertEqual(record.message, message)
         self.assertEqual(record.levelname, levelname)
 
-    def assertInLog(self,
+    def assert_in_log(self,
                     message: str,
                     name: Optional[str] = None,
                     levelname: str = 'INFO',
@@ -126,7 +133,7 @@ class CaptureLogTestCase(TestCase):
                 return i
         raise AssertionError(f'Assertion not found in {records}')
 
-    def assertNoWarningLogs(self):
+    def assert_no_warning_logs(self):
         """
         Asserts that no logs of level WARNING or higher
         were found in the log.
@@ -151,7 +158,7 @@ class MooseControlTestCase(CaptureLogTestCase):
         super().setUp()
         self.directory.cleanup()
 
-    def assertMethodsCalledInOrder(self,
+    def assert_methods_called_in_order(self,
                                    methods: list[str],
                                    action: Callable[[], None]):
         """
@@ -160,14 +167,14 @@ class MooseControlTestCase(CaptureLogTestCase):
         """
         order = []
         def mark(name):
-            def _inner(*_, **__): order.append(name)
+            def _inner(*_, **__):
+                order.append(name)
             return _inner
 
         contexts = (patch(v, new=mark(v)) for v in methods)
         with ExitStack() as stack:
-            for i, cm in enumerate(contexts):
+            for cm in contexts:
                 stack.enter_context(cm)
-
             action()
 
         self.assertEqual(order, methods)
@@ -194,11 +201,11 @@ def set_fake_response(response: Response | MagicMock,
         The URL to associate with the response; defaults to FAKE_URL.
     """
     response.status_code = status_code
-    response.url = FAKE_URL
+    response.url = url
     if data is not None:
-        response.headers = {'content-type': 'application/json'}
+        response.headers = {'content-type': 'application/json'} # type: ignore
         if isinstance(response, Response):
-            response._content = dumps(data).encode('utf-8')
+            response._content = dumps(data).encode('utf-8') # pylint: disable=protected-access
         else:
             response.json.return_value = data
 
@@ -211,10 +218,10 @@ def mock_response(**kwargs) -> MagicMock:
     ---------------------
     See set_fake_response().
     """
-    mock_response = MagicMock()
-    mock_response.__enter__.return_value = mock_response
-    set_fake_response(mock_response, **kwargs)
-    return mock_response
+    response = MagicMock()
+    response.__enter__.return_value = response
+    set_fake_response(response, **kwargs)
+    return response
 
 @staticmethod
 def fake_response(**kwargs) -> Response:
@@ -236,7 +243,7 @@ class FakeSession(Session):
 
     Will return code 200 on all GET requests.
     """
-    def __init__(self, *_, **__):
+    def __init__(self, *_, **__): # pylint: disable=super-init-not-called
         pass
 
     def close(self):

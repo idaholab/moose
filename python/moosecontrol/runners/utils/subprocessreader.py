@@ -7,6 +7,8 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+# pylint: disable=logging-not-lazy
+
 from logging import getLogger
 from threading import Thread
 from subprocess import Popen
@@ -45,6 +47,8 @@ class SubprocessReader(Thread):
         assert self._process.poll() is None
 
         pipe = self._process.stdout
+        assert pipe is not None
+
         with pipe:
             for line in iter(pipe.readline, ''):
                 logger.info(self.OUTPUT_PREFIX + line.rstrip())

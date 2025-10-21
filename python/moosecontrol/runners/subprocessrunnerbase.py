@@ -7,6 +7,8 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+# pylint: disable=logging-fstring-interpolation
+
 import os
 from abc import ABC, abstractmethod
 from logging import getLogger
@@ -29,7 +31,7 @@ class SubprocessRunnerBase(ABC):
     def __init__(self,
                  command: list[str],
                  moose_control_name: str,
-                 directory: os.PathLike = DEFAULT_DIRECTORY,
+                 directory: str = DEFAULT_DIRECTORY,
                  use_subprocess_reader: bool = True):
         """
         Parameters
@@ -41,7 +43,7 @@ class SubprocessRunnerBase(ABC):
 
         Optional Parameters
         -------------------
-        directory : os.PathLike
+        directory : str
             Directory to run in. Defaults to the current
             working directory.
         use_subprocess_reader : bool
@@ -128,6 +130,7 @@ class SubprocessRunnerBase(ABC):
         """
         pid = self.get_process_pid()
         if pid is not None:
+            assert self._process is not None
             logger.info(f'Waiting for MOOSE process {pid} to end...')
             self._process.wait()
             logger.info('MOOSE process has ended')
@@ -149,9 +152,10 @@ class SubprocessRunnerBase(ABC):
             logger.warning('MOOSE process still running on cleanup; killing')
             self.kill_process()
 
-        if getattr(self, '_subprocess_reader', None) is not None and self._subprocess_reader.is_alive():
+        subprocess_reader = getattr(self, '_subprocess_reader', None)
+        if subprocess_reader is not None and subprocess_reader.is_alive():
             logger.warning('Reader thread still running on cleanup; waiting')
-            self._subprocess_reader.join()
+            subprocess_reader.join()
             logger.info('Reader thread has ended')
 
     @abstractmethod
@@ -193,7 +197,7 @@ class SubprocessRunnerBase(ABC):
         """
         Get the PID of the underlying process if it is running.
         """
-        return self._process.pid if self.is_process_running() else None
+        return self._process.pid if self.is_process_running() else None # type: ignore
 
     def is_process_running(self) -> bool:
         """
@@ -206,7 +210,7 @@ class SubprocessRunnerBase(ABC):
         Kills the running process, if any.
         """
         pid = self.get_process_pid()
-        if pid is not None:
+        if self._process is not None and (pid := self.get_process_pid()) is not None:
             logger.info(f'Killing MOOSE process {pid}')
             self._process.kill()
             self._process.wait()

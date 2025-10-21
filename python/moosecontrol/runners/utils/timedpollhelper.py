@@ -33,13 +33,13 @@ class TimedPollHelper:
     >>>> # Finalize timing if it succeeds
     >>>> helper.end()
     """
-    def __init__(self, poll_time: Number, timeout_time: Number):
+    def __init__(self, poll_time: float, timeout_time: float):
         """
         Parameters
         ----------
-        poll_time : Number
+        poll_time : float
             How often to poll in seconds.
-        timeout_time : Number
+        timeout_time : float
             How many seconds may elapse before raising TimedPollTimeout
             when calling poll().
         """
@@ -95,7 +95,7 @@ class TimedPollHelper:
         return self._end_time
 
     @property
-    def total_time(self) -> Optional[Number]:
+    def total_time(self) -> Optional[float]:
         """
         The total time spent polling in seconds.
 
@@ -157,6 +157,7 @@ class TimedPollHelper:
         # Must call start() first
         if self.start_time is None:
             raise self.StartNotCalled
+        assert self.total_time is not None
 
         # Keep checking the criteria until criteria is
         # met or we have gone past the timeout

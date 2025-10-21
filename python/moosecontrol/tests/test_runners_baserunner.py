@@ -7,16 +7,18 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from json import dumps
+# pylint: skip-file
+# type: ignore
+
 from unittest.mock import patch
-from requests import Response, Session
-from requests.exceptions import ConnectionError, HTTPError
+from requests import Session
+from requests.exceptions import ConnectionError
 
 from common import FAKE_URL, CaptureLogTestCase, FakeSession, \
-    fake_response, mock_response, setup_moose_python_path
+    mock_response, setup_moose_python_path
 setup_moose_python_path()
 
-from moosecontrol.exceptions import BadStatus, InitializeTimeout, WebServerControlError
+from moosecontrol.exceptions import InitializeTimeout
 from moosecontrol.runners import BaseRunner
 from moosecontrol.runners.baserunner import DEFAULT_POLL_TIME, DEFAULT_POKE_POLL_TIME, DEFAULT_INITIALIZE_TIMEOUT
 
@@ -133,8 +135,8 @@ class TestBaseRunner(CaptureLogTestCase):
 
         self.assertFalse(runner.initialized)
         self.assertGreater(runner._initialize_poller.total_time, 0)
-        self.assertLogSize(1)
-        self.assertLogMessage(0, 'Waiting for MOOSE webserver to be listening...')
+        self.assert_log_size(1)
+        self.assert_log_message(0, 'Waiting for MOOSE webserver to be listening...')
         self.assertEqual(len(is_listening.mock_calls), int(initialize_timeout / poll_time) + 1)
 
     def test_initialize_listening_immediate(self):
@@ -151,8 +153,8 @@ class TestBaseRunner(CaptureLogTestCase):
 
         is_listening.assert_called_once()
         self.assertTrue(runner.initialized)
-        self.assertLogSize(1)
-        self.assertLogMessage(0, 'MOOSE webserver is listening')
+        self.assert_log_size(1)
+        self.assert_log_message(0, 'MOOSE webserver is listening')
         self.assertGreater(runner._initialize_poller.total_time, 0)
 
     def test_initialize_listening_eventual(self):
@@ -175,9 +177,9 @@ class TestBaseRunner(CaptureLogTestCase):
         self.assertTrue(runner.initialized)
         self.assertGreater(runner._initialize_poller.total_time, 0)
         self.assertEqual(is_listening_calls, listening_after_num)
-        self.assertLogSize(2)
-        self.assertLogMessage(0, 'Waiting for MOOSE webserver to be listening...')
-        self.assertLogMessage(1, 'MOOSE webserver is listening')
+        self.assert_log_size(2)
+        self.assert_log_message(0, 'Waiting for MOOSE webserver to be listening...')
+        self.assert_log_message(1, 'MOOSE webserver is listening')
 
     def test_initialize_start_poker(self):
         """
@@ -207,12 +209,12 @@ class TestBaseRunner(CaptureLogTestCase):
 
         self.assertIsNone(runner._poker)
         self.assertFalse(poke_thread.is_alive())
-        self.assertInLog('Stopping poke poll thread')
+        self.assert_in_log('Stopping poke poll thread')
 
         # Can be ran again
         self._caplog.clear()
         runner.stop_poker()
-        self.assertLogSize(0)
+        self.assert_log_size(0)
 
     def test_finalize_close_session(self):
         """
@@ -241,7 +243,7 @@ class TestBaseRunner(CaptureLogTestCase):
         with patch_baserunner('is_listening', return_value=False):
             runner.finalize()
 
-        self.assertInLog('Stopping poke poll thread')
+        self.assert_in_log('Stopping poke poll thread')
         self.assertFalse(poke_thread.is_alive())
         self.assertIsNone(runner._poker)
 
@@ -266,9 +268,9 @@ class TestBaseRunner(CaptureLogTestCase):
             runner.finalize()
 
         self.assertEqual(num_called, not_listening_after_calls)
-        self.assertLogSize(2)
-        self.assertLogMessage(0, 'Waiting for the MOOSE webserver to stop listening...')
-        self.assertLogMessage(1, 'MOOSE webserver is no longer listening')
+        self.assert_log_size(2)
+        self.assert_log_message(0, 'Waiting for the MOOSE webserver to stop listening...')
+        self.assert_log_message(1, 'MOOSE webserver is no longer listening')
 
     def test_cleanup_ok(self):
         """
@@ -276,7 +278,7 @@ class TestBaseRunner(CaptureLogTestCase):
         """
         runner = BaseRunnerTest()
         runner.cleanup()
-        self.assertLogSize(0)
+        self.assert_log_size(0)
 
     def test_cleanup_close_session(self):
         """
@@ -289,8 +291,8 @@ class TestBaseRunner(CaptureLogTestCase):
                 with self._caplog.at_level('WARNING'):
                     runner.cleanup()
         close.assert_called_once()
-        self.assertLogSize(1)
-        self.assertInLog('Request session is still active on cleanup; closing', levelname='WARNING')
+        self.assert_log_size(1)
+        self.assert_in_log('Request session is still active on cleanup; closing', levelname='WARNING')
 
     def test_cleanup_poker_not_alive(self):
         """
@@ -308,7 +310,7 @@ class TestBaseRunner(CaptureLogTestCase):
         self._caplog.clear()
         with self._caplog.at_level('INFO'):
             runner.cleanup()
-        self.assertLogSize(0)
+        self.assert_log_size(0)
 
     def test_cleanup_stop_poker(self):
         """
@@ -325,9 +327,9 @@ class TestBaseRunner(CaptureLogTestCase):
         with self._caplog.at_level('INFO'):
             runner.cleanup()
         self.assertFalse(poke_thread.is_alive())
-        self.assertLogSize(2)
-        self.assertLogMessage(0, 'Poke thread is still alive on cleanup; stopping', levelname='WARNING')
-        self.assertLogMessage(1, 'Stopping poke poll thread')
+        self.assert_log_size(2)
+        self.assert_log_message(0, 'Poke thread is still alive on cleanup; stopping', levelname='WARNING')
+        self.assert_log_message(1, 'Stopping poke poll thread')
 
     def test_cleanup_kill(self):
         """
@@ -340,8 +342,8 @@ class TestBaseRunner(CaptureLogTestCase):
             with patch_baserunner('kill') as patch_kill:
                 runner.cleanup()
 
-        self.assertLogSize(2)
-        self.assertInLog('MOOSE webserver is still listening on cleanup; killing', levelname='WARNING')
+        self.assert_log_size(2)
+        self.assert_in_log('MOOSE webserver is still listening on cleanup; killing', levelname='WARNING')
         patch_is_listening.assert_called_once()
         patch_kill.assert_called_once()
 
@@ -402,8 +404,8 @@ class TestBaseRunner(CaptureLogTestCase):
             with patch_baserunner('get') as get:
                 runner.kill()
 
-        self.assertLogSize(1)
-        self.assertLogMessage(0, 'Killing MOOSE webserver')
+        self.assert_log_size(1)
+        self.assert_log_message(0, 'Killing MOOSE webserver')
 
         is_listening.assert_called_once()
         get.assert_called_once_with('kill')

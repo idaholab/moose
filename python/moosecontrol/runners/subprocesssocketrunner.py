@@ -19,11 +19,16 @@ from moosecontrol.runners.subprocessrunnerbase import SubprocessRunnerBase, DEFA
 logger = getLogger('SubprocessSocketRunner')
 
 class SubprocessSocketRunner(SubprocessRunnerBase, SocketRunner):
+    """
+    Runner to be used with the MooseControl that
+    spawns a MOOSE process and connects to the
+    webserver over a socket.
+    """
     def __init__(self,
                  command: list[str],
                  moose_control_name: str,
-                 socket_path: Optional[os.PathLike] = None,
-                 directory: os.PathLike = DEFAULT_DIRECTORY,
+                 socket_path: Optional[str] = None,
+                 directory: str = DEFAULT_DIRECTORY,
                  use_subprocess_reader: bool = True,
                  **kwargs):
         """
@@ -36,10 +41,10 @@ class SubprocessSocketRunner(SubprocessRunnerBase, SocketRunner):
 
         Optional Parameters
         -------------------
-        socket_path : Optional[os.PathLike]
+        socket_path : Optional[str]
             The socket path to use. If unset, build
             a random onw in the directory.
-        directory : os.PathLike
+        directory : str
             Directory to run in. Defaults to the current
             working directory.
         use_subprocess_reader : bool

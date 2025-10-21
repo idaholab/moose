@@ -7,6 +7,8 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+# pylint: disable=logging-fstring-interpolation
+
 from dataclasses import dataclass
 from numbers import Number
 from typing import Any, Iterable, Optional, Tuple, Type
@@ -22,10 +24,16 @@ logger = logging.getLogger('MooseControl')
 
 @dataclass
 class MooseControlManager:
+    """
+    Context manager for MooseControlNew.
+    """
     # The underlying MooseControlNew
     control: 'MooseControlNew'
 
 class MooseControlNew:
+    """
+    Helper for interacting with the MOOSE WebServerControl.
+    """
     def __init__(self, runner: BaseRunner):
         assert isinstance(runner, BaseRunner)
 
@@ -40,12 +48,28 @@ class MooseControlNew:
         return self._runner
 
     def initialize(self):
+        """
+        Initializes the underlying runner.
+
+        Must be called before interacting with the process;
+        context manager calls initialize() on enter.
+        """
         self.runner.initialize()
 
     def finalize(self):
+        """
+        Finalizes the underlying runner.
+
+        Should be called when done to gracefully cleanup;
+        context manager calls finalize() on exit
+        """
         self.runner.finalize()
 
     def cleanup(self):
+        """
+        Performs cleanup when a non-graceful exit is needed
+        such as when an exception is thrown.
+        """
         self.runner.cleanup()
 
     def __enter__(self) -> MooseControlManager:
@@ -149,7 +173,7 @@ class MooseControlNew:
         logger.info('Sending continue to webserver')
 
         ws_response = self.get('continue')
-        assert ws_response.data is None
+        assert not ws_response.has_data()
 
     def set_terminate(self):
         """
@@ -158,7 +182,7 @@ class MooseControlNew:
         logger.info('Sending terminate to webserver')
 
         ws_response = self.get('terminate')
-        assert ws_response.data is None
+        assert not ws_response.has_data()
 
     def get_postprocessor(self, name: str) -> float:
         """
@@ -186,7 +210,7 @@ class MooseControlNew:
         """
         Gets the current simulation time.
         """
-        logger.debug(f'Getting simulation time')
+        logger.debug('Getting simulation time')
 
         response = self.get('get/time')
         check_response_data(response, [('time', (int, float))])
@@ -196,7 +220,7 @@ class MooseControlNew:
         """
         Gets the current simulation timestep.
         """
-        logger.debug(f'Getting simulation timestep')
+        logger.debug('Getting simulation timestep')
 
         response = self.get('get/dt')
         check_response_data(response, [('dt', (int, float))])

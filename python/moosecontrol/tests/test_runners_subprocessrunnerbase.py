@@ -7,6 +7,9 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+# pylint: skip-file
+# type: ignore
+
 import os
 from unittest.mock import patch
 
@@ -116,23 +119,23 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
 
         # Start and stop log + output if reader thread enabled
         log_size = 2 + ((len(output) + 2) if use_subprocess_reader else 0)
-        self.assertLogSize(log_size)
+        self.assert_log_size(log_size)
 
         # Process starting
-        self.assertLogMessage(
+        self.assert_log_message(
             0,
             f'Starting MOOSE process with command {command}',
             name='SubprocessRunnerBase'
         )
         # Reader thread started
         if use_subprocess_reader:
-            self.assertLogMessage(
+            self.assert_log_message(
                 1,
                 'Subprocess reader started',
                 name='SubprocessReader',
             )
         # Process started
-        self.assertLogMessage(
+        self.assert_log_message(
             2 if use_subprocess_reader else 1,
             f'MOOSE process started with pid {pid}',
             name='SubprocessRunnerBase'
@@ -141,7 +144,7 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
         if use_subprocess_reader:
             log_i = 1
             for val in output:
-                log_i = self.assertInLog(
+                log_i = self.assert_in_log(
                     SubprocessReader.OUTPUT_PREFIX + val,
                     name='SubprocessReader',
                     after_index=log_i
@@ -169,7 +172,7 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
         """
         runner = SubprocessRunnerBaseTest(**ARGS, use_subprocess_reader=False)
         runner.finalize()
-        self.assertLogSize(0)
+        self.assert_log_size(0)
 
     def test_finalize_wait_process(self):
         """
@@ -189,9 +192,9 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
         self._caplog.clear()
         runner.finalize()
 
-        self.assertLogSize(2)
-        self.assertLogMessage(0, f'Waiting for MOOSE process {pid} to end...')
-        self.assertLogMessage(1, 'MOOSE process has ended')
+        self.assert_log_size(2)
+        self.assert_log_message(0, f'Waiting for MOOSE process {pid} to end...')
+        self.assert_log_message(1, 'MOOSE process has ended')
 
     def test_finalize_wait_subprocess_reader(self):
         """
@@ -208,8 +211,8 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
         runner._subprocess_reader.start()
         runner.finalize()
 
-        self.assertInLog('Waiting for the reader thread to end...', levelname='DEBUG')
-        self.assertInLog('Reader thread has ended', levelname='DEBUG')
+        self.assert_in_log('Waiting for the reader thread to end...', levelname='DEBUG')
+        self.assert_in_log('Reader thread has ended', levelname='DEBUG')
         self.assertIsNone(runner._subprocess_reader)
 
         process.wait()
@@ -235,7 +238,7 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
         runner.finalize()
 
         self.assertIsNone(runner._subprocess_reader)
-        self.assertLogSize(0)
+        self.assert_log_size(0)
 
     def test_cleanup_kill_process(self):
         """
@@ -251,8 +254,8 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
 
         self.assertFalse(runner.is_process_running())
 
-        self.assertLogSize(3)
-        self.assertLogMessage(0, 'MOOSE process still running on cleanup; killing', levelname='WARNING')
+        self.assert_log_size(3)
+        self.assert_log_message(0, 'MOOSE process still running on cleanup; killing', levelname='WARNING')
 
     def test_cleanup_wait_subprocess_reader(self):
         """
@@ -268,9 +271,9 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
 
         self.assertFalse(runner._subprocess_reader.is_alive())
 
-        self.assertLogSize(5)
-        self.assertLogMessage(2, 'Reader thread still running on cleanup; waiting', levelname='WARNING')
-        self.assertLogMessage(4, 'Reader thread has ended')
+        self.assert_log_size(5)
+        self.assert_log_message(2, 'Reader thread still running on cleanup; waiting', levelname='WARNING')
+        self.assert_log_message(4, 'Reader thread has ended')
 
     def test_kill_process(self):
         """
@@ -290,9 +293,9 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
 
         self.assertFalse(runner.is_process_running())
 
-        self.assertLogSize(2)
-        self.assertLogMessage(0, f'Killing MOOSE process {pid}')
-        self.assertLogMessage(1, 'Killed MOOSE process has ended')
+        self.assert_log_size(2)
+        self.assert_log_message(0, f'Killing MOOSE process {pid}')
+        self.assert_log_message(1, 'Killed MOOSE process has ended')
 
     def test_kill_process_no_process(self):
         """
@@ -304,4 +307,4 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
         )
 
         runner.kill_process()
-        self.assertLogSize(0)
+        self.assert_log_size(0)

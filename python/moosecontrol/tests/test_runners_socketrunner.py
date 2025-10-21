@@ -7,6 +7,9 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+# pylint: skip-file
+# type: ignore
+
 import os
 from subprocess import Popen, PIPE
 from tempfile import NamedTemporaryFile, TemporaryDirectory
@@ -109,8 +112,8 @@ class TestSocketRunner(CaptureLogTestCase):
 
         parent_initialize.assert_called_once()
         socket_exists.assert_called_once()
-        self.assertLogSize(1)
-        self.assertLogMessage(0, f'Found connection socket {DUMMY_SOCKET_PATH}')
+        self.assert_log_size(1)
+        self.assert_log_message(0, f'Found connection socket {DUMMY_SOCKET_PATH}')
 
     def test_initialize_eventually(self):
         """
@@ -130,9 +133,9 @@ class TestSocketRunner(CaptureLogTestCase):
                 runner.initialize()
 
         parent_initialize.assert_called_once()
-        self.assertLogSize(2)
-        self.assertLogMessage(0, f'Waiting for connection socket {DUMMY_SOCKET_PATH}...')
-        self.assertLogMessage(1, f'Found connection socket {DUMMY_SOCKET_PATH}')
+        self.assert_log_size(2)
+        self.assert_log_message(0, f'Waiting for connection socket {DUMMY_SOCKET_PATH}...')
+        self.assert_log_message(1, f'Found connection socket {DUMMY_SOCKET_PATH}')
 
     def test_delete_socket(self):
         """
@@ -143,8 +146,8 @@ class TestSocketRunner(CaptureLogTestCase):
             runner.delete_socket()
             self.assertFalse(os.path.exists(f.name))
 
-        self.assertLogSize(1)
-        self.assertLogMessage(0, f'Deleting socket {f.name}')
+        self.assert_log_size(1)
+        self.assert_log_message(0, f'Deleting socket {f.name}')
 
     def test_finalize_delete_socket(self):
         """
@@ -230,20 +233,20 @@ class TestSocketRunner(CaptureLogTestCase):
             # Initialize; wait for socket and connection
             runner = SocketRunner(socket_path)
             runner.initialize()
-            socket_i = self.assertInLog(f'Found connection socket {socket_path}')
-            self.assertInLog(f'MOOSE webserver is listening', after_index=socket_i)
+            socket_i = self.assert_in_log(f'Found connection socket {socket_path}')
+            self.assert_in_log(f'MOOSE webserver is listening', after_index=socket_i)
 
             # Input has one continue on INITIAL
             runner.get('continue')
 
             # Finalize; should delete socket
             runner.finalize()
-            self.assertInLog(f'Deleting socket {socket_path}')
+            self.assert_in_log(f'Deleting socket {socket_path}')
 
             # Wait for the MOOSE process to finish up
             stdout, _ = process.communicate()
 
-            self.assertNoWarningLogs()
+            self.assert_no_warning_logs()
             self.assertEqual(process.returncode, 0)
             self.assertIn('Solve Skipped!', stdout)
             self.assertFalse(os.path.exists(socket_path))

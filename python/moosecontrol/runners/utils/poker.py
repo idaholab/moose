@@ -7,11 +7,13 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+# pylint: disable=logging-fstring-interpolation
+
 from logging import getLogger
 from numbers import Number
-from requests import Session
 from threading import Event, Thread
-from typing import Optional
+
+from requests import Session
 
 logger = getLogger('Poker')
 
@@ -21,14 +23,14 @@ class Poker(Thread):
 
     Parameters
     ----------
-    poll_time : Number
+    poll_time : float
         How often to do the poke in seconds.
     session : Session
         The Session to use to make the poke requests.
     url : str
         The url to call GET to in order to poke.
     """
-    def __init__(self, poll_time: Number, session: Session, url: str):
+    def __init__(self, poll_time: float, session: Session, url: str):
         assert isinstance(poll_time, Number)
         assert poll_time > 0
         assert isinstance(session, Session)
@@ -37,13 +39,13 @@ class Poker(Thread):
         super().__init__()
 
         # How often to poke
-        self._poll_time = float(poll_time)
+        self._poll_time: float = float(poll_time)
         # The Session to poke with
         self._session: Session = session
         # The url to poke to
-        self._url = url
+        self._url: str = url
         # Event so that the owning thread can stop this one
-        self._stop_event = Event()
+        self._stop_event: Event = Event()
         # The number of times that we've poked
         self._num_poked: int = 0
 
@@ -62,6 +64,9 @@ class Poker(Thread):
         return self._num_poked
 
     def poke(self):
+        """
+        Performs the poke.
+        """
         assert self._session is not None
         with self._session.get(self._url) as request:
             request.raise_for_status()
@@ -76,7 +81,7 @@ class Poker(Thread):
             logger.debug('Poking webserver')
             try:
                 request = self.poke()
-            except Exception as e:
+            except Exception as e: # pylint: disable=broad-exception-caught
                 logger.debug(f'Poke raised {type(e).__name__}; stopping')
                 break
             if request.status_code != 200:
@@ -87,7 +92,6 @@ class Poker(Thread):
 
         # Close the session
         self._session.close()
-        self._session = None
 
         logger.debug('Poke thread stopped')
 
