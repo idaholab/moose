@@ -11,12 +11,13 @@
 # type: ignore
 
 import os
+from pathlib import Path
 from subprocess import Popen, PIPE
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 from unittest import skipUnless
 from unittest.mock import patch
 
-from common import BASE_INPUT, MOOSE_EXE, CaptureLogTestCase, \
+from common import BASE_INPUT, MOOSE_EXE, MooseControlTestCase, \
     mock_response, setup_moose_python_path
 setup_moose_python_path()
 
@@ -37,7 +38,7 @@ def patch_base(name: str, **kwargs):
     """
     return patch(f'moosecontrol.runners.BaseRunner.{name}', **kwargs)
 
-class TestSocketRunner(CaptureLogTestCase):
+class TestSocketRunner(MooseControlTestCase):
     """
     Tests moosecontrol.runners.socketrunner.SocketRunner.
     """
@@ -141,112 +142,126 @@ class TestSocketRunner(CaptureLogTestCase):
         """
         Tests delete_socket().
         """
-        with NamedTemporaryFile() as f:
-            runner = SocketRunner(f.name)
-            runner.delete_socket()
-            self.assertFalse(os.path.exists(f.name))
+        socket = os.path.join(self.directory.name, 'sock.sock')
+        Path(socket).touch()
+        runner = SocketRunner(socket)
+        runner.delete_socket()
+        self.assertFalse(os.path.exists(socket))
 
         self.assert_log_size(1)
-        self.assert_log_message(0, f'Deleting socket {f.name}')
+        self.assert_log_message(0, f'Deleting socket {socket}')
 
     def test_finalize_delete_socket(self):
         """
         Tests finalize() deleting the socket, ignoring the
         parent finalize()
         """
-        with NamedTemporaryFile() as f:
-            runner = SocketRunner(f.name)
-            with patch_base('finalize') as parent_finalize:
-                runner.finalize()
-            self.assertFalse(os.path.exists(f.name))
+        socket = os.path.join(self.directory.name, 'sock.sock')
+        Path(socket).touch()
+        runner = SocketRunner(socket)
+        with patch_base('finalize') as parent_finalize:
+            runner.finalize()
+        self.assertFalse(os.path.exists(socket))
 
         parent_finalize.assert_called_once()
 
-    def test_cleanup(self):
+    def test_cleanup_socket_not_used(self):
         """
-        Tests cleanup().
+        Tests cleanup() when the socket is not used.
         """
-        # Socket not used
-        with NamedTemporaryFile() as f:
-            runner = SocketRunner(f.name)
-            with patch_base('cleanup') as base_cleanup:
-                with patch_runner('delete_socket') as delete_socket:
-                    runner.cleanup()
-            base_cleanup.assert_called()
-            delete_socket.assert_not_called()
+        socket = os.path.join(self.directory.name, 'sock.sock')
+        Path(socket).touch()
+        runner = SocketRunner(socket)
+        with patch_base('cleanup') as base_cleanup:
+            with patch_runner('delete_socket') as delete_socket:
+                runner.cleanup()
+        self.assertTrue(os.path.exists(socket))
+        base_cleanup.assert_called()
+        delete_socket.assert_not_called()
 
-        # Used, path set, doesn't exist
-        with NamedTemporaryFile() as f:
-            os.remove(f.name)
-            runner = SocketRunner(f.name)
-            with patch_base('cleanup') as base_cleanup:
-                with patch_runner('delete_socket') as delete_socket:
-                    runner.cleanup()
-            base_cleanup.assert_called()
-            delete_socket.assert_not_called()
+    def test_cleanup_socket_not_exist(self):
+        """
+        Tests cleanup() when the socket does not exist.
+        """
+        socket = os.path.join(self.directory.name, 'sock.sock')
+        self.assertFalse(os.path.exists(socket))
+        runner = SocketRunner(socket)
+        with patch_base('cleanup') as base_cleanup:
+            with patch_runner('delete_socket') as delete_socket:
+                runner.cleanup()
+        base_cleanup.assert_called()
+        delete_socket.assert_not_called()
 
-        # Used, path set, does exist, calls delete_socket()
-        with NamedTemporaryFile() as f:
-            runner = SocketRunner(f.name)
-            runner._socket_used = True
-            with patch_base('cleanup') as base_cleanup:
-                with patch_runner('delete_socket') as delete_socket:
-                    runner.cleanup()
-            base_cleanup.assert_called()
-            delete_socket.assert_called_once()
+    def test_cleanup_socket_delete(self):
+        """
+        Tests cleanup() when the socket exists and is used,
+        which deletes it.
+        """
+        socket = os.path.join(self.directory.name, 'sock.sock')
+        Path(socket).touch()
+        self.assertTrue(os.path.exists(socket))
+        runner = SocketRunner(socket)
+        runner._socket_used = True
+        with patch_base('cleanup') as base_cleanup:
+            with patch_runner('delete_socket') as delete_socket:
+                runner.cleanup()
+        self.assert_log_size(1)
+        self.assert_log_message(0, 'Socket still exists on cleanup; deleting', levelname='WARNING')
+        base_cleanup.assert_called_once()
+        delete_socket.assert_called_once()
 
     def test_initialize_finalize(self):
         """
         Tests initialize() and finalize() together.
         """
-        with NamedTemporaryFile() as f:
-            runner = SocketRunner(f.name)
+        socket = os.path.join(self.directory.name, 'sock.sock')
+        Path(socket).touch()
+        runner = SocketRunner(socket)
 
-            with patch('moosecontrol.requests_unixsocket.Session.get', return_value=mock_response()):
-                with patch_runner('socket_exists', return_value=True):
-                    runner.initialize()
+        with patch('moosecontrol.requests_unixsocket.Session.get', return_value=mock_response()):
+            with patch_runner('socket_exists', return_value=True):
+                runner.initialize()
 
-            runner.finalize()
-            self.assertFalse(os.path.exists(f.name))
+        runner.finalize()
+        self.assertFalse(os.path.exists(socket))
 
     @skipUnless(MOOSE_EXE is not None, 'MOOSE_EXE is not set')
     def test_live(self):
         """
         Tests running a MOOSE input live.
         """
-        with TemporaryDirectory() as dir:
-            input_path = os.path.join(dir, 'input.i')
-            socket_path = os.path.join(dir, 'socket.sock')
+        input_path = os.path.join(self.directory.name, 'input.i')
+        socket_path = os.path.join(self.directory.name, 'socket.sock')
 
-            # Spawn the MOOSE process
-            with open(input_path, 'w') as f:
-                f.write(BASE_INPUT)
-            command = [
-                MOOSE_EXE,
-                '-i',
-                input_path,
-                f'Controls/web_server/file_socket={socket_path}',
-                '--color=off'
-            ]
-            process = Popen(command, stdout=PIPE, text=True)
+        # Spawn the MOOSE process
+        with open(input_path, 'w') as f:
+            f.write(BASE_INPUT)
+        command = [
+            MOOSE_EXE,
+            '-i',
+            input_path,
+            f'Controls/web_server/file_socket={socket_path}',
+            '--color=off'
+        ]
+        process = Popen(command, stdout=PIPE, text=True)
 
-            # Initialize; wait for socket and connection
-            runner = SocketRunner(socket_path)
-            runner.initialize()
-            socket_i = self.assert_in_log(f'Found connection socket {socket_path}')
-            self.assert_in_log(f'MOOSE webserver is listening', after_index=socket_i)
+        # Initialize; wait for socket and connection
+        runner = SocketRunner(socket_path)
+        runner.initialize()
+        socket_i = self.assert_in_log(f'Found connection socket {socket_path}')
+        self.assert_in_log(f'MOOSE webserver is listening', after_index=socket_i)
 
-            # Input has one continue on INITIAL
-            runner.get('continue')
+        # Input has one continue on INITIAL
+        runner.get('continue')
 
-            # Finalize; should delete socket
-            runner.finalize()
-            self.assert_in_log(f'Deleting socket {socket_path}')
+        # Finalize; should delete socket
+        runner.finalize()
+        self.assert_in_log(f'Deleting socket {socket_path}')
 
-            # Wait for the MOOSE process to finish up
-            stdout, _ = process.communicate()
+        # Wait for the MOOSE process to finish up
+        stdout, _ = process.communicate()
 
-            self.assert_no_warning_logs()
-            self.assertEqual(process.returncode, 0)
-            self.assertIn('Solve Skipped!', stdout)
-            self.assertFalse(os.path.exists(socket_path))
+        self.assert_no_warning_logs()
+        self.assertEqual(process.returncode, 0)
+        self.assertIn('Solve Skipped!', stdout)
+        self.assertFalse(os.path.exists(socket_path))
