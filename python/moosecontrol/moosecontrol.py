@@ -96,6 +96,13 @@ class MooseControl:
         """
         return self.runner.poll_time
 
+    @property
+    def initialized(self) -> bool:
+        """
+        Whether or not we have initialized.
+        """
+        return self.runner.initialized
+
     def initialize(self):
         """
         Initializes the underlying runner and waits
@@ -104,7 +111,10 @@ class MooseControl:
         Must be called before interacting with the process;
         context manager calls initialize() on enter.
         """
+        assert not self.initialized
         self.runner.initialize()
+        assert self.initialized
+
         self.wait()
 
     def finalize(self):

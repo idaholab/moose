@@ -57,8 +57,9 @@ class TestMooseControl(MooseControlTestCase):
                 format=DEFAULT_LOG_FORMAT,
                 datefmt='%H:%M:%S'
             )
-            self.assertEqual(control.runner, runner)
-            self.assertEqual(control.poll_time, control.runner.poll_time)
+        self.assertEqual(control.runner, runner)
+        self.assertEqual(control.poll_time, control.runner.poll_time)
+        self.assertFalse(control.initialized)
 
     def test_init_quiet_and_verbose(self):
         """
@@ -153,7 +154,9 @@ class TestMooseControl(MooseControlTestCase):
         and calls wait().
         """
         control = MooseControl(BaseRunnerTest())
-        with patch(f'{BASERUNNER}.initialize') as runner_initialize:
+        def set_initialize():
+            control.runner._initialized = True
+        with patch(f'{BASERUNNER}.initialize', side_effect=set_initialize) as runner_initialize:
             with patch(f'{MOOSECONTROL}.wait') as wait:
                 control.initialize()
         runner_initialize.assert_called_once()
