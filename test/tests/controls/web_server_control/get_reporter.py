@@ -11,7 +11,7 @@
 import json
 import math
 
-from test_moose_control import TestMooseControl
+from testmoosecontrol import TestMooseControl
 
 # This should be called by the test harness with the get_postprocessor.i
 # input file to obtain changing postprocessor values from the web server

@@ -12,7 +12,7 @@
 import sys
 import numpy as np
 
-from test_moose_control import TestMooseControl
+from testmoosecontrol import TestMooseControl
 
 # This should be called by the test harness with the control_reporter.i
 # input file to test setting the controllable values for many times. It

@@ -10,7 +10,7 @@
 
 import csv
 
-from test_moose_control import TestMooseControl, expect_close
+from testmoosecontrol import TestMooseControl, expect_close
 
 # This should be called by the test harness with the get_postprocessor.i
 # input file to obtain changing postprocessor values from the web server

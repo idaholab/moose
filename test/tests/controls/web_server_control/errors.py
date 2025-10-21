@@ -11,7 +11,7 @@
 # pylint: disable=protected-access
 
 import sys
-from test_moose_control import TestMooseControl
+from testmoosecontrol import TestMooseControl
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:

@@ -10,7 +10,7 @@
 
 import sys
 
-from test_moose_control import TestMooseControl
+from testmoosecontrol import TestMooseControl
 
 # This should be called by the test harness with the get_postprocessor.i
 if __name__ == '__main__':
