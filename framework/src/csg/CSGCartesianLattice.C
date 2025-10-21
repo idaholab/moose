@@ -16,13 +16,12 @@ CSGCartesianLattice::CSGCartesianLattice(
     const std::string & name,
     const Real pitch,
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes)
-  : CSGLattice(name, universes, MooseUtils::prettyCppType<CSGCartesianLattice>()),
-    _nx0(_universe_map.size()),
-    _nx1(_universe_map[0].size()),
+  : CSGLattice(name, MooseUtils::prettyCppType<CSGCartesianLattice>()),
+    _nx0(universes.size()),
+    _nx1(universes[0].size()),
     _pitch(pitch)
 {
-  // universe map dimensions are checked in the CSGLattice constructor, but must also check
-  // specified pitch:
+  setUniverses(universes);
   if (!hasValidDimensions())
     mooseError("Lattice " + getName() + " of type " + getType() +
                " must have pitch and number of elements in both dimensions greater than 0.");
@@ -71,7 +70,7 @@ CSGCartesianLattice::getDimensions() const
 {
   std::unordered_map<std::string, std::any> dims_map;
   dims_map["nx0"] = _nx0;
-  dims_map["nx1"] = _nx0;
+  dims_map["nx1"] = _nx1;
   dims_map["pitch"] = _pitch;
   return dims_map;
 }

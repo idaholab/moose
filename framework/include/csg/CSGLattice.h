@@ -31,17 +31,6 @@ public:
   CSGLattice(const std::string & name, const std::string & lattice_type);
 
   /**
-   * @brief Construct a new CSGLattice of specified type from the lists of universes provided
-   *
-   * @param name unique name of lattice
-   * @param universes list of lists of CSGUniverses to define the lattice map
-   * @param lattice_type type of lattice
-   */
-  CSGLattice(const std::string & name,
-             std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes,
-             const std::string & lattice_type);
-
-  /**
    * Destructor
    */
   virtual ~CSGLattice() = default;

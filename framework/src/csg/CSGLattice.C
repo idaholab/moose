@@ -17,15 +17,6 @@ CSGLattice::CSGLattice(const std::string & name, const std::string & lattice_typ
 {
 }
 
-CSGLattice::CSGLattice(
-    const std::string & name,
-    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes,
-    const std::string & lattice_type)
-  : _name(name), _lattice_type(lattice_type)
-{
-  setUniverses(universes);
-}
-
 void
 CSGLattice::setUniverses(
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes)
