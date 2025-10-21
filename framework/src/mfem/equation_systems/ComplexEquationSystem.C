@@ -44,7 +44,7 @@ ComplexEquationSystem::Init(GridFunctions & gridfunctions,
   // forming the jacobian
   for (auto & eliminated_var_name : _eliminated_var_names)
     _cmplx_eliminated_variables.Register(eliminated_var_name,
-                                       cmplx_gridfunctions.GetShared(eliminated_var_name));
+                                         cmplx_gridfunctions.GetShared(eliminated_var_name));
 }
 
 void
@@ -187,7 +187,9 @@ ComplexEquationSystem::AddComplexIntegratedBC(std::shared_ptr<MFEMComplexIntegra
       auto bcs = std::make_shared<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>();
       _cmplx_integrated_bc_map.Get(test_var_name)->Register(trial_var_name, std::move(bcs));
     }
-    _cmplx_integrated_bc_map.GetRef(test_var_name).Get(trial_var_name)->push_back(std::move(bc_ptr));
+    _cmplx_integrated_bc_map.GetRef(test_var_name)
+        .Get(trial_var_name)
+        ->push_back(std::move(bc_ptr));
   }
   else
   {

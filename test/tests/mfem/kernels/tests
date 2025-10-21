@@ -169,14 +169,13 @@
     recover = false
   []
   [MFEMComplexWaveguide]
-    type = XMLDiff
+    type = CSVDiff
     input = complex_waveguide.i
-    xmldiff = 'OutputData/ComplexWaveguide/Run0/Run0.pvd
-                OutputData/ComplexWaveguide/Run0/Cycle000001/proc000000.vtu'
-    ignored_items = "root['VTKFile']['@version']"
+    csvdiff = 'OutputData/ComplexWaveguide.csv'
     requirement = 'The system shall have the ability to solve a complex-valued problem using MFEM with integrated boundary conditions on a rectangular waveguide with an obstruction.'
+    abs_zero = 1e-6
     capabilities = 'mfem'
-    max_parallel = 1
+    compute_devices = 'cpu cuda'
     recover = false
   []
   [MFEMHeatTransfer]

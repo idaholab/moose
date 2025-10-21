@@ -27,9 +27,9 @@ MFEMRWTE10IntegratedBC::validParams()
       "Vector along the y-axis of the port, where its magnitude is the port width in meters.");
   params.addParam<Real>("frequency", 1.0, "Mode frequency in Hz.");
   params.addParam<Real>(
-      "electric_permittivity", 8.8541878176e-12, "Electric permittivity constant in F/m.");
+      "epsilon", 1.0, "Electric permittivity constant.");
   params.addParam<Real>(
-      "magnetic_permeability", 1.256637061e-6, "Magnetic permeability constant in H/m.");
+      "mu", 1.0, "Magnetic permeability constant.");
   params.addParam<bool>("input_port",
                         false,
                         "Whether the boundary attribute passed to this BC corresponds to the input "
@@ -40,8 +40,8 @@ MFEMRWTE10IntegratedBC::validParams()
 
 MFEMRWTE10IntegratedBC::MFEMRWTE10IntegratedBC(const InputParameters & parameters)
   : MFEMComplexIntegratedBC(parameters),
-    _mu0(getParam<Real>("magnetic_permeability")),
-    _epsilon0(getParam<Real>("electric_permittivity")),
+    _mu(getParam<Real>("mu")),
+    _epsilon(getParam<Real>("epsilon")),
     _omega(2 * M_PI * getParam<Real>("frequency")),
     _a1_vec(to3DMFEMVector(getParam<RealVectorValue>("port_length_vector"))),
     _a2_vec(to3DMFEMVector(getParam<RealVectorValue>("port_width_vector"))),
@@ -50,7 +50,7 @@ MFEMRWTE10IntegratedBC::MFEMRWTE10IntegratedBC(const InputParameters & parameter
     _a3xa1(CrossProduct(_a3_vec, _a1_vec)),
     _v(mfem::InnerProduct(_a1_vec, _a2xa3)),
     _kc(M_PI / _a1_vec.Norml2()),
-    _k0(_omega * sqrt(_mu0 * _epsilon0)),
+    _k0(_omega * sqrt(_mu * _epsilon)),
     _k(std::complex<double>(0., sqrt(_k0 * _k0 - _kc * _kc))),
     _k_a(_a2xa3),
     _k_c(_a3_vec)
@@ -58,7 +58,7 @@ MFEMRWTE10IntegratedBC::MFEMRWTE10IntegratedBC(const InputParameters & parameter
   _k_a *= M_PI / _v;
   _k_c *= _k.imag() / _a3_vec.Norml2();
 
-  _robin_coef_im = std::make_unique<mfem::ConstantCoefficient>(_k.imag() / _mu0);
+  _robin_coef_im = std::make_unique<mfem::ConstantCoefficient>(_k.imag() / _mu);
 
   if (getParam<bool>("input_port"))
   {
@@ -78,7 +78,7 @@ MFEMRWTE10IntegratedBC::RWTE10(const mfem::Vector & x, std::vector<std::complex<
   e_hat *= 1.0 / e_hat.Norml2();
   std::complex<double> zi(0., 1.);
 
-  double e0(sqrt(2 * _omega * _mu0 / (_a1_vec.Norml2() * _a2_vec.Norml2() * _k.imag())));
+  double e0(sqrt(2 * _omega * _mu / (_a1_vec.Norml2() * _a2_vec.Norml2() * _k.imag())));
   std::complex<double> e_mag = e0 * sin(InnerProduct(_k_a, x)) * exp(-zi * InnerProduct(_k_c, x));
 
   E[0] = e_mag * e_hat(1);
@@ -93,7 +93,7 @@ MFEMRWTE10IntegratedBC::RWTE10Real(const mfem::Vector & x, mfem::Vector & v)
   RWTE10(x, eval);
   for (int i = 0; i < x.Size(); ++i)
   {
-    v(i) = -2 * _k.imag() * eval[i].imag() / _mu0;
+    v(i) = -2 * _k.imag() * eval[i].imag() / _mu;
   }
 }
 void
@@ -103,7 +103,7 @@ MFEMRWTE10IntegratedBC::RWTE10Imag(const mfem::Vector & x, mfem::Vector & v)
   RWTE10(x, eval);
   for (int i = 0; i < x.Size(); ++i)
   {
-    v(i) = 2 * _k.imag() * eval[i].real() / _mu0;
+    v(i) = 2 * _k.imag() * eval[i].real() / _mu;
   }
 }
 

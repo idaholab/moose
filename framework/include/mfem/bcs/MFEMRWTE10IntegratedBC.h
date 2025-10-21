@@ -72,8 +72,8 @@ public:
   }
 
 protected:
-  mfem::real_t _mu0;
-  mfem::real_t _epsilon0;
+  mfem::real_t _mu;
+  mfem::real_t _epsilon;
 
   mfem::real_t _omega;
   mfem::Vector _a1_vec;
