@@ -154,4 +154,4 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
 
         process_output = [v.message for v in self._caplog.records if v.name == 'SubprocessReader']
         self.assertIn(SubprocessReader.OUTPUT_PREFIX + ' Solve Skipped!', process_output)
-        self.assertEqual(runner._process.returncode, 0)
+        self.assertEqual(runner.get_return_code(), 0)

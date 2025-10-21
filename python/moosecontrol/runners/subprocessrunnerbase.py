@@ -215,3 +215,12 @@ class SubprocessRunnerBase(ABC):
             self._process.kill()
             self._process.wait()
             logger.info('Killed MOOSE process has ended')
+
+    def get_return_code(self) -> int:
+        """
+        Gets the return code of the process that ran.
+        """
+        assert self._process is not None
+        if self._process.poll() is None:
+            raise RuntimeError('The process is still running')
+        return self._process.returncode

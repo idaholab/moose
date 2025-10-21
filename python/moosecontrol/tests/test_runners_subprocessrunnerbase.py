@@ -308,3 +308,29 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
 
         runner.kill_process()
         self.assert_log_size(0)
+
+    def test_get_return_code(self):
+        """
+        Tests get_return_code().
+        """
+        runner = SubprocessRunnerBaseTest(**ARGS, use_subprocess_reader=False)
+
+        runner._process = runner.start_process('exit 0', shell=True)
+        runner._process.wait()
+
+        self.assertEqual(runner._process.returncode, 0)
+        self.assertEqual(runner.get_return_code(), 0)
+
+    def test_get_return_code_running(self):
+        """
+        Tests get_return_code().
+        """
+        runner = SubprocessRunnerBaseTest(**ARGS, use_subprocess_reader=False)
+
+        runner._process = runner.start_process('sleep 10', shell=True)
+
+        with self.assertRaises(RuntimeError) as e:
+            runner.get_return_code()
+        runner._process.kill()
+        self.assertEqual(str(e.exception), 'The process is still running')
+        runner._process.wait()
