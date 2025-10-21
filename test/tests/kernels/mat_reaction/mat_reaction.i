@@ -1,3 +1,5 @@
+AD = ''
+
 [Mesh]
   [square]
     type = GeneratedMeshGenerator
@@ -13,14 +15,12 @@
 
 [Variables]
   [u]
-    order = FIRST
-    family = LAGRANGE
   []
 []
 
 [Materials]
   [ad_prop]
-    type = ADParsedMaterial
+    type = ${AD}ParsedMaterial
     expression = '-log(3)*log(3)'
     property_name = rxn_prop
   []
@@ -28,11 +28,11 @@
 
 [Kernels]
   [diff]
-    type = ADDiffusion
+    type = ${AD}Diffusion
     variable = u
   []
   [reaction]
-    type = ADMatReaction
+    type = ${AD}MatReaction
     variable = u
     reaction_rate = rxn_prop
   []
@@ -40,13 +40,13 @@
 
 [BCs]
   [left]
-    type = DirichletBC
+    type = ${AD}DirichletBC
     variable = u
     boundary = left
     value = 1
   []
   [right]
-    type = DirichletBC
+    type = ${AD}DirichletBC
     variable = u
     boundary = right
     value = 3
@@ -60,4 +60,5 @@
 
 [Outputs]
   exodus = true
+  file_base = ${AD}mat_reaction_out
 []
