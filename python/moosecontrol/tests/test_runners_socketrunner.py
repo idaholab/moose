@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 from subprocess import Popen, PIPE
 from tempfile import NamedTemporaryFile
+from time import sleep
 from unittest.mock import patch
 
 import pytest
@@ -252,6 +253,8 @@ class TestSocketRunner(MooseControlTestCase):
         self.assert_in_log(f'MOOSE webserver is listening', after_index=socket_i)
 
         # Input has one continue on INITIAL
+        while not runner.get('waiting').data['waiting']:
+            sleep(0.001)
         runner.get('continue')
 
         # Finalize; should delete socket

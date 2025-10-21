@@ -14,6 +14,7 @@ import os
 from re import match
 from unittest.mock import patch
 from tempfile import NamedTemporaryFile, gettempdir
+from time import sleep
 
 import pytest
 
@@ -146,6 +147,8 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
         self.assert_in_log(f'MOOSE process started with pid {pid}')
 
         self.assertTrue(runner.is_process_running())
+        while not runner.get('waiting').data['waiting']:
+            sleep(0.001)
         runner.get('continue')
 
         runner.finalize()

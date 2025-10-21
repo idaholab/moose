@@ -13,6 +13,7 @@
 import os
 from requests import Session
 from subprocess import Popen, PIPE
+from time import sleep
 
 import pytest
 
@@ -101,6 +102,8 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
         self.assert_in_log('MOOSE webserver is listening')
 
         # Input has one continue on INITIAL
+        while not runner.get('waiting').data['waiting']:
+            sleep(0.001)
         runner.get('continue')
 
         # Finalize; should delete socket
