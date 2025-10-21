@@ -153,10 +153,20 @@ elec_cond_air = 0.0
   assembly_level = legacy
 []
 
+[Postprocessors]
+  [ObstructionAbsorption]
+    type = MFEMComplexVectorTimeAveragedPostprocessor
+    coefficient = ${elec_cond_mouse}
+    dual_variable = E
+    primal_variable = E
+    block = 1
+  []
+[]
+
+
 [Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
+  [ReportedPostprocessors]
+    type = CSV
     file_base = OutputData/ComplexWaveguide
-    vtk_format = ASCII
   []
 []

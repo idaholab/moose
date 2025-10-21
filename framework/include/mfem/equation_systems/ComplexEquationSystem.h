@@ -80,7 +80,8 @@ public:
   NamedFieldsMap<mfem::ParComplexLinearForm> _clfs;
 
   // Complex kernels and integrated BCs
-  NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>> _cmplx_kernels_map;
+  NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexKernel>>>>
+      _cmplx_kernels_map;
   NamedFieldsMap<NamedFieldsMap<std::vector<std::shared_ptr<MFEMComplexIntegratedBC>>>>
       _cmplx_integrated_bc_map;
 
