@@ -105,7 +105,7 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
             runner.initialize()
 
         # Process should still be running
-        pid = runner.get_process_pid()
+        pid = runner.get_pid()
         self.assertIsNotNone(pid)
 
         # Wait for it to finish up
@@ -186,7 +186,7 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
 
         runner._process = runner.start_process('sleep 0.1', shell=True)
 
-        pid = runner.get_process_pid()
+        pid = runner.get_pid()
         self.assertIsNotNone(pid)
 
         self._caplog.clear()
@@ -285,7 +285,7 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
         )
 
         runner._process = runner.start_process('sleep 10', shell=True)
-        pid = runner.get_process_pid()
+        pid = runner.get_pid()
         self.assertIsNotNone(pid)
 
         self._caplog.clear()

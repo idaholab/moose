@@ -117,7 +117,7 @@ class SubprocessRunnerBase(ABC):
             self._subprocess_reader.start()
 
         # Report the PID
-        pid = self.get_process_pid()
+        pid = self.get_pid()
         assert pid is not None
         logger.info(f'MOOSE process started with pid {pid}')
 
@@ -128,7 +128,7 @@ class SubprocessRunnerBase(ABC):
 
         Should be called first in derived classes within finalize().
         """
-        pid = self.get_process_pid()
+        pid = self.get_pid()
         if pid is not None:
             assert self._process is not None
             logger.info(f'Waiting for MOOSE process {pid} to end...')
@@ -193,7 +193,7 @@ class SubprocessRunnerBase(ABC):
         })
         return Popen(command, **kwargs)
 
-    def get_process_pid(self) -> Optional[int]:
+    def get_pid(self) -> Optional[int]:
         """
         Get the PID of the underlying process if it is running.
         """
@@ -209,8 +209,8 @@ class SubprocessRunnerBase(ABC):
         """
         Kills the running process, if any.
         """
-        pid = self.get_process_pid()
-        if self._process is not None and (pid := self.get_process_pid()) is not None:
+        pid = self.get_pid()
+        if self._process is not None and (pid := self.get_pid()) is not None:
             logger.info(f'Killing MOOSE process {pid}')
             self._process.kill()
             self._process.wait()

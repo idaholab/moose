@@ -130,7 +130,7 @@ class TestSubprocessPortRunner(MooseControlTestCase):
         full_command = runner.get_full_command()
 
         runner.initialize()
-        pid = runner.get_process_pid()
+        pid = runner.get_pid()
         self.assertIsNotNone(pid)
         self.assert_in_log(f'Starting MOOSE process with command {full_command}')
         self.assert_in_log(f'MOOSE process started with pid {pid}')
