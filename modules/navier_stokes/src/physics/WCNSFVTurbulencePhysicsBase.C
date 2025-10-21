@@ -424,24 +424,15 @@ WCNSFVTurbulencePhysicsBase::addMaterials()
   {
     if (!getProblem().hasFunctor(NS::mu_eff, /*thread_id=*/0))
     {
-      const auto object_type = is_linear ? "ParsedFunctorMaterial" : "ADParsedFunctorMaterial";
-      InputParameters params = getFactory().getValidParams(object_type);
+      const auto mat_type =
+          is_linear ? "FunctorEffectiveDynamicViscosity" : "ADFunctorEffectiveDynamicViscosity";
+      InputParameters params = getFactory().getValidParams(mat_type);
       assignBlocks(params, _blocks);
-      const auto mu_name = _flow_equations_physics->dynamicViscosityName();
-
-      // Avoid defining floats as functors in the parsed expression
-      if (!MooseUtils::isFloat(_turbulent_viscosity_name) && !MooseUtils::isFloat(mu_name))
-        params.set<std::vector<std::string>>("functor_names") = {_turbulent_viscosity_name,
-                                                                 mu_name};
-      else if (MooseUtils::isFloat(_turbulent_viscosity_name) && !MooseUtils::isFloat(mu_name))
-        params.set<std::vector<std::string>>("functor_names") = {mu_name};
-      else if (!MooseUtils::isFloat(_turbulent_viscosity_name) && MooseUtils::isFloat(mu_name))
-        params.set<std::vector<std::string>>("functor_names") = {_turbulent_viscosity_name};
-
-      params.set<std::string>("expression") =
-          _flow_equations_physics->dynamicViscosityName() + " + " + _turbulent_viscosity_name;
-      params.set<std::string>("property_name") = NS::mu_eff;
-      getProblem().addMaterial(object_type, prefix() + "effective_viscosity", params);
+      params.set<MooseFunctorName>("property_name") = NS::mu_eff;
+      params.set<MooseFunctorName>(NS::mu) = _flow_equations_physics->dynamicViscosityName();
+      params.set<MooseFunctorName>(NS::mu_t) = _turbulent_viscosity_name;
+      params.set<MooseFunctorName>(NS::mu_t + "_inverse_factor") = "1";
+      getProblem().addMaterial(mat_type, prefix() + "effective_viscosity", params);
     }
     if (!getParam<bool>("mu_t_as_aux_variable"))
     {
@@ -483,31 +474,25 @@ WCNSFVTurbulencePhysicsBase::addMaterials()
       getProblem().addMaterial(object_type, prefix() + "turbulent_heat_eff_conductivity", params);
     }
 
-    if (_has_scalar_equations && !getProblem().hasFunctor(NS::mu_t_passive_scalar, /*thread_id=*/0))
+    if (_has_scalar_equations &&
+        !getProblem().hasFunctor("mu_eff_passive_scalars", /*thread_id=*/0))
     {
-      const auto object_type = is_linear ? "ParsedFunctorMaterial" : "ADParsedFunctorMaterial";
-      InputParameters params = getFactory().getValidParams(object_type);
+      const auto mat_type =
+          is_linear ? "FunctorEffectiveDynamicViscosity" : "ADFunctorEffectiveDynamicViscosity";
+      InputParameters params = getFactory().getValidParams(mat_type);
       assignBlocks(params, _blocks);
+      params.set<MooseFunctorName>("property_name") = "mu_eff_passive_scalars";
+      params.set<MooseFunctorName>(NS::mu) = _flow_equations_physics->dynamicViscosityName();
+      params.set<MooseFunctorName>(NS::mu_t) = _turbulent_viscosity_name;
       const auto & rho_name = _flow_equations_physics->densityName();
-
-      // Avoid defining floats as functors in the parsed expression
-      if (!MooseUtils::isFloat(_turbulent_viscosity_name) && !MooseUtils::isFloat(rho_name))
-        params.set<std::vector<std::string>>("functor_names") = {_turbulent_viscosity_name,
-                                                                 rho_name};
-      else if (MooseUtils::isFloat(_turbulent_viscosity_name) && !MooseUtils::isFloat(rho_name))
-        params.set<std::vector<std::string>>("functor_names") = {rho_name};
-      else if (!MooseUtils::isFloat(_turbulent_viscosity_name) && MooseUtils::isFloat(rho_name))
-        params.set<std::vector<std::string>>("functor_names") = {_turbulent_viscosity_name};
-
+      params.set<MooseFunctorName>(NS::mu_t + "_inverse_factor") = rho_name;
       const auto turbulent_schmidt_number = getParam<std::vector<Real>>("Sc_t");
       if (turbulent_schmidt_number.size() != 1)
         paramError("passive_scalar_schmidt_number",
                    "A single passive scalar turbulent Schmidt number can and must be specified "
                    "with k-epsilon");
-      params.set<std::string>("expression") = _turbulent_viscosity_name + "/" + rho_name + " / " +
-                                              std::to_string(turbulent_schmidt_number[0]);
-      params.set<std::string>("property_name") = NS::mu_t_passive_scalar;
-      getProblem().addMaterial(object_type, prefix() + "scalar_turbulent_diffusivity", params);
+      params.set<Real>(NS::mu_t + "_extra_inverse_factor") = turbulent_schmidt_number[0];
+      getProblem().addMaterial(mat_type, prefix() + "mu_eff_passive_scalars", params);
     }
   }
 }
