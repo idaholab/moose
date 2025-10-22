@@ -113,7 +113,7 @@ class SubprocessRunnerBase(ABC):
             raise FileNotFoundError(f"Directory {self.directory} does not exist")
 
         # Start the process
-        self._process = self.start_process(self.get_full_command())
+        self._process = self.start_process(self.get_full_command(), cwd=self.directory)
 
         # Start the reader thread if enabled
         if self.use_subprocess_reader:

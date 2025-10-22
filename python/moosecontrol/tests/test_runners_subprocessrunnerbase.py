@@ -112,11 +112,10 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
         # Form a fake process that does something briefly
         output = ["foo", "bar"]
         joined_output = "\n".join(output)
-        command = f'echo "{joined_output}"'
+        command = ["echo", joined_output]
         start_process_before = runner.start_process
 
         def mock_start_process(*_, **kwargs):
-            kwargs["shell"] = True
             return start_process_before(command, **kwargs)
 
         # Call initialize, ignoring the parent initialize() and using our
@@ -178,6 +177,30 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
         Tests initialize() with dummy process with the reader thread.
         """
         self.run_initialize_dummy_process(False)
+
+    def test_initialize_process_directory(self):
+        """
+        Tests that initialize() uses the directory as the running
+        directory for the process.
+        """
+        self._caplog.clear()
+
+        runner = SubprocessRunnerBaseTest(
+            **ARGS,
+            directory=self.directory.name,
+            use_subprocess_reader=False,
+        )
+
+        start_process_before = runner.start_process
+
+        def mock_start_process(*_, **kwargs):
+            return start_process_before(["pwd"], **kwargs)
+
+        with patch_runner("start_process", new=mock_start_process):
+            runner.initialize()
+        stdout, _ = runner._process.communicate()
+
+        self.assertEqual(stdout, f"{self.directory.name}\n")
 
     def test_get_full_command(self):
         """
