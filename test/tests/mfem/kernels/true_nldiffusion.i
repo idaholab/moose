@@ -1,6 +1,6 @@
 [Mesh]
   type = MFEMMesh
-  file = square.e
+  file = ../mesh/square.e
   dim = 2
 []
 
@@ -27,25 +27,17 @@
 [ICs]
   [diffused_ic]
     type = MFEMScalarIC
-    coefficient = different
+    coefficient = initial
     variable = concentration
   []
 []
 
 [Functions]
-  [one]
-    type = ParsedFunction
-    expression = 1.0
-  []
   [minus]
     type = ParsedFunction
     expression = -1.0
   []
-  [source]
-    type = ParsedFunction
-    expression = 100
-  []
-  [different]
+  [initial]
     type = ParsedFunction
     expression = 2*y+1
   []
@@ -69,7 +61,6 @@
 
 
 [Kernels]
-  active = 'residual jacobian_one jacobian_two'
   [residual]
     type = MFEMDomainLFGardKernel
     variable = concentration
@@ -84,11 +75,6 @@
     type = MFEMMixedScalarWeakDivergenceKernel
     variable = concentration
     coefficient = minus
-  []
-  [force]
-    type = MFEMDomainLFKernel
-    variable = concentration
-    coefficient = one
   []
 []
 
