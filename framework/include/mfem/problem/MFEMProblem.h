@@ -214,7 +214,10 @@ public:
   /**
    * set newton solver parameters
    */
-  void setNewtonParamaters(unsigned int nl_max_its, mfem::real_t nl_abs_tol, mfem::real_t nl_rel_tol, unsigned int print_level);
+  void setNewtonParamaters(unsigned int nl_max_its,
+                           mfem::real_t nl_abs_tol,
+                           mfem::real_t nl_rel_tol,
+                           unsigned int print_level);
 
 protected:
   MFEMProblemData _problem_data;

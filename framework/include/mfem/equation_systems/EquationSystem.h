@@ -73,7 +73,8 @@ public:
   /// Build mixed bilinear forms (off-diagonal Jacobian contributions)
   virtual void BuildMixedBilinearForms();
   /// Build all forms comprising this EquationSystem
-  virtual void BuildEquationSystem(Moose::MFEM::GridFunctions & gridfunctions, mfem::Array<int> & btoffsets);
+  virtual void BuildEquationSystem(Moose::MFEM::GridFunctions & gridfunctions,
+                                   mfem::Array<int> & btoffsets);
 
   /// Form Jacobian operator based on on- and off-diagonal bilinear form contributions, populate
   /// solution and RHS vectors of true DoFs, and apply constraints
@@ -114,7 +115,7 @@ public:
   virtual void RecoverFEMSolution(mfem::BlockVector & trueX,
                                   Moose::MFEM::GridFunctions & gridfunctions);
 
-  void CopyVec(const mfem::Vector & x, mfem::Vector & y){ y = x;}
+  void CopyVec(const mfem::Vector & x, mfem::Vector & y) { y = x; }
 
   std::vector<mfem::Array<int>> _ess_tdof_lists;
 
@@ -284,7 +285,6 @@ EquationSystem::ApplyDomainLFIntegrators(
   }
 }
 
-
 inline void
 EquationSystem::ApplyDomainNLActionIntegrators(
     const std::string & test_var_name,
@@ -308,8 +308,6 @@ EquationSystem::ApplyDomainNLActionIntegrators(
     }
   }
 }
-
-
 
 template <class FormType>
 void
@@ -376,7 +374,8 @@ public:
                     mfem::AssemblyLevel assembly_level) override;
 
   virtual void SetTimeStep(mfem::real_t dt);
-  virtual void UpdateEquationSystem(Moose::MFEM::GridFunctions & gridfunctions, mfem::Array<int> & btoffsets);
+  virtual void UpdateEquationSystem(Moose::MFEM::GridFunctions & gridfunctions,
+                                    mfem::Array<int> & btoffsets);
 
   virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel) override;
   virtual void BuildBilinearForms() override;

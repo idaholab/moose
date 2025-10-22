@@ -512,8 +512,11 @@ MFEMProblem::getGridFunction(const std::string & name)
   return getUserObject<MFEMVariable>(name).getGridFunction();
 }
 
-void 
-MFEMProblem::setNewtonParamaters(unsigned int nl_max_its, mfem::real_t nl_abs_tol, mfem::real_t nl_rel_tol, unsigned int print_level)
+void
+MFEMProblem::setNewtonParamaters(unsigned int nl_max_its,
+                                 mfem::real_t nl_abs_tol,
+                                 mfem::real_t nl_rel_tol,
+                                 unsigned int print_level)
 {
   _nl_max_its = nl_max_its;
   _nl_abs_tol = nl_abs_tol;

@@ -27,12 +27,13 @@ MFEMMixedScalarWeakDivergenceKernel::validParams()
   return params;
 }
 
-MFEMMixedScalarWeakDivergenceKernel::MFEMMixedScalarWeakDivergenceKernel(const InputParameters & parameters)
+MFEMMixedScalarWeakDivergenceKernel::MFEMMixedScalarWeakDivergenceKernel(
+    const InputParameters & parameters)
   : MFEMKernel(parameters), _coef(getScalarCoefficient("coefficient"))
 // FIXME: The MFEM bilinear form can also handle vector and matrix
 // coefficients, so ideally we'd handle all three too.
 {
-    // declares GradientGridFunctionCoefficient
+  // declares GradientGridFunctionCoefficient
   getMFEMProblem().getCoefficients().declareVector<mfem::GradientGridFunctionCoefficient>(
       name(), getMFEMProblem().getProblemData().gridfunctions.Get(_test_var_name));
 }
@@ -40,7 +41,8 @@ MFEMMixedScalarWeakDivergenceKernel::MFEMMixedScalarWeakDivergenceKernel(const I
 mfem::BilinearFormIntegrator *
 MFEMMixedScalarWeakDivergenceKernel::createBFIntegrator()
 {
-  mfem::VectorCoefficient & vec_coef = getMFEMProblem().getCoefficients().getVectorCoefficient(name());
+  mfem::VectorCoefficient & vec_coef =
+      getMFEMProblem().getCoefficients().getVectorCoefficient(name());
   _product_coef = new mfem::ScalarVectorProductCoefficient(_coef, vec_coef);
   return new mfem::MixedScalarWeakDivergenceIntegrator(*_product_coef);
 }

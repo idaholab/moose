@@ -35,10 +35,11 @@ EquationSystemProblemOperator::Solve()
 
   for (const auto i : index_range(_test_var_names))
   {
-     auto & test_var_name = _test_var_names.at(i);
-     *(GetEquationSystem()->_var_ess_constraints.at(i)) = *(_problem_data.gridfunctions.GetShared(test_var_name));
+    auto & test_var_name = _test_var_names.at(i);
+    *(GetEquationSystem()->_var_ess_constraints.at(i)) =
+        *(_problem_data.gridfunctions.GetShared(test_var_name));
   }
-  
+
   GetEquationSystem()->ApplyEssentialBCs();
   GetEquationSystem()->BuildJacobian(_true_x, _true_rhs);
 
