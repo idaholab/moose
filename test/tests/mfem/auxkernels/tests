@@ -49,14 +49,14 @@
     restep = false
 []
 [MFEMDotProductAux.C]
-    type = XMLDiff
+    type = CSVDiff
     input = ../submeshes/av_magnetostatic.i
     cli_args = 'FESpaces/inactive="" '
                'AuxVariables/inactive="" '
                'AuxKernels/inactive="" '
                'Outputs/ParaViewDataCollection/file_base=OutputData/CrossProduct'
-    xmldiff = 'OutputData/CrossProduct/Run0/Run0.pvd
-                OutputDate/CrossProduct/Run0/Cycle000001/proc000000.vtu'
+               'Outputs/ReportedPostprocessors/file_base=OutputData/CrossProduct'
+    csvdiff = 'OutputData/CrossProduct.csv'
     design = 'MFEMCrossProductAux.md'
     issues = '#31613'
     requirement = 'The system shall have the abillity to calculate the cross product of two gridfucntions onto an MFEM vector auxvariable'

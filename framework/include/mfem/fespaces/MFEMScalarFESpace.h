@@ -30,7 +30,7 @@ protected:
   /// Get the number of degrees of freedom per basis function needed
   /// in this finite element space.
   virtual int getVDim() const override;
-  
+
 private:
   /// Name of the family of finite element collections to use
   const std::string _fec_type;

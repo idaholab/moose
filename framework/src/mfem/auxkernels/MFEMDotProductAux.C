@@ -21,8 +21,10 @@ MFEMDotProductAux::validParams()
   params.addClassDescription("Project s(x) * (U . V) onto a scalar MFEM auxvariable.");
   params.addRequiredParam<VariableName>("u", "Vector MFEMVariable U");
   params.addRequiredParam<VariableName>("v", "Vector MFEMVariable V");
-  params.addParam<mfem::real_t>("scale_factor", 1.0, "Constant multiplier applied to the dot product");
-  // params.addParam<VariableName>("scale_variable", "Optional scalar MFEMVariable s(x) to multiply the dot product.");
+  params.addParam<mfem::real_t>(
+      "scale_factor", 1.0, "Constant multiplier applied to the dot product");
+  // params.addParam<VariableName>("scale_variable", "Optional scalar MFEMVariable s(x) to multiply
+  // the dot product.");
   return params;
 }
 
@@ -33,9 +35,9 @@ MFEMDotProductAux::MFEMDotProductAux(const InputParameters & parameters)
     _u_var(*getMFEMProblem().getProblemData().gridfunctions.Get(_u_var_name)),
     _v_var(*getMFEMProblem().getProblemData().gridfunctions.Get(_v_var_name)),
     // _scale_var(parameters.isParamValid("scale_variable")
-                //  ? &(*getMFEMProblem().getProblemData().gridfunctions.Get(
-                      //  getParam<VariableName>("scale_variable")))
-                //  : nullptr),
+    //  ? &(*getMFEMProblem().getProblemData().gridfunctions.Get(
+    //  getParam<VariableName>("scale_variable")))
+    //  : nullptr),
     _scale_factor(getParam<mfem::real_t>("scale_factor"))
 {
   // nothing else to assemble, the coefficient expression is build in the execute()
@@ -53,7 +55,7 @@ MFEMDotProductAux::execute()
   mfem::ConstantCoefficient ccoef(_scale_factor);
   mfem::ProductCoefficient final_coef(ccoef, dot_uv);
 
-  //Enforce L2 with INTEGRAL mapping and interior DOFs only
+  // Enforce L2 with INTEGRAL mapping and interior DOFs only
   mfem::ParFiniteElementSpace * fes = _result_var.ParFESpace();
 
   // Must be L2
@@ -64,12 +66,13 @@ MFEMDotProductAux::execute()
   const int dim = fes->GetMesh()->Dimension();
   const auto mt = static_cast<mfem::FiniteElement::MapType>(fes->FEColl()->GetMapType(dim));
   if (mt != mfem::FiniteElement::INTEGRAL)
-    mooseError("MFEMDotProductAux requires map_type = FiniteElement::INTEGRAL for the target L2 space.");
+    mooseError(
+        "MFEMDotProductAux requires map_type = FiniteElement::INTEGRAL for the target L2 space.");
 
   // Must have no shared/constrained DOFs
   if (fes->GetTrueVSize() != fes->GetVSize())
-    mooseError("MFEMDotProductAux currently supports only L2 spaces with interior DOFs (no shared/constrained DOFs).");
-
+    mooseError("MFEMDotProductAux currently supports only L2 spaces with interior DOFs (no "
+               "shared/constrained DOFs).");
 
   // Project into the scalar aux result variable per element projection for L2
   _result_var = 0.0;

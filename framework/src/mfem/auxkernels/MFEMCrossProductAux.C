@@ -28,7 +28,8 @@ MFEMCrossProductAux::MFEMCrossProductAux(const InputParameters & parameters)
 {
 }
 
-void MFEMCrossProductAux::execute()
+void
+MFEMCrossProductAux::execute()
 {
   // Build vector coefficient: s(x) * (U x V)
   mfem::VectorGridFunctionCoefficient Ucoef(const_cast<mfem::ParGridFunction *>(&_u_var));
@@ -39,11 +40,11 @@ void MFEMCrossProductAux::execute()
   mfem::ConstantCoefficient scoef(_scale_factor);
   mfem::ScalarVectorProductCoefficient final_vec(scoef, cross_uv); // vector-valued
 
-  //Must be vector L2 with INTEGRAL map and interior DOFs
+  // Must be vector L2 with INTEGRAL map and interior DOFs
   mfem::ParFiniteElementSpace * fes = _result_var.ParFESpace();
   const int mesh_dim = fes->GetMesh()->Dimension();
 
-  //Enforce 3D cross product
+  // Enforce 3D cross product
   if (mesh_dim != 3)
     mooseError("MFEMCrossProductAux requires a 3D mesh (Dimension == 3).");
 
@@ -59,7 +60,7 @@ void MFEMCrossProductAux::execute()
     mooseError("MFEMCrossProductAux currently supports only L2 spaces with interior DOFs "
                "(no shared/constrained DOFs).");
 
-  //MFEM element projection for L2
+  // MFEM element projection for L2
   _result_var = 0.0;
   _result_var.ProjectCoefficient(final_vec);
 }
