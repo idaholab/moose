@@ -253,6 +253,8 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
         """
         Tests cleanup() killing a dummy process.
         """
+        self.allow_log_warnings = True
+
         runner = SubprocessRunnerBaseTest(**ARGS)
 
         runner._process = runner.start_process("sleep 10", shell=True)
@@ -272,6 +274,8 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
         """
         Tests cleanup() waiting for the reader thread to finish.
         """
+        self.allow_log_warnings = True
+
         runner = SubprocessRunnerBaseTest(**ARGS)
 
         reader = MagicMock()

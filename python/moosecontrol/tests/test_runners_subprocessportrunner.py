@@ -149,7 +149,6 @@ class TestSubprocessPortRunner(MooseControlTestCase):
 
         runner.finalize()
 
-        self.assert_no_warning_logs()
         self.assertFalse(runner.is_process_running())
 
         process_output = [

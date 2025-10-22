@@ -131,6 +131,8 @@ class TestMooseControl(MooseControlTestCase):
         Tests __exit__() when an exception is raised, which
         should call cleanup() instead of finalize.
         """
+        self.allow_log_warnings = True
+
         control = MooseControl(BaseRunnerTest())
         control.cleanup = MagicMock()
         control.finalize = MagicMock()
@@ -224,7 +226,6 @@ class TestMooseControl(MooseControlTestCase):
             control = ctx.control
             control.set_continue()
 
-        self.assert_no_warning_logs()
         self.assertEqual(runner.get_return_code(), 0)
 
 

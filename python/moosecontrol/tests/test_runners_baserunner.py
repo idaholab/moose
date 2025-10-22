@@ -315,6 +315,8 @@ class TestBaseRunner(MooseControlTestCase):
         """
         Tests cleanup() closing a session.
         """
+        self.allow_log_warnings = True
+
         runner = BaseRunnerTest(poke_poll_time=None)
         runner._session = runner.build_session()
         runner.is_listening = MagicMock(return_value=False)
@@ -352,6 +354,8 @@ class TestBaseRunner(MooseControlTestCase):
         """
         Tests cleanup() with stopping the poke thread.
         """
+        self.allow_log_warnings = True
+
         runner = BaseRunnerTest()
 
         # Start the poke thread with a fake poke
@@ -373,6 +377,8 @@ class TestBaseRunner(MooseControlTestCase):
         """
         Tests cleanup() with stopping webserver via kill().
         """
+        self.allow_log_warnings = True
+
         runner = BaseRunnerTest(poke_poll_time=None)
         runner._session = runner.build_session()
         runner.is_listening = MagicMock(return_value=True)

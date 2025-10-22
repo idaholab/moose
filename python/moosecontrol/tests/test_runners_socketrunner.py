@@ -211,6 +211,8 @@ class TestSocketRunner(MooseControlTestCase):
         Tests cleanup() when the socket exists and is used,
         which deletes it.
         """
+        self.allow_log_warnings = True
+
         socket = os.path.join(self.directory.name, "sock.sock")
         Path(socket).touch()
         self.assertTrue(os.path.exists(socket))
@@ -281,7 +283,6 @@ class TestSocketRunner(MooseControlTestCase):
         # Wait for the MOOSE process to finish up
         stdout, _ = process.communicate()
 
-        self.assert_no_warning_logs()
         self.assertEqual(process.returncode, 0)
         self.assertIn("Solve Skipped!", stdout)
         self.assertFalse(os.path.exists(socket_path))

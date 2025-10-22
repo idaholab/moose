@@ -119,6 +119,5 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
         # Wait for the MOOSE process to finish up
         stdout, _ = process.communicate()
 
-        self.assert_no_warning_logs()
         self.assertEqual(process.returncode, 0)
         self.assertIn("Solve Skipped!", stdout)

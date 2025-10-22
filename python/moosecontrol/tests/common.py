@@ -58,13 +58,21 @@ class MooseControlTestCase(TestCase):
     def setUp(self):
         super().setUp()
 
+        # Can be set to True in a test to allow warnings
+        self.allow_log_warnings = False
+
+        # Clanup the log
         self._caplog.clear()
+
+        # Create a temporary directory if needed
         self.directory = TemporaryDirectory()
 
     def tearDown(self):
         super().setUp()
 
-        self._caplog.clear()
+        if not self.allow_log_warnings:
+            self.assert_no_warning_logs()
+
         self.directory.cleanup()
 
     def get_moose_exe(self) -> str:
