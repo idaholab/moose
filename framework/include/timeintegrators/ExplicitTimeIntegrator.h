@@ -36,6 +36,8 @@ public:
   virtual bool isExplicit() const override { return true; }
 
 protected:
+  void setupSolver();
+
   enum SolveType
   {
     CONSISTENT,
