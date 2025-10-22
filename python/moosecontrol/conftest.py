@@ -37,7 +37,7 @@ def pytest_collection_modifyitems(config, items):
     """
     # Skip 'moose' tests if --no-moose is set
     if config.getoption("--no-moose"):
-        marker = pytest.mark.skip(reason="skipping moose test due to --no-moose")
+        marker = pytest.mark.skip(reason="--no-moose")
         for item in items:
             if "moose" in item.keywords:
                 item.add_marker(marker)
