@@ -14,7 +14,7 @@
 #include "mfem.hpp"
 
 /**
- * Project s(x) * (U × V) onto a vector MFEM auxvariable.
+ * Project s(x) * (U x V) onto a vector MFEM auxvariable.
  *
  * Parameters:
  *   - variable (AuxVariableName, required): AuxVariable name (inherited)

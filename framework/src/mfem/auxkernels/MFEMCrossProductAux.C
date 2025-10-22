@@ -10,7 +10,7 @@ InputParameters
 MFEMCrossProductAux::validParams()
 {
   InputParameters params = MFEMAuxKernel::validParams();
-  params.addClassDescription("Projects s(x) * (U × V) onto a vector MFEM auxvariable");
+  params.addClassDescription("Projects s(x) * (U x V) onto a vector MFEM auxvariable");
   params.addRequiredParam<VariableName>("u", "Vector MFEMVariable U (vdim=3)");
   params.addRequiredParam<VariableName>("v", "Vector MFEMVariable V (vdim=3)");
   params.addParam<mfem::real_t>(
@@ -30,7 +30,7 @@ MFEMCrossProductAux::MFEMCrossProductAux(const InputParameters & parameters)
 
 void MFEMCrossProductAux::execute()
 {
-  // Build vector coefficient: s(x) * (U × V)
+  // Build vector coefficient: s(x) * (U x V)
   mfem::VectorGridFunctionCoefficient Ucoef(const_cast<mfem::ParGridFunction *>(&_u_var));
   mfem::VectorGridFunctionCoefficient Vcoef(const_cast<mfem::ParGridFunction *>(&_v_var));
   mfem::VectorCrossProductCoefficient cross_uv(Ucoef, Vcoef); // vector-valued

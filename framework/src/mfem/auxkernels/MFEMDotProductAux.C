@@ -18,7 +18,7 @@ InputParameters
 MFEMDotProductAux::validParams()
 {
   InputParameters params = MFEMAuxKernel::validParams();
-  params.addClassDescription("Projects s(x) * (U · V) onto a scalar MFEM auxvariable");
+  params.addClassDescription("Project s(x) * (U . V) onto a scalar MFEM auxvariable.");
   params.addRequiredParam<VariableName>("u", "Vector MFEMVariable U");
   params.addRequiredParam<VariableName>("v", "Vector MFEMVariable V");
   params.addParam<mfem::real_t>("scale_factor", 1.0, "Constant multiplier applied to the dot product");
@@ -44,7 +44,7 @@ MFEMDotProductAux::MFEMDotProductAux(const InputParameters & parameters)
 void
 MFEMDotProductAux::execute()
 {
-  // Build scalar coefficient: s(x) * (U · V)
+  // Build scalar coefficient s(x) * (U . V)
   mfem::VectorGridFunctionCoefficient Ucoef(const_cast<mfem::ParGridFunction *>(&_u_var));
   mfem::VectorGridFunctionCoefficient Vcoef(const_cast<mfem::ParGridFunction *>(&_v_var));
   mfem::InnerProductCoefficient dot_uv(Ucoef, Vcoef);

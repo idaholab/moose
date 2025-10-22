@@ -14,7 +14,7 @@
 #include "mfem.hpp"
 
 /**
- * Project s(x) * (U · V) onto a scalar MFEM auxvariable.
+ * Project s(x) * (U . V) onto a scalar MFEM auxvariable.
  *
  * Parameters:
  *   - u (VariableName): vector MFEM variable U
