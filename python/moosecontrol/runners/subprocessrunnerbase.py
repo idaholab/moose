@@ -132,9 +132,9 @@ class SubprocessRunnerBase(ABC):
 
         Should be called first in derived classes within finalize().
         """
-        pid = self.get_pid()
-        if pid is not None:
+        if self.is_process_running():
             assert self._process is not None
+            pid = self.get_pid()
             logger.info(f"Waiting for MOOSE process {pid} to end...")
             self._process.wait()
             logger.info("MOOSE process has ended")
@@ -201,9 +201,9 @@ class SubprocessRunnerBase(ABC):
 
     def get_pid(self) -> Optional[int]:
         """
-        Get the PID of the underlying process if it is running.
+        Get the PID of the underlying process if it is running or has ran.
         """
-        return self._process.pid if self.is_process_running() else None
+        return None if self._process is None else self._process.pid
 
     def is_process_running(self) -> bool:
         """
@@ -216,7 +216,8 @@ class SubprocessRunnerBase(ABC):
         Kills the running process, if any.
         """
         pid = self.get_pid()
-        if self._process is not None and (pid := self.get_pid()) is not None:
+        if self.is_process_running():
+            pid = self.get_pid()
             logger.info(f"Killing MOOSE process {pid}")
             self._process.kill()
             self._process.wait()

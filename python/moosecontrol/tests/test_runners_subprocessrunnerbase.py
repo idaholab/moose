@@ -97,7 +97,7 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
         # Form a fake process that does something briefly
         output = ["foo", "bar"]
         joined_output = "\n".join(output)
-        command = f'sleep 0.1 && echo "{joined_output}" && sleep 0.1'
+        command = f'echo "{joined_output}"'
         start_process_before = runner.start_process
 
         def mock_start_process(*_, **kwargs):
@@ -109,18 +109,15 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
         with patch_runner("start_process", new=mock_start_process):
             runner.initialize()
 
-        # Process should still be running
-        pid = runner.get_pid()
-        self.assertIsNotNone(pid)
-
         # Wait for it to finish up
-        self.assertIsNone(runner._process.poll())
         runner._process.wait()
         if use_subprocess_reader:
             self.assertIsNotNone(runner._subprocess_reader)
             runner._subprocess_reader.join()
         else:
             self.assertIsNone(runner._subprocess_reader)
+        pid = runner.get_pid()
+        self.assertIsNotNone(pid)
 
         # Start and stop log + output if reader thread enabled
         log_size = 2 + ((len(output) + 2) if use_subprocess_reader else 0)
@@ -155,12 +152,16 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
                     after_index=log_i,
                 )
 
-    def test_initialize_dummy_process(self):
+    def test_initialize_dummy_process_with_reader_thread(self):
         """
-        Tests initialize() with dummy process with and without the
-        reader thread.
+        Tests initialize() with dummy process with the reader thread.
         """
         self.run_initialize_dummy_process(True)
+
+    def test_initialize_dummy_process_without_reader_thread(self):
+        """
+        Tests initialize() with dummy process with the reader thread.
+        """
         self.run_initialize_dummy_process(False)
 
     def test_get_full_command(self):
