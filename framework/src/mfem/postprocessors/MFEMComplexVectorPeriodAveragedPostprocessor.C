@@ -9,13 +9,13 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MFEMComplexVectorTimeAveragedPostprocessor.h"
+#include "MFEMComplexVectorPeriodAveragedPostprocessor.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMComplexVectorTimeAveragedPostprocessor);
+registerMooseObject("MooseApp", MFEMComplexVectorPeriodAveragedPostprocessor);
 
 InputParameters
-MFEMComplexVectorTimeAveragedPostprocessor::validParams()
+MFEMComplexVectorPeriodAveragedPostprocessor::validParams()
 {
   InputParameters params = MFEMPostprocessor::validParams();
   params += MFEMBlockRestrictable::validParams();
@@ -31,7 +31,7 @@ MFEMComplexVectorTimeAveragedPostprocessor::validParams()
   return params;
 }
 
-MFEMComplexVectorTimeAveragedPostprocessor::MFEMComplexVectorTimeAveragedPostprocessor(
+MFEMComplexVectorPeriodAveragedPostprocessor::MFEMComplexVectorPeriodAveragedPostprocessor(
     const InputParameters & parameters)
   : MFEMPostprocessor(parameters),
     MFEMBlockRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh()),
@@ -69,14 +69,14 @@ MFEMComplexVectorTimeAveragedPostprocessor::MFEMComplexVectorTimeAveragedPostpro
 }
 
 void
-MFEMComplexVectorTimeAveragedPostprocessor::execute()
+MFEMComplexVectorPeriodAveragedPostprocessor::execute()
 {
   _subdomain_integrator.Assemble();
   _integral = _subdomain_integrator(_scalar_var);
 }
 
 PostprocessorValue
-MFEMComplexVectorTimeAveragedPostprocessor::getValue() const
+MFEMComplexVectorPeriodAveragedPostprocessor::getValue() const
 {
   return _integral;
 }

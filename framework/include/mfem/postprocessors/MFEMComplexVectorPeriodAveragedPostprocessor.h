@@ -17,13 +17,13 @@
  * Compute the time average of the inner product between two complex MFEM vector FE variables,
  * scaled by an optional scalar coefficient.
  */
-class MFEMComplexVectorTimeAveragedPostprocessor : public MFEMPostprocessor,
-                                                   public MFEMBlockRestrictable
+class MFEMComplexVectorPeriodAveragedPostprocessor : public MFEMPostprocessor,
+                                                     public MFEMBlockRestrictable
 {
 public:
   static InputParameters validParams();
 
-  MFEMComplexVectorTimeAveragedPostprocessor(const InputParameters & parameters);
+  MFEMComplexVectorPeriodAveragedPostprocessor(const InputParameters & parameters);
 
   /**
    * Evaluate integral.
