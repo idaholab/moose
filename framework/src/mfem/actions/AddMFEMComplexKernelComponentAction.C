@@ -33,31 +33,14 @@ AddMFEMComplexKernelComponentAction::AddMFEMComplexKernelComponentAction(
 void
 AddMFEMComplexKernelComponentAction::act()
 {
-  if (_name == "real_part" || _name == "imag_part")
-  {
-    // Finding the string "parent/real_part" or "parent/imag_part" to associate with the object
-    std::string action_name = _app.actionWarehouse().getCurrentActionName();
-    int second_last_slash = 0;
-    int occur = 0;
-    for (int i = action_name.length() - 1; i >= 0; --i)
-    {
-      if (action_name[i] == '/')
-        occur += 1;
+  std::vector<std::string> elements;
+  MooseUtils::tokenize<std::string>(_pars.blockFullpath(), elements);
+  MFEMProblem * mfem_problem = dynamic_cast<MFEMProblem *>(_problem.get());
 
-      if (occur == 2)
-      {
-        second_last_slash = i;
-        break;
-      }
-    }
-
-    std::string comp_name =
-        action_name.substr(second_last_slash + 1, action_name.length() - second_last_slash - 1);
-
-    MFEMProblem * mfem_problem = dynamic_cast<MFEMProblem *>(_problem.get());
-    if (mfem_problem)
-      mfem_problem->addComplexComponentToKernel(_type, comp_name, _moose_object_pars);
-  }
+  if (mfem_problem && _name == "RealComponent")
+     mfem_problem->addRealComponentToKernel(_type, elements[elements.size()-2], _moose_object_pars);
+  else if (mfem_problem && _name == "ImagComponent")
+     mfem_problem->addImagComponentToKernel(_type, elements[elements.size()-2], _moose_object_pars);
 }
 
 #endif

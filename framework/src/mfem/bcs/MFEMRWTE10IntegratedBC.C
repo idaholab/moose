@@ -26,10 +26,8 @@ MFEMRWTE10IntegratedBC::validParams()
       "port_width_vector",
       "Vector along the y-axis of the port, where its magnitude is the port width in meters.");
   params.addParam<Real>("frequency", 1.0, "Mode frequency in Hz.");
-  params.addParam<Real>(
-      "epsilon", 1.0, "Electric permittivity constant.");
-  params.addParam<Real>(
-      "mu", 1.0, "Magnetic permeability constant.");
+  params.addParam<Real>("epsilon", 1.0, "Electric permittivity constant.");
+  params.addParam<Real>("mu", 1.0, "Magnetic permeability constant.");
   params.addParam<bool>("input_port",
                         false,
                         "Whether the boundary attribute passed to this BC corresponds to the input "

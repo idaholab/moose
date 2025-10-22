@@ -105,8 +105,8 @@ elec_cond_air = 0.0
     port_length_vector = "24.76e-2 0.0 0.0"
     port_width_vector = "0.0 12.38e-2 0.0"
     frequency = ${freq}
-    electric_permittivity = ${epsilon0}
-    magnetic_permeability = ${mu0}
+    epsilon = ${epsilon0}
+    mu = ${mu0}
   []
   [WaveguidePortOut]
     type = MFEMRWTE10IntegratedBC
@@ -116,8 +116,8 @@ elec_cond_air = 0.0
     port_length_vector = "24.76e-2 0.0 0.0"
     port_width_vector = "0.0 12.38e-2 0.0"
     frequency = ${freq}
-    electric_permittivity = ${epsilon0}
-    magnetic_permeability = ${mu0}
+    epsilon = ${epsilon0}
+    mu = ${mu0}
   []
 []
 
@@ -125,7 +125,7 @@ elec_cond_air = 0.0
   [curlcurl]
     type = MFEMComplexKernel
     variable = E
-    [real_part]
+    [RealComponent]
       type = MFEMCurlCurlKernel
       coefficient = MagReluctivity
     []
@@ -133,11 +133,11 @@ elec_cond_air = 0.0
   [mass_loss]
     type = MFEMComplexKernel
     variable = E
-    [real_part]
+    [RealComponent]
       type = MFEMVectorFEMassKernel
       coefficient = massCoef
     []
-    [imag_part]
+    [ImagComponent]
       type = MFEMVectorFEMassKernel
       coefficient = lossCoef
     []
@@ -155,7 +155,7 @@ elec_cond_air = 0.0
 
 [Postprocessors]
   [ObstructionAbsorption]
-    type = MFEMComplexVectorTimeAveragedPostprocessor
+    type = MFEMComplexVectorPeriodAveragedPostprocessor
     coefficient = ${elec_cond_mouse}
     dual_variable = E
     primal_variable = E

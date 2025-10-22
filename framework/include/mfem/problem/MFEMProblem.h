@@ -115,15 +115,30 @@ public:
                  InputParameters & parameters) override;
 
   /**
-   * Adds a real or imaginary component kernel to the parent MFEMComplexKernel.
+   * Adds a real component kernel to the parent MFEMComplexKernel.
    */
-  void addComplexComponentToKernel(const std::string & kernel_name,
+  void addRealComponentToKernel(const std::string & kernel_name,
                                    const std::string & name,
                                    InputParameters & parameters);
-  /**
-   * Adds a real or imaginary component BC to the parent MFEMComplexIntegratedBC.
+  
+                                     /**
+   * Adds an imaginary component kernel to the parent MFEMComplexKernel.
    */
-  void addComplexComponentToBC(const std::string & kernel_name,
+  void addImagComponentToKernel(const std::string & kernel_name,
+                                   const std::string & name,
+                                   InputParameters & parameters);
+
+  /**
+   * Adds a real component BC to the parent MFEMComplexIntegratedBC.
+   */
+  void addRealComponentToBC(const std::string & kernel_name,
+                               const std::string & name,
+                               InputParameters & parameters);
+                               
+  /**
+   * Adds an imaginary component BC to the parent MFEMComplexIntegratedBC.
+   */
+  void addImagComponentToBC(const std::string & kernel_name,
                                const std::string & name,
                                InputParameters & parameters);
 

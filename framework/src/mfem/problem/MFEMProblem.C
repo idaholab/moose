@@ -330,47 +330,63 @@ MFEMProblem::addKernel(const std::string & kernel_name,
 }
 
 void
-MFEMProblem::addComplexComponentToKernel(const std::string & kernel_name,
+MFEMProblem::addRealComponentToKernel(const std::string & kernel_name,
                                          const std::string & name,
                                          InputParameters & parameters)
 {
-  std::string parent_name = name.substr(0, name.find_last_of('/'));
   auto parent_ptr = std::dynamic_pointer_cast<MFEMComplexKernel>(
-      getUserObject<MFEMComplexKernel>(parent_name).getSharedPtr());
+      getUserObject<MFEMComplexKernel>(name).getSharedPtr());
   parameters.set<VariableName>("variable") = parent_ptr->getParam<VariableName>("variable");
-  FEProblemBase::addUserObject(kernel_name, name, parameters);
+  FEProblemBase::addUserObject(kernel_name, name + "_real", parameters);
   auto kernel_ptr =
-      std::dynamic_pointer_cast<MFEMKernel>(getUserObject<MFEMKernel>(name).getSharedPtr());
-
-  if (name == parent_name + "/real_part")
-    parent_ptr->setRealKernel(std::dynamic_pointer_cast<MFEMKernel>(kernel_ptr));
-  else if (name == parent_name + "/imag_part")
-    parent_ptr->setImagKernel(std::dynamic_pointer_cast<MFEMKernel>(kernel_ptr));
-  else
-    mooseError("Unknown component name '", name, "' for MFEMComplexKernel.");
+      std::dynamic_pointer_cast<MFEMKernel>(getUserObject<MFEMKernel>(name + "_real").getSharedPtr());
+  parent_ptr->setRealKernel(std::dynamic_pointer_cast<MFEMKernel>(kernel_ptr));
 }
 
 void
-MFEMProblem::addComplexComponentToBC(const std::string & kernel_name,
+MFEMProblem::addImagComponentToKernel(const std::string & kernel_name,
+                                         const std::string & name,
+                                         InputParameters & parameters)
+{
+  auto parent_ptr = std::dynamic_pointer_cast<MFEMComplexKernel>(
+      getUserObject<MFEMComplexKernel>(name).getSharedPtr());
+  parameters.set<VariableName>("variable") = parent_ptr->getParam<VariableName>("variable");
+  FEProblemBase::addUserObject(kernel_name, name + "_imag", parameters);
+  auto kernel_ptr =
+      std::dynamic_pointer_cast<MFEMKernel>(getUserObject<MFEMKernel>(name + "_imag").getSharedPtr());
+  parent_ptr->setImagKernel(std::dynamic_pointer_cast<MFEMKernel>(kernel_ptr));
+}
+
+void
+MFEMProblem::addRealComponentToBC(const std::string & kernel_name,
                                      const std::string & name,
                                      InputParameters & parameters)
 {
-  std::string parent_name = name.substr(0, name.find_last_of('/'));
   auto parent_ptr = std::dynamic_pointer_cast<MFEMComplexIntegratedBC>(
-      getUserObject<MFEMComplexIntegratedBC>(parent_name).getSharedPtr());
+      getUserObject<MFEMComplexIntegratedBC>(name).getSharedPtr());
   parameters.set<VariableName>("variable") = parent_ptr->getParam<VariableName>("variable");
   parameters.set<std::vector<BoundaryName>>("boundary") =
       parent_ptr->getParam<std::vector<BoundaryName>>("boundary");
-  FEProblemBase::addUserObject(kernel_name, name, parameters);
+  FEProblemBase::addUserObject(kernel_name, name + "_real", parameters);
   auto bc_ptr = std::dynamic_pointer_cast<MFEMIntegratedBC>(
-      getUserObject<MFEMIntegratedBC>(name).getSharedPtr());
+      getUserObject<MFEMIntegratedBC>(name + "_real").getSharedPtr());
+  parent_ptr->setRealBC(std::dynamic_pointer_cast<MFEMIntegratedBC>(bc_ptr));
+}
 
-  if (name == parent_name + "/real_part")
-    parent_ptr->setRealBC(std::dynamic_pointer_cast<MFEMIntegratedBC>(bc_ptr));
-  else if (name == parent_name + "/imag_part")
-    parent_ptr->setImagBC(std::dynamic_pointer_cast<MFEMIntegratedBC>(bc_ptr));
-  else
-    mooseError("Unknown component name '", name, "' for MFEMComplexKernel.");
+void
+MFEMProblem::addImagComponentToBC(const std::string & kernel_name,
+                                     const std::string & name,
+                                     InputParameters & parameters)
+{
+  auto parent_ptr = std::dynamic_pointer_cast<MFEMComplexIntegratedBC>(
+      getUserObject<MFEMComplexIntegratedBC>(name).getSharedPtr());
+  parameters.set<VariableName>("variable") = parent_ptr->getParam<VariableName>("variable");
+  parameters.set<std::vector<BoundaryName>>("boundary") =
+      parent_ptr->getParam<std::vector<BoundaryName>>("boundary");
+  FEProblemBase::addUserObject(kernel_name, name + "_imag", parameters);
+  auto bc_ptr = std::dynamic_pointer_cast<MFEMIntegratedBC>(
+      getUserObject<MFEMIntegratedBC>(name + "_imag").getSharedPtr());
+  parent_ptr->setImagBC(std::dynamic_pointer_cast<MFEMIntegratedBC>(bc_ptr));
 }
 
 libMesh::Point

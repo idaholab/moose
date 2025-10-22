@@ -67,11 +67,11 @@ kappa_i = -7.86151377757423297509831172647
   [diffusion_complex]
     type = MFEMComplexKernel
     variable = u
-    [real_part]
+    [RealComponent]
       type = MFEMDiffusionKernel
       coefficient = stiffnessCoef
     []
-    [imag_part]
+    [ImagComponent]
       type = MFEMDiffusionKernel
       coefficient = 0.0
     []
@@ -79,11 +79,11 @@ kappa_i = -7.86151377757423297509831172647
   [mass_complex]
     type = MFEMComplexKernel
     variable = u
-    [real_part]
+    [RealComponent]
       type = MFEMMassKernel
       coefficient = massCoef
     []
-    [imag_part]
+    [ImagComponent]
       type = MFEMMassKernel
       coefficient = lossCoef
     []

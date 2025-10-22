@@ -23,7 +23,7 @@ forms, the trial variable that the integrator acts on is the variable returned f
 ## Example Input File Syntax
 
 The real and imaginary contributions to the `MFEMComplexKernel` can be set up by using the sub-blocks 
-`real_part` and `imag_part` on the script.
+`RealComponent` and `ImagComponent` on the script.
 
 !listing mfem/kernels/complex.i block=/Kernels
 
