@@ -50,18 +50,9 @@ void MFEMCrossProductAux::execute()
   if (fes->GetVDim() != 3)
     mooseError("MFEMCrossProductAux requires AuxVariable to have vdim == 3.");
 
-  // Source fields must also be 3D vectors
-  if (_u_var.ParFESpace()->GetVDim() != 3 || _v_var.ParFESpace()->GetVDim() != 3)
-    mooseError("MFEMCrossProductAux requires U and V to be vector fields with vdim == 3.");
-
   // Must be L2
   if (!dynamic_cast<const mfem::L2_FECollection *>(fes->FEColl()))
     mooseError("MFEMCrossProductAux requires the target variable to use L2_FECollection.");
-
-  // Must use integral mapping (provide dimension to GetMapType)
-  const auto mt = static_cast<mfem::FiniteElement::MapType>(fes->FEColl()->GetMapType(mesh_dim));
-  if (mt != mfem::FiniteElement::INTEGRAL)
-    mooseError("MFEMCrossProductAux requires map_type = FiniteElement::INTEGRAL for the target L2 space.");
 
   // Must have no shared/constrained DOFs (pure interior DOFs)
   if (fes->GetTrueVSize() != fes->GetVSize())
