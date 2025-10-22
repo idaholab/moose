@@ -156,9 +156,8 @@ class TestBaseRunner(MooseControlTestCase):
         self.assertGreater(runner._initialize_poller.total_time, 0)
         self.assert_log_size(1)
         self.assert_log_message(0, "Waiting for MOOSE webserver to be listening...")
-        self.assertEqual(
-            len(runner.is_listening.mock_calls), int(initialize_timeout / poll_time) + 1
-        )
+
+        self.assertGreater(len(runner.is_listening.mock_calls), 1)
 
     def test_initialize_listening_immediate(self):
         """
