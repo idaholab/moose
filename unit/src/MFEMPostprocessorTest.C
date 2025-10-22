@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMObjectUnitTest.h"
@@ -91,7 +100,7 @@ TEST_F(MFEMPostprocessorTest, MFEMVectorL2Error)
   pp_params.set<VariableName>("variable") = "vector_var";
   auto & l2_pp = addObject<MFEMVectorL2Error>("MFEMVectorL2Error", "ppl2", pp_params);
 
-  mfem::VectorConstantCoefficient twos(mfem::Vector({2., 2.}));
+  mfem::VectorConstantCoefficient twos(mfem::Vector({2., 2., 2.}));
   _vector_var->ProjectCoefficient(twos);
   EXPECT_GT(l2_pp.getValue(), 1.);
 

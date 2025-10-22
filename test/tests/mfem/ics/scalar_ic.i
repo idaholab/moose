@@ -18,6 +18,7 @@
     type = MFEMScalarFESpace
     fec_type = L2
     fec_order = CONSTANT
+    basis = GaussLegendre
   []
 []
 

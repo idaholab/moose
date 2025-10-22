@@ -44,6 +44,7 @@ The RGMB system is useful for regular 2D or extruded 3D Cartesian or hexagonal g
 
 !media tutorial04_meshing/rgmb_pinmesh_cart.png
        style=width:70%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configurations.
 
 !col-end!
 
@@ -62,6 +63,7 @@ The RGMB system is useful for regular 2D or extruded 3D Cartesian or hexagonal g
 
 !media tutorial04_meshing/rgmb_pinmesh_hex.png
        style=width:60%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configurations.
 
 !col-end!
 
@@ -86,6 +88,7 @@ The RGMB system is useful for regular 2D or extruded 3D Cartesian or hexagonal g
 
 !media tutorial04_meshing/rgmb_assemblymesh_cart_blockid.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configurations.
 
 !col-end!
 
@@ -104,6 +107,7 @@ The RGMB system is useful for regular 2D or extruded 3D Cartesian or hexagonal g
 
 !media tutorial04_meshing/rgmb_assemblymesh_hex.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configurations.
 
 !col-end!
 
@@ -128,6 +132,7 @@ The RGMB system is useful for regular 2D or extruded 3D Cartesian or hexagonal g
 
 !media tutorial04_meshing/rgmb_coremesh_cart.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configurations.
 
 !col-end!
 
@@ -146,6 +151,7 @@ The RGMB system is useful for regular 2D or extruded 3D Cartesian or hexagonal g
 
 !media tutorial04_meshing/rgmb_coremesh_hex.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configurations.
 
 !col-end!
 
@@ -166,6 +172,7 @@ By default, [CoreMeshGenerator.md] does not consider the location of nodes at th
 
 !col! width=33%
 !media reactor/meshgenerators/rgmb_flexible_stitching_case1.png style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=Assemblies with different numbers of pins, stitched together.
 
 !col-end!
 
@@ -181,6 +188,7 @@ By default, [CoreMeshGenerator.md] does not consider the location of nodes at th
 !col! width=33%
 
 !media reactor/meshgenerators/rgmb_flexible_stitching_case2.png style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=Assemblies with the same number of pins but different number of sectors per side, stitched together.
 
 !col-end!
 
@@ -196,6 +204,7 @@ By default, [CoreMeshGenerator.md] does not consider the location of nodes at th
 !col! width=33%
 
 !media reactor/meshgenerators/rgmb_flexible_stitching_case3.png style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=A heterogeneous and homogeneous assembly, stitched together.
 
 !col-end!
 
@@ -226,6 +235,7 @@ The parameter [!param](/Mesh/ReactorMeshParams/flexible_assembly_stitching) in [
 
 !media tutorial04_meshing/rgmb_drummesh_nopad.png
        style=width:40%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configuration.
 
 !col-end!
 
@@ -244,6 +254,7 @@ The parameter [!param](/Mesh/ReactorMeshParams/flexible_assembly_stitching) in [
 
 !media tutorial04_meshing/rgmb_drummesh_pad.png
        style=width:40%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configuration.
 
 !col-end!
 
@@ -268,6 +279,7 @@ Use of [ControlDrumMeshGenerator.md] allows for drum structures to be stitched d
 
 !media tutorial04_meshing/rgmb_coremesh_cd.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configuration.
 
 !col-end!
 
@@ -292,6 +304,7 @@ A core periphery region can be added utilizing either the [PeripheralRingMeshGen
 
 !media tutorial04_meshing/rgmb_periphery.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configuration.
 
 !col-end!
 

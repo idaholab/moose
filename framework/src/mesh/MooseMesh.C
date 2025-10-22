@@ -1827,9 +1827,9 @@ MooseMesh::setBoundaryName(BoundaryID boundary_id, BoundaryName name)
 }
 
 const std::string &
-MooseMesh::getBoundaryName(BoundaryID boundary_id)
+MooseMesh::getBoundaryName(BoundaryID boundary_id) const
 {
-  BoundaryInfo & boundary_info = getMesh().get_boundary_info();
+  const BoundaryInfo & boundary_info = getMesh().get_boundary_info();
 
   // We need to figure out if this boundary is a sideset or nodeset
   if (boundary_info.get_side_boundary_ids().count(boundary_id))
@@ -3024,25 +3024,6 @@ MooseMesh::buildNodeListFromSideList()
 {
   if (_construct_node_list_from_side_list)
     getMesh().get_boundary_info().build_node_list_from_side_list();
-}
-
-void
-MooseMesh::buildSideList(std::vector<dof_id_type> & el,
-                         std::vector<unsigned short int> & sl,
-                         std::vector<boundary_id_type> & il)
-{
-#ifdef LIBMESH_ENABLE_DEPRECATED
-  mooseDeprecated("The version of MooseMesh::buildSideList() taking three arguments is "
-                  "deprecated, call the version that returns a vector of tuples instead.");
-  getMesh().get_boundary_info().build_side_list(el, sl, il);
-#else
-  libmesh_ignore(el);
-  libmesh_ignore(sl);
-  libmesh_ignore(il);
-  mooseError("The version of MooseMesh::buildSideList() taking three "
-             "arguments is not available in your version of libmesh, call the "
-             "version that returns a vector of tuples instead.");
-#endif
 }
 
 std::vector<std::tuple<dof_id_type, unsigned short int, boundary_id_type>>

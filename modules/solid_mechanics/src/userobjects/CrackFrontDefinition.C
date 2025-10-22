@@ -28,7 +28,7 @@ CrackFrontDefinition::validParams()
   params.addClassDescription("Used to describe geometric characteristics of the crack front for "
                              "fracture integral calculations");
   params += BoundaryRestrictable::validParams();
-  addCrackFrontDefinitionParams(params);
+  CrackFrontDefinition::includeCrackFrontDefinitionParams(params);
   params.set<bool>("use_displaced_mesh") = false;
 
   params.addRelationshipManager("ElementSideNeighborLayers",
@@ -40,6 +40,12 @@ CrackFrontDefinition::validParams()
 
 void
 addCrackFrontDefinitionParams(InputParameters & params)
+{
+  CrackFrontDefinition::includeCrackFrontDefinitionParams(params);
+}
+
+void
+CrackFrontDefinition::includeCrackFrontDefinitionParams(InputParameters & params)
 {
   MooseEnum direction_method("CrackDirectionVector CrackMouth CurvedCrackFront");
   MooseEnum end_direction_method("NoSpecialTreatment CrackDirectionVector CrackTangentVector",
@@ -105,9 +111,11 @@ addCrackFrontDefinitionParams(InputParameters & params)
   params.addParam<unsigned int>(
       "number_points_from_provider",
       "The number of crack front points, only needed if crack_front_points_provider is used.");
+  params.addParam<Real>(
+      "crack_front_node_tolerance",
+      1e-10,
+      "General tolerance for locating nodes on the crack front based on xyz coordinates.");
 }
-
-const Real CrackFrontDefinition::_tol = 1e-10;
 
 CrackFrontDefinition::CrackFrontDefinition(const InputParameters & parameters)
   : GeneralUserObject(parameters),
@@ -128,7 +136,8 @@ CrackFrontDefinition::CrackFrontDefinition(const InputParameters & parameters)
     _t_stress(getParam<bool>("t_stress")),
     _q_function_rings(getParam<bool>("q_function_rings")),
     _q_function_type(getParam<MooseEnum>("q_function_type")),
-    _crack_front_points_provider(nullptr)
+    _crack_front_points_provider(nullptr),
+    _tol(getParam<Real>("crack_front_node_tolerance"))
 {
   auto boundary = isParamValid("boundary") ? getParam<std::vector<BoundaryName>>("boundary")
                                            : std::vector<BoundaryName>{};
@@ -273,8 +282,6 @@ CrackFrontDefinition::CrackFrontDefinition(const InputParameters & parameters)
     _j_integral_radius_outer = getParam<std::vector<Real>>("j_integral_radius_outer");
   }
 }
-
-CrackFrontDefinition::~CrackFrontDefinition() {}
 
 void
 CrackFrontDefinition::execute()

@@ -230,7 +230,9 @@ The building blocks in MOOSE for boundary conditions are +BCs+ for FE, +FVBCs+ f
 # A Simple Example: Laminar Free Flow in a Channel
 style=font-size:26pt
 
-!media navier_stokes/nsfv-channel-example.png style=width:100%;background:white;
+!media navier_stokes/nsfv-channel-example.png
+       style=width:100%;background:white;
+       alt=A diagram showing the size, shape, and conditions of a channel.
 
 Let us consider the following (fictional) material properties:
 
@@ -271,7 +273,9 @@ style=font-size:26pt
 !row!
 
 !col! width=30%
-!media navier_stokes/rc_bad.png style=width:100%;background:white;
+!media navier_stokes/rc_bad.png
+       style=width:100%;background:white;
+       alt=Checkerboard pattern in the pressure field when using linear interpolation of advecting velocity and pressure gradient.
 !col-end!
 
 !col! width=40%
@@ -279,7 +283,9 @@ $\Large\xrightarrow[\mathrm{Rhie-Chow~Interpolation}]{\vec{u}_{RC,f} = \vec{u}_{
 !col-end!
 
 !col! width=30%
-!media navier_stokes/rc_good.png style=width:100%;background:white;
+!media navier_stokes/rc_good.png
+       style=width:100%;background:white;
+       alt=The pressure field obtained using Rhie-Chow interpolation for the advecting velocity.
 !col-end!
 
 !row-end!

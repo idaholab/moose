@@ -58,11 +58,15 @@ For applications where an output mesh does not need to be created and meshing ro
 
 This is the resulting mesh block layout, where by default a single block is assigned to the triangular elements and another block is assigned to the quadrilateral elements:
 
-!media reactor/meshgenerators/pin_mesh_generator.png style=width:40%;
+!media reactor/meshgenerators/pin_mesh_generator.png
+       style=width:40%;
+       alt=The mesh layout for a square pin, with a mix of quadrilateral and triangular elements.
 
 This is the resulting "region_id" extra element integer layout, which was chosen by setting the region IDs for each radial region within the pin:
 
-!media reactor/meshgenerators/pin_mesh_generator_rid.png style=width:40%;
+!media reactor/meshgenerators/pin_mesh_generator_rid.png
+       style=width:40%;
+       alt=Region IDs for the pin mesh.
 
 !syntax parameters /Mesh/PinMeshGenerator
 

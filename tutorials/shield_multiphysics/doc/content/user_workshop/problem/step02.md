@@ -61,3 +61,4 @@ moose-opt -i step2.i
 ## Step 2: Result
 
 !media shield_multiphysics/results/step02.png
+       alt=Temperature field for the shielding, produced by running the simulation above. 

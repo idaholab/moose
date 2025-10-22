@@ -57,6 +57,7 @@ moose-opt -i step6_transient.i
 ## Step 6: Transient Simulation Result
 
 !media shield_multiphysics/results/step06_transient.mp4
+       alt=Animation of the evolution of the temperature field of the reactor shielding.
 
 
 !---
@@ -100,3 +101,4 @@ moose-opt -i step6_pseudo_transient.i
 ## Step 6: Pseudo-Transient Simulation Result
 
 !media shield_multiphysics/results/step06_pseudo_transient.mp4
+       alt=Animation of the result of the pseudo-transient simulation of reactor shielding temperature.

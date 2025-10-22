@@ -578,7 +578,7 @@ MooseVariableData<OutputType>::computeValuesInternal()
   // Curl
   if (_need_curl)
     fill(_curl_u, *_current_curl_phi, _vector_tags_dof_u[_solution_tag]);
-  if (_need_curl_old)
+  if (is_transient && _need_curl_old)
     fill(_curl_u_old, *_current_curl_phi, _vector_tags_dof_u[_old_solution_tag]);
 
   // Div
@@ -597,10 +597,16 @@ MooseVariableData<OutputType>::computeValuesInternal()
   // Vector tags
   for (auto tag : _required_vector_tags)
   {
-    if (_need_vector_tag_u[tag] && _sys.hasVector(tag) && _sys.getVector(tag).closed())
+    if (_need_vector_tag_u[tag] && _sys.hasVector(tag))
+    {
+      mooseAssert(_sys.getVector(tag).closed(), "Vector should be closed");
       fill(_vector_tag_u[tag], *_current_phi, _vector_tags_dof_u[tag]);
-    if (_need_vector_tag_grad[tag] && _sys.hasVector(tag) && _sys.getVector(tag).closed())
+    }
+    if (_need_vector_tag_grad[tag] && _sys.hasVector(tag))
+    {
+      mooseAssert(_sys.getVector(tag).closed(), "Vector should be closed");
       fill(_vector_tag_grad[tag], *_current_grad_phi, _vector_tags_dof_u[tag]);
+    }
   }
 
   // Matrix tags
@@ -627,8 +633,6 @@ MooseVariableData<OutputType>::computeValuesInternal()
     if (_need_du_dot_du)
     {
       _du_dot_du.resize(nqp);
-      for (const auto qp : make_range(nqp))
-        _du_dot_du[qp] = 0.;
       for (const auto i : make_range(num_dofs))
         for (const auto qp : make_range(nqp))
           _du_dot_du[qp] = _dof_du_dot_du[i];
@@ -636,8 +640,6 @@ MooseVariableData<OutputType>::computeValuesInternal()
     if (_need_du_dotdot_du)
     {
       _du_dotdot_du.resize(nqp);
-      for (const auto qp : make_range(nqp))
-        _du_dotdot_du[qp] = 0.;
       for (const auto i : make_range(num_dofs))
         for (const auto qp : make_range(nqp))
           _du_dotdot_du[qp] = _dof_du_dotdot_du[i];
@@ -684,7 +686,7 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
 
   _ad_dof_values.resize(num_dofs);
   for (const auto i : make_range(num_dofs))
-    _ad_dof_values[i] = (*_sys.currentSolution())(_dof_indices[i]);
+    _ad_dof_values[i] = _vector_tags_dof_u[_solution_tag][i];
   // NOTE!  You have to do this AFTER setting the value!
   if (do_derivatives)
     for (const auto i : make_range(num_dofs))
@@ -759,8 +761,6 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
       if (_need_ad_u_dotdot)
         _ad_dofs_dotdot.resize(num_dofs);
       _ad_u_dot.resize(nqp);
-      for (const auto qp : make_range(nqp))
-        _ad_u_dot[qp] = _ad_zero;
 
       if (_time_integrator && _time_integrator->dt())
       {
@@ -772,10 +772,14 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
                                                      _need_ad_u_dotdot ? _ad_dofs_dotdot[i]
                                                                        : _ad_real_dummy);
 
+        for (const auto qp : make_range(nqp))
+          _ad_u_dot[qp] = _ad_zero;
         for (const auto i : make_range(num_dofs))
           for (const auto qp : make_range(nqp))
             _ad_u_dot[qp] += (*_current_phi)[i][qp] * _ad_dofs_dot[i];
       }
+      // We are too early in the setup to have a time integrator, so we are not really using the
+      // AD-derivatives. We set the AD value of the derivatives to the nonAD value
       else if (!_time_integrator)
       {
         for (const auto i : make_range(num_dofs))
@@ -803,11 +807,12 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
     if (_need_ad_grad_u_dot)
     {
       _ad_grad_u_dot.resize(nqp);
-      for (const auto qp : make_range(nqp))
-        _ad_grad_u_dot[qp] = _ad_zero;
 
       if (_time_integrator && _time_integrator->dt())
       {
+        for (const auto qp : make_range(nqp))
+          _ad_grad_u_dot[qp] = _ad_zero;
+
         // The latter check here is for handling the fact that we have not yet implemented
         // calculation of ad_grad_phi for neighbor and neighbor-face, so if we are in that
         // situation we need to default to using the non-ad grad_phi
@@ -1444,8 +1449,7 @@ MooseVariableData<OutputType>::reinitAux()
     _dof_map.dof_indices(_elem, _dof_indices, _var_num);
     if (_elem->n_dofs(_sys.number(), _var_num) > 0)
     {
-      // FIXME: check if the following is equivalent with '_nodal_dof_index = _dof_indices[0];'?
-      _nodal_dof_index = _elem->dof_number(_sys.number(), _var_num, 0);
+      _nodal_dof_index = _dof_indices[0];
 
       fetchDoFValues();
 

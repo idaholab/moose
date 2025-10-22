@@ -8,6 +8,7 @@
 !col! width=50%
 
 !media subchannel/tutorial/CFD.jpg
+       alt=A CFD simulation exhibiting vortex shedding.
 
 !col-end!
 
@@ -22,6 +23,7 @@
 !col! width=50%
 
 !media subchannel/tutorial/CTF.jpg
+       alt=Isometric view of core mixture mass flux distribution calculated using a SubChannel approach.
 
 !col-end!
 
@@ -57,6 +59,7 @@
 !col! width=50%
 
 !media subchannel/tutorial/shapes.png
+       alt=The shape of subchannels in different designs of fuel assemblies.
 
 !col-end!
 
@@ -66,6 +69,7 @@
 !col! width=50%
 
 !media subchannel/tutorial/scales.png
+       alt=The relationships between different levels of numerical modelling.
 
 !col-end!
 
@@ -103,6 +107,7 @@
 !col! width=40%
 
 !media subchannel/tutorial/ControlVolume1.png
+       alt=The subchannel control volumes within a nuclear reactor core.
 
 !col-end!
 
@@ -127,6 +132,7 @@
 !col! width=50%
 
 !media subchannel/tutorial/ControlVolume2.png
+       alt=Illustration of control volumes for the lateral and axial momentum equations.
 
 !col-end!
 
@@ -134,6 +140,7 @@
 
 !media subchannel/tutorial/Vij.png
     style=width:25%;margin-bottom:2%;margin:auto;
+    alt=Distances in lateral control volumes.
 
 !---
 
@@ -253,6 +260,7 @@ w'_{ij} = \beta S_{ij} \bar{G}, ~\frac{dw'_{ij}}{dz} = \frac{w'_{ij}}{\Delta Z}=
 
 !media subchannel/tutorial/stencil2.png
     style=width:100%;
+    alt=Flowchart illustrating the algorithm for the SCM Model.
 
 !col-end!
 

@@ -41,6 +41,7 @@ triangular frame resurfaces as an optimized design. See figure below for one sol
 multi-load problem:
 
 !media large_media/optimization/multiload.png style=width:75%
+       alt=A pseudo-density plot showing the solution to the multi-load problem.
 
 
 

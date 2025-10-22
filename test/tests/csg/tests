@@ -1,0 +1,76 @@
+[Tests]
+  design = 'CSGBase.md'
+  issues = '#29095'
+  [geometry]
+    requirement = "The system shall support the generation of Constructive Solid Geometry (CSG) representations by correctly constructing a CSG object that "
+    [csg_only]
+        type = 'JSONDiff'
+        input = 'csg_only_inf_planes.i'
+        cli_args = '--csg-only'
+        jsondiff = 'csg_only_inf_planes_out_csg.json'
+        recover = false
+        mesh_mode = REPLICATED
+        detail = 'is uniquely generated from a single mesh generator input.'
+    []
+    [csg_only_chained]
+        type = 'JSONDiff'
+        input = 'csg_only_chained.i'
+        cli_args = '--csg-only'
+        jsondiff = 'csg_only_chained_out_csg.json'
+        recover = false
+        mesh_mode = REPLICATED
+        detail = 'updates an existing CSG representation from another mesh generator.'
+    []
+    [csg_only_final_generator]
+        type = 'JSONDiff'
+        input = 'csg_only_chained.i'
+        cli_args = 'Mesh/final_generator=inf_square --csg-only csg_only_inf_planes_out_csg.json'
+        jsondiff = 'csg_only_inf_planes_out_csg.json'
+        recover = false
+        mesh_mode = REPLICATED
+        detail = 'specifies a final generator to create a CSG representation for an intermediate generator.'
+    []
+  []
+  [errors]
+    requirement = 'The system shall report an error when generating a mesh in CSG-only mode when'
+    [csg_only_chained_not_moved]
+      type = 'RunException'
+      input = 'csg_only_chained_not_moved.i'
+      detail = ' a CSG object from an input mesh generator is not moved upon retrieval.'
+      cli_args = '--csg-only'
+      expect_err = "The CSGBase object from input ExampleCSGInfiniteSquareMeshGenerator 'csg_inf_square' was not moved."
+      mesh_mode = REPLICATED
+    []
+    [distributed_mesh]
+      type = RunException
+      input = 'csg_only_inf_planes.i'
+      detail = ' used in conjunction with distributed mesh command line option'
+      cli_args = '--distributed-mesh --csg-only'
+      expect_err = "--csg-only cannot be used in conjunction with --distributed-mesh"
+    []
+    [split_mesh]
+      type = RunException
+      input = 'csg_only_inf_planes.i'
+      detail = ' used in conjunction with split mesh command line option.'
+      cli_args = '--use-split --csg-only'
+      expect_err = "--csg-only is not compatible with any mesh splitting options"
+      mesh_mode = REPLICATED
+    []
+    [refinements]
+      type = RunException
+      input = 'csg_only_inf_planes.i'
+      detail = ' used in conjunction with mesh refinements command line option.'
+      cli_args = '-r 5 --csg-only'
+      expect_err = "--csg-only cannot be used in conjunction with -r refinements option"
+      mesh_mode = REPLICATED
+    []
+    [recover]
+      type = RunException
+      input = 'csg_only_inf_planes.i'
+      detail = ' used in conjunction with recovery command line option.'
+      cli_args = '--recover --csg-only'
+      expect_err = "--csg-only option cannot be used in recovery mode"
+      mesh_mode = REPLICATED
+    []
+  []
+[]

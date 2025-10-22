@@ -57,25 +57,29 @@ template void MFEMSolverBase::setPreconditioner(mfem::HypreFGMRES &);
 template void MFEMSolverBase::setPreconditioner(mfem::HypreGMRES &);
 template void MFEMSolverBase::setPreconditioner(mfem::HyprePCG &);
 
-bool
+void
 MFEMSolverBase::checkSpectralEquivalence(mfem::ParBilinearForm & blf) const
 {
-  bool equiv = true;
-
-  if (auto fec = dynamic_cast<const mfem::ND_FECollection *>(blf.FESpace()->FEColl()))
+  if (auto fec = dynamic_cast<const mfem::H1_FECollection *>(blf.FESpace()->FEColl()))
+  {
+    if (fec->GetBasisType() != mfem::BasisType::GaussLobatto)
+      mooseError("Low-Order-Refined solver requires the FESpace basis to be GaussLobatto "
+                 "for H1 elements.");
+  }
+  else if (auto fec = dynamic_cast<const mfem::ND_FECollection *>(blf.FESpace()->FEColl()))
   {
     if (fec->GetClosedBasisType() != mfem::BasisType::GaussLobatto ||
         fec->GetOpenBasisType() != mfem::BasisType::IntegratedGLL)
-      equiv = false;
+      mooseError("Low-Order-Refined solver requires the FESpace closed-basis to be GaussLobatto "
+                 "and the open-basis to be IntegratedGLL for ND elements.");
   }
   else if (auto fec = dynamic_cast<const mfem::RT_FECollection *>(blf.FESpace()->FEColl()))
   {
     if (fec->GetClosedBasisType() != mfem::BasisType::GaussLobatto ||
         fec->GetOpenBasisType() != mfem::BasisType::IntegratedGLL)
-      equiv = false;
+      mooseError("Low-Order-Refined solver requires the FESpace closed-basis to be GaussLobatto "
+                 "and the open-basis to be IntegratedGLL for RT elements.");
   }
-
-  return equiv;
 }
 
 #endif

@@ -45,6 +45,7 @@ MeshGenerator::validParams()
   params.registerBase("MeshGenerator");
 
   params.addPrivateParam<bool>("_has_generate_data", false);
+  params.addPrivateParam<bool>("_has_generate_csg", false);
   params.addPrivateParam<MooseMesh *>("_moose_mesh", nullptr);
   params.addPrivateParam<bool>(data_only_param, false);
   // Controls are not created early enough
@@ -64,7 +65,8 @@ MeshGenerator::MeshGenerator(const InputParameters & parameters)
   const auto & system = _app.getMeshGeneratorSystem();
   if (isDataOnly())
   {
-    if (!hasGenerateData())
+    // Skip the requirement for generateData() if we are generating CSG object
+    if (!hasGenerateCSG() && !hasGenerateData())
       system.dataDrivenError(*this, "does not support data-driven generation");
     if (hasSaveMesh())
       system.dataDrivenError(*this, "has 'save_with_name' set");
@@ -86,6 +88,18 @@ bool
 MeshGenerator::hasGenerateData(const InputParameters & params)
 {
   return params.get<bool>("_has_generate_data");
+}
+
+void
+MeshGenerator::setHasGenerateCSG(InputParameters & params)
+{
+  params.set<bool>("_has_generate_csg") = true;
+}
+
+bool
+MeshGenerator::hasGenerateCSG(const InputParameters & params)
+{
+  return params.get<bool>("_has_generate_csg");
 }
 
 const MeshGeneratorName *
@@ -146,7 +160,7 @@ MeshGenerator::checkGetMesh(const MeshGeneratorName & mesh_generator_name,
 {
   mooseAssert(!mesh_generator_name.empty(), "Empty name");
   const auto & mg_sys = _app.getMeshGeneratorSystem();
-  if (!_app.constructingMeshGenerators())
+  if (!hasGenerateCSG() && !_app.constructingMeshGenerators())
     mooseError("Cannot get a mesh outside of construction");
   if (!mg_sys.hasMeshGenerator(mesh_generator_name) && !isNullMeshName(mesh_generator_name))
   {
@@ -203,6 +217,40 @@ MeshGenerator::getMeshesByName(const std::vector<MeshGeneratorName> & mesh_gener
   for (const auto & name : mesh_generator_names)
     meshes.push_back(&getMeshByName(name));
   return meshes;
+}
+
+std::unique_ptr<CSG::CSGBase> &
+MeshGenerator::getCSGBase(const std::string & param_name)
+{
+  const MeshGeneratorName * name = getMeshGeneratorNameFromParam(param_name, false);
+  return getCSGBaseByName(*name);
+}
+
+std::unique_ptr<CSG::CSGBase> &
+MeshGenerator::getCSGBaseByName(const MeshGeneratorName & mesh_generator_name)
+{
+  checkGetMesh(mesh_generator_name, "");
+
+  auto & csg_base = _app.getMeshGeneratorSystem().getCSGBaseGeneratorOutput(mesh_generator_name);
+  if (!csg_base)
+    mooseError("Requested CSG object from " + mesh_generator_name + " returned a null object.");
+  _requested_csg_bases.emplace_back(mesh_generator_name, &csg_base);
+  return csg_base;
+}
+
+std::vector<std::unique_ptr<CSG::CSGBase> *>
+MeshGenerator::getCSGBases(const std::string & param_name)
+{
+  return getCSGBasesByName(getMeshGeneratorNamesFromParam(param_name));
+}
+
+std::vector<std::unique_ptr<CSG::CSGBase> *>
+MeshGenerator::getCSGBasesByName(const std::vector<MeshGeneratorName> & mesh_generator_names)
+{
+  std::vector<std::unique_ptr<CSG::CSGBase> *> csg_bases;
+  for (const auto & name : mesh_generator_names)
+    csg_bases.push_back(&getCSGBaseByName(name));
+  return csg_bases;
 }
 
 void
@@ -330,6 +378,25 @@ MeshGenerator::generateInternal()
   return mesh;
 }
 
+std::unique_ptr<CSG::CSGBase>
+MeshGenerator::generateInternalCSG()
+{
+  mooseAssert(isDataOnly(), "Trying to use csg-only mode while not in data-driven mode");
+  auto csg_obj = generateCSG();
+  for (const auto & [requested_name, requested_csg] : _requested_csg_bases)
+    if (*requested_csg)
+      mooseError(
+          "The CSGBase object from input ",
+          _app.getMeshGenerator(requested_name).type(),
+          " '",
+          _app.getMeshGenerator(requested_name).name(),
+          "' was not moved.\n\nThe MeshGenerator system requires that the memory from all input "
+          "meshes\nare managed by the requesting MeshGenerator during the generate phase.\n\nThis "
+          "is achieved with a std::move() operation within the generateCSG() method.");
+
+  return csg_obj;
+}
+
 void
 MeshGenerator::addMeshSubgenerator(const std::string & type,
                                    const std::string & name,
@@ -425,4 +492,11 @@ MeshGenerator::generateData()
 {
   mooseAssert(!hasGenerateData(), "Inconsistent flag");
   mooseError("This MeshGenerator does not have a generateData() implementation.");
+}
+
+[[nodiscard]] std::unique_ptr<CSG::CSGBase>
+MeshGenerator::generateCSG()
+{
+  mooseAssert(!hasGenerateCSG(), "Inconsistent flag");
+  mooseError("This MeshGenerator does not have a generateCSG() implementation.");
 }

@@ -38,7 +38,9 @@ Clicking any item in this menu will launch an interactive shell terminal for tha
 
   One of the more exciting features of HPC OnDemand, is having a terminal-like window using a web browser:
 
-  !media large_media/hpc/hpcondemand_terminal.png style=filter:drop-shadow(0 0 0.25rem black);
+  !media large_media/hpc/hpcondemand_terminal.png
+         style=filter:drop-shadow(0 0 0.25rem black);
+         alt=Screenshot of the online interactive terminal for HPC OnDemand.
 
   With this prompt, you can launch jobs, build MOOSE, obtain a Civet-like testing environment (see below) and more.
 

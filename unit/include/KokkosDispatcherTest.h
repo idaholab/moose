@@ -18,16 +18,17 @@
 #include <map>
 #include <string>
 
-class KokkosTestObject
+class KokkosDispatcherTestObject
 {
 public:
-  KokkosTestObject(Moose::Kokkos::Array<unsigned int> array) : _array(array) {}
+  KokkosDispatcherTestObject(Moose::Kokkos::Array<unsigned int> array) : _array(array) {}
 
   struct TestLoop
   {
   };
 
-  KOKKOS_FUNCTION void operator()(TestLoop, const ThreadID tid, const KokkosTestObject &) const
+  KOKKOS_FUNCTION void
+  operator()(TestLoop, const ThreadID tid, const KokkosDispatcherTestObject &) const
   {
     _array[tid] = tid;
   }

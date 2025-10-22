@@ -182,6 +182,17 @@
     valgrind = 'none' # http library is not completely valgrind clean
   []
 
+  [get_time]
+    type = RunApp
+    input = get_time.i
+    command_proxy = get_time.py
+    required_python_packages = requests
+    recover = false
+    restep = false
+    requirement = 'The system shall support extracting the system time and time step size via a REST API'
+    valgrind = 'none' # http library is not completely valgrind clean
+  []
+
   # We cannot run these tests with valgrind because they come from the python script, which will terminate
   # the MOOSE process early and therefore we won't receive and of the valgrind summary output
   [errors]

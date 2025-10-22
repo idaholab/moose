@@ -57,6 +57,7 @@ Example scheme (implicit-explicit)
 !col width=39%
 !media images/coupling.png
        style=width:80%;margin-left:auto;margin-right:auto;display:block;box-shadow:none;
+       alt=Diagram showing the different levels of coupling possible between apps.
 
 !row-end!
 
@@ -78,6 +79,7 @@ Each sub-app can solve for different physics from the main application
 !---
 
 !media darcy_thermo_mech/multiapp_hierarchy.png
+       alt=Graph showing the multiple levels of nested apps that can make up a MOOSE simulation.
 
 !---
 

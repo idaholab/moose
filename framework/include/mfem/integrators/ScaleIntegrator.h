@@ -23,7 +23,7 @@ class ScaleIntegrator : public mfem::BilinearFormIntegrator
 {
 private:
   mfem::BilinearFormIntegrator * _integrator{nullptr};
-  double _scale;
+  mfem::real_t _scale;
   bool _own_integrator;
 
 public:
@@ -31,11 +31,11 @@ public:
     : _integrator{integ}, _scale{1}, _own_integrator{true}
   {
   }
-  ScaleIntegrator(mfem::BilinearFormIntegrator * integ, double scale)
+  ScaleIntegrator(mfem::BilinearFormIntegrator * integ, mfem::real_t scale)
     : _integrator{integ}, _scale{scale}, _own_integrator{true}
   {
   }
-  ScaleIntegrator(mfem::BilinearFormIntegrator * integ, double scale, bool own)
+  ScaleIntegrator(mfem::BilinearFormIntegrator * integ, mfem::real_t scale, bool own)
     : _integrator{integ}, _scale{scale}, _own_integrator{own}
   {
   }
@@ -50,7 +50,7 @@ public:
     _integrator = integ;
   }
 
-  void SetScale(double scale) { _scale = scale; }
+  void SetScale(mfem::real_t scale) { _scale = scale; }
 
   void SetOwn(bool own) { _own_integrator = own; }
 

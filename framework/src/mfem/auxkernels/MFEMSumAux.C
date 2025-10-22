@@ -21,31 +21,46 @@ MFEMSumAux::validParams()
   params.addClassDescription(
       "Calculates the sum of two variables sharing an FE space, each optionally scaled by a real "
       "constant, and stores the result in a third.");
-  params.addRequiredParam<VariableName>("first_source_variable", "First variable to sum.");
-  params.addRequiredParam<VariableName>("second_source_variable", "Second variable to sum.");
-  params.addParam<mfem::real_t>(
-      "first_scale_factor", 1.0, "Factor to scale the first variable by prior to sum.");
-  params.addParam<mfem::real_t>(
-      "second_scale_factor", 1.0, "Factor to scale the second variable by prior to sum.");
+  params.addRequiredParam<std::vector<VariableName>>("source_variables",
+                                                     "The names of MFEM variables to sum over");
+  params.addParam<std::vector<mfem::real_t>>(
+      "scale_factors", "The factors to scale each MFEM variable by during summation");
   return params;
 }
 
 MFEMSumAux::MFEMSumAux(const InputParameters & parameters)
   : MFEMAuxKernel(parameters),
-    _v1_var_name(getParam<VariableName>("first_source_variable")),
-    _v2_var_name(getParam<VariableName>("second_source_variable")),
-    _v1_var(*getMFEMProblem().getProblemData().gridfunctions.Get(_v1_var_name)),
-    _v2_var(*getMFEMProblem().getProblemData().gridfunctions.Get(_v2_var_name)),
-    _lambda1(getParam<mfem::real_t>("first_scale_factor")),
-    _lambda2(getParam<mfem::real_t>("second_scale_factor"))
+    _var_names(getParam<std::vector<VariableName>>("source_variables")),
+    _scale_factors(parameters.isParamValid("scale_factors")
+                       ? getParam<std::vector<mfem::real_t>>("scale_factors")
+                       : std::vector<mfem::real_t>(_var_names.size(), 1.0))
 {
+  if (_var_names.size() != _scale_factors.size())
+    paramError("scale_factors",
+               "Number of MFEM variables to sum over is different from the number of provided "
+               "scale factors.");
+  for (const auto & var_name : _var_names)
+  {
+    const mfem::ParGridFunction * gf =
+        getMFEMProblem().getProblemData().gridfunctions.Get(var_name);
+    if (gf->ParFESpace() == _result_var.ParFESpace())
+      _summed_vars.push_back(gf);
+    else
+      paramError("source_variables",
+                 "The MFEM variable ",
+                 var_name,
+                 " being summed has a different FESpace from ",
+                 _result_var_name);
+  }
 }
 
 void
 MFEMSumAux::execute()
 {
-  // result = lambda1 * v1 + lambda2 * v2
-  add(_lambda1, _v1_var, _lambda2, _v2_var, _result_var);
+  // result = sum_i (_scale_factor_i * _summed_var_i)
+  _result_var = 0.0;
+  for (const auto i : index_range(_summed_vars))
+    _result_var.Add(_scale_factors[i], *_summed_vars[i]);
 }
 
 #endif

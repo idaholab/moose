@@ -22,6 +22,7 @@ This tutorial covers the generation of mostly standard geometries, but many reac
 
 !media tutorial04_meshing/adv_ex_2DMSRE.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=A 2D mesh for the MSRE, with circular and triangular-shaped regions.
 
 !col-end!
 
@@ -45,6 +46,7 @@ This tutorial covers the generation of mostly standard geometries, but many reac
 
 !media tutorial04_meshing/adv_ex_2DKRUSTY.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=2D mesh for the core of a KRUSTY heat-pipe cooled microreactor.
 
 !col-end!
 
@@ -68,6 +70,7 @@ This tutorial covers the generation of mostly standard geometries, but many reac
 
 !media tutorial04_meshing/adv_ex_mhgtr.png
        style=width:50%;display:block;margin-left:auto;margin-right:auto;
+       alt=A 2D mesh for MHTGR.
 
 !col-end!
 
@@ -75,6 +78,7 @@ This tutorial covers the generation of mostly standard geometries, but many reac
 
 !media tutorial04_meshing/adv_ex_mhtgrzoom.png
        style=width:70%;display:block;margin-left:auto;margin-right:auto;
+       alt=A close-up view of part of the mesh for MHTGR.
 
 !col-end!
 
@@ -98,6 +102,7 @@ This tutorial covers the generation of mostly standard geometries, but many reac
 
 !media tutorial04_meshing/adv_ex_PBRPronghornGriffin.png
        style=width:60%;display:block;margin-left:auto;margin-right:auto;
+       alt=2D meshes for the Pronghorn and Griffin pebble bed reactors, with streamlines.
 
 !col-end!
 
@@ -128,6 +133,7 @@ Mesh biasing applies non-uniform meshing subintervals within a specific region. 
 
 !media tutorial04_meshing/aeg_ax_bias.png
        style=width:40%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configuration on this page.
 
 !col-end!
 
@@ -152,6 +158,7 @@ Similarly, the user may want to radially bias the mesh where solution gradients 
 
 !media tutorial04_meshing/pccmg_rad_bias.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configuration on this page.
 
 !col-end!
 
@@ -174,6 +181,7 @@ Similarly, the user may want to radially bias the mesh where solution gradients 
 
 !media tutorial04_meshing/prmg_rad_bias.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configuration on this page.
 
 !col-end!
 
@@ -198,6 +206,7 @@ Boundary layers are commonly needed in thermal-hydraulic applications, where the
 
 !media tutorial04_meshing/pccmg_bdry_layer.png
        style=width:80%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configuration on this page.
 
 !col-end!
 
@@ -224,6 +233,7 @@ The best approach for this situation is to use [PatternedHexPeripheralModifier.m
 
 !media tutorial04_meshing/adv_ex_assembies_with_different_pin_nums.png
        style=width:80%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configuration on this page.
 
 !col-end!
 
@@ -250,6 +260,7 @@ As long as pins are not overlapped, [FlexiblePatternGenerator.md] can handle any
 
 !media tutorial04_meshing/adv_ex_oversized_pin.png
        style=width:70%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configuration on this page.
 
 !col-end!
 
@@ -274,6 +285,7 @@ The MSRE 2D lattice case was constructed using the [FillBetweenSidesetsGenerator
 
 !media tutorial04_meshing/adv_ex_fbsg.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The portion of the MSRE mesh produced by the configuration on this page.
 
 !col-end!
 
@@ -300,6 +312,7 @@ First, the center assembly is created using regular pins and procedures.
 
 !media tutorial04_meshing/adv_ex_pcg_xy_patterned_pins.png
        style=width:80%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configuration on this page.
 
 !col-end!
 
@@ -324,6 +337,7 @@ Next, two circular peripheral regions are added using [PeripheralTriangleMeshGen
 
 !media tutorial04_meshing/adv_ex_pcg_xy_patterned_pins_with_rings.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configuration on this page.
 
 !col-end!
 
@@ -348,6 +362,7 @@ Next, the complex boundary shape which is the outer edge of the light blue zone 
 
 !media tutorial04_meshing/adv_ex_pcg_xy_patterned_pins_with_irregular_peripheral_region.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configuration on this page.
 
 !col-end!
 
@@ -372,6 +387,7 @@ The control drum object is defined including the absorber arc using [PolygonConc
 
 !media tutorial04_meshing/adv_ex_pcg_xy_three_holes_for_xyd.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configuration on this page.
 
 !col-end!
 
@@ -396,6 +412,7 @@ The outer boundary of the dark blue zone is then generated using [ParsedCurveGen
 
 !media tutorial04_meshing/adv_ex_pcg_xy_second_xyd.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configuration on this page.
 
 !col-end!
 
@@ -420,6 +437,7 @@ Finally, a circular peripheral region is added at the end using [PeripheralTrian
 
 !media tutorial04_meshing/adv_ex_pcg_and_xyd.png
        style=width:100%;display:block;margin-left:auto;margin-right:auto;
+       alt=The mesh produced by the configuration on this page.
 
 !col-end!
 

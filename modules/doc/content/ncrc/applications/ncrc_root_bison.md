@@ -14,4 +14,5 @@ BISON is a finite element-based nuclear fuel performance code. It is applicable 
 
 !col small=8 medium=4 large=4
 !media xfem/image21.gif style=width:100%;align:bottom;
+       alt=Output of a BISON simulation.
 !row-end!

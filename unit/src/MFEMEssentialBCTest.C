@@ -1,3 +1,12 @@
+//* This file is part of the MOOSE framework
+//* https://mooseframework.inl.gov
+//*
+//* All rights reserved, see COPYRIGHT for full restrictions
+//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
+//*
+//* Licensed under LGPL 2.1, please see LICENSE for details
+//* https://www.gnu.org/licenses/lgpl-2.1.html
+
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "libmesh/ignore_warnings.h"
@@ -57,9 +66,9 @@ public:
 
   void check_boundary(int /*bound*/,
                       mfem::FiniteElementSpace & fespace,
-                      std::function<double(mfem::ElementTransformation *,
-                                           const mfem::IntegrationPoint &)> error_func,
-                      double tolerance)
+                      std::function<mfem::real_t(mfem::ElementTransformation *,
+                                                 const mfem::IntegrationPoint &)> error_func,
+                      mfem::real_t tolerance)
   {
     for (int be = 0; be < _mfem_mesh_ptr->getMFEMParMeshPtr()->GetNBE(); be++)
     {
@@ -71,12 +80,12 @@ public:
       const mfem::FiniteElement * fe = fespace.GetBE(be);
       const mfem::IntegrationRule & ir =
           mfem::IntRules.Get(fe->GetGeomType(), 2 * fe->GetOrder() + 2);
-      double total_error = 0.0;
+      mfem::real_t total_error = 0.0;
       for (int j = 0; j < ir.GetNPoints(); j++)
       {
         const mfem::IntegrationPoint point = ir.IntPoint(j);
         transform->SetIntPoint(&point);
-        const double error = error_func(transform, point);
+        const mfem::real_t error = error_func(transform, point);
         total_error += error * error;
       }
       EXPECT_LT(total_error, tolerance);

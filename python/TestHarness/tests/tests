@@ -304,17 +304,29 @@
     requirement = 'The system shall support storing results and data for validation cases that are combined with a standard test'
     issues = '#30517'
   []
-  [resultsreader_results]
+  [resultsstore_storedresults]
     type = PythonUnitTest
-    input = test_resultsreader_results.py
+    input = test_resultsstore_storedresults.py
     requirement = 'The system shall provide a python interface for interacting with previous test results stored in a database'
     issues = '#30819'
   []
-  [resultsreader_reader]
+  [resultsstore_reader]
     type = PythonUnitTest
-    input = test_resultsreader_reader.py
+    input = test_resultsstore_reader.py
     requirement = 'The system shall provide a python interface for loading previous test results from a database'
     issues = '#30819'
+  []
+  [resultsstore_civetstore]
+    type = PythonUnitTest
+    input = test_resultsstore_civetstore.py
+    requirement = 'The system shall provide a python interface for storing test results into a database for future access'
+    issues = '#31675'
+  []
+  [resultsstore_combined]
+    type = PythonUnitTest
+    input = test_resultsstore_combined.py
+    requirement = 'The system shall provide python interfaces to both store and load test results into a database'
+    issues = '#31675'
   []
   [augmented_capabilities]
     type = PythonUnitTest
@@ -333,5 +345,11 @@
     input = test_append_pythonpath.py
     requirement = 'The system shall be able to import python utilities when running tests.'
     issues = '#31457'
+  []
+  [resultssummary]
+    type = PythonUnitTest
+    input = test_resultssummary.py
+    requirement = 'The system shall provide a system that summaries the changes in tests within a pull request event`
+    issues = '#31645'
   []
 []
