@@ -10,7 +10,7 @@
 # ruff: noqa: E402
 
 import os
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock, PropertyMock
 
 from common import MooseControlTestCase, setup_moose_python_path
 
@@ -182,20 +182,24 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
 
     def test_finalize_wait_process(self):
         """
-        Tests running a dummy process and waiting for it in finalize().
+        Tests waiting for a dummy process in finalize().
         """
         runner = SubprocessRunnerBaseTest(
             **ARGS, directory=self.directory.name, use_subprocess_reader=False
         )
 
-        runner._process = runner.start_process("sleep 0.1", shell=True)
+        pid = 1234
+        process = MagicMock()
+        type(process).pid = PropertyMock(return_value=pid)
+        process.wait.return_value = None
+        runner._process = process
+        runner.is_process_running = MagicMock(return_value=True)
 
-        pid = runner.get_pid()
-        self.assertIsNotNone(pid)
-
-        self._caplog.clear()
         runner.finalize()
 
+        self.assertEqual(pid, runner.get_pid())
+        runner.is_process_running.assert_called_once()
+        process.wait.assert_called_once()
         self.assert_log_size(2)
         self.assert_log_message(0, f"Waiting for MOOSE process {pid} to end...")
         self.assert_log_message(1, "MOOSE process has ended")
@@ -208,16 +212,21 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
             **ARGS, directory=self.directory.name, use_subprocess_reader=True
         )
 
-        process = runner.start_process("sleep 0.1", shell=True)
-        runner._subprocess_reader = SubprocessReader(process)
-        runner._subprocess_reader.start()
+        reader = MagicMock()
+        reader.is_alive.return_value = True
+        reader.join.return_value = None
+        runner._subprocess_reader = reader
+
         runner.finalize()
 
-        self.assert_in_log("Waiting for the reader thread to end...", levelname="DEBUG")
-        self.assert_in_log("Reader thread has ended", levelname="DEBUG")
+        reader.is_alive.assert_called_once()
+        reader.join.assert_called_once()
+        self.assert_log_size(2)
+        self.assert_log_message(
+            0, "Waiting for the reader thread to end...", levelname="DEBUG"
+        )
+        self.assert_log_message(1, "Reader thread has ended", levelname="DEBUG")
         self.assertIsNone(runner._subprocess_reader)
-
-        process.wait()
 
     def test_finalize_wait_subprocess_reader_not_alive(self):
         """
@@ -228,15 +237,15 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
             **ARGS, directory=self.directory.name, use_subprocess_reader=True
         )
 
-        process = runner.start_process("exit 0", shell=True)
-        runner._subprocess_reader = SubprocessReader(process)
-        runner._subprocess_reader.start()
-        runner._subprocess_reader.join()
-        process.wait()
+        reader = MagicMock()
+        reader.is_alive.return_value = False
+        reader.join.return_value = None
+        runner._subprocess_reader = reader
 
-        self._caplog.clear()
         runner.finalize()
 
+        reader.is_alive.assert_called_once()
+        reader.join.assert_not_called()
         self.assertIsNone(runner._subprocess_reader)
         self.assert_log_size(0)
 
@@ -265,19 +274,20 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
         """
         runner = SubprocessRunnerBaseTest(**ARGS)
 
-        process = runner.start_process("sleep 0.1", shell=True)
-        runner._subprocess_reader = SubprocessReader(process)
-        runner._subprocess_reader.start()
+        reader = MagicMock()
+        reader.is_alive.return_value = True
+        reader.join.return_value = None
+        runner._subprocess_reader = reader
 
         runner.cleanup()
 
-        self.assertFalse(runner._subprocess_reader.is_alive())
-
-        self.assert_log_size(5)
+        reader.is_alive.assert_called_once()
+        reader.join.assert_called_once()
+        self.assert_log_size(2)
         self.assert_log_message(
-            2, "Reader thread still running on cleanup; waiting", levelname="WARNING"
+            0, "Reader thread still running on cleanup; waiting", levelname="WARNING"
         )
-        self.assert_log_message(4, "Reader thread has ended")
+        self.assert_log_message(1, "Reader thread has ended")
 
     def test_kill_process(self):
         """
