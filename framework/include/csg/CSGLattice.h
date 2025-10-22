@@ -121,6 +121,13 @@ public:
   isValidUniverseMap(std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes)
       const = 0; // pure virtual function
 
+  /**
+   * @brief Get the list of unique universe objects in the lattice
+   *
+   * @return list of references to unique CSGUniverse objects
+   */
+  const std::vector<std::reference_wrapper<const CSGUniverse>> getUniqueUniverses();
+
   /// Operator overload for checking if two CSGLattice objects are equal
   bool operator==(const CSGLattice & other) const;
 
