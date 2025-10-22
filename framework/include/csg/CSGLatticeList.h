@@ -10,6 +10,7 @@
 #pragma once
 
 #include "CSGLattice.h"
+#include "CSGCartesianLattice.h"
 
 namespace CSG
 {
@@ -37,6 +38,32 @@ protected:
   //  * @return reference to empty universe that is created
   //  */
   // CSGLattice & addLattice(const std::string & name);
+
+  /**
+   * @brief add a Cartesian lattice whose layout is defined by the set of universes
+   *
+   * @param name unique name identifier of the lattice
+   * @param pitch flat-to-flat size of the lattice elements
+   * @param universes list of list of universes that define the lattice layout
+   * @return reference to new Cartesian lattice
+   */
+  CSGLattice & addCartesianLattice(
+      const std::string & name,
+      const Real pitch,
+      std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes);
+
+  /**
+   * @brief add a Cartesian lattice of the specified dimension but does not have a defined
+   * universe layout yet.
+   *
+   * @param name unique name identifier of the lattice
+   * @param nx0 number of elements in the first dimension
+   * @param nx1 number of elements in the second dimension
+   * @param pitch flat-to-flat size of the lattice elements
+   * @return reference to new Cartesian lattice
+   */
+  CSGLattice &
+  addCartesianLattice(const std::string & name, const int nx0, const int nx1, const Real pitch);
 
   /**
    * @brief add an existing universe to list. Ownership of universe will be transferred to universe

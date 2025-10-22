@@ -13,6 +13,7 @@
 #include "CSGRegion.h"
 #include "CSGCellList.h"
 #include "CSGUniverseList.h"
+#include "CSGLatticeList.h"
 #include "nlohmann/json.h"
 
 #ifdef MOOSE_UNIT_TEST
@@ -276,6 +277,102 @@ public:
   }
 
   /**
+   * @brief Create a Cartesian Lattice from the provided universes
+   *
+   * @param name unique name identifier for the lattice
+   * @param pitch flat-to-flat size of the lattice elements
+   * @param universes list of list of universes that define the layout of the lattice
+   * @return reference to new Cartesian lattice
+   */
+  const CSGLattice & createCartesianLattice(
+      const std::string & name,
+      const Real pitch,
+      std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes);
+
+  /**
+   * @brief Create an empty Cartesian lattice. NOTE: this will not create an empty universe mapping;
+   * this must be done by using setLatticeUniverses.
+   *
+   * @param name unique name identifier for the lattice
+   * @param nx0 number of lattice elements in the first dimension
+   * @param nx1 number of lattice elements in the second dimension
+   * @param pitch flat-to-flat size of the lattice elements
+   * @return reference to new Cartesian lattice
+   */
+  const CSGLattice &
+  createCartesianLattice(const std::string & name, const int nx0, const int nx1, const Real pitch)
+  {
+    return _lattice_list.addCartesianLattice(name, nx0, nx1, pitch);
+  }
+
+  /**
+   * @brief add the universe to the lattice at the specified location
+   *
+   * @param lattice lattice to update
+   * @param universe universe to set at the location
+   * @param index index of the lattice element (int, int)
+   */
+  void addUniverseToLattice(CSGLattice & lattice,
+                            std::reference_wrapper<const CSGUniverse> & universe,
+                            std::pair<int, int> index);
+
+  /**
+   * @brief Set provided universes as the layout of the lattice.
+   *
+   * @param lattice lattice to add universes to
+   * @param universes list of list of universes in the proper layout for the lattice type and
+   * dimensions
+   */
+  void setLatticeUniverses(
+      CSGLattice & lattice,
+      std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> & universes);
+
+  /**
+   * @brief rename the lattice
+   *
+   * @param lattice lattice to rename
+   * @param name new name
+   */
+  void renameLattice(const CSGLattice & lattice, const std::string & name)
+  {
+    _lattice_list.renameLattice(lattice, name);
+  }
+
+  /**
+   * @brief change a dimension of the lattice
+   *
+   * @param lattice lattice to update
+   * @param dim_name name of the dimension to change
+   * @param dim_value new value for the dimension
+   */
+  void
+  updateLatticeDimension(CSGLattice & lattice, const std::string & dim_name, std::any dim_value)
+  {
+    lattice.updateDimension(dim_name, dim_value);
+  }
+
+  /**
+   * @brief Get all lattice objects
+   *
+   * @return list of references to CSGLattice objects in this CSGBase instance
+   */
+  std::vector<std::reference_wrapper<const CSGLattice>> getAllLattices() const
+  {
+    return _lattice_list.getAllLattices();
+  }
+
+  /**
+   * @brief Get a lattice object by name
+   *
+   * @param name lattice name
+   * @return reference to CSGLattice object
+   */
+  const CSGLattice & getLatticeByName(const std::string & name)
+  {
+    return _lattice_list.getLattice(name);
+  }
+
+  /**
    * @brief Join another CSGBase object to this one. The cells of the root universe
    * of the incoming CSGBase will be added to the existing root universe of this
    * CSGBase.
@@ -471,6 +568,9 @@ private:
 
   /// List of universes associated with CSG object
   CSGUniverseList _universe_list;
+
+  /// List of lattices associated with CSG object
+  CSGLatticeList _lattice_list;
 
 #ifdef MOOSE_UNIT_TEST
   /// Friends for unit testing

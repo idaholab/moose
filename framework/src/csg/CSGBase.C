@@ -208,6 +208,54 @@ CSGBase::removeCellsFromUniverse(const CSGUniverse & universe,
     removeCellFromUniverse(universe, c);
 }
 
+const CSGLattice &
+CSGBase::createCartesianLattice(
+    const std::string & name,
+    const Real pitch,
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes)
+{
+  // make sure all universes are a part of this base instance
+  for (auto univ_list : universes)
+  {
+    for (const CSGUniverse & univ : univ_list)
+    {
+      if (!checkUniverseInBase(univ))
+        mooseError("Cannot create Cartesian lattice " + name + ". Universe " + univ.getName() +
+                   " is not in the CSGBase instance.");
+    }
+  }
+  auto & lattice = _lattice_list.addCartesianLattice(name, pitch, universes);
+  return lattice;
+}
+
+void
+CSGBase::addUniverseToLattice(CSGLattice & lattice,
+                              std::reference_wrapper<const CSGUniverse> & universe,
+                              std::pair<int, int> index)
+{
+  if (!checkUniverseInBase(universe))
+    mooseError("Cannot add universe " + universe.get().getName() + " to lattice " +
+               lattice.getName() + ". Universe is not in the CSGBase instance.");
+  lattice.setUniverseAtIndex(universe, index);
+}
+
+void
+CSGBase::setLatticeUniverses(
+    CSGLattice & lattice,
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> & universes)
+{
+  // make sure all universes are a part of this base instance
+  for (auto univ_list : universes)
+  {
+    for (const CSGUniverse & univ : univ_list)
+    {
+      if (!checkUniverseInBase(univ))
+        mooseError("Cannot set universes for lattice " + lattice.getName() + ". Universe " +
+                   univ.getName() + " is not in the CSGBase instance.");
+    }
+  }
+}
+
 void
 CSGBase::joinOtherBase(std::unique_ptr<CSGBase> base)
 {
