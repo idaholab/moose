@@ -42,17 +42,16 @@ def patch_runner(name: str, **kwargs):
 
 
 def get_process_output(
-    test: MooseControlTestCase, runner: SubprocessRunnerBase, join=False
-) -> list[str] | str:
+    test: MooseControlTestCase, runner: SubprocessRunnerBase
+) -> list[str]:
     """
     Helper for reading the process output from the SubprocessReader.
     """
-    output = [
+    return [
         v.message.replace(SubprocessReader.OUTPUT_PREFIX, "", 1)
         for v in test._caplog.records
         if v.name == "SubprocessReader"
     ]
-    return "\n".join(output) if join else output
 
 
 class TestSubprocessRunnerBase(MooseControlTestCase):
