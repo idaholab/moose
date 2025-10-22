@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#23359 #27909'
+  issues = '#23359 #27909 #31755'
   design = 'syntax/Controls/index.md source/controls/WebServerControl.md'
 
   # Not really sure if all of these prereqs are required as I can't guarantee
@@ -293,5 +293,14 @@
       detail = 'both a port and a file were specified to listen on'
       valgrind = 'none' # http library is not completely valgrind clean
     []
+  []
+
+  [kill]
+    type = RunException
+    input = 'control_reporter.i'
+    command_proxy = 'kill.py'
+    required_python_packages = requests
+    expect_err = 'WebServerControl "web_server": Kill requested'
+    requirement = 'The system shall support killing a running MOOSE simulation via a REST API'
   []
 []
