@@ -37,7 +37,6 @@ QuadSubChannel1PhaseProblem::QuadSubChannel1PhaseProblem(const InputParameters &
   : SubChannel1PhaseProblem(params),
     _subchannel_mesh(SCM::getMesh<QuadSubChannelMesh>(_mesh)),
     _beta(getParam<Real>("beta")),
-    _default_friction_model(getParam<bool>("default_friction_model")),
     _constant_beta(getParam<bool>("constant_beta"))
 {
 }
@@ -204,38 +203,39 @@ QuadSubChannel1PhaseProblem::initializeSolution()
   _aux->solution().close();
 }
 
-Real
-QuadSubChannel1PhaseProblem::computeFrictionFactor(FrictionStruct friction_args)
+void
+QuadSubChannel1PhaseProblem::computeFrictionFactorParameters(FrictionStruct friction_args)
 {
   auto Re = friction_args.Re;
   auto i_ch = friction_args.i_ch;
+  auto iz = friction_args.iz;
+  auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
   /// Pang, B. et al. KIT, 2013
-  if (_default_friction_model)
+  if (_friction_model == 0) // default
   {
-    Real a, b;
     if (Re < 1)
     {
-      return 64.0;
+      _ff_a_soln->set(node, 64.0);
+      _ff_b_soln->set(node, 0.0);
     }
     else if (Re >= 1 and Re < 5000)
     {
-      a = 64.0;
-      b = -1.0;
+      _ff_a_soln->set(node, 64.0);
+      _ff_b_soln->set(node, -1.0);
     }
     else if (Re >= 5000 and Re < 30000)
     {
-      a = 0.316;
-      b = -0.25;
+      _ff_a_soln->set(node, 0.316);
+      _ff_b_soln->set(node, -0.25);
     }
     else
     {
-      a = 0.184;
-      b = -0.20;
+      _ff_a_soln->set(node, 0.184);
+      _ff_b_soln->set(node, -0.20);
     }
-    return a * std::pow(Re, b);
   }
   /// Todreas-Kazimi NUCLEAR SYSTEMS, second edition, Volume 1, 2011
-  else
+  else if (_friction_model == 1) // non-default
   {
     Real aL, b1L, b2L, cL;
     Real aT, b1T, b2T, cT;
@@ -251,7 +251,6 @@ QuadSubChannel1PhaseProblem::computeFrictionFactor(FrictionStruct friction_args)
     auto ReT = std::pow(10, 0.7 * (p_over_d - 1)) * 1.0E+4;
     auto psi = std::log(Re / ReL) / std::log(ReT / ReL);
     auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
-    const Real lambda = 7.0;
 
     // Find the coefficients of bare Pin bundle friction factor
     // correlations for turbulent and laminar flow regimes. Todreas & Kazimi, Nuclear Systems Volume
@@ -277,9 +276,9 @@ QuadSubChannel1PhaseProblem::computeFrictionFactor(FrictionStruct friction_args)
         b2T = -0.09926;
       }
       // laminar flow friction factor for bare Pin bundle - Center subchannel
-      cL = aL + b1L * (p_over_d - 1) + b2L * std::pow((p_over_d - 1), 2);
+      cL = aL + b1L * (p_over_d - 1) + b2L * Utility::pow<2>((p_over_d - 1));
       // turbulent flow friction factor for bare Pin bundle - Center subchannel
-      cT = aT + b1T * (p_over_d - 1) + b2T * std::pow((p_over_d - 1), 2);
+      cT = aT + b1T * (p_over_d - 1) + b2T * Utility::pow<2>((p_over_d - 1));
     }
     else if (subch_type == EChannelType::EDGE)
     {
@@ -302,9 +301,9 @@ QuadSubChannel1PhaseProblem::computeFrictionFactor(FrictionStruct friction_args)
         b2T = -0.04428;
       }
       // laminar flow friction factor for bare Pin bundle - Edge subchannel
-      cL = aL + b1L * (w_over_d - 1) + b2L * std::pow((w_over_d - 1), 2);
+      cL = aL + b1L * (w_over_d - 1) + b2L * Utility::pow<2>((w_over_d - 1));
       // turbulent flow friction factor for bare Pin bundle - Edge subchannel
-      cT = aT + b1T * (w_over_d - 1) + b2T * std::pow((w_over_d - 1), 2);
+      cT = aT + b1T * (w_over_d - 1) + b2T * Utility::pow<2>((w_over_d - 1));
     }
     else
     {
@@ -327,32 +326,44 @@ QuadSubChannel1PhaseProblem::computeFrictionFactor(FrictionStruct friction_args)
         b2T = -0.03411;
       }
       // laminar flow friction factor for bare Pin bundle - Corner subchannel
-      cL = aL + b1L * (w_over_d - 1) + b2L * std::pow((w_over_d - 1), 2);
+      cL = aL + b1L * (w_over_d - 1) + b2L * Utility::pow<2>((w_over_d - 1));
       // turbulent flow friction factor for bare Pin bundle - Corner subchannel
-      cT = aT + b1T * (w_over_d - 1) + b2T * std::pow((w_over_d - 1), 2);
+      cT = aT + b1T * (w_over_d - 1) + b2T * Utility::pow<2>((w_over_d - 1));
     }
-
-    // laminar friction factor
-    auto fL = cL / Re;
-    // turbulent friction factor
-    auto fT = cT / std::pow(Re, 0.18);
+    // laminar friction factor and turbulent friction factor coefficients (power-law form)
+    const Real bL = -1.0;
+    const Real bT = -0.18;
 
     if (Re < ReL)
     {
       // laminar flow
-      return fL;
+      _ff_b_soln->set(node, bL);
+      _ff_a_soln->set(node, cL);
     }
     else if (Re > ReT)
     {
       // turbulent flow
-      return fT;
+      _ff_b_soln->set(node, bT);
+      _ff_a_soln->set(node, cT);
     }
     else
     {
-      // transient flow: psi definition uses a Bulk ReT/ReL number, same for all channels
-      return fL * std::pow((1 - psi), 1.0 / 3.0) * (1 - std::pow(psi, lambda)) +
-             fT * std::pow(psi, 1.0 / 3.0);
+      // transitional regime: enforce f = a * Re^{b} with log-space blending
+      const Real b_eff = (1.0 - psi) * bL + psi * bT;
+      const Real a_eff = std::exp((1.0 - psi) * std::log(cL) + psi * std::log(cT));
+      _ff_b_soln->set(node, b_eff);
+      _ff_a_soln->set(node, a_eff);
     }
+  }
+  else if (_friction_model == 2 || _friction_model == 3)
+  {
+    // Do nothing the user should populate the aux variable ff_a, ff_b or directly the aux variable
+    // ff.
+  }
+  else
+  {
+    mooseError(name(),
+               ": Friction model should be a string: default, non_default, user_ab, user_ff ");
   }
 }
 
@@ -413,7 +424,7 @@ QuadSubChannel1PhaseProblem::computeBeta(unsigned int i_gap, unsigned int iz, bo
     auto z_FP_over_D = (2.0 * L_x / pin_diameter) *
                        (1 + (-0.5 * std::log(lamda) + 0.5 * std::log(4.0) - 0.25) * lamda * lamda);
     auto Str = 1.0 / (0.822 * (gap / pin_diameter) + 0.144); // Strouhal number (Wu & Trupp 1994)
-    auto freq_factor = 2.0 / std::pow(gamma, 2) * std::sqrt(a / 8.0) * (avg_hD / gap);
+    auto freq_factor = 2.0 / Utility::pow<2>(gamma) * std::sqrt(a / 8.0) * (avg_hD / gap);
     auto rod_mixing = (1 / Pr_t) * lamda;
     auto axial_mixing = a_x * z_FP_over_D * Str;
     // Mixing Stanton number: Stg (eq 25,Kim and Chung (2001), eq 19 (Jeong et. al 2005)
