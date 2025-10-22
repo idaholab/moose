@@ -2,9 +2,9 @@
   [fatigue]
     type = ParisLaw
     growth_increment_name = "growth_increment"
-    cycles_to_max_growth_size_name = "fatigue"
+    cycles_to_max_growth_increment_name = "fatigue"
     crackMeshCut3DUserObject_name = cut_mesh
-    max_growth_size = 0.1
+    max_growth_increment = 0.1
     paris_law_c = 1e-13
     paris_law_m = 2.5
   []
@@ -17,7 +17,7 @@
     growth_dir_method = FUNCTION
     size_control = 1
     n_step_growth = 1
-    growth_rate_method = REPORTER
+    growth_increment_method = REPORTER
     growth_direction_x = growth_func_x
     growth_direction_y = growth_func_y
     growth_direction_z = growth_func_z

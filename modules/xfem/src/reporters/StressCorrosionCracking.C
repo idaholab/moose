@@ -27,13 +27,15 @@ StressCorrosionCracking::validParams()
       "k_low>0",
       "Value of K_I below which the crack growth rate is constant, with the value specified in "
       "growth_rate_low");
-  params.addRequiredParam<Real>("growth_rate_low", "growth rate when K_I is below k_low");
+  params.addRequiredRangeCheckedParam<Real>(
+      "growth_rate_low", "growth_rate_low>0", "growth rate when K_I is below k_low");
   params.addRequiredRangeCheckedParam<Real>(
       "k_high",
       "k_high>0",
       "Value of K_I above which the crack growth rate is constant, with the value specified in "
       "growth_rate_high");
-  params.addRequiredParam<Real>("growth_rate_high", "growth rate when K_I is above k_high");
+  params.addRequiredRangeCheckedParam<Real>(
+      "growth_rate_high", "growth_rate_high>0", "growth rate when K_I is above k_high");
   params.addRequiredParam<Real>("growth_rate_mid_multiplier",
                                 "Growth rate multiplier when K_I is between k_low and k_high");
   params.addRequiredParam<Real>("growth_rate_mid_exp_factor", "Growth rate exponential factor");
@@ -43,9 +45,9 @@ StressCorrosionCracking::validParams()
       "growth_increment",
       "ReporterValueName for storing computed growth increments for the crack front points.");
   params.addParam<ReporterValueName>(
-      "time_to_max_growth_size_name",
+      "time_to_max_growth_increment_name",
       "max_growth_timestep",
-      "ReporterValueName for storing computed timestep to reach max_growth_size.");
+      "ReporterValueName for storing computed timestep to reach max_growth_increment.");
   return params;
 }
 
@@ -59,7 +61,7 @@ StressCorrosionCracking::StressCorrosionCracking(const InputParameters & paramet
     _growth_rate_mid_exp_factor(getParam<Real>("growth_rate_mid_exp_factor")),
 
     _corrosion_time_step(declareValueByName<Real>(
-        getParam<ReporterValueName>("time_to_max_growth_size_name"), REPORTER_MODE_ROOT)),
+        getParam<ReporterValueName>("time_to_max_growth_increment_name"), REPORTER_MODE_ROOT)),
     _growth_increment(declareValueByName<std::vector<Real>>(
         getParam<ReporterValueName>("growth_increment_name"), REPORTER_MODE_ROOT))
 {
@@ -68,7 +70,7 @@ StressCorrosionCracking::StressCorrosionCracking(const InputParameters & paramet
 }
 
 void
-StressCorrosionCracking::compute_growth(std::vector<int> & index)
+StressCorrosionCracking::computeGrowth(std::vector<int> & index)
 {
   _growth_increment.resize(_ki_x.size(), 0.0);
   std::vector<Real> growth_rate(_ki_x.size(), 0.0);
@@ -88,7 +90,10 @@ StressCorrosionCracking::compute_growth(std::vector<int> & index)
   }
 
   Real max_growth_rate = *std::max_element(growth_rate.begin(), growth_rate.end());
-  _corrosion_time_step = _max_growth_size / max_growth_rate;
+  if (max_growth_rate <= 0)
+    mooseError("Negative max growth rate encountered on crack front. ");
+
+  _corrosion_time_step = _max_growth_increment / max_growth_rate;
 
   for (std::size_t i = 0; i < _ki_vpp.size(); ++i)
   {

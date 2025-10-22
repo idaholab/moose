@@ -23,7 +23,7 @@ public:
   StressCorrosionCracking(const InputParameters & parameters);
 
 protected:
-  virtual void compute_growth(std::vector<int> & index) override;
+  virtual void computeGrowth(std::vector<int> & index) override;
 
   ///@{ Material specific scc parameters
   const Real & _k_low;
@@ -34,7 +34,7 @@ protected:
   const Real & _growth_rate_mid_exp_factor;
   ///@}
 
-  /// timestep size to reach max_growth_size postprocessor
+  /// timestep size to reach max_growth_increment postprocessor
   Real & _corrosion_time_step;
 
   /// growth increment reporters

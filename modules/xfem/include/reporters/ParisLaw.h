@@ -22,7 +22,7 @@ public:
   ParisLaw(const InputParameters & parameters);
 
 protected:
-  virtual void compute_growth(std::vector<int> & index) override;
+  virtual void computeGrowth(std::vector<int> & index) override;
   ///@{ Paris law parameters
   const Real _paris_law_c;
   const Real _paris_law_m;
@@ -31,7 +31,7 @@ protected:
   /// The name of the reporter with K_II fracture integral values
   const std::vector<Real> & _kii_vpp;
 
-  /// Vector containing number of cycles to reach max_growth_size postprocessor for each crack front point
+  /// Vector containing number of cycles to reach max_growth_increment postprocessor for each crack front point
   Real & _dn;
 
   /// growth rate reporter

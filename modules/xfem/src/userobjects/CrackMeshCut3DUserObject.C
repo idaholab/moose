@@ -31,7 +31,8 @@ CrackMeshCut3DUserObject::validParams()
   params.addParam<MooseEnum>(
       "growth_dir_method", growthDirection, "choose from FUNCTION, MAX_HOOP_STRESS");
   MooseEnum growthRate("REPORTER FUNCTION", "FUNCTION");
-  params.addParam<MooseEnum>("growth_rate_method", growthRate, "choose from FUNCTION, REPORTER");
+  params.addParam<MooseEnum>(
+      "growth_increment_method", growthRate, "choose from FUNCTION, REPORTER");
   params.addParam<FunctionName>("growth_direction_x",
                                 "Function defining x-component of crack growth direction");
   params.addParam<FunctionName>("growth_direction_y",
@@ -62,7 +63,8 @@ CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & param
   : MeshCutUserObjectBase(parameters),
     _mesh(_subproblem.mesh()),
     _growth_dir_method(getParam<MooseEnum>("growth_dir_method").getEnum<GrowthDirectionEnum>()),
-    _growth_rate_method(getParam<MooseEnum>("growth_rate_method").getEnum<GrowthRateEnum>()),
+    _growth_increment_method(
+        getParam<MooseEnum>("growth_increment_method").getEnum<GrowthRateEnum>()),
     _n_step_growth(getParam<unsigned int>("n_step_growth")),
     _is_mesh_modified(false),
     _func_x(parameters.isParamValid("growth_direction_x") ? &getFunction("growth_direction_x")
@@ -82,7 +84,7 @@ CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & param
                        "kii_vectorpostprocessor",
                        getParam<VectorPostprocessorName>("kii_vectorpostprocessor"))
                  : nullptr),
-    _growth_inc_reporter((_growth_rate_method == GrowthRateEnum::REPORTER)
+    _growth_inc_reporter((_growth_increment_method == GrowthRateEnum::REPORTER)
                              ? &getReporterValueByName<std::vector<Real>>(
                                    getParam<ReporterName>("growth_reporter"), REPORTER_MODE_ROOT)
                              : nullptr)
@@ -112,7 +114,7 @@ CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & param
   }
 
   if ((_growth_dir_method == GrowthDirectionEnum::MAX_HOOP_STRESS ||
-       _growth_rate_method == GrowthRateEnum::REPORTER) &&
+       _growth_increment_method == GrowthRateEnum::REPORTER) &&
       !_cfd)
     paramError("crack_front_nodes",
                "Required for any crack growth rate or direction criterion that requires fracture "
@@ -839,7 +841,7 @@ CrackMeshCut3DUserObject::growFront()
 
       Point x;
       Real growth_size = 0;
-      switch (_growth_rate_method)
+      switch (_growth_increment_method)
       {
         case GrowthRateEnum::FUNCTION:
         {
@@ -857,7 +859,7 @@ CrackMeshCut3DUserObject::growFront()
         }
         default:
         {
-          mooseError("This growth_rate_method is not pre-defined!");
+          mooseError("This growth_increment_method is not pre-defined!");
           break;
         }
       }

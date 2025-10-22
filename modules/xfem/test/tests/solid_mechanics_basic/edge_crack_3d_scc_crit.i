@@ -1,13 +1,13 @@
-# This takes 1 step of max_growth_size and back computes a time of 11s which
+# This takes 1 step of max_growth_increment and back computes a time of 11s which
 # is the amount of time edge_crack_3d_scc.i takes to grow a crack of similar length.
 
 [Reporters]
   [scc_crack_growth]
     type = StressCorrosionCracking
     growth_increment_name = "crack_growth"
-    time_to_max_growth_size_name = "max_growth_timestep"
+    time_to_max_growth_increment_name = "max_growth_timestep"
     crackMeshCut3DUserObject_name = cut_mesh
-    max_growth_size = 0.1
+    max_growth_increment = 0.1
     k_low = 10
     growth_rate_low = 0.075
     k_high = 20
@@ -23,7 +23,7 @@
     growth_dir_method = MAX_HOOP_STRESS
     size_control = 1
     n_step_growth = 1
-    growth_rate_method = REPORTER
+    growth_increment_method = REPORTER
     growth_reporter = "scc_crack_growth/crack_growth"
     crack_front_nodes = '7 6 5 4'
   []

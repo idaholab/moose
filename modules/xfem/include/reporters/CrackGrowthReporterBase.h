@@ -30,14 +30,14 @@ protected:
    * in an internal data structure.
    * @param index Vector of crack front point indices from the cutter mesh.
    */
-  virtual void compute_growth(std::vector<int> & index) = 0;
+  virtual void computeGrowth(std::vector<int> & index) = 0;
 
   /// cutter mesh object name
   const UserObjectName & _cutter_name;
   /// 3D mesh cutter object that provides active nodes
   CrackMeshCut3DUserObject * _3Dcutter;
   /// Maximum crack growth increment allowed for any of the crack front points
-  const Real _max_growth_size;
+  const Real _max_growth_increment;
 
   /// The name of the reporter with K_I fracture integral values
   const std::vector<Real> & _ki_vpp;
@@ -65,7 +65,7 @@ private:
    * get indexing from the cutter mesh
    * @return the cutter mesh index vector
    */
-  std::vector<int> get_cutter_mesh_indices() const;
+  std::vector<int> getCutterMeshIndices() const;
   /// copy data into coordinate reporters
-  void copy_coordinates() const;
+  void copyCoordinates() const;
 };

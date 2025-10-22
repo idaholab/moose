@@ -18,8 +18,9 @@ CrackGrowthReporterBase::validParams()
   InputParameters params = GeneralReporter::validParams();
   params.addRequiredParam<UserObjectName>("crackMeshCut3DUserObject_name",
                                           "The CrackMeshCut3DUserObject user object name");
-  params.addRequiredParam<Real>(
-      "max_growth_size",
+  params.addRequiredRangeCheckedParam<Real>(
+      "max_growth_increment",
+      "max_growth_increment>0",
       "the max growth size at the crack front in each increment of a fatigue simulation");
   params.addParam<VectorPostprocessorName>(
       "ki_vectorpostprocessor", "II_KI_1", "The name of the vectorpostprocessor that contains KI");
@@ -37,7 +38,7 @@ CrackGrowthReporterBase::CrackGrowthReporterBase(const InputParameters & paramet
   : GeneralReporter(parameters),
     _cutter_name(getParam<UserObjectName>("crackMeshCut3DUserObject_name")),
     _3Dcutter(&_fe_problem.getUserObject<CrackMeshCut3DUserObject>(_cutter_name)),
-    _max_growth_size(getParam<Real>("max_growth_size")),
+    _max_growth_increment(getParam<Real>("max_growth_increment")),
     _ki_vpp(getVectorPostprocessorValue(
         "ki_vectorpostprocessor", getParam<VectorPostprocessorName>("ki_vectorpostprocessor"))),
     _ki_x(getVectorPostprocessorValue("ki_vectorpostprocessor", "x")),
@@ -54,13 +55,13 @@ CrackGrowthReporterBase::CrackGrowthReporterBase(const InputParameters & paramet
 void
 CrackGrowthReporterBase::execute()
 {
-  copy_coordinates();
-  std::vector<int> index = get_cutter_mesh_indices();
-  compute_growth(index);
+  copyCoordinates();
+  std::vector<int> index = getCutterMeshIndices();
+  computeGrowth(index);
 }
 
 void
-CrackGrowthReporterBase::copy_coordinates() const
+CrackGrowthReporterBase::copyCoordinates() const
 {
   _x.resize(_ki_x.size());
   _y.resize(_ki_y.size());
@@ -73,7 +74,7 @@ CrackGrowthReporterBase::copy_coordinates() const
 }
 
 std::vector<int>
-CrackGrowthReporterBase::get_cutter_mesh_indices() const
+CrackGrowthReporterBase::getCutterMeshIndices() const
 {
   // Generate _active_boundary and _inactive_boundary_pos;
   // This is a duplicated call before the one in CrackMeshCut3DUserObject;

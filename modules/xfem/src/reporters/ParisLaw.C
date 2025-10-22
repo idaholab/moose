@@ -32,9 +32,9 @@ ParisLaw::validParams()
       "growth_increment",
       "ReporterValueName for storing computed growth increments for the crack front points.");
   params.addParam<ReporterValueName>(
-      "cycles_to_max_growth_size_name",
+      "cycles_to_max_growth_increment_name",
       "dN",
-      "ReporterValueName for storing computed number of cycles to reach max_growth_size.");
+      "ReporterValueName for storing computed number of cycles to reach max_growth_increment.");
   return params;
 }
 
@@ -44,7 +44,7 @@ ParisLaw::ParisLaw(const InputParameters & parameters)
     _paris_law_m(getParam<Real>("paris_law_m")),
     _kii_vpp(getVectorPostprocessorValue(
         "kii_vectorpostprocessor", getParam<VectorPostprocessorName>("kii_vectorpostprocessor"))),
-    _dn(declareValueByName<Real>(getParam<ReporterValueName>("cycles_to_max_growth_size_name"),
+    _dn(declareValueByName<Real>(getParam<ReporterValueName>("cycles_to_max_growth_increment_name"),
                                  REPORTER_MODE_ROOT)),
     _growth_increment(declareValueByName<std::vector<Real>>(
         getParam<ReporterValueName>("growth_increment_name"), REPORTER_MODE_ROOT))
@@ -52,7 +52,7 @@ ParisLaw::ParisLaw(const InputParameters & parameters)
 }
 
 void
-ParisLaw::compute_growth(std::vector<int> & index)
+ParisLaw::computeGrowth(std::vector<int> & index)
 {
   _growth_increment.resize(_ki_x.size(), 0.0);
   std::vector<Real> effective_k(_ki_x.size(), 0.0);
@@ -64,7 +64,7 @@ ParisLaw::compute_growth(std::vector<int> & index)
   if (_max_k == 0)
     _dn = std::numeric_limits<Real>::max();
   else
-    _dn = _max_growth_size / (_paris_law_c * std::pow(_max_k, _paris_law_m));
+    _dn = _max_growth_increment / (_paris_law_c * std::pow(_max_k, _paris_law_m));
 
   for (std::size_t i = 0; i < _ki_vpp.size(); ++i)
     if (index[i] != -1)
@@ -72,6 +72,7 @@ ParisLaw::compute_growth(std::vector<int> & index)
       if (_max_k == 0)
         _growth_increment[i] = 0;
       else
-        _growth_increment[i] = _max_growth_size * std::pow(effective_k[i] / _max_k, _paris_law_m);
+        _growth_increment[i] =
+            _max_growth_increment * std::pow(effective_k[i] / _max_k, _paris_law_m);
     }
 }

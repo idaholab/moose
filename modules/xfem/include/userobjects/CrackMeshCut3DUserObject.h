@@ -102,8 +102,8 @@ protected:
     REPORTER,
     FUNCTION
   };
-  /// The rate method for growing mesh at the front
-  const GrowthRateEnum _growth_rate_method;
+  /// The growth increment method for growing mesh at the front
+  const GrowthRateEnum _growth_increment_method;
 
   /// The structural mesh must be 3D only
   const unsigned int _elem_dim = 3;
