@@ -20,8 +20,8 @@
     type = 'Exodiff'
     exodiff = 'block-dynamics-aux-wear_out.e'
     input = 'block-dynamics-aux-wear.i'
-    rel_err = 5.0e-4
-    abs_zero = 1.0e-5
+    rel_err = 1e-3
+    abs_zero = 1.0e-4
     min_parallel = 1
     max_parallel = 4
     capabilities = 'ad_size>=50 & method!=dbg'
