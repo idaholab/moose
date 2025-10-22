@@ -46,7 +46,6 @@ class SubprocessReader(Thread):
         logger.info("Subprocess reader started")
 
         assert self._process.universal_newlines
-        assert self._process.poll() is None
 
         pipe = self._process.stdout
         assert pipe is not None

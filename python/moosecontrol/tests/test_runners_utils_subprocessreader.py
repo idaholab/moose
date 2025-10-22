@@ -29,7 +29,7 @@ class TestSubprocessReader(MooseControlTestCase):
         """
         output = ["foo", "bar"]
         joined_output = "\n".join(output)
-        command = f'sleep 0.01 && echo "{joined_output}"'
+        command = f'echo "{joined_output}"'
         process = Popen(
             command,
             shell=True,
@@ -42,7 +42,6 @@ class TestSubprocessReader(MooseControlTestCase):
         reader = SubprocessReader(process)
         reader.start()
         reader.join()
-        process.wait()
 
         log_size = 2 + len(output)
         self.assert_log_size(log_size)
