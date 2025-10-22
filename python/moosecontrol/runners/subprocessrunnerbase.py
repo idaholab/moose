@@ -10,9 +10,9 @@
 """Defines the SubprocessRunnerBase."""
 
 import os
+import subprocess
 from abc import ABC, abstractmethod
 from logging import getLogger
-from subprocess import Popen, PIPE, STDOUT
 from typing import Optional
 
 from .utils import SubprocessReader
@@ -71,7 +71,7 @@ class SubprocessRunnerBase(ABC):
         self._use_subprocess_reader: bool = use_subprocess_reader
 
         # The underlying process
-        self._process: Optional[Popen] = None
+        self._process: Optional[subprocess.Popen] = None
         # The thread that reads from the process output
         self._subprocess_reader: Optional[SubprocessReader] = None
 
@@ -181,7 +181,7 @@ class SubprocessRunnerBase(ABC):
         return self.command + self.get_additional_command()
 
     @staticmethod
-    def start_process(command: list[str], **kwargs) -> Popen:
+    def start_process(command: list[str], **kwargs) -> subprocess.Popen:
         """
         Starts a process with the given command.
         """
@@ -189,15 +189,15 @@ class SubprocessRunnerBase(ABC):
 
         kwargs.update(
             {
-                "stdout": PIPE,
-                "stderr": STDOUT,
+                "stdout": subprocess.PIPE,
+                "stderr": subprocess.STDOUT,
                 "text": True,
                 "universal_newlines": True,
                 "bufsize": 1,
                 "preexec_fn": os.setsid,
             }
         )
-        return Popen(command, **kwargs)
+        return subprocess.Popen(command, **kwargs)
 
     def get_pid(self) -> Optional[int]:
         """

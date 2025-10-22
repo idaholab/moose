@@ -10,6 +10,7 @@
 # ruff: noqa: E402
 
 import os
+import subprocess
 from unittest.mock import patch, MagicMock, PropertyMock
 
 from common import MooseControlTestCase, setup_moose_python_path
@@ -306,6 +307,42 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
             0, "Reader thread still running on cleanup; waiting", levelname="WARNING"
         )
         self.assert_log_message(1, "Reader thread has ended")
+
+    def test_start_process(self):
+        """
+        Tests start_process().
+        """
+        message = "foo"
+        command = ["echo", message]
+        with patch("subprocess.Popen", wraps=subprocess.Popen) as mock_popen:
+            process = SubprocessRunnerBase.start_process(command)
+        stdout, _ = process.communicate()
+
+        mock_popen.assert_called_once_with(
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            universal_newlines=True,
+            bufsize=1,
+            preexec_fn=os.setsid,
+        )
+        self.assertEqual(stdout, f"{message}\n")
+        self.assert_log_size(1)
+        self.assert_log_message(0, f"Starting MOOSE process with command {command}")
+
+    def test_start_process_kwargs(self):
+        """
+        Tests that start_process() passes its kwargs to popen.
+        """
+        with patch("subprocess.Popen", wraps=subprocess.Popen) as mock_popen:
+            process = SubprocessRunnerBase.start_process(
+                ["echo", "foo"], cwd=self.directory.name
+            )
+        process.communicate()
+
+        _, kwargs = mock_popen.call_args
+        self.assertEqual(kwargs["cwd"], self.directory.name)
 
     def test_get_pid(self):
         """
