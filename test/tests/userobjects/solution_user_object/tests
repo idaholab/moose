@@ -73,6 +73,6 @@
     exodiff = "read_exodus_multiple_vars_out.e"
     prereq = "write_exodus_multiple_vars"
     issues = "#31238 #31747 #31767"
-    requirement = "The system shall be able to read in multiple variables from a previous exodus file, leveraging caching and time step interpolation."
+    requirement = "The system shall be able to read in multiple variables from a previous exodus file, loaded separately from the mesh file, leveraging caching and time step interpolation."
   []
 []

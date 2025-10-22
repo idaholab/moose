@@ -1084,8 +1084,8 @@ SolutionUserObjectBase::evalMeshFunction(const Point & p,
     else if (func_num == 2)
     {
       // Check the cache
-      // if (p == _cached_p2 && (!subdomain_ids || (*subdomain_ids == _cached_subdomain_ids2)))
-      //   return _cached_values2(local_var_index);
+      if (p == _cached_p2 && (!subdomain_ids || (*subdomain_ids == _cached_subdomain_ids2)))
+        return _cached_values2(local_var_index);
 
       // else get a new value
       (*_mesh_function2)(p, 0.0, output, subdomain_ids);
