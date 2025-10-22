@@ -109,7 +109,7 @@
   active = ParaViewDataCollection
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/TrueNLDiffusion
+    file_base = OutputData/NLDiffusion
     vtk_format = ASCII
   []
 []
