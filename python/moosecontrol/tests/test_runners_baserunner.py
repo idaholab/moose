@@ -193,12 +193,14 @@ class TestBaseRunner(MooseControlTestCase):
         """
         runner = BaseRunnerTest(poll_time=0.001, poke_poll_time=None)
         runner.is_listening = MagicMock(return_value=True)
+        runner.get = MagicMock()
 
         with self._caplog.at_level("INFO"):
             runner.initialize()
         runner._session = None
 
         runner.is_listening.assert_called_once()
+        runner.get.assert_called_once_with("poke", require_status=200)
         self.assertTrue(runner.initialized)
         self.assert_log_size(1)
         self.assert_log_message(0, "MOOSE webserver is listening")
@@ -218,10 +220,12 @@ class TestBaseRunner(MooseControlTestCase):
             return is_listening_calls == listening_after_num
 
         runner = BaseRunnerTest(poll_time=0.001, poke_poll_time=None)
+        runner.get = MagicMock()
         with patch_baserunner("is_listening", new=mock_is_listening):
             runner.initialize()
         runner._session = None
 
+        runner.get.assert_called_once_with("poke", require_status=200)
         self.assertTrue(runner.initialized)
         self.assertGreater(runner._initialize_poller.total_time, 0)
         self.assertEqual(is_listening_calls, listening_after_num)

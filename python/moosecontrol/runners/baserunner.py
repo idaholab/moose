@@ -203,6 +203,9 @@ class BaseRunner(ABC):
 
         logger.info("MOOSE webserver is listening")
 
+        # Poke for the first time now that we are listening
+        self.get("poke", require_status=200)
+
         # Start the poke thread now that the webserver is listening
         if self.poke_poll_time is not None:
             self._poker = self._build_poker()
