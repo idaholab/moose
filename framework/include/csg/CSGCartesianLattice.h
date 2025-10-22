@@ -84,13 +84,18 @@ protected:
    */
   virtual bool hasValidDimensions() const override;
 
+  virtual void updateDimension(const std::string & dim_name, std::any dim_value) override;
+
   /// number of elements in the first dimension
-  const int _nx0;
+  int _nx0;
 
   /// number of elements in the second direction
-  const int _nx1;
+  int _nx1;
 
   /// pitch
-  const Real _pitch;
+  Real _pitch;
+
+  /// @brief string names of the dimension parameters that defined the geometry of the lattice
+  // MooseEnum _dimension_names{"nx0 nx1 pitch"};
 };
 }
