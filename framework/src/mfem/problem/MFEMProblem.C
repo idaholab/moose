@@ -331,36 +331,36 @@ MFEMProblem::addKernel(const std::string & kernel_name,
 
 void
 MFEMProblem::addRealComponentToKernel(const std::string & kernel_name,
-                                         const std::string & name,
-                                         InputParameters & parameters)
+                                      const std::string & name,
+                                      InputParameters & parameters)
 {
   auto parent_ptr = std::dynamic_pointer_cast<MFEMComplexKernel>(
       getUserObject<MFEMComplexKernel>(name).getSharedPtr());
   parameters.set<VariableName>("variable") = parent_ptr->getParam<VariableName>("variable");
   FEProblemBase::addUserObject(kernel_name, name + "_real", parameters);
-  auto kernel_ptr =
-      std::dynamic_pointer_cast<MFEMKernel>(getUserObject<MFEMKernel>(name + "_real").getSharedPtr());
+  auto kernel_ptr = std::dynamic_pointer_cast<MFEMKernel>(
+      getUserObject<MFEMKernel>(name + "_real").getSharedPtr());
   parent_ptr->setRealKernel(std::dynamic_pointer_cast<MFEMKernel>(kernel_ptr));
 }
 
 void
 MFEMProblem::addImagComponentToKernel(const std::string & kernel_name,
-                                         const std::string & name,
-                                         InputParameters & parameters)
+                                      const std::string & name,
+                                      InputParameters & parameters)
 {
   auto parent_ptr = std::dynamic_pointer_cast<MFEMComplexKernel>(
       getUserObject<MFEMComplexKernel>(name).getSharedPtr());
   parameters.set<VariableName>("variable") = parent_ptr->getParam<VariableName>("variable");
   FEProblemBase::addUserObject(kernel_name, name + "_imag", parameters);
-  auto kernel_ptr =
-      std::dynamic_pointer_cast<MFEMKernel>(getUserObject<MFEMKernel>(name + "_imag").getSharedPtr());
+  auto kernel_ptr = std::dynamic_pointer_cast<MFEMKernel>(
+      getUserObject<MFEMKernel>(name + "_imag").getSharedPtr());
   parent_ptr->setImagKernel(std::dynamic_pointer_cast<MFEMKernel>(kernel_ptr));
 }
 
 void
 MFEMProblem::addRealComponentToBC(const std::string & kernel_name,
-                                     const std::string & name,
-                                     InputParameters & parameters)
+                                  const std::string & name,
+                                  InputParameters & parameters)
 {
   auto parent_ptr = std::dynamic_pointer_cast<MFEMComplexIntegratedBC>(
       getUserObject<MFEMComplexIntegratedBC>(name).getSharedPtr());
@@ -375,8 +375,8 @@ MFEMProblem::addRealComponentToBC(const std::string & kernel_name,
 
 void
 MFEMProblem::addImagComponentToBC(const std::string & kernel_name,
-                                     const std::string & name,
-                                     InputParameters & parameters)
+                                  const std::string & name,
+                                  InputParameters & parameters)
 {
   auto parent_ptr = std::dynamic_pointer_cast<MFEMComplexIntegratedBC>(
       getUserObject<MFEMComplexIntegratedBC>(name).getSharedPtr());
