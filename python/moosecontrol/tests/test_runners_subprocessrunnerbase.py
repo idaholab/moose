@@ -307,6 +307,23 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
         )
         self.assert_log_message(1, "Reader thread has ended")
 
+    def test_get_pid(self):
+        """
+        Tests get_pid().
+        """
+        runner = SubprocessRunnerBaseTest(**ARGS)
+        runner._process = runner.start_process("exit 0", shell=True)
+        self.assertEqual(runner.get_pid(), runner._process.pid)
+        runner._process.wait()
+
+    def test_get_pid_no_process(self):
+        """
+        Tests get_pid() when there is no process.
+        """
+        runner = SubprocessRunnerBaseTest(**ARGS)
+        self.assertIsNone(runner._process)
+        self.assertIsNone(runner.get_pid())
+
     def test_kill_process(self):
         """
         Tests kill_process() on a dummy process.
