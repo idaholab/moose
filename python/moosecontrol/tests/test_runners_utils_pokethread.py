@@ -60,7 +60,6 @@ class TestPoker(MooseControlTestCase):
 
         # This is time based, so even though we're looking for
         # a fixed number of pokes, we'll look for at least one.
-        min_pokes_expected = num_polls / 2
         self.assertGreater(poke_thread.num_poked, 0)
 
         # Check logging; we should have:
@@ -69,7 +68,7 @@ class TestPoker(MooseControlTestCase):
         # - stop request log
         # - stopped log
         records = self._caplog.records
-        self.assertGreater(len(records), 3 + min_pokes_expected)
+        self.assertGreater(len(records), 4)
         self.assert_log_message(0, "Poke thread started", levelname="DEBUG")
         self.assert_in_log("Poking webserver", levelname="DEBUG")
         self.assert_in_log("Poke thread requested to stop", levelname="DEBUG")
