@@ -126,7 +126,7 @@ class SubprocessSocketRunner(SubprocessRunnerBase, SocketRunner):
 
         Should ideally do nothing unless something went wrong.
         """
-        # Kill process if needed
-        SubprocessRunnerBase.cleanup(self)
         # And then cleanup the socket
         SocketRunner.cleanup(self)
+        # Kill process if needed
+        SubprocessRunnerBase.cleanup(self)

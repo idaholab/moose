@@ -14,7 +14,10 @@ from pathlib import Path
 from subprocess import Popen, PIPE
 from tempfile import NamedTemporaryFile
 from time import sleep
+from typing import Tuple
 from unittest.mock import patch
+
+from test_runners_baserunner import check_baserunner_cleanup_live
 
 import pytest
 
@@ -245,10 +248,9 @@ class TestSocketRunner(MooseControlTestCase):
         runner.finalize()
         self.assertFalse(os.path.exists(socket))
 
-    @pytest.mark.moose
-    def test_live(self):
+    def setup_live(self) -> Tuple[SocketRunner, Popen]:
         """
-        Tests running a MOOSE input live.
+        Sets up a live test.
         """
         input_path = os.path.join(self.directory.name, "input.i")
         socket_path = os.path.join(self.directory.name, "socket.sock")
@@ -263,7 +265,7 @@ class TestSocketRunner(MooseControlTestCase):
             f"Controls/web_server/file_socket={socket_path}",
             "--color=off",
         ]
-        process = Popen(command, stdout=PIPE, text=True)
+        process = Popen(command, stdout=PIPE, stderr=PIPE, text=True)
 
         # Initialize; wait for socket and connection
         runner = SocketRunner(socket_path, **LIVE_BASERUNNER_KWARGS)
@@ -274,15 +276,46 @@ class TestSocketRunner(MooseControlTestCase):
         # Input has one continue on INITIAL
         while not runner.get("waiting").data["waiting"]:
             sleep(0.001)
+
+        return runner, process
+
+    @pytest.mark.moose
+    def test_live(self):
+        """
+        Tests running a MOOSE input live.
+        """
+        runner, process = self.setup_live()
+
+        # Continue on the one timestep
         runner.get("continue")
 
         # Finalize; should delete socket
         runner.finalize()
-        self.assert_in_log(f"Deleting socket {socket_path}")
+        self.assert_in_log(f"Deleting socket {runner.socket_path}")
 
         # Wait for the MOOSE process to finish up
         stdout, _ = process.communicate()
 
         self.assertEqual(process.returncode, 0)
         self.assertIn("Solve Skipped!", stdout)
-        self.assertFalse(os.path.exists(socket_path))
+        self.assertFalse(os.path.exists(runner.socket_path))
+
+    @pytest.mark.moose
+    def test_cleanup_live(self):
+        """
+        Tests cleanup() live, which should kill the process.
+        """
+        self.allow_log_warnings = True
+
+        runner, process = self.setup_live()
+
+        # Call cleanup, will kill the process
+        runner.cleanup()
+
+        # Capture process output
+        _, stderr = process.communicate()
+
+        # Check state versus what the BaseRunner tests say it should be
+        check_baserunner_cleanup_live(self, runner, stderr, process.returncode)
+
+        self.assertFalse(os.path.exists(runner.socket_path))

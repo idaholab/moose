@@ -113,7 +113,7 @@ class SubprocessPortRunner(SubprocessRunnerBase, PortRunner):
 
         Should ideally do nothing unless something went wrong.
         """
-        # Kill process if needed
-        SubprocessRunnerBase.cleanup(self)
         # And then cleanup the connection
         PortRunner.cleanup(self)
+        # Kill process if needed
+        SubprocessRunnerBase.cleanup(self)

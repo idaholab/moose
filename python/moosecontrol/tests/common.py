@@ -103,6 +103,15 @@ class MooseControlTestCase(TestCase):
             "to a moose executable or skip moose tests with --no-moose"
         )
 
+    def printable_logs(self) -> str:
+        """
+        Get all logs in a printable form.
+        """
+        joined = []
+        for i, record in enumerate(self._caplog.records):
+            joined.append(f"{i}:{record.levelname}:{record.name}: {record.message}")
+        return "\n".join(joined)
+
     def assert_log_size(self, num: int):
         """
         Assert that there are exactly num logs.
@@ -110,9 +119,8 @@ class MooseControlTestCase(TestCase):
         records = self._caplog.records
         num_records = len(records)
         if num_records != num:
-            joined = "\n".join([str(v) for v in records])
             raise AssertionError(
-                f"Num logs {num_records} != {num}; present logs:" f"\n{joined}"
+                f"Num logs {num_records} != {num}; present logs:\n{self.printable_logs()}"
             )
 
     def assert_log_message(
@@ -180,7 +188,7 @@ class MooseControlTestCase(TestCase):
                     self.assertEqual(record.name, name)
                 self.assertEqual(record.levelname, levelname)
                 return i
-        raise AssertionError(f"Assertion not found in {records}")
+        raise AssertionError(f"Log not found in:\n{self.printable_logs()}")
 
     def assert_no_warning_logs(self):
         """

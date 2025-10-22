@@ -49,6 +49,33 @@ def patch_baserunner(name: str, **kwargs):
     return patch(f"moosecontrol.runners.BaseRunner.{name}", **kwargs)
 
 
+def check_baserunner_cleanup_live(
+    test: MooseControlTestCase,
+    runner: BaseRunner,
+    process_output: str,
+    process_returncode: int,
+):
+    """
+    Helper for derived runners to be able to test the result when
+    testing cleanup() live.
+    """
+    # Should have killed the things
+    poke_alive = test.assert_in_log(
+        "Poke thread is still alive on cleanup; stopping", levelname="WARNING"
+    )
+    stop_poke = test.assert_in_log("Stopping poke poll thread", after_index=poke_alive)
+    webserver_alive = test.assert_in_log(
+        "MOOSE webserver is still listening on cleanup; killing",
+        levelname="WARNING",
+        after_index=stop_poke,
+    )
+    test.assert_in_log("Killing MOOSE webserver", after_index=webserver_alive)
+
+    test.assertIsInstance(process_returncode, int)
+    test.assertNotEqual(process_returncode, 0)
+    test.assertIn('WebServerControl "web_server": Kill requested', process_output)
+
+
 class TestBaseRunner(MooseControlTestCase):
     """
     Tests moosecontrol.runners.baserunner.BaseRunner.

@@ -31,7 +31,7 @@ setup_moose_python_path()
 
 from test_runners_baserunner import BaseRunnerTest
 
-from moosecontrol import MooseControl, SubprocessPortRunner
+from moosecontrol import MooseControl, SubprocessSocketRunner
 from moosecontrol.moosecontrol import MooseControlContextManager
 from moosecontrol.exceptions import ControlNotWaiting, UnexpectedFlag
 from moosecontrol.moosecontrol import (
@@ -217,7 +217,7 @@ class TestMooseControl(MooseControlTestCase):
             f.write(BASE_INPUT)
 
         command = [self.get_moose_exe(), "-i", input_file]
-        runner = SubprocessPortRunner(
+        runner = SubprocessSocketRunner(
             command=command,
             moose_control_name="web_server",
             directory=self.directory.name,

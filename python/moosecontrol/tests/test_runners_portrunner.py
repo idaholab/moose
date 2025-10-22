@@ -13,6 +13,7 @@ import os
 from requests import Session
 from subprocess import Popen, PIPE
 from time import sleep
+from typing import Tuple
 
 import pytest
 
@@ -27,6 +28,8 @@ setup_moose_python_path()
 
 from moosecontrol import PortRunner
 from moosecontrol.runners.portrunner import DEFAULT_HOST
+
+from test_runners_baserunner import check_baserunner_cleanup_live
 
 DUMMY_PORT = 13579
 
@@ -83,10 +86,9 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
         port = PortRunner.find_available_port()
         self.assertTrue(PortRunner.port_is_available(port))
 
-    @pytest.mark.moose
-    def test_live(self):
+    def setup_live(self) -> Tuple[PortRunner, Popen]:
         """
-        Tests running a MOOSE input live.
+        Sets up a live test.
         """
         input_path = os.path.join(self.directory.name, "input.i")
         port = PortRunner.find_available_port()
@@ -101,7 +103,7 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
             f"Controls/web_server/port={port}",
             "--color=off",
         ]
-        process = Popen(command, stdout=PIPE, text=True)
+        process = Popen(command, stdout=PIPE, stderr=PIPE, text=True)
 
         # Initialize; wait for connection
         runner = PortRunner(port, **LIVE_BASERUNNER_KWARGS)
@@ -111,6 +113,17 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
         # Input has one continue on INITIAL
         while not runner.get("waiting").data["waiting"]:
             sleep(0.001)
+
+        return runner, process
+
+    @pytest.mark.moose
+    def test_live(self):
+        """
+        Tests running a MOOSE input live.
+        """
+        runner, process = self.setup_live()
+
+        # Continue on the one timestep
         runner.get("continue")
 
         # Finalize; should delete socket
@@ -121,3 +134,21 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
 
         self.assertEqual(process.returncode, 0)
         self.assertIn("Solve Skipped!", stdout)
+
+    @pytest.mark.moose
+    def test_cleanup_live(self):
+        """
+        Tests cleanup() live,  which should kill the process.
+        """
+        self.allow_log_warnings = True
+
+        runner, process = self.setup_live()
+
+        # Call cleanup, will kill the process
+        runner.cleanup()
+
+        # Capture process output
+        _, stderr = process.communicate()
+
+        # Check state versus what the BaseRunner tests say it should be
+        check_baserunner_cleanup_live(self, runner, stderr, process.returncode)

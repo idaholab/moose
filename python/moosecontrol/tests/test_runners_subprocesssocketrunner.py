@@ -27,9 +27,14 @@ from common import (
 setup_moose_python_path()
 
 from moosecontrol import SubprocessSocketRunner
-from moosecontrol.runners.utils import SubprocessReader
 
-from test_runners_subprocessrunnerbase import ARGS, COMMAND, MOOSE_CONTROL_NAME
+from test_runners_baserunner import check_baserunner_cleanup_live
+from test_runners_subprocessrunnerbase import (
+    ARGS,
+    COMMAND,
+    MOOSE_CONTROL_NAME,
+    get_process_output,
+)
 
 RUNNER = "moosecontrol.SubprocessSocketRunner"
 RUNNER_BASE = "moosecontrol.runners.subprocessrunnerbase.SubprocessRunnerBase"
@@ -128,13 +133,15 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
         SubprocessRunnerBase and SocketRunner.
         """
         runner = SubprocessSocketRunner(**ARGS)
-        methods = [RUNNER_BASE + ".cleanup", SOCKET_RUNNER + ".cleanup"]
+        methods = [
+            SOCKET_RUNNER + ".cleanup",
+            RUNNER_BASE + ".cleanup",
+        ]
         self.assert_methods_called_in_order(methods, lambda: runner.cleanup())
 
-    @pytest.mark.moose
-    def test_live(self):
+    def setup_live(self) -> SubprocessSocketRunner:
         """
-        Tests running a MOOSE input live.
+        Sets up a live test.
         """
         input_file = os.path.join(self.directory.name, "input.i")
         with open(input_file, "w") as f:
@@ -158,16 +165,42 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
         self.assertTrue(runner.is_process_running())
         while not runner.get("waiting").data["waiting"]:
             sleep(0.001)
+
+        return runner
+
+    @pytest.mark.moose
+    def test_live(self):
+        """
+        Tests running a MOOSE input live.
+        """
+        runner = self.setup_live()
+
+        # Continue on the one timestep
         runner.get("continue")
 
+        # Wait for process to finish
         runner.finalize()
 
         self.assertFalse(runner.is_process_running())
-
-        process_output = [
-            v.message for v in self._caplog.records if v.name == "SubprocessReader"
-        ]
-        self.assertIn(
-            SubprocessReader.OUTPUT_PREFIX + " Solve Skipped!", process_output
-        )
+        process_output = get_process_output(self, runner)
+        self.assertIn(" Solve Skipped!", process_output)
         self.assertEqual(runner.get_return_code(), 0)
+
+    @pytest.mark.moose
+    def test_cleanup_live(self):
+        """
+        Tests cleanup() live, which should kill the process.
+        """
+        self.allow_log_warnings = True
+
+        runner = self.setup_live()
+
+        # Call cleanup, will kill the process
+        runner.cleanup()
+
+        self.assertFalse(runner.is_process_running())
+
+        # Check state versus what the BaseRunner tests say it should be
+        output = get_process_output(self, runner)
+        returncode = runner.get_return_code()
+        check_baserunner_cleanup_live(self, runner, output, returncode)
