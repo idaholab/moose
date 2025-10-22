@@ -16,7 +16,8 @@ from moosecontrol.runners.interfaces import SubprocessRunnerInterface
 if __name__ == '__main__':
     runner = TestMooseControl('web_server').control.runner
 
-    # Just start the process, nothing else
+    # Just start the process, nothing else because
+    # the BaseRunner will poke once it is listening
     SubprocessRunnerInterface.initialize(runner)
     SubprocessRunnerInterface.finalize(runner)
 

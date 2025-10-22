@@ -11,6 +11,7 @@ import math
 import os
 import shlex
 from numbers import Number
+from typing import Optional
 
 from moosecontrol import SubprocessPortRunner, SubprocessSocketRunner, MooseControl
 from moosecontrol.runners.interfaces import SubprocessRunnerInterface
@@ -22,7 +23,13 @@ class TestMooseControl:
     which sets the proxy command in the RUNAPP_COMMAND
     environment variable.
     """
-    def __init__(self, control_name: str, use_port: bool = False):
+
+    def __init__(
+        self,
+        control_name: str,
+        use_port: bool = False,
+        runner_kwargs: Optional[dict] = None,
+    ):
         """
         Arguments
         ---------
@@ -34,6 +41,8 @@ class TestMooseControl:
         use_port : bool
             Set to True to use a port instead of a socket;
             default is False.
+        runner_kwargs : Optional[dict]
+            Keyword arguments to pass to the runner.
         """
         assert isinstance(control_name, str)
         assert isinstance(use_port, bool)
@@ -48,7 +57,10 @@ class TestMooseControl:
         # Setup the control
         runner_type = SubprocessPortRunner if use_port else SubprocessSocketRunner
         self._runner: SubprocessRunnerInterface = runner_type(
-            command=command, moose_control_name=control_name, initialize_timeout=5
+            command=command,
+            moose_control_name=control_name,
+            initialize_timeout=5,
+            **(runner_kwargs if runner_kwargs else {}),
         )
         self._control: MooseControl = MooseControl(
             self._runner,

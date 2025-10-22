@@ -14,7 +14,9 @@ from sys import exit
 from testmoosecontrol import TestMooseControl
 
 if __name__ == '__main__':
-    with TestMooseControl('web_server') as control:
+    with TestMooseControl(
+        "web_server", runner_kwargs={"poke_poll_time": None}
+    ) as control:
         runner = control.runner
         while runner.is_process_running():
             sleep(0.01)
