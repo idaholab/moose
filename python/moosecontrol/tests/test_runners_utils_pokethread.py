@@ -38,7 +38,7 @@ class TestPoker(MooseControlTestCase):
         """
         # Spawn a Poker thread that does nothing a few times
         # and then stop it
-        poll_time = 0.005
+        poll_time = 0.001
         url = "foo/bar"
         session = FakeSession()
 
