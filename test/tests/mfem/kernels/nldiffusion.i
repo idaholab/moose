@@ -62,7 +62,7 @@
 
 [Kernels]
   [residual]
-    type = MFEMDomainLFGardKernel
+    type = MFEMDomainLFGradKernel
     variable = concentration
     coefficient = concentration
   []
