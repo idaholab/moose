@@ -13,12 +13,15 @@ from logging import getLogger
 from typing import Optional
 
 from .portrunner import PortRunner
-from .subprocessrunnerbase import SubprocessRunnerBase, DEFAULT_DIRECTORY
+from moosecontrol.runners.interfaces.subprocessrunnerinterface import (
+    SubprocessRunnerInterface,
+    DEFAULT_DIRECTORY,
+)
 
 logger = getLogger("SubprocessPortRunner")
 
 
-class SubprocessPortRunner(SubprocessRunnerBase, PortRunner):
+class SubprocessPortRunner(SubprocessRunnerInterface, PortRunner):
     """
     Runner to be used with the MooseControl that
     spawns a MOOSE process and connects to the
@@ -58,7 +61,7 @@ class SubprocessPortRunner(SubprocessRunnerBase, PortRunner):
         """
         assert isinstance(port, (int, type(None)))
 
-        SubprocessRunnerBase.__init__(
+        SubprocessRunnerInterface.__init__(
             self,
             command=command,
             moose_control_name=moose_control_name,
@@ -94,7 +97,7 @@ class SubprocessPortRunner(SubprocessRunnerBase, PortRunner):
             raise ConnectionRefusedError(f"Port {self.port} is already used")
 
         # Start the subprocess
-        SubprocessRunnerBase.initialize(self)
+        SubprocessRunnerInterface.initialize(self)
         # And then wait for a connection
         PortRunner.initialize(self)
 
@@ -103,7 +106,7 @@ class SubprocessPortRunner(SubprocessRunnerBase, PortRunner):
         Finalizes the runner.
         """
         # Wait for process to finish
-        SubprocessRunnerBase.finalize(self)
+        SubprocessRunnerInterface.finalize(self)
         # And then close the connection
         PortRunner.finalize(self)
 
@@ -116,4 +119,4 @@ class SubprocessPortRunner(SubprocessRunnerBase, PortRunner):
         # And then cleanup the connection
         PortRunner.cleanup(self)
         # Kill process if needed
-        SubprocessRunnerBase.cleanup(self)
+        SubprocessRunnerInterface.cleanup(self)

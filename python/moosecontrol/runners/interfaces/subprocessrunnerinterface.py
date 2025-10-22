@@ -7,7 +7,7 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-"""Defines the SubprocessRunnerBase."""
+"""Defines the SubprocessRunnerInterface."""
 
 import os
 import subprocess
@@ -15,16 +15,16 @@ from abc import ABC, abstractmethod
 from logging import getLogger
 from typing import Optional
 
-from .utils import SubprocessReader
+from moosecontrol.runners.utils import SubprocessReader
 
-logger = getLogger("SubprocessRunnerBase")
+logger = getLogger("SubprocessRunnerInterface")
 
 DEFAULT_DIRECTORY = os.getcwd()
 
 
-class SubprocessRunnerBase(ABC):
+class SubprocessRunnerInterface(ABC):
     """
-    Base class for subprocess runners.
+    Base interface for subprocess runners.
 
     Is an abstract base class and is used in
     SubprocessSocketRunner and SubprocessPortRunner.

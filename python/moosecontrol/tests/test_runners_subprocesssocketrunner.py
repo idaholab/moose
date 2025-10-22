@@ -29,7 +29,7 @@ setup_moose_python_path()
 from moosecontrol import SubprocessSocketRunner
 
 from test_runners_baserunner import check_baserunner_cleanup_live
-from test_runners_subprocessrunnerbase import (
+from test_runners_interfaces_subprocessrunnerinterface import (
     ARGS,
     COMMAND,
     MOOSE_CONTROL_NAME,
@@ -37,7 +37,7 @@ from test_runners_subprocessrunnerbase import (
 )
 
 RUNNER = "moosecontrol.SubprocessSocketRunner"
-RUNNER_BASE = "moosecontrol.runners.subprocessrunnerbase.SubprocessRunnerBase"
+INTERFACE = "moosecontrol.runners.interfaces.SubprocessRunnerInterface"
 SOCKET_RUNNER = "moosecontrol.SocketRunner"
 
 FAKE_SOCKET_PATH = "/path/to/foo.sock"
@@ -108,12 +108,12 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
     def test_initialize(self):
         """
         Tests initialize(), which should call initialize() on the parent
-        SubprocessRunnerBase and SocketRunner.
+        SubprocessRunnerInterface and SocketRunner.
         """
         runner = SubprocessSocketRunner(**ARGS)
         methods = [
             RUNNER + ".initialize_start",
-            RUNNER_BASE + ".initialize",
+            INTERFACE + ".initialize",
             SOCKET_RUNNER + ".initialize",
         ]
         self.assert_methods_called_in_order(methods, lambda: runner.initialize())
@@ -121,21 +121,21 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
     def test_finalize(self):
         """
         Tests finalize(), which should call finalize() on the parent
-        SubprocessRunnerBase and SocketRunner.
+        SubprocessRunnerInterface and SocketRunner.
         """
         runner = SubprocessSocketRunner(**ARGS)
-        methods = [RUNNER_BASE + ".finalize", SOCKET_RUNNER + ".finalize"]
+        methods = [INTERFACE + ".finalize", SOCKET_RUNNER + ".finalize"]
         self.assert_methods_called_in_order(methods, lambda: runner.finalize())
 
     def test_cleanup(self):
         """
         Tests cleanup(), which should call cleanup() on the parent
-        SubprocessRunnerBase and SocketRunner.
+        SubprocessRunnerInterface and SocketRunner.
         """
         runner = SubprocessSocketRunner(**ARGS)
         methods = [
             SOCKET_RUNNER + ".cleanup",
-            RUNNER_BASE + ".cleanup",
+            INTERFACE + ".cleanup",
         ]
         self.assert_methods_called_in_order(methods, lambda: runner.cleanup())
 

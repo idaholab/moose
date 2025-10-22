@@ -13,7 +13,7 @@ import shlex
 from numbers import Number
 
 from moosecontrol import SubprocessPortRunner, SubprocessSocketRunner, MooseControl
-from moosecontrol.runners.subprocessrunnerbase import SubprocessRunnerBase
+from moosecontrol.runners.interfaces import SubprocessRunnerInterface
 
 class TestMooseControl:
     """
@@ -48,10 +48,8 @@ class TestMooseControl:
 
         # Setup the control
         runner_type = SubprocessPortRunner if use_port else SubprocessSocketRunner
-        self._runner: SubprocessRunnerBase = runner_type(
-            command=command,
-            moose_control_name=control_name,
-            initialize_timeout=10
+        self._runner: SubprocessRunnerInterface = runner_type(
+            command=command, moose_control_name=control_name, initialize_timeout=10
         )
         self._control: MooseControl = MooseControl(
             self._runner,

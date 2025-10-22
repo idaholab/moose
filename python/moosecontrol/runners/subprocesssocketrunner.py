@@ -17,12 +17,15 @@ from tempfile import gettempdir
 from typing import Optional
 
 from .socketrunner import SocketRunner
-from .subprocessrunnerbase import SubprocessRunnerBase, DEFAULT_DIRECTORY
+from moosecontrol.runners.interfaces.subprocessrunnerinterface import (
+    SubprocessRunnerInterface,
+    DEFAULT_DIRECTORY,
+)
 
 logger = getLogger("SubprocessSocketRunner")
 
 
-class SubprocessSocketRunner(SubprocessRunnerBase, SocketRunner):
+class SubprocessSocketRunner(SubprocessRunnerInterface, SocketRunner):
     """
     Runner to be used with the MooseControl that
     spawns a MOOSE process and connects to the
@@ -60,7 +63,7 @@ class SubprocessSocketRunner(SubprocessRunnerBase, SocketRunner):
 
         See BaseRunner.__init__() for additional parameters.
         """
-        SubprocessRunnerBase.__init__(
+        SubprocessRunnerInterface.__init__(
             self,
             command=command,
             moose_control_name=moose_control_name,
@@ -107,7 +110,7 @@ class SubprocessSocketRunner(SubprocessRunnerBase, SocketRunner):
             raise FileExistsError(f"Socket {self.socket_path} already exists")
 
         # Start the subprocess
-        SubprocessRunnerBase.initialize(self)
+        SubprocessRunnerInterface.initialize(self)
         # And then wait for a connection
         SocketRunner.initialize(self)
 
@@ -116,7 +119,7 @@ class SubprocessSocketRunner(SubprocessRunnerBase, SocketRunner):
         Finalizes the runner.
         """
         # Wait for process to finish
-        SubprocessRunnerBase.finalize(self)
+        SubprocessRunnerInterface.finalize(self)
         # And then delete the socket
         SocketRunner.finalize(self)
 
@@ -129,4 +132,4 @@ class SubprocessSocketRunner(SubprocessRunnerBase, SocketRunner):
         # And then cleanup the socket
         SocketRunner.cleanup(self)
         # Kill process if needed
-        SubprocessRunnerBase.cleanup(self)
+        SubprocessRunnerInterface.cleanup(self)
