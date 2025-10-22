@@ -295,7 +295,7 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
 
         runner = SubprocessRunnerBaseTest(**ARGS)
 
-        runner._process = runner.start_process("sleep 10", shell=True)
+        runner._process = runner.start_process(["sleep", "0.1"])
         self.assertTrue(runner.is_process_running())
 
         self._caplog.clear()
@@ -372,7 +372,7 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
         Tests get_pid().
         """
         runner = SubprocessRunnerBaseTest(**ARGS)
-        runner._process = runner.start_process("exit 0", shell=True)
+        runner._process = runner.start_process(["/bin/sh", "-c", "exit 0"])
         self.assertEqual(runner.get_pid(), runner._process.pid)
         runner._process.wait()
 
@@ -384,6 +384,24 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
         self.assertIsNone(runner._process)
         self.assertIsNone(runner.get_pid())
 
+    def test_is_process_running(self):
+        """
+        Tests is_process_running().
+        """
+        runner = SubprocessRunnerBaseTest(**ARGS, directory=self.directory.name)
+        runner._process = runner.start_process(["sleep", "0.01"], shell=True)
+        self.assertTrue(runner.is_process_running())
+        runner._process.wait()
+        self.assertFalse(runner.is_process_running())
+
+    def test_is_process_running_no_process(self):
+        """
+        Tests is_process_running() when there is no process.
+        """
+        runner = SubprocessRunnerBaseTest(**ARGS)
+        self.assertIsNone(runner._process)
+        self.assertFalse(runner.is_process_running())
+
     def test_kill_process(self):
         """
         Tests kill_process() on a dummy process.
@@ -393,7 +411,7 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
             directory=self.directory.name,
         )
 
-        runner._process = runner.start_process("sleep 10", shell=True)
+        runner._process = runner.start_process(["sleep", "10"])
         pid = runner.get_pid()
         self.assertIsNotNone(pid)
 
@@ -424,7 +442,7 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
         """
         runner = SubprocessRunnerBaseTest(**ARGS, use_subprocess_reader=False)
 
-        runner._process = runner.start_process("exit 0", shell=True)
+        runner._process = runner.start_process(["/bin/sh", "-c", "exit 0"])
         runner._process.wait()
 
         self.assertEqual(runner._process.returncode, 0)
@@ -436,7 +454,7 @@ class TestSubprocessRunnerBase(MooseControlTestCase):
         """
         runner = SubprocessRunnerBaseTest(**ARGS, use_subprocess_reader=False)
 
-        runner._process = runner.start_process("sleep 10", shell=True)
+        runner._process = runner.start_process(["sleep", "0.1"])
 
         with self.assertRaises(RuntimeError) as e:
             runner.get_return_code()
