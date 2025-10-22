@@ -91,18 +91,36 @@ CSGLattice::getUniverseIndices(const std::string & univ_name) const
   return indices;
 }
 
-// bool
-// CSGLattice::operator==(const CSGLattice & other) const
-// {
-//   return (getName() == other.getName()) &&
-//          (getDimensions() == other.getDimensions()) &&
-//          (getType() == other.getType());
-// }
+bool
+CSGLattice::operator==(const CSGLattice & other) const
+{
+  if (this->getName() != other.getName())
+    return false;
+  if (this->getType() != other.getType())
+    return false;
+  if (!this->compareDimensions(other))
+    return false;
 
-// bool
-// CSGLattice::operator!=(const CSGLattice & other) const
-// {
-//   return !(*this == other);
-// }
+  const auto & this_univs = this->getUniverses();
+  const auto & other_univs = other.getUniverses();
+  if (this_univs.size() != other_univs.size())
+    return false;
+  for (unsigned int i = 0; i < this_univs.size(); ++i)
+  {
+    if (this_univs[i].size() != other_univs[i].size())
+      return false;
+    for (unsigned int j = 0; j < this_univs[i].size(); j++)
+      if (this_univs[i][j].get() != other_univs[i][j].get())
+        return false;
+  }
+
+  return true;
+}
+
+bool
+CSGLattice::operator!=(const CSGLattice & other) const
+{
+  return !(*this == other);
+}
 
 } // namespace CSG

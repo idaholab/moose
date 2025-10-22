@@ -86,6 +86,10 @@ protected:
 
   virtual void updateDimension(const std::string & dim_name, std::any dim_value) override;
 
+  // helper function for comparing dimensions maps of various data types (data depends on lattice
+  // type)
+  virtual bool compareDimensions(const CSGLattice & other) const override;
+
   /// number of elements in the first dimension
   int _nx0;
 
