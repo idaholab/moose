@@ -17,6 +17,8 @@
 [Controls/web_server]
   type = WebServerControl
   execute_on = TIMESTEP_END
+  initial_client_timeout = 5
+  client_timeout = 5
 []
 
 [Problem]

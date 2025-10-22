@@ -297,10 +297,28 @@
 
   [kill]
     type = RunException
-    input = 'control_reporter.i'
+    input = 'wait_initial.i'
     command_proxy = 'kill.py'
     required_python_packages = requests
     expect_err = 'WebServerControl "web_server": Kill requested'
     requirement = 'The system shall support killing a running MOOSE simulation via a REST API'
+  []
+
+  [initial_timeout]
+    type = RunException
+    input = 'wait_initial.i'
+    command_proxy = 'initial_timeout.py'
+    cli_args = 'Controls/web_server/initial_client_timeout=0.01'
+    expect_err = 'WebServerControl "web_server": Client timed out on initial(.*)The timeout is 0.01 seconds and is set by the initial_client_timeout parameter'
+    requirement = 'The system shall support timing out during initialization when running a MOOSE simulation via a REST API'
+  []
+
+  [timeout]
+    type = RunException
+    input = 'wait_initial.i'
+    command_proxy = 'timeout.py'
+    cli_args = 'Controls/web_server/client_timeout=0.01'
+    expect_err = 'WebServerControl "web_server": Client timed out(.*)The timeout is 0.01 seconds and is set by the client_timeout parameter'
+    requirement = 'The system shall support timing out during a solve when running a MOOSE simulation via a REST API'
   []
 []

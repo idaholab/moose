@@ -192,15 +192,17 @@ private:
    */
   bool currentlyWaiting() const { return _currently_waiting.load(); }
 
-  /// How long to allow the client to communicate before timing out
+  /// Time in seconds to allow the client to initially communicate before timing out
+  const Real _initial_client_timeout;
+  /// Time in seconds to allow the client to communicate after init before timing out
   const Real _client_timeout;
 
   /// Whether or not the Control is currently waiting
   std::atomic<bool> _currently_waiting;
   /// Whether or not the solve should be terminated in the next execute() call
   std::atomic<bool> _terminate_requested;
-  /// The last time we've heard from the client
-  std::atomic<int64_t> _last_client_message;
+  /// The most recent time we've heard from the client
+  std::atomic<int64_t> _last_client_poke;
   /// Whether or not to kill the client timeout thread
   std::atomic<bool> _kill_client_timeout_thread;
 

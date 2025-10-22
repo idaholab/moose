@@ -39,36 +39,44 @@ class TestMooseControl:
         assert isinstance(use_port, bool)
 
         # Get the command to run (from env)
-        command_var = 'RUNAPP_COMMAND'
-        command = os.environ.get(command_var)
+        command_str = "RUNAPP_COMMAND"
+        command = os.environ.get(command_str)
         if not command:
             raise SystemExit(f'Missing command variable {command}')
         command = shlex.split(command)
-        command += [f'Controls/{control_name}/client_timeout=10']
 
         # Setup the control
         runner_type = SubprocessPortRunner if use_port else SubprocessSocketRunner
         self._runner: SubprocessRunnerInterface = runner_type(
-            command=command, moose_control_name=control_name, initialize_timeout=10
+            command=command, moose_control_name=control_name, initialize_timeout=5
         )
         self._control: MooseControl = MooseControl(
             self._runner,
             verbose=True
         )
 
+    @property
+    def control(self) -> MooseControl:
+        """
+        Gets the underlying MooseControl.
+
+        Can be utilized instead of the context manager if needed.
+        """
+        return self._control
+
     def __enter__(self) -> MooseControl:
         """
         Context manager enter; uses the underlying enter
         from the MooseControl.
         """
-        return self._control.__enter__().control
+        return self.control.__enter__().control
 
     def __exit__(self, *args):
         """
         Context manager exit; uses the underlying exit from
         the MooseControl.
         """
-        self._control.__exit__(*args)
+        self.control.__exit__(*args)
 
 def expect_equal(gold: Number, value: Number):
     """
