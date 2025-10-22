@@ -243,4 +243,48 @@ TEST(CSGLatticeTest, testSetName)
   cart_lattice.setName("new_name");
   ASSERT_EQ(cart_lattice.getName(), "new_name");
 }
+
+// test the == and != overloaded operators for lattices
+TEST(CSGLatticeTest, testCartLatticeEquality)
+{
+  // universe maps to use for different lattice comparisons
+  const auto univ1 = CSGUniverse("univ1", false);
+  const auto univ2 = CSGUniverse("univ2", false);
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map1 = {
+      {std::cref(univ1), std::cref(univ1)}, {std::cref(univ1), std::cref(univ1)}};
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map2 = {
+      {std::cref(univ2), std::cref(univ2)}, {std::cref(univ2), std::cref(univ2)}};
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map3 = {
+      {std::cref(univ1), std::cref(univ1)}};
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map4 = {
+      {std::cref(univ1)}, {std::cref(univ1)}};
+  // identical lattices
+  auto l1 = CSGCartesianLattice("cartlat", 1.0, univ_map1);
+  auto l2 = CSGCartesianLattice("cartlat", 1.0, univ_map1);
+  // lattice that differs by name only
+  auto l3 = CSGCartesianLattice("cartlat1", 1.0, univ_map1);
+  // lattice that differs by universe map items
+  auto l4 = CSGCartesianLattice("cartlat", 1.0, univ_map2);
+  // lattice that differs by pitch
+  auto l5 = CSGCartesianLattice("cartlat", 2.0, univ_map1);
+  // lattice that differs by nx0
+  auto l6 = CSGCartesianLattice("cartlat", 1.0, univ_map3);
+  // lattice that differs by nx1
+  auto l7 = CSGCartesianLattice("cartlat", 1.0, univ_map4);
+
+  // check equality
+  {
+    ASSERT_TRUE(l1 == l2);
+  }
+  // check inequality
+  {
+    // all lattices 1-7 should differ from each other in some way
+    std::vector<CSGCartesianLattice> diff_compare = {l2, l3, l4, l5, l6, l7};
+    for (std::size_t i = 0; i < diff_compare.size(); i++)
+    {
+      for (std::size_t j = i + 1; j < diff_compare.size(); ++j)
+        ASSERT_TRUE(diff_compare[i] != diff_compare[j]);
+    }
+  }
+}
 }

@@ -105,4 +105,22 @@ CSGCartesianLattice::isValidIndex(const std::pair<int, int> index) const
   return true;
 }
 
+bool
+CSGCartesianLattice::compareDimensions(const CSGLattice & other) const
+{
+  if (other.getType() != this->getType())
+    return false;
+
+  auto this_dims = this->getDimensions();
+  auto other_dims = other.getDimensions();
+
+  if (std::any_cast<int>(this_dims["nx0"]) != std::any_cast<int>(other_dims["nx0"]))
+    return false;
+  if (std::any_cast<int>(this_dims["nx1"]) != std::any_cast<int>(other_dims["nx1"]))
+    return false;
+  if (std::any_cast<Real>(this_dims["pitch"]) != std::any_cast<Real>(other_dims["pitch"]))
+    return false;
+  return true;
+}
+
 } // namespace CSG

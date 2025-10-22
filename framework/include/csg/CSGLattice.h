@@ -58,7 +58,7 @@ public:
    *
    * @return list of list of pointers to universes
    */
-  const std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> & getUniverses()
+  const std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> & getUniverses() const
   {
     return _universe_map;
   }
@@ -122,10 +122,10 @@ public:
       const = 0; // pure virtual function
 
   /// Operator overload for checking if two CSGLattice objects are equal
-  // bool operator==(const CSGLattice & other) const;
+  bool operator==(const CSGLattice & other) const;
 
   /// Operator overload for checking if two CSGLattice objects are not equal
-  // bool operator!=(const CSGLattice & other) const;
+  bool operator!=(const CSGLattice & other) const;
 
 protected:
   // set the name of the lattices - intentionally not public because
@@ -161,7 +161,12 @@ protected:
    * @param dim_name
    * @param dim_value
    */
-  virtual void updateDimension(const std::string & dim_name, std::any dim_value); // pure virtual
+  virtual void updateDimension(const std::string & dim_name,
+                               std::any dim_value) = 0; // pure virtual
+
+  // helper function for comparing dimensions maps of various data types (data depends on lattice
+  // type)
+  virtual bool compareDimensions(const CSGLattice & other) const = 0; // pure virtual
 
   /// Name of lattice
   std::string _name;
