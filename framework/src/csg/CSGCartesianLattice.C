@@ -65,6 +65,26 @@ CSGCartesianLattice::isValidUniverseMap(
   return true;
 }
 
+void
+CSGCartesianLattice::updateDimension(const std::string & dim_name, std::any dim_value)
+{
+  if (dim_name == "pitch")
+    _pitch = *std::any_cast<Real>(&dim_value);
+  else if (dim_name == "nx0" || dim_name == "nx1")
+  {
+    // number of lattice elements can only be changed if _universe_map is not already set
+    if (_universe_map.size() > 0)
+      mooseError("Cannot update the dimension " + dim_name + " of the lattice " + getName() +
+                 ". Universe map is already defined.");
+    else
+      dim_name == "nx0" ? _nx0 = *std::any_cast<int>(&dim_value)
+                        : _nx1 = *std::any_cast<int>(&dim_value);
+  }
+  else
+    mooseError("Dimension " + dim_name + " is not an allowable dimension for lattice type " +
+               getType() + " allowable dimension types are: nx0, nx1, pitch.");
+}
+
 std::unordered_map<std::string, std::any>
 CSGCartesianLattice::getDimensions() const
 {

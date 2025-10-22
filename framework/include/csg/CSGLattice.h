@@ -153,6 +153,16 @@ protected:
    */
   virtual bool hasValidDimensions() const = 0; // pure virtual function
 
+  /**
+   * @brief change the value of a dimension parameter for the lattice. Each lattice type shall
+   * determine which dimensions (dim_name) are able to be changed and check for validity of the new
+   * value.
+   *
+   * @param dim_name
+   * @param dim_value
+   */
+  virtual void updateDimension(const std::string & dim_name, std::any dim_value); // pure virtual
+
   /// Name of lattice
   std::string _name;
 
@@ -164,6 +174,8 @@ protected:
 
   // CSGLatticeList needs to be friend to access setName()
   friend class CSGLatticeList;
+  // CSGBase needed for access updateDimension
+  friend class CSGBase;
 
 #ifdef MOOSE_UNIT_TEST
   /// Friends for unit testing
