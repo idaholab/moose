@@ -61,7 +61,8 @@ public:
   /// Build bilinear forms
   virtual void BuildBilinearForms();
   virtual void BuildMixedBilinearForms();
-  virtual void BuildEquationSystem(Moose::MFEM::GridFunctions & gridfunctions, mfem::Array<int> & btoffsets);
+  virtual void BuildEquationSystem(Moose::MFEM::GridFunctions & gridfunctions,
+                                   mfem::Array<int> & btoffsets);
 
   /// Form linear system, with essential boundary conditions accounted for
   virtual void FormLinearSystem(mfem::OperatorHandle & op,
@@ -89,7 +90,7 @@ public:
   virtual void RecoverFEMSolution(mfem::BlockVector & trueX,
                                   Moose::MFEM::GridFunctions & gridfunctions);
 
-  void CopyVec(const mfem::Vector & x, mfem::Vector & y){ y = x;}
+  void CopyVec(const mfem::Vector & x, mfem::Vector & y) { y = x; }
 
   std::vector<mfem::Array<int>> _ess_tdof_lists;
 
@@ -259,7 +260,6 @@ EquationSystem::ApplyDomainLFIntegrators(
   }
 }
 
-
 inline void
 EquationSystem::ApplyDomainNLActionIntegrators(
     const std::string & test_var_name,
@@ -283,8 +283,6 @@ EquationSystem::ApplyDomainNLActionIntegrators(
     }
   }
 }
-
-
 
 template <class FormType>
 void
@@ -349,7 +347,8 @@ public:
   void AddCoupledVariableNameIfMissing(const std::string & coupled_var_name) override;
 
   virtual void SetTimeStep(mfem::real_t dt);
-  virtual void UpdateEquationSystem(Moose::MFEM::GridFunctions & gridfunctions, mfem::Array<int> & btoffsets);
+  virtual void UpdateEquationSystem(Moose::MFEM::GridFunctions & gridfunctions,
+                                    mfem::Array<int> & btoffsets);
 
   virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel) override;
   virtual void BuildBilinearForms() override;
