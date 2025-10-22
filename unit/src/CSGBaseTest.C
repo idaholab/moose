@@ -500,6 +500,57 @@ TEST(CSGBaseTest, testGetUniverse)
 }
 
 /**
+ * Tests associated with CSGLattice or CSGLatticeList functionality through CSGBase
+ */
+
+TEST(CSGBaseTest, testCreateLattice)
+{
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  // create cartesian lattice w/out universes
+  {
+    const CSGLattice & lat = csg_obj->createCartesianLattice("hermione", 2, 3, 1.0);
+    auto dims_map = lat.getDimensions();
+    ASSERT_EQ(*std::any_cast<int>(&dims_map["nx0"]), 2);
+    ASSERT_EQ(*std::any_cast<int>(&dims_map["nx1"]), 3);
+    ASSERT_EQ(*std::any_cast<Real>(&dims_map["pitch"]), 1.0);
+    // expect no universe map to be present yet
+    ASSERT_EQ(lat.getUniverses().size(), 0);
+    // check other attributes
+    ASSERT_TRUE(lat.getName() == "hermione");
+    ASSERT_TRUE(lat.getType() == "CSG::CSGCartesianLattice");
+  }
+  // create cartesian lattice w/ provided list of universes
+  {
+    auto & univ1 = csg_obj->createUniverse("univ1");
+    auto & univ2 = csg_obj->createUniverse("univ2");
+    std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> univs = {{univ1},
+                                                                                      {univ2}};
+    const CSGLattice & lat = csg_obj->createCartesianLattice("ron", 1.0, univs);
+    auto dims_map = lat.getDimensions();
+    ASSERT_EQ(*std::any_cast<int>(&dims_map["nx0"]), 2);
+    ASSERT_EQ(*std::any_cast<int>(&dims_map["nx1"]), 1);
+    ASSERT_EQ(*std::any_cast<Real>(&dims_map["pitch"]), 1.0);
+    ASSERT_EQ(lat.getUniverses().size(), 2);
+    ASSERT_EQ(lat.getUniverses()[0].size(), 1);
+    ASSERT_EQ(lat.getUniverses()[1].size(), 1);
+    // check other attributes
+    ASSERT_TRUE(lat.getName() == "ron");
+    ASSERT_TRUE(lat.getType() == "CSG::CSGCartesianLattice");
+  }
+  // create lattice trying to use lattices from a different CSGBase instance
+  {
+    // make new CSGBase and add new universes to this
+    auto csg_obj2 = std::make_unique<CSG::CSGBase>();
+    auto & univ1 = csg_obj2->createUniverse("univ1"); // same name as existing universe
+    std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> univs = {{univ1},
+                                                                                      {univ1}};
+    Moose::UnitUtils::assertThrows(
+        [&csg_obj, &univs]() { csg_obj->createCartesianLattice("harry", 1.0, univs); },
+        "Cannot create Cartesian lattice harry. Universe univ1 is not in the CSGBase instance.");
+  }
+}
+
+/**
  * CSGBase::joinOtherBase methods
  */
 
