@@ -91,6 +91,26 @@ CSGLattice::getUniverseIndices(const std::string & univ_name) const
   return indices;
 }
 
+const std::vector<std::reference_wrapper<const CSGUniverse>>
+CSGLattice::getUniqueUniverses()
+{
+  std::vector<std::reference_wrapper<const CSGUniverse>> unique_univs;
+  auto all_univs = getUniverses();
+
+  for (const auto & ulist : all_univs)
+  {
+    for (const auto & u : ulist)
+    {
+      auto it = std::find_if(unique_univs.begin(),
+                             unique_univs.end(),
+                             [&u](const auto & ref) { return &ref.get() == &u.get(); });
+      if (it == unique_univs.end())
+        unique_univs.push_back(u);
+    }
+  }
+  return unique_univs;
+}
+
 bool
 CSGLattice::operator==(const CSGLattice & other) const
 {

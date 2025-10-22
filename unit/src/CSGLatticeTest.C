@@ -287,4 +287,18 @@ TEST(CSGLatticeTest, testCartLatticeEquality)
     }
   }
 }
+
+// test CSGLattice::getUniqueUniverses
+TEST(CSGLatticeTest, testGetUniqueUniverses)
+{
+  const auto univ1 = CSGUniverse("univ1", false);
+  const auto univ2 = CSGUniverse("univ2", false);
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
+      {std::cref(univ1), std::cref(univ1)}, {std::cref(univ2), std::cref(univ1)}};
+  auto lat = CSGCartesianLattice("cartlat", 1.0, univ_map);
+  auto unique = lat.getUniqueUniverses();
+  ASSERT_EQ(unique.size(), 2);
+  ASSERT_EQ(unique[0].get(), univ1);
+  ASSERT_EQ(unique[1].get(), univ2);
+}
 }
