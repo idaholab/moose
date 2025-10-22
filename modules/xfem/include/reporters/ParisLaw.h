@@ -12,7 +12,7 @@
 #include "CrackGrowthReporterBase.h"
 
 /**
- *  ParisLaw is a reporter that compute fracture growth size and number of cycles
+ *  ParisLaw is a reporter that computes fatigue crack growth increment and number of cycles
  */
 class CrackMeshCut3DUserObject;
 class ParisLaw : public CrackGrowthReporterBase
@@ -23,14 +23,15 @@ public:
 
 protected:
   virtual void compute_growth(std::vector<int> & index) override;
-  /// Paris law parameters
+  ///@{ Paris law parameters
   const Real _paris_law_c;
   const Real _paris_law_m;
+  ///@}
 
-  /// The name of the reporter with fracture integral values
+  /// The name of the reporter with K_II fracture integral values
   const std::vector<Real> & _kii_vpp;
 
-  /// Number of cycles vector to reach max_growth_size postprocessor
+  /// Vector containing number of cycles to reach max_growth_size postprocessor for each crack front point
   Real & _dn;
 
   /// growth rate reporter

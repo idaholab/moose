@@ -19,22 +19,22 @@ ParisLaw::validParams()
 {
   InputParameters params = CrackGrowthReporterBase::validParams();
   params.addClassDescription(
-      "This reporter computes the crack extension size at all active crack front points "
-      "in the CrackMeshCut3DUserObject.  This reporter is in the same order as "
-      "kii_ and ki_vectorpostprocessor.");
+      "This reporter computes the crack growth increment at all active crack front points "
+      "in the CrackMeshCut3DUserObject for fatigue crack growth based on the Paris Law. "
+      "Data for crack growth rates in this reporter are stored in the same order as in the "
+      "fracture integral VectorPostprocessors.");
   params.addRequiredParam<Real>("paris_law_c", "parameter C in the Paris law for fatigue");
   params.addRequiredParam<Real>("paris_law_m", "parameter m in the Paris law for fatigue");
-  params.addParam<VectorPostprocessorName>("kii_vectorpostprocessor",
-                                           "II_KII_1",
-                                           "The name of the vectorpostprocessor that contains KII");
+  params.addParam<VectorPostprocessorName>(
+      "kii_vectorpostprocessor", "II_KII_1", "Name of the vectorpostprocessor that computes K_II");
   params.addParam<ReporterValueName>(
       "growth_increment_name",
       "growth_increment",
-      "Reporter name containing growth increments for the crack front points.");
+      "ReporterValueName for storing computed growth increments for the crack front points.");
   params.addParam<ReporterValueName>(
       "cycles_to_max_growth_size_name",
       "dN",
-      "Reporter name containing the number of cycles to reach max_growth_size.");
+      "ReporterValueName for storing computed number of cycles to reach max_growth_size.");
   return params;
 }
 

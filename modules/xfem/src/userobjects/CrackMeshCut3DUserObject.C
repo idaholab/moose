@@ -40,12 +40,12 @@ CrackMeshCut3DUserObject::validParams()
                                 "Function defining z-component of crack growth direction");
 
   params.addParam<VectorPostprocessorName>(
-      "ki_vectorpostprocessor", "II_KI_1", "The name of the vectorpostprocessor that contains KI");
+      "ki_vectorpostprocessor", "II_KI_1", "Name of the VectorPostprocessor that computes K_I");
   params.addParam<VectorPostprocessorName>("kii_vectorpostprocessor",
                                            "II_KII_1",
                                            "The name of the vectorpostprocessor that contains KII");
   params.addParam<ReporterName>("growth_reporter",
-                                "The name of the reporter that contains growth increment");
+                                "The name of the Reporter that computes the growth increment");
   params.addParam<FunctionName>("growth_rate", "Function defining crack growth rate");
   params.addParam<Real>(
       "size_control", 0, "Criterion for refining elements while growing the crack");
@@ -114,17 +114,17 @@ CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & param
   if ((_growth_dir_method == GrowthDirectionEnum::MAX_HOOP_STRESS ||
        _growth_rate_method == GrowthRateEnum::REPORTER) &&
       !_cfd)
-    paramError(
-        "crack_front_nodes",
-        "Required for any crack growth or direction criterion that requires fracture integrals.");
+    paramError("crack_front_nodes",
+               "Required for any crack growth rate or direction criterion that requires fracture "
+               "integrals.");
 
   // test element type; only tri3 elements are allowed
   for (const auto & cut_elem : _cutter_mesh->element_ptr_range())
   {
     if (cut_elem->n_nodes() != _cut_elem_nnode)
-      paramError("mesh_generator_name", "The input cut mesh should include tri elements only!");
+      mooseError("The input cut mesh should include tri elements only!");
     if (cut_elem->dim() != _cut_elem_dim)
-      paramError("mesh_generator_name", "The input cut mesh should have 2D elements only!");
+      mooseError("The input cut mesh should have 2D elements only!");
   }
 }
 
@@ -749,7 +749,7 @@ CrackMeshCut3DUserObject::findActiveBoundaryDirection()
     // determine growth direction based on KI and KII at the crack front
     else if (_growth_dir_method == GrowthDirectionEnum::MAX_HOOP_STRESS)
     {
-      mooseAssert(_ki_vpp->size() == _kii_vpp->size(), "KI and KII VPPs should have the same size");
+      mooseAssert(_ki_vpp->size() == _kii_vpp->size(), "KI and KII VPPs must be the same size");
       mooseAssert(_ki_vpp->size() == _active_boundary[0].size(),
                   "the number of crack front nodes in the self-similar method should equal to the "
                   "size of VPP defined at the crack front");

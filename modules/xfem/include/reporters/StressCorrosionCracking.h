@@ -12,7 +12,8 @@
 #include "CrackGrowthReporterBase.h"
 
 /**
- *  StressCorrosionCracking is a reporter that compute fracture growth size and number of cycles
+ *  StressCorrosionCracking is a reporter that computs stress corrosion cracking growth size and
+ * number of cycles
  */
 class CrackMeshCut3DUserObject;
 class StressCorrosionCracking : public CrackGrowthReporterBase

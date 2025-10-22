@@ -17,34 +17,35 @@ StressCorrosionCracking::validParams()
 {
   InputParameters params = CrackGrowthReporterBase::validParams();
   params.addClassDescription(
-      "This reporter computes the crack extension size at all active crack front points "
-      "in the CrackMeshCut3DUserObject.  This reporter is in the same order as "
-      "ki_vectorpostprocessor.");
+      "This reporter computes the crack growth increment at all active crack front points "
+      "in the CrackMeshCut3DUserObject for stress corrosion cracking. Crack growth "
+      "rates computed by this reporter are stored in the same order as in the fracture "
+      "integral VectorPostprocessors.");
 
   params.addRequiredRangeCheckedParam<Real>(
       "k_low",
       "k_low>0",
-      "K1 integral below this value has constant growth rate of growth_rate_low");
-  params.addRequiredParam<Real>("growth_rate_low", "growth rate when K1 is below k_low");
+      "Value of K_I below which the crack growth rate is constant, with the value specified in "
+      "growth_rate_low");
+  params.addRequiredParam<Real>("growth_rate_low", "growth rate when K_I is below k_low");
   params.addRequiredRangeCheckedParam<Real>(
       "k_high",
       "k_high>0",
-      "K1 integral above this value has constant growth rate of growth_rate_high");
-  params.addRequiredParam<Real>("growth_rate_high", "growth rate when K1 is above k_high");
+      "Value of K_I above which the crack growth rate is constant, with the value specified in "
+      "growth_rate_high");
+  params.addRequiredParam<Real>("growth_rate_high", "growth rate when K_I is above k_high");
   params.addRequiredParam<Real>("growth_rate_mid_multiplier",
-                                "Growth rate multiplier when K1 is between k_low and k_high");
-  params.addRequiredParam<Real>(
-      "growth_rate_mid_exp_factor",
-      "Growth rate exponential factor when K1 is between k_low and k_high");
+                                "Growth rate multiplier when K_I is between k_low and k_high");
+  params.addRequiredParam<Real>("growth_rate_mid_exp_factor", "Growth rate exponential factor");
 
   params.addParam<ReporterValueName>(
       "growth_increment_name",
       "growth_increment",
-      "Reporter name containing growth increments for the crack front points.");
+      "ReporterValueName for storing computed growth increments for the crack front points.");
   params.addParam<ReporterValueName>(
       "time_to_max_growth_size_name",
       "max_growth_timestep",
-      "Reporter name containing the timestep to reach max_growth_size.");
+      "ReporterValueName for storing computed timestep to reach max_growth_size.");
   return params;
 }
 
