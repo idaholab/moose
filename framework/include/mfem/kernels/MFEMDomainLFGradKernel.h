@@ -17,12 +17,12 @@
  * (f, v)
  * \f]
  */
-class MFEMDomainLFGardKernel : public MFEMKernel
+class MFEMDomainLFGradKernel : public MFEMKernel
 {
 public:
   static InputParameters validParams();
 
-  MFEMDomainLFGardKernel(const InputParameters & parameters);
+  MFEMDomainLFGradKernel(const InputParameters & parameters);
 
   virtual mfem::LinearFormIntegrator * createNLActionIntegrator() override;
 

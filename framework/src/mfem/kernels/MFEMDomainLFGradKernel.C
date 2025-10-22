@@ -12,10 +12,10 @@
 #include "MFEMDomainLFGradKernel.h"
 #include "MFEMProblem.h"
 
-registerMooseObject("MooseApp", MFEMDomainLFGardKernel);
+registerMooseObject("MooseApp", MFEMDomainLFGradKernel);
 
 InputParameters
-MFEMDomainLFGardKernel::validParams()
+MFEMDomainLFGradKernel::validParams()
 {
   InputParameters params = MFEMKernel::validParams();
   params.addClassDescription("Adds the domain integrator to an MFEM problem for the linear form "
@@ -26,7 +26,7 @@ MFEMDomainLFGardKernel::validParams()
   return params;
 }
 
-MFEMDomainLFGardKernel::MFEMDomainLFGardKernel(const InputParameters & parameters)
+MFEMDomainLFGradKernel::MFEMDomainLFGradKernel(const InputParameters & parameters)
   : MFEMKernel(parameters), _coef(getScalarCoefficient("coefficient"))
 {
   // declares GradientGridFunctionCoefficient
@@ -35,7 +35,7 @@ MFEMDomainLFGardKernel::MFEMDomainLFGardKernel(const InputParameters & parameter
 }
 
 mfem::LinearFormIntegrator *
-MFEMDomainLFGardKernel::createNLActionIntegrator()
+MFEMDomainLFGradKernel::createNLActionIntegrator()
 {
   mfem::VectorCoefficient & vec_coef = getMFEMProblem().getCoefficients().getVectorCoefficient(name());
   _product_coeff = new mfem::ScalarVectorProductCoefficient(_coef, vec_coef);
