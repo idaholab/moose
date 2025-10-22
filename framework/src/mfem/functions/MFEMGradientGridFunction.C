@@ -20,14 +20,12 @@ MFEMGradientGridFunction::validParams()
   InputParameters params = MFEMGeneralUserObject::validParams();
   params.registerBase("Function");
   params.addClassDescription("Creates a GradientGridFunctionCoefficient out of a variable");
-  params.addRequiredParam<VariableName>("var_name",
-                                        "The names of the gridfunction variable");
+  params.addRequiredParam<VariableName>("var_name", "The names of the gridfunction variable");
   return params;
 }
 
 MFEMGradientGridFunction::MFEMGradientGridFunction(const InputParameters & parameters)
-  : MFEMGeneralUserObject(parameters),
-    _var_name(getParam<VariableName>("var_name"))
+  : MFEMGeneralUserObject(parameters), _var_name(getParam<VariableName>("var_name"))
 {
   // declares GradientGridFunctionCoefficient
   getMFEMProblem().getCoefficients().declareVector<mfem::GradientGridFunctionCoefficient>(

@@ -46,7 +46,7 @@ MFEMProblemSolve::MFEMProblemSolve(
                        : _app.isUltimateMaster() ? "cpu"
                                                  : "",
                        Moose::PassKey<MFEMProblemSolve>());
-  
+
   _mfem_problem.setNewtonParamaters(_nl_max_its, _nl_abs_tol, _nl_rel_tol, _print_level);
 }
 

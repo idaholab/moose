@@ -37,10 +37,10 @@ MFEMDomainLFGradKernel::MFEMDomainLFGradKernel(const InputParameters & parameter
 mfem::LinearFormIntegrator *
 MFEMDomainLFGradKernel::createNLActionIntegrator()
 {
-  mfem::VectorCoefficient & vec_coef = getMFEMProblem().getCoefficients().getVectorCoefficient(name());
+  mfem::VectorCoefficient & vec_coef =
+      getMFEMProblem().getCoefficients().getVectorCoefficient(name());
   _product_coeff = new mfem::ScalarVectorProductCoefficient(_coef, vec_coef);
   return new mfem::DomainLFGradIntegrator(*_product_coeff);
 }
-
 
 #endif
