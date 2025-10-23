@@ -1110,6 +1110,10 @@ FEProblemBase::initialSetup()
                           // ParsedFunctions
       _functions.initialSetup(tid);
     }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+    _kokkos_functions.initialSetup();
+#endif
   }
 
   {
@@ -1606,6 +1610,10 @@ FEProblemBase::timestepSetup()
     _all_materials.timestepSetup(tid);
     _functions.timestepSetup(tid);
   }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  _kokkos_functions.timestepSetup();
+#endif
 
   _aux->timestepSetup();
   for (auto & sys : _solver_systems)
@@ -4806,6 +4814,10 @@ FEProblemBase::customSetup(const ExecFlagType & exec_type)
     _functions.customSetup(exec_type, tid);
   }
 
+#ifdef MOOSE_KOKKOS_ENABLED
+  _kokkos_functions.customSetup(exec_type);
+#endif
+
   _aux->customSetup(exec_type);
   for (auto & nl : _nl)
     nl->customSetup(exec_type);
@@ -7232,6 +7244,10 @@ FEProblemBase::computeResidualAndJacobian(const NumericVector<Number> & soln,
         _functions.residualSetup(tid);
       }
 
+#ifdef MOOSE_KOKKOS_ENABLED
+      _kokkos_functions.residualSetup();
+#endif
+
       computeSystems(EXEC_LINEAR);
 
       computeUserObjects(EXEC_LINEAR, Moose::POST_AUX);
@@ -7464,6 +7480,10 @@ FEProblemBase::computeResidualTags(const std::set<TagID> & tags)
         _functions.residualSetup(tid);
       }
 
+#ifdef MOOSE_KOKKOS_ENABLED
+      _kokkos_functions.residualSetup();
+#endif
+
       computeSystems(EXEC_LINEAR);
 
       computeUserObjects(EXEC_LINEAR, Moose::POST_AUX);
@@ -7609,6 +7629,10 @@ FEProblemBase::computeJacobianTags(const std::set<TagID> & tags)
           _all_materials.jacobianSetup(tid);
           _functions.jacobianSetup(tid);
         }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+        _kokkos_functions.jacobianSetup();
+#endif
 
         computeSystems(EXEC_NONLINEAR);
 
@@ -7797,6 +7821,10 @@ FEProblemBase::computeLinearSystemTags(const NumericVector<Number> & soln,
   {
     _functions.jacobianSetup(tid);
   }
+
+#ifdef MOOSE_KOKKOS_ENABLED
+  _kokkos_functions.jacobianSetup();
+#endif
 
   try
   {
