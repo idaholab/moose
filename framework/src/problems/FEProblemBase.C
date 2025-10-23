@@ -8285,6 +8285,7 @@ FEProblemBase::updateMeshXFEM()
       _console << "\nXFEM update complete: Mesh modified" << std::endl;
     }
   }
+  // Changing near-tip enrichment requires repeating the solution, even if the mesh is not updated
   bool crack_front_advanced = false;
   if (!updated)
   {
