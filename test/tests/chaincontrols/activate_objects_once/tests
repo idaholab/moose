@@ -1,0 +1,16 @@
+[Tests]
+  design = 'UnitTripChainControl.md'
+  issues = '#28948'
+  [activate_for_a_single_step_from_function]
+    type = CSVDiff
+    input = 'activate_objects_then_deactivate_function.i'
+    csvdiff = 'activate_objects_then_deactivate_function_out.csv'
+    requirement = 'The system shall be able to activate objects for a single time step using a heaviside function.'
+  []
+  [activate_for_a_single_step]
+    type = CSVDiff
+    input = 'activate_objects_then_deactivate_logic.i'
+    csvdiff = 'activate_objects_then_deactivate_logic_out.csv'
+    requirement = 'The system shall be able to activate objects following a tripped signal but only for a single time step.'
+  []
+[]

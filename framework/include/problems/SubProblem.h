@@ -921,7 +921,9 @@ public:
   virtual void jacobianSetup();
 
   /// Setter for debug functor output
-  void setFunctorOutput(bool set_output) { _output_functors = set_output; }
+  void setFunctorOutput(bool set_output) { _show_functors = set_output; }
+  /// Setter for debug chain control data output
+  void setChainControlDataOutput(bool set_output) { _show_chain_control_data = set_output; }
 
   /**
    * @return the number of nonlinear systems in the problem
@@ -1161,7 +1163,10 @@ private:
   std::vector<std::multimap<std::string, std::pair<bool, bool>>> _functor_to_request_info;
 
   /// Whether to output a list of the functors used and requested (currently only at initialSetup)
-  bool _output_functors;
+  bool _show_functors;
+
+  /// Whether to output a list of all the chain control data
+  bool _show_chain_control_data;
 
   /// The declared vector tags
   std::vector<VectorTag> _vector_tags;
