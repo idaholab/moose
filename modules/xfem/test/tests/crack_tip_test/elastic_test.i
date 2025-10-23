@@ -187,11 +187,10 @@
     order = SECOND
   []
 
-  l_max_its = 50
-  nl_max_its = 100
+  nl_max_its = 200
 
-  nl_abs_tol = 1e-5
-  nl_rel_tol = 1e-5
+  nl_abs_tol = 1e-10
+  nl_rel_tol = 1e-10
 
   start_time = 0.0
   dt = 0.1
