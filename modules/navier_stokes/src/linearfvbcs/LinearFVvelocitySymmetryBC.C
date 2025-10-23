@@ -73,15 +73,16 @@ LinearFVVelocitySymmetryBC::computeBoundaryValue() const
 
   // By default we approximate the boundary value with the neighboring cell value
   auto boundary_value = _var.getElemValue(*elem_info, determineState());
+  auto reflected_boundary_value = boundary_value;
 
   auto scaled_normal = _current_face_info->normal();
-  scaled_normal *= scaled_normal(_index);
+  scaled_normal *= 2 * scaled_normal(_index);
 
   for (const auto dim_i : make_range(_dim))
-    boundary_value -=
+    reflected_boundary_value -=
         scaled_normal(dim_i) * _vel_vars[dim_i]->getElemValue(*elem_info, determineState());
 
-  return boundary_value;
+  return 0.5 * (boundary_value + reflected_boundary_value);
 }
 
 Real
@@ -109,8 +110,7 @@ LinearFVVelocitySymmetryBC::computeBoundaryValueMatrixContribution() const
   // No matter if we have a one-term or two-term expansion we will always
   // have a contribution to the matrix
   const auto normal_component = _current_face_info->normal()(_index);
-
-  return 0.0; // 1.0 - normal_component * normal_component;
+  return 1.0 - abs(normal_component);
 }
 
 Real
@@ -121,16 +121,15 @@ LinearFVVelocitySymmetryBC::computeBoundaryValueRHSContribution() const
                              ? _current_face_info->elemInfo()
                              : _current_face_info->neighborInfo();
 
-  Real boundary_value_rhs = 0.0;
+  // Real boundary_value_rhs = 0.0;
   auto scaled_normal = _current_face_info->normal();
   scaled_normal *= scaled_normal(_index);
 
-  for (const auto dim_i : make_range(_dim))
-    if (dim_i != _index)
-      boundary_value_rhs +=
-          scaled_normal(dim_i) * _vel_vars[dim_i]->getElemValue(*elem_info, determineState());
+  auto current_bd_value = computeBoundaryValue();
+  const auto normal_component = _current_face_info->normal()(_index);
 
-  return 0.0; // boundary_value_rhs;
+  return current_bd_value -
+         (1.0 - abs(normal_component)) * _var.getElemValue(*elem_info, determineState());
 }
 
 Real
@@ -138,7 +137,7 @@ LinearFVVelocitySymmetryBC::computeBoundaryGradientMatrixContribution() const
 {
   const auto normal_component = _current_face_info->normal()(_index);
 
-  return normal_component * normal_component / computeCellToFaceDistance();
+  return abs(normal_component) / computeCellToFaceDistance();
 }
 
 Real
@@ -149,14 +148,8 @@ LinearFVVelocitySymmetryBC::computeBoundaryGradientRHSContribution() const
                              ? _current_face_info->elemInfo()
                              : _current_face_info->neighborInfo();
 
-  Real boundary_grad_rhs = 0.0;
-  auto scaled_normal = _current_face_info->normal();
-  scaled_normal *= scaled_normal(_index);
-
-  for (const auto dim_i : make_range(_dim))
-    if (dim_i != _index)
-      boundary_grad_rhs -=
-          scaled_normal(dim_i) * _vel_vars[dim_i]->getElemValue(*elem_info, determineState());
-
-  return boundary_grad_rhs / computeCellToFaceDistance();
+  auto boundary_value = _var.getElemValue(*elem_info, determineState());
+  const auto normal_component = _current_face_info->normal()(_index);
+  return computeBoundaryNormalGradient() -
+         abs(normal_component) / computeCellToFaceDistance() * boundary_value;
 }

@@ -218,17 +218,31 @@ LinearFVAnisotropicDiffusion::computeBoundaryRHSContribution(const LinearFVBound
 
   // We add the nonorthogonal corrector for the face here. Potential idea: we could do
   // this in the boundary condition too. For now, however, we keep it like this.
-  if (_use_nonorthogonal_correction_on_boundary && diff_bc->useBoundaryGradientExtrapolation())
+  if (diff_bc->useBoundaryGradientExtrapolation())
   {
-    const auto elem_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
-                               ? _current_face_info->elemInfo()
-                               : _current_face_info->neighborInfo();
-    const auto e_Cf = _current_face_info->faceCentroid() - elem_info->centroid();
-    const auto correction_vector =
-        _current_face_info->normal() - 1 / (_current_face_info->normal() * e_Cf) * e_Cf;
+    // We allow internal boundaries as well, in that case we have to make sure the normals point in
+    // the right direction
+    const Real boundary_normal_multiplier =
+        (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM) ? 1.0 : -1.0;
 
-    grad_contrib +=
-        normal_scaled_diff_tensor * boundary_grad * boundary_normal_multiplier * correction_vector;
+    grad_contrib += (scaled_diff_tensor - normal_scaled_diff_tensor * boundary_normal_multiplier *
+                                              _current_face_info->normal()) *
+                    boundary_grad;
+
+    // We add the nonorthogonal corrector for the face here. Potential idea: we could do
+    // this in the boundary condition too. For now, however, we keep it like this.
+    if (_use_nonorthogonal_correction_on_boundary)
+    {
+      const auto elem_info = (_current_face_type == FaceInfo::VarFaceNeighbors::ELEM)
+                                 ? _current_face_info->elemInfo()
+                                 : _current_face_info->neighborInfo();
+      const auto e_Cf = _current_face_info->faceCentroid() - elem_info->centroid();
+      const auto correction_vector =
+          _current_face_info->normal() - 1 / (_current_face_info->normal() * e_Cf) * e_Cf;
+
+      grad_contrib += normal_scaled_diff_tensor * boundary_grad * boundary_normal_multiplier *
+                      correction_vector;
+    }
   }
 
   return grad_contrib * _current_face_area;

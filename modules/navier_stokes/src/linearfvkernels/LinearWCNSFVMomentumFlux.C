@@ -124,19 +124,21 @@ LinearWCNSFVMomentumFlux::computeBoundaryMatrixContribution(const LinearFVBounda
 {
   const auto * const adv_diff_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
 
-  if (_current_face_info->faceCentroid()(1) < 0.0001)
-  {
-    std::cout << "Mx adv: "
-              << computeAdvectionBoundaryMatrixContribution(adv_diff_bc) * _current_face_area
-              << std::endl;
-    std::cout << "Mx dif: "
-              << computeStressBoundaryMatrixContribution(adv_diff_bc) * _current_face_area
-              << std::endl;
-  }
+  Real flux_multiplier = 1.0;
+  // if (_current_face_info->faceCentroid()(1) < 0.0001)
+  // {
+  //   std::cout << "Mx adv: "
+  //             << computeAdvectionBoundaryMatrixContribution(adv_diff_bc) * _current_face_area
+  //             << std::endl;
+  //   std::cout << "Mx dif: "
+  //             << computeStressBoundaryMatrixContribution(adv_diff_bc) * _current_face_area
+  //             << std::endl;
+  //   flux_multiplier = 0.0;
+  // }
 
   mooseAssert(adv_diff_bc, "This should be a valid BC!");
   return (computeStressBoundaryMatrixContribution(adv_diff_bc) +
-          computeAdvectionBoundaryMatrixContribution(adv_diff_bc)) *
+          flux_multiplier * computeAdvectionBoundaryMatrixContribution(adv_diff_bc)) *
          _current_face_area;
 }
 
@@ -144,20 +146,21 @@ Real
 LinearWCNSFVMomentumFlux::computeBoundaryRHSContribution(const LinearFVBoundaryCondition & bc)
 {
   const auto * const adv_diff_bc = static_cast<const LinearFVAdvectionDiffusionBC *>(&bc);
-
-  if (_current_face_info->faceCentroid()(1) < 0.0001)
-  {
-    std::cout << "Rhs adv: "
-              << computeStressBoundaryRHSContribution(adv_diff_bc) * _current_face_area
-              << std::endl;
-    std::cout << "Rhs dif: "
-              << computeAdvectionBoundaryRHSContribution(adv_diff_bc) * _current_face_area
-              << std::endl;
-  }
+  Real flux_multiplier = 1.0;
+  // if (_current_face_info->faceCentroid()(1) < 0.0001)
+  // {
+  //   std::cout << "Rhs adv: "
+  //             << computeStressBoundaryRHSContribution(adv_diff_bc) * _current_face_area
+  //             << std::endl;
+  //   std::cout << "Rhs dif: "
+  //             << computeAdvectionBoundaryRHSContribution(adv_diff_bc) * _current_face_area
+  //             << std::endl;
+  //   flux_multiplier = 0.0;
+  // }
 
   mooseAssert(adv_diff_bc, "This should be a valid BC!");
   return (computeStressBoundaryRHSContribution(adv_diff_bc) +
-          computeAdvectionBoundaryRHSContribution(adv_diff_bc)) *
+          flux_multiplier * computeAdvectionBoundaryRHSContribution(adv_diff_bc)) *
          _current_face_area;
 }
 
