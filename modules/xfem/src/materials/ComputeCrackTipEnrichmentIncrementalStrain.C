@@ -41,14 +41,8 @@ ComputeCrackTipEnrichmentIncrementalStrain::ComputeCrackTipEnrichmentIncremental
     _enrich_variable(4),
     _phi(_assembly.phi()),
     _grad_phi(_assembly.gradPhi()),
-    _mechanical_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "mechanical_strain")),
-    _total_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "total_strain")),
-    _grad_disp_tensor(declareProperty<RankTwoTensor>(_base_name + "grad_disp_tensor")),
-    _small_strain(declareProperty<RankTwoTensor>(_base_name + "small_strain")),
     _grad_enrich_disp_tensor(
         declareProperty<RankTwoTensor>(_base_name + "grad_enrich_disp_tensor")),
-    _grad_disp_tensor_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "grad_disp_tensor")),
-    _small_strain_old(getMaterialPropertyOld<RankTwoTensor>(_base_name + "small_strain")),
     _grad_enrich_disp_tensor_old(
         getMaterialPropertyOld<RankTwoTensor>(_base_name + "grad_enrich_disp_tensor")),
     _B(4),
@@ -136,20 +130,23 @@ ComputeCrackTipEnrichmentIncrementalStrain::computeProperties()
     _grad_enrich_disp_tensor[_qp] = RankTwoTensor::initializeFromRows(
         _grad_enrich_disp[0], _grad_enrich_disp[1], _grad_enrich_disp[2]);
 
-    _grad_disp_tensor[_qp] = RankTwoTensor::initializeFromRows(
+    const auto grad_disp_tensor = RankTwoTensor::initializeFromRows(
         (*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]);
 
-    _deformation_gradient[_qp] = _grad_disp_tensor[_qp] + _grad_enrich_disp_tensor[_qp];
+    const auto grad_disp_tensor_old = RankTwoTensor::initializeFromRows(
+        (*_grad_disp_old[0])[_qp], (*_grad_disp_old[1])[_qp], (*_grad_disp_old[2])[_qp]);
+
+    _deformation_gradient[_qp] = grad_disp_tensor + _grad_enrich_disp_tensor[_qp];
     _deformation_gradient[_qp].addIa(1.0);
 
-    _small_strain[_qp] =
-        0.5 * ((_grad_disp_tensor[_qp] + _grad_enrich_disp_tensor[_qp]) +
-               (_grad_disp_tensor[_qp] + _grad_enrich_disp_tensor[_qp]).transpose());
-
-    _strain_increment[_qp] = _small_strain[_qp] - _small_strain_old[_qp];
+    _strain_increment[_qp] =
+        0.5 * ((grad_disp_tensor + _grad_enrich_disp_tensor[_qp]) +
+               (grad_disp_tensor + _grad_enrich_disp_tensor[_qp]).transpose()) -
+        0.5 * ((grad_disp_tensor_old + _grad_enrich_disp_tensor_old[_qp]) +
+               (grad_disp_tensor_old + _grad_enrich_disp_tensor_old[_qp]).transpose());
 
     _grad_disp_rate[_qp] =
-        (MetaPhysicL::raw_value((_grad_disp_tensor[_qp])) - (_grad_disp_tensor_old[_qp])) / _dt;
+        (MetaPhysicL::raw_value(grad_disp_tensor) - (grad_disp_tensor_old)) / _dt;
 
     // total strain
     _total_strain[_qp] = _total_strain_old[_qp] + _strain_increment[_qp];

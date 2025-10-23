@@ -48,13 +48,8 @@ protected:
   /// gradient of the shape function
   const VariablePhiGradient & _grad_phi;
 
-  const MaterialProperty<RankTwoTensor> & _mechanical_strain_old;
-  const MaterialProperty<RankTwoTensor> & _total_strain_old;
-  MaterialProperty<RankTwoTensor> & _grad_disp_tensor;
-  MaterialProperty<RankTwoTensor> & _small_strain;
+  /// gradient of the enriched solution
   MaterialProperty<RankTwoTensor> & _grad_enrich_disp_tensor;
-  const MaterialProperty<RankTwoTensor> & _grad_disp_tensor_old;
-  const MaterialProperty<RankTwoTensor> & _small_strain_old;
   const MaterialProperty<RankTwoTensor> & _grad_enrich_disp_tensor_old;
 
 private:
