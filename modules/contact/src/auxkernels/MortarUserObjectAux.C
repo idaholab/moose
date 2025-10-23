@@ -18,7 +18,7 @@
 registerMooseObject("ContactApp", MortarUserObjectAux);
 registerMooseObjectRenamed("ContactApp",
                            PenaltyMortarUserObjectAux,
-                           "01/01/2026 00:00",
+                           "04/01/2026 00:00",
                            MortarUserObjectAux);
 
 const MooseEnum MortarUserObjectAux::_contact_quantities(

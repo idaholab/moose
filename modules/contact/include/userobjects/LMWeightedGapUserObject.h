@@ -45,7 +45,7 @@ protected:
   /**
    * Verify that the provided variables have degrees of freedom at nodes
    */
-  void verifyNodal(const MooseVariable & var, const std::string & var_name) const;
+  void verifyLagrange(const MooseVariable & var, const std::string & var_name) const;
 
   /// The Lagrange multiplier variable representing the contact pressure
   const MooseVariableFE<Real> * const _lm_var;

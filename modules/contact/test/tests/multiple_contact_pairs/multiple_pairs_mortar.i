@@ -13,9 +13,7 @@ offset = 1e-2
 []
 
 [Physics]
-
   [SolidMechanics]
-
     [QuasiStatic]
       [all]
         add_variables = true

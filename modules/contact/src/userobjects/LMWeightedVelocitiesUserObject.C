@@ -46,9 +46,9 @@ LMWeightedVelocitiesUserObject::LMWeightedVelocitiesUserObject(const InputParame
     checkInput(_lm_variable_tangential_two, "lm_variable_tangential_two");
 
   // Check that user inputted the right type of variable
-  verifyNodal(*_lm_variable_tangential_one, "lm_variable_tangential_one");
+  verifyLagrange(*_lm_variable_tangential_one, "lm_variable_tangential_one");
   if (_lm_variable_tangential_two)
-    verifyNodal(*_lm_variable_tangential_two, "lm_variable_tangential_two");
+    verifyLagrange(*_lm_variable_tangential_two, "lm_variable_tangential_two");
 }
 
 const ADVariableValue &

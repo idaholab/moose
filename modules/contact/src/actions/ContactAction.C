@@ -526,8 +526,8 @@ ContactAction::act()
         InputParameters params = _factory.getValidParams(type);
         params.set<std::vector<BoundaryName>>("boundary") = {secondary_name};
         params.set<AuxVariableName>("variable") = "gap";
-        params.set<bool>("use_displaced_mesh") = true; // Unecessary as this object only operates on
-                                                       // nodes, but we'll do it for consistency
+        params.set<bool>("use_displaced_mesh") = true; // Unnecessary as this object only operates
+                                                       // on nodes, but we'll do it for consistency
         params.set<MooseEnum>("contact_quantity") = "normal_gap";
         const auto & [primary_id, secondary_id, uo_name] =
             libmesh_map_find(_bnd_pair_to_mortar_info, contact_pair);
