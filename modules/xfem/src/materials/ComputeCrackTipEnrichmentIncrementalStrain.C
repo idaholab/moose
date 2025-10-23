@@ -21,7 +21,7 @@ ComputeCrackTipEnrichmentIncrementalStrain::validParams()
 {
   InputParameters params = ComputeStrainBase::validParams();
   params.addClassDescription(
-      "Computes the crack tip enrichment at a point within an incremental strain formulation.");
+      "Computes the crack tip enrichment strain for an incremental small-strain formulation.");
   params.addRequiredParam<std::vector<NonlinearVariableName>>("enrichment_displacements",
                                                               "The enrichment displacement");
 
