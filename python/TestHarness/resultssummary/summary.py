@@ -60,14 +60,14 @@ class TestHarnessResultsSummary:
         pr_parser.add_argument(
             '--run-time-floor',
             type = float,
-            default = 1,
+            default = 2.00,
             help = 'The minimum threshold for a test to checked for a run time difference'
         )
 
         pr_parser.add_argument(
             '--run-time-rate-floor',
             type = float,
-            default = 0.5,
+            default = 0.50,
             help = "The ratio by which to report a test's difference in run time"
         )
 
@@ -143,7 +143,7 @@ class TestHarnessResultsSummary:
         base_results = self.get_commit_results(base_sha)
         # If no base, display message and return None for base
         if not isinstance(base_results, StoredResult):
-            no_base = f"Base results not available for {base_sha}"
+            no_base = f"Base results not available for {base_sha[:7]}"
             # Write no base message in out_file path
             self.write_output(no_base, out_file)
             return None, head_results, None, test_names
@@ -158,6 +158,65 @@ class TestHarnessResultsSummary:
         """
         return f'`{str(test_name)}`'
 
+    def _sort_test_times_key(self, test_table_row: list, test_time_col_index: int) -> Tuple[int, float]:
+        """
+        Generate a sorting key for each test table row based on test time value
+        Parameters:
+        ----------
+        test_table_row : list
+            A list representing a row of data from the test table
+        test_time_col_index : int
+            The index of the column containing the test time value
+
+        Returns:
+        ----------
+        sorting_key : tuple
+            A temporary sorting key:
+            (0, -value) for numeric values (to sort in descending order)
+            (1, 0) for the string 'SKIP'
+            (2, 0) for the empty string
+        """
+        assert isinstance(test_table_row, list)
+        assert isinstance(test_time_col_index, int)
+
+        value = test_table_row[test_time_col_index]
+        if value.replace('.', '', 1).isdigit():
+            sorting_key = (0, -float(value))
+        elif value == 'SKIP':
+            sorting_key = (1, 0)
+        else:
+            sorting_key = (2, 0)
+        return sorting_key
+
+    def sort_test_times(self, test_table: List[List], test_time_col_index: int) -> List[List]:
+        """
+        Sort a list of test table based on the test time values using custom sort.
+        The sorting logic priorities as follow:
+            1. Numeric values (sorted in descending order).
+            2. The string 'SKIP' (sorted after numeric values).
+            3. The empty string (sorted last).
+
+        Parameters
+        ----------
+        test_table : list[list]
+            The test table dataset to sort, where each inner list represents a row of test data.
+        test_time_col_index : int
+            The index of the column containing test time values.
+
+        Returns
+        -------
+        sorted_test_table: list[list]
+            The sorted test table dataset, ordered according to the custom sorting logic.
+        """
+        assert isinstance(test_table, list)
+        assert isinstance(test_time_col_index, int)
+
+        sorted_test_table = sorted(
+            test_table,
+            key=lambda test_table_row: self._sort_test_times_key(test_table_row, test_time_col_index)
+        )
+        return sorted_test_table
+
     def _build_diff_table(self, test_names: set[TestName], test_results: StoredResult) -> Optional[List[List]]:
         """
         Build a table of test names that are either removed or added, optionally including runtime.
@@ -171,10 +230,11 @@ class TestHarnessResultsSummary:
 
         Returns
         -------
-        Optional[List[List]]
+        test_table: List[List]
             A sorted list of lists where each sublist contains:
                 - the formatted test name (str)
-                - the runtime as a string formatted to two decimal places, or "None" if not available.
+                - the run time (str, if numeric value, formatted to 2 decimal places)
+            The table is sorted by runtime value,  'SKIP' and empty strings sorted accordingly.
         """
         assert isinstance(test_names, set)
         assert isinstance(test_results, StoredResult)
@@ -182,24 +242,28 @@ class TestHarnessResultsSummary:
         test_table = []
         for test_name in test_names:
             test_result = test_results.get_test(test_name.folder, test_name.name)
-            # if run time is None, it will display "" in Time column
-            test_result_run_time = (
-            f'{test_result.run_time:.2f}' if test_result.run_time is not None else ""
-            )
+            # Test is skipped, so show time as SKIP
+            if test_result.status is not None and \
+                test_result.status_value == 'SKIP':
+                run_time = 'SKIP'
+            # Test has a run time
+            elif test_result.run_time is not None:
+                run_time = f'{test_result.run_time:.2f}'
+            # Test does not have a run time
+            else:
+                run_time = ''
             test_table.append([
                 self._format_test_name(test_name),
-                test_result_run_time,
+                run_time,
             ])
-        # Sorted based on run time
-        test_table.sort(
-            key=lambda row: float(row[1]) if row[1] != "" else float('-inf'),
-            reverse=True
-        )
+        # Table will be sorted by runtime value, SKIP then empty
+        test_table = self.sort_test_times(test_table, 1)
+
         return test_table
 
     def _build_same_table(self, same_names: set[TestName],
             base_results: StoredResult, head_results: StoredResult,
-            head_run_time_floor: float, run_time_rate_floor: float)-> Optional[List[List]]:
+            run_time_floor: float, run_time_rate_floor: float)-> Optional[List[List]]:
         """
         Build a table of tests present in both base and head with significant runtime changes.
 
@@ -211,16 +275,16 @@ class TestHarnessResultsSummary:
             Object providing access to test results for the base.
         head_results : StoredResult
             Object providing access to test results for the head.
-        head_run_time_floor : float
-            Minimum runtime in the head commit to consider for comparison.
+        run_time_floor : float
+            Minimum runtime in the base and head commit to consider for comparison.
         run_time_rate_floor : float
             Minimum relative runtime change (as a fraction) to include in the table.
 
         Returns
         -------
-        Optional[List[List]]
-            A sorted list of lists based on relative runtime containing:
-            - Formatted test name
+        same_table: Optional[List[List]]
+            A sorted list of lists based on relative runtime and each sublist contains:
+            - Formatted test name (str)
             - Base runtime (str, formatted to 2 decimal places)
             - Head runtime (str, formatted to 2 decimal places)
             - Relative runtime change (str, formatted as percentage with sign)
@@ -229,21 +293,24 @@ class TestHarnessResultsSummary:
         assert isinstance(same_names, set)
         assert isinstance(base_results, StoredResult)
         assert isinstance(head_results, StoredResult)
-        assert isinstance(head_run_time_floor, (float, int))
+        assert isinstance(run_time_floor, (float, int))
         assert isinstance(run_time_rate_floor, (float, int))
 
         same_table = []
         for test_name in same_names:
             base_result = base_results.get_test(test_name.folder, test_name.name)
             head_result = head_results.get_test(test_name.folder, test_name.name)
-            # Skip to check relative run time if run time is None or below the threadshold
-            if  head_result.run_time is None or \
-                base_result.run_time is None or \
-                head_result.run_time < head_run_time_floor:
+            # Skip to check relative run time if run time is None, Zero or below the threshold
+            if  base_result.run_time is None or \
+                head_result.run_time is None or \
+                base_result.run_time == 0 or \
+                head_result.run_time == 0 or \
+                base_result.run_time < run_time_floor or \
+                head_result.run_time < run_time_floor:
                 continue
             # Calculate relative runtime ratio between base and head
             relative_runtime = (head_result.run_time - base_result.run_time) / base_result.run_time
-            # Check if relative run time rate is higher than threadshold, then it will put in the result
+            # Check if relative run time rate is higher than threshold, then it will put in the result
             if abs(relative_runtime) >= run_time_rate_floor:
                 same_table.append(
                     [
@@ -281,10 +348,10 @@ class TestHarnessResultsSummary:
         -------------------
         run-time-floor : float
             The runtime at which to not check for a difference
-            (default: 1 s)
+            (default: 2.00 s)
         run-time-rate-floor : float
             The runtime rate at which to not attach in same_table summary
-            (default: 0.5 i.e 50%)
+            (default: 0.50 i.e 50%)
         no-run-time-comparison : bool
             If True, skip runtime comparison
         Returns
@@ -310,10 +377,10 @@ class TestHarnessResultsSummary:
         assert isinstance(head_names,(set, NoneType))
         assert isinstance(base_names,(set, NoneType))
 
-        # Extract potional parameters
-        head_run_time_floor = kwargs.pop('run_time_floor', 1.0)
-        assert isinstance(head_run_time_floor, (float, int))
-        run_time_rate_floor = kwargs.pop('run_time_rate_floor', 0.5)
+        # Extract optional parameters
+        run_time_floor = kwargs.pop('run_time_floor', 2.00)
+        assert isinstance(run_time_floor, (float, int))
+        run_time_rate_floor = kwargs.pop('run_time_rate_floor', 0.50)
         assert isinstance(run_time_rate_floor, (float, int))
         # Check disable run time comparison option, if True, skip run time comparison
         no_run_time_comparison = kwargs.pop('no_run_time_comparison', False)
@@ -341,7 +408,7 @@ class TestHarnessResultsSummary:
                 same_names,
                 base_results,
                 head_results,
-                head_run_time_floor,
+                run_time_floor,
                 run_time_rate_floor
             )
         else:
@@ -375,7 +442,7 @@ class TestHarnessResultsSummary:
         formatted_table = [title]
         if table_data:
             assert all(isinstance(row, list) for row in table_data)
-            formatted_table.append(tabulate(table_data, headers=headers, tablefmt="github"))
+            formatted_table.append(tabulate(table_data, headers=headers, tablefmt="github", disable_numparse=True))
         else:
             formatted_table.append(no_data_message)
 
@@ -417,28 +484,28 @@ class TestHarnessResultsSummary:
         # Format removed table
         summary.append(
             self._format_table(
-                "### Removed tests",
+                "\n### Removed tests\n",
                 removed_table,
                 ["Test","Time (s)"],
-                "None"
+                ""
             )
         )
         # Format added table
         summary.append(
             self._format_table(
-                "### Added tests",
+                "\n### Added tests\n",
                 added_table,
                 ["Test", "Time (s)"],
-                "None"
+                ""
             )
         )
         # Format same table
         summary.append(
             self._format_table(
-                "### Run time changes",
+                "\n### Run time changes\n",
                 same_table,
                 ["Test", "Base (s)", "Head (s)", "+/-"],
-                "None"
+                ""
             )
         )
         return "\n".join(summary)
@@ -504,7 +571,9 @@ class TestHarnessResultsSummary:
             head_names,
             **kwargs
         )
-        summary_result = self.build_summary(removed_table, added_table, same_table)
+        # Display base commit and url
+        summary_result = f'Compared against {base_results.event_sha[:7]} in job [{base_results.civet_job_url}](https://{base_results.civet_job_url}).\n'
+        summary_result+= self.build_summary(removed_table, added_table, same_table)
         # Write results in out_file path
         self.write_output(summary_result, out_file)
         return summary_result
