@@ -11,8 +11,6 @@
 #include "LinearInterpolation.h"
 #include "PolynomialFit.h"
 
-#include "libmesh/auto_ptr.h"
-
 registerMooseObject("MooseTestApp", LinearInterpolationMaterial);
 
 InputParameters

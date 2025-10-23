@@ -21,7 +21,6 @@
 #include "libmesh/petsc_vector.h"
 #include "libmesh/petsc_matrix.h"
 #include "libmesh/slepc_macro.h"
-#include "libmesh/auto_ptr.h"
 #include "petscsnes.h"
 #include "slepceps.h"
 
