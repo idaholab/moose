@@ -86,12 +86,16 @@ findTestRoot()
 }
 
 bool
-parsesToReal(const std::string & input)
+parsesToReal(const std::string & input, Real * parsed_real)
 {
   std::istringstream ss(input);
   Real real_value;
   if (ss >> real_value && ss.eof())
+  {
+    if (parsed_real)
+      (*parsed_real) = real_value;
     return true;
+  }
   return false;
 }
 

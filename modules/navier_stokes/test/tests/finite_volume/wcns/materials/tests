@@ -25,6 +25,8 @@
     # are small at the no-slip boundary conditions, and this leads to absolute diffs of around 1e-15,
     # triggering the default relative tolerance error criterion
     valgrind = HEAVY
+    # Warning from setting AD derivatives to 0 in h_from_p_T(p, T, h, dh_dp, dh_dT)
+    allow_warnings = true
   []
   [fluidprops]
     type = 'Exodiff'

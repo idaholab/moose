@@ -35,7 +35,7 @@ protected:
   const Moose::Functor<ADReal> & _rho;
 
   /// the temperature
-  const Moose::Functor<ADReal> & _temperature;
+  const Moose::Functor<ADReal> * _temperature;
 
   /// the pressure
   const Moose::Functor<ADReal> * _pressure;

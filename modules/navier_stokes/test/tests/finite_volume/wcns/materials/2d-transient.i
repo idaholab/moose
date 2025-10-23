@@ -205,6 +205,8 @@ inlet_v = 0.001
 [FluidProperties]
   [fp]
     type = FlibeFluidProperties
+    # AD-version of h_from_p_T(p, T, h, dh_dp, dh_dT) not implemented
+    allow_imperfect_jacobians = true
   []
 []
 

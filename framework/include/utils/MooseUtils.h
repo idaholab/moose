@@ -68,7 +68,9 @@ pathjoin(const std::filesystem::path & p, Args... args)
 }
 
 /// Check if the input string can be parsed into a Real
-bool parsesToReal(const std::string & input);
+/// @param input input to check / parse
+/// @param parsed_real pointer to a Real that gets set to the parsed real if it does parse to Real
+bool parsesToReal(const std::string & input, Real * parsed_real = nullptr);
 
 /// Returns the location of either a local repo run_tests script - or an
 /// installed test executor script if run_tests isn't found.

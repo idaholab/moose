@@ -206,6 +206,15 @@ static constexpr Real mu_t_low_limit = 1.0e-8;
 static constexpr Real epsilon_low_limit = 1.0e-8;
 // Lower limit for y_plus
 static constexpr Real min_y_plus = 1e-10;
+
+// Boundary condition types
+enum class MomentumInletTypes
+{
+  FIXED_VELOCITY = 0,
+  FLUX_VELOCITY = 1,
+  FLUX_MASS = 2,
+  FIXED_PRESSURE = 3
+};
 }
 
 namespace NS_DEFAULT_VALUES

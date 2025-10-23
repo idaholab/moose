@@ -34,6 +34,9 @@ WCNSFVFluidHeatTransferPhysicsBase::validParams()
   params.addParam<NonlinearVariableName>(
       "fluid_temperature_variable", NS::T_fluid, "Name of the fluid temperature variable");
 
+  params.addParam<UserObjectName>(NS::fluid, "Fluid properties userobject");
+  params.addParamNamesToGroup(NS::fluid, "Material properties");
+
   // Initial conditions
   params.addParam<FunctionName>(
       "initial_enthalpy",
@@ -217,75 +220,96 @@ WCNSFVFluidHeatTransferPhysicsBase::addInitialConditions()
         "condition");
   // do not set initial conditions if we are not defining variables
   if (!_define_variables)
+  {
+    reportPotentiallyMissedParameters({"initial_temperature", "initial_enthalpy"}, "FunctionIC");
     return;
+  }
 
-  InputParameters params = getFactory().getValidParams("FunctionIC");
+  InputParameters params = getFactory().getValidParams("FVFunctionIC");
   assignBlocks(params, _blocks);
 
-  if (shouldCreateIC(_fluid_temperature_name,
-                     _blocks,
-                     /*whether IC is a default*/ !isParamSetByUser("initial_temperature"),
-                     /*error if already an IC*/ isParamSetByUser("initial_temperature")))
+  // initial_temperature has a default so we should almost always set it (see shouldCreateIC logic)
   {
-    params.set<VariableName>("variable") = _fluid_temperature_name;
-    params.set<FunctionName>("function") = getParam<FunctionName>("initial_temperature");
+    bool temperature_ic_used = false;
+    if (variableExists(_fluid_temperature_name, false) &&
+        shouldCreateIC(_fluid_temperature_name,
+                       _blocks,
+                       /*whether IC is a default*/ !isParamSetByUser("initial_temperature"),
+                       /*error if already an IC*/ isParamSetByUser("initial_temperature")))
+    {
+      params.set<VariableName>("variable") = _fluid_temperature_name;
+      params.set<FunctionName>("function") = getParam<FunctionName>("initial_temperature");
 
-    getProblem().addInitialCondition("FunctionIC", _fluid_temperature_name + "_ic", params);
+      getProblem().addFVInitialCondition("FVFunctionIC", _fluid_temperature_name + "_ic", params);
+      temperature_ic_used = true;
+    }
+    // Needed to solve for enthalpy: an initial condition on enthalpy based on the initial
+    // temperature
+    if (isParamValid(NS::fluid) && _solve_for_enthalpy && !isParamValid("initial_enthalpy") &&
+        shouldCreateIC(_fluid_enthalpy_name,
+                       _blocks,
+                       /*whether IC is a default*/ !isParamSetByUser("initial_temperature"),
+                       /*error if already an IC*/ isParamSetByUser("initial_temperature")))
+    {
+      // from the FluidProperties module
+      InputParameters params =
+          getFactory().getValidParams("SpecificEnthalpyFromPressureTemperatureIC");
+      assignBlocks(params, _blocks);
+      params.set<VariableName>("variable") = _fluid_enthalpy_name;
+      params.set<UserObjectName>(NS::fluid) = getParam<UserObjectName>(NS::fluid);
+      params.set<std::vector<VariableName>>("p") = {_flow_equations_physics->getPressureName()};
+      Real temp;
+      if (MooseUtils::parsesToReal(getParam<FunctionName>("initial_temperature"), &temp))
+      {
+        params.defaultCoupledValue("T", temp, 0);
+        params.set<std::vector<VariableName>>("T") = {};
+      }
+      else
+        paramError("initial_temperature", "Only Real values supported when solving for enthalpy");
+      getProblem().addInitialCondition(
+          "SpecificEnthalpyFromPressureTemperatureIC", _fluid_enthalpy_name + "_ic", params);
+      temperature_ic_used = true;
+    }
+
+    if (!temperature_ic_used && isParamSetByUser("initial_temperature"))
+      reportPotentiallyMissedParameters({"initial_temperature"}, "FunctionIC");
   }
-  if (parameters().isParamValid("initial_enthalpy") &&
+  if (isParamValid("initial_enthalpy") && _solve_for_enthalpy &&
       shouldCreateIC(_fluid_enthalpy_name,
                      _blocks,
                      /*whether IC is a default*/ false,
-                     /*error if already an IC*/ true))
+                     /*error if already an IC*/ false))
   {
     params.set<VariableName>("variable") = _fluid_enthalpy_name;
     params.set<FunctionName>("function") = getParam<FunctionName>("initial_enthalpy");
 
-    getProblem().addInitialCondition("FunctionIC", _fluid_enthalpy_name + "_ic", params);
+    getProblem().addFVInitialCondition("FVFunctionIC", _fluid_enthalpy_name + "_ic", params);
   }
+  else if (isParamValid("initial_enthalpy"))
+    reportPotentiallyMissedParameters({"initial_enthalpy"}, "FunctionIC");
 }
 
 void
-WCNSFVFluidHeatTransferPhysicsBase::addMaterials()
+WCNSFVFluidHeatTransferPhysicsBase::defineKOverCpFunctors(const bool use_ad)
 {
-  // For compatibility with Modules/NavierStokesFV syntax
-  if (!_has_energy_equation)
-    return;
-
-  // Note that this material choice would not work for Newton-INSFV + solve_for_enthalpy
-  const auto object_type =
-      _solve_for_enthalpy ? "LinearFVEnthalpyFunctorMaterial" : "INSFVEnthalpyFunctorMaterial";
-
-  InputParameters params = getFactory().getValidParams(object_type);
-  assignBlocks(params, _blocks);
-
-  if (_solve_for_enthalpy)
+  // Define alpha, the diffusion coefficient when solving for enthalpy, on each block
+  for (unsigned int i = 0; i < _thermal_conductivity_name.size(); ++i)
   {
-    params.set<MooseFunctorName>(NS::pressure) = _flow_equations_physics->getPressureName();
-    params.set<MooseFunctorName>(NS::T_fluid) = _fluid_temperature_name;
-    params.set<MooseFunctorName>(NS::specific_enthalpy) = _fluid_enthalpy_name;
-    if (isParamValid(NS::fluid))
-      params.set<UserObjectName>(NS::fluid) = getParam<UserObjectName>(NS::fluid);
-    else
-    {
-      if (!getProblem().hasFunctor("h_from_p_T_functor", 0) ||
-          !getProblem().hasFunctor("T_from_p_h_functor", 0))
-        paramError(NS::fluid,
-                   "Either 'fp' must be specified or the 'h_from_p_T_functor' and "
-                   "'T_from_p_h_functor' must be defined outside the Physics");
-      // Note: we could define those in the Physics if cp is constant
-      params.set<MooseFunctorName>("h_from_p_T_functor") = "h_from_p_T_functor";
-      params.set<MooseFunctorName>("T_from_p_h_functor") = "T_from_p_h_functor";
-    }
+    const auto object_type = use_ad ? "ADParsedFunctorMaterial" : "ParsedFunctorMaterial";
+    InputParameters params = getFactory().getValidParams(object_type);
+    assignBlocks(params, _blocks);
+    std::vector<std::string> f_names;
+    if (!MooseUtils::parsesToReal(_thermal_conductivity_name[i]))
+      f_names.push_back(_thermal_conductivity_name[i]);
+    if (!MooseUtils::parsesToReal(getSpecificHeatName()))
+      f_names.push_back(getSpecificHeatName());
+    params.set<std::vector<std::string>>("functor_names") = f_names;
+    params.set<std::string>("expression") =
+        _thermal_conductivity_name[i] + "/" + getSpecificHeatName();
+    params.set<std::string>("property_name") = _thermal_conductivity_name[i] + "_by_cp";
+    getProblem().addMaterial(
+        object_type, prefix() + "rho_alpha_from_" + _thermal_conductivity_name[i], params);
   }
-  else
-  {
-    params.set<MooseFunctorName>(NS::density) = _density_name;
-    params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
-    params.set<MooseFunctorName>("temperature") = _fluid_temperature_name;
-  }
-
-  getProblem().addMaterial(object_type, prefix() + "enthalpy_material", params);
 }
 
 unsigned short
