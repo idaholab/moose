@@ -19,7 +19,7 @@ registerMooseObject("XFEMApp", ComputeCrackTipEnrichmentIncrementalStrain);
 InputParameters
 ComputeCrackTipEnrichmentIncrementalStrain::validParams()
 {
-  InputParameters params = ComputeStrainBase::validParams();
+  InputParameters params = ComputeIncrementalStrainBase::validParams();
   params.addClassDescription(
       "Computes the crack tip enrichment strain for an incremental small-strain formulation.");
   params.addRequiredParam<std::vector<NonlinearVariableName>>("enrichment_displacements",
@@ -130,10 +130,10 @@ ComputeCrackTipEnrichmentIncrementalStrain::computeProperties()
     _grad_enrich_disp_tensor[_qp] = RankTwoTensor::initializeFromRows(
         _grad_enrich_disp[0], _grad_enrich_disp[1], _grad_enrich_disp[2]);
 
-    const auto grad_disp_tensor = RankTwoTensor::initializeFromRows(
+    auto grad_disp_tensor = RankTwoTensor::initializeFromRows(
         (*_grad_disp[0])[_qp], (*_grad_disp[1])[_qp], (*_grad_disp[2])[_qp]);
 
-    const auto grad_disp_tensor_old = RankTwoTensor::initializeFromRows(
+    auto grad_disp_tensor_old = RankTwoTensor::initializeFromRows(
         (*_grad_disp_old[0])[_qp], (*_grad_disp_old[1])[_qp], (*_grad_disp_old[2])[_qp]);
 
     _deformation_gradient[_qp] = grad_disp_tensor + _grad_enrich_disp_tensor[_qp];
@@ -145,9 +145,6 @@ ComputeCrackTipEnrichmentIncrementalStrain::computeProperties()
         0.5 * ((grad_disp_tensor_old + _grad_enrich_disp_tensor_old[_qp]) +
                (grad_disp_tensor_old + _grad_enrich_disp_tensor_old[_qp]).transpose());
 
-    _grad_disp_rate[_qp] =
-        (MetaPhysicL::raw_value(grad_disp_tensor) - (grad_disp_tensor_old)) / _dt;
-
     // total strain
     _total_strain[_qp] = _total_strain_old[_qp] + _strain_increment[_qp];
 
@@ -156,9 +153,15 @@ ComputeCrackTipEnrichmentIncrementalStrain::computeProperties()
 
     // strain rate
     if (_dt > 0)
+    {
       _strain_rate[_qp] = _strain_increment[_qp] / _dt;
+      _grad_disp_rate[_qp] = (grad_disp_tensor - grad_disp_tensor_old) / _dt;
+    }
     else
+    {
       _strain_rate[_qp].zero();
+      _grad_disp_rate[_qp].zero();
+    }
 
     // Update strain in intermediate configuration: rotations are not needed
     _mechanical_strain[_qp] = _mechanical_strain_old[_qp] + _strain_increment[_qp];
