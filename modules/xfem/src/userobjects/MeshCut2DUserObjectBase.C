@@ -328,7 +328,7 @@ MeshCut2DUserObjectBase::isPointOnEdgeBoundary(const Point & point, Real toleran
         }
       }
       else
-        mooseError("Current implementation only supports 2D problem!\n");
+        mooseError("MeshCut2DUserObjectBase currently only supports linear elements.\n");
     }
   }
   return false;
