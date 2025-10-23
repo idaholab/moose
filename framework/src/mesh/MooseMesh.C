@@ -252,6 +252,7 @@ MooseMesh::MooseMesh(const InputParameters & parameters)
     _regular_orthogonal_mesh(false),
     _is_split(getParam<bool>("_is_split")),
     _has_lower_d(false),
+    _has_incomplete_interface_pairs(false),
     _allow_recovery(true),
     _construct_node_list_from_side_list(getParam<bool>("construct_node_list_from_side_list")),
     _need_delete(false),

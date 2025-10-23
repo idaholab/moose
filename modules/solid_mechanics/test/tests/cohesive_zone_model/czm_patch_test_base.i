@@ -145,7 +145,7 @@
 
 [Physics/SolidMechanics/CohesiveZone]
   [./czm_ik]
-    boundary = 'interface'
+    boundary = 'Block1_Block2 Block1_Block3 Block1_Block4 Block1_Block5 Block1_Block6 Block2_Block3 Block2_Block4 Block2_Block5 Block2_Block7 Block3_Block4 Block3_Block6 Block3_Block7 Block4_Block5 Block4_Block6 Block4_Block7 Block5_Block6 Block5_Block7 Block6_Block7'
   [../]
 []
 
@@ -159,7 +159,7 @@
     C_ijkl = '1.684e5 0.176e5 0.176e5 1.684e5 0.176e5 1.684e5 0.754e5 0.754e5 0.754e5'
   [../]
   [./czm_mat]
-    boundary = 'interface'
+    boundary = 'Block1_Block2 Block1_Block3 Block1_Block4 Block1_Block5 Block1_Block6 Block2_Block3 Block2_Block4 Block2_Block5 Block2_Block7 Block3_Block4 Block3_Block6 Block3_Block7 Block4_Block5 Block4_Block6 Block4_Block7 Block5_Block6 Block5_Block7 Block6_Block7'
   [../]
 []
 

@@ -95,7 +95,7 @@
 
 [Physics/SolidMechanics/CohesiveZone]
   [czm_ik]
-    boundary = 'interface'
+    boundary = 'block1_block2'
   []
 []
 
@@ -110,7 +110,7 @@
   []
   [czm]
     type = BiLinearMixedModeTraction
-    boundary = 'interface'
+    boundary = 'block1_block2'
     penalty_stiffness = 1e6
     GI_c = 1e3
     GII_c = 1e2
