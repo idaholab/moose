@@ -22,7 +22,7 @@
 // rather than hand-coding them in derived classes.
 typedef DualNumber<Real, DNDerivativeSize<5>> FPADReal;
 
-class FluidProperties : public ThreadedGeneralUserObject, public SolutionInvalidInterface
+class FluidProperties : public ThreadedGeneralUserObject
 {
 public:
   static InputParameters validParams();

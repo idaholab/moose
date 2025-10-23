@@ -17,8 +17,7 @@
  * Performs a geometric interpolation based on the values at the nearest nodes to a target location
  * in the origin mesh.
  */
-class MultiAppGeneralFieldNearestLocationTransfer : public MultiAppGeneralFieldTransfer,
-                                                    public SolutionInvalidInterface
+class MultiAppGeneralFieldNearestLocationTransfer : public MultiAppGeneralFieldTransfer
 
 {
 public:
@@ -27,6 +26,9 @@ public:
   MultiAppGeneralFieldNearestLocationTransfer(const InputParameters & parameters);
 
   void initialSetup() override;
+
+  // Use solution invalid output for these warnings
+  usingCombinedWarningSolutionWarnings;
 
 protected:
   virtual void prepareEvaluationOfInterpValues(const unsigned int var_index) override;

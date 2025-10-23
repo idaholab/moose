@@ -12,9 +12,9 @@
 // MOOSE includes
 #include "Moose.h"
 #include "SolutionInvalidity.h"
+#include "MooseBase.h"
 
 // Forward declarations
-class MooseObject;
 class FEProblemBase;
 
 #define flagInvalidSolution(message)                                                               \
@@ -31,13 +31,35 @@ class FEProblemBase;
     this->flagInvalidSolutionInternal<true>(__invalid_id);                                         \
   } while (0)
 
+// This macro is useful when we have different messages but appearing in the same place in the code
+// for example when nesting a solution warning creation under the mooseWarning
+#define flagSolutionWarningMultipleRegistration(message)                                           \
+  do                                                                                               \
+  {                                                                                                \
+    const auto __invalid_id = this->registerInvalidSolutionInternal(message, true);                \
+    this->flagInvalidSolutionInternal<true>(__invalid_id);                                         \
+  } while (0)
+
+// Every class using this interface must specify either
+// 'usingCombinedWarningSolutionWarnings' or 'usingMooseBaseWarnings'
+#define usingCombinedWarningSolutionWarnings                                                       \
+  using SolutionInvalidInterface::mooseWarning;                                                    \
+  using SolutionInvalidInterface::mooseWarningNonPrefixed;                                         \
+  using SolutionInvalidInterface::mooseDeprecated;                                                 \
+  using SolutionInvalidInterface::paramWarning
+#define usingMooseBaseWarnings                                                                     \
+  using MooseBase::mooseWarning;                                                                   \
+  using MooseBase::mooseWarningNonPrefixed;                                                        \
+  using MooseBase::mooseDeprecated;                                                                \
+  using MooseBase::paramWarning
+
 /**
  * An interface that allows the marking of invalid solutions during a solve
  */
 class SolutionInvalidInterface
 {
 public:
-  SolutionInvalidInterface(const MooseObject * const moose_object);
+  SolutionInvalidInterface(const MooseBase * const moose_base, const InputParameters & params);
 
 #ifdef MOOSE_KOKKOS_ENABLED
   /**
@@ -46,6 +68,35 @@ public:
   SolutionInvalidInterface(const SolutionInvalidInterface & object,
                            const Moose::Kokkos::FunctorCopy & key);
 #endif
+
+  template <typename... Args>
+  void mooseWarning(Args &&... args) const
+  {
+    _si_moose_base.MooseBase::mooseWarning(std::forward<Args>(args)...);
+    flagSolutionWarningMultipleRegistration(_si_moose_base.name() + ": warning");
+  }
+
+  template <typename... Args>
+  void mooseWarningNonPrefixed(Args &&... args) const
+  {
+    _si_moose_base.MooseBase::mooseWarningNonPrefixed(std::forward<Args>(args)...);
+    flagSolutionWarningMultipleRegistration(_si_moose_base.name() + ": warning");
+  }
+
+  template <typename... Args>
+  void mooseDeprecated(Args &&... args) const
+  {
+    _si_moose_base.MooseBase::mooseDeprecated(std::forward<Args>(args)...);
+    flagSolutionWarningMultipleRegistration(_si_moose_base.name() + ": deprecation");
+  }
+
+  template <typename... Args>
+  void paramWarning(const std::string & param, Args... args) const
+  {
+    _si_moose_base.MooseBase::paramWarning(param, std::forward<Args>(args)...);
+    flagSolutionWarningMultipleRegistration(_si_moose_base.name() + ": warning for parameter '" +
+                                            param + "'");
+  }
 
 protected:
   template <bool warning>
@@ -56,9 +107,9 @@ protected:
                                                     const bool warning) const;
 
 private:
-  /// The MooseObject that owns this interface
-  const MooseObject & _si_moose_object;
+  /// The MooseBase that owns this interface
+  const MooseBase & _si_moose_base;
 
-  /// A reference to FEProblem base
-  const FEProblemBase & _si_problem;
+  /// A pointer to FEProblem base
+  const FEProblemBase * _si_problem;
 };
