@@ -22,20 +22,16 @@ StressCorrosionCracking::validParams()
       "rates computed by this reporter are stored in the same order as in the fracture "
       "integral VectorPostprocessors.");
 
-  params.addRequiredRangeCheckedParam<Real>(
-      "k_low",
-      "k_low>0",
-      "Value of K_I below which the crack growth rate is constant, with the value specified in "
-      "growth_rate_low");
-  params.addRequiredRangeCheckedParam<Real>(
-      "growth_rate_low", "growth_rate_low>0", "growth rate when K_I is below k_low");
-  params.addRequiredRangeCheckedParam<Real>(
-      "k_high",
-      "k_high>0",
-      "Value of K_I above which the crack growth rate is constant, with the value specified in "
-      "growth_rate_high");
-  params.addRequiredRangeCheckedParam<Real>(
-      "growth_rate_high", "growth_rate_high>0", "growth rate when K_I is above k_high");
+  params.addRequiredRangeCheckedParam<Real>("k_low",
+                                            "k_low>0",
+                                            "Value of K_I below which the crack growth rate is "
+                                            "constant and equal to the mid growth rate function "
+                                            "evaluated with a K_I=k_low.");
+  params.addRequiredRangeCheckedParam<Real>("k_high",
+                                            "k_high>0",
+                                            "Value of K_I above which the crack growth rate is "
+                                            "constant and equal to the mid growth rate function "
+                                            "evaluated with a K_I=k_high.");
   params.addRequiredParam<Real>("growth_rate_mid_multiplier",
                                 "Growth rate multiplier when K_I is between k_low and k_high");
   params.addRequiredParam<Real>("growth_rate_mid_exp_factor", "Growth rate exponential factor");
@@ -54,9 +50,7 @@ StressCorrosionCracking::validParams()
 StressCorrosionCracking::StressCorrosionCracking(const InputParameters & parameters)
   : CrackGrowthReporterBase(parameters),
     _k_low(getParam<Real>("k_low")),
-    _growth_rate_low(getParam<Real>("growth_rate_low")),
     _k_high(getParam<Real>("k_high")),
-    _growth_rate_high(getParam<Real>("growth_rate_high")),
     _growth_rate_mid_multiplier(getParam<Real>("growth_rate_mid_multiplier")),
     _growth_rate_mid_exp_factor(getParam<Real>("growth_rate_mid_exp_factor")),
 
@@ -79,13 +73,13 @@ StressCorrosionCracking::computeGrowth(std::vector<int> & index)
   {
     if (index[i] != -1)
     {
-      if (_ki_vpp[i] < _k_low)
-        growth_rate[i] = _growth_rate_low;
-      else if ((_ki_vpp[i] >= _k_low) && (_ki_vpp[i] < _k_high))
-        growth_rate[i] =
-            _growth_rate_mid_multiplier * std::pow(_ki_vpp[i], _growth_rate_mid_exp_factor);
-      else
-        growth_rate[i] = _growth_rate_high;
+      Real ki = _ki_vpp[i];
+      if (ki < _k_low)
+        ki = _k_low;
+      else if (ki > _k_high)
+        ki = _k_high;
+
+      growth_rate[i] = _growth_rate_mid_multiplier * std::pow(ki, _growth_rate_mid_exp_factor);
     }
   }
 

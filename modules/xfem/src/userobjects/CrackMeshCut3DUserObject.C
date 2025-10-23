@@ -126,7 +126,7 @@ CrackMeshCut3DUserObject::CrackMeshCut3DUserObject(const InputParameters & param
     if (cut_elem->n_nodes() != _cut_elem_nnode)
       mooseError("The input cut mesh should include tri elements only!");
     if (cut_elem->dim() != _cut_elem_dim)
-      mooseError("The input cut mesh should have 2D elements only!");
+      mooseError("The input cut mesh must be 2D elements only!");
   }
 }
 
@@ -597,7 +597,7 @@ CrackMeshCut3DUserObject::refineBoundary()
 {
   std::vector<dof_id_type> new_boundary_order(_boundary.begin(), _boundary.end());
 
-  mooseAssert(_boundary.size() >= 2, "Boundary should have at least two nodes");
+  mooseAssert(_boundary.size() >= 2, "Boundary must be at least two nodes");
 
   for (unsigned int i = _boundary.size() - 1; i >= 1; --i)
   {
@@ -984,8 +984,7 @@ CrackMeshCut3DUserObject::findFrontIntersection()
         Node * this_node = Node::build(inter1, _cutter_mesh->n_nodes()).release();
         _cutter_mesh->add_node(this_node);
 
-        mooseAssert(_cutter_mesh->n_nodes() - 1 > 0,
-                    "The cut mesh should have at least one element.");
+        mooseAssert(_cutter_mesh->n_nodes() - 1 > 0, "The cut mesh must be at least one element.");
         unsigned int n = _cutter_mesh->n_nodes() - 1;
 
         auto it = _front[i].begin();
@@ -1106,7 +1105,7 @@ CrackMeshCut3DUserObject::triangulation()
 {
 
   mooseAssert(_active_boundary.size() == _front.size(),
-              "_active_boundary and _front should have the same size!");
+              "_active_boundary and _front must be the same size!");
 
   if (_inactive_boundary_pos.size() == 0)
   {

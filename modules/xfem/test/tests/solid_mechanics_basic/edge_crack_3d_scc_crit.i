@@ -9,9 +9,7 @@
     crackMeshCut3DUserObject_name = cut_mesh
     max_growth_increment = 0.1
     k_low = 10
-    growth_rate_low = 0.075
     k_high = 20
-    growth_rate_high = 0.015
     growth_rate_mid_multiplier = 0.00075
     growth_rate_mid_exp_factor = 1
   []

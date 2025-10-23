@@ -27,9 +27,7 @@ protected:
 
   ///@{ Material specific scc parameters
   const Real & _k_low;
-  const Real & _growth_rate_low;
   const Real & _k_high;
-  const Real & _growth_rate_high;
   const Real & _growth_rate_mid_multiplier;
   const Real & _growth_rate_mid_exp_factor;
   ///@}

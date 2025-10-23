@@ -25,14 +25,14 @@ which is input into `StressCorrosionCracking` using the following input file syn
     crackMeshCut3DUserObject_name = cut_mesh
     max_growth_increment = 0.0004
     k_low = 6.7e6
-    growth_rate_low = 2e-9
     k_high = 59e6
-    growth_rate_high = 2.01e-7
     growth_rate_mid_multiplier = 3.601e-24 #3.33e-11*(1e-6)**2.161
     growth_rate_mid_exp_factor = 2.161
   []
 []
 ```
+The growth rate below [!param](/Reporters/StressCorrosionCracking/k_low) and above [!param](/Reporters/StressCorrosionCracking/k_high) is constant and computed from the equation for the mid growth rate.
+
 
 ## Example Syntax
 
