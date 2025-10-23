@@ -208,7 +208,7 @@ CSGBase::removeCellsFromUniverse(const CSGUniverse & universe,
     removeCellFromUniverse(universe, c);
 }
 
-const CSGLattice &
+CSGLattice &
 CSGBase::createCartesianLattice(
     const std::string & name,
     const Real pitch,
@@ -230,13 +230,13 @@ CSGBase::createCartesianLattice(
 
 void
 CSGBase::addUniverseToLattice(CSGLattice & lattice,
-                              std::reference_wrapper<const CSGUniverse> & universe,
+                              const CSGUniverse & universe,
                               std::pair<int, int> index)
 {
   if (!checkUniverseInBase(universe))
-    mooseError("Cannot add universe " + universe.get().getName() + " to lattice " +
-               lattice.getName() + ". Universe is not in the CSGBase instance.");
-  lattice.setUniverseAtIndex(universe, index);
+    mooseError("Cannot add universe " + universe.getName() + " to lattice " + lattice.getName() +
+               ". Universe is not in the CSGBase instance.");
+  lattice.setUniverseAtIndex(std::cref(universe), index);
 }
 
 void
@@ -254,6 +254,7 @@ CSGBase::setLatticeUniverses(
                    univ.getName() + " is not in the CSGBase instance.");
     }
   }
+  lattice.setUniverses(universes);
 }
 
 void

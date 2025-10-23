@@ -24,7 +24,16 @@ CSGLattice::setUniverses(
   if (!isValidUniverseMap(universes))
     mooseError("Cannot set lattice " + getName() +
                " with universes. Does not have valid dimensions for lattice type " + getType());
-  _universe_map = universes;
+  // Convert input to std::optional
+  _universe_map.resize(universes.size());
+  for (size_t i = 0; i < universes.size(); ++i)
+  {
+    _universe_map[i].resize(universes[i].size());
+    for (size_t j = 0; j < universes[i].size(); ++j)
+    {
+      _universe_map[i][j] = universes[i][j];
+    }
+  }
 }
 
 void
@@ -37,21 +46,22 @@ CSGLattice::setUniverseAtIndex(std::reference_wrapper<const CSGUniverse> univers
     mooseError(base_msg + "Universe map has not been initialized.");
   if (!isValidIndex(index))
     mooseError(base_msg + "Not a valid location.");
-  _universe_map[index.first][index.second] = universe;
+  _universe_map[index.first][index.second] =
+      std::optional<std::reference_wrapper<const CSGUniverse>>(universe);
 }
 
 bool
 CSGLattice::hasUniverse(const std::string & name) const
 {
-  for (auto list_univ : _universe_map)
+  for (const auto & list_univ : _universe_map)
   {
-    for (const CSGUniverse & univ : list_univ)
+    for (const auto & univ_opt : list_univ)
     {
-      if (univ.getName() == name)
+      if (univ_opt.has_value() && univ_opt.value().get().getName() == name)
         return true;
     }
   }
-  return false; // no universe with matching name was found
+  return false;
 }
 
 void
@@ -62,14 +72,36 @@ CSGLattice::checkDimensions() const
                getType());
 }
 
+std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>>
+CSGLattice::getUniverses() const
+{
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universe_map;
+
+  for (const auto & row : _universe_map)
+  {
+    std::vector<std::reference_wrapper<const CSGUniverse>> universe_row;
+    for (const auto & universe_opt : row)
+    {
+      if (universe_opt.has_value())
+        universe_row.push_back(universe_opt.value());
+      else
+        mooseError("Lattice " + getName() + " contains elements with uninitialized universes.");
+    }
+    universe_map.push_back(universe_row);
+  }
+  return universe_map;
+}
+
 std::reference_wrapper<const CSGUniverse>
 CSGLattice::getUniverseAtIndex(const std::pair<int, int> index)
 {
   if (!isValidIndex(index))
     mooseError("Index (" + std::to_string(index.first) + ", " + std::to_string(index.second) +
                ") is not a valid index for lattice " + getName());
-  else
-    return _universe_map[index.first][index.second];
+  else if (!_universe_map[index.first][index.second].has_value())
+    mooseError("No universe set at index (" + std::to_string(index.first) + ", " +
+               std::to_string(index.second) + ") for lattice " + getName());
+  return _universe_map[index.first][index.second].value();
 }
 
 const std::vector<std::pair<int, int>>
@@ -83,9 +115,12 @@ CSGLattice::getUniverseIndices(const std::string & univ_name) const
   {
     for (auto j : make_range(_universe_map[i].size()))
     {
-      const CSGUniverse & univ = _universe_map[i][j];
-      if (univ.getName() == univ_name)
-        indices.push_back(std::make_pair(i, j));
+      if (_universe_map[i][j].has_value())
+      {
+        const CSGUniverse & univ = _universe_map[i][j].value().get();
+        if (univ.getName() == univ_name)
+          indices.push_back(std::make_pair(i, j));
+      }
     }
   }
   return indices;
