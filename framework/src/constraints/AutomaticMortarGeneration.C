@@ -1908,19 +1908,20 @@ AutomaticMortarGeneration::processAlignedNodes(
 
   for (const auto nn : index_range(*secondary_node_neighbors))
   {
-    const Elem * secondary_neigh = (*secondary_node_neighbors)[nn];
-    Point opposite = (secondary_neigh->node_ptr(0) == &secondary_node) ? secondary_neigh->point(1)
-                                                                       : secondary_neigh->point(0);
-    Point cp = nodal_normal.cross(opposite - secondary_node);
+    const Elem * const secondary_neigh = (*secondary_node_neighbors)[nn];
+    const Point opposite = (secondary_neigh->node_ptr(0) == &secondary_node)
+                               ? secondary_neigh->point(1)
+                               : secondary_neigh->point(0);
+    const Point cp = nodal_normal.cross(opposite - secondary_node);
     secondary_node_neighbor_cps[nn] = cp(2);
   }
 
   for (const auto nn : index_range(*primary_node_neighbors))
   {
-    const Elem * primary_neigh = (*primary_node_neighbors)[nn];
-    Point opposite = (primary_neigh->node_ptr(0) == &primary_node) ? primary_neigh->point(1)
-                                                                   : primary_neigh->point(0);
-    Point cp = nodal_normal.cross(opposite - secondary_node);
+    const Elem * const primary_neigh = (*primary_node_neighbors)[nn];
+    const Point opposite = (primary_neigh->node_ptr(0) == &primary_node) ? primary_neigh->point(1)
+                                                                         : primary_neigh->point(0);
+    const Point cp = nodal_normal.cross(opposite - primary_node);
     primary_node_neighbor_cps[nn] = cp(2);
   }
 
