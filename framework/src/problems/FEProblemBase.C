@@ -8276,7 +8276,7 @@ FEProblemBase::updateMeshXFEM()
           /*intermediate_change=*/false, /*contract_mesh=*/true, /*clean_refinement_flags=*/false);
 
     updated = _xfem->update(_time, _nl, *_aux);
-    if (updated) // if subcrical crack advancement, do not need to reinitialize solution
+    if (updated)
     {
       meshChanged(
           /*intermediate_change=*/false, /*contract_mesh=*/true, /*clean_refinement_flags=*/false);
