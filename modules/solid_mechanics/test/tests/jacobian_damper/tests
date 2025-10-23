@@ -1,5 +1,5 @@
 [Tests]
-  issues = '#21397'
+  issues = '#21397 #31731'
   design = 'source/dampers/ElementJacobianDamper.md source/dampers/ReferenceElementJacobianDamper.md'
   [damper_exodus]
     type = 'Exodiff'
@@ -28,5 +28,14 @@
     exodiff = 'block_restriction_out.e'
     requirement = "The module shall be able to apply a damper on certain blocks of the undisplaced "
                   "mesh to limit the element Jacobian change over nonlinear iterations."
+  []
+  [survive_negative_jacobian]
+    type = RunException
+    input = 'exception_handling.i'
+    requirement = "The system shall treat negative Jacobians encountered during the process of applying dampers as exceptions that can be recovered from by retrying the current time step."
+    # exception hit turns into a warning
+    allow_warnings = true
+    should_crash = false
+    expect_err = 'negative Jacobian'
   []
 []
