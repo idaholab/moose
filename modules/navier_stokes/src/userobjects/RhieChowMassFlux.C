@@ -553,6 +553,7 @@ RhieChowMassFlux::computeHbyA(const bool with_updated_pressure, bool verbose)
 
   _HbyA_raw.clear();
   _Ainv_raw.clear();
+
   for (auto system_i : index_range(_momentum_systems))
   {
     LinearImplicitSystem * momentum_system = _momentum_implicit_systems[system_i];
@@ -699,6 +700,12 @@ RhieChowMassFlux::computeHbyA(const bool with_updated_pressure, bool verbose)
     }
 
     Ainv.pointwise_mult(Ainv, *_cell_volumes);
+
+    if (verbose)
+    {
+      _console << " 1/A" << std::endl;
+      Ainv.print();
+    }
   }
 
   // We fill the 1/A and H/A functors

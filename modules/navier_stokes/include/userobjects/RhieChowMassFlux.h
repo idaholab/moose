@@ -149,6 +149,8 @@ protected:
    */
   std::vector<std::unique_ptr<NumericVector<Number>>> _Ainv_raw;
 
+  std::unique_ptr<NumericVector<Number>> _A_avg;
+
   /**
    * A map functor from faces to mass fluxes which are used in the advection terms.
    */
