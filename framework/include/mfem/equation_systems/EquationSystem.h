@@ -48,8 +48,7 @@ public:
   virtual void AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc);
 
   /// Initialise
-  virtual void Init(Moose::MFEM::GridFunctions & gridfunctions,
-                    mfem::AssemblyLevel assembly_level);
+  virtual void Init(Moose::MFEM::GridFunctions & gridfunctions, mfem::AssemblyLevel assembly_level);
 
   /// Build linear forms and eliminate constrained DoFs
   virtual void BuildLinearForms();
@@ -64,14 +63,16 @@ public:
   virtual void BuildMixedBilinearForms();
   virtual void BuildEquationSystem();
 
-  void assembleJacobian(Moose::MFEM::NamedFieldsMap<mfem::ParBilinearForm> &jac_blfs,
-                    Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>> & jac_mblfs,
-                    Moose::MFEM::NamedFieldsMap<mfem::ParLinearForm> & rhs_lfs,
-                    std::vector<mfem::Array<int>> & ess_tdof_lists,
-                    std::vector<std::unique_ptr<mfem::ParGridFunction>> &var_ess_constraints,
-                    mfem::OperatorHandle & op,                    
-                    mfem::BlockVector & trueX,
-                    mfem::BlockVector & trueRHS);
+  void assembleJacobian(
+      Moose::MFEM::NamedFieldsMap<mfem::ParBilinearForm> & jac_blfs,
+      Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>> &
+          jac_mblfs,
+      Moose::MFEM::NamedFieldsMap<mfem::ParLinearForm> & rhs_lfs,
+      std::vector<mfem::Array<int>> & ess_tdof_lists,
+      std::vector<std::unique_ptr<mfem::ParGridFunction>> & var_ess_constraints,
+      mfem::OperatorHandle & op,
+      mfem::BlockVector & trueX,
+      mfem::BlockVector & trueRHS);
 
   /// Form linear system, with essential boundary conditions accounted for
   virtual void FormLinearSystem(mfem::OperatorHandle & op,

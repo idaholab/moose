@@ -17,7 +17,7 @@
     type = MFEMScalarFESpace
     fec_type = L2
     fec_order = CONSTANT
-  []  
+  []
 []
 
 [Variables]
@@ -32,23 +32,16 @@
   []
 []
 
-[AuxVariables]
-  [div_heat_flux]
-    type = MFEMVariable
-    fespace = L2FESpace
-  []  
-[]
-
-[AuxKernels]
-  [div_heat_flux]
-    type = MFEMDivAux
-    variable = div_heat_flux
-    source = heat_flux
-    execute_on = TIMESTEP_END
-  []
-[]
-
 [Kernels]
+  [dT_dt,T']
+    type = MFEMTimeDerivativeMassKernel
+    variable = temperature
+  []
+  [divh,T']
+    type = MFEMVectorFEDivergenceKernel
+    trial_variable = heat_flux
+    variable = temperature
+  []
   [h,h']
     type = MFEMTimeDerivativeVectorFEMassKernel
     variable = time_integrated_heat_flux
@@ -59,18 +52,6 @@
     variable = time_integrated_heat_flux
     coefficient = -1.0
     transpose = true
-  []
-
-  [dT_dt,dT_dt']
-    type = MFEMTimeDerivativeMassKernel
-    variable = temperature
-    coefficient = 1.0
-  []  
-  [divh,dT_dt']
-    type = MFEMVectorFEDivergenceKernel
-    trial_variable = heat_flux
-    variable = temperature
-    coefficient = 1.0
   []
 []
 

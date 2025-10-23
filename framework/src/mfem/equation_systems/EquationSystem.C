@@ -121,8 +121,7 @@ EquationSystem::AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc)
 }
 
 void
-EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
-                     mfem::AssemblyLevel assembly_level)
+EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions, mfem::AssemblyLevel assembly_level)
 {
   _assembly_level = assembly_level;
 
@@ -258,14 +257,16 @@ EquationSystem::FormSystem(mfem::OperatorHandle & op,
 }
 
 void
-EquationSystem::assembleJacobian(Moose::MFEM::NamedFieldsMap<mfem::ParBilinearForm> &jac_blfs,
-                            Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>> & jac_mblfs,
-                            Moose::MFEM::NamedFieldsMap<mfem::ParLinearForm> & rhs_lfs,
-                            std::vector<mfem::Array<int>> & ess_tdof_lists,
-                            std::vector<std::unique_ptr<mfem::ParGridFunction>> &var_ess_constraints,
-                            mfem::OperatorHandle & op,
-                            mfem::BlockVector & trueX,
-                            mfem::BlockVector & trueRHS)
+EquationSystem::assembleJacobian(
+    Moose::MFEM::NamedFieldsMap<mfem::ParBilinearForm> & jac_blfs,
+    Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>> &
+        jac_mblfs,
+    Moose::MFEM::NamedFieldsMap<mfem::ParLinearForm> & rhs_lfs,
+    std::vector<mfem::Array<int>> & ess_tdof_lists,
+    std::vector<std::unique_ptr<mfem::ParGridFunction>> & var_ess_constraints,
+    mfem::OperatorHandle & op,
+    mfem::BlockVector & trueX,
+    mfem::BlockVector & trueRHS)
 {
   // Allocate block operator
   DeleteAllBlocks();
@@ -317,8 +318,8 @@ EquationSystem::assembleJacobian(Moose::MFEM::NamedFieldsMap<mfem::ParBilinearFo
   trueRHS.SyncFromBlocks();
 
   // Create monolithic matrix
-  op.Reset(mfem::HypreParMatrixFromBlocks(_h_blocks));  
-}                                 
+  op.Reset(mfem::HypreParMatrixFromBlocks(_h_blocks));
+}
 
 void
 EquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
@@ -467,7 +468,7 @@ TimeDependentEquationSystem::TimeDependentEquationSystem(
 
 void
 TimeDependentEquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
-                     mfem::AssemblyLevel assembly_level)
+                                  mfem::AssemblyLevel assembly_level)
 {
   EquationSystem::Init(gridfunctions, assembly_level);
   for (auto & test_var_name : _test_var_names)
@@ -533,7 +534,7 @@ TimeDependentEquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
     AddTestVariableNameIfMissing(test_var_name);
     AddCoupledVariableNameIfMissing(trial_var_name);
 
-    // Register new kernels map if not present for the test variable    
+    // Register new kernels map if not present for the test variable
     if (!_td_kernels_map.Has(test_var_name))
     {
       auto kernel_field_map =
@@ -637,9 +638,10 @@ TimeDependentEquationSystem::BuildMixedBilinearForms()
       // Recover and scale integrators from the mblf acting on the time integral of the trial
       // variable corresponding to coupled_var_name. This is to apply the dt*du/dt contributions
       // from the operator on the trial variable in the implicit integration scheme
-      const auto & trial_var_time_integral_name = _time_derivative_map.getTimeIntegralName(trial_var_name);
+      const auto & trial_var_time_integral_name =
+          _time_derivative_map.getTimeIntegralName(trial_var_name);
       if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(trial_var_time_integral_name))
-      {      
+      {
         // Recover and scale integrators from mblf. This is to apply the dt*du/dt contributions
         // from the operator on the trial variable in the implicit integration scheme
         auto mblf = _mblfs.Get(test_var_name)->Get(trial_var_time_integral_name);
@@ -662,9 +664,9 @@ TimeDependentEquationSystem::BuildMixedBilinearForms()
       }
       // If implicit contributions exist, scale them by timestep and add to td_mblf
       if (td_mblf->GetDBFI()->Size() || td_mblf->GetBBFI()->Size())
-      {        
+      {
         // Assemble mixed bilinear form
-        td_mblf->SetAssemblyLevel(_assembly_level);                                                    
+        td_mblf->SetAssemblyLevel(_assembly_level);
         td_mblf->Assemble();
         // Register mixed bilinear forms associated with a single trial variable
         // for the current test variable
@@ -729,7 +731,8 @@ TimeDependentEquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
                                               mfem::BlockVector & trueRHS)
 {
   // Form linear system for operator acting on vector of du/dt
-  assembleJacobian(_td_blfs, _td_mblfs, _lfs, _ess_tdof_lists, _td_var_ess_constraints, op, truedXdt, trueRHS);
+  assembleJacobian(
+      _td_blfs, _td_mblfs, _lfs, _ess_tdof_lists, _td_var_ess_constraints, op, truedXdt, trueRHS);
 }
 
 void
@@ -744,7 +747,8 @@ TimeDependentEquationSystem::FormSystem(mfem::OperatorHandle & op,
   // Form linear system for operator acting on vector of du/dt
   mfem::OperatorPtr aux_a;
   mfem::Vector aux_x, aux_rhs;
-  td_blf->FormLinearSystem(_ess_tdof_lists.at(0), *(_td_var_ess_constraints.at(0)), *lf, aux_a, aux_x, aux_rhs);
+  td_blf->FormLinearSystem(
+      _ess_tdof_lists.at(0), *(_td_var_ess_constraints.at(0)), *lf, aux_a, aux_x, aux_rhs);
 
   truedXdt.GetBlock(0) = aux_x;
   trueRHS.GetBlock(0) = aux_rhs;
