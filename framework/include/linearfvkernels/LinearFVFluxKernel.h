@@ -69,6 +69,11 @@ public:
    */
   virtual Real computeBoundaryRHSContribution(const LinearFVBoundaryCondition & bc) = 0;
 
+  /**
+   * Computes the flux from this kernel on a boundary
+   */
+  virtual Real computeBoundaryFlux(const LinearFVBoundaryCondition & bc);
+
 protected:
   /**
    * Determine the single sided face argument when evaluating a functor on a face.
