@@ -216,7 +216,7 @@
     fa_name  = f_total_matrix
     fb_name  = f_total_bub
     w        = 0.356
-    args = 'cvm cvb cgm cgb'
+    coupled_variables = 'cvm cvb cgm cgb'
   [../]
   [./ACBulkCv]
     type = KKSACBulkC
@@ -224,7 +224,7 @@
     ca       = cvm
     cb       = cvb
     fa_name  = f_total_matrix
-    args     = 'cgm'
+    coupled_variables = 'cgm'
   [../]
   [./ACBulkCg]
     type = KKSACBulkC
@@ -232,7 +232,7 @@
     ca       = cgm
     cb       = cgb
     fa_name  = f_total_matrix
-    args     = 'cvm'
+    coupled_variables = 'cvm'
   [../]
   [./ACInterface]
     type = ACInterface
@@ -259,7 +259,7 @@
     type = ElasticEnergyMaterial
     base_name = matrix
     f_name = fe_m
-    args = ' '
+    coupled_variables = ' '
   [../]
 # Total free energy of the matrix
   [./Total_energy_matrix]
@@ -283,7 +283,7 @@
     type = ElasticEnergyMaterial
     base_name = bub
     f_name = fe_b
-    args = ' '
+    coupled_variables = ' '
   [../]
 
 # Total free energy of the bubble

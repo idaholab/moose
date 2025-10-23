@@ -54,6 +54,6 @@
   execute_on = 'timestep_end'
   [out]
     type = CSV
-    minimum_time_interval = 0.21
+    min_simulation_time_interval = 0.21
   []
 []

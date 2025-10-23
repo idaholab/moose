@@ -188,13 +188,13 @@ velocity_interp_method = 'rc'
     type = INSFVInletVelocityBC
     boundary = 'bottom'
     variable = superficial_vel_x
-    function = 0
+    functor = 0
   []
   [inlet-v]
     type = INSFVInletVelocityBC
     boundary = 'bottom'
     variable = superficial_vel_y
-    function = ${v_inlet}
+    functor = ${v_inlet}
   []
   [inlet-T]
     type = FVNeumannBC

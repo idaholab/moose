@@ -147,7 +147,7 @@ NSFVBase::commonMomentumBoundaryTypesParams()
   params.addParam<MultiMooseEnum>("momentum_outlet_types",
                                   mom_outlet_types,
                                   "Types of outlet boundaries for the momentum equation");
-  params.addParam<std::vector<MooseFunctorName>>("pressure_function",
+  params.addParam<std::vector<MooseFunctorName>>("pressure_functors",
                                                  std::vector<MooseFunctorName>(),
                                                  "Functions for boundary pressures at outlets.");
 
@@ -163,7 +163,7 @@ NSFVBase::commonMomentumBoundaryFluxesParams()
 {
   InputParameters params = emptyInputParameters();
   params.addParam<std::vector<std::vector<MooseFunctorName>>>(
-      "momentum_inlet_function",
+      "momentum_inlet_functors",
       std::vector<std::vector<MooseFunctorName>>(),
       "Functions for inlet boundary velocities or pressures (for fixed-pressure option). Provide a "
       "double vector where the leading dimension corresponds to the number of fixed-velocity and "
@@ -212,7 +212,7 @@ NSFVBase::commonFluidEnergyEquationParams()
                                   "Types for the inlet boundaries for the energy equation.");
 
   params.addParam<std::vector<MooseFunctorName>>(
-      "energy_inlet_function",
+      "energy_inlet_functors",
       std::vector<MooseFunctorName>(),
       "Functions for fixed-value boundaries in the energy equation.");
 
@@ -235,7 +235,7 @@ NSFVBase::commonFluidEnergyEquationParams()
       "Physics wall boundaries will be used");
 
   params.addParam<std::vector<MooseFunctorName>>(
-      "energy_wall_function",
+      "energy_wall_functors",
       std::vector<MooseFunctorName>(),
       "Functions for Dirichlet/Neumann boundaries in the energy equation. For wall types requiring "
       "multiple functions, the syntax is <function_1>:<function_2>:... So, 'convection' types are "
@@ -353,10 +353,7 @@ NSFVBase::commonTurbulenceParams()
                                     "turbulent_prandtl > 0",
                                     "Turbulent Prandtl number for energy turbulent diffusion");
   params.addParam<std::vector<Real>>(
-      "passive_scalar_schmidt_number",
-      std::vector<Real>(),
-      "Turbulent Schmidt numbers used for the passive scalar fields.");
-  params.deprecateParam("passive_scalar_schmidt_number", "Sc_t", "01/01/2025");
+      "Sc_t", std::vector<Real>(), "Turbulent Schmidt numbers used for the passive scalar fields.");
   params.addParamNamesToGroup("mixing_length_walls mixing_length_aux_execute_on von_karman_const "
                               "von_karman_const_0 mixing_length_delta",
                               "Mixing length model");
@@ -473,12 +470,6 @@ NSFVBase::validParams()
    * Parameters describing the handling of advected scalar fields
    */
   params += NSFVBase::commonScalarFieldAdvectionParams();
-
-  // These parameters are not shared because the WCNSFVPhysics use functors
-  params.addParam<std::vector<std::vector<std::string>>>(
-      "passive_scalar_inlet_function",
-      std::vector<std::vector<std::string>>(),
-      "Functions for inlet boundaries in the passive scalar equations.");
 
   /**
    * Parameters describing the handling of turbulence
@@ -616,11 +607,10 @@ NSFVBase::validParams()
                               "Material property");
 
   params.addParamNamesToGroup(
-      "inlet_boundaries momentum_inlet_types momentum_inlet_function energy_inlet_types "
-      "energy_inlet_function wall_boundaries momentum_wall_types energy_wall_boundaries "
-      "energy_wall_types energy_wall_function outlet_boundaries momentum_outlet_types "
-      "pressure_function passive_scalar_inlet_types passive_scalar_inlet_function flux_inlet_pps "
-      "flux_inlet_directions",
+      "inlet_boundaries momentum_inlet_types momentum_inlet_functors energy_inlet_types "
+      "energy_inlet_functors wall_boundaries momentum_wall_types energy_wall_boundaries "
+      "energy_wall_types energy_wall_functors outlet_boundaries momentum_outlet_types "
+      "pressure_functors passive_scalar_inlet_types flux_inlet_pps flux_inlet_directions",
       "Boundary condition");
 
   params.addParamNamesToGroup(

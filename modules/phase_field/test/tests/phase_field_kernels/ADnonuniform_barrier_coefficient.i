@@ -52,21 +52,21 @@
   [./h0]
     type = ADDerivativeParsedMaterial
     f_name = h0
-    args = 'gr0 gr1'
+    coupled_variables = 'gr0 gr1'
     function = 'gr0^2 / (gr0^2 + gr1^2)'
     derivative_order = 2
   [../]
   [./h1]
     type = ADDerivativeParsedMaterial
     f_name = h1
-    args = 'gr0 gr1'
+    coupled_variables = 'gr0 gr1'
     function = 'gr1^2 / (gr0^2 + gr1^2)'
     derivative_order = 2
   [../]
   [./mu]
     type = ADDerivativeParsedMaterial
     f_name = mu
-    args = 'gr0 gr1'
+    coupled_variables = 'gr0 gr1'
     constant_names = 'mag'
     constant_expressions = '16'
     function = 'mag * (gr0^2 * gr1^2 + 0.1)'
@@ -75,7 +75,7 @@
   [./kappa]
     type = ADDerivativeParsedMaterial
     f_name = kappa
-    args = 'gr0 gr1'
+    coupled_variables = 'gr0 gr1'
     material_property_names = 'h0(gr0,gr1) h1(gr0,gr1)'
     constant_names = 'mag0 mag1'
     constant_expressions = '200 100'
@@ -92,7 +92,7 @@
   [./gr0_interface]
     type = ADACInterface
     variable = gr0
-    args = 'gr1'
+    coupled_variables = 'gr1'
     mob_name = L
     kappa_name = 'kappa'
     variable_L = false
@@ -133,7 +133,7 @@
   [./gr1_interface]
     type = ADACInterface
     variable = gr1
-    args = 'gr0'
+    coupled_variables = 'gr0'
     mob_name = L
     kappa_name = 'kappa'
     variable_L = false

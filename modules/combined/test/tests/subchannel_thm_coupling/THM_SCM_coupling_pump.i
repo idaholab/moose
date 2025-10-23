@@ -386,7 +386,7 @@ m_dot_sec_in = 1. # kg/s
   [core_delta_p]
     type = ParsedPostprocessor
     pp_names = 'core_p_in core_p_out'
-    function = 'core_p_in - core_p_out'
+    expression = 'core_p_in - core_p_out'
   []
 
   [hx_pri_T_out]
@@ -428,7 +428,7 @@ m_dot_sec_in = 1. # kg/s
   [Kloss]
     type = ParsedPostprocessor
     pp_names = 'core_delta_p_tgt av_rhouA av_rho'
-    function = '2.0 * core_delta_p_tgt * av_rho * ${A_core} * ${A_core} / (av_rhouA * av_rhouA)'
+    expression = '2.0 * core_delta_p_tgt * av_rho * ${A_core} * ${A_core} / (av_rhouA * av_rhouA)'
   []
 
   [Dh]
@@ -440,7 +440,7 @@ m_dot_sec_in = 1. # kg/s
   [core_f]
     type = ParsedPostprocessor
     pp_names = 'Kloss Dh'
-    function = 'Kloss * Dh / ${core_length}'
+    expression = 'Kloss * Dh / ${core_length}'
   []
 
   ### INFO to send to SC
@@ -467,7 +467,7 @@ m_dot_sec_in = 1. # kg/s
   [inlet_mass_flux]
     type = ParsedPostprocessor
     pp_names = 'inlet_mass_flow_rate'
-    function = 'abs(inlet_mass_flow_rate/${SC_core})'
+    expression = 'abs(inlet_mass_flow_rate/${SC_core})'
   []
   #####
   ##### Info received from subchannel

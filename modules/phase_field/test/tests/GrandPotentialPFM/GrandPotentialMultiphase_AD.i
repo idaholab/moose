@@ -161,7 +161,7 @@
     v = etaa0
     Fj_names = 'rhoa rhob'
     hj_names = 'ha   hb'
-    args = 'etaa0 etab0 etab1'
+    coupled_variables = 'etaa0 etab0 etab1'
   []
   [coupled_etab0dot]
     type = ADCoupledSwitchingTimeDerivative
@@ -169,7 +169,7 @@
     v = etab0
     Fj_names = 'rhoa rhob'
     hj_names = 'ha   hb'
-    args = 'etaa0 etab0 etab1'
+    coupled_variables = 'etaa0 etab0 etab1'
   []
   [coupled_etab1dot]
     type = ADCoupledSwitchingTimeDerivative
@@ -177,7 +177,7 @@
     v = etab1
     Fj_names = 'rhoa rhob'
     hj_names = 'ha   hb'
-    args = 'etaa0 etab0 etab1'
+    coupled_variables = 'etaa0 etab0 etab1'
   []
 []
 
@@ -207,7 +207,7 @@
   []
   [omegaa]
     type = ADDerivativeParsedMaterial
-    args = 'w'
+    coupled_variables = 'w'
     f_name = omegaa
     material_property_names = 'Vm ka caeq'
     expression = '-0.5*w^2/Vm^2/ka-w/Vm*caeq'
@@ -215,7 +215,7 @@
   []
   [omegab]
     type = ADDerivativeParsedMaterial
-    args = 'w'
+    coupled_variables = 'w'
     f_name = omegab
     material_property_names = 'Vm kb cbeq'
     expression = '-0.5*w^2/Vm^2/kb-w/Vm*cbeq'
@@ -223,7 +223,7 @@
   []
   [rhoa]
     type = ADDerivativeParsedMaterial
-    args = 'w'
+    coupled_variables = 'w'
     f_name = rhoa
     material_property_names = 'Vm ka caeq'
     expression = 'w/Vm^2/ka + caeq/Vm'
@@ -231,7 +231,7 @@
   []
   [rhob]
     type = ADDerivativeParsedMaterial
-    args = 'w'
+    coupled_variables = 'w'
     f_name = rhob
     material_property_names = 'Vm kb cbeq'
     expression = 'w/Vm^2/kb + cbeq/Vm'

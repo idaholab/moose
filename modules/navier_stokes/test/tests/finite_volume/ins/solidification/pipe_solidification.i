@@ -284,7 +284,7 @@ Ny = 5
     type = INSFVInletVelocityBC
     boundary = 'inlet'
     variable = vel_x
-    function = '${U_inlet}'
+    functor = '${U_inlet}'
   []
   [sym_u]
     type = INSFVSymmetryVelocityBC
@@ -299,7 +299,7 @@ Ny = 5
     type = INSFVInletVelocityBC
     boundary = 'inlet'
     variable = vel_y
-    function = 0
+    functor = 0
   []
   [walls-u]
     type = INSFVNoSlipWallBC

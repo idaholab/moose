@@ -39,10 +39,6 @@ WCNSFVFluidHeatTransferPhysicsBase::validParams()
       "initial_enthalpy",
       "Initial value of the enthalpy variable, only to be used when solving for enthalpy");
 
-  // New functor boundary conditions
-  params.deprecateParam("energy_inlet_function", "energy_inlet_functors", "01/01/2025");
-  params.deprecateParam("energy_wall_function", "energy_wall_functors", "01/01/2025");
-
   // Spatial finite volume discretization scheme
   params.transferParam<MooseEnum>(NSFVBase::validParams(), "energy_advection_interpolation");
   params.transferParam<MooseEnum>(NSFVBase::validParams(), "energy_face_interpolation");
@@ -68,7 +64,7 @@ WCNSFVFluidHeatTransferPhysicsBase::WCNSFVFluidHeatTransferPhysicsBase(
     _has_energy_equation(
         isParamValid("add_energy_equation")
             ? getParam<bool>("add_energy_equation")
-            : (usingNavierStokesFVSyntax() ? isParamSetByUser("energy_inlet_function") : true)),
+            : (usingNavierStokesFVSyntax() ? isParamSetByUser("energy_inlet_functors") : true)),
     _solve_for_enthalpy(getParam<bool>("solve_for_enthalpy")),
     _fluid_enthalpy_name(getSpecificEnthalpyName()),
     _fluid_temperature_name(getParam<NonlinearVariableName>("fluid_temperature_variable")),

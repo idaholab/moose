@@ -129,7 +129,7 @@
     type = CahnHilliard
     variable = c
     f_name = F
-    args = 'eta1 eta2 eta3'
+    coupled_variables = 'eta1 eta2 eta3'
   [../]
   [./time]
     type = TimeDerivative
@@ -144,7 +144,7 @@
   [./ACBulk1]
     type = AllenCahn
     variable = eta1
-    args = 'eta2 eta3 c'
+    coupled_variables = 'eta2 eta3 c'
     mob_name = L1
     f_name = F
   [../]
@@ -170,7 +170,7 @@
   [./ACBulk2]
     type = AllenCahn
     variable = eta2
-    args = 'eta1 eta3 c'
+    coupled_variables = 'eta1 eta3 c'
     mob_name = L2
     f_name = F
   [../]
@@ -196,7 +196,7 @@
   [./ACBulk3]
     type = AllenCahn
     variable = eta3
-    args = 'eta1 eta2 c'
+    coupled_variables = 'eta1 eta2 c'
     mob_name = L3
     f_name = F
   [../]
@@ -372,21 +372,21 @@
     base_name = phase1
     f_name = Fe1
     derivative_order = 2
-    args = 'c' # should be empty
+    coupled_variables = 'c' # should be empty
   [../]
   [./elastic_free_energy_2]
     type = ElasticEnergyMaterial
     base_name = phase2
     f_name = Fe2
     derivative_order = 2
-    args = 'c' # should be empty
+    coupled_variables = 'c' # should be empty
   [../]
   [./elastic_free_energy_3]
     type = ElasticEnergyMaterial
     base_name = phase3
     f_name = Fe3
     derivative_order = 2
-    args = 'c' # should be empty
+    coupled_variables = 'c' # should be empty
   [../]
 
   # phase free energies (chemical + elastic)

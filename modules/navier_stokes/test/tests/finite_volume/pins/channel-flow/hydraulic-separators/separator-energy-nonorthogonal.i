@@ -176,19 +176,19 @@ velocity_interp_method='rc'
     type = INSFVInletVelocityBC
     boundary = 'inlet-1 inlet-2'
     variable = superficial_vel_x
-    function = '0.0'
+    functor = '0.0'
   []
   [inlet-v-1]
     type = INSFVInletVelocityBC
     boundary = 'inlet-1'
     variable = superficial_vel_y
-    function = 0.1
+    functor = 0.1
   []
   [inlet-v-2]
     type = INSFVInletVelocityBC
     boundary = 'inlet-2'
     variable = superficial_vel_y
-    function = 0.2
+    functor = 0.2
   []
 
   [inlet-T-1]

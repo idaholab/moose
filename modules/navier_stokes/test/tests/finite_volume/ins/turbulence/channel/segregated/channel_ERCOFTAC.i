@@ -253,7 +253,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     variable = TKED
     u = vel_x
     v = vel_y
-    k = TKE
+    tke = TKE
     rho = ${rho}
     mu = ${mu}
     mu_t = 'mu_t'
@@ -270,13 +270,13 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     type = INSFVInletVelocityBC
     boundary = 'left'
     variable = vel_x
-    function = '${bulk_u}'
+    functor = '${bulk_u}'
   []
   [inlet-v]
     type = INSFVInletVelocityBC
     boundary = 'left'
     variable = vel_y
-    function = 0
+    functor = 0
   []
   [walls-u]
     type = FVDirichletBC
@@ -318,7 +318,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     rho = ${rho}
     mu = ${mu}
     mu_t = 'mu_t'
-    k = TKE
+    tke = TKE
     wall_treatment = ${wall_treatment}
   []
 []
@@ -340,7 +340,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     type = kEpsilonViscosityAux
     variable = mu_t
     C_mu = ${C_mu}
-    k = TKE
+    tke = TKE
     epsilon = TKED
     mu = ${mu}
     rho = ${rho}
@@ -355,7 +355,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   [compute_y_plus]
     type = RANSYPlusAux
     variable = yplus
-    k = TKE
+    tke = TKE
     mu = ${mu}
     rho = ${rho}
     u = vel_x

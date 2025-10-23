@@ -101,8 +101,8 @@
   [negative_gradient]
     type = ParsedAux
     variable = negative_gradient
-    args = 'grad_Tx grad_Ty grad_Tz grad_Tfx grad_Tfy grad_Tfz'
-    function = '-(grad_Tx*grad_Tfx+grad_Ty*grad_Tfy+grad_Tz*grad_Tfz)'
+    coupled_variables = 'grad_Tx grad_Ty grad_Tz grad_Tfx grad_Tfy grad_Tfz'
+    expression = '-(grad_Tx*grad_Tfx+grad_Ty*grad_Tfy+grad_Tz*grad_Tfz)'
   []
 []
 

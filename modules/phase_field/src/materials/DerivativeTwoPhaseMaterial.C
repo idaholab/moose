@@ -26,8 +26,7 @@ DerivativeTwoPhaseMaterial::validParams()
   params.addParam<MaterialPropertyName>("g", "g", "Barrier Function Material that provides g(eta)");
 
   // All arguments of the phase free energies
-  params.addCoupledVar("args", "Vector of variable arguments of fa and fb");
-  params.deprecateCoupledVar("args", "coupled_variables", "02/27/2024");
+  params.addCoupledVar("coupled_variables", "Vector of variable arguments of fa and fb");
   params.addCoupledVar("displacement_gradients",
                        "Vector of displacement gradient variables (see "
                        "Modules/PhaseField/DisplacementGradients "

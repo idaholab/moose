@@ -82,9 +82,7 @@ CompositeTensorBase<T, U>::CompositeTensorBase(const InputParameters & parameter
   : DerivativeMaterialInterface<U>(parameters),
     _tensor_names(this->template getParam<std::vector<MaterialPropertyName>>("tensors")),
     _weight_names(this->template getParam<std::vector<MaterialPropertyName>>("weights")),
-    _num_args(this->DerivativeMaterialInterface<U>::isCoupled("args")
-                  ? this->DerivativeMaterialInterface<U>::coupledComponents("args")
-                  : this->DerivativeMaterialInterface<U>::coupledComponents("coupled_variables")),
+    _num_args(this->DerivativeMaterialInterface<U>::coupledComponents("coupled_variables")),
     _num_comp(_tensor_names.size()),
     _dM(_num_args),
     _d2M(_num_args),
@@ -106,8 +104,7 @@ CompositeTensorBase<T, U>::validParams()
   InputParameters params = U::validParams();
   params.addRequiredParam<std::vector<MaterialPropertyName>>("tensors", "Component tensors");
   params.addRequiredParam<std::vector<MaterialPropertyName>>("weights", "Component weights");
-  params.addRequiredCoupledVar("args", "variable dependencies for the prefactor");
-  params.deprecateCoupledVar("args", "coupled_variables", "02/07/2024");
+  params.addRequiredCoupledVar("coupled_variables", "variable dependencies for the prefactor");
   return params;
 }
 

@@ -209,7 +209,7 @@
 []
 
 [Outputs]
-  interval = 50
+  time_step_interval = 50
   exodus = true
   csv = true
 []

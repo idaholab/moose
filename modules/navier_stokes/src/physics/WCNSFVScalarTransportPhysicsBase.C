@@ -31,13 +31,9 @@ WCNSFVScalarTransportPhysicsBase::validParams()
 
   // These parameters are not shared because the NSFVPhysics use functors
   params.addParam<std::vector<std::vector<MooseFunctorName>>>(
-      "passive_scalar_inlet_function",
+      "passive_scalar_inlet_functors",
       std::vector<std::vector<MooseFunctorName>>(),
       "Functors for inlet boundaries in the passive scalar equations.");
-
-  // New functor boundary conditions
-  params.deprecateParam(
-      "passive_scalar_inlet_function", "passive_scalar_inlet_functors", "01/01/2025");
 
   // No need for the duplication
   params.addParam<std::vector<MooseFunctorName>>("passive_scalar_source", "Passive scalar sources");

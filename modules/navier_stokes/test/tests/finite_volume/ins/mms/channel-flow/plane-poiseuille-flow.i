@@ -121,13 +121,13 @@ two_term_boundary_expansion = true
     type = INSFVInletVelocityBC
     boundary = 'left'
     variable = u
-    function = 'exact_u'
+    functor = 'exact_u'
   []
   [inlet-v]
     type = INSFVInletVelocityBC
     boundary = 'left'
     variable = v
-    function = 'exact_v'
+    functor = 'exact_v'
   []
   [walls-u]
     type = INSFVNoSlipWallBC

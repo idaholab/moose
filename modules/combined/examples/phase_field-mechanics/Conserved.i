@@ -172,7 +172,7 @@
     type = ElasticEnergyMaterial
     f_name = Fe
     block = 0
-    args = 'c'
+    coupled_variables = 'c'
     derivative_order = 2
   [../]
 

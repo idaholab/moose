@@ -106,14 +106,14 @@
     eigen_base = '0.1 0.1 0 0 0 0'
     prefactor = var_dep
     #outputs = exodus
-    args = 'eta'
+    coupled_variables = 'eta'
     eigenstrain_name = eigenstrain
   [../]
 
   [./elastic_free_energy]
     type = ElasticEnergyMaterial
     f_name = Fe
-    args = 'eta'
+    coupled_variables = 'eta'
     derivative_order = 2
   [../]
 

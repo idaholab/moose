@@ -47,14 +47,14 @@ rho = 10
 
     inlet_boundaries = 'left'
     momentum_inlet_types = 'fixed-velocity'
-    momentum_inlet_function = '1 0'
+    momentum_inlet_functors = '1 0'
 
     wall_boundaries = 'top bottom'
     momentum_wall_types = 'noslip noslip'
 
     outlet_boundaries = 'right'
     momentum_outlet_types = 'fixed-pressure'
-    pressure_function = '1'
+    pressure_functors = '1'
 
     use_friction_correction = true
     consistent_scaling = 10

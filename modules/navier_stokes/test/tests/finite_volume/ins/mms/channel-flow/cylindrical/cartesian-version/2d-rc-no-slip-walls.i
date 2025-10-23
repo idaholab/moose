@@ -149,13 +149,13 @@ rho=1.1
   [inlet_u]
     type = INSFVInletVelocityBC
     variable = u
-    function = 'exact_u'
+    functor = 'exact_u'
     boundary = 'bottom'
   []
   [inlet_v]
     type = INSFVInletVelocityBC
     variable = v
-    function = 'exact_v'
+    functor = 'exact_v'
     boundary = 'bottom'
   []
 []

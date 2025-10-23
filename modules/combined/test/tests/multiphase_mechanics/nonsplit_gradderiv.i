@@ -123,7 +123,7 @@
   [./elastic_free_energy]
     type = ElasticEnergyMaterial
     f_name = F
-    args = 'c'
+    coupled_variables = 'c'
     derivative_order = 3
   [../]
 []
