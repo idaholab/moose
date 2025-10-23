@@ -141,14 +141,13 @@ class SubprocessRunnerInterface(ABC):
 
     def cleanup(self):
         """Stop the process and subprocess reader."""
-        if hasattr(self, "_process") and self.is_process_running():
+        if self.is_process_running():
             logger.warning("MOOSE process still running on cleanup; killing")
             self.kill_process()
 
-        subprocess_reader = getattr(self, "_subprocess_reader", None)
-        if subprocess_reader is not None and subprocess_reader.is_alive():
+        if self._subprocess_reader is not None and self._subprocess_reader.is_alive():
             logger.warning("Reader thread still running on cleanup; waiting")
-            subprocess_reader.join()
+            self._subprocess_reader.join()
             logger.info("Reader thread has ended")
 
     @abstractmethod
