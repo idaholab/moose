@@ -109,6 +109,7 @@ heated_length = 1.0
   verbose_multiapps = true
   verbose_subchannel = false
   interpolation_scheme = 'upwind'
+  pin_htc_correlation = 'gnielinski'
 []
 
 [ICs]

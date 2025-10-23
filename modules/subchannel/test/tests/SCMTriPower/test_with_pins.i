@@ -107,6 +107,9 @@ num_cells = 40
   segregated = false
   verbose_subchannel = true
   interpolation_scheme = upwind
+
+  # Heat Transfer Correlations
+  pin_htc_correlation = 'gnielinski'
 []
 
 [ICs]

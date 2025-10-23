@@ -141,6 +141,10 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   segregated = false
   interpolation_scheme = 'upwind'
   verbose_subchannel = true
+
+  # Heat Transfer Correlations
+  pin_htc_correlation = 'gnielinski'
+  duct_htc_correlation = 'gnielinski'
 []
 
 [ICs]
