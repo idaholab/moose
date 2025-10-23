@@ -700,8 +700,7 @@ PinMeshGenerator::generate()
 std::unique_ptr<CSG::CSGBase>
 PinMeshGenerator::generateCSG()
 {
-  auto rmp_csg = std::move(getCSGBaseByName(_reactor_params));
-  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  auto csg_obj = std::move(getCSGBaseByName(_reactor_params));
 
   unsigned int radial_index = 0;
   std::vector<std::vector<std::reference_wrapper<const CSG::CSGSurface>>> surfaces_by_radial_region;
@@ -709,7 +708,7 @@ PinMeshGenerator::generateCSG()
   // Add surfaces corresponding to pin rings
   for (const auto & radius : _ring_radii)
   {
-    const auto surf_name = name() + "_radial_ring" + std::to_string(radial_index);
+    const auto surf_name = name() + "_radial_ring_" + std::to_string(radial_index);
     std::unique_ptr<CSG::CSGSurface> ring_surf_ptr =
         std::make_unique<CSG::CSGZCylinder>(surf_name, 0, 0, radius);
     const auto & ring_surf = csg_obj->addSurface(std::move(ring_surf_ptr));
@@ -759,7 +758,7 @@ PinMeshGenerator::generateCSG()
     for (const auto i : make_range(axial_boundaries.size() + 1))
     {
       axial_level += (i != 0) ? axial_boundaries[i - 1] : 0.;
-      const auto surf_name = name() + "_axial_plane" + std::to_string(i);
+      const auto surf_name = name() + "_axial_plane_" + std::to_string(i);
       std::unique_ptr<CSG::CSGSurface> plane_surf_ptr =
           std::make_unique<CSG::CSGPlane>(surf_name, 0, 0, 1, axial_level);
       const auto & plane_surf = csg_obj->addSurface(std::move(plane_surf_ptr));
@@ -776,30 +775,25 @@ PinMeshGenerator::generateCSG()
   // Define all cells within pin domain
   for (const auto i : index_range(radial_regions))
   {
-    const auto & radial_region = radial_regions[i];
-    if (_extrude)
+    for (const auto j : make_range(_extrude ? axial_regions.size() : 1))
     {
-      for (const auto j : index_range(axial_regions))
-      {
-        const auto & axial_region = axial_regions[j];
-        const auto combined_region = radial_region & axial_region;
-        const auto cell_name =
-            name() + "_cell_radial" + std::to_string(i) + "_axial" + std::to_string(j);
-        const auto region_id = _region_ids[j][i];
-        const auto mat_name = "rgmb_region_" + std::to_string(region_id);
-        csg_obj->createCell(cell_name, mat_name, combined_region);
-      }
-    }
-    else
-    {
-      const auto cell_name = name() + "_cell_radial" + std::to_string(i);
-      const auto region_id = _region_ids[0][i];
+      auto cell_region = radial_regions[i];
+      auto cell_name = name() + "_cell_radial_" + std::to_string(i);
+      const auto region_id = _region_ids[j][i];
       const auto mat_name = "rgmb_region_" + std::to_string(region_id);
-      csg_obj->createCell(cell_name, mat_name, radial_region);
+      if (_extrude)
+      {
+        // update name and region with axial info only if extruded
+        const auto axial_region = axial_regions[j];
+        cell_region &= axial_region;
+        cell_name += "_axial_" + std::to_string(j);
+      }
+      csg_obj->createCell(cell_name, mat_name, cell_region);
     }
   }
 
-  // Define void cell to cover region outside pin domain
+  // Define void cell to cover region outside pin domain, where the complement of the last set
+  // inner_region is the outermost defined zone of the pin
   const auto void_cell_name = name() + "_void_cell";
   auto void_region = ~inner_region;
   if (_extrude)
@@ -832,7 +826,7 @@ PinMeshGenerator::getHexCartSurfaces(unsigned int radial_index,
   for (const auto i : make_range(n_surfaces))
   {
     const auto surf_name =
-        name() + "_radial_duct" + std::to_string(radial_index) + "_surf" + std::to_string(i);
+        name() + "_radial_duct_" + std::to_string(radial_index) + "_surf_" + std::to_string(i);
 
     // Define 3 points on the surface
     const auto current_angle = i * angle_increment_radians + angle_offset_radians;

@@ -189,7 +189,7 @@
   [csg]
     requirement = 'The system shall generate the Constructive Solid Geoemtry (CSG) representation of a '
     [2d_hex]
-      detail = '2D hexgaonal pin as a CSG object'
+      detail = '2D hexgaonal pin'
       type = JSONDiff
       input = pin_hex.i
       cli_args = 'Outputs/file_base=pin_hex_2d
@@ -199,7 +199,7 @@
       mesh_mode = REPLICATED
     []
     [3d_hex]
-      detail = '3D hexgaonal pin as a CSG object'
+      detail = '3D hexgaonal pin'
       type = JSONDiff
       input = pin_hex.i
       cli_args = "Mesh/rmp/dim=3
@@ -220,7 +220,7 @@
       mesh_mode = REPLICATED
     []
     [2d_square]
-      detail = '2D square pin as a CSG object'
+      detail = '2D square pin'
       type = JSONDiff
       input = pin_square.i
       cli_args = "Mesh/pin1/ring_radii='0.3385 0.3705 0.4665'
@@ -234,7 +234,7 @@
       mesh_mode = REPLICATED
     []
     [3d_square]
-      detail = '3D square pin as a CSG object'
+      detail = '3D square pin'
       type = JSONDiff
       input = pin_square.i
       cli_args = "Mesh/rmp/dim=3
@@ -253,7 +253,7 @@
       mesh_mode = REPLICATED
     []
     [2d_hex_homogenized]
-      detail = 'homogenized 2D hexagonal pin as a CSG object'
+      detail = 'homogenized 2D hexagonal pin'
       type = JSONDiff
       input = pin_homogenized.i
       cli_args = "Outputs/file_base=pin_hex_homogenized_2d
@@ -263,7 +263,7 @@
       mesh_mode = REPLICATED
     []
     [3d_hex_homogenized]
-      detail = 'homogenized 3D hexagonal pin as a CSG object'
+      detail = 'homogenized 3D hexagonal pin'
       type = JSONDiff
       input = pin_homogenized.i
       cli_args = "Mesh/rmp/dim=3
@@ -291,6 +291,28 @@
                   Outputs/file_base=pin_hex_single_assembly
                   --csg-only"
       jsondiff = pin_hex_single_assembly_csg.json
+      recover = false
+      mesh_mode = REPLICATED
+    []
+    [3d_hex_single_assembly]
+      detail = '3D hexagonal pin that behaves as a single assembly'
+      type = JSONDiff
+      input = single_pin_assembly.i
+      cli_args = "Mesh/rmp/dim=3
+                  Mesh/rmp/axial_regions='1.0'
+                  Mesh/rmp/top_boundary_id=201
+                  Mesh/rmp/bottom_boundary_id=202
+                  Mesh/rmp/axial_mesh_intervals='1'
+                  Mesh/pin1/extrude=true
+                  Mesh/pin1/homogenized=false
+                  Mesh/pin1/num_sectors=2
+                  Mesh/pin1/region_ids='1 2 3'
+                  Mesh/pin1/ring_radii='2.0'
+                  Mesh/pin1/duct_halfpitch='3.0'
+                  Mesh/pin1/mesh_intervals='1 1 1'
+                  Outputs/file_base=pin_hex_single_assembly_3d
+                  --csg-only"
+      jsondiff = pin_hex_single_assembly_3d_csg.json
       recover = false
       mesh_mode = REPLICATED
     []
