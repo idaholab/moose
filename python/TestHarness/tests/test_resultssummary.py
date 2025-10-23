@@ -26,7 +26,6 @@ from test_resultsstore_storedresults import TestResultsStoredResults
 HAS_AUTH = ResultsReader.hasEnvironmentAuthentication()
 # Test database name for testing pull request results
 LIVE_DATABASE_NAME = 'civet_tests_moose_store_results_live'
-LIVE_TEST_NAME = TestName('tests/test_harness', 'ok')
 
 MOCKED_TEST_NAME = TestName('tests/test_harness', 'always_ok')
 
