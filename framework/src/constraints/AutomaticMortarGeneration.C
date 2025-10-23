@@ -1883,11 +1883,29 @@ AutomaticMortarGeneration::processAlignedNodes(
   // First, determine "on left" vs. "on right" orientation of the nodal neighbors.
   // There can be a max of 2 nodal neighbors, and we want to make sure that the
   // secondary nodal neighbor on the "left" is associated with the primary nodal
-  // neighbor on the "left" and similarly for the "right".
-  std::vector<Real> secondary_node_neighbor_cps(2), primary_node_neighbor_cps(2);
+  // neighbor on the "left" and similarly for the "right". We use cross products to determine
+  // alignment. In the below diagram, 'x' denotes a node, and connected '|' are lower dimensional
+  // elements.
+  //                   x
+  //           x       |
+  //           |       |
+  // secondary x ----> x primary
+  //           |       |
+  //           |       x
+  //           x
+  //
+  //  Looking at the aligned nodes, the secondary node first, if we pick the top secondary lower
+  //  dimensional element, then the cross product as written a few lines below points out of the
+  //  screen towards you. (Point in the direction of the secondary nodal normal, and then curl your
+  //  hand towards the secondary element's opposite node, then the thumb points in the direction of
+  //  the cross product). Doing the same with the aligned primary node, if we pick the top primary
+  //  element, then the cross product also points out of the screen. Because the cross products
+  //  point in the same direction (positive dot product), then we know to associate the
+  //  secondary-primary pair. If we had picked the bottom primary element whose cross product points
+  //  into the screen, then clearly the cross products point in the opposite direction and we don't
+  //  have a match
+  std::array<Real, 2> secondary_node_neighbor_cps, primary_node_neighbor_cps;
 
-  // Figure out which secondary side neighbor is on the "left" and which is on the
-  // "right".
   for (const auto nn : index_range(*secondary_node_neighbors))
   {
     const Elem * secondary_neigh = (*secondary_node_neighbors)[nn];
@@ -1897,8 +1915,6 @@ AutomaticMortarGeneration::processAlignedNodes(
     secondary_node_neighbor_cps[nn] = cp(2);
   }
 
-  // Figure out which primary side neighbor is on the "left" and which is on the
-  // "right".
   for (const auto nn : index_range(*primary_node_neighbors))
   {
     const Elem * primary_neigh = (*primary_node_neighbors)[nn];
