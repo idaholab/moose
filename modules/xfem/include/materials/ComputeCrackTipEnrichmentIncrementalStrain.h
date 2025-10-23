@@ -8,7 +8,6 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #pragma once
-// #include "ComputeStrainBase.h"
 #include "ComputeIncrementalStrainBase.h"
 #include "Material.h"
 #include "RankTwoTensor.h"
