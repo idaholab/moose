@@ -48,7 +48,7 @@
 
 [Physics/SolidMechanics/CohesiveZone]
   [./czm1]
-    boundary = 'interface'
+    boundary = 'Block1_Block2'
     generate_output = 'traction_x traction_y traction_z normal_traction tangent_traction jump_x jump_y jump_z normal_jump tangent_jump'
   [../]
 []
@@ -108,7 +108,7 @@
   [../]
   [./czm_mat]
     type = PureElasticTractionSeparation
-    boundary = 'interface'
+    boundary = 'Block1_Block2'
     normal_stiffness = 10
     tangent_stiffness = 5
   [../]

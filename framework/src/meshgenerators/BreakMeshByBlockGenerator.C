@@ -40,7 +40,7 @@ BreakMeshByBlockGenerator::validParams()
   params.addParam<bool>(
       "split_transition_interface", false, "Whether to split the transition interface by blocks.");
   params.addParam<bool>("add_interface_on_two_sides",
-                        false,
+                        true,
                         "Whether to add an additional interface boundary at the other side.");
   params.addParam<BoundaryName>(
       "interface_transition_name",
@@ -345,6 +345,7 @@ BreakMeshByBlockGenerator::generate()
                       unsigned int connected_elem_side,
                       bool need_to_switch)
               {
+                std::cout <<"block pair: "<<blocks_pair.first<<" "<<blocks_pair.second<<std::endl;
                 _neighboring_block_list.insert(blocks_pair);
                 _new_boundary_sides_map[blocks_pair].insert(
                     std::make_pair(!need_to_switch ? current_elem : connected_elem, side));
@@ -461,6 +462,8 @@ BreakMeshByBlockGenerator::addInterface(MeshBase & mesh)
       }
       else
       {
+        // When _split_interface == false, all pairs share the same boundary_id_interface
+        // (This would cause self-pairing)
         boundary_name = _interface_name;
         // assign a unique boundary ID for the interface boundary
         boundary_id_interface = boundary_id_interface == Moose::INVALID_BOUNDARY_ID
@@ -524,20 +527,28 @@ BreakMeshByBlockGenerator::addInterface(MeshBase & mesh)
     new_boundaryID++;
   }
 
-// Generate boundary_id pairs mapping based on _subid_pairs_to_boundary_id
-for (auto & entry : _subid_pairs_to_boundary_id)
-{
-  // Get the reversed pair, e.g., (1,2) -> (2,1)
-  auto rev_entry = std::make_pair(entry.first.second, entry.first.first);
+  // Generate boundary_id pairs mapping based on _subid_pairs_to_boundary_id
+  for (auto & entry : _subid_pairs_to_boundary_id)
+  {
+    const auto & sub_pair = entry.first; // (subA, subB)
+    const auto & boundary_id = entry.second;
+    const auto rev_pair = std::make_pair(sub_pair.second, sub_pair.first);
 
-  // If the reversed pair exists, it means interfaces are generated on both sides
-  if (_subid_pairs_to_boundary_id.find(rev_entry) != _subid_pairs_to_boundary_id.end())
-    // pair = (own, opposite)
-    mesh.add_disconnected_boundaries(entry.second, _subid_pairs_to_boundary_id[rev_entry]);
-  else
-    // If the opposite side does not exist: pair = (own, own)
-    mesh.add_disconnected_boundaries(entry.second, entry.second);
-}
+    const bool has_reverse = _subid_pairs_to_boundary_id.find(rev_pair) != _subid_pairs_to_boundary_id.end();
+
+    if (has_reverse)
+      // Normal disconnected boundary pair: blockA_blockB <-> blockB_blockA
+      mesh.add_disconnected_boundaries(boundary_id,
+                                      _subid_pairs_to_boundary_id[rev_pair],
+                                      RealVectorValue(0.0, 0.0, 0.0));
+    else
+    {
+      _mesh->setIncompleteInterfacePairs();
+      mooseInfo("Single interface boundary '", boundary_id,
+                "' found (no reverse pair). Compatible only with non-CZM setups.");
+    }
+  }
+
 }
 
 subdomain_id_type

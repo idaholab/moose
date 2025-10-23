@@ -56,7 +56,7 @@
 [Physics/SolidMechanics/CohesiveZone]
   [./czm1]
     strain = SMALL
-    boundary = 'interface'
+    boundary = 'Block1_Block2'
     generate_output = 'traction_x traction_y traction_z normal_traction tangent_traction jump_x jump_y jump_z normal_jump tangent_jump'
   [../]
 []
@@ -115,7 +115,7 @@
     block = '1 2'
   [../]
   [./czm_mat]
-    boundary = 'interface'
+    boundary = 'Block1_Block2'
   [../]
 []
 
