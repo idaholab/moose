@@ -18,6 +18,7 @@
     capabilities = 'method!=dbg'
     abs_zero = 1e-5
     valgrind = NONE
+    heavy = true
     recover = false
     requirement = 'The system will examine the subchannel solver for the FFM-5B high flow case'
   []

@@ -45,11 +45,12 @@ QuadSubChannel1PhaseProblem::QuadSubChannel1PhaseProblem(const InputParameters &
 void
 QuadSubChannel1PhaseProblem::initializeSolution()
 {
-  /// update surface area, wetted perimeter based on: Dpin, displacement
+  // update surface area, wetted perimeter, fuel pin gap, based on: Dpin, displacement
+  // (user must have initialized surface area and wetted perimeter)
   if (_deformation)
   {
-    Real standard_area, additional_area, wetted_perimeter, displaced_area;
     auto pitch = _subchannel_mesh.getPitch();
+    auto pin_diameter = _subchannel_mesh.getPinDiameter();
     auto side_gap = _subchannel_mesh.getSideGap();
     auto z_blockage = _subchannel_mesh.getZBlockage();
     auto index_blockage = _subchannel_mesh.getIndexBlockage();
@@ -61,41 +62,33 @@ QuadSubChannel1PhaseProblem::initializeSolution()
         auto * node = _subchannel_mesh.getChannelNode(i_ch, iz);
         auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
         auto Z = _z_grid[iz];
-        Real rod_area = 0.0;
-        Real rod_perimeter = 0.0;
+        Real subchannel_area = (*_S_flow_soln)(node);
+        Real wetted_perimeter = (*_w_perim_soln)(node);
+        /// calculate the change in subchannel area and wetted perimeter due to change in pin diameter
         for (auto i_pin : _subchannel_mesh.getChannelPins(i_ch))
         {
           auto * pin_node = _subchannel_mesh.getPinNode(i_pin, iz);
-          rod_area += 0.25 * 0.25 * M_PI * (*_Dpin_soln)(pin_node) * (*_Dpin_soln)(pin_node);
-          rod_perimeter += 0.25 * M_PI * (*_Dpin_soln)(pin_node);
+          subchannel_area +=
+              0.25 * 0.25 * M_PI *
+              ((*_Dpin_soln)(pin_node) * (*_Dpin_soln)(pin_node)-pin_diameter * pin_diameter);
+          wetted_perimeter += 0.25 * M_PI * ((*_Dpin_soln)(pin_node)-pin_diameter);
         }
 
+        /// calculate the change in subchannel area and wetted perimeter due to duct deformation
         if (subch_type == EChannelType::CORNER)
         {
-          standard_area = 0.25 * pitch * pitch;
-          displaced_area = (2 * side_gap + pitch) * (*_displacement_soln)(node) / sqrt(2) +
-                           (*_displacement_soln)(node) * (*_displacement_soln)(node) / 2;
-          additional_area = pitch * side_gap + side_gap * side_gap;
-          wetted_perimeter =
-              rod_perimeter + pitch + 2 * side_gap + 2 * (*_displacement_soln)(node) / sqrt(2);
+          subchannel_area += (2 * side_gap + pitch) * (*_displacement_soln)(node) +
+                             (*_displacement_soln)(node) * (*_displacement_soln)(node);
+          wetted_perimeter += 2 * (*_displacement_soln)(node);
         }
         else if (subch_type == EChannelType::EDGE)
         {
-          standard_area = 0.5 * pitch * pitch;
-          additional_area = pitch * side_gap;
-          displaced_area = pitch * (*_displacement_soln)(node);
-          wetted_perimeter = rod_perimeter + pitch;
+          subchannel_area += pitch * (*_displacement_soln)(node);
         }
         else
         {
-          standard_area = pitch * pitch;
-          displaced_area = 0.0;
-          additional_area = 0.0;
-          wetted_perimeter = rod_perimeter;
+          /// nothing changes for inner subchannels
         }
-
-        /// Calculate subchannel area
-        auto subchannel_area = displaced_area + standard_area + additional_area - rod_area;
 
         /// Correct subchannel area and wetted perimeter in case of overlapping pins
         auto overlapping_pin_area = 0.0;
@@ -810,7 +803,7 @@ QuadSubChannel1PhaseProblem::computeh(int iblock)
     PC pc;
     Vec sol;
     LibmeshPetscCall(VecDuplicate(_hc_sys_h_rhs, &sol));
-    LibmeshPetscCall(KSPCreate(PETSC_COMM_WORLD, &ksploc));
+    LibmeshPetscCall(KSPCreate(PETSC_COMM_SELF, &ksploc));
     LibmeshPetscCall(KSPSetOperators(ksploc, _hc_sys_h_mat, _hc_sys_h_mat));
     LibmeshPetscCall(KSPGetPC(ksploc, &pc));
     LibmeshPetscCall(PCSetType(pc, PCJACOBI));
@@ -822,27 +815,8 @@ QuadSubChannel1PhaseProblem::computeh(int iblock)
     LibmeshPetscCall(VecGetArray(sol, &xx));
     for (unsigned int iz = first_node; iz < last_node + 1; iz++)
     {
-<<<<<<< HEAD
-      // Assembly the matrix system
-      KSP ksploc;
-      PC pc;
-      Vec sol;
-      LibmeshPetscCall(VecDuplicate(_hc_sys_h_rhs, &sol));
-      LibmeshPetscCall(KSPCreate(PETSC_COMM_SELF, &ksploc));
-      LibmeshPetscCall(KSPSetOperators(ksploc, _hc_sys_h_mat, _hc_sys_h_mat));
-      LibmeshPetscCall(KSPGetPC(ksploc, &pc));
-      LibmeshPetscCall(PCSetType(pc, PCJACOBI));
-      LibmeshPetscCall(KSPSetTolerances(ksploc, _rtol, _atol, _dtol, _maxit));
-      LibmeshPetscCall(KSPSetOptionsPrefix(ksploc, "h_sys_"));
-      LibmeshPetscCall(KSPSetFromOptions(ksploc));
-      LibmeshPetscCall(KSPSolve(ksploc, _hc_sys_h_rhs, sol));
-      PetscScalar * xx;
-      LibmeshPetscCall(VecGetArray(sol, &xx));
-      for (unsigned int iz = first_node; iz < last_node + 1; iz++)
-=======
       auto iz_ind = iz - first_node;
       for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
->>>>>>> a7adad7b6a (remove full-monolithic solve Refs #31500)
       {
         auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
         auto h_out = xx[iz_ind * _n_channels + i_ch];

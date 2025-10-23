@@ -1493,7 +1493,6 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
     LibmeshPetscCall(VecGetArray(sol, &xx));
     for (unsigned int iz = first_node; iz < last_node + 1; iz++)
     {
-<<<<<<< HEAD
       // Assembly the matrix system
       KSP ksploc;
       PC pc;
@@ -1507,26 +1506,25 @@ TriSubChannel1PhaseProblem::computeh(int iblock)
       LibmeshPetscCall(KSPSetOptionsPrefix(ksploc, "h_sys_"));
       LibmeshPetscCall(KSPSetFromOptions(ksploc));
       LibmeshPetscCall(KSPSolve(ksploc, _hc_sys_h_rhs, sol));
-      // VecView(sol, PETSC_VIEWER_STDOUT_WORLD);
       PetscScalar * xx;
       LibmeshPetscCall(VecGetArray(sol, &xx));
       for (unsigned int iz = first_node; iz < last_node + 1; iz++)
-=======
-      auto iz_ind = iz - first_node;
-      for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
->>>>>>> a7adad7b6a (remove full-monolithic solve Refs #31500)
       {
-        auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-        auto h_out = xx[iz_ind * _n_channels + i_ch];
-        if (h_out < 0)
+        auto iz_ind = iz - first_node;
+        for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
         {
-          mooseError(name(),
-                     " : Calculation of negative Enthalpy h_out = : ",
-                     h_out,
-                     " Axial Level= : ",
-                     iz);
+          auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
+          auto h_out = xx[iz_ind * _n_channels + i_ch];
+          if (h_out < 0)
+          {
+            mooseError(name(),
+                       " : Calculation of negative Enthalpy h_out = : ",
+                       h_out,
+                       " Axial Level= : ",
+                       iz);
+          }
+          _h_soln->set(node_out, h_out);
         }
-        _h_soln->set(node_out, h_out);
       }
     }
     LibmeshPetscCall(KSPDestroy(&ksploc));
