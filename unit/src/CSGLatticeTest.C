@@ -301,4 +301,55 @@ TEST(CSGLatticeTest, testGetUniqueUniverses)
   ASSERT_EQ(unique[0].get(), univ1);
   ASSERT_EQ(unique[1].get(), univ2);
 }
+
+// test CSGCartesianLattice::UpdateDimension
+TEST(CSGLatticeTest, testCartUpdateDimension)
+{
+  auto cart_lattice = CSGCartesianLattice("cartlat", 6, 4, 1.0);
+  {
+    // update valid: pitch, nx0, and nx0
+    cart_lattice.updateDimension("pitch", 1.5);
+    cart_lattice.updateDimension("nx0", 2);
+    cart_lattice.updateDimension("nx1", 3);
+    // check new dimensions
+    auto dims_map = cart_lattice.getDimensions();
+    ASSERT_EQ(*std::any_cast<int>(&dims_map["nx0"]), 2);
+    ASSERT_EQ(*std::any_cast<int>(&dims_map["nx1"]), 3);
+    ASSERT_EQ(*std::any_cast<Real>(&dims_map["pitch"]), 1.5);
+  }
+  {
+    // try update each value to something invalid (raise error)
+    Moose::UnitUtils::assertThrows([&cart_lattice]()
+                                   { cart_lattice.updateDimension("pitch", 0.0); },
+                                   "Updated pitch value for lattice cartlat is not valid.");
+    Moose::UnitUtils::assertThrows([&cart_lattice]() { cart_lattice.updateDimension("nx0", -3); },
+                                   "Updated nx0 value for lattice cartlat is not valid.");
+    Moose::UnitUtils::assertThrows([&cart_lattice]() { cart_lattice.updateDimension("nx1", -6); },
+                                   "Updated nx1 value for lattice cartlat is not valid.");
+  }
+  {
+    // update invalid: nx0 or nx1 when universes are already set (raise error)
+    // set the universe map first
+    const auto univ1 = CSGUniverse("univ1", false);
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
+        {std::cref(univ1), std::cref(univ1), std::cref(univ1)},
+        {std::cref(univ1), std::cref(univ1), std::cref(univ1)}};
+    cart_lattice.setUniverses(univ_map);
+    // try to update each dimension: pitch is valid, nx0 and nx1 are not valid
+    cart_lattice.updateDimension("pitch", 2.0);
+    auto dims_map = cart_lattice.getDimensions();
+    ASSERT_EQ(*std::any_cast<Real>(&dims_map["pitch"]), 2.0);
+    Moose::UnitUtils::assertThrows(
+        [&cart_lattice]() { cart_lattice.updateDimension("nx0", 3); },
+        "Cannot update the dimension nx0 of the lattice cartlat. Universe map is already defined.");
+    Moose::UnitUtils::assertThrows(
+        [&cart_lattice]() { cart_lattice.updateDimension("nx1", 6); },
+        "Cannot update the dimension nx1 of the lattice cartlat. Universe map is already defined.");
+  }
+  {
+    // try to update a dimension that does not exists
+    Moose::UnitUtils::assertThrows([&cart_lattice]() { cart_lattice.updateDimension("elmo", 3); },
+                                   "Dimension elmo is not an allowable dimension for lattice type");
+  }
+}
 }

@@ -69,7 +69,12 @@ void
 CSGCartesianLattice::updateDimension(const std::string & dim_name, std::any dim_value)
 {
   if (dim_name == "pitch")
-    _pitch = *std::any_cast<Real>(&dim_value);
+  {
+    auto val = *std::any_cast<Real>(&dim_value);
+    if (val <= 0.0)
+      mooseError("Updated pitch value for lattice " + getName() + " is not valid.");
+    _pitch = val;
+  }
   else if (dim_name == "nx0" || dim_name == "nx1")
   {
     // number of lattice elements can only be changed if _universe_map is not already set
@@ -77,12 +82,19 @@ CSGCartesianLattice::updateDimension(const std::string & dim_name, std::any dim_
       mooseError("Cannot update the dimension " + dim_name + " of the lattice " + getName() +
                  ". Universe map is already defined.");
     else
-      dim_name == "nx0" ? _nx0 = *std::any_cast<int>(&dim_value)
-                        : _nx1 = *std::any_cast<int>(&dim_value);
+    {
+      auto val = *std::any_cast<int>(&dim_value);
+      if (val < 1)
+        mooseError("Updated " + dim_name + " value for lattice " + getName() + " is not valid.");
+      dim_name == "nx0" ? _nx0 = val : _nx1 = val;
+    }
   }
   else
     mooseError("Dimension " + dim_name + " is not an allowable dimension for lattice type " +
                getType() + " allowable dimension types are: nx0, nx1, pitch.");
+  if (!hasValidDimensions())
+    mooseError("Lattice " + getName() + " does not have valid dimensions after updating " +
+               dim_name);
 }
 
 std::unordered_map<std::string, std::any>
