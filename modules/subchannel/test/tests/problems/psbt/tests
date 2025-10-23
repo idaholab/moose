@@ -10,7 +10,6 @@
     recover = false
     abs_zero = 1e-6
     max_threads = 1
-    max_parallel = 1
     requirement = 'The system shall be able to solve a PSBT-type case with the subchannel solver using an explicit algorithm.'
   []
   [psbt_regression_test_explicit_friction2]
@@ -22,7 +21,6 @@
     recover = false
     abs_zero = 1e-6
     max_threads = 1
-    max_parallel = 1
     requirement = 'The system shall be able to solve a PSBT-type case with the subchannel solver using the non-default friction/mixing model.'
   []
   [psbt_regression_test_explicit_staggered]
@@ -34,7 +32,6 @@
     recover = false
     abs_zero = 1e-6
     max_threads = 1
-    max_parallel = 1
     requirement = 'The system shall be able to solve a PSBT-type case with the subchannel solver using an explicit algorithm and a staggered pressure formulation.'
   []
   [psbt_regression_test_implicit]
@@ -46,7 +43,6 @@
     recover = false
     abs_zero = 1e-6
     max_threads = 1
-    max_parallel = 1
     requirement = 'The system shall be able to solve a PSBT-type case with the subchannel solver using an implicit algorithm.'
   []
   [psbt_regression_test_monolithic]
@@ -58,7 +54,6 @@
     recover = false
     abs_zero = 1e-6
     max_threads = 1
-    max_parallel = 1
     requirement = 'The system shall be able to solve a PSBT-type case with the subchannel solver using a monolithic algorithm.'
   []
   [psbt_regression_test_full_monolithic]
@@ -71,7 +66,6 @@
     abs_zero = 1e-6
     rel_err = 1e-4
     max_threads = 1
-    max_parallel = 1
     requirement = 'The system shall be able to solve a PSBT-type case with the subchannel solver using a full-monolithic algorithm.'
   []
   [psbt_regression_test_full_monolithic_staggered]
@@ -84,7 +78,6 @@
     abs_zero = 1e-6
     rel_err = 6e-5
     max_threads = 1
-    max_parallel = 1
     requirement = 'The system shall be able to solve a PSBT-type case with the subchannel solver using a full-monolithic algorithm and a staggered pressure formulation.'
   []
 []

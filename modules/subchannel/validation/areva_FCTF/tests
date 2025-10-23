@@ -12,7 +12,6 @@
       recover = false
       abs_zero = 1e-5
       max_threads = 1
-      max_parallel = 1
       requirement = 'The system should be able to model the deformed duct displacement in the AREVA_fctf simulation and produce consistent results'
   []
 []

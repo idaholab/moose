@@ -40,7 +40,10 @@ QuadSubChannelNormalSliceValues::QuadSubChannelNormalSliceValues(const InputPara
 void
 QuadSubChannelNormalSliceValues::output()
 {
+  // Accessing new solution handles should be done in parallel
   auto val_soln = SolutionHandle(_problem_ptr->getVariable(0, _variable));
+  if (processor_id() > 0)
+    return;
   auto nz = _mesh.getNumOfAxialCells();
   auto z_grid = _mesh.getZGrid();
   auto n_channels = _mesh.getNumOfChannels();

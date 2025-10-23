@@ -22,7 +22,7 @@ public:
   virtual std::unique_ptr<MooseMesh> safeClone() const override;
   virtual void buildMesh() override;
 
-  virtual const unsigned int & getNumOfPins() const override { return _npins; }
+  virtual unsigned int getNumOfPins() const override { return processor_id() == 0 ? _npins : 0; }
 
   virtual Node * getPinNode(unsigned int i_pin, unsigned iz) const override
   {
@@ -70,8 +70,14 @@ public:
   {
     return _nodes[i_chan][iz];
   }
-  virtual const unsigned int & getNumOfChannels() const override { return _n_channels; }
-  virtual const unsigned int & getNumOfGapsPerLayer() const override { return _n_gaps; }
+  virtual unsigned int getNumOfChannels() const override
+  {
+    return processor_id() == 0 ? _n_channels : 0;
+  }
+  virtual unsigned int getNumOfGapsPerLayer() const override
+  {
+    return processor_id() == 0 ? _n_gaps : 0;
+  }
   virtual const std::pair<unsigned int, unsigned int> &
   getGapChannels(unsigned int i_gap) const override
   {

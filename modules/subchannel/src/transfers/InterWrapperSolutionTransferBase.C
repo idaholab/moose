@@ -36,6 +36,10 @@ InterWrapperSolutionTransferBase::initialSetup()
   MultiAppTransfer::initialSetup();
   for (std::size_t var_index = 0; var_index < _var_names.size(); ++var_index)
   {
+    // No local app, we cannot examine the target variable
+    if (_to_problems.empty())
+      continue;
+
     // Check source variable on regular subchannel problem
     MooseVariableFieldBase & from_var = _subproblem.getVariable(
         0, _var_names[var_index], Moose::VarKindType::VAR_ANY, Moose::VarFieldType::VAR_FIELD_ANY);
@@ -110,6 +114,9 @@ InterWrapperSolutionTransferBase::transferNodalVars(unsigned int app_idx)
 
   for (auto & node : mesh->getMesh().local_node_ptr_range())
   {
+    // No local data to send
+    if (processor_id() != 0)
+      continue;
     Node * from_node = getFromNode(from_mesh, *node);
 
     for (auto & var_name : _var_names)

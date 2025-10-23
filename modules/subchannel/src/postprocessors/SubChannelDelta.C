@@ -43,8 +43,8 @@ SubChannelDelta::execute()
 {
   auto nz = _mesh.getNumOfAxialCells();
   auto n_channels = _mesh.getNumOfChannels();
-  auto Soln = SolutionHandle(_fe_problem.getVariable(0, _variable));
-  auto mdot_soln = SolutionHandle(_fe_problem.getVariable(0, "mdot"));
+  auto Soln = SolutionHandle(_fe_problem.getVariable(/*tid*/ 0, _variable));
+  auto mdot_soln = SolutionHandle(_fe_problem.getVariable(/*tid*/ 0, "mdot"));
 
   auto mass_flow_in = 0.0;
   auto sum_Delta_mass_flow_in = 0.0;

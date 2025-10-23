@@ -44,9 +44,15 @@ public:
   virtual const std::vector<Node *> getDuctNodes() const override { return std::vector<Node *>(); }
   ///@}
 
-  virtual const unsigned int & getNumOfChannels() const override { return _n_channels; }
-  virtual const unsigned int & getNumOfGapsPerLayer() const override { return _n_gaps; }
-  virtual const unsigned int & getNumOfPins() const override { return _n_pins; }
+  virtual unsigned int getNumOfChannels() const override
+  {
+    return processor_id() == 0 ? _n_channels : 0;
+  }
+  virtual unsigned int getNumOfGapsPerLayer() const override
+  {
+    return processor_id() == 0 ? _n_gaps : 0;
+  }
+  virtual unsigned int getNumOfPins() const override { return processor_id() == 0 ? _n_pins : 0; }
   virtual bool pinMeshExist() const override { return _pin_mesh_exist; }
   virtual bool ductMeshExist() const override { return false; }
   virtual const std::pair<unsigned int, unsigned int> &

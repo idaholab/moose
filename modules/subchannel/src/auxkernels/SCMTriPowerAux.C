@@ -41,6 +41,8 @@ SCMTriPowerAux::SCMTriPowerAux(const InputParameters & parameters)
     _filename(getParam<std::string>("filename")),
     _axial_heat_rate(getFunction("axial_heat_rate"))
 {
+  if (processor_id() > 0)
+    return;
   auto n_pins = _triMesh.getNumOfPins();
   // Matrix sizing
   _power_dis.resize(n_pins, 1);
@@ -78,6 +80,9 @@ SCMTriPowerAux::SCMTriPowerAux(const InputParameters & parameters)
 void
 SCMTriPowerAux::initialSetup()
 {
+  if (processor_id() > 0)
+    return;
+
   auto heated_length = _triMesh.getHeatedLength();
   auto sum = _power_dis.sum();
   // full (100%) power of one pin [W]

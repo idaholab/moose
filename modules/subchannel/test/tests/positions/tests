@@ -1,0 +1,14 @@
+[Tests]
+  issues = '#31642'
+  design = 'SCMPinPositions.md'
+  [pin_pos]
+    type = JSONDiff
+    input = 'pin_positions.i'
+    jsondiff = 'pin_positions_out.json'
+    requirement = 'The system shall be able to generate the list of positions for the subchannel assembly fuel pins.'
+    max_threads = 1
+    recover = false  # steady solve
+    # Distributed not supported
+    mesh_mode = 'replicated'
+  []
+[]

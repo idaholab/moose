@@ -8,7 +8,6 @@
     cli_args = 'Outputs/file_base=counter_flow'
     recover = False
     abs_zero = 1e-7
-    max_parallel = 1
     requirement = 'The system will calculate the pressure drop across the pin with a counter_flow direction of gravity'
   []
   [Pressure_drop_co_flow]
@@ -18,7 +17,6 @@
     cli_args = 'SubChannel/gravity=co_flow Outputs/file_base=co_flow'
     recover = False
     abs_zero = 1e-7
-    max_parallel = 1
     requirement = 'The system will calculate the pressure drop across the pin with a co_flow direction of gravity'
   []
   [Pressure_drop_no_gravity]
@@ -28,7 +26,6 @@
     cli_args = 'SubChannel/gravity=none Outputs/file_base=no_gravity'
     recover = False
     abs_zero = 1e-7
-    max_parallel = 1
     requirement = 'The system will calculate the pressure drop across the pin with no gravity'
   []
 []
