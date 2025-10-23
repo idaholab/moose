@@ -6,6 +6,7 @@
 
   [./smooth]
     type = SmoothMeshGenerator
+    algorithm = laplace
     input = fmg
     iterations = 3
   []
