@@ -20,7 +20,7 @@ MFEMTimeDerivativeDiffusionKernel::validParams()
   params.addClassDescription("Adds the domain integrator to an MFEM problem for the bilinear form "
                              "$(k\\vec\\nabla \\dot{u}, \\vec\\nabla v)_\\Omega$ "
                              "arising from the weak form of the Laplacian operator "
-                             "$- \\vec\\nabla \\cdot \\left( k \\vec \\nabla \\dot{u} \\right)$.");  
+                             "$- \\vec\\nabla \\cdot \\left( k \\vec \\nabla \\dot{u} \\right)$.");
   return params;
 }
 

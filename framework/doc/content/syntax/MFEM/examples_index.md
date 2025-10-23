@@ -14,6 +14,10 @@ that may serve as a useful starting point for users to adapt:
   problem with a boundary parameterized by a heat transfer coefficient that exchanges
   heat with a thermal reservoir.
 
+- [Transient Heat Transfer (Mixed Form)](syntax/MFEM/MixedHeatTransfer.md): Transient heat
+  conduction problem solved using the mixed form of the heat equation, strongly imposing a zero heat
+  flux condition on part of the boundary.  
+
 ## Mechanical Problems
 
 - [Linear Elasticity](syntax/MFEM/LinearElasticity.md): Solves a 3D linear elasticity
@@ -35,11 +39,6 @@ that may serve as a useful starting point for users to adapt:
 - [Magnetostatic (closed coil)](syntax/MFEM/ClosedCoilMagnetostatic.md): Solves for the magnetic
   field around a topologically closed toroidal conductor carrying a net current, using a magnetic
   vector potential discretized using $H(\mathrm{curl})$ conforming Nédélec elements.
-
-- [Magnetodynamic (open coil)](syntax/MFEM/OpenWireMagnetodynamic.md): Solves for the magnetic field
-  around a conducting wire carrying a net current that passes through the boundary of the
-  computational domain, using a magnetic vector potential discretized using $H(\mathrm{curl})$
-  conforming Nédélec elements.
 
 ## Fluid Problems
 
