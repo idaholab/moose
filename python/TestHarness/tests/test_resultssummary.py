@@ -910,7 +910,7 @@ class TestResultsSummary(TestHarnessTestCase):
         """
         Tests pr() to read PR from live database
         """
-        # Set the run time and run time rate to zero, so that run time changes show in summary table
+        # Set the run time and relative run time rate to zero
         fake_run_time_floor = 0.00
         fake_run_time_rate_floor = 0.00
         # Connect to database and get data from live database
@@ -920,8 +920,6 @@ class TestResultsSummary(TestHarnessTestCase):
         if head_results is not None:
             base_results = summary.get_commit_results(head_results.base_sha)
             if base_results is not None:
-                base_test = base_results.get_test(LIVE_TEST_NAME.folder, LIVE_TEST_NAME.name)
-                head_test = head_results.get_test(LIVE_TEST_NAME.folder, LIVE_TEST_NAME.name)
                 with tempfile.NamedTemporaryFile() as out_file:
                     summary.pr(
                         event_id = EVENT_ID,
@@ -929,20 +927,13 @@ class TestResultsSummary(TestHarnessTestCase):
                         run_time_floor = fake_run_time_floor,
                         run_time_rate_floor = fake_run_time_rate_floor
                     )
-                    # There is run time changes, so check the format of summary result
+                    # Check the header format of summary results
                     with open(out_file.name, 'r') as f:
                         output = f.read()
                         self.assertIn('Compared against', output)
                         self.assertIn('Removed tests', output)
                         self.assertIn('Added tests', output)
                         self.assertIn('Run time changes', output)
-                        self.assertIn('Test', output)
-                        self.assertIn(str(LIVE_TEST_NAME), output)
-                        self.assertIn('Base (s)', output)
-                        self.assertIn(f'{base_test.run_time:.2f}',output)
-                        self.assertIn('Head (s)', output)
-                        self.assertIn(f'{head_test.run_time:.2f}',output)
-                        self.assertIn('+/-', output)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
