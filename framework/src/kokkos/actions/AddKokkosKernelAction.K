@@ -28,5 +28,8 @@ AddKokkosKernelAction::AddKokkosKernelAction(const InputParameters & params)
 void
 AddKokkosKernelAction::act()
 {
-  _problem->addKokkosKernel(_type, _name, _moose_object_pars);
+  if (_current_task == "add_kernel")
+    _problem->addKokkosKernel(_type, _name, _moose_object_pars);
+  else
+    _problem->addKokkosAuxKernel(_type, _name, _moose_object_pars);
 }

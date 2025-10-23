@@ -239,10 +239,9 @@ Datum::reinitTransform(const unsigned int qp)
 }
 
 /**
- * The Kokkos object that holds thread-private data in the parallel operations of Kokkos residual
- * objects
+ * The Kokkos object that holds thread-private data in the parallel operations of Kokkos kernels
  */
-class ResidualDatum : public Datum
+class AssemblyDatum : public Datum
 {
 public:
   /**
@@ -256,7 +255,7 @@ public:
    * @param comp The variable component
    */
   KOKKOS_FUNCTION
-  ResidualDatum(const ContiguousElementID elem,
+  AssemblyDatum(const ContiguousElementID elem,
                 const unsigned int side,
                 const Assembly & assembly,
                 const Array<System> & systems,
@@ -283,7 +282,7 @@ public:
    * @param comp The variable component
    */
   KOKKOS_FUNCTION
-  ResidualDatum(const ContiguousNodeID node,
+  AssemblyDatum(const ContiguousNodeID node,
                 const Assembly & assembly,
                 const Array<System> & systems,
                 const Variable & ivar,
@@ -367,4 +366,4 @@ protected:
 } // namespace Moose
 
 using Datum = Moose::Kokkos::Datum;
-using ResidualDatum = Moose::Kokkos::ResidualDatum;
+using AssemblyDatum = Moose::Kokkos::AssemblyDatum;

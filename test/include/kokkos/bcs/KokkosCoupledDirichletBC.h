@@ -25,11 +25,11 @@ public:
 
   KokkosCoupledDirichletBC(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, ResidualDatum & datum) const;
-  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int qp, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
+  KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int qp, AssemblyDatum & datum) const;
   KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int jvar,
                                                 const unsigned int qp,
-                                                ResidualDatum & datum) const;
+                                                AssemblyDatum & datum) const;
 
 protected:
   // The coupled variable
@@ -43,14 +43,14 @@ protected:
 };
 
 KOKKOS_FUNCTION inline Real
-KokkosCoupledDirichletBC::computeQpResidual(const unsigned int qp, ResidualDatum & datum) const
+KokkosCoupledDirichletBC::computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
 {
   return _c * _u(datum, qp) + _u(datum, qp) * _u(datum, qp) + _v(datum, qp) * _v(datum, qp) -
          _value;
 }
 
 KOKKOS_FUNCTION inline Real
-KokkosCoupledDirichletBC::computeQpJacobian(const unsigned int qp, ResidualDatum & datum) const
+KokkosCoupledDirichletBC::computeQpJacobian(const unsigned int qp, AssemblyDatum & datum) const
 {
   return _c + 2 * _u(datum, qp);
 }
@@ -58,7 +58,7 @@ KokkosCoupledDirichletBC::computeQpJacobian(const unsigned int qp, ResidualDatum
 KOKKOS_FUNCTION inline Real
 KokkosCoupledDirichletBC::computeQpOffDiagJacobian(const unsigned int jvar,
                                                    const unsigned int qp,
-                                                   ResidualDatum & datum) const
+                                                   AssemblyDatum & datum) const
 {
   if (jvar == _v_num)
     return 2 * _v(datum, qp);

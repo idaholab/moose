@@ -23,12 +23,12 @@ public:
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
-                                         ResidualDatum & datum) const;
+                                         AssemblyDatum & datum) const;
   KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int i,
                                                 const unsigned int j,
                                                 const unsigned int jvar,
                                                 const unsigned int qp,
-                                                ResidualDatum & datum) const;
+                                                AssemblyDatum & datum) const;
 
 protected:
   const Moose::Kokkos::VariableValue _v_dot;
@@ -39,7 +39,7 @@ protected:
 KOKKOS_FUNCTION inline Real
 KokkosCoupledTimeDerivative::computeQpResidual(const unsigned int i,
                                                const unsigned int qp,
-                                               ResidualDatum & datum) const
+                                               AssemblyDatum & datum) const
 {
   return _test(datum, i, qp) * _v_dot(datum, qp);
 }
@@ -49,7 +49,7 @@ KokkosCoupledTimeDerivative::computeQpOffDiagJacobian(const unsigned int i,
                                                       const unsigned int j,
                                                       const unsigned int jvar,
                                                       const unsigned int qp,
-                                                      ResidualDatum & datum) const
+                                                      AssemblyDatum & datum) const
 {
   if (jvar == _v_var)
     return _test(datum, i, qp) * _phi(datum, j, qp) * _dv_dot;

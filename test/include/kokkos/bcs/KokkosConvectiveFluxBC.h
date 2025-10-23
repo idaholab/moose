@@ -20,11 +20,11 @@ public:
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
-                                         ResidualDatum & datum) const;
+                                         AssemblyDatum & datum) const;
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
                                          const unsigned int j,
                                          const unsigned int qp,
-                                         ResidualDatum & datum) const;
+                                         AssemblyDatum & datum) const;
 
 private:
   const Real _initial;
@@ -36,7 +36,7 @@ private:
 KOKKOS_FUNCTION inline Real
 KokkosConvectiveFluxBC::computeQpResidual(const unsigned int i,
                                           const unsigned int qp,
-                                          ResidualDatum & datum) const
+                                          AssemblyDatum & datum) const
 {
   Real value;
 
@@ -52,7 +52,7 @@ KOKKOS_FUNCTION inline Real
 KokkosConvectiveFluxBC::computeQpJacobian(const unsigned int i,
                                           const unsigned int j,
                                           const unsigned int qp,
-                                          ResidualDatum & datum) const
+                                          AssemblyDatum & datum) const
 {
   return -(_test(datum, i, qp) * _rate * (-_phi(datum, j, qp)));
 }

@@ -1772,7 +1772,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
   residualSetup();
 
 #ifdef MOOSE_KOKKOS_ENABLED
-  if (_fe_problem.hasKokkosObjects())
+  if (_fe_problem.hasKokkosResidualObjects())
     computeKokkosResidual(tags);
 #endif
 
@@ -2877,7 +2877,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
   jacobianSetup();
 
 #ifdef MOOSE_KOKKOS_ENABLED
-  if (_fe_problem.hasKokkosObjects())
+  if (_fe_problem.hasKokkosResidualObjects())
     computeKokkosJacobian(tags);
 #endif
 

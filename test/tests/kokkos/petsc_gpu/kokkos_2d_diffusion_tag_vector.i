@@ -34,23 +34,15 @@
   []
 []
 
-[AuxKernels]
-  active = 'TagVectorAux1 TagVectorAux2'
+[KokkosAuxKernels]
   [TagVectorAux1]
-    type = TagVectorAux
+    type = KokkosTagVectorAux
     variable = tag_variable1
     v = u
     vector_tag = vec_tag1
   []
-  [on_the_fly]
-    type = OnTheFlyTagVectorAux
-    variable = tag_variable1
-    v = u
-    vector_tag = vec_tag1
-  []
-
   [TagVectorAux2]
-    type = TagVectorAux
+    type = KokkosTagVectorAux
     variable = tag_variable2
     v = u
     vector_tag = vec_tag2

@@ -256,6 +256,11 @@ public:
 
     _data.copyToHost();
   }
+  /**
+   * Get the underlying data array
+   * @returns The data array
+   */
+  auto & array() { return _data; }
 
   /**
    * Get whether the array is finalized
