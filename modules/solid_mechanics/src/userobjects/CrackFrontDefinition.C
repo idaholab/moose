@@ -360,6 +360,7 @@ CrackFrontDefinition::initialSetup()
 void
 CrackFrontDefinition::updateCrackFrontPoints()
 {
+  mooseAssert(_crack_front_points_provider, "_crack_front_points_provider is NULL");
   _crack_front_points =
       _crack_front_points_provider->getCrackFrontPoints(_num_points_from_provider);
   updateCrackFrontGeometry();
