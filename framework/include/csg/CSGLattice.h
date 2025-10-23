@@ -58,10 +58,7 @@ public:
    *
    * @return list of list of pointers to universes
    */
-  const std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> & getUniverses() const
-  {
-    return _universe_map;
-  }
+  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> getUniverses() const;
 
   /**
    * @brief whether or not the universe of the specified name exists in the lattice
@@ -139,6 +136,8 @@ protected:
   // name needs to be managed at the CSGLatticeList level
   void setName(const std::string & name) { _name = name; }
 
+  virtual void initializeUniverseMap() = 0;
+
   /// @brief assign the vectors of universes as the lattice elements
   /// @param universes
   void setUniverses(std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes);
@@ -182,7 +181,7 @@ protected:
   const std::string _lattice_type;
 
   /// Universes in the arrangement of how they appear in the lattice; dimensions depends on lattice type
-  std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> _universe_map;
+  std::vector<std::vector<std::optional<std::reference_wrapper<const CSGUniverse>>>> _universe_map;
 
   // CSGLatticeList needs to be friend to access setName()
   friend class CSGLatticeList;
