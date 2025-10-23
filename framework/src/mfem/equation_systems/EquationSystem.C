@@ -414,9 +414,11 @@ void
 EquationSystem::BuildMixedBilinearForms()
 {
   // Register mixed bilinear forms. Note that not all combinations may
-  // have a kernel
+  // have a kernel.
 
-  // Create mblf for each test/coupled variable pair with an added kernel
+  // Create mblf for each test/coupled variable pair with an added kernel.
+  // Mixed bilinear forms with coupled variables that are not trial variables are
+  // associated with contributions from eliminated variables.
   for (const auto i : index_range(_test_var_names))
   {
     auto test_var_name = _test_var_names.at(i);
@@ -611,67 +613,65 @@ TimeDependentEquationSystem::BuildMixedBilinearForms()
   // Register mixed bilinear forms. Note that not all combinations may
   // have a kernel
 
-  // Create mblf for each test/coupled variable pair with an added kernel
+  // Create mblf for each test/trial variable pair with an added kernel
   for (const auto i : index_range(_test_var_names))
   {
     auto test_var_name = _test_var_names.at(i);
     auto test_td_mblfs =
         std::make_shared<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>();
-    for (const auto j : index_range(_coupled_var_names))
+    for (const auto j : index_range(_trial_var_names))
     {
-      const auto & coupled_var_name = _coupled_var_names.at(j);
-      auto td_mblf = std::make_shared<mfem::ParMixedBilinearForm>(_coupled_pfespaces.at(j),
+      const auto & trial_var_name = _trial_var_names.at(j);
+      auto td_mblf = std::make_shared<mfem::ParMixedBilinearForm>(_test_pfespaces.at(j),
                                                                   _test_pfespaces.at(i));
       // Register MixedBilinearForm if kernels exist for it, and assemble
       // kernels
       if (_td_kernels_map.Has(test_var_name) &&
-          _td_kernels_map.Get(test_var_name)->Has(coupled_var_name) &&
-          _time_derivative_map.getTimeDerivativeName(test_var_name) != coupled_var_name)
+          _td_kernels_map.Get(test_var_name)->Has(trial_var_name) &&
+          _time_derivative_map.getTimeDerivativeName(test_var_name) != trial_var_name)
       {
-        td_mblf->SetAssemblyLevel(_assembly_level);
         // Apply all mixed kernels with this test/trial pair
         ApplyDomainBLFIntegrators<mfem::ParMixedBilinearForm>(
-            coupled_var_name, test_var_name, td_mblf, _td_kernels_map);
-
-        // Recover and scale integrators from the mblf acting on the time integral of the trial
-        // variable corresponding to coupled_var_name. This is to apply the dt*du/dt contributions
+            trial_var_name, test_var_name, td_mblf, _td_kernels_map);
+      }
+      // Recover and scale integrators from the mblf acting on the time integral of the trial
+      // variable corresponding to coupled_var_name. This is to apply the dt*du/dt contributions
+      // from the operator on the trial variable in the implicit integration scheme
+      const auto & trial_var_time_integral_name = _time_derivative_map.getTimeIntegralName(trial_var_name);
+      if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(trial_var_time_integral_name))
+      {      
+        // Recover and scale integrators from mblf. This is to apply the dt*du/dt contributions
         // from the operator on the trial variable in the implicit integration scheme
-        if (_mblfs.Has(test_var_name) &&
-            _mblfs.Get(test_var_name)
-                ->Has(_time_derivative_map.getTimeIntegralName(coupled_var_name)))
+        auto mblf = _mblfs.Get(test_var_name)->Get(trial_var_time_integral_name);
+        auto integs = mblf->GetDBFI();
+        auto b_integs = mblf->GetBBFI();
+        auto markers = mblf->GetBBFI_Marker();
+        // If implicit contributions exist, scale them by timestep and add to td_mblf
+        if (integs->Size() || b_integs->Size())
         {
-          // Recover and scale integrators from mblf. This is to apply the dt*du/dt contributions
-          // from the operator on the trial variable in the implicit integration scheme
-          auto mblf = _mblfs.Get(test_var_name)
-                          ->Get(_time_derivative_map.getTimeIntegralName(coupled_var_name));
-          auto integs = mblf->GetDBFI();
-          auto b_integs = mblf->GetBBFI();
-          auto markers = mblf->GetBBFI_Marker();
-
-          // If implicit contributions exist, scale them by timestep and add to td_mblf
-          if (integs->Size() || b_integs->Size())
-          {
-            mfem::SumIntegrator * sum = new mfem::SumIntegrator(false);
-            ScaleIntegrator * scaled_sum = new ScaleIntegrator(sum, _dt_coef.constant, true);
-            for (int i = 0; i < integs->Size(); ++i)
-              sum->AddIntegrator(*integs[i]);
-            for (int i = 0; i < b_integs->Size(); ++i)
-              td_mblf->AddBoundaryIntegrator(
-                  new ScaleIntegrator(*b_integs[i], _dt_coef.constant, false), *(*markers[i]));
-            // scaled_sum is owned by td_mblf
-            td_mblf->AddDomainIntegrator(scaled_sum);
-          }
+          mfem::SumIntegrator * sum = new mfem::SumIntegrator(false);
+          ScaleIntegrator * scaled_sum = new ScaleIntegrator(sum, _dt_coef.constant, true);
+          for (int i = 0; i < integs->Size(); ++i)
+            sum->AddIntegrator(*integs[i]);
+          for (int i = 0; i < b_integs->Size(); ++i)
+            td_mblf->AddBoundaryIntegrator(
+                new ScaleIntegrator(*b_integs[i], _dt_coef.constant, false), *(*markers[i]));
+          // scaled_sum is owned by td_mblf
+          td_mblf->AddDomainIntegrator(scaled_sum);
         }
-
+      }
+      // If implicit contributions exist, scale them by timestep and add to td_mblf
+      if (td_mblf->GetDBFI()->Size() || td_mblf->GetBBFI()->Size())
+      {        
         // Assemble mixed bilinear form
+        td_mblf->SetAssemblyLevel(_assembly_level);                                                    
         td_mblf->Assemble();
         // Register mixed bilinear forms associated with a single trial variable
         // for the current test variable
-        test_td_mblfs->Register(coupled_var_name, td_mblf);
+        test_td_mblfs->Register(trial_var_name, td_mblf);
       }
     }
-    // Register all mixed bilinear form sets associated with a single test
-    // variable
+    // Register all mixed bilinear forms associated with a single test variable
     _td_mblfs.Register(test_var_name, test_td_mblfs);
   }
 }

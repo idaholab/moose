@@ -212,9 +212,14 @@ public:
     return false;
   }
 
+  inline bool hasTimeDerivative(const std::string & var_name) const
+  {
+    return _field_map.count(var_name);
+  }  
+
   inline const std::string & getTimeDerivativeName(const std::string & var_name) const
   {
-    if (_field_map.count(var_name))
+    if (hasTimeDerivative(var_name))
       return _field_map.at(var_name);
     else
     {
