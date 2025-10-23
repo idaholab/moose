@@ -7,6 +7,8 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
+"""Test moosecontrol.runners.subprocessportrunner.SubprocessPortRunner."""
+
 # ruff: noqa: E402
 
 import os
@@ -14,7 +16,6 @@ from time import sleep
 from unittest.mock import patch
 
 import pytest
-
 from common import (
     BASE_INPUT,
     LIVE_BASERUNNER_KWARGS,
@@ -25,7 +26,6 @@ from common import (
 setup_moose_python_path()
 
 from moosecontrol import SubprocessPortRunner
-
 from test_runners_baserunner import check_baserunner_cleanup_live
 from test_runners_interfaces_subprocessrunnerinterface import (
     ARGS,
@@ -42,21 +42,15 @@ PORT_RUNNER = "moosecontrol.PortRunner"
 
 
 def patch_runner(name: str, **kwargs):
-    """
-    Convenience method for patching the SubprocessPortRunner.
-    """
+    """Patch a method on the SubprocessPortRunner."""
     return patch(f"{RUNNER}.{name}", **kwargs)
 
 
 class TestSubprocessPortRunner(MooseControlTestCase):
-    """
-    Tests moosecontrol.runners.subprocessportrunner.SubprocessPortRunner.
-    """
+    """Test moosecontrol.runners.subprocessportrunner.SubprocessPortRunner."""
 
     def test_init(self):
-        """
-        Tests __init__() with the required arguments.
-        """
+        """Test __init__() with the required arguments."""
         runner = SubprocessPortRunner(**ARGS)
         self.assertEqual(runner.command, COMMAND)
         self.assertEqual(runner.moose_control_name, MOOSE_CONTROL_NAME)
@@ -65,16 +59,12 @@ class TestSubprocessPortRunner(MooseControlTestCase):
         self.assertTrue(runner.use_subprocess_reader)
 
     def test_init_socket_path(self):
-        """
-        Tests __init__() with a port provided.
-        """
+        """Test __init__() with a port provided."""
         runner = SubprocessPortRunner(**ARGS, port=FAKE_PORT)
         self.assertEqual(runner.port, FAKE_PORT)
 
     def test_get_additional_command(self):
-        """
-        Tests get_additional_command()
-        """
+        """Test get_additional_command()."""
         runner = SubprocessPortRunner(**ARGS, port=FAKE_PORT)
         result = runner.get_additional_command()
         self.assertEqual(
@@ -83,9 +73,7 @@ class TestSubprocessPortRunner(MooseControlTestCase):
         )
 
     def test_initialize_port_unavailable(self):
-        """
-        Tests initialize() when the port is not available.
-        """
+        """Test initialize() when the port is not available."""
         runner = SubprocessPortRunner(**ARGS, port=FAKE_PORT)
         with patch_runner("port_is_available", return_value=False):
             regex = f"Port {FAKE_PORT} is already used"
@@ -93,10 +81,7 @@ class TestSubprocessPortRunner(MooseControlTestCase):
                 runner.initialize()
 
     def test_initialize(self):
-        """
-        Tests initialize(), which should call initialize() on the parent
-        SubprocessRunnerInterface and PortRunner.
-        """
+        """Tests initialize() calling initialize() on the parents in order."""
         runner = SubprocessPortRunner(**ARGS)
         methods = [
             RUNNER + ".initialize_start",
@@ -106,27 +91,19 @@ class TestSubprocessPortRunner(MooseControlTestCase):
         self.assert_methods_called_in_order(methods, lambda: runner.initialize())
 
     def test_finalize(self):
-        """
-        Tests finalize(), which should call finalize() on the parent
-        SubprocessRunnerInterface and PortRunner.
-        """
+        """Test finalize() calling finalize() on the parents in order."""
         runner = SubprocessPortRunner(**ARGS)
         methods = [INTERFACE + ".finalize", PORT_RUNNER + ".finalize"]
         self.assert_methods_called_in_order(methods, lambda: runner.finalize())
 
     def test_cleanup(self):
-        """
-        Tests cleanup(), which should call cleanup() on the parent
-        SubprocessRunnerInterface and PortRunner.
-        """
+        """Test cleanup() calling cleanup() on the parents in order."""
         runner = SubprocessPortRunner(**ARGS)
         methods = [PORT_RUNNER + ".cleanup", INTERFACE + ".cleanup"]
         self.assert_methods_called_in_order(methods, lambda: runner.cleanup())
 
     def setup_live(self) -> SubprocessPortRunner:
-        """
-        Sets up a live test.
-        """
+        """Set up a live test."""
         input_file = os.path.join(self.directory.name, "input.i")
         with open(input_file, "w") as f:
             f.write(BASE_INPUT)
@@ -154,9 +131,7 @@ class TestSubprocessPortRunner(MooseControlTestCase):
 
     @pytest.mark.moose
     def test_live(self):
-        """
-        Tests running a MOOSE input live.
-        """
+        """Test running a MOOSE input live."""
         runner = self.setup_live()
 
         # Continue on the one timestep
@@ -172,9 +147,7 @@ class TestSubprocessPortRunner(MooseControlTestCase):
 
     @pytest.mark.moose
     def test_cleanup_live(self):
-        """
-        Tests cleanup() live, which should kill the process.
-        """
+        """Test cleanup() live, which should kill the process."""
         self.allow_log_warnings = True
 
         runner = self.setup_live()

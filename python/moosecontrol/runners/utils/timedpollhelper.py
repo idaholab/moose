@@ -10,16 +10,17 @@
 """Defines the TimedPollHelper."""
 
 from numbers import Number
-from typing import Callable, Optional
 from time import monotonic, sleep
+from typing import Callable, Optional
 
 
 class TimedPollHelper:
     """
-    Helper for performing an action in a polled fashion,
-    while also raising an exception when a timeout is reached.
+    Wrapped for performing an action in a polled fashion.
 
-    Example
+    Raises PollTimeout if a timeout is reached.
+
+    Example:
     -------
     >>>> helper = TimedPollHelper(poll_time=0.1, timeout_time=10)
     >>>> helper.start()
@@ -35,10 +36,13 @@ class TimedPollHelper:
     >>>>
     >>>> # Finalize timing if it succeeds
     >>>> helper.end()
+
     """
 
     def __init__(self, poll_time: float, timeout_time: float):
         """
+        Initialize state.
+
         Parameters
         ----------
         poll_time : float
@@ -46,6 +50,7 @@ class TimedPollHelper:
         timeout_time : float
             How many seconds may elapse before raising TimedPollTimeout
             when calling poll().
+
         """
         assert isinstance(poll_time, Number)
         assert poll_time > 0
@@ -64,16 +69,12 @@ class TimedPollHelper:
 
     @property
     def poll_time(self) -> float:
-        """
-        How often to poll in seconds.
-        """
+        """How often to poll in seconds."""
         return self._poll_time
 
     @property
     def timeout_time(self) -> float:
-        """
-        Timeout time during polling in seconds.
-        """
+        """Timeout during polling in seconds."""
         return self._timeout_time
 
     @property
@@ -119,7 +120,7 @@ class TimedPollHelper:
 
     def start(self):
         """
-        Starts the timing.
+        Start the timing.
 
         Must be called before using poll().
         """
@@ -127,28 +128,24 @@ class TimedPollHelper:
             self._start_time = monotonic()
 
     def end(self):
-        """
-        Finishes the timing.
-        """
+        """Finish the timing."""
         assert self.start_time is not None
         self._end_time = monotonic()
 
     class PollTimeout(Exception):
-        """
-        Exception raised when the timeout is hit during poll()
-        """
+        """Exception raised when the timeout is hit during poll()."""
 
         def __init__(self, waited_time: float):
+            """Store the waited time and setup the timeout message."""
             self.waited_time: float = waited_time
             message = f"Timed out after {waited_time:.2f} seconds"
             super().__init__(message)
 
     class StartNotCalled(Exception):
-        """
-        Exception for calling poll() without start() in TimedPollHelper.
-        """
+        """Exception for calling poll() without start() in TimedPollHelper."""
 
         def __init__(self):
+            """Store the timeout message."""
             super().__init__("poll() was called without calling start()")
 
     def poll(self, should_exit: Callable[[], bool]):

@@ -9,36 +9,35 @@
 
 # ruff: noqa: E402
 
+"""Tests moosecontrol.moosecontrol.MooseControl."""
+
 import logging
 import os
-
 from copy import deepcopy
 from numbers import Number
-from unittest.mock import MagicMock, patch
 from typing import Any, Optional, Tuple
+from unittest.mock import MagicMock, patch
 
 import pytest
-
 from common import (
-    MooseControlTestCase,
-    setup_moose_python_path,
-    mock_response,
     BASE_INPUT,
     FAKE_URL,
+    MooseControlTestCase,
+    mock_response,
+    setup_moose_python_path,
 )
 
 setup_moose_python_path()
 
-from test_runners_baserunner import BaseRunnerTest
-
 from moosecontrol import MooseControl, SubprocessSocketRunner
-from moosecontrol.moosecontrol import MooseControlContextManager
 from moosecontrol.exceptions import ControlNotWaiting, UnexpectedFlag
 from moosecontrol.moosecontrol import (
-    DEFAULT_LOG_FORMAT,
     DEBUG_LOG_FORMAT,
+    DEFAULT_LOG_FORMAT,
     STREAM_HANDLER,
+    MooseControlContextManager,
 )
+from test_runners_baserunner import BaseRunnerTest
 
 MOOSECONTROL = "moosecontrol.MooseControl"
 BASERUNNER = "moosecontrol.runners.BaseRunner"
@@ -48,14 +47,10 @@ FAKE_NAME = "cool_name"
 
 
 class TestMooseControl(MooseControlTestCase):
-    """
-    Tests moosecontrol.moosecontrol.MooseControl.
-    """
+    """Tests moosecontrol.moosecontrol.MooseControl."""
 
     def test_init(self):
-        """
-        Test __init__() with the required and default arguments.
-        """
+        """Test __init__() with the required and default arguments."""
         runner = BaseRunnerTest()
         with patch("moosecontrol.moosecontrol.logging.basicConfig") as basic_config:
             control = MooseControl(runner)
@@ -70,25 +65,19 @@ class TestMooseControl(MooseControlTestCase):
         self.assertFalse(control.initialized)
 
     def test_init_quiet_and_verbose(self):
-        """
-        Test __init__() with quiet and verbose set.
-        """
+        """Test __init__() with quiet and verbose set."""
         with self.assertRaises(ValueError) as e:
             MooseControl(BaseRunnerTest(), quiet=True, verbose=True)
         self.assertEqual(str(e.exception), "Cannot set quiet=True and verbose=True")
 
     def test_init_quiet(self):
-        """
-        Tests __init__() with quiet=True, which does not add a logging handler.
-        """
+        """Test __init__() with quiet=True, which does not add a logging handler."""
         with patch("moosecontrol.moosecontrol.logging.basicConfig") as basic_config:
             MooseControl(BaseRunnerTest(), quiet=True)
         basic_config.assert_not_called()
 
     def test_init_verbose(self):
-        """
-        Tests __init__() with verbose=True, which adds a debug log handler.
-        """
+        """Test __init__() with verbose=True, which adds a debug log handler."""
         with patch("moosecontrol.moosecontrol.logging.basicConfig") as basic_config:
             MooseControl(BaseRunnerTest(), verbose=True)
         basic_config.assert_called_once_with(
@@ -100,8 +89,9 @@ class TestMooseControl(MooseControlTestCase):
 
     def test_enter(self):
         """
-        Tests __enter__(), which should call initialize()
-        and return a MooseControlContextManager.
+        Test __enter__().
+
+        Should call initialize()and return a MooseControlContextManager.
         """
         control = MooseControl(BaseRunnerTest())
         control.initialize = MagicMock()
@@ -114,7 +104,9 @@ class TestMooseControl(MooseControlTestCase):
 
     def test_exit(self):
         """
-        Tests __exit__(), which should call finalize() and not cleanup().
+        Test __exit__().
+
+        Should call finalize() and not cleanup().
         """
         control = MooseControl(BaseRunnerTest())
         control.cleanup = MagicMock()
@@ -128,8 +120,9 @@ class TestMooseControl(MooseControlTestCase):
 
     def test_exit_raise(self):
         """
-        Tests __exit__() when an exception is raised, which
-        should call cleanup() instead of finalize.
+        Test __exit__() when an exception is raised.
+
+        Should call cleanup() instead of finalize.
         """
         self.allow_log_warnings = True
 
@@ -148,9 +141,7 @@ class TestMooseControl(MooseControlTestCase):
         control.finalize.assert_not_called()
 
     def test_context_manager(self):
-        """
-        Tests __enter__() and __exit__ together() on success.
-        """
+        """Test __enter__() and __exit__ together() on success."""
         control = MooseControl(BaseRunnerTest())
         control.initialize = MagicMock()
         control.cleanup = MagicMock()
@@ -167,8 +158,9 @@ class TestMooseControl(MooseControlTestCase):
 
     def test_initialize(self):
         """
-        Tests that initialize() calls the underlying runner's initialize()
-        and calls wait().
+        Test initialize().
+
+        Should call the underlying runner's initialize() and wait().
         """
         control = MooseControl(BaseRunnerTest())
 
@@ -185,7 +177,9 @@ class TestMooseControl(MooseControlTestCase):
 
     def test_finalize(self):
         """
-        Tests that finalize() calls the underlying runner's finalize().
+        Test finalize().
+
+        Should call the underlying runner's finalize().
         """
         runner = BaseRunnerTest()
         control = MooseControl(runner)
@@ -196,9 +190,7 @@ class TestMooseControl(MooseControlTestCase):
         runner.finalize.assert_called_once()
 
     def test_cleanup(self):
-        """
-        Tests that cleanup() calls the underlying runner's cleanup().
-        """
+        """Test that cleanup() calls the underlying runner's cleanup()."""
         runner = BaseRunnerTest()
         control = MooseControl(runner)
         runner.cleanup = MagicMock()
@@ -209,9 +201,7 @@ class TestMooseControl(MooseControlTestCase):
 
     @pytest.mark.moose
     def test_live(self):
-        """
-        Tests running a MOOSE input live.
-        """
+        """Test running a MOOSE input live."""
         input_file = os.path.join(self.directory.name, "input.i")
         with open(input_file, "w") as f:
             f.write(BASE_INPUT)
@@ -230,12 +220,16 @@ class TestMooseControl(MooseControlTestCase):
 
 
 class TestMooseControlSetUpControl(MooseControlTestCase):
-    """
-    Tests moosecontrol.moosecontrol.MooseControl, automatically
-    setting up a MooseControl for each case.
-    """
+    """Test moosecontrol.moosecontrol.MooseControl with automatic MooseControl setup."""
 
     def setUp(self):
+        """
+        Set up test.
+
+        Creates a MooseControl and data structures for tracking
+        what calls were made to the session GET and POST and
+        calls the parent setUp().
+        """
         # The control for this test
         runner = BaseRunnerTest(poll_time=0.001)
         self.control: MooseControl = MooseControl(runner, quiet=True)
@@ -251,6 +245,11 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
         super().setUp()
 
     def tearDown(self):
+        """
+        Tear down a test.
+
+        Closes the session and calls the parent tearDown().
+        """
         # Clean up the session
         self.control.runner._session.close()
 
@@ -262,8 +261,7 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
         waiting: Optional[bool] = None,
     ):
         """
-        Helper for mocking Session.get for the runner, simplifying
-        fake GET responses from the server.
+        Mock Session.get for the runner.
 
         Parameters
         ----------
@@ -274,6 +272,7 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
             waiting on FAKE_EXECUTE_ON_FLAG. If False, sets
             up a fake GET for the server to return that it
             is not waiting.
+
         """
         self.get_paths.clear()
 
@@ -309,15 +308,11 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
         return patch.object(runner._session, "get", new=new)
 
     def assertGetPaths(self, paths: list[str]):
-        """
-        Asserts that the given paths were passed in the mocked get.
-        """
+        """Assert that the given paths were passed in the mocked get."""
         self.assertEqual(self.get_paths, paths)
 
     def mock_post(self, paths: list[Tuple[str, dict]] = []):
-        """
-        Mocks session.post for the runner.
-        """
+        """Mock session.post for the runner."""
         self.post_paths.clear()
 
         paths = deepcopy(paths)
@@ -335,15 +330,11 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
         return patch.object(runner._session, "post", new=new)
 
     def assertPostPaths(self, paths: list[Tuple[str, dict]]):
-        """
-        Asserts that the given paths and data were passed in the mocked get.
-        """
+        """Assert that the given paths and data were passed in the mocked get."""
         self.assertEqual(self.post_paths, paths)
 
     def test_get_waiting_flag(self):
-        """
-        Tests get_waiting_flag().
-        """
+        """Test get_waiting_flag()."""
         with self.mock_get(waiting=False):
             self.assertIsNone(self.control.get_waiting_flag())
         self.assertGetPaths(["waiting"])
@@ -353,9 +344,7 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
         self.assertGetPaths(["waiting"])
 
     def test_is_waiting(self):
-        """
-        Tests is_waiting().
-        """
+        """Test is_waiting()."""
         with self.mock_get(waiting=False):
             self.assertFalse(self.control.is_waiting())
         self.assertGetPaths(["waiting"])
@@ -365,26 +354,19 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
         self.assertGetPaths(["waiting"])
 
     def test_require_waiting_not_waiting(self):
-        """
-        Tests require_waiting() when the control is not waiting.
-        """
-        with self.mock_get(waiting=False):
-            with self.assertRaises(ControlNotWaiting):
-                self.control.require_waiting()
+        """Test require_waiting() when the control is not waiting."""
+        with self.mock_get(waiting=False), self.assertRaises(ControlNotWaiting):
+            self.control.require_waiting()
         self.assertGetPaths(["waiting"])
 
     def test_require_waiting(self):
-        """
-        Tests require_waiting().
-        """
+        """Test require_waiting()."""
         with self.mock_get(waiting=True):
             self.control.require_waiting()
         self.assertGetPaths(["waiting"])
 
     def test_set_continue(self):
-        """
-        Tests set_continue().
-        """
+        """Test set_continue()."""
         with self.mock_get(waiting=True, paths=[("continue", {})]):
             self.control.set_continue()
         self.assertGetPaths(["waiting", "continue"])
@@ -392,9 +374,7 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
         self.assert_log_message(0, "Sending continue to server")
 
     def test_set_terminate(self):
-        """
-        Tests set_terminate().
-        """
+        """Test set_terminate()."""
         with self.mock_get(waiting=True, paths=[("terminate", {})]):
             self.control.set_terminate()
         self.assertEqual(self.get_paths, ["waiting", "terminate"])
@@ -402,9 +382,7 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
         self.assert_log_message(0, "Sending terminate to server")
 
     def test_wait_immediate(self):
-        """
-        Tests wait() returning immediately.
-        """
+        """Test wait() returning immediately."""
         with self.mock_get(waiting=True):
             flag = self.control.wait()
         self.assertEqual(flag, FAKE_EXECUTE_ON_FLAG)
@@ -414,9 +392,7 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
         self.assert_log_message(1, f"Server is waiting at flag {FAKE_EXECUTE_ON_FLAG}")
 
     def test_wait_with_flag(self):
-        """
-        Tests wait() with a flag.
-        """
+        """Test wait() with a flag."""
         with self.mock_get(waiting=True):
             flag = self.control.wait(FAKE_EXECUTE_ON_FLAG)
         self.assertEqual(flag, FAKE_EXECUTE_ON_FLAG)
@@ -428,12 +404,9 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
         self.assert_log_message(1, f"Server is waiting at flag {FAKE_EXECUTE_ON_FLAG}")
 
     def test_wait_wrong_flag(self):
-        """
-        Tests wait() with a flag and being at the wrong flag.
-        """
-        with self.mock_get(waiting=True):
-            with self.assertRaises(UnexpectedFlag) as e:
-                self.control.wait("abcd")
+        """Test wait() with a flag and being at the wrong flag."""
+        with self.mock_get(waiting=True), self.assertRaises(UnexpectedFlag) as e:
+            self.control.wait("abcd")
         self.assertEqual(str(e.exception), "Unexpected execute on flag foo")
         self.assertGetPaths(["waiting"])
         self.assert_log_size(2)
@@ -441,9 +414,7 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
         self.assert_log_message(1, f"Server is waiting at flag {FAKE_EXECUTE_ON_FLAG}")
 
     def test_wait_with_poll(self):
-        """
-        Tests wait() not being ready immediately and polling.
-        """
+        """Test wait() not being ready immediately and polling."""
         # Polls for a little bit
         get_count = 0
         waiting_at_num = 2
@@ -467,9 +438,7 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
         self.assert_log_message(1, f"Server is waiting at flag {FAKE_EXECUTE_ON_FLAG}")
 
     def test_get_postprocessor(self):
-        """
-        Tests get_postprocessor().
-        """
+        """Test get_postprocessor()."""
         value = 5.0
 
         for value_type in [float, int]:
@@ -488,9 +457,7 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
             )
 
     def test_get_reporter_value(self):
-        """
-        Tests get_reporter_value().
-        """
+        """Test get_reporter_value()."""
         value = 100
         with self.mock_get(waiting=True):
             paths = [("get/reporter", {"data": {"value": value}})]
@@ -506,9 +473,7 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
         )
 
     def test_get_time(self):
-        """
-        Tests get_time().
-        """
+        """Test get_time()."""
         value = 5.0
 
         for value_type in [float, int]:
@@ -523,9 +488,7 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
             self.assert_log_message(0, "Getting simulation time", levelname="DEBUG")
 
     def test_get_dt(self):
-        """
-        Tests get_dt().
-        """
+        """Test get_dt()."""
         value = 5.0
 
         for value_type in [float, int]:
@@ -540,26 +503,23 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
             self.assert_log_message(0, "Getting simulation timestep", levelname="DEBUG")
 
     def test_set_controllable_scalar_bad_type(self):
-        """
-        Tests _set_controllable_scalar() with a bad type.
-        """
+        """Test _set_controllable_scalar() with a bad type."""
         with self.assertRaises(TypeError) as e:
             self.control._set_controllable_scalar("unused", "unused", (Number,), "foo")
         self.assertEqual(str(e.exception), "Type str is not of allowed type(s) Number")
 
     def test_set_controllable_scalar_convert_type(self):
-        """
-        Tests _set_controllable_scalar() converting input values
-        into a common type.
-        """
+        """Test _set_controllable_scalar() converting input values."""
         value = 1
 
         # Converts int -> float
-        with self.mock_get(waiting=True):
-            with self.mock_post([("set/controllable", {"status_code": 201})]):
-                self.control._set_controllable_scalar(
-                    FAKE_NAME, "Real", (Number,), value, float
-                )
+        with (
+            self.mock_get(waiting=True),
+            self.mock_post([("set/controllable", {"status_code": 201})]),
+        ):
+            self.control._set_controllable_scalar(
+                FAKE_NAME, "Real", (Number,), value, float
+            )
         post_value = self.post_paths[0][1]["value"]
         self.assertIsInstance(post_value, float)
 
@@ -570,15 +530,15 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
         method_type: str,
         expected_value: Optional[Any] = None,
     ):
-        """
-        Helper for testing the various set_controllable_XXX() routines.
-        """
+        """Run a test for the various set_controllable_XXX() routines."""
         if expected_value is None:
             expected_value = value
-        with self.mock_get(waiting=True):
-            with self.mock_post([("set/controllable", {"status_code": 201})]):
-                method = getattr(self.control, f"set_controllable_{method_type}")
-                method(FAKE_NAME, value)
+        with (
+            self.mock_get(waiting=True),
+            self.mock_post([("set/controllable", {"status_code": 201})]),
+        ):
+            method = getattr(self.control, f"set_controllable_{method_type}")
+            method(FAKE_NAME, value)
         self.assertGetPaths(["waiting"])
         self.assertPostPaths(
             [
@@ -594,33 +554,23 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
         )
 
     def test_set_controllable_bool(self):
-        """
-        Tests set_controllable_bool().
-        """
+        """Test set_controllable_bool()."""
         self.run_test_set_controllable(True, "bool", "bool")
 
     def test_set_controllable_int(self):
-        """
-        Tests set_controllable_int().
-        """
+        """Test set_controllable_int()."""
         self.run_test_set_controllable(int(1), "int", "int")
 
     def test_set_controllable_real(self):
-        """
-        Tests set_controllable_real().
-        """
+        """Test set_controllable_real()."""
         self.run_test_set_controllable(float(1), "Real", "real")
 
     def test_set_controllable_string(self):
-        """
-        Tests set_controllable_string().
-        """
+        """Test set_controllable_string()."""
         self.run_test_set_controllable("foo", "std::string", "string")
 
     def test_set_controllable_vector_bad_type(self):
-        """
-        Tests _set_controllable_vector() with a bad type.
-        """
+        """Test _set_controllable_vector() with a bad type."""
         with self.assertRaises(TypeError) as e:
             self.control._set_controllable_vector(
                 "unused",
@@ -633,32 +583,27 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
         )
 
     def test_set_controllable_vector_convert_type(self):
-        """
-        Tests _set_controllable_vector() converting input values
-        into a common type.
-        """
+        """Test _set_controllable_vector() converting input values."""
         value = [1, 2, 3]
         self.assertFalse(all(isinstance(v, float) for v in value))
 
         # Converts list[int] -> list[float]
-        with self.mock_get(waiting=True):
-            with self.mock_post([("set/controllable", {"status_code": 201})]):
-                self.control._set_controllable_vector(
-                    FAKE_NAME, "Real", (Number,), value, float
-                )
+        with (
+            self.mock_get(waiting=True),
+            self.mock_post([("set/controllable", {"status_code": 201})]),
+        ):
+            self.control._set_controllable_vector(
+                FAKE_NAME, "Real", (Number,), value, float
+            )
         post_value = self.post_paths[0][1]["value"]
         self.assertTrue(all(isinstance(v, float) for v in post_value))
 
     def test_set_controllable_vector_int(self):
-        """
-        Tests set_controllable_vector_int().
-        """
+        """Test set_controllable_vector_int()."""
         self.run_test_set_controllable([1, 2, 3], "std::vector<int>", "vector_int")
 
     def test_set_controllable_vector_real(self):
-        """
-        Tests set_controllable_vector_int().
-        """
+        """Test set_controllable_vector_int()."""
         value = [1.0, 2, 3.0]
         self.assertFalse(all(isinstance(v, float) for v in value))
 
@@ -669,32 +614,23 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
         self.assertTrue(all(isinstance(v, float) for v in post_value))
 
     def test_set_controllable_vector_string(self):
-        """
-        Tests set_controllable_vector_string().
-        """
+        """Test set_controllable_vector_string()."""
         self.run_test_set_controllable(
             ["foo", "bar"], "std::vector<std::string>", "vector_string"
         )
 
     def test_set_controllable_matrix(self):
-        """
-        Tests test_set_controllable_matrix().
-        """
+        """Test set_controllable_matrix()."""
         value = [[1, 2], [3.0, 4.0]]
         self.run_test_set_controllable(value, "RealEigenMatrix", "matrix")
 
     def test_set_controllable_matrix_1D(self):
-        """
-        Tests test_set_controllable_matrix() with a 1D array.
-        """
+        """Test set_controllable_matrix() with a 1D array."""
         value = [1]
         self.run_test_set_controllable(value, "RealEigenMatrix", "matrix", [[1]])
 
     def test_set_controllable_matrix_non_1D_2D(self):
-        """
-        Tests test_set_controllable_matrix() when the value
-        is not 1D or 2D
-        """
+        """Tests set_controllable_matrix() when the value is not 1D or 2D."""
         value = [[[1]]]
         with self.assertRaises(ValueError) as e:
             self.run_test_set_controllable(

@@ -16,21 +16,18 @@ from string import ascii_lowercase, digits
 from tempfile import gettempdir
 from typing import Optional
 
-from .socketrunner import SocketRunner
 from moosecontrol.runners.interfaces.subprocessrunnerinterface import (
-    SubprocessRunnerInterface,
     DEFAULT_DIRECTORY,
+    SubprocessRunnerInterface,
 )
+
+from .socketrunner import SocketRunner
 
 logger = getLogger("SubprocessSocketRunner")
 
 
 class SubprocessSocketRunner(SubprocessRunnerInterface, SocketRunner):
-    """
-    Runner to be used with the MooseControl that
-    spawns a MOOSE process and connects to the
-    webserver over a socket.
-    """
+    """Runner that spawns a MOOSE process and connects to it via a port."""
 
     def __init__(
         self,
@@ -42,6 +39,8 @@ class SubprocessSocketRunner(SubprocessRunnerInterface, SocketRunner):
         **kwargs,
     ):
         """
+        Initialize state.
+
         Parameters
         ----------
         command : list[str]
@@ -60,8 +59,9 @@ class SubprocessSocketRunner(SubprocessRunnerInterface, SocketRunner):
         use_subprocess_reader : bool
             Whether or not to spawn a separate reader thread
             to collect subprocess output. Defaults to true.
+        **kwargs : dict
+            See SocketRunner.__init__().
 
-        See BaseRunner.__init__() for additional parameters.
         """
         SubprocessRunnerInterface.__init__(
             self,
@@ -81,16 +81,14 @@ class SubprocessSocketRunner(SubprocessRunnerInterface, SocketRunner):
 
     @staticmethod
     def random_socket_path() -> str:
-        """
-        Generates a random socket path in the temporary directory.
-        """
+        """Generate a random socket path in the temporary directory."""
         characters = ascii_lowercase + digits
         name = "".join(choice(characters) for i in range(7))
         return os.path.join(gettempdir(), f"moosecontrol_{name}.sock")
 
     def get_additional_command(self) -> list[str]:
         """
-        Gets the full command to run.
+        Get the full command to run.
 
         Takes the user's command and also:
             - Sets the file socket for the control
@@ -101,9 +99,7 @@ class SubprocessSocketRunner(SubprocessRunnerInterface, SocketRunner):
         return [control_socket, "--color=off"]
 
     def initialize(self):
-        """
-        Initializes the runner.
-        """
+        """Spawn the process and wait for the server to be listening."""
         self.initialize_start()
 
         if os.path.exists(self.socket_path):
@@ -115,20 +111,14 @@ class SubprocessSocketRunner(SubprocessRunnerInterface, SocketRunner):
         SocketRunner.initialize(self)
 
     def finalize(self):
-        """
-        Finalizes the runner.
-        """
+        """Finalize the process and the connection."""
         # Wait for process to finish
         SubprocessRunnerInterface.finalize(self)
         # And then delete the socket
         SocketRunner.finalize(self)
 
     def cleanup(self):
-        """
-        Performs cleanup.
-
-        Should ideally do nothing unless something went wrong.
-        """
+        """Kill the server and the process."""
         # And then cleanup the socket
         SocketRunner.cleanup(self)
         # Kill process if needed

@@ -14,19 +14,19 @@ import stat
 from logging import getLogger
 
 from moosecontrol.requests_unixsocket import Session
+
 from .baserunner import BaseRunner
 
 logger = getLogger("SocketRunner")
 
 
 class SocketRunner(BaseRunner):
-    """
-    Runner to be used with the MooseControl to interact
-    with an already-running MOOSE webserver over a socket.
-    """
+    """Runner that interacts with an already-running webserver over a socket."""
 
     def __init__(self, socket_path: str, **kwargs):
         """
+        Initialize state.
+
         Parameters
         ----------
         socket_path : str
@@ -34,7 +34,9 @@ class SocketRunner(BaseRunner):
 
         Optional Parameters
         -------------------
-        See BaseRunner.__init__() for additional parameters.
+        **kwargs : dict
+            See BaseRunner.__init__().
+
         """
         # The path to the socket
         self._socket_path: str = socket_path
@@ -46,29 +48,23 @@ class SocketRunner(BaseRunner):
 
     @property
     def url(self) -> str:
-        """
-        Get the URL for interacting with the server.
-        """
+        """Get the URL for interacting with the server."""
         return f'http+unix://{self.socket_path.replace("/", "%2F")}'
 
     @staticmethod
     def build_session() -> Session:
-        """
-        Get a Session for interacting with the server.
-        """
+        """Get a Session for interacting with the server."""
         return Session()
 
     @property
     def socket_path(self) -> str:
-        """
-        Get the path to the socket.
-        """
+        """Get the path to the socket."""
         return self._socket_path
 
     @staticmethod
     def socket_exists(socket_path: str) -> bool:
         """
-        Helper for checking if the given path exists as a socket.
+        Whether or not the given path exists as a socket.
 
         If the path doesn't exist, returns False. If the path
         exist but isn't a socket, raises FileNotFoundError.
@@ -82,12 +78,7 @@ class SocketRunner(BaseRunner):
         return True
 
     def initialize(self):
-        """
-        Initializes the runner.
-
-        Waits for the socket to exist and then calls
-        BaseRunner.initialize().
-        """
+        """Wait for the socket to exist and call the parent initialize."""
         self.initialize_start()
 
         socket_path = self.socket_path
@@ -106,19 +97,12 @@ class SocketRunner(BaseRunner):
         super().initialize()
 
     def delete_socket(self):
-        """
-        Delete the socket.
-        """
+        """Delete the socket."""
         logger.info(f"Deleting socket {self.socket_path}")
         os.remove(self.socket_path)
 
     def finalize(self):
-        """
-        Finalizes the runner.
-
-        Calls finalize() in the BaseRunner and cleans up
-        the socket.
-        """
+        """Finalize the parent and delete the socket."""
         # Let the parent finish up
         super().finalize()
 
@@ -126,11 +110,7 @@ class SocketRunner(BaseRunner):
         self.delete_socket()
 
     def cleanup(self):
-        """
-        Performs cleanup.
-
-        Should ideally do nothing unless something went wrong.
-        """
+        """Cleanup the parent and delete the socket if it exists."""
         super().cleanup()
 
         # Delete the socket if it exists

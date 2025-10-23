@@ -9,19 +9,19 @@
 
 """Implements the MooseControl."""
 
+import logging
 from dataclasses import dataclass
 from numbers import Number
 from time import sleep
 from typing import Any, Iterable, Optional, Tuple, Type
-import logging
 
 import numpy as np
 import numpy.typing as npt
 
 from moosecontrol.exceptions import ControlNotWaiting, UnexpectedFlag
-from moosecontrol.validation import check_response_data
 from moosecontrol.runners import BaseRunner
 from moosecontrol.runners.baserunner import WebServerControlResponse
+from moosecontrol.validation import check_response_data
 
 # Common logger for the MooseControl
 logger = logging.getLogger("MooseControl")
@@ -35,22 +35,20 @@ DEBUG_LOG_FORMAT = "%(asctime)s:%(levelname)s:%(name)s: %(message)s"
 
 @dataclass
 class MooseControlContextManager:
-    """
-    Context manager for MooseControl.
-    """
+    """Context manager for MooseControl."""
 
     # The underlying MooseControl
     control: "MooseControl"
 
 
 class MooseControl:
-    """
-    Helper for interacting with the MOOSE WebServerControl.
-    """
+    """Helper for interacting with the MOOSE WebServerControl."""
 
     def __init__(self, runner: BaseRunner, quiet: bool = False, verbose: bool = False):
         """
-        Arguments
+        Initialize state and setup logger if applicable.
+
+        Arguments:
         ---------
         runner : BaseRunner
             The runner used to connect to the server.
@@ -61,6 +59,7 @@ class MooseControl:
             Disables on-screen logging output if True.
         verbose : bool
             Enables on-screen debugging output if True.
+
         """
         assert isinstance(runner, BaseRunner)
         assert isinstance(quiet, bool)
@@ -85,29 +84,22 @@ class MooseControl:
 
     @property
     def runner(self) -> BaseRunner:
-        """
-        Get the underlying runner.
-        """
+        """Get the underlying runner."""
         return self._runner
 
     @property
     def poll_time(self) -> float:
-        """
-        Get the time between polls in seconds.
-        """
+        """Get the time between polls in seconds."""
         return self.runner.poll_time
 
     @property
     def initialized(self) -> bool:
-        """
-        Whether or not we have initialized.
-        """
+        """Whether or not we have initialized."""
         return self.runner.initialized
 
     def initialize(self):
         """
-        Initializes the underlying runner and waits
-        for the moose process to start.
+        Initialize the runner and waits for the process to start.
 
         Must be called before interacting with the process;
         context manager calls initialize() on enter.
@@ -120,7 +112,7 @@ class MooseControl:
 
     def finalize(self):
         """
-        Finalizes the underlying runner.
+        Finalize the underlying runner.
 
         Should be called when done to gracefully cleanup;
         context manager calls finalize() on exit
@@ -128,10 +120,7 @@ class MooseControl:
         self.runner.finalize()
 
     def cleanup(self):
-        """
-        Performs cleanup when a non-graceful exit is needed
-        such as when an exception is thrown.
-        """
+        """Perform cleanup for a non-graceful exit."""
         self.runner.cleanup()
 
     def __enter__(self) -> MooseControlContextManager:
@@ -159,10 +148,7 @@ class MooseControl:
             self.finalize()
 
     def get_waiting_flag(self) -> Optional[str]:
-        """
-        Get the current EXECUTE_ON flag that the WebServerControl
-        is waiting on, if any.
-        """
+        """Get the current EXECUTE_ON flag from MOOSE, if any."""
         response = self.runner.get("waiting", require_status=200)
         check_response_data(response, [("waiting", bool)], [("execute_on_flag", str)])
         data = response.data
@@ -176,15 +162,11 @@ class MooseControl:
         return data["execute_on_flag"]
 
     def is_waiting(self) -> bool:
-        """
-        Get whether or not the control is currently waiting.
-        """
+        """Get whether or not the control is currently waiting."""
         return self.get_waiting_flag() is not None
 
     def require_waiting(self):
-        """
-        Raises ControlNotWaiting if the control is not currently waiting.
-        """
+        """Raise ControlNotWaiting if the control is not waiting."""
         if not self.is_waiting():
             raise ControlNotWaiting
 
@@ -208,6 +190,7 @@ class MooseControl:
         -------
         WebServerControlResponse:
             The combined response, along with the JSON data if any.
+
         """
         self.require_waiting()
         return self.runner.get(path, require_status=require_status)
@@ -236,23 +219,20 @@ class MooseControl:
         -------
         WebServerControlResponse:
             The combined response, along with the JSON data if any.
+
         """
         self.require_waiting()
         return self.runner.post(path, data, require_status=require_status)
 
     def set_continue(self):
-        """
-        Tells the control to continue.
-        """
+        """Tell the control to continue."""
         logger.info("Sending continue to server")
 
         ws_response = self.get("continue")
         assert not ws_response.has_data()
 
     def set_terminate(self):
-        """
-        Tells the control to terminate gracefully.
-        """
+        """Tell the control to terminate gracefully."""
         logger.info("Sending terminate to server")
 
         ws_response = self.get("terminate")
@@ -260,8 +240,7 @@ class MooseControl:
 
     def wait(self, flag: Optional[str] = None) -> str:
         """
-        Waits for the webserver and returns once the
-        webserver is waiting.
+        Wait for the webserver to be waiting.
 
         Additional Parameters
         ---------------------
@@ -272,6 +251,7 @@ class MooseControl:
         -------
         str
             The execute on flag that the server is waiting on.
+
         """
         assert isinstance(flag, (str, type(None)))
 
@@ -292,9 +272,7 @@ class MooseControl:
             sleep(self.poll_time)
 
     def get_postprocessor(self, name: str) -> float:
-        """
-        Gets a postprocessor value.
-        """
+        """Get a postprocessor value by name."""
         assert isinstance(name, str)
         logger.debug(f'Getting postprocessor value for "{name}"')
 
@@ -303,9 +281,7 @@ class MooseControl:
         return float(response.data["value"])
 
     def get_reporter_value(self, name: str) -> Any:
-        """
-        Gets a reporter value.
-        """
+        """Get a reporter value by name."""
         assert isinstance(name, str)
         logger.debug(f'Getting reporter value for "{name}"')
 
@@ -314,9 +290,7 @@ class MooseControl:
         return response.data["value"]
 
     def get_time(self) -> float:
-        """
-        Gets the current simulation time.
-        """
+        """Get the current simulation time."""
         logger.debug("Getting simulation time")
 
         response = self.get("get/time")
@@ -324,9 +298,7 @@ class MooseControl:
         return float(response.data["time"])
 
     def get_dt(self) -> float:
-        """
-        Gets the current simulation timestep.
-        """
+        """Get the current simulation timestep."""
         logger.debug("Getting simulation timestep")
 
         response = self.get("get/dt")
@@ -337,7 +309,9 @@ class MooseControl:
         self, path: str, cpp_type: str, python_types: Tuple[Type, ...], value: Any
     ):
         """
-        Internal method for setting a controllable value.
+        Set a generic controllable value.
+
+        Internal method to be used by the explicit setters.
 
         Parameters
         ----------
@@ -349,6 +323,7 @@ class MooseControl:
             Allowed types for the input values.
         value : Any
             The value to set.
+
         """
         assert isinstance(path, str)
         assert isinstance(cpp_type, str)
@@ -367,7 +342,9 @@ class MooseControl:
         python_value_type: Optional[Type] = None,
     ):
         """
-        Internal method for setting a scalar controllable value.
+        Set a generic scalar controllable value.
+
+        Internal method to be used by the explicit scalar setters.
 
         Parameters
         ----------
@@ -384,6 +361,7 @@ class MooseControl:
         ---------------------
         python_value_type : Optional[Type]
             The type to convert the value to, if any.
+
         """
         assert all(isinstance(v, Type) for v in python_types)
         assert isinstance(python_value_type, (Type, type(None)))
@@ -400,7 +378,7 @@ class MooseControl:
 
     def set_controllable_bool(self, path: str, value: bool):
         """
-        Sets a controllable bool parameter.
+        Set a controllable bool parameter.
 
         Parameters
         ----------
@@ -408,12 +386,13 @@ class MooseControl:
             The path to the controllable value.
         value : bool
             The value to set.
+
         """
         self._set_controllable_scalar(path, "bool", (bool,), value)
 
     def set_controllable_int(self, path: str, value: int):
         """
-        Sets a controllable int parameter.
+        Set a controllable int parameter.
 
         Parameters
         ----------
@@ -421,12 +400,13 @@ class MooseControl:
             The path to the controllable value.
         value : int
             The value to set.
+
         """
         self._set_controllable_scalar(path, "int", (int,), value)
 
     def set_controllable_real(self, path: str, value: float):
         """
-        Sets a controllable Real parameter.
+        Set a controllable Real parameter.
 
         Parameters
         ----------
@@ -434,14 +414,13 @@ class MooseControl:
             The path to the controllable value.
         value : float
             The value to set.
+
         """
         self._set_controllable_scalar(path, "Real", (Number,), value, float)
 
     def set_controllable_string(self, path: str, value: str):
         """
-        Sets a controllable std::string parameter.
-
-        Must be waiting.
+        Set a controllable std::string parameter.
 
         Parameters
         ----------
@@ -449,6 +428,7 @@ class MooseControl:
             The path to the controllable value.
         value : str
             The value to set.
+
         """
         self._set_controllable_scalar(path, "std::string", (str,), value)
 
@@ -461,7 +441,9 @@ class MooseControl:
         python_value_type: Optional[Type] = None,
     ):
         """
-        Internal method for setting a std::vector controllable value.
+        Set a generic vector controllable value.
+
+        Internal method to be used by the explicit vector setters.
 
         Parameters
         ----------
@@ -478,6 +460,7 @@ class MooseControl:
         ---------------------
         python_value_type : Optional[Type]
             The type to convert the value to, if any.
+
         """
         assert all(isinstance(v, Type) for v in python_types)
         assert isinstance(python_value_type, (Type, type(None)))
@@ -498,7 +481,7 @@ class MooseControl:
 
     def set_controllable_vector_int(self, path: str, value: Iterable[int]):
         """
-        Sets a controllable std::vector<int> parameter.
+        Set a controllable std::vector<int> parameter.
 
         Parameters
         ----------
@@ -506,12 +489,13 @@ class MooseControl:
             The path to the controllable value.
         value : Iterable[int]
             The value to set.
+
         """
         self._set_controllable_vector(path, "int", (int,), value)
 
     def set_controllable_vector_real(self, path: str, value: Iterable[Number]):
         """
-        Sets a controllable std::vector<Real> parameter.
+        Set a controllable std::vector<Real> parameter.
 
         Parameters
         ----------
@@ -519,12 +503,13 @@ class MooseControl:
             The path to the controllable value.
         value : Iterable[Number]
             The value to set.
+
         """
         self._set_controllable_vector(path, "Real", (Number,), value, float)
 
     def set_controllable_vector_string(self, path: str, value: Iterable[str]):
         """
-        Sets a controllable std::vector<std::string> parameter.
+        Set a controllable std::vector<std::string> parameter.
 
         Parameters
         ----------
@@ -532,12 +517,13 @@ class MooseControl:
             The path to the controllable value.
         value : Iterable[str]
             The value to set.
+
         """
         self._set_controllable_vector(path, "std::string", (str,), value)
 
     def set_controllable_matrix(self, path: str, value: npt.ArrayLike):
         """
-        Sets a controllable RealEigenMatrix parameter.
+        Set a controllable RealEigenMatrix parameter.
 
         Parameters
         ----------
@@ -545,6 +531,7 @@ class MooseControl:
             The path to the controllable value.
         value : npt.ArrayLike
             The value to set.
+
         """
         try:
             array = np.array(value, dtype=np.float64)

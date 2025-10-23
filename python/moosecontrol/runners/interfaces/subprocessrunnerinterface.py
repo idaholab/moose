@@ -38,6 +38,8 @@ class SubprocessRunnerInterface(ABC):
         use_subprocess_reader: bool = True,
     ):
         """
+        Initialize state.
+
         Parameters
         ----------
         command : list[str]
@@ -77,35 +79,27 @@ class SubprocessRunnerInterface(ABC):
 
     @property
     def command(self) -> list[str]:
-        """
-        Get the command to run.
-        """
+        """Get the command to run."""
         return self._command
 
     @property
     def moose_control_name(self) -> str:
-        """
-        The name of the WebServerControl object in MOOSE input.
-        """
+        """The name of the WebServerControl object in MOOSE input."""
         return self._moose_control_name
 
     @property
     def directory(self) -> str:
-        """
-        The directory to run in.
-        """
+        """The directory to run in."""
         return self._directory
 
     @property
     def use_subprocess_reader(self) -> bool:
-        """
-        Whether or not to use the reader thread.
-        """
+        """Whether or not to use the reader thread."""
         return self._use_subprocess_reader
 
     def initialize(self):
         """
-        Initializes the subprocess and optionally the reader thread.
+        Initialize the subprocess and optionally the reader thread.
 
         Should be called first in derived classes within initialize().
         """
@@ -127,8 +121,7 @@ class SubprocessRunnerInterface(ABC):
 
     def finalize(self):
         """
-        Finalizes the subprocess (waits for it to end) and optionally
-        waits for the reader thread to end if it is running.
+        Wait for the process and reader thread to end.
 
         Should be called first in derived classes within finalize().
         """
@@ -147,11 +140,7 @@ class SubprocessRunnerInterface(ABC):
             self._subprocess_reader = None
 
     def cleanup(self):
-        """
-        Performs cleanup.
-
-        Should ideally do nothing unless something went wrong.
-        """
+        """Stop the process and subprocess reader."""
         if hasattr(self, "_process") and self.is_process_running():
             logger.warning("MOOSE process still running on cleanup; killing")
             self.kill_process()
@@ -182,9 +171,7 @@ class SubprocessRunnerInterface(ABC):
 
     @staticmethod
     def start_process(command: list[str], **kwargs) -> subprocess.Popen:
-        """
-        Starts a process with the given command.
-        """
+        """Start a process with the given command."""
         logger.info(f"Starting MOOSE process with command {command}")
 
         kwargs.update(
@@ -200,21 +187,15 @@ class SubprocessRunnerInterface(ABC):
         return subprocess.Popen(command, **kwargs)
 
     def get_pid(self) -> Optional[int]:
-        """
-        Get the PID of the underlying process if it is running or has ran.
-        """
+        """Get the PID of the underlying process if it is running or has ran."""
         return None if self._process is None else self._process.pid
 
     def is_process_running(self) -> bool:
-        """
-        Whether or not the underlying process is running.
-        """
+        """Whether or not the underlying process is running."""
         return self._process is not None and self._process.poll() is None
 
     def kill_process(self):
-        """
-        Kills the running process, if any.
-        """
+        """Kill the running process, if any."""
         pid = self.get_pid()
         if self.is_process_running():
             pid = self.get_pid()
@@ -224,9 +205,7 @@ class SubprocessRunnerInterface(ABC):
             logger.info("Killed MOOSE process has ended")
 
     def get_return_code(self) -> int:
-        """
-        Gets the return code of the process that ran.
-        """
+        """Get the return code of the process that ran."""
         assert self._process is not None
         if self._process.poll() is None:
             raise RuntimeError("The process is still running")

@@ -10,27 +10,27 @@
 """Defines the SubprocessReader."""
 
 from logging import getLogger
-from threading import Thread
 from subprocess import Popen
+from threading import Thread
 
 logger = getLogger("SubprocessReader")
 
 
 class SubprocessReader(Thread):
-    """
-    Thread that reads stdout from a subprocess
-    and pipes it to a log.
-    """
+    """Thread that reads stdout from a subprocess to a log."""
 
     # Prefix appended to output
     OUTPUT_PREFIX: str = "OUTPUT: "
 
     def __init__(self, process: Popen):
         """
+        Initialize state.
+
         Parameters
         ----------
         process : Popen
             The process to read stdout from.
+
         """
         assert isinstance(process, Popen)
 
@@ -40,9 +40,7 @@ class SubprocessReader(Thread):
         self._process: Popen = process
 
     def run(self):
-        """
-        Run the thread.
-        """
+        """Run the thread."""
         logger.info("Subprocess reader started")
 
         assert self._process.universal_newlines

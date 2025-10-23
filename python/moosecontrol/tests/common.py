@@ -7,19 +7,20 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
+"""Holds common utilities for moosecontrol testing."""
+
 import os
 import sys
 from contextlib import ExitStack
 from importlib.util import find_spec
 from json import dumps
-from unittest import TestCase
-from unittest.mock import MagicMock, patch
 from tempfile import TemporaryDirectory
 from typing import Callable, Optional
-
-from requests import Response, Session
+from unittest import TestCase
+from unittest.mock import MagicMock, patch
 
 import pytest
+from requests import Response, Session
 
 # A fake URL to use for testing
 FAKE_URL = "http://127.0.0.1:13579"
@@ -27,8 +28,7 @@ FAKE_URL = "http://127.0.0.1:13579"
 
 def setup_moose_python_path():
     """
-    Helper for adding the moose python path to the
-    PYTHONPATH if we fail to import the moosecontrol.
+    Add the moose python path to PATH if needed.
 
     Used in each unit test to avoid having to set
     PYTHONPATH at test time.
@@ -41,21 +41,24 @@ def setup_moose_python_path():
 
 
 class MooseControlTestCase(TestCase):
-    """
-    Base TestCase for MooseControl tests.
-    """
+    """Base TestCase for MooseControl tests."""
 
     @pytest.fixture(autouse=True)
     def inject_fixtures(self, caplog, moose_exe):
-        """
-        Inject pytest fixtures.
-        """
+        """Inject pytest fixtures."""
         # Allow unittest access to the caplog
         self._caplog: pytest.LogCaptureFixture = caplog
         # Allow unittest access to the --moose-exe arg
         self._moose_exe_arg = moose_exe
 
     def setUp(self):
+        """
+        Set up a test.
+
+        Reset state for:
+            - Allowing log warnings
+            - The temporary directory
+        """
         super().setUp()
 
         # Can be set to True in a test to allow warnings
@@ -68,6 +71,13 @@ class MooseControlTestCase(TestCase):
         self.directory = TemporaryDirectory()
 
     def tearDown(self):
+        """
+        Tear down a test.
+
+        Raises an exception if warning logs exist
+        and they are not allowed and cleans up
+        the temporary directory.
+        """
         super().setUp()
 
         if not self.allow_log_warnings:
@@ -77,7 +87,7 @@ class MooseControlTestCase(TestCase):
 
     def get_moose_exe(self) -> str:
         """
-        Helper for finding a MOOSE executable to run.
+        Get the path to the MOOSE executable to run.
 
         Will first use the --moose-exe command line option
         if it is set. Will then search for moose_test-<METHOD>
@@ -104,23 +114,20 @@ class MooseControlTestCase(TestCase):
         )
 
     def printable_logs(self) -> str:
-        """
-        Get all logs in a printable form.
-        """
+        """Get all logs in a printable form."""
         joined = []
         for i, record in enumerate(self._caplog.records):
             joined.append(f"{i}:{record.levelname}:{record.name}: {record.message}")
         return "\n".join(joined)
 
     def assert_log_size(self, num: int):
-        """
-        Assert that there are exactly num logs.
-        """
+        """Assert that there are exactly the given number of logs."""
         records = self._caplog.records
         num_records = len(records)
         if num_records != num:
             raise AssertionError(
-                f"Num logs {num_records} != {num}; present logs:\n{self.printable_logs()}"
+                f"Num logs {num_records} != {num}; "
+                f"present logs:\n{self.printable_logs()}"
             )
 
     def assert_log_message(
@@ -142,6 +149,7 @@ class MooseControlTestCase(TestCase):
             The log level name. Defaults to INFO.
         name : Optional[str]
             The name in the log; if not provided, don't check.
+
         """
         record = self._caplog.records[i]
         if name is not None:
@@ -177,6 +185,7 @@ class MooseControlTestCase(TestCase):
         -------
         int
             The index at which the message was found in the records.
+
         """
         records = self._caplog.records
         if after_index is not None:
@@ -191,10 +200,7 @@ class MooseControlTestCase(TestCase):
         raise AssertionError(f"Log not found in:\n{self.printable_logs()}")
 
     def assert_no_warning_logs(self):
-        """
-        Asserts that no logs of level WARNING or higher
-        were found in the log.
-        """
+        """Assert that no logs of level WARNING or higher exist."""
         for record in self._caplog.records:
             if record.levelname == "WARNING":
                 raise AssertionError(
@@ -206,10 +212,7 @@ class MooseControlTestCase(TestCase):
     def assert_methods_called_in_order(
         self, methods: list[str], action: Callable[[], None]
     ):
-        """
-        Asserts that when calling the given action, the provided
-        methods are called in the given order.
-        """
+        """Assert when calling action that the given methods are called in order."""
         order = []
 
         def mark(name):
@@ -234,7 +237,7 @@ def set_fake_response(
     url: str = FAKE_URL,
 ):
     """
-    Internal helper for setting the state of a Response for testing.
+    Set the state of a Response for testing.
 
     Parameters
     ----------
@@ -249,6 +252,7 @@ def set_fake_response(
         Data to add to the response; defaults to no data.
     url : str
         The URL to associate with the response; defaults to FAKE_URL.
+
     """
     response.status_code = status_code
     response.url = url
@@ -263,11 +267,12 @@ def set_fake_response(
 @staticmethod
 def mock_response(**kwargs) -> MagicMock:
     """
-    Creates a mocked Response.
+    Create a mocked Response.
 
     Additional Parameters
     ---------------------
-    See set_fake_response().
+    **kwargs : dict
+        See set_fake_response().
     """
     response = MagicMock()
     response.__enter__.return_value = response
@@ -278,11 +283,12 @@ def mock_response(**kwargs) -> MagicMock:
 @staticmethod
 def fake_response(**kwargs) -> Response:
     """
-    Creates a faked Response.
+    Create a faked Response.
 
     Additional Parameters
     ---------------------
-    See set_fake_response().
+    **kwargs : dict
+        See set_fake_response().
     """
     response = Response()
     set_fake_response(response, **kwargs)
@@ -291,19 +297,21 @@ def fake_response(**kwargs) -> Response:
 
 class FakeSession(Session):
     """
-    A fake Session that doesn't init or need to be
-    cleaned up.
+    A fake Session that doesn't init or need to be cleaned up.
 
     Will return code 200 on all GET requests.
     """
 
     def __init__(self, *_, **__):
+        """Do nothing."""
         pass
 
     def close(self):
+        """Do nothing."""
         pass
 
     def get(self, *_, **__):
+        """Get a mocked response."""
         return mock_response()
 
 

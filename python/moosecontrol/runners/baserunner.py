@@ -10,6 +10,7 @@
 """Defines the BaseRunner."""
 
 from abc import ABC, abstractmethod
+from contextlib import suppress
 from logging import getLogger
 from numbers import Number
 from time import sleep
@@ -20,6 +21,7 @@ from requests.exceptions import ConnectionError
 
 from moosecontrol.exceptions import InitializeTimeout
 from moosecontrol.validation import WebServerControlResponse, process_response
+
 from .utils import Poker, TimedPollHelper
 
 logger = getLogger("BaseRunner")
@@ -47,8 +49,10 @@ class BaseRunner(ABC):
         initialize_timeout: float = DEFAULT_INITIALIZE_TIMEOUT,
     ):
         """
+        Initialize state.
+
         Parameters
-        -------------------
+        ----------
         poll_time : Number
             Time between successive message polls in seconds.
         poke_poll_time : Optional[Number]
@@ -58,6 +62,7 @@ class BaseRunner(ABC):
         initialize_timeout : Number
             Time in seconds to wait before erroring when failing
             to initialize the connection.
+
         """
         assert isinstance(poll_time, Number)
         assert poll_time > 0
@@ -93,30 +98,22 @@ class BaseRunner(ABC):
 
     @property
     def poll_time(self) -> float:
-        """
-        Get the time between polls in seconds.
-        """
+        """Get the time between polls in seconds."""
         return self._poll_time
 
     @property
     def poke_poll_time(self) -> Optional[float]:
-        """
-        Get the time between pokes in seconds, if enabled.
-        """
+        """Get the time between pokes in seconds, if enabled."""
         return self._poke_poll_time
 
     @property
     def initialize_timeout(self) -> float:
-        """
-        Get the time in seconds to wait in initialize() until timing out.
-        """
+        """Get the time in seconds to wait in initialize() until timing out."""
         return self._initialize_poller.timeout_time
 
     @property
     def initialized(self) -> bool:
-        """
-        Whether or not initialize() has been called.
-        """
+        """Whether or not initialize() has been called."""
         return self._initialized
 
     @property
@@ -183,7 +180,7 @@ class BaseRunner(ABC):
 
     def initialize(self):
         """
-        Initializes the connection; waits for the web server to be available.
+        Initialize the connection; waits for the web server to be available.
 
         Derived classes that need to override initialize should call
         this implementation of initialize() last and should call
@@ -218,9 +215,7 @@ class BaseRunner(ABC):
         self._initialized = True
 
     def stop_poker(self):
-        """
-        Stops the poke thread if it is running.
-        """
+        """Stop the poke thread if it is running."""
         if self._poker is not None and self._poker.is_alive():
             logger.info("Stopping poke poll thread")
             self._poker.stop()
@@ -228,9 +223,7 @@ class BaseRunner(ABC):
             self._poker = None
 
     def finalize(self):
-        """
-        Finalize method; performs cleanup in a structured manner.
-        """
+        """Finalize method; performs cleanup in a structured manner."""
         assert self._initialized
         assert self._session is not None
 
@@ -251,11 +244,7 @@ class BaseRunner(ABC):
         self._session = None
 
     def cleanup(self):
-        """
-        Performs cleanup.
-
-        Should ideally do nothing unless something went wrong.
-        """
+        """Perform cleanup to be used when exiting non-gracefully."""
         # Stop the poke thread if it's still running (it shouldn't be!)
         if self._poker is not None:
             if self._poker.is_alive():
@@ -297,6 +286,7 @@ class BaseRunner(ABC):
         -------
         WebServerControlResponse:
             The combined response, along with the JSON data if any.
+
         """
         assert self._session is not None
         with self._session.post(f"{self.url}/{path}", json=data) as response:
@@ -322,28 +312,23 @@ class BaseRunner(ABC):
         -------
         WebServerControlResponse:
             The combined response, along with the JSON data if any.
+
         """
         assert self._session is not None
         with self._session.get(f"{self.url}/{path}") as response:
             return process_response(response, require_status=require_status)
 
     def _build_poker(self) -> Poker:
-        """
-        Internal method for building the poke thread.
-        """
+        """Build the Poker thread."""
         assert self.poke_poll_time is not None
         return Poker(self.poke_poll_time, self.build_session(), f"{self.url}/poke")
 
     def kill(self):
-        """
-        Sends the kill command via GET /kill if the webserver is listening.
-        """
+        """Send the kill command via GET /kill if the webserver is listening."""
         if self.is_listening():
             logger.info("Killing MOOSE webserver")
 
             # This will trigger a mooseError in MOOSE, so we can't
             # really guarantee any valid response after this
-            try:
+            with suppress(Exception):
                 self.get("kill")
-            except:  # noqa: E722
-                pass

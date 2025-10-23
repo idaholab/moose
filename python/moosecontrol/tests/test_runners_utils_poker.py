@@ -7,18 +7,20 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
+"""Test moosecontrol.runners.utils.poker.Poker."""
+
 # ruff: noqa: E402
 
-from requests import ConnectionError, HTTPError
 from time import sleep
 from unittest.mock import patch
 
 from common import (
-    MooseControlTestCase,
     FakeSession,
+    MooseControlTestCase,
     mock_response,
     setup_moose_python_path,
 )
+from requests import ConnectionError, HTTPError
 
 setup_moose_python_path()
 
@@ -26,9 +28,7 @@ from moosecontrol.runners.utils import Poker
 
 
 class TestPoker(MooseControlTestCase):
-    """
-    Tests moosecontrol.runners.utils.poker.Poker.
-    """
+    """Test moosecontrol.runners.utils.poker.Poker."""
 
     def test(self):
         """
@@ -77,10 +77,7 @@ class TestPoker(MooseControlTestCase):
         )
 
     def test_raises(self):
-        """
-        Tests that if the poke thread raises immediately that it'll
-        exit gracefully.
-        """
+        """Test that the poke thread raising will result in a graceful exit."""
         session = FakeSession()
         poke_thread = Poker(1, session, "unused")
         with patch.object(session, "get", side_effect=RuntimeError):
@@ -99,9 +96,7 @@ class TestPoker(MooseControlTestCase):
         self.assert_log_message(3, "Poke thread stopped", levelname="DEBUG")
 
     def test_non_200_status_stop(self):
-        """
-        Tests a non-200 status code stopping the thread.
-        """
+        """Test a non-200 status code stopping the thread."""
         session = FakeSession()
         poke_thread = Poker(1, session, "unused")
         with patch.object(session, "get", return_value=mock_response(status_code=201)):
@@ -110,9 +105,7 @@ class TestPoker(MooseControlTestCase):
         self.assert_in_log("Poke has status code 201; stopping", levelname="DEBUG")
 
     def test_status_raise_stop(self):
-        """
-        Tests raise_for_status() in the request stopping the thread.
-        """
+        """Test raise_for_status() in the request stopping the thread."""
         session = FakeSession()
         poke_thread = Poker(1, session, "unused")
         with patch.object(session, "get", side_effect=HTTPError):
@@ -121,9 +114,7 @@ class TestPoker(MooseControlTestCase):
         self.assert_in_log("Poke raised HTTPError; stopping", levelname="DEBUG")
 
     def test_connection_error_stop(self):
-        """
-        Tests a failed connection stopping the thread.
-        """
+        """Test a failed connection stopping the thread."""
         session = FakeSession()
         poke_thread = Poker(1, session, "http://localhost:13579")
         with patch.object(session, "get", side_effect=ConnectionError):
@@ -132,10 +123,7 @@ class TestPoker(MooseControlTestCase):
         self.assert_in_log("Poke raised ConnectionError; stopping", levelname="DEBUG")
 
     def test_failed_later(self):
-        """
-        Tests that if the poke thread throws after a few successful
-        pokes that it'll still exit gracefully.
-        """
+        """Test the poke not immediately raising will exit gracefully."""
         poke_count = 0
         allow_successful_pokes = 2
 

@@ -30,9 +30,23 @@ class Poker(Thread):
         The Session to use to make the poke requests.
     url : str
         The url to call GET to in order to poke.
+
     """
 
     def __init__(self, poll_time: float, session: Session, url: str):
+        """
+        Initialize state.
+
+        Parameters
+        ----------
+        poll_time : float
+            How often to poll in seconds.
+        session : Session
+            The session to use to connect.
+        url : str
+            The URL to call GET on to do the poke.
+
+        """
         assert isinstance(poll_time, Number)
         assert poll_time > 0
         assert isinstance(session, Session)
@@ -53,28 +67,23 @@ class Poker(Thread):
 
     @property
     def poll_time(self) -> float:
-        """
-        Return how often to poll in seconds.
-        """
+        """How often to poll in seconds."""
         return self._poll_time
 
     @property
     def num_poked(self) -> int:
-        """
-        Return the number of times that we've poked.
-        """
+        """The number of times that we've poked."""
         return self._num_poked
 
     def poke(self):
-        """
-        Performs the poke.
-        """
+        """Poke the server."""
         assert self._session is not None
         with self._session.get(self._url) as request:
             request.raise_for_status()
         return request
 
     def run(self):
+        """Run the poke thread."""
         logger.debug("Poke thread started")
 
         # Poll until we've been told not to or until
@@ -98,8 +107,6 @@ class Poker(Thread):
         logger.debug("Poke thread stopped")
 
     def stop(self):
-        """
-        Tell the run thread to stop.
-        """
+        """Tell the thread to stop."""
         logger.debug("Poke thread requested to stop")
         self._stop_event.set()

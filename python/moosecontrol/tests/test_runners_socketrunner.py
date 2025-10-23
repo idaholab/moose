@@ -7,20 +7,19 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
+"""Test moosecontrol.runners.baserunner.SocketRunner."""
+
 # ruff: noqa: E402
 
 import os
 from pathlib import Path
-from subprocess import Popen, PIPE
+from subprocess import PIPE, Popen
 from tempfile import NamedTemporaryFile
 from time import sleep
 from typing import Tuple
 from unittest.mock import patch
 
-from test_runners_baserunner import check_baserunner_cleanup_live
-
 import pytest
-
 from common import (
     BASE_INPUT,
     LIVE_BASERUNNER_KWARGS,
@@ -28,6 +27,7 @@ from common import (
     mock_response,
     setup_moose_python_path,
 )
+from test_runners_baserunner import check_baserunner_cleanup_live
 
 setup_moose_python_path()
 
@@ -38,35 +38,25 @@ DUMMY_SOCKET_PATH = "/foo/bar.sock"
 
 
 def patch_runner(name: str, **kwargs):
-    """
-    Convenience method for patching the SocketRunner.
-    """
+    """Patch a method on the SocketRunner."""
     return patch(f"moosecontrol.SocketRunner.{name}", **kwargs)
 
 
 def patch_base(name: str, **kwargs):
-    """
-    Convenience method for patching the BaseRunner.
-    """
+    """Patch a method on the BaseRunner."""
     return patch(f"moosecontrol.runners.BaseRunner.{name}", **kwargs)
 
 
 class TestSocketRunner(MooseControlTestCase):
-    """
-    Tests moosecontrol.runners.socketrunner.SocketRunner.
-    """
+    """Test moosecontrol.runners.socketrunner.SocketRunner."""
 
     def test_init_no_socket_path(self):
-        """
-        Tests __init__() with a None socket_path.
-        """
+        """Test __init__() with a None socket_path."""
         runner = SocketRunner(DUMMY_SOCKET_PATH)
         self.assertEqual(runner.socket_path, DUMMY_SOCKET_PATH)
 
     def test_init_kwargs(self):
-        """
-        Tests __init__() passing kwargs to the BaseRunner.
-        """
+        """Test __init__() passing kwargs to the BaseRunner."""
         kwargs = {
             "poll_time": 0.001,
             "poke_poll_time": 20.0,
@@ -77,53 +67,43 @@ class TestSocketRunner(MooseControlTestCase):
             self.assertEqual(getattr(runner, key), value)
 
     def test_url(self):
-        """
-        Tests property url.
-        """
+        """Test property url."""
         runner = SocketRunner(DUMMY_SOCKET_PATH)
         self.assertEqual(runner.url, "http+unix://%2Ffoo%2Fbar.sock")
 
     def test_session(self):
-        """
-        Tests build_session().
-        """
+        """Test build_session()."""
         runner = SocketRunner(DUMMY_SOCKET_PATH)
         session = runner.build_session()
         self.assertIsInstance(session, Session)
         session.close()
 
     def test_socket_exists_no_file(self):
-        """
-        Tests socket_exists() when the file doesn't exist.
-        """
+        """Test socket_exists() when the file doesn't exist."""
         self.assertFalse(SocketRunner.socket_exists("/foo/bar"))
 
     def test_socket_exists_not_a_socket(self):
-        """
-        Tests socket_exists() when a file isn't a socket.
-        """
-        with NamedTemporaryFile() as f:
-            with self.assertRaises(FileNotFoundError):
-                SocketRunner.socket_exists(f.name)
+        """Test socket_exists() when a file isn't a socket."""
+        with NamedTemporaryFile() as f, self.assertRaises(FileNotFoundError):
+            SocketRunner.socket_exists(f.name)
 
     def test_socket_exists(self):
-        """
-        Tests socket_exists() when the socket exists (mocked).
-        """
-        with NamedTemporaryFile() as f:
-            with patch("stat.S_ISSOCK", return_value=True) as patch_issock:
-                self.assertTrue(SocketRunner.socket_exists(f.name))
+        """Test socket_exists() when the socket exists (mocked)."""
+        with (
+            NamedTemporaryFile() as f,
+            patch("stat.S_ISSOCK", return_value=True) as patch_issock,
+        ):
+            self.assertTrue(SocketRunner.socket_exists(f.name))
         patch_issock.assert_called_once()
 
     def test_initialize_immediate(self):
-        """
-        Tests initialize() when the socket is found immediately,
-        ignoring the parent initialize().
-        """
+        """Test initialize() when the socket is found immediately."""
         runner = SocketRunner(DUMMY_SOCKET_PATH)
-        with patch_base("initialize") as parent_initialize:
-            with patch_runner("socket_exists", return_value=True) as socket_exists:
-                runner.initialize()
+        with (
+            patch_base("initialize") as parent_initialize,
+            patch_runner("socket_exists", return_value=True) as socket_exists,
+        ):
+            runner.initialize()
 
         parent_initialize.assert_called_once()
         socket_exists.assert_called_once()
@@ -131,10 +111,7 @@ class TestSocketRunner(MooseControlTestCase):
         self.assert_log_message(0, f"Found connection socket {DUMMY_SOCKET_PATH}")
 
     def test_initialize_eventually(self):
-        """
-        Tests initialize() when the socket is found after some time,
-        ignoring the parent initialize().
-        """
+        """Test initialize() when the socket is not found immediately."""
         exists_calls = 0
         exists_after_calls = 2
 
@@ -144,9 +121,11 @@ class TestSocketRunner(MooseControlTestCase):
             return exists_after_calls == exists_calls
 
         runner = SocketRunner(DUMMY_SOCKET_PATH)
-        with patch_base("initialize") as parent_initialize:
-            with patch_runner("socket_exists", new=mock_socket_exists):
-                runner.initialize()
+        with (
+            patch_base("initialize") as parent_initialize,
+            patch_runner("socket_exists", new=mock_socket_exists),
+        ):
+            runner.initialize()
 
         parent_initialize.assert_called_once()
         self.assert_log_size(2)
@@ -156,9 +135,7 @@ class TestSocketRunner(MooseControlTestCase):
         self.assert_log_message(1, f"Found connection socket {DUMMY_SOCKET_PATH}")
 
     def test_delete_socket(self):
-        """
-        Tests delete_socket().
-        """
+        """Test delete_socket()."""
         socket = os.path.join(self.directory.name, "sock.sock")
         Path(socket).touch()
         runner = SocketRunner(socket)
@@ -169,10 +146,7 @@ class TestSocketRunner(MooseControlTestCase):
         self.assert_log_message(0, f"Deleting socket {socket}")
 
     def test_finalize_delete_socket(self):
-        """
-        Tests finalize() deleting the socket, ignoring the
-        parent finalize()
-        """
+        """Test finalize() deleting the socket."""
         socket = os.path.join(self.directory.name, "sock.sock")
         Path(socket).touch()
         runner = SocketRunner(socket)
@@ -183,37 +157,34 @@ class TestSocketRunner(MooseControlTestCase):
         parent_finalize.assert_called_once()
 
     def test_cleanup_socket_not_used(self):
-        """
-        Tests cleanup() when the socket is not used.
-        """
+        """Test cleanup() when the socket is not used."""
         socket = os.path.join(self.directory.name, "sock.sock")
         Path(socket).touch()
         runner = SocketRunner(socket)
-        with patch_base("cleanup") as base_cleanup:
-            with patch_runner("delete_socket") as delete_socket:
-                runner.cleanup()
+        with (
+            patch_base("cleanup") as base_cleanup,
+            patch_runner("delete_socket") as delete_socket,
+        ):
+            runner.cleanup()
         self.assertTrue(os.path.exists(socket))
         base_cleanup.assert_called()
         delete_socket.assert_not_called()
 
     def test_cleanup_socket_not_exist(self):
-        """
-        Tests cleanup() when the socket does not exist.
-        """
+        """Test cleanup() when the socket does not exist."""
         socket = os.path.join(self.directory.name, "sock.sock")
         self.assertFalse(os.path.exists(socket))
         runner = SocketRunner(socket)
-        with patch_base("cleanup") as base_cleanup:
-            with patch_runner("delete_socket") as delete_socket:
-                runner.cleanup()
+        with (
+            patch_base("cleanup") as base_cleanup,
+            patch_runner("delete_socket") as delete_socket,
+        ):
+            runner.cleanup()
         base_cleanup.assert_called()
         delete_socket.assert_not_called()
 
     def test_cleanup_socket_delete(self):
-        """
-        Tests cleanup() when the socket exists and is used,
-        which deletes it.
-        """
+        """Test cleanup() when the socket exists and is used, which deletes it."""
         self.allow_log_warnings = True
 
         socket = os.path.join(self.directory.name, "sock.sock")
@@ -221,9 +192,11 @@ class TestSocketRunner(MooseControlTestCase):
         self.assertTrue(os.path.exists(socket))
         runner = SocketRunner(socket)
         runner._socket_used = True
-        with patch_base("cleanup") as base_cleanup:
-            with patch_runner("delete_socket") as delete_socket:
-                runner.cleanup()
+        with (
+            patch_base("cleanup") as base_cleanup,
+            patch_runner("delete_socket") as delete_socket,
+        ):
+            runner.cleanup()
         self.assert_log_size(1)
         self.assert_log_message(
             0, "Socket still exists on cleanup; deleting", levelname="WARNING"
@@ -232,26 +205,25 @@ class TestSocketRunner(MooseControlTestCase):
         delete_socket.assert_called_once()
 
     def test_initialize_finalize(self):
-        """
-        Tests initialize() and finalize() together.
-        """
+        """Test initialize() and finalize() together."""
         socket = os.path.join(self.directory.name, "sock.sock")
         Path(socket).touch()
         runner = SocketRunner(socket)
 
-        with patch(
-            "moosecontrol.requests_unixsocket.Session.get", return_value=mock_response()
+        with (
+            patch(
+                "moosecontrol.requests_unixsocket.Session.get",
+                return_value=mock_response(),
+            ),
+            patch_runner("socket_exists", return_value=True),
         ):
-            with patch_runner("socket_exists", return_value=True):
-                runner.initialize()
+            runner.initialize()
 
         runner.finalize()
         self.assertFalse(os.path.exists(socket))
 
     def setup_live(self) -> Tuple[SocketRunner, Popen]:
-        """
-        Sets up a live test.
-        """
+        """Set up a live test."""
         input_path = os.path.join(self.directory.name, "input.i")
         socket_path = os.path.join(self.directory.name, "socket.sock")
 
@@ -281,9 +253,7 @@ class TestSocketRunner(MooseControlTestCase):
 
     @pytest.mark.moose
     def test_live(self):
-        """
-        Tests running a MOOSE input live.
-        """
+        """Test running a MOOSE input live."""
         runner, process = self.setup_live()
 
         # Continue on the one timestep
@@ -302,9 +272,7 @@ class TestSocketRunner(MooseControlTestCase):
 
     @pytest.mark.moose
     def test_cleanup_live(self):
-        """
-        Tests cleanup() live, which should kill the process.
-        """
+        """Test cleanup() live, which should kill the process."""
         self.allow_log_warnings = True
 
         runner, process = self.setup_live()

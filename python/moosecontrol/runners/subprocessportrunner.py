@@ -12,21 +12,18 @@
 from logging import getLogger
 from typing import Optional
 
-from .portrunner import PortRunner
 from moosecontrol.runners.interfaces.subprocessrunnerinterface import (
-    SubprocessRunnerInterface,
     DEFAULT_DIRECTORY,
+    SubprocessRunnerInterface,
 )
+
+from .portrunner import PortRunner
 
 logger = getLogger("SubprocessPortRunner")
 
 
 class SubprocessPortRunner(SubprocessRunnerInterface, PortRunner):
-    """
-    Runner to be used with the MooseControl that
-    spawns a MOOSE process and connects to the
-    webserver over a port.
-    """
+    """Runner that spawns a MOOSE process and connects to it via a socket."""
 
     def __init__(
         self,
@@ -38,6 +35,8 @@ class SubprocessPortRunner(SubprocessRunnerInterface, PortRunner):
         **kwargs,
     ):
         """
+        Initialize state.
+
         Parameters
         ----------
         command : list[str]
@@ -56,8 +55,9 @@ class SubprocessPortRunner(SubprocessRunnerInterface, PortRunner):
         use_subprocess_reader : bool
             Whether or not to spawn a separate reader thread
             to collect subprocess output. Defaults to true.
+        **kwargs : dict
+            See PortRunner.__init__().
 
-        See BaseRunner.__init__() for additional parameters.
         """
         assert isinstance(port, (int, type(None)))
 
@@ -77,7 +77,7 @@ class SubprocessPortRunner(SubprocessRunnerInterface, PortRunner):
 
     def get_additional_command(self) -> list[str]:
         """
-        Gets the full command to run.
+        Get the full command to run.
 
         Takes the user's command and also:
             - Sets the port for the control
@@ -88,9 +88,7 @@ class SubprocessPortRunner(SubprocessRunnerInterface, PortRunner):
         return [control_socket, "--color=off"]
 
     def initialize(self):
-        """
-        Initializes the runner.
-        """
+        """Spawn the process and wait for the server to be listening."""
         self.initialize_start()
 
         if not self.port_is_available(self.port):
@@ -102,20 +100,14 @@ class SubprocessPortRunner(SubprocessRunnerInterface, PortRunner):
         PortRunner.initialize(self)
 
     def finalize(self):
-        """
-        Finalizes the runner.
-        """
+        """Finalize the process and the connection."""
         # Wait for process to finish
         SubprocessRunnerInterface.finalize(self)
         # And then close the connection
         PortRunner.finalize(self)
 
     def cleanup(self):
-        """
-        Performs cleanup.
-
-        Should ideally do nothing unless something went wrong.
-        """
+        """Kill the server and the process."""
         # And then cleanup the connection
         PortRunner.cleanup(self)
         # Kill process if needed

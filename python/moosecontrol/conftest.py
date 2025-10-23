@@ -15,9 +15,7 @@ import pytest
 
 
 def pytest_addoption(parser):
-    """
-    Adds custom options to pytest.
-    """
+    """Add custom options to pytest."""
     parser.addoption(
         "--no-moose",
         action="store_true",
@@ -32,9 +30,7 @@ def pytest_addoption(parser):
 
 
 def pytest_collection_modifyitems(config, items):
-    """
-    Adds custom skips to pytest.
-    """
+    """Add custom skips to pytest."""
     # Skip 'moose' tests if --no-moose is set
     if config.getoption("--no-moose"):
         marker = pytest.mark.skip(reason="--no-moose")
@@ -45,7 +41,5 @@ def pytest_collection_modifyitems(config, items):
 
 @pytest.fixture(scope="session")
 def moose_exe(request) -> Optional[str]:
-    """
-    Gets the --moose-exe command line argument.
-    """
+    """Get the --moose-exe command line argument."""
     return request.config.getoption("--moose-exe")

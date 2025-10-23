@@ -7,9 +7,11 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
+"""Test moosecontrol.runners.utils.subprocessreader.SubprocessReader."""
+
 # ruff: noqa: E402
 
-from subprocess import Popen, PIPE
+from subprocess import PIPE, Popen
 
 from common import MooseControlTestCase, setup_moose_python_path
 
@@ -19,14 +21,10 @@ from moosecontrol.runners.utils import SubprocessReader
 
 
 class TestSubprocessReader(MooseControlTestCase):
-    """
-    Tests moosecontrol.runners.utils.subprocessreader.SubprocessReader.
-    """
+    """Test moosecontrol.runners.utils.subprocessreader.SubprocessReader."""
 
     def test(self):
-        """
-        Tests running the SubprocessReader.
-        """
+        """Test running the SubprocessReader."""
         output = ["foo", "bar"]
         joined_output = "\n".join(output)
         command = f'echo "{joined_output}"'

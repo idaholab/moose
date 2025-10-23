@@ -7,25 +7,26 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-from moosecontrol.exceptions import InitializeTimeout
-from moosecontrol.runners import BaseRunner
-from moosecontrol.runners.baserunner import (
-    DEFAULT_POLL_TIME,
-    DEFAULT_POKE_POLL_TIME,
-    DEFAULT_INITIALIZE_TIMEOUT,
-)
+"""Test moosecontrol.runners.baserunner.BaseRunner."""
 
 from unittest.mock import MagicMock, patch
-from requests import Session
-from requests.exceptions import ConnectionError
 
 from common import (
     FAKE_URL,
-    MooseControlTestCase,
     FakeSession,
+    MooseControlTestCase,
     mock_response,
     setup_moose_python_path,
 )
+from moosecontrol.exceptions import InitializeTimeout
+from moosecontrol.runners import BaseRunner
+from moosecontrol.runners.baserunner import (
+    DEFAULT_INITIALIZE_TIMEOUT,
+    DEFAULT_POKE_POLL_TIME,
+    DEFAULT_POLL_TIME,
+)
+from requests import Session
+from requests.exceptions import ConnectionError
 
 setup_moose_python_path()
 
@@ -33,19 +34,21 @@ BASERUNNER = "moosecontrol.runners.BaseRunner"
 
 
 class BaseRunnerTest(BaseRunner):
+    """Specialized BaseRunner for testing."""
+
     @property
     def url(self):
+        """Get the faked URL."""
         return FAKE_URL
 
     @staticmethod
     def build_session():
+        """Get the faked Session."""
         return FakeSession()
 
 
 def patch_baserunner(name: str, **kwargs):
-    """
-    Convenience method for patching the BaseRunner.
-    """
+    """Patch a method in the BaseRunner."""
     return patch(f"moosecontrol.runners.BaseRunner.{name}", **kwargs)
 
 
@@ -56,8 +59,9 @@ def check_baserunner_cleanup_live(
     process_returncode: int,
 ):
     """
-    Helper for derived runners to be able to test the result when
-    testing cleanup() live.
+    Check state when testing cleanup().
+
+    Used in derived runner tests.
     """
     # Should have killed the things
     poke_alive = test.assert_in_log(
@@ -77,14 +81,10 @@ def check_baserunner_cleanup_live(
 
 
 class TestBaseRunner(MooseControlTestCase):
-    """
-    Tests moosecontrol.runners.baserunner.BaseRunner.
-    """
+    """Test moosecontrol.runners.baserunner.BaseRunner."""
 
     def test_init(self):
-        """
-        Tests init with the default arguments.
-        """
+        """Test init with the default arguments."""
         runner = BaseRunnerTest()
         self.assertEqual(runner.url, FAKE_URL)
         self.assertEqual(runner.poll_time, DEFAULT_POLL_TIME)
@@ -92,19 +92,14 @@ class TestBaseRunner(MooseControlTestCase):
         self.assertEqual(runner.initialize_timeout, DEFAULT_INITIALIZE_TIMEOUT)
 
     def test_init_args(self):
-        """
-        Tests init with set arguments.
-        """
+        """Test init with set arguments."""
         value = 100
         for arg in ["poll_time", "poke_poll_time", "initialize_timeout"]:
             runner = BaseRunnerTest(**{arg: value})
             self.assertEqual(getattr(runner, arg), value)
 
     def test_is_listening_connection_error(self):
-        """
-        Tests is_listening() raising a ConnectionError being
-        considered not listening.
-        """
+        """Test is_listening() with a ConnectionError returning False."""
         runner = BaseRunnerTest()
         runner._session = runner.build_session()
         runner._session.get = MagicMock(side_effect=ConnectionError)
@@ -115,9 +110,7 @@ class TestBaseRunner(MooseControlTestCase):
         runner._session = None
 
     def test_is_listening_true(self):
-        """
-        Tests is_listening() when the server responds 200 to /check.
-        """
+        """Test is_listening() when the server responds 200 to /check."""
         runner = BaseRunnerTest()
         runner._session = runner.build_session()
         runner._session.get = MagicMock(return_value=mock_response())
@@ -127,19 +120,14 @@ class TestBaseRunner(MooseControlTestCase):
         runner._session.get.assert_called_once_with(f"{runner.url}/check")
 
     def test_initialize_start(self):
-        """
-        Tests that initialize_start() will start the poller.
-        """
+        """Test that initialize_start() will start the poller."""
         runner = BaseRunnerTest()
         self.assertIsNone(runner._initialize_poller.start_time)
         runner.initialize_start()
         self.assertIsNotNone(runner._initialize_poller.start_time)
 
     def test_initialize_poll_timeout(self):
-        """
-        Tests that initialize_poll() will eventually raise
-        an InitializeTimeout if the timeout has been exceeded.
-        """
+        """Test initialize_poll() raising InitializeTimeout."""
         poll_time = 0.001
         initialize_timeout = 0.005
         runner = BaseRunnerTest(
@@ -150,24 +138,19 @@ class TestBaseRunner(MooseControlTestCase):
             runner.initialize_poll(lambda: False)
         self.assertEqual(
             str(e_cm.exception),
-            f"Initialization timed out after {runner._initialize_poller.total_time:.2f} seconds",
+            f"Initialization timed out after "
+            f"{runner._initialize_poller.total_time:.2f} seconds",
         )
         self.assertFalse(runner.initialized)
 
     def test_initialize_poll_no_start(self):
-        """
-        Tests that calling initialize_poll() without calling
-        initialize_start() will raise an exception.
-        """
+        """Test initialize_poll() without calling initialize_start() raises."""
         runner = BaseRunnerTest(poll_time=0.001)
         with self.assertRaises(NotImplementedError):
             runner.initialize_poll(lambda: False)
 
     def test_initialize_timeout(self):
-        """
-        Tests initialize() throwing after timing out
-        at making a connection.
-        """
+        """Tests initialize() raising InitializeTimeout."""
         poll_time = 0.001
         initialize_timeout = 0.002
         runner = BaseRunnerTest(
@@ -187,10 +170,7 @@ class TestBaseRunner(MooseControlTestCase):
         self.assertGreater(len(runner.is_listening.mock_calls), 1)
 
     def test_initialize_listening_immediate(self):
-        """
-        Tests initialize() completing immediately when it is
-        immediately listening.
-        """
+        """Test initialize() when the server is immediately listening."""
         runner = BaseRunnerTest(poll_time=0.001, poke_poll_time=None)
         runner.is_listening = MagicMock(return_value=True)
         runner.get = MagicMock()
@@ -207,10 +187,7 @@ class TestBaseRunner(MooseControlTestCase):
         self.assertGreater(runner._initialize_poller.total_time, 0)
 
     def test_initialize_listening_eventual(self):
-        """
-        Tests initialize() completing when it takes a little bit
-        for the webserver to start listening
-        """
+        """Test initialize() when the server is not immediately listening."""
         is_listening_calls = 0
         listening_after_num = 2
 
@@ -234,9 +211,7 @@ class TestBaseRunner(MooseControlTestCase):
         self.assert_log_message(1, "MOOSE webserver is listening")
 
     def test_initialize_start_poker(self):
-        """
-        Tests initialize() starting the poke thread.
-        """
+        """Test initialize() starting the poke thread."""
         runner = BaseRunnerTest()
 
         runner.initialize()
@@ -247,9 +222,7 @@ class TestBaseRunner(MooseControlTestCase):
         runner._poker.join()
 
     def test_stop_poker(self):
-        """
-        Tests stop_poker() stopping the poke thread.
-        """
+        """Test stop_poker() stopping the poke thread."""
         runner = BaseRunnerTest()
         runner._poker = runner._build_poker()
 
@@ -269,9 +242,7 @@ class TestBaseRunner(MooseControlTestCase):
         self.assert_log_size(0)
 
     def test_finalize_close_session(self):
-        """
-        Tests finalize() closing the session.
-        """
+        """Test finalize() closing the session."""
         runner = BaseRunnerTest(poke_poll_time=None)
         runner._initialized = True
         runner._session = runner.build_session()
@@ -286,9 +257,7 @@ class TestBaseRunner(MooseControlTestCase):
         self.assertIsNone(runner._session)
 
     def test_finalize_stop_poker(self):
-        """
-        Tests finalize() stopping the poke thread.
-        """
+        """Test finalize() stopping the poke thread."""
         runner = BaseRunnerTest()
         runner._poker = runner._build_poker()
         poke_thread = runner._poker
@@ -306,9 +275,7 @@ class TestBaseRunner(MooseControlTestCase):
         self.assertIsNone(runner._poker)
 
     def test_finalize_wait_listening(self):
-        """
-        Tests finalize() to wait for the server to stop listening.
-        """
+        """Test finalize() waiting for the server to stop listening."""
         runner = BaseRunnerTest(poll_time=0.001)
 
         num_called = 0
@@ -317,9 +284,7 @@ class TestBaseRunner(MooseControlTestCase):
         def is_listening(*_, **__):
             nonlocal num_called
             num_called += 1
-            if num_called == not_listening_after_calls:
-                return False
-            return True
+            return num_called != not_listening_after_calls
 
         runner._initialized = True
         runner._session = runner.build_session()
@@ -334,26 +299,24 @@ class TestBaseRunner(MooseControlTestCase):
         self.assert_log_message(1, "MOOSE webserver is no longer listening")
 
     def test_cleanup_ok(self):
-        """
-        Tests cleanup() with nothing to do.
-        """
+        """Test cleanup() with nothing to do."""
         runner = BaseRunnerTest()
         runner.cleanup()
         self.assert_log_size(0)
 
     def test_cleanup_close_session(self):
-        """
-        Tests cleanup() closing a session.
-        """
+        """Test cleanup() closing a session."""
         self.allow_log_warnings = True
 
         runner = BaseRunnerTest(poke_poll_time=None)
         runner._session = runner.build_session()
         runner.is_listening = MagicMock(return_value=False)
 
-        with patch.object(runner._session, "close") as runner_close:
-            with self._caplog.at_level("WARNING"):
-                runner.cleanup()
+        with (
+            patch.object(runner._session, "close") as runner_close,
+            self._caplog.at_level("WARNING"),
+        ):
+            runner.cleanup()
 
         runner_close.assert_called_once()
         runner.is_listening.assert_called_once()
@@ -363,9 +326,7 @@ class TestBaseRunner(MooseControlTestCase):
         )
 
     def test_cleanup_poker_not_alive(self):
-        """
-        Tests cleanup() with a poke thread set but not alive
-        """
+        """Test cleanup() with a poke thread set but not alive."""
         runner = BaseRunnerTest()
 
         # Start and finish the poke thread
@@ -381,9 +342,7 @@ class TestBaseRunner(MooseControlTestCase):
         self.assert_log_size(0)
 
     def test_cleanup_stop_poker(self):
-        """
-        Tests cleanup() with stopping the poke thread.
-        """
+        """Test cleanup() stopping the poke thread."""
         self.allow_log_warnings = True
 
         runner = BaseRunnerTest()
@@ -404,9 +363,7 @@ class TestBaseRunner(MooseControlTestCase):
         self.assert_log_message(1, "Stopping poke poll thread")
 
     def test_cleanup_kill(self):
-        """
-        Tests cleanup() with stopping webserver via kill().
-        """
+        """Test cleanup() stopping webserver via kill()."""
         self.allow_log_warnings = True
 
         runner = BaseRunnerTest(poke_poll_time=None)
@@ -425,9 +382,7 @@ class TestBaseRunner(MooseControlTestCase):
         )
 
     def test_post(self):
-        """
-        Tests post().
-        """
+        """Test post()."""
         runner = BaseRunnerTest()
         runner._session = runner.build_session()
 
@@ -444,9 +399,7 @@ class TestBaseRunner(MooseControlTestCase):
         self.assertEqual(response.data, data)
 
     def test_get(self):
-        """
-        Tests get().
-        """
+        """Test get()."""
         runner = BaseRunnerTest()
         runner._session = runner.build_session()
 
@@ -460,9 +413,7 @@ class TestBaseRunner(MooseControlTestCase):
         self.assertEqual(response.response.status_code, 200)
 
     def test_build_poker(self):
-        """
-        Tests build_poker.
-        """
+        """Test build_poker()."""
         runner = BaseRunnerTest()
         poke_thread = runner._build_poker()
         self.assertEqual(poke_thread._poll_time, runner.poke_poll_time)
@@ -470,10 +421,8 @@ class TestBaseRunner(MooseControlTestCase):
         self.assertEqual(poke_thread._url, f"{runner.url}/poke")
         poke_thread._session.close()
 
-    def test_kill(self):
-        """
-        Tests kill() sending /kill to the webserver because it is listening.
-        """
+    def test_kill_listening(self):
+        """Test kill() sending /kill to the webserver because it is listening."""
         runner = BaseRunnerTest()
         runner.is_listening = MagicMock(return_value=True)
         runner.get = MagicMock()
@@ -486,12 +435,10 @@ class TestBaseRunner(MooseControlTestCase):
         self.assert_log_message(0, "Killing MOOSE webserver")
 
     def test_kill_raise(self):
-        """
-        Tests the get() call raising in kill() being ignored.
-        """
+        """Test the get() call raising in kill() being ignored."""
         runner = BaseRunnerTest()
         runner.is_listening = MagicMock(return_value=True)
-        runner.get = MagicMock(side_effect=RuntimeError)
+        runner.get = MagicMock(side_effect=Exception)
 
         runner.kill()
 
@@ -499,9 +446,7 @@ class TestBaseRunner(MooseControlTestCase):
         runner.get.assert_called_once()
 
     def test_kill_not_listening(self):
-        """
-        Tests kill() when the server is not listening, which will do nothing.
-        """
+        """Test kill() when the server is not listening, which will do nothing."""
         runner = BaseRunnerTest()
         runner.is_listening = MagicMock(return_value=False)
         runner.get = MagicMock()
