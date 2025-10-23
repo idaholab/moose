@@ -1,8 +1,7 @@
 [Tests]
   issues = '#31729'
   design = 'ComputeCrackTipEnrichmentIncrementalStrain.md'
-  requirement = 'The XFEM Module shall have the capability to allow crack tip'
-                  'to be placed anywhere inside elements'
+
   [2D]
     [tip_location]
       type = Exodiff
@@ -11,12 +10,14 @@
       abs_zero = 1e-8
       map = false
       capabilities = 'unique_id'
+      requirement = 'test crack tip location'
     []
     [JIntegral]
       type = CSVDiff
       input = 'elastic_test.i output_JIntegral.i'
       csvdiff = 'output_JIntegral_out.csv'
       capabilities = 'unique_id'
+      requirement = 'test J integral'
     []
   []
 []
