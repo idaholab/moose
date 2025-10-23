@@ -105,13 +105,13 @@
   assembly_level = legacy
   dt = 0.03
   start_time = 0.0
-  end_time = 0.3
+  end_time = 0.09
 []
 
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/MixedHeatEquation
+    file_base = OutputData/MixedHeatTransfer
     vtk_format = ASCII
   []
 []
