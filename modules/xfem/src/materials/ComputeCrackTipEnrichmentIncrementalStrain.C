@@ -19,7 +19,7 @@ registerMooseObject("XFEMApp", ComputeCrackTipEnrichmentIncrementalStrain);
 InputParameters
 ComputeCrackTipEnrichmentIncrementalStrain::validParams()
 {
-  InputParameters params = ComputeStrainBase::validParams();
+  InputParameters params = ComputeIncrementalStrainBase::validParams();
   params.addClassDescription(
       "Computes the crack tip enrichment strain for an incremental small-strain formulation.");
   params.addRequiredParam<std::vector<NonlinearVariableName>>("enrichment_displacements",
