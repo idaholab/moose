@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "KokkosTypes.h"
+#include "KokkosFunction.h"
 
 #include "FEProblemBase.h"
 #include "DisplacedProblem.h"
@@ -89,6 +90,54 @@ FEProblemBase::addKokkosBoundaryCondition(const std::string & bc_name,
 }
 
 void
+FEProblemBase::addKokkosAuxKernel(const std::string & kernel_name,
+                                  const std::string & name,
+                                  InputParameters & parameters)
+{
+  parallel_object_only();
+
+  setAuxKernelParamsAndLog(kernel_name, name, parameters, "KokkosAuxKernel");
+
+  _aux->addKokkosKernel(kernel_name, name, parameters);
+
+  _has_kokkos_objects = true;
+}
+
+void
+FEProblemBase::addKokkosFunction(const std::string & type,
+                                 const std::string & name,
+                                 InputParameters & parameters)
+{
+  parallel_object_only();
+
+  parameters.set<SubProblem *>("_subproblem") = this;
+
+  std::shared_ptr<Moose::FunctionBase> func =
+      _factory.create<Moose::FunctionBase>(type, name, parameters);
+  logAdd("Function", name, type, parameters);
+  _kokkos_functions.addObject(func);
+
+  _has_kokkos_objects = true;
+}
+
+bool
+FEProblemBase::hasKokkosFunction(const std::string & name)
+{
+  return _kokkos_functions.hasActiveObject(name);
+}
+
+Moose::Kokkos::Function
+FEProblemBase::getKokkosFunction(const std::string & name)
+{
+  const auto & function = getKokkosFunction<Moose::FunctionBase>(name);
+
+  std::shared_ptr<Moose::Kokkos::FunctionWrapperHostBase> wrapper =
+      Moose::Kokkos::FunctorRegistry::buildFunction(&function, function.type());
+
+  return Moose::Kokkos::Function(wrapper);
+}
+
+void
 FEProblemBase::addKokkosMaterial(const std::string & mat_name,
                                  const std::string & name,
                                  InputParameters & parameters)
@@ -120,20 +169,6 @@ FEProblemBase::getKokkosMaterialData(Moose::MaterialDataType type, const MooseOb
   }
 
   mooseError("FEProblemBase::getKokkosMaterialData(): Invalid MaterialDataType ", type);
-}
-
-void
-FEProblemBase::addKokkosAuxKernel(const std::string & kernel_name,
-                                  const std::string & name,
-                                  InputParameters & parameters)
-{
-  parallel_object_only();
-
-  setAuxKernelParamsAndLog(kernel_name, name, parameters, "KokkosAuxKernel");
-
-  _aux->addKokkosKernel(kernel_name, name, parameters);
-
-  _has_kokkos_objects = true;
 }
 
 const std::set<const MooseObject *> &
