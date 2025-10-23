@@ -301,7 +301,7 @@
 [Executioner]
   type = Transient
   solve_type = NEWTON
-  petsc_options_iname = '-pc_type -sub_pc_factor_shift_type'
+  petsc_options_iname = '-pc_type -pc_factor_shift_type'
   petsc_options_value = 'lu       nonzero'
   l_max_its = 30
   nl_max_its = 10

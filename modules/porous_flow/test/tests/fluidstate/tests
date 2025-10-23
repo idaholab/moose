@@ -45,6 +45,7 @@
     requirement = 'The system shall evolve a gas phase as a gas component is added in a water and NCG system.'
     design = 'PorousFlowWaterNCG.md'
     issues = '#8818'
+    valgrind = 'none' # too slow
   []
   [theis_nonisothermal]
     type = 'CSVDiff'

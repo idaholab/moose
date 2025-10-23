@@ -177,6 +177,7 @@ public:
 
 TEST(CheckData, NonlinearIntegratorTest)
 {
+  mfem::Hypre::Init();
   mfem::Mesh mesh("../test/tests/mfem/mesh/cylinder-hex-q2.gen", 1, 1);
   auto pmesh = std::make_shared<mfem::ParMesh>(MPI_COMM_WORLD, mesh);
 
@@ -218,8 +219,21 @@ TEST(CheckData, NonlinearIntegratorTest)
 
   // Solver for the Jacobian solve in the Newton method
   mfem::Solver * jacobian_solver;
+
+  // Patch mfem::HyprePCG to reset preconditioning matrix at every nonlinear iteration
+  class HyprePCGPatched : public mfem::HyprePCG
+  {
+  public:
+    using mfem::HyprePCG::HyprePCG;
+    void SetOperator(const mfem::Operator & op)
+    {
+      mfem::HyprePCG::SetOperator(op);
+      HYPRE_PCGSetPrecondMatrix(HYPRE_Solver(*this), NULL);
+    }
+  };
+
   // Set up the Jacobian solver
-  mfem::HyprePCG j_pcg(h_curl_fe_space.GetComm());
+  HyprePCGPatched j_pcg(h_curl_fe_space.GetComm());
   mfem::HypreAMS ams(&h_curl_fe_space);
   ams.SetPrintLevel(1);
   j_pcg.SetTol(1e-7);

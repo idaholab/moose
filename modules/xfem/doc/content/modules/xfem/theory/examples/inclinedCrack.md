@@ -1,6 +1,6 @@
 # Inclined Crack in Infinite Plate
 
-The following example follows from [!citet](Dolbow99,Richardson2011) where the stress intensity factors for a plate with an angled center crack is subjected to a far-field load in the y-direction.   The analytic solution for the stress intensity factors of the configuration shown in [stress] is given by
+The following example follows from [!citet](Dolbow99,Richardson2011) where the stress intensity factors for a plate with an angled center crack is subjected to a far-field load in the y-direction.   The analytic solution for the stress intensity factors of the configuration shown in [!ref](stress) is given by
 
 \begin{equation}
 \begin{aligned}
@@ -9,7 +9,7 @@ The following example follows from [!citet](Dolbow99,Richardson2011) where the s
 \end{aligned}
 \end{equation}
 
-where the crack angle with respect to the x-axis is $\theta$, the crack length is $a$ and the far-field load $\sigma$.  Convergence with global mesh refinement to the analytic solution is shown for a range of crack orientations in [convergence].  The values for $KI$ in blue show better convergence than $KII$ shown in red for mixed mode loading of the crack-tip when $20^\circ\ge\theta\le80^\circ$.  [qintegral] shows the q-function for integrating the J-integral.  Incorrectly specifying the radii for the q-function will lead to inaccurate calculation of the J-integral and stress intensity factors.  The q-function should exclude a few elements around the crack tip where $q=1$.  The q-function radii are designated in the `DomainIntegral` block shown in [input].  This example uses a cutter mesh, shown by the white line in [stress], to create the initial crack using the `MeshCut2DFractureUserObject` object, also shown in [input].
+where the crack angle with respect to the x-axis is $\theta$, the crack length is $a$ and the far-field load $\sigma$.  Convergence with global mesh refinement to the analytic solution is shown for a range of crack orientations in [!ref](convergence).  The values for $KI$ in blue show better convergence than $KII$ shown in red for mixed mode loading of the crack-tip when $20^\circ\ge\theta\le80^\circ$.  [!ref](qintegral) shows the q-function for integrating the J-integral.  Incorrectly specifying the radii for the q-function will lead to inaccurate calculation of the J-integral and stress intensity factors.  The q-function should exclude a few elements around the crack tip where $q=1$.  The q-function radii are designated in the `DomainIntegral` block shown in [!ref](input).  This example uses a cutter mesh, shown by the white line in [!ref](stress), to create the initial crack using the `MeshCut2DFractureUserObject` object, also shown in [!ref](input).
 
 !media large_media/xfem/stress_field_label.png
       style=width:80%;margin:auto;padding-top:2.5%;background-color: white;color: black;
@@ -19,7 +19,7 @@ where the crack angle with respect to the x-axis is $\theta$, the crack length i
 !media large_media/xfem/q1_field_label.png
       style=width:70%;margin:auto;padding-top:2.5%;background-color: white;color: black;
       id=qintegral
-      caption=Domain integral integration field (q-function) around the bottom crack-tip.  The integration field is integrated over the area between r_inner and r_outer specified in the `DomainIntegral` block in [input].  The initial XFEM cut created by the `MeshCut2DFractureUserObject` is also shown.
+      caption=Domain integral integration field (q-function) around the bottom crack-tip.  The integration field is integrated over the area between r_inner and r_outer specified in the `DomainIntegral` block in [!ref](input).  The initial XFEM cut created by the `MeshCut2DFractureUserObject` is also shown.
 
 !media large_media/xfem/incline_angle_convergence.png
       style=width:70%;margin:auto;padding-top:2.5%;background-color: white;color: black;
