@@ -14,7 +14,6 @@ advected_interp_method = 'upwind'
     xmax = ${L}
     nx = ${nx}
   []
-  allow_renumbering = false
 []
 
 [Physics]
@@ -113,9 +112,9 @@ advected_interp_method = 'upwind'
 
 [Postprocessors]
   [T_out_sim]
-    type = ElementalVariableValue
+    type = PointValue
     variable = T_out
-    elementid = ${fparse nx-1}
+    point = '${fparse L * (nx-0.5)/ nx} 0 0'
   []
 []
 
