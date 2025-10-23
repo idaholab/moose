@@ -433,6 +433,7 @@ The following objects are currently available in Kokkos-MOOSE:
 - [BCs](syntax/KokkosBCs/index.md)
 - [Materials](syntax/KokkosMaterials/index.md)
 - [AuxKernels](syntax/KokkosAuxKernels/index.md)
+- [Functions](syntax/KokkosFunctions/index.md)
 
 !if-end!
 
