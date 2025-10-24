@@ -2031,7 +2031,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     Vec unity_vec = nullptr;
     Vec sol_holder_P = nullptr;
     Vec diag_Wij_loc = nullptr;
-    Vec Wij_estimate = nullptr;
     Vec unity_vec_Wij = nullptr;
     Vec Wij_loc_vec = nullptr;
     Vec Wij_old_loc_vec = nullptr;
@@ -2044,7 +2043,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
 
     LibmeshPetscCall(createPetscVector(sol_holder_P, _block_size * _n_gaps));
     LibmeshPetscCall(createPetscVector(diag_Wij_loc, _block_size * _n_gaps));
-    LibmeshPetscCall(createPetscVector(Wij_estimate, _block_size * _n_gaps));
     LibmeshPetscCall(createPetscVector(unity_vec_Wij, _block_size * _n_gaps));
     LibmeshPetscCall(VecSet(unity_vec_Wij, 1.0));
 
@@ -2061,7 +2059,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     LibmeshPetscCall(VecAXPY(sol_holder_P, -1.0, _cmc_pressure_force_rhs));
     LibmeshPetscCall(MatGetDiagonal(mat_array[2 * Q + 2], diag_Wij_loc)); // A(2,2)
     LibmeshPetscCall(VecAXPY(diag_Wij_loc, 1e-10, unity_vec_Wij));
-    LibmeshPetscCall(VecPointwiseDivide(Wij_estimate, sol_holder_P, diag_Wij_loc));
 
     // Compute sumWij_loc
     Vec sumWij_loc = nullptr;
@@ -2172,7 +2169,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     LibmeshPetscCall(VecDestroy(&sol_holder_P));
     LibmeshPetscCall(VecDestroy(&diag_Wij_loc));
     LibmeshPetscCall(VecDestroy(&unity_vec_Wij));
-    LibmeshPetscCall(VecDestroy(&Wij_estimate));
     LibmeshPetscCall(VecDestroy(&sumWij_loc));
     LibmeshPetscCall(VecDestroy(&Wij_loc_vec));
     LibmeshPetscCall(VecDestroy(&Wij_old_loc_vec));
@@ -2256,7 +2252,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   LibmeshPetscCall(KSPCreate(PETSC_COMM_SELF, &ksp));
   LibmeshPetscCall(KSPSetType(ksp, KSPFGMRES));
   LibmeshPetscCall(KSPSetOperators(ksp, A_nest, A_nest));
-  // Read PETSc options early; we'll enforce a safe PC after this
   LibmeshPetscCall(KSPSetFromOptions(ksp));
   LibmeshPetscCall(KSPGetPC(ksp, &pc));
   LibmeshPetscCall(PCSetType(pc, PCFIELDSPLIT));
@@ -2267,12 +2262,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
     std::vector<IS> rows(Q);
     LibmeshPetscCall(MatNestGetISs(A_nest, rows.data(), nullptr));
     for (PetscInt j = 0; j < Q; ++j)
-    {
-      IS isj = nullptr;
-      LibmeshPetscCall(ISDuplicate(rows[j], &isj));
-      LibmeshPetscCall(PCFieldSplitSetIS(pc, nullptr, isj));
-      LibmeshPetscCall(ISDestroy(&isj));
-    }
+      LibmeshPetscCall(PCFieldSplitSetIS(pc, nullptr, rows[j]));
   }
   verbose("Linear solver assembled");
 
@@ -2280,7 +2270,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   // Solve
   //
   LibmeshPetscCall(VecDuplicate(b_nest, &x_nest));
-  LibmeshPetscCall(VecSet(x_nest, 0.0));
   LibmeshPetscCall(KSPSolve(ksp, b_nest, x_nest));
 
   // Convergence info
@@ -2360,13 +2349,13 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   // Pressure (backward assign) safe reverse iteration
   PetscScalar * sol_p_array = nullptr;
   LibmeshPetscCall(VecGetArray(sol_p, &sol_p_array));
-  for (unsigned int iz = last_node + 1; iz-- > first_node;)
+  for (unsigned int iz = last_node; iz > first_node - 1; iz--)
   {
-    const unsigned int iz_ind = iz - first_node;
-    for (unsigned int i_ch = 0; i_ch < _n_channels; ++i_ch)
+    auto iz_ind = iz - first_node;
+    for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
     {
       auto * node_in = _subchannel_mesh.getChannelNode(i_ch, iz - 1);
-      const PetscScalar value = sol_p_array[iz_ind * _n_channels + i_ch];
+      PetscScalar value = sol_p_array[iz_ind * _n_channels + i_ch];
       _P_soln->set(node_in, value);
     }
   }
