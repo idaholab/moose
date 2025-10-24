@@ -45,7 +45,8 @@ EquationSystemProblemOperator::Solve()
   _problem_data.nonlinear_solver->SetOperator(*GetEquationSystem());
   _problem_data.nonlinear_solver->Mult(_true_rhs, _true_x);
 
-  GetEquationSystem()->RecoverFEMSolution(_true_x, _problem_data.gridfunctions);
+  GetEquationSystem()->RecoverFEMSolution(
+      _true_x, _problem_data.gridfunctions, _problem_data.cmplx_gridfunctions);
 }
 
 } // namespace Moose::MFEM
