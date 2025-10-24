@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMVariable.h"
+#include "MFEMProblem.h"
 #include "MooseVariableBase.h"
 #include "libmesh/ignore_warnings.h"
 #include <mfem.hpp>
