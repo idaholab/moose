@@ -89,7 +89,6 @@ P_out = 14.72e6 # Pa
   implicit = true
   segregated = false
   staggered_pressure = false
-  monolithic_thermal = false
   verbose_subchannel = true
   interpolation_scheme = exponential
   deformation = true # this flag allows the re-calculation of subchannel geometric parameters based on the dpin value
