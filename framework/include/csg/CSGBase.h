@@ -284,7 +284,7 @@ public:
    * @param universes list of list of universes that define the layout of the lattice
    * @return reference to new Cartesian lattice
    */
-  CSGLattice & createCartesianLattice(
+  const CSGLattice & createCartesianLattice(
       const std::string & name,
       const Real pitch,
       std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes);
@@ -299,7 +299,7 @@ public:
    * @param pitch flat-to-flat size of the lattice elements
    * @return reference to new Cartesian lattice
    */
-  CSGLattice &
+  const CSGLattice &
   createCartesianLattice(const std::string & name, const int nx0, const int nx1, const Real pitch)
   {
     return _lattice_list.addCartesianLattice(name, nx0, nx1, pitch);
@@ -313,7 +313,7 @@ public:
    * @param index index of the lattice element (int, int)
    */
   void addUniverseToLattice(CSGLattice & lattice,
-                            const CSGUniverse & universe,
+                            std::reference_wrapper<const CSGUniverse> & universe,
                             std::pair<int, int> index);
 
   /**

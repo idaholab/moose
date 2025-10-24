@@ -21,11 +21,10 @@ CSGCartesianLattice::CSGCartesianLattice(
     _nx1(universes[0].size()),
     _pitch(pitch)
 {
+  setUniverses(universes);
   if (!hasValidDimensions())
     mooseError("Lattice " + getName() + " of type " + getType() +
                " must have pitch and number of elements in both dimensions greater than 0.");
-  initializeUniverseMap();
-  setUniverses(universes);
 }
 
 CSGCartesianLattice::CSGCartesianLattice(const std::string & name,
@@ -40,19 +39,6 @@ CSGCartesianLattice::CSGCartesianLattice(const std::string & name,
   if (!hasValidDimensions())
     mooseError("Lattice " + getName() + " of type " + getType() +
                " must have pitch and number of elements in both dimensions greater than 0.");
-  initializeUniverseMap();
-}
-
-void
-CSGCartesianLattice::initializeUniverseMap()
-{
-  size_t rows = _nx0;
-  size_t cols = _nx1;
-  _universe_map =
-      std::vector<std::vector<std::optional<std::reference_wrapper<const CSGUniverse>>>>(
-          rows,
-          std::vector<std::optional<std::reference_wrapper<const CSGUniverse>>>(cols,
-                                                                                std::nullopt));
 }
 
 bool

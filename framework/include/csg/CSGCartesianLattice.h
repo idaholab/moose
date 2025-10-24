@@ -77,7 +77,6 @@ public:
       std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes) const override;
 
 protected:
-  virtual void initializeUniverseMap() override;
   /**
    * @brief For the lattice type, check that the dimension of _universe_map are valid
    *
