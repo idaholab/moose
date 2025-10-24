@@ -52,8 +52,6 @@ MaterialBase::MaterialBase(const MaterialBase & object)
     MeshHolder(object),
     AssemblyHolder(object),
     SystemHolder(object),
-    _init_dispatcher(nullptr),
-    _compute_dispatcher(nullptr),
     _t(object._t),
     _t_old(object._t_old),
     _t_step(object._t_step),

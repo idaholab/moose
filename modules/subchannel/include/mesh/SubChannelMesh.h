@@ -60,7 +60,7 @@ public:
   /**
    * Return the number of axial cells
    */
-  virtual const unsigned int & getNumOfAxialCells() const { return _n_cells; }
+  virtual unsigned int getNumOfAxialCells() const { return processor_id() == 0 ? _n_cells : 0; }
 
   /**
    * Get the subchannel mesh node for a given channel index and elevation index
@@ -85,7 +85,7 @@ public:
   /**
    * Return the number of channels per layer
    */
-  virtual const unsigned int & getNumOfChannels() const = 0;
+  virtual unsigned int getNumOfChannels() const = 0;
 
   /**
    * Return if Pin Mesh exists or not
@@ -100,12 +100,12 @@ public:
   /**
    * Return the number of gaps per layer
    */
-  virtual const unsigned int & getNumOfGapsPerLayer() const = 0;
+  virtual unsigned int getNumOfGapsPerLayer() const = 0;
 
   /**
    * Return the number of pins
    */
-  virtual const unsigned int & getNumOfPins() const = 0;
+  virtual unsigned int getNumOfPins() const = 0;
 
   /**
    * Return a pair of subchannel indices for a given gap index

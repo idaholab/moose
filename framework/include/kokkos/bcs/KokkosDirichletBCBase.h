@@ -50,10 +50,10 @@ public:
   /**
    * Compute residual contribution on a node
    * @param qp The dummy quadrature point index (= 0)
-   * @param datum The ResidualDatum object of the current thread
+   * @param datum The AssemblyDatum object of the current thread
    * @returns The residual contribution
    */
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
 
 private:
   /**
@@ -100,19 +100,19 @@ DirichletBCBase<Derived>::operator()(const ThreadID tid) const
   auto bc = static_cast<const Derived *>(this);
   auto node = kokkosBoundaryNodeID(tid);
   auto & sys = kokkosSystem(_kokkos_var.sys());
-  auto dof = sys.getNodeLocalDofIndex(node, _kokkos_var.var());
+  auto dof = sys.getNodeLocalDofIndex(node, 0, _kokkos_var.var());
 
   if (dof == libMesh::DofObject::invalid_id)
     return;
 
-  ResidualDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
+  AssemblyDatum datum(node, kokkosAssembly(), kokkosSystems(), _kokkos_var, _kokkos_var.var());
 
   sys.getVectorDofValue(dof, _solution_tag) = bc->computeValue(0, datum);
 }
 
 template <typename Derived>
 KOKKOS_FUNCTION Real
-DirichletBCBase<Derived>::computeQpResidual(const unsigned int qp, ResidualDatum & datum) const
+DirichletBCBase<Derived>::computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
 {
   auto bc = static_cast<const Derived *>(this);
 

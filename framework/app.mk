@@ -369,6 +369,8 @@ app_resource = $(APPLICATION_DIR)/$(APPLICATION_NAME).yaml
 
 ifeq ($(ENABLE_KOKKOS),true)
 
+app_KOKKOS_UNITY_SRC_FILES :=
+
 app_KOKKOS_SRC_FILES := $(shell find $(SRC_DIRS) -name "*.K")
 app_KOKKOS_OBJECTS   := $(patsubst %.K, %.$(KOKKOS_OBJ_SUFFIX), $(app_KOKKOS_SRC_FILES))
 app_KOKKOS_DEPS      := $(patsubst %.$(KOKKOS_OBJ_SUFFIX), %.$(KOKKOS_OBJ_SUFFIX).d, $(app_KOKKOS_OBJECTS))

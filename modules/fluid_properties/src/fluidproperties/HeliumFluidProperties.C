@@ -216,6 +216,12 @@ HeliumFluidProperties::T_from_p_h(Real /* p */, Real h) const
   return h / _cp;
 }
 
+ADReal
+HeliumFluidProperties::T_from_p_h(const ADReal & /* p */, const ADReal & h) const
+{
+  return h / _cp;
+}
+
 Real
 HeliumFluidProperties::c_from_v_e(Real v, Real e) const
 {

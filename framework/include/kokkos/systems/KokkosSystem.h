@@ -52,9 +52,13 @@ public:
    * @param tags The vector tags
    * @param dir Copy direction
    */
+  ///{@
   void sync(const std::set<TagID> & tags, const MemcpyKind dir);
+  void sync(const std::vector<TagID> & tags, const MemcpyKind dir);
+  void sync(const TagID tag, const MemcpyKind dir);
+  ///@}
   /**
-   * Allocate the quadrature point solution vectors for active variable and tags and cache
+   * Allocate the quadrature point vectors for active variable and tags and cache
    * quadrature point values
    */
   void reinit();
@@ -67,7 +71,7 @@ public:
    * Set the active solution tags
    * @param tags The active solution tags
    */
-  void setActiveVariableTags(const std::set<TagID> & tags);
+  void setActiveSolutionTags(const std::set<TagID> & tags);
   /**
    * Set the active residual tags
    * @param tags The active residual tags
@@ -85,7 +89,7 @@ public:
   /**
    * Clear the cached active solution tags
    */
-  void clearActiveVariableTags() { _active_variable_tags.destroy(); }
+  void clearActiveSolutionTags() { _active_solution_tags.destroy(); }
   /**
    * Clear the cached active residual tags
    */
@@ -234,12 +238,15 @@ public:
   /**
    * Get the local DOF index of a variable for a node
    * @param node The contiguous node ID
+   * @param idx The node-local DOF index
    * @param var The variable number
    * @returns The local DOF index
    */
-  KOKKOS_FUNCTION dof_id_type getNodeLocalDofIndex(ContiguousNodeID node, unsigned int var) const
+  KOKKOS_FUNCTION dof_id_type getNodeLocalDofIndex(ContiguousNodeID node,
+                                                   unsigned int i,
+                                                   unsigned int var) const
   {
-    return _local_node_dof_index[var][node];
+    return _local_node_dof_index[var][node] + i;
   }
   /**
    * Get the global DOF index of a variable for an element
@@ -496,7 +503,7 @@ private:
    * List of active tags
    */
   ///@{
-  Array<TagID> _active_variable_tags;
+  Array<TagID> _active_solution_tags;
   Array<TagID> _active_residual_tags;
   Array<TagID> _active_matrix_tags;
   ///@}

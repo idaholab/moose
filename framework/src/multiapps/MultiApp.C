@@ -227,7 +227,7 @@ MultiApp::validParams()
                         "final auxiliary solution from the previous coupling iteration"
                         "and re-uses it as the initial guess for the next coupling iteration");
   params.addParam<bool>(
-      "no_backup_and_restore",
+      "no_restore",
       false,
       "True to turn off restore for this multiapp. This is useful when doing steady-state "
       "Picard iterations where we want to use the solution of previous Picard iteration as the "
@@ -237,7 +237,6 @@ MultiApp::validParams()
       10,
       "Integer set by user that will stop the simulation if the multiapp level "
       "exceeds it. Useful for preventing infinite loops with multiapp simulations");
-  params.deprecateParam("no_backup_and_restore", "no_restore", "01/01/2025");
 
   params.addDeprecatedParam<bool>("clone_master_mesh",
                                   false,

@@ -117,7 +117,11 @@ FaceCenteredMapFunctor<T, Map>::evaluate(const ElemArg & elem_arg, const StateAr
     return result;
   }
   else
+  {
+    (void)elem_arg; // WE do this because the GCC min complains that it is not used and
+                    // [[maybe_unused]] doesnt work for GCC min
     mooseError("Cell center reconstruction is not implemented!");
+  }
 }
 
 template <typename T, typename Map>

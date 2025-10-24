@@ -47,14 +47,8 @@ Output::validParams()
       "The interval (number of time steps) at which output occurs. "
       "Unless explicitly set, the default value of this parameter is set "
       "to infinity if the wall_time_interval is explicitly set.");
-  params.addParam<unsigned int>("interval",
-                                "The interval (number of time steps) at which output occurs");
-  params.deprecateParam("interval", "time_step_interval", "02/01/2025");
   params.addParam<Real>(
       "min_simulation_time_interval", 0.0, "The minimum simulation time between output steps");
-  params.addParam<Real>("minimum_time_interval",
-                        "The minimum simulation time between output steps");
-  params.deprecateParam("minimum_time_interval", "min_simulation_time_interval", "02/01/2025");
   params.addParam<Real>("simulation_time_interval",
                         std::numeric_limits<Real>::max(),
                         "The target simulation time interval (in seconds) at which to output");

@@ -375,7 +375,7 @@ public:
 };
 ```
 
-In the pseudo-codes, `compute` is the +*template method*+ that provides the overall structure of the algorithm, and `implementation` is the +*hook method*+ that derived classes override to implement specific steps of the algorithm.
+In the pseudo-codes, `compute()` is the +*template method*+ that provides the overall structure of the algorithm, and `implementation()` is the +*hook method*+ that derived classes override to implement specific steps of the algorithm.
 Calling the derived class method is resolved at runtime in the dynamic polymorphism, whereas in the CRTP, the derived class type is known at compile time through the template argument, which makes it possible to explicitly cast `this` pointer to the derived class type to call the derived class method.
 Overriding a virtual function of the base class is mimicked in the CRTP by +*hiding*+ the function of the base class by redefining it in the derived class.
 If the function is not hidden by the derived class, the base class function will be simply called which is available through inheritance.
@@ -432,6 +432,7 @@ The following objects are currently available in Kokkos-MOOSE:
 - [NodalKernels](syntax/KokkosNodalKernels/index.md)
 - [BCs](syntax/KokkosBCs/index.md)
 - [Materials](syntax/KokkosMaterials/index.md)
+- [AuxKernels](syntax/KokkosAuxKernels/index.md)
 
 !if-end!
 

@@ -87,11 +87,11 @@
     # boundary conditions
     inlet_boundaries = 'attached_to_non_fluid_block_inlet'
     momentum_inlet_types = 'fixed-velocity'
-    momentum_inlet_function = '0 0.1'
+    momentum_inlet_functors = '0 0.1'
 
     outlet_boundaries = 'attached_to_non_fluid_block_outlet'
     momentum_outlet_types = 'fixed-pressure'
-    pressure_function = '0'
+    pressure_functors = '0'
 
     wall_boundaries = 'attached_to_non_fluid_block_walls'
     momentum_wall_types = 'slip'

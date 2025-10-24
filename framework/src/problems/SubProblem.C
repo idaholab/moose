@@ -68,7 +68,8 @@ SubProblem::SubProblem(const InputParameters & parameters)
     _safe_access_tagged_matrices(false),
     _safe_access_tagged_vectors(false),
     _have_ad_objects(false),
-    _output_functors(false),
+    _show_functors(false),
+    _show_chain_control_data(false),
     _typed_vector_tags(2),
     _have_p_refinement(false)
 {
@@ -1187,6 +1188,8 @@ SubProblem::timestepSetup()
   for (auto & map : _pbblf_functors)
     for (auto & pr : map)
       pr.second->timestepSetup();
+  if (_show_chain_control_data)
+    _console << _app.getChainControlDataSystem().outputChainControlMap() << std::flush;
 }
 
 void
@@ -1216,11 +1219,13 @@ SubProblem::jacobianSetup()
 void
 SubProblem::initialSetup()
 {
-  if (_output_functors)
+  if (_show_functors)
   {
     showFunctors();
     showFunctorRequestors();
   }
+  if (_show_chain_control_data)
+    _console << _app.getChainControlDataSystem().outputChainControlMap() << std::flush;
 
   for (const auto & functors : _functors)
     for (const auto & [functor_wrapper_name, functor_wrapper] : functors)

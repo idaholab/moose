@@ -77,6 +77,11 @@ public:
   void init(const std::vector<Real> & values, CoupleableKey);
 
   /**
+   * Get whether the variable is initialized
+   * @returns Whether the variable is initialized
+   */
+  KOKKOS_FUNCTION bool initialized() const { return _initialized; }
+  /**
    * Get whether the variable is coupled
    * @returns Whether the variable is coupled
    */
@@ -121,6 +126,10 @@ public:
   }
 
 private:
+  /**
+   * Whether the variable is initialized
+   */
+  bool _initialized = false;
   /**
    * Whether the variable is coupled
    */

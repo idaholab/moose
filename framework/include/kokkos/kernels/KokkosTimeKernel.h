@@ -33,12 +33,12 @@ public:
    * Hook for additional computation for residual after the standard calls
    * @param ib The beginning element-local DOF index
    * @param ie The end element-local DOF index
-   * @param datum The ResidualDatum object of the current thread
+   * @param datum The AssemblyDatum object of the current thread
    * @param local_re The temporary storage storing the residual contribution of each DOF
    */
   KOKKOS_FUNCTION void computeResidualAdditional(const unsigned int /* ib */,
                                                  const unsigned int /* ie */,
-                                                 ResidualDatum & /* datum */,
+                                                 AssemblyDatum & /* datum */,
                                                  Real * /* local_re */) const
   {
   }
@@ -48,7 +48,7 @@ public:
    * for residual through computeResidualAdditional()
    */
   template <typename Derived>
-  KOKKOS_FUNCTION void computeResidualInternal(const Derived & kernel, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION void computeResidualInternal(const Derived & kernel, AssemblyDatum & datum) const;
 
 protected:
   /**
@@ -63,7 +63,7 @@ protected:
 
 template <typename Derived>
 KOKKOS_FUNCTION void
-TimeKernel::computeResidualInternal(const Derived & kernel, ResidualDatum & datum) const
+TimeKernel::computeResidualInternal(const Derived & kernel, AssemblyDatum & datum) const
 {
   ResidualObject::computeResidualInternal(
       datum,

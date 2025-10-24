@@ -26,11 +26,11 @@ public:
 
   KOKKOS_FUNCTION Real computeQpResidual(const unsigned int i,
                                          const unsigned int qp,
-                                         ResidualDatum & datum) const;
+                                         AssemblyDatum & datum) const;
   KOKKOS_FUNCTION Real computeQpJacobian(const unsigned int i,
                                          const unsigned int j,
                                          const unsigned int qp,
-                                         ResidualDatum & datum) const;
+                                         AssemblyDatum & datum) const;
 
 private:
   /// Ratio of u to du/dn
@@ -40,7 +40,7 @@ private:
 KOKKOS_FUNCTION inline Real
 KokkosVacuumBC::computeQpResidual(const unsigned int i,
                                   const unsigned int qp,
-                                  ResidualDatum & datum) const
+                                  AssemblyDatum & datum) const
 {
   return _test(datum, i, qp) * _alpha * _u(datum, qp) / 2.;
 }
@@ -49,7 +49,7 @@ KOKKOS_FUNCTION inline Real
 KokkosVacuumBC::computeQpJacobian(const unsigned int i,
                                   const unsigned int j,
                                   const unsigned int qp,
-                                  ResidualDatum & datum) const
+                                  AssemblyDatum & datum) const
 {
   return _test(datum, i, qp) * _alpha * _phi(datum, j, qp) / 2.;
 }

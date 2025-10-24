@@ -97,7 +97,7 @@
     type = SplitCHParsed
     variable = c
     f_name = F
-    args = 'eta'
+    coupled_variables = 'eta'
     kappa_name = kappa_c
     w = w
   [../]
@@ -120,7 +120,7 @@
   [./ACBulk1]
     type = AllenCahn
     variable = eta
-    args = 'c'
+    coupled_variables = 'c'
     mob_name = L
     f_name = F
   [../]
@@ -223,7 +223,7 @@
     fa_name = Fc1
     fb_name = Fc2
     eta = eta
-    args = 'c'
+    coupled_variables = 'c'
     W = 4
   [../]
 
@@ -231,7 +231,7 @@
   [./elastic_free_energy]
     type = ElasticEnergyMaterial
     f_name = Fe
-    args = 'eta'
+    coupled_variables = 'eta'
     output_properties = Fe
     outputs = 'all'
     derivative_order = 2

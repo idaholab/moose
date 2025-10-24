@@ -262,6 +262,6 @@
   skip_exception_check = true
 []
 [Outputs]
-  interval = 100
+  time_step_interval = 100
   exodus = true
 []

@@ -222,7 +222,7 @@ heated_length = 1.0
   [total_pressure_drop_SC_limited]
     type = ParsedPostprocessor
     pp_names = 'total_pressure_drop_SC'
-    function = 'min(total_pressure_drop_SC, 1e6)'
+    expression = 'min(total_pressure_drop_SC, 1e6)'
     execute_on = "timestep_end"
   []
 

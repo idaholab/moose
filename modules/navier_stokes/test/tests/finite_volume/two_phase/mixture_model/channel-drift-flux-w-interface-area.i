@@ -357,7 +357,7 @@ mass_exchange_coeff = 0.01
 [Postprocessors]
   [Re]
     type = ParsedPostprocessor
-    function = '${rho} * ${l} * ${U}'
+    expression = '${rho} * ${l} * ${U}'
     pp_names = ''
   []
   [rho_outlet]

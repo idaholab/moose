@@ -148,6 +148,12 @@ FlibeFluidProperties::T_from_p_h(Real /* p */, Real h) const
   return h / _cp;
 }
 
+ADReal
+FlibeFluidProperties::T_from_p_h(const ADReal & /* p */, const ADReal & h) const
+{
+  return h / _cp;
+}
+
 Real FlibeFluidProperties::cp_from_v_e(Real /*v*/, Real /*e*/) const { return _cp; }
 
 void

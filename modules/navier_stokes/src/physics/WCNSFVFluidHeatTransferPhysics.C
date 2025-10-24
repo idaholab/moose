@@ -10,6 +10,7 @@
 #include "WCNSFVFluidHeatTransferPhysics.h"
 #include "WCNSFVFlowPhysics.h"
 #include "NSFVBase.h"
+#include "NS.h"
 
 registerNavierStokesPhysicsBaseTasks("NavierStokesApp", WCNSFVFluidHeatTransferPhysics);
 registerWCNSFVFluidHeatTransferPhysicsBaseTasks("NavierStokesApp", WCNSFVFluidHeatTransferPhysics);
@@ -20,6 +21,12 @@ WCNSFVFluidHeatTransferPhysics::validParams()
   InputParameters params = WCNSFVFluidHeatTransferPhysicsBase::validParams();
   params.transferParam<MooseEnum>(NSFVBase::validParams(), "energy_face_interpolation");
   params.transferParam<Real>(NSFVBase::validParams(), "energy_scaling");
+  params.addParam<bool>(
+      "check_bc_compatibility",
+      true,
+      "Whether to check for known incompatibility between boundary conditions for "
+      "the heat transport equation physics and other physics");
+  params.addParamNamesToGroup("check_bc_compatibility", "Advanced");
 
   params.addParamNamesToGroup("energy_face_interpolation energy_scaling", "Numerical scheme");
   return params;
@@ -28,8 +35,7 @@ WCNSFVFluidHeatTransferPhysics::validParams()
 WCNSFVFluidHeatTransferPhysics::WCNSFVFluidHeatTransferPhysics(const InputParameters & parameters)
   : WCNSFVFluidHeatTransferPhysicsBase(parameters)
 {
-  if (_solve_for_enthalpy)
-    paramError("solve_for_enthalpy", "Enthalpy solve not supported at this time with Physics");
+  checkSecondParamNotSetIfFirstOneSet("solve_for_enthalpy", "fluid_temperature_variable");
 }
 
 void
@@ -39,8 +45,11 @@ WCNSFVFluidHeatTransferPhysics::addSolverVariables()
   if (!_has_energy_equation)
     return;
 
+  const auto & solver_variable_name =
+      _solve_for_enthalpy ? _fluid_enthalpy_name : _fluid_temperature_name;
+
   // Dont add if the user already defined the variable
-  if (!shouldCreateVariable(_fluid_temperature_name, _blocks, /*error if aux*/ true))
+  if (!shouldCreateVariable(solver_variable_name, _blocks, /*error if aux*/ true))
     reportPotentiallyMissedParameters({"system_names",
                                        "energy_scaling",
                                        "energy_face_interpolation",
@@ -54,12 +63,13 @@ WCNSFVFluidHeatTransferPhysics::addSolverVariables()
     params.set<MooseEnum>("face_interp_method") = getParam<MooseEnum>("energy_face_interpolation");
     params.set<bool>("two_term_boundary_expansion") =
         getParam<bool>("energy_two_term_bc_expansion");
-    params.set<SolverSystemName>("solver_sys") = getSolverSystem(_fluid_temperature_name);
-    getProblem().addVariable("INSFVEnergyVariable", _fluid_temperature_name, params);
+    params.set<SolverSystemName>("solver_sys") = getSolverSystem(solver_variable_name);
+    getProblem().addVariable("INSFVEnergyVariable", solver_variable_name, params);
   }
   else
-    paramError("fluid_temperature_variable",
-               "Variable (" + _fluid_temperature_name +
+    // we don't let the user select the enthalpy variable name at this time
+    paramError(_solve_for_enthalpy ? "solve_for_enthalpy" : "fluid_temperature_variable",
+               "Variable (" + solver_variable_name +
                    ") supplied to the WCNSFVFluidHeatTransferPhysics does not exist!");
 }
 
@@ -78,9 +88,12 @@ WCNSFVFluidHeatTransferPhysics::addEnergyTimeKernels()
                   "_energy_time";
   }
 
+  const auto & solver_variable_name =
+      _solve_for_enthalpy ? _fluid_enthalpy_name : _fluid_temperature_name;
+
   InputParameters params = getFactory().getValidParams(kernel_type);
   assignBlocks(params, _blocks);
-  params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
+  params.set<NonlinearVariableName>("variable") = solver_variable_name;
   params.set<MooseFunctorName>(NS::density) = _density_name;
   params.set<MooseFunctorName>(NS::time_deriv(NS::specific_enthalpy)) =
       NS::time_deriv(NS::specific_enthalpy);
@@ -117,8 +130,11 @@ WCNSFVFluidHeatTransferPhysics::addEnergyAdvectionKernels()
     kernel_name = prefix() + "pins_energy_advection";
   }
 
+  const auto & solver_variable_name =
+      _solve_for_enthalpy ? _fluid_enthalpy_name : _fluid_temperature_name;
+
   InputParameters params = getFactory().getValidParams(kernel_type);
-  params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
+  params.set<NonlinearVariableName>("variable") = solver_variable_name;
   assignBlocks(params, _blocks);
   params.set<MooseEnum>("velocity_interp_method") = _velocity_interpolation;
   params.set<UserObjectName>("rhie_chow_user_object") = _flow_equations_physics->rhieChowUOName();
@@ -134,6 +150,8 @@ WCNSFVFluidHeatTransferPhysics::addEnergyHeatConductionKernels()
   const auto vector_conductivity = processThermalConductivity();
   const auto num_blocks = _thermal_conductivity_blocks.size();
   const auto num_used_blocks = num_blocks ? num_blocks : 1;
+  const auto & solver_variable_name =
+      _solve_for_enthalpy ? _fluid_enthalpy_name : _fluid_temperature_name;
 
   for (const auto block_i : make_range(num_used_blocks))
   {
@@ -149,14 +167,18 @@ WCNSFVFluidHeatTransferPhysics::addEnergyHeatConductionKernels()
           vector_conductivity ? "PINSFVEnergyAnisotropicDiffusion" : "PINSFVEnergyDiffusion";
 
       InputParameters params = getFactory().getValidParams(kernel_type);
-      params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
+      params.set<NonlinearVariableName>("variable") = solver_variable_name;
       const auto block_names = num_blocks ? _thermal_conductivity_blocks[block_i] : _blocks;
       assignBlocks(params, block_names);
       const auto conductivity_name = vector_conductivity ? NS::kappa : NS::k;
-      params.set<MooseFunctorName>(conductivity_name) = _thermal_conductivity_name[block_i];
       params.set<MooseFunctorName>(NS::porosity) =
           _flow_equations_physics->getPorosityFunctorName(true);
       params.set<bool>("effective_conductivity") = getParam<bool>("effective_conductivity");
+      if (!_solve_for_enthalpy)
+        params.set<MooseFunctorName>(conductivity_name) = _thermal_conductivity_name[block_i];
+      else
+        params.set<MooseFunctorName>(conductivity_name) =
+            _thermal_conductivity_name[block_i] + "_by_cp";
 
       getProblem().addFVKernel(
           kernel_type, prefix() + "pins_energy_diffusion_" + block_name, params);
@@ -165,11 +187,14 @@ WCNSFVFluidHeatTransferPhysics::addEnergyHeatConductionKernels()
     {
       const std::string kernel_type = "FVDiffusion";
       InputParameters params = getFactory().getValidParams(kernel_type);
-      params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
+      params.set<NonlinearVariableName>("variable") = solver_variable_name;
       std::vector<SubdomainName> block_names =
           num_blocks ? _thermal_conductivity_blocks[block_i] : _blocks;
       assignBlocks(params, block_names);
-      params.set<MooseFunctorName>("coeff") = _thermal_conductivity_name[block_i];
+      if (!_solve_for_enthalpy)
+        params.set<MooseFunctorName>("coeff") = _thermal_conductivity_name[block_i];
+      else
+        params.set<MooseFunctorName>("coeff") = _thermal_conductivity_name[block_i] + "_by_cp";
 
       getProblem().addFVKernel(
           kernel_type, prefix() + "ins_energy_diffusion_" + block_name, params);
@@ -182,10 +207,12 @@ WCNSFVFluidHeatTransferPhysics::addEnergyAmbientConvection()
 {
   unsigned int num_convection_blocks = _ambient_convection_blocks.size();
   unsigned int num_used_blocks = num_convection_blocks ? num_convection_blocks : 1;
+  const auto & solver_variable_name =
+      _solve_for_enthalpy ? _fluid_enthalpy_name : _fluid_temperature_name;
 
   const std::string kernel_type = "PINSFVEnergyAmbientConvection";
   InputParameters params = getFactory().getValidParams(kernel_type);
-  params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
+  params.set<NonlinearVariableName>("variable") = solver_variable_name;
   params.set<MooseFunctorName>(NS::T_fluid) = _fluid_temperature_name;
   params.set<bool>("is_solid") = false;
 
@@ -213,9 +240,11 @@ WCNSFVFluidHeatTransferPhysics::addEnergyAmbientConvection()
 void
 WCNSFVFluidHeatTransferPhysics::addEnergyExternalHeatSource()
 {
+  const auto & solver_variable_name =
+      _solve_for_enthalpy ? _fluid_enthalpy_name : _fluid_temperature_name;
   const std::string kernel_type = "FVCoupledForce";
   InputParameters params = getFactory().getValidParams(kernel_type);
-  params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
+  params.set<NonlinearVariableName>("variable") = solver_variable_name;
   assignBlocks(params, _blocks);
   params.set<MooseFunctorName>("v") = getParam<MooseFunctorName>("external_heat_source");
   params.set<Real>("coef") = getParam<Real>("external_heat_source_coeff");
@@ -240,42 +269,76 @@ WCNSFVFluidHeatTransferPhysics::addEnergyInletBC()
                    ") should be the same size as inlet_boundaries (size " +
                    std::to_string(inlet_boundaries.size()) + ")");
 
+  const auto & solver_variable_name =
+      _solve_for_enthalpy ? _fluid_enthalpy_name : _fluid_temperature_name;
+
   unsigned int flux_bc_counter = 0;
   for (const auto bc_ind : index_range(_energy_inlet_types))
   {
     if (_energy_inlet_types[bc_ind] == "fixed-temperature")
     {
-      const std::string bc_type = "FVADFunctorDirichletBC";
+      const std::string bc_type = _solve_for_enthalpy
+                                      ? "FVSpecificEnthalpyFromPressureTemperatureDirichletBC"
+                                      : "FVADFunctorDirichletBC";
       InputParameters params = getFactory().getValidParams(bc_type);
-      params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
-      params.set<MooseFunctorName>("functor") = _energy_inlet_functors[bc_ind];
+      params.set<NonlinearVariableName>("variable") = solver_variable_name;
+      if (!_solve_for_enthalpy)
+        params.set<MooseFunctorName>("functor") = _energy_inlet_functors[bc_ind];
+      else
+      {
+        mooseAssert(_flow_equations_physics, "Should be coupled");
+        params.set<UserObjectName>(NS::fluid) = getParam<UserObjectName>(NS::fluid);
+        params.set<MooseFunctorName>(NS::pressure) = _flow_equations_physics->getPressureName();
+        params.set<MooseFunctorName>(NS::T_fluid) = _energy_inlet_functors[bc_ind];
+      }
       params.set<std::vector<BoundaryName>>("boundary") = {inlet_boundaries[bc_ind]};
 
-      getProblem().addFVBC(
-          bc_type, _fluid_temperature_name + "_" + inlet_boundaries[bc_ind], params);
+      getProblem().addFVBC(bc_type, solver_variable_name + "_" + inlet_boundaries[bc_ind], params);
+
+      // Check the BCs for momentum
+      const auto momentum_inlet_type =
+          _flow_equations_physics->inletBoundaryType(inlet_boundaries[bc_ind]);
+      if (getParam<bool>("check_bc_compatibility") &&
+          (momentum_inlet_type == NS::MomentumInletTypes::FLUX_VELOCITY ||
+           momentum_inlet_type == NS::MomentumInletTypes::FLUX_MASS))
+        paramError("energy_inlet_types",
+                   "At inlet '" + inlet_boundaries[bc_ind] +
+                       "', you are using a Dirichlet boundary condition on temperature, and a "
+                       "flux boundary condition on momentum. This is known to create an "
+                       "undesirable inlet source term.");
     }
     else if (_energy_inlet_types[bc_ind] == "heatflux")
     {
       const std::string bc_type = "FVFunctionNeumannBC";
       InputParameters params = getFactory().getValidParams(bc_type);
-      params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
+      params.set<NonlinearVariableName>("variable") = solver_variable_name;
       params.set<FunctionName>("function") = _energy_inlet_functors[bc_ind];
       params.set<std::vector<BoundaryName>>("boundary") = {inlet_boundaries[bc_ind]};
 
-      getProblem().addFVBC(
-          bc_type, _fluid_temperature_name + "_" + inlet_boundaries[bc_ind], params);
+      getProblem().addFVBC(bc_type, solver_variable_name + "_" + inlet_boundaries[bc_ind], params);
     }
     else if (_energy_inlet_types[bc_ind] == "flux-mass" ||
              _energy_inlet_types[bc_ind] == "flux-velocity")
     {
       const std::string bc_type = "WCNSFVEnergyFluxBC";
       InputParameters params = getFactory().getValidParams(bc_type);
-      params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
-      const auto flux_inlet_directions = _flow_equations_physics->getFluxInletDirections();
-      const auto flux_inlet_pps = _flow_equations_physics->getFluxInletPPs();
+      params.set<NonlinearVariableName>("variable") = solver_variable_name;
+      const auto & flux_inlet_directions = _flow_equations_physics->getFluxInletDirections();
+      const auto & flux_inlet_pps = _flow_equations_physics->getFluxInletPPs();
+
+      if (flux_inlet_pps.size() < flux_bc_counter)
+        _flow_equations_physics->paramError(
+            "flux_inlet_pps",
+            "Should be specified for all 'flux-mass/velocity' boundary conditions");
 
       if (flux_inlet_directions.size())
+      {
+        if (flux_inlet_directions.size() < flux_bc_counter)
+          _flow_equations_physics->paramError("flux_inlet_pps",
+                                              "Should be specified for all or none of the "
+                                              "'flux-mass/velocity' boundary conditions");
         params.set<Point>("direction") = flux_inlet_directions[flux_bc_counter];
+      }
       if (_energy_inlet_types[bc_ind] == "flux-mass")
       {
         params.set<PostprocessorName>("mdot_pp") = flux_inlet_pps[flux_bc_counter];
@@ -289,13 +352,21 @@ WCNSFVFluidHeatTransferPhysics::addEnergyInletBC()
       params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
       params.set<MooseFunctorName>(NS::T_fluid) = _fluid_temperature_name;
 
+      if (isParamValid(NS::fluid))
+      {
+        params.set<UserObjectName>(NS::fluid) = getParam<UserObjectName>(NS::fluid);
+        params.set<MooseFunctorName>(NS::pressure) = _flow_equations_physics->getPressureName();
+      }
+
+      if (_solve_for_enthalpy)
+        params.set<MooseFunctorName>(NS::specific_enthalpy) = _fluid_enthalpy_name;
+
       for (const auto d : make_range(dimension()))
         params.set<MooseFunctorName>(NS::velocity_vector[d]) = _velocity_names[d];
 
       params.set<std::vector<BoundaryName>>("boundary") = {inlet_boundaries[bc_ind]};
 
-      getProblem().addFVBC(
-          bc_type, _fluid_temperature_name + "_" + inlet_boundaries[bc_ind], params);
+      getProblem().addFVBC(bc_type, solver_variable_name + "_" + inlet_boundaries[bc_ind], params);
       flux_bc_counter += 1;
     }
   }
@@ -318,35 +389,45 @@ WCNSFVFluidHeatTransferPhysics::addEnergyWallBC()
                    ") should be the same size as wall_boundaries (size " +
                    std::to_string(wall_boundaries.size()) + ")");
 
+  const auto & solver_variable_name =
+      _solve_for_enthalpy ? _fluid_enthalpy_name : _fluid_temperature_name;
+
   for (unsigned int bc_ind = 0; bc_ind < _energy_wall_types.size(); ++bc_ind)
   {
     if (_energy_wall_types[bc_ind] == "fixed-temperature")
     {
-      const std::string bc_type = "FVADFunctorDirichletBC";
+      const std::string bc_type = _solve_for_enthalpy
+                                      ? "FVSpecificEnthalpyFromPressureTemperatureDirichletBC"
+                                      : "FVADFunctorDirichletBC";
       InputParameters params = getFactory().getValidParams(bc_type);
-      params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
-      params.set<MooseFunctorName>("functor") = _energy_wall_functors[bc_ind];
+      params.set<NonlinearVariableName>("variable") = solver_variable_name;
+      if (!_solve_for_enthalpy)
+        params.set<MooseFunctorName>("functor") = _energy_wall_functors[bc_ind];
+      else
+      {
+        params.set<UserObjectName>(NS::fluid) = getParam<UserObjectName>(NS::fluid);
+        params.set<MooseFunctorName>(NS::pressure) = _flow_equations_physics->getPressureName();
+        params.set<MooseFunctorName>(NS::T_fluid) = _energy_wall_functors[bc_ind];
+      }
       params.set<std::vector<BoundaryName>>("boundary") = {wall_boundaries[bc_ind]};
 
-      getProblem().addFVBC(
-          bc_type, _fluid_temperature_name + "_" + wall_boundaries[bc_ind], params);
+      getProblem().addFVBC(bc_type, solver_variable_name + "_" + wall_boundaries[bc_ind], params);
     }
     else if (_energy_wall_types[bc_ind] == "heatflux")
     {
       const std::string bc_type = "FVFunctorNeumannBC";
       InputParameters params = getFactory().getValidParams(bc_type);
-      params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
+      params.set<NonlinearVariableName>("variable") = solver_variable_name;
       params.set<MooseFunctorName>("functor") = _energy_wall_functors[bc_ind];
       params.set<std::vector<BoundaryName>>("boundary") = {wall_boundaries[bc_ind]};
 
-      getProblem().addFVBC(
-          bc_type, _fluid_temperature_name + "_" + wall_boundaries[bc_ind], params);
+      getProblem().addFVBC(bc_type, solver_variable_name + "_" + wall_boundaries[bc_ind], params);
     }
     else if (_energy_wall_types[bc_ind] == "convection")
     {
       const std::string bc_type = "FVFunctorConvectiveHeatFluxBC";
       InputParameters params = getFactory().getValidParams(bc_type);
-      params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
+      params.set<NonlinearVariableName>("variable") = solver_variable_name;
       params.set<MooseFunctorName>("T_bulk") = _fluid_temperature_name;
       params.set<std::vector<BoundaryName>>("boundary") = {wall_boundaries[bc_ind]};
       params.set<bool>("is_solid") = false;
@@ -359,8 +440,7 @@ WCNSFVFluidHeatTransferPhysics::addEnergyWallBC()
       params.set<MooseFunctorName>("T_solid") = Tinf_htc_functors[0];
       params.set<MooseFunctorName>("heat_transfer_coefficient") = Tinf_htc_functors[1];
 
-      getProblem().addFVBC(
-          bc_type, _fluid_temperature_name + "_" + wall_boundaries[bc_ind], params);
+      getProblem().addFVBC(bc_type, solver_variable_name + "_" + wall_boundaries[bc_ind], params);
     }
     // We add this boundary condition here to facilitate the input of wall boundaries / functors for
     // energy. If there are too many turbulence options and this gets out of hand we will have to
@@ -374,7 +454,7 @@ WCNSFVFluidHeatTransferPhysics::addEnergyWallBC()
                        wall_boundaries[bc_ind]);
       const std::string bc_type = "INSFVTurbulentTemperatureWallFunction";
       InputParameters params = getFactory().getValidParams(bc_type);
-      params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
+      params.set<NonlinearVariableName>("variable") = solver_variable_name;
       params.set<std::vector<BoundaryName>>("boundary") = {wall_boundaries[bc_ind]};
       params.set<MooseEnum>("wall_treatment") =
           _turbulence_physics->turbulenceTemperatureWallTreatment();
@@ -404,15 +484,67 @@ WCNSFVFluidHeatTransferPhysics::addEnergyWallBC()
 }
 
 void
+WCNSFVFluidHeatTransferPhysics::addMaterials()
+{
+  if (!_has_energy_equation)
+    return;
+
+  // Note that this material choice does not make sense for Newton-INSFV + solve_for_enthalpy since
+  // this material explicitly computes enthalpy from temperature
+  const auto object_type = "INSFVEnthalpyFunctorMaterial";
+
+  InputParameters params = getFactory().getValidParams(object_type);
+  assignBlocks(params, _blocks);
+
+  params.set<MooseFunctorName>(NS::density) = _density_name;
+  params.set<MooseFunctorName>(NS::cp) = _specific_heat_name;
+
+  if (_solve_for_enthalpy)
+  {
+    params.set<MooseFunctorName>(NS::pressure) = _flow_equations_physics->getPressureName();
+    params.set<MooseFunctorName>(NS::specific_enthalpy + "_in") = _fluid_enthalpy_name;
+    params.set<bool>("assumed_constant_cp") = false;
+    if (isParamValid(NS::fluid))
+      params.set<UserObjectName>(NS::fluid) = getParam<UserObjectName>(NS::fluid);
+    else
+      paramError(NS::fluid, "Required when solving for enthalpy");
+  }
+  // the functor material defines the temperature
+  else
+  {
+    params.set<MooseFunctorName>("temperature") = _fluid_temperature_name;
+    params.set<MooseFunctorName>(NS::specific_enthalpy) = _fluid_enthalpy_name;
+    if (isParamValid(NS::fluid))
+    {
+      params.set<bool>("assumed_constant_cp") = false;
+      params.set<UserObjectName>(NS::fluid) = getParam<UserObjectName>(NS::fluid);
+    }
+  }
+  if (_solve_for_enthalpy)
+  {
+    params.set<std::vector<std::string>>("output_properties") = {_fluid_temperature_name};
+    params.set<std::vector<OutputName>>("outputs") = {"all"};
+  }
+
+  getProblem().addMaterial(object_type, prefix() + "enthalpy_material", params);
+
+  if (_solve_for_enthalpy)
+    WCNSFVFluidHeatTransferPhysicsBase::defineKOverCpFunctors(/*use ad*/ true);
+}
+
+void
 WCNSFVFluidHeatTransferPhysics::addEnergySeparatorBC()
 {
   if (_flow_equations_physics->getHydraulicSeparators().size())
   {
+    const auto & solver_variable_name =
+        _solve_for_enthalpy ? _fluid_enthalpy_name : _fluid_temperature_name;
+
     const std::string bc_type = "INSFVScalarFieldSeparatorBC";
     InputParameters params = getFactory().getValidParams(bc_type);
-    params.set<NonlinearVariableName>("variable") = _fluid_temperature_name;
+    params.set<NonlinearVariableName>("variable") = solver_variable_name;
     params.set<std::vector<BoundaryName>>("boundary") =
         _flow_equations_physics->getHydraulicSeparators();
-    getProblem().addFVBC(bc_type, prefix() + _fluid_temperature_name + "_separators", params);
+    getProblem().addFVBC(bc_type, prefix() + solver_variable_name + "_separators", params);
   }
 }

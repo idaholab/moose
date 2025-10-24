@@ -336,13 +336,13 @@ d = 0.05
   [inlet_vel_x]
     type = INSFVInletVelocityBC
     variable = 'superficial_vel_x'
-    function = ${superficial_vel_x_initial}
+    functor = ${superficial_vel_x_initial}
     boundary = 'top'
   []
   [inlet_vel_y]
     type = INSFVInletVelocityBC
     variable = 'superficial_vel_y'
-    function = ${superficial_vel_y_initial}
+    functor = ${superficial_vel_y_initial}
     boundary = 'top'
   []
 []

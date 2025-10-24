@@ -153,6 +153,10 @@ Advected passive scalars do not affect the flow distribution, and therefore can 
 pressure fields have been computed using the `SIMPLE` algorithm.
 Several systems may be used, for each passive scalar.
 
+## Conjugate heat transfer
+
+For the conjuagate heat transfer capabilities visit the [corresponding design page](linear_fv_cht.md)
+
 !syntax parameters /Executioner/SIMPLE
 
 !syntax inputs /Executioner/SIMPLE

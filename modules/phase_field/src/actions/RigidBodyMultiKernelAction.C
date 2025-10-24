@@ -122,7 +122,7 @@ RigidBodyMultiKernelAction::act()
     {
       InputParameters params = _factory.getValidParams("AllenCahn");
       params.set<NonlinearVariableName>("variable") = var_name;
-      params.set<std::vector<VariableName>>("args") = arg;
+      params.set<std::vector<VariableName>>("coupled_variables") = arg;
       params.set<MaterialPropertyName>("mob_name") = getParam<MaterialPropertyName>("mob_name");
       params.set<MaterialPropertyName>("f_name") = getParam<MaterialPropertyName>("f_name");
       params.set<bool>("implicit") = _implicit;

@@ -18,10 +18,10 @@ public:
 
   KokkosCoupledForceNodalKernel(const InputParameters & parameters);
 
-  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, ResidualDatum & datum) const;
+  KOKKOS_FUNCTION Real computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const;
   KOKKOS_FUNCTION Real computeQpOffDiagJacobian(const unsigned int jvar,
                                                 const unsigned int qp,
-                                                ResidualDatum & datum) const;
+                                                AssemblyDatum & datum) const;
 
 private:
   /// The number of the coupled variable
@@ -35,7 +35,7 @@ private:
 };
 
 KOKKOS_FUNCTION inline Real
-KokkosCoupledForceNodalKernel::computeQpResidual(const unsigned int qp, ResidualDatum & datum) const
+KokkosCoupledForceNodalKernel::computeQpResidual(const unsigned int qp, AssemblyDatum & datum) const
 {
   return -_coef * _v(datum, qp);
 }
@@ -43,7 +43,7 @@ KokkosCoupledForceNodalKernel::computeQpResidual(const unsigned int qp, Residual
 KOKKOS_FUNCTION inline Real
 KokkosCoupledForceNodalKernel::computeQpOffDiagJacobian(const unsigned int jvar,
                                                         const unsigned int /* qp */,
-                                                        ResidualDatum & /* datum */) const
+                                                        AssemblyDatum & /* datum */) const
 {
   if (jvar == _v_var)
     return -_coef;

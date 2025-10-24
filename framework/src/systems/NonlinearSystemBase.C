@@ -1772,7 +1772,7 @@ NonlinearSystemBase::computeResidualInternal(const std::set<TagID> & tags)
   residualSetup();
 
 #ifdef MOOSE_KOKKOS_ENABLED
-  if (_fe_problem.hasKokkosObjects())
+  if (_fe_problem.hasKokkosResidualObjects())
     computeKokkosResidual(tags);
 #endif
 
@@ -2877,7 +2877,7 @@ NonlinearSystemBase::computeJacobianInternal(const std::set<TagID> & tags)
   jacobianSetup();
 
 #ifdef MOOSE_KOKKOS_ENABLED
-  if (_fe_problem.hasKokkosObjects())
+  if (_fe_problem.hasKokkosResidualObjects())
     computeKokkosJacobian(tags);
 #endif
 
@@ -3455,6 +3455,13 @@ NonlinearSystemBase::computeDamping(const NumericVector<Number> & solution,
     // The buck stops here, we have already handled the exception by
     // calling stopSolve(), it is now up to PETSc to return a
     // "diverged" reason during the next solve.
+  }
+  catch (std::exception & e)
+  {
+    // Allow the libmesh error/exception on negative jacobian
+    const std::string & message = e.what();
+    if (message.find("Jacobian") == std::string::npos)
+      throw e;
   }
 
   _communicator.min(damping);

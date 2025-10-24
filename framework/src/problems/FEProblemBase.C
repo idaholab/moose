@@ -1171,9 +1171,9 @@ FEProblemBase::initialSetup()
           _neighbor_material_props.hasStatefulProperties())
         _has_initialized_stateful = true;
 #ifdef MOOSE_KOKKOS_ENABLED
-      else if (_kokkos_material_props.hasStatefulProperties() ||
-               _kokkos_bnd_material_props.hasStatefulProperties() ||
-               _kokkos_neighbor_material_props.hasStatefulProperties())
+      if (_kokkos_material_props.hasStatefulProperties() ||
+          _kokkos_bnd_material_props.hasStatefulProperties() ||
+          _kokkos_neighbor_material_props.hasStatefulProperties())
         _has_initialized_stateful = true;
 #endif
     }
@@ -1463,13 +1463,25 @@ FEProblemBase::initialSetup()
   // this happen during restart.  I honestly have no idea why this has to happen after initial user
   // object computation.
   // THAT is something we should fix... so I've opened this ticket: #5804
-  if (!_app.isRecovering() && !_app.isRestarting() &&
-      (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
-       _neighbor_material_props.hasStatefulProperties()))
+  if (!_app.isRecovering() && !_app.isRestarting())
   {
-    TIME_SECTION("computeMaterials", 2, "Computing Initial Material Properties");
+    if (_material_props.hasStatefulProperties() || _bnd_material_props.hasStatefulProperties() ||
+        _neighbor_material_props.hasStatefulProperties())
+    {
+      TIME_SECTION("computeMaterials", 2, "Computing Initial Material Properties");
 
-    initElementStatefulProps(*_mesh.getActiveLocalElementRange(), true);
+      initElementStatefulProps(*_mesh.getActiveLocalElementRange(), true);
+    }
+#ifdef MOOSE_KOKKOS_ENABLED
+    if (_kokkos_material_props.hasStatefulProperties() ||
+        _kokkos_bnd_material_props.hasStatefulProperties() ||
+        _kokkos_neighbor_material_props.hasStatefulProperties())
+    {
+      TIME_SECTION("computeMaterials", 2, "Computing Initial Material Properties");
+
+      initElementStatefulProps(*_mesh.getActiveLocalElementRange(), true);
+    }
+#endif
   }
 
   // Control Logic
@@ -2974,6 +2986,42 @@ FEProblemBase::setResidualObjectParamsAndLog(const std::string & ro_name,
 }
 
 void
+FEProblemBase::setAuxKernelParamsAndLog(const std::string & ak_name,
+                                        const std::string & name,
+                                        InputParameters & parameters,
+                                        const std::string & base_name)
+{
+  if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
+  {
+    parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
+    parameters.set<SystemBase *>("_sys") = &_displaced_problem->auxSys();
+    parameters.set<SystemBase *>("_nl_sys") = &_displaced_problem->solverSys(0);
+    if (!parameters.get<std::vector<BoundaryName>>("boundary").empty())
+      _reinit_displaced_face = true;
+    else
+      _reinit_displaced_elem = true;
+  }
+  else
+  {
+    if (_displaced_problem == nullptr && parameters.get<bool>("use_displaced_mesh"))
+    {
+      // We allow AuxKernels to request that they use_displaced_mesh,
+      // but then be overridden when no displacements variables are
+      // provided in the Mesh block.  If that happened, update the value
+      // of use_displaced_mesh appropriately for this AuxKernel.
+      if (parameters.have_parameter<bool>("use_displaced_mesh"))
+        parameters.set<bool>("use_displaced_mesh") = false;
+    }
+
+    parameters.set<SubProblem *>("_subproblem") = this;
+    parameters.set<SystemBase *>("_sys") = _aux.get();
+    parameters.set<SystemBase *>("_nl_sys") = _solver_systems[0].get();
+  }
+
+  logAdd(base_name, name, ak_name, parameters);
+}
+
+void
 FEProblemBase::addKernel(const std::string & kernel_name,
                          const std::string & name,
                          InputParameters & parameters)
@@ -3290,34 +3338,8 @@ FEProblemBase::addAuxKernel(const std::string & kernel_name,
 {
   parallel_object_only();
 
-  if (_displaced_problem && parameters.get<bool>("use_displaced_mesh"))
-  {
-    parameters.set<SubProblem *>("_subproblem") = _displaced_problem.get();
-    parameters.set<SystemBase *>("_sys") = &_displaced_problem->auxSys();
-    parameters.set<SystemBase *>("_nl_sys") = &_displaced_problem->solverSys(0);
-    if (!parameters.get<std::vector<BoundaryName>>("boundary").empty())
-      _reinit_displaced_face = true;
-    else
-      _reinit_displaced_elem = true;
-  }
-  else
-  {
-    if (_displaced_problem == nullptr && parameters.get<bool>("use_displaced_mesh"))
-    {
-      // We allow AuxKernels to request that they use_displaced_mesh,
-      // but then be overridden when no displacements variables are
-      // provided in the Mesh block.  If that happened, update the value
-      // of use_displaced_mesh appropriately for this AuxKernel.
-      if (parameters.have_parameter<bool>("use_displaced_mesh"))
-        parameters.set<bool>("use_displaced_mesh") = false;
-    }
+  setAuxKernelParamsAndLog(kernel_name, name, parameters, "AuxKernel");
 
-    parameters.set<SubProblem *>("_subproblem") = this;
-    parameters.set<SystemBase *>("_sys") = _aux.get();
-    parameters.set<SystemBase *>("_nl_sys") = _solver_systems[0].get();
-  }
-
-  logAdd("AuxKernel", name, kernel_name, parameters);
   _aux->addKernel(kernel_name, name, parameters);
 }
 
