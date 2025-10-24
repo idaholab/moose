@@ -2493,7 +2493,7 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
 
   /// Populating Crossflow
   LibmeshPetscCall(populateDenseFromVector<libMesh::DenseMatrix<Real>>(
-      sol_Wij, _Wij, first_node, last_node - 1, _n_gaps));
+      sol_Wij, _Wij, first_node, last_node, _n_gaps));
 
   /// Populating sum_Wij
   LibmeshPetscCall(MatMult(_mc_sumWij_mat, sol_Wij, _prod));
