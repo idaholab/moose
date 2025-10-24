@@ -19,36 +19,36 @@ if __name__ == '__main__':
     with TestMooseControl('web_server') as control:
         match test:
             case 'set_controllable_no_exist':
-                control.set_controllable_real('no_exist', 0.0)
+                control.set_real('no_exist', 0.0)
             case 'postprocessor_no_exist':
                 control.get_postprocessor('no_exist')
             case 'set_controllable_unregistered_type':
-                control._set_controllable('unused', 'BadType', (str,), 'unused')
+                control.set_controllable('unused', 'BadType', (str,), 'unused')
             case 'set_controllable_bad_convert':
-                control._set_controllable('Outputs/json/enable', 'bool', (str,), 'foo')
+                control.set_controllable('Outputs/json/enable', 'bool', (str,), 'foo')
             case 'set_controllable_vector_non_array':
-                control._set_controllable(
+                control.set_controllable(
                     'Reporters/test/vec_real_value',
                     'std::vector<Real>',
                     (int,),
                     1234
                 )
-            case 'set_controllable_matrix_bad_convert1':
-                control._set_controllable(
+            case 'set_realeigenmatrix_bad_convert1':
+                control.set_controllable(
                     'Reporters/test/matrix_value',
                     'RealEigenMatrix',
                     (int,),
                     1234
                 )
-            case 'set_controllable_matrix_bad_convert2':
-                control._set_controllable(
+            case 'set_realeigenmatrix_bad_convert2':
+                control.set_controllable(
                     'Reporters/test/matrix_value',
                     'RealEigenMatrix',
                     (int,),
                     [1234]
                 )
-            case 'set_controllable_matrix_jagged':
-                control._set_controllable(
+            case 'set_realeigenmatrix_jagged':
+                control.set_controllable(
                     'Reporters/test/matrix_value',
                     'RealEigenMatrix',
                     (list,),

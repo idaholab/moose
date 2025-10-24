@@ -239,7 +239,7 @@ class StochasticControl(MooseControl):
         # Simulation is already started
         else:
             self.wait("TIMESTEP_END")
-            self.set_controllable_matrix(self.controllable_matrix, x)
+            self.set_realeigenmatrix(self.controllable_matrix, x)
 
     def run(self):
         """
@@ -270,7 +270,7 @@ class StochasticControl(MooseControl):
         y = []
         for qoi in self._qois:
             rep = f"{self.qoi_storage_name}/" + qoi.replace("/", ":")
-            y.append(self.get_reporter_value(rep))
+            y.append(self.get_reporter(rep))
         return np.array(y).T
 
     def _buildStochasticInput(self) -> pyhit.Node:

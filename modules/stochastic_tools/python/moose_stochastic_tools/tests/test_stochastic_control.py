@@ -474,11 +474,11 @@ class TestStochasticControlRun(unittest.TestCase):
         # Test after initialization
         control.runner._initialized = True
         control.wait = mock.MagicMock()
-        control.set_controllable_matrix = mock.MagicMock()
+        control.set_realeigenmatrix = mock.MagicMock()
         x = np.random.rand(3, 4)
         control.setInput(x)
         self.assertEqual(control.wait.call_args.args[0].upper(), "TIMESTEP_END")
-        param, val = control.set_controllable_matrix.call_args.args
+        param, val = control.set_realeigenmatrix.call_args.args
         self.assertEqual(param, f"Samplers/{StochasticControl.sampler_name}/matrix")
         self.assertTrue(np.allclose(x, val))
 

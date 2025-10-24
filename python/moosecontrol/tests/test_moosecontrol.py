@@ -456,13 +456,13 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
                 0, f'Getting postprocessor value for "{FAKE_NAME}"', levelname="DEBUG"
             )
 
-    def test_get_reporter_value(self):
-        """Test get_reporter_value()."""
+    def test_get_reporter(self):
+        """Test get_reporter()."""
         value = 100
         with self.mock_get(waiting=True):
             paths = [("get/reporter", {"data": {"value": value}})]
             with self.mock_post(paths):
-                get_value = self.control.get_reporter_value(FAKE_NAME)
+                get_value = self.control.get_reporter(FAKE_NAME)
 
         self.assertEqual(value, get_value)
         self.assertGetPaths(["waiting"])
@@ -503,13 +503,13 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
             self.assert_log_message(0, "Getting simulation timestep", levelname="DEBUG")
 
     def test_set_controllable_scalar_bad_type(self):
-        """Test _set_controllable_scalar() with a bad type."""
+        """Test set_controllable_scalar() with a bad type."""
         with self.assertRaises(TypeError) as e:
-            self.control._set_controllable_scalar("unused", "unused", (Number,), "foo")
+            self.control.set_controllable_scalar("unused", "unused", (Number,), "foo")
         self.assertEqual(str(e.exception), "Type str is not of allowed type(s) Number")
 
     def test_set_controllable_scalar_convert_type(self):
-        """Test _set_controllable_scalar() converting input values."""
+        """Test set_controllable_scalar() converting input values."""
         value = 1
 
         # Converts int -> float
@@ -517,7 +517,7 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
             self.mock_get(waiting=True),
             self.mock_post([("set/controllable", {"status_code": 201})]),
         ):
-            self.control._set_controllable_scalar(
+            self.control.set_controllable_scalar(
                 FAKE_NAME, "Real", (Number,), value, float
             )
         post_value = self.post_paths[0][1]["value"]
@@ -537,7 +537,7 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
             self.mock_get(waiting=True),
             self.mock_post([("set/controllable", {"status_code": 201})]),
         ):
-            method = getattr(self.control, f"set_controllable_{method_type}")
+            method = getattr(self.control, f"set_{method_type}")
             method(FAKE_NAME, value)
         self.assertGetPaths(["waiting"])
         self.assertPostPaths(
@@ -553,26 +553,26 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
             0, f'Setting controllable value "{FAKE_NAME}"', levelname="DEBUG"
         )
 
-    def test_set_controllable_bool(self):
-        """Test set_controllable_bool()."""
+    def test_set_bool(self):
+        """Test set_bool()."""
         self.run_test_set_controllable(True, "bool", "bool")
 
-    def test_set_controllable_int(self):
-        """Test set_controllable_int()."""
+    def test_set_int(self):
+        """Test set_int()."""
         self.run_test_set_controllable(int(1), "int", "int")
 
-    def test_set_controllable_real(self):
-        """Test set_controllable_real()."""
+    def test_set_real(self):
+        """Test set_real()."""
         self.run_test_set_controllable(float(1), "Real", "real")
 
-    def test_set_controllable_string(self):
-        """Test set_controllable_string()."""
+    def test_set_string(self):
+        """Test set_string()."""
         self.run_test_set_controllable("foo", "std::string", "string")
 
     def test_set_controllable_vector_bad_type(self):
-        """Test _set_controllable_vector() with a bad type."""
+        """Test set_controllable_vector() with a bad type."""
         with self.assertRaises(TypeError) as e:
-            self.control._set_controllable_vector(
+            self.control.set_controllable_vector(
                 "unused",
                 "unused",
                 (Number,),
@@ -583,7 +583,7 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
         )
 
     def test_set_controllable_vector_convert_type(self):
-        """Test _set_controllable_vector() converting input values."""
+        """Test set_controllable_vector() converting input values."""
         value = [1, 2, 3]
         self.assertFalse(all(isinstance(v, float) for v in value))
 
@@ -592,18 +592,18 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
             self.mock_get(waiting=True),
             self.mock_post([("set/controllable", {"status_code": 201})]),
         ):
-            self.control._set_controllable_vector(
+            self.control.set_controllable_vector(
                 FAKE_NAME, "Real", (Number,), value, float
             )
         post_value = self.post_paths[0][1]["value"]
         self.assertTrue(all(isinstance(v, float) for v in post_value))
 
-    def test_set_controllable_vector_int(self):
-        """Test set_controllable_vector_int()."""
+    def test_set_vector_int(self):
+        """Test set_vector_int()."""
         self.run_test_set_controllable([1, 2, 3], "std::vector<int>", "vector_int")
 
-    def test_set_controllable_vector_real(self):
-        """Test set_controllable_vector_int()."""
+    def test_set_vector_real(self):
+        """Test set_vector_real()."""
         value = [1.0, 2, 3.0]
         self.assertFalse(all(isinstance(v, float) for v in value))
 
@@ -613,29 +613,31 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
         post_value = self.post_paths[0][1]["value"]
         self.assertTrue(all(isinstance(v, float) for v in post_value))
 
-    def test_set_controllable_vector_string(self):
-        """Test set_controllable_vector_string()."""
+    def test_set_vector_string(self):
+        """Test set_vector_string()."""
         self.run_test_set_controllable(
             ["foo", "bar"], "std::vector<std::string>", "vector_string"
         )
 
-    def test_set_controllable_matrix(self):
-        """Test set_controllable_matrix()."""
+    def test_set_realeigenmatrix(self):
+        """Test set_realeigenmatrix()."""
         value = [[1, 2], [3.0, 4.0]]
-        self.run_test_set_controllable(value, "RealEigenMatrix", "matrix")
+        self.run_test_set_controllable(value, "RealEigenMatrix", "realeigenmatrix")
 
-    def test_set_controllable_matrix_1D(self):
-        """Test set_controllable_matrix() with a 1D array."""
+    def test_set_realeigenmatrix_1D(self):
+        """Test set_realeigenmatrix() with a 1D array."""
         value = [1]
-        self.run_test_set_controllable(value, "RealEigenMatrix", "matrix", [[1]])
+        self.run_test_set_controllable(
+            value, "RealEigenMatrix", "realeigenmatrix", [[1]]
+        )
 
-    def test_set_controllable_matrix_non_1D_2D(self):
-        """Tests set_controllable_matrix() when the value is not 1D or 2D."""
+    def test_set_realeigenmatrix_non_1D_2D(self):
+        """Tests set_realeigenmatrix() when the value is not 1D or 2D."""
         value = [[[1]]]
         with self.assertRaises(ValueError) as e:
             self.run_test_set_controllable(
                 value,
                 "RealEigenMatrix",
-                "matrix",
+                "realeigenmatrix",
             )
         self.assertEqual(str(e.exception), "Value not convertible to a 1- or 2-D array")

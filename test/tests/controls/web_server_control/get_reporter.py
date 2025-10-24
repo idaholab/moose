@@ -73,7 +73,7 @@ if __name__ == '__main__':
 
         # Get the initial value of the reporters and compare to the gold
         for rep, gold_values in gold.items():
-            value = control.get_reporter_value(rep)
+            value = control.get_reporter(rep)
             expect_close(value, gold_values[0])
 
         # Tell MOOSE to continue with the solve
@@ -86,7 +86,7 @@ if __name__ == '__main__':
 
             # Get the current value of the postprocessor and compare to the gold
             for rep, gold_values in gold.items():
-                value = control.get_reporter_value(rep)
+                value = control.get_reporter(rep)
                 expect_close(value, gold_values[t + 1])
 
             # Tell MOOSE to continue with the solve

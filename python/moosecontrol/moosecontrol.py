@@ -280,7 +280,7 @@ class MooseControl:
         check_response_data(response, [("value", (int, float))])
         return float(response.data["value"])
 
-    def get_reporter_value(self, name: str) -> Any:
+    def get_reporter(self, name: str) -> Any:
         """Get a reporter value by name."""
         assert isinstance(name, str)
         logger.debug(f'Getting reporter value for "{name}"')
@@ -305,13 +305,11 @@ class MooseControl:
         check_response_data(response, [("dt", (int, float))])
         return float(response.data["dt"])
 
-    def _set_controllable(
+    def set_controllable(
         self, path: str, cpp_type: str, python_types: Tuple[Type, ...], value: Any
     ):
         """
         Set a generic controllable value.
-
-        Internal method to be used by the explicit setters.
 
         Parameters
         ----------
@@ -333,7 +331,7 @@ class MooseControl:
         data = {"name": path, "value": value, "type": cpp_type}
         self.post("set/controllable", data, require_status=201)
 
-    def _set_controllable_scalar(
+    def set_controllable_scalar(
         self,
         path: str,
         cpp_type: str,
@@ -343,8 +341,6 @@ class MooseControl:
     ):
         """
         Set a generic scalar controllable value.
-
-        Internal method to be used by the explicit scalar setters.
 
         Parameters
         ----------
@@ -374,9 +370,9 @@ class MooseControl:
 
         if python_value_type is not None:
             value = python_value_type(value)
-        self._set_controllable(path, cpp_type, python_types, value)
+        self.set_controllable(path, cpp_type, python_types, value)
 
-    def set_controllable_bool(self, path: str, value: bool):
+    def set_bool(self, path: str, value: bool):
         """
         Set a controllable bool parameter.
 
@@ -388,9 +384,9 @@ class MooseControl:
             The value to set.
 
         """
-        self._set_controllable_scalar(path, "bool", (bool,), value)
+        self.set_controllable_scalar(path, "bool", (bool,), value)
 
-    def set_controllable_int(self, path: str, value: int):
+    def set_int(self, path: str, value: int):
         """
         Set a controllable int parameter.
 
@@ -402,9 +398,9 @@ class MooseControl:
             The value to set.
 
         """
-        self._set_controllable_scalar(path, "int", (int,), value)
+        self.set_controllable_scalar(path, "int", (int,), value)
 
-    def set_controllable_real(self, path: str, value: float):
+    def set_real(self, path: str, value: float):
         """
         Set a controllable Real parameter.
 
@@ -416,9 +412,9 @@ class MooseControl:
             The value to set.
 
         """
-        self._set_controllable_scalar(path, "Real", (Number,), value, float)
+        self.set_controllable_scalar(path, "Real", (Number,), value, float)
 
-    def set_controllable_string(self, path: str, value: str):
+    def set_string(self, path: str, value: str):
         """
         Set a controllable std::string parameter.
 
@@ -430,9 +426,9 @@ class MooseControl:
             The value to set.
 
         """
-        self._set_controllable_scalar(path, "std::string", (str,), value)
+        self.set_controllable_scalar(path, "std::string", (str,), value)
 
-    def _set_controllable_vector(
+    def set_controllable_vector(
         self,
         path: str,
         cpp_type: str,
@@ -477,9 +473,9 @@ class MooseControl:
             value = [python_value_type(v) for v in value]
 
         cpp_type = f"std::vector<{cpp_type}>"
-        self._set_controllable(path, cpp_type, python_types, value)
+        self.set_controllable(path, cpp_type, python_types, value)
 
-    def set_controllable_vector_int(self, path: str, value: Iterable[int]):
+    def set_vector_int(self, path: str, value: Iterable[int]):
         """
         Set a controllable std::vector<int> parameter.
 
@@ -491,9 +487,9 @@ class MooseControl:
             The value to set.
 
         """
-        self._set_controllable_vector(path, "int", (int,), value)
+        self.set_controllable_vector(path, "int", (int,), value)
 
-    def set_controllable_vector_real(self, path: str, value: Iterable[Number]):
+    def set_vector_real(self, path: str, value: Iterable[Number]):
         """
         Set a controllable std::vector<Real> parameter.
 
@@ -505,9 +501,9 @@ class MooseControl:
             The value to set.
 
         """
-        self._set_controllable_vector(path, "Real", (Number,), value, float)
+        self.set_controllable_vector(path, "Real", (Number,), value, float)
 
-    def set_controllable_vector_string(self, path: str, value: Iterable[str]):
+    def set_vector_string(self, path: str, value: Iterable[str]):
         """
         Set a controllable std::vector<std::string> parameter.
 
@@ -519,9 +515,9 @@ class MooseControl:
             The value to set.
 
         """
-        self._set_controllable_vector(path, "std::string", (str,), value)
+        self.set_controllable_vector(path, "std::string", (str,), value)
 
-    def set_controllable_matrix(self, path: str, value: npt.ArrayLike):
+    def set_realeigenmatrix(self, path: str, value: npt.ArrayLike):
         """
         Set a controllable RealEigenMatrix parameter.
 
@@ -540,4 +536,4 @@ class MooseControl:
             assert len(array.shape) == 2
         except Exception as e:
             raise ValueError("Value not convertible to a 1- or 2-D array") from e
-        self._set_controllable_scalar(path, "RealEigenMatrix", (list,), array.tolist())
+        self.set_controllable_scalar(path, "RealEigenMatrix", (list,), array.tolist())

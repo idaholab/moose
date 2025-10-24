@@ -31,29 +31,29 @@ if __name__ == '__main__':
     match controllable_name:
         case 'bool_value':
             test_values = [False, True]
-            method_name = 'set_controllable_bool'
+            method_name = 'set_bool'
         case 'real_value':
             test_values = [1.5, 3.2]
-            method_name = 'set_controllable_real'
+            method_name = 'set_real'
         case 'int_value':
             test_values = [-5000, 1]
-            method_name = 'set_controllable_int'
+            method_name = 'set_int'
         case 'vec_real_value':
             test_values = [[1, 2, 3, 4, 5], [6, 100]]
-            method_name = 'set_controllable_vector_real'
+            method_name = 'set_vector_real'
         case 'vec_int_value':
             test_values = [[-1, -2, -3, 4, 5], [888, -1000]]
-            method_name = 'set_controllable_vector_int'
+            method_name = 'set_vector_int'
         case 'string_value':
             test_values = ['foo', 'bar']
-            method_name = 'set_controllable_string'
+            method_name = 'set_string'
         case 'vec_string_value':
             test_values = [['what', 'magic'], ['dont', '   you', ' say!']]
-            method_name = 'set_controllable_vector_string'
+            method_name = 'set_vector_string'
         case 'matrix_value':
             test_values = [np.arange((i + 1) * (i + 2), dtype=np.float64)
                            .reshape((i + 1, i + 2)) * 10**i for i in range(1, 3)]
-            method_name = 'set_controllable_matrix'
+            method_name = 'set_realeigenmatrix'
         case _:
             raise ValueError(f'Unknown controllable name {controllable_name}')
 
