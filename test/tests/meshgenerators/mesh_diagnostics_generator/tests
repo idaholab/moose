@@ -123,8 +123,8 @@
       input = jacobian_test.i
       cli_args = '--mesh-only'
       mesh_mode = replicated
-      expect_out = '(Number of elements with a negative Jacobian: 1|Number of element sides with negative Jacobians: 2)'
-      detail = 'elements with negative Jacobians'
+      expect_out = '(Number of elements with a bad Jacobian: 1|Number of element sides with bad Jacobians: 2)'
+      detail = 'elements with non-positive Jacobians'
     []
   []
 
