@@ -39,4 +39,7 @@ protected:
 
   /// face normals
   const MooseArray<Point> & _normals;
+
+  /// Current side element
+  const Elem *& _current_side_elem;
 };

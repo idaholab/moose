@@ -85,13 +85,12 @@ l = 1
     component = 1
   []
 
-  [pressure_convection]
-    type = AdvectionIPHDGKernel
+  [pressure]
+    type = MassContinuityIPHDGKernel
     variable = pressure
     face_variable = pressure_bar
-    velocity = 'velocity'
-    coeff = '${fparse -rho}'
-    self_advection = false
+    interior_velocity_vars = 'vel_x vel_y'
+    face_velocity_functors = 'vel_bar_x vel_bar_y'
   []
 []
 
@@ -216,15 +215,21 @@ l = 1
     component = 1
   []
 
-  [mass_convection]
-    type = AdvectionIPHDGPrescribedFluxBC
+  [pressure_walls]
+    type = MassContinuityIPHDGBC
     face_variable = pressure_bar
     variable = pressure
-    velocity = 'velocity'
-    coeff = '${fparse -rho}'
-    self_advection = false
-    boundary = 'left bottom top right'
-    prescribed_normal_flux = 0
+    boundary = 'left bottom right'
+    face_velocity_functors = '0 0'
+    interior_velocity_vars = 'vel_x vel_y'
+  []
+  [pressure_lid]
+    type = MassContinuityIPHDGBC
+    face_variable = pressure_bar
+    variable = pressure
+    boundary = 'top'
+    face_velocity_functors = '${U} 0'
+    interior_velocity_vars = 'vel_x vel_y'
   []
 
   [pb_mass]
@@ -244,7 +249,7 @@ l = 1
     vector_tags = ''
     matrix_tags = 'jump combined'
     boundary = 'left right bottom'
-    dirichlet_value = 'walls'
+    face_functor = 'walls'
   []
   [v_jump_walls]
     type = MassFluxPenaltyBC
@@ -256,7 +261,7 @@ l = 1
     vector_tags = ''
     matrix_tags = 'jump combined'
     boundary = 'left right bottom'
-    dirichlet_value = 'walls'
+    face_functor = 'walls'
   []
   [u_jump_top]
     type = MassFluxPenaltyBC
@@ -268,7 +273,7 @@ l = 1
     vector_tags = ''
     matrix_tags = 'jump combined'
     boundary = 'top'
-    dirichlet_value = 'top'
+    face_functor = 'top'
   []
   [v_jump_top]
     type = MassFluxPenaltyBC
@@ -280,20 +285,7 @@ l = 1
     vector_tags = ''
     matrix_tags = 'jump combined'
     boundary = 'top'
-    dirichlet_value = 'top'
-  []
-[]
-
-[Functions]
-  [top]
-    type = ParsedVectorFunction
-    value_x = ${U}
-    value_y = 0
-  []
-  [walls]
-    type = ParsedVectorFunction
-    value_x = 0
-    value_y = 0
+    face_functor = 'top'
   []
 []
 
@@ -308,6 +300,19 @@ l = 1
     vector_prop_name = 'velocity'
     u = vel_x
     v = vel_y
+  []
+[]
+
+[FunctorMaterials]
+  [top]
+    type = GenericConstantVectorFunctorMaterial
+    prop_names = top
+    prop_values = '${U} 0 0'
+  []
+  [walls]
+    type = GenericConstantVectorFunctorMaterial
+    prop_names = walls
+    prop_values = '0 0 0'
   []
 []
 
