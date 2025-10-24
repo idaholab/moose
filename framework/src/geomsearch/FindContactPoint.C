@@ -213,7 +213,7 @@ findContactPoint(PenetrationInfo & p_info,
       {
         // Make sure this *is* just a bad mapping Jacobian
         if (!strstr(e.what(), "Jacobian"))
-          throw e;
+          throw;
 
         ref_point(0) -= mult * update(0);
         if (dim - 1 == 2)

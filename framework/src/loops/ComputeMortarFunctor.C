@@ -173,10 +173,6 @@ ComputeMortarFunctor::operator()(const Moose::ComputeType compute_type,
                                             act_functor,
                                             /*reinit_mortar_user_objects=*/true);
     }
-    catch (libMesh::LogicError & e)
-    {
-      _fe_problem.setException("We caught a libMesh::LogicError: " + std::string(e.what()));
-    }
     catch (MooseException & e)
     {
       _fe_problem.setException(e.what());
@@ -184,6 +180,13 @@ ComputeMortarFunctor::operator()(const Moose::ComputeType compute_type,
     catch (MetaPhysicL::LogicError & e)
     {
       moose::translateMetaPhysicLError(e);
+    }
+    catch (std::exception & e)
+    {
+      if (!strstr(e.what(), "Jacobian") && !strstr(e.what(), "singular"))
+        throw;
+
+      _fe_problem.setException("We caught a degeneracy from libMesh:" + std::string(e.what()));
     }
   }
   PARALLEL_CATCH;

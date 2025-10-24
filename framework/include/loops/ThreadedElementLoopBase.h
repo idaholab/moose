@@ -307,13 +307,18 @@ ThreadedElementLoopBase<RangeType>::operator()(const RangeType & range, bool byp
       post();
       resetExecPrintedSets();
     }
-    catch (libMesh::LogicError & e)
-    {
-      mooseException("We caught a libMesh error in ThreadedElementLoopBase:", e.what());
-    }
     catch (MetaPhysicL::LogicError & e)
     {
       moose::translateMetaPhysicLError(e);
+    }
+    catch (std::exception & e)
+    {
+      // Continue if we find a libMesh degenerate map exception, but
+      // just re-throw for any real error
+      if (!strstr(e.what(), "Jacobian") && !strstr(e.what(), "singular"))
+        throw; // not "throw e;" - that destroys type info!
+
+      mooseException("We caught a libMesh Jacobian exception: ", e.what());
     }
   }
   catch (MooseException & e)
