@@ -151,8 +151,7 @@
     type = 'Exodiff'
     exodiff = 'block-dynamics-aux-fretting-wear-test-action-quick_out.e'
     input = 'block-dynamics-aux-fretting-wear-test-action.i'
-    rel_err = 1.0e-3
-    abs_zero = 5.0e-4
+    custom_cmp = block-dynamics-aux-fretting-wear-test-action.cmp
     min_parallel = 1
     max_parallel = 4
     capabilities = 'ad_size>=50'

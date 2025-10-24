@@ -73,21 +73,21 @@
 
 [AuxKernels]
   [penalty_normal_pressure]
-    type = PenaltyMortarUserObjectAux
+    type = MortarUserObjectAux
     variable = penalty_normal_pressure
     user_object = friction_uo
     contact_quantity = normal_pressure
     boundary = 3
   []
   [normal_lm]
-    type = PenaltyMortarUserObjectAux
+    type = MortarUserObjectAux
     variable = normal_lm
     user_object = friction_uo
     contact_quantity = normal_lm
     boundary = 3
   []
   [normal_gap]
-    type = PenaltyMortarUserObjectAux
+    type = MortarUserObjectAux
     variable = normal_gap
     user_object = friction_uo
     contact_quantity = normal_gap

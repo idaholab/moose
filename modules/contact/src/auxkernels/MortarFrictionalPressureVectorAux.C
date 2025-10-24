@@ -9,6 +9,7 @@
 
 #include "MortarFrictionalPressureVectorAux.h"
 #include "SystemBase.h"
+#include "AutomaticMortarGeneration.h"
 
 registerMooseObject("ContactApp", MortarFrictionalPressureVectorAux);
 
@@ -88,7 +89,8 @@ MortarFrictionalPressureVectorAux::MortarFrictionalPressureVectorAux(const Input
                "frictional pressure vector auxiliary variable definition.");
 
   _mortar_generation_object =
-      &libmesh_map_find(displaced_mortar_interfaces, std::make_pair(_primary_id, _secondary_id));
+      libmesh_map_find(displaced_mortar_interfaces, std::make_pair(_primary_id, _secondary_id))
+          .get();
 }
 
 Real

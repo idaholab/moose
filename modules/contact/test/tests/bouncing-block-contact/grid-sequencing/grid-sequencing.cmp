@@ -1,0 +1,12 @@
+
+TIME STEPS relative 1.e-6 floor 0.0     # min:              15 @ t1 max:              15 @ t1
+
+GLOBAL VARIABLES relative 5.5.e-6 floor 1e-10
+	contact  # min:               0 @ t1	max:               0 @ t1
+
+NODAL VARIABLES relative 5.5.e-6 floor 1e-10
+	contact_normal_lm      # min:               0 @ t1,n1	max:      0.17748644 @ t1,n8
+	contact_tangential_lm  # min:               0 @ t1,n1	max:     0.070994577 @ t1,n8
+	disp_x                 # min:               0 @ t1,n3	max:            0.15 @ t1,n6
+	disp_y                 # min:               0 @ t1,n3	max:      0.13142136 @ t1,n5
+

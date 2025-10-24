@@ -10,6 +10,7 @@
 #pragma once
 
 #include "WeightedVelocitiesUserObject.h"
+#include "LMWeightedGapUserObject.h"
 
 template <typename>
 class MooseVariableFE;
@@ -17,7 +18,8 @@ class MooseVariableFE;
 /**
  * Nodal-based mortar contact user object for frictional problem
  */
-class LMWeightedVelocitiesUserObject : public WeightedVelocitiesUserObject
+class LMWeightedVelocitiesUserObject : public WeightedVelocitiesUserObject,
+                                       public LMWeightedGapUserObject
 {
 public:
   static InputParameters validParams();
@@ -27,22 +29,8 @@ public:
   virtual const ADVariableValue & contactTangentialPressureDirOne() const override;
   virtual const ADVariableValue & contactTangentialPressureDirTwo() const override;
 
-  virtual const ADVariableValue & contactPressure() const override;
-
-  virtual void reinit() override {}
-
 protected:
-  virtual const VariableTestValue & test() const override;
-  virtual bool constrainedByOwner() const override { return true; }
-
-  /// The Lagrange multiplier variables representing the contact pressure along various directions
-  const MooseVariableFE<Real> * const _lm_normal_var;
+  /// The Lagrange multiplier variables representing the tangential contact pressure
   const MooseVariableFE<Real> * const _lm_variable_tangential_one;
   const MooseVariableFE<Real> * const _lm_variable_tangential_two;
-
-  /// Whether to use Petrov-Galerkin approach
-  const bool _use_petrov_galerkin;
-
-  /// The auxiliary Lagrange multiplier variable (used together whith the Petrov-Galerkin approach)
-  const MooseVariable * const _aux_lm_var;
 };
