@@ -23,6 +23,9 @@
 #include "libmesh/fe_base.h"
 #include "libmesh/vector_value.h"
 
+// C++
+#include <cstring> // for "Jacobian" exception test
+
 using namespace libMesh;
 
 namespace Moose
@@ -205,8 +208,13 @@ findContactPoint(PenetrationInfo & p_info,
         update_size = update.l2_norm();
         break;
       }
-      catch (libMesh::LogicError & e)
+      // libMesh might throw here if we hit a zero/negative Jacobian
+      catch (std::exception & e)
       {
+        // Make sure this *is* just a bad mapping Jacobian
+        if (!strstr(e.what(), "Jacobian"))
+          throw e;
+
         ref_point(0) -= mult * update(0);
         if (dim - 1 == 2)
           ref_point(1) -= mult * update(1);
