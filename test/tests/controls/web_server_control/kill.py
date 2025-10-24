@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 #* This file is part of the MOOSE framework
 #* https://mooseframework.inl.gov
 #*
@@ -7,4 +8,12 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from .MooseControl import MooseControl
+from sys import exit
+
+from testmoosecontrol import TestMooseControl
+
+if __name__ == '__main__':
+    with TestMooseControl('web_server') as control:
+        control.runner.kill()
+
+    exit(control.runner.get_return_code())

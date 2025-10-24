@@ -8,12 +8,16 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
+from time import sleep
+from sys import exit
+
 from testmoosecontrol import TestMooseControl
 
-# This should be called by the test harness with the errors.i
-# input file (which just waits on INITIAL) to test connecting
-# to the web server on a port
 if __name__ == '__main__':
-    with TestMooseControl('web_server', use_port=True) as control:
-        control.wait('INITIAL')
-        control.set_continue()
+    with TestMooseControl(
+        "web_server", runner_kwargs={"poke_poll_time": None}
+    ) as control:
+        runner = control.runner
+        while runner.is_process_running():
+            sleep(0.01)
+        exit(runner.get_return_code())

@@ -4,7 +4,7 @@ The `WebServerControl` object is designed to allow an external process to contro
 
 The server can either listen on a port via the [!param](/Controls/WebServerControl/port) parameter, or on a unix file socket via the [!param](/Controls/WebServerControl/file_socket) parameter. One of these two parameters must be provided.
 
-It can then be managed via the [MooseControl](MooseControl/index.md optional=true) python utility.
+It can then be managed via the [MooseControl](moosecontrol/index.md optional=true) python utility.
 
 ## API
 
@@ -49,7 +49,7 @@ where `<EXEC_ON_FLAG>` is the current execution flag. If the control is not curr
 }
 ```
 
-This endpoint can be accessed via the [MooseControl](MooseControl/index.md optional=true) python utility via the following methods:
+This endpoint can be accessed via the [MooseControl](moosecontrol/index.md optional=true) python utility via the following methods:
 
 - `wait()`: Waits for the control to be waiting
 - `getWaitingFlag()`: Gets the current flag that the control is waiting on, if any
@@ -124,7 +124,7 @@ where `<NAME>` is the string path to the controllable parameter, `<TYPE>` is the
 
 On success, the response will be empty with a status code of 201.
 
-This endpoint can be accessed via the [MooseControl](MooseControl/index.md optional=true) python utility via the following methods:
+This endpoint can be accessed via the [MooseControl](moosecontrol/index.md optional=true) python utility via the following methods:
 
 - `setControllableBool()`: Sets a controllable `bool` parameter
 - `setControllableReal()`: Sets a controllable `Real` parameter
@@ -137,13 +137,13 @@ This endpoint can be accessed via the [MooseControl](MooseControl/index.md optio
 
 Tells a waiting control to continue with the execution. The control must be waiting in order to access this endpoint.
 
-Interact with this endpoint by a `GET` request to `/continue`. On success, the response will be empty with a status code of 200. This endpoint can be accessed via the [MooseControl](MooseControl/index.md optional=true) python utility via `setContinue()`.
+Interact with this endpoint by a `GET` request to `/continue`. On success, the response will be empty with a status code of 200. This endpoint can be accessed via the [MooseControl](moosecontrol/index.md optional=true) python utility via `setContinue()`.
 
 ### `terminate`
 
 Tells a waiting control to terminate the simulation at the end of the current timestep. Any other execution points in the control during the timestep will be skipped. The control must be waiting in order to access this endpoint.
 
-Interact with this endpoint by a `GET` request to `/terminate`. On success, the response will be empty with a status code of 200. This endpoint can be accessed via the [MooseControl](MooseControl/index.md optional=true) python utility via `setTerminate()`.
+Interact with this endpoint by a `GET` request to `/terminate`. On success, the response will be empty with a status code of 200. This endpoint can be accessed via the [MooseControl](moosecontrol/index.md optional=true) python utility via `setTerminate()`.
 
 !syntax parameters /Controls/WebServerControl
 

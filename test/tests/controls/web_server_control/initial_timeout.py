@@ -8,12 +8,17 @@
 #* Licensed under LGPL 2.1, please see LICENSE for details
 #* https://www.gnu.org/licenses/lgpl-2.1.html
 
-from testmoosecontrol import TestMooseControl
+from sys import exit
 
-# This should be called by the test harness with the errors.i
-# input file (which just waits on INITIAL) to test connecting
-# to the web server on a port
+from testmoosecontrol import TestMooseControl
+from moosecontrol.runners.interfaces import SubprocessRunnerInterface
+
 if __name__ == '__main__':
-    with TestMooseControl('web_server', use_port=True) as control:
-        control.wait('INITIAL')
-        control.set_continue()
+    runner = TestMooseControl('web_server').control.runner
+
+    # Just start the process, nothing else because
+    # the BaseRunner will poke once it is listening
+    SubprocessRunnerInterface.initialize(runner)
+    SubprocessRunnerInterface.finalize(runner)
+
+    exit(runner.get_return_code())

@@ -58,11 +58,25 @@ WebServerControl::validParams()
   params.addParam<FileName>(
       "file_socket",
       "The path to the unix file socket to listen on; must provide either this or 'port'");
+  params.addParam<Real>("initial_client_timeout",
+                        10,
+                        "Time in seconds to allow the client to begin communicating on init; if "
+                        "this time is surpassed the run will be killed");
+  params.addParam<Real>("client_timeout",
+                        10,
+                        "Time in seconds to allow the client to communicate; if this time is "
+                        "surpassed the run will be killed");
   return params;
 }
 
 WebServerControl::WebServerControl(const InputParameters & parameters)
-  : Control(parameters), _currently_waiting(false), _terminate_requested(false)
+  : Control(parameters),
+    _initial_client_timeout(getParam<Real>("initial_client_timeout")),
+    _client_timeout(getParam<Real>("client_timeout")),
+    _currently_waiting(false),
+    _terminate_requested(false),
+    _last_client_poke(0),
+    _kill_client_timeout_thread(false)
 {
   const auto has_port = isParamValid("port");
   const auto has_file_socket = isParamValid("file_socket");
@@ -82,6 +96,11 @@ WebServerControl::~WebServerControl()
   {
     _server->shutdown();
     _server_thread->join();
+  }
+  if (_client_timeout_thread)
+  {
+    _kill_client_timeout_thread.store(true);
+    _client_timeout_thread->join();
   }
 }
 
@@ -138,10 +157,26 @@ WebServerControl::startServer()
     return result{};
   };
 
+  // Helper for getting a time for now that is storable in an atomic
+  const auto now_time = []() -> int64_t
+  {
+    return std::chrono::duration_cast<std::chrono::milliseconds>(
+               std::chrono::steady_clock::now().time_since_epoch())
+        .count();
+  };
+
   _server = std::make_unique<HttpServer>();
 
   // GET /check, returns code 200
-  _server->when("/check")->requested([](const HttpRequest & /*req*/) { return HttpResponse{200}; });
+  _server->when("/check")->requested([](const HttpRequest &) { return HttpResponse{200}; });
+
+  // GET /poke, returns code 200
+  _server->when("/poke")->requested(
+      [this, &now_time](const HttpRequest &)
+      {
+        this->_last_client_poke.store(now_time());
+        return HttpResponse{200};
+      });
 
   // GET /waiting, returns code 200 on success and JSON:
   //  'waiting' (bool): Whether or not the control is waiting
@@ -359,6 +394,53 @@ WebServerControl::startServer()
             // Not currently waiting
             return error("The control is not currently waiting");
           });
+
+  // GET /kill, calls mooseError to kill the solve
+  _server->when("/kill")->requested(
+      [this](const HttpRequest &)
+      {
+        ::mooseError(this->typeAndName(), ": Kill requested");
+        return HttpResponse{200};
+      });
+
+  // Setup the timeout thread before starting the server
+  _client_timeout_thread = std::make_unique<std::thread>(
+      [this, &now_time]
+      {
+        // Capture timeouts locally
+        const auto initial_timeout = this->_initial_client_timeout;
+        const auto running_timeout = this->_client_timeout;
+
+        // For comparison in the initial timeout
+        const int64_t started_time = now_time();
+
+        // Poll until the thread is told to stop
+        do
+        {
+          // Last time the client poked
+          const auto last_time = this->_last_client_poke.load();
+
+          // On the initial timeout of we haven't heard from the client yet
+          const bool initial = last_time == 0;
+
+          const auto compare_time = std::chrono::milliseconds(initial ? started_time : last_time);
+          const auto timeout = initial ? initial_timeout : running_timeout;
+          const auto now_time = std::chrono::steady_clock::now().time_since_epoch();
+          const auto elapsed = std::chrono::duration<float>(now_time - compare_time).count();
+          if (elapsed > timeout)
+          {
+            std::ostringstream message;
+            message << this->typeAndName() << ": Client timed out" << (initial ? " on initial" : "")
+                    << "\nThe timeout is " << std::fixed << std::setprecision(2) << timeout
+                    << " seconds and is set by the " << (initial ? "initial_" : "")
+                    << "client_timeout parameter";
+            ::mooseError(message.str());
+          }
+
+          std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+        } while (!this->_kill_client_timeout_thread.load());
+      });
 
   _server_thread = std::make_unique<std::thread>(
       [this]
