@@ -60,7 +60,10 @@ CSGRegion::CSGRegion(const CSGRegion & region, const std::string & region_type)
   if (getRegionType() == RegionType::COMPLEMENT)
   {
     // no change to surfaces, but update string
-    _region_str = "~" + region.toString();
+    if (region.toString()[0] == '(')
+      _region_str = "~" + region.toString();
+    else
+      _region_str = "~(" + region.toString() + ")";
     _surfaces = region.getSurfaces();
   }
   else if (getRegionType() == RegionType::EMPTY)
