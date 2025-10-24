@@ -250,7 +250,7 @@ ConservativeAdvectionTempl<is_ad>::fullUpwind(JacRes res_or_jac)
 
           _dtotal_mass_out[n] += _local_ke(n, n);
         }
-      _my_local_re(n) *= _u_nodal[n];
+      _my_local_re(n) *= getUNodal(n);
       total_mass_out += _my_local_re(n);
     }
     else                           // downwind node
