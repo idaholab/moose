@@ -26,7 +26,7 @@ We can rearrange the fully expanded [eq:weak-array-diffusion] into
 \begin{equation}
 (\nabla \vec{u}^\ast, \mathbf{D} \nabla \vec{u}) = \sum_{e} \sum_{i=1}^{N_{\text{dof}}} \sum_{\text{qp}=1}^{N_{qp}} (|J|w)_{\text{qp}} \vec{w}_p\vec{u}_i^\ast \underline{\mathbf{D}_{\text{qp}} \nabla \vec{u}_{\text{qp}} \cdot \nabla b_{i,\text{qp}}},
 \end{equation}
-where the underlined term is the array provided by [ArrayDiffusion::computeQpResidual](ArrayDiffusion.C).
+where the underlined term is the array provided by [ArrayDiffusion::computeQpResidual](/ArrayDiffusion.C).
 The element, shape function and quadrature point summations are taken care of by MOOSE.
 It is noted that since test functions are arbitrary, $\vec{u}_i^\ast$ can be viewed as an index indicator with which the local residual goes into the global residual vector.
 Note that $\vec{a}\vec{b}$ represents element-wise multiplication, i.e. $\vec{a}\vec{b}$ is equal to vector whose *i*th element is $a_i \times b_i$, where $a$ and $b$ are two generic vectors.
@@ -43,7 +43,7 @@ With some further transformation, the kernel becomes
 \begin{equation}
 (\nabla \vec{u}^\ast, \mathbf{D} \nabla \vec{u}) = \sum_{e} \sum_{i=1}^{N_{\text{dof}}} \sum_{j=1}^{N_{\text{dof}}} \sum_{\text{qp}=1}^{N_{qp}} (|J|w)_{\text{qp}} \vec{w}_p\vec{u}_i^\ast \underline{\mathbf{D}_{\text{qp}} \nabla b_{j,\text{qp}} \cdot \nabla b_{i,\text{qp}}} \vec{u}_j,
 \end{equation}
-where the underlined part is the local Jacobian evaluated by [ArrayDiffusion::computeQpJacobian](ArrayDiffusion.C) and [ArrayDiffusion::computeQpOffDiagJacobian](ArrayDiffusion.C).
+where the underlined part is the local Jacobian evaluated by [ArrayDiffusion::computeQpJacobian](/ArrayDiffusion.C) and [ArrayDiffusion::computeQpOffDiagJacobian](/ArrayDiffusion.C).
 
 ## Example Input Syntax
 
