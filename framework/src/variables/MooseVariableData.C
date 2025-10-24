@@ -405,81 +405,6 @@ MooseVariableData<OutputType>::divPhiFace() const
   return *_div_phi_face;
 }
 
-template <>
-void
-MooseVariableData<RealEigenVector>::fetchADNodalValues()
-{
-  const auto nshapes = _dof_indices.size() / _count;
-  libmesh_assert(nshapes);
-  _ad_dof_values.resize(nshapes);
-
-  if (_need_ad_u_dot)
-    _ad_dofs_dot.resize(nshapes);
-  if (_need_ad_u_dotdot)
-    _ad_dofs_dotdot.resize(nshapes);
-
-  const bool do_derivatives = Moose::doDerivatives(_subproblem, _sys);
-
-  for (const auto i : make_range(nshapes))
-  {
-    _ad_dof_values[i] = _vector_tags_dof_u[_solution_tag][i];
-    if (do_derivatives)
-      for (const auto j : make_range(_count))
-        Moose::derivInsert(_ad_dof_values[i](j).derivatives(), _dof_indices[j * nshapes + i], 1.);
-    assignADNodalValue(_ad_dof_values[i], i);
-
-    if (_need_ad_u_dot)
-    {
-      if (_time_integrator && _time_integrator->dt())
-      {
-        _ad_dofs_dot[i] = _ad_dof_values[i];
-        for (const auto j : make_range(_count))
-          _time_integrator->computeADTimeDerivatives(_ad_dofs_dot[i](j),
-                                                     _dof_indices[j * nshapes + i],
-                                                     _need_ad_u_dotdot ? _ad_dofs_dotdot[i](j)
-                                                                       : _ad_real_dummy);
-      }
-      // Executing something with a time derivative at initial should not put a NaN
-      else if (_time_integrator && !_time_integrator->dt())
-        _ad_dofs_dot[i] = {};
-      else
-        mooseError("AD nodal time derivatives not implemented for variables without a time "
-                   "integrator (auxiliary variables)");
-    }
-  }
-}
-
-template <>
-void
-MooseVariableData<RealEigenVector>::computeAD(const unsigned int num_dofs, const unsigned int nqp)
-{
-  const bool do_derivatives = Moose::doDerivatives(_subproblem, _sys);
-  const auto n_test = num_dofs / _count;
-  mooseAssert(num_dofs == _count * n_test,
-              "Our assertions around number of dofs, test functions, and count are incorrect");
-
-  _ad_dof_values.resize(n_test);
-  // Test is outer, count is inner
-  for (const auto i : make_range(n_test))
-  {
-    _ad_dof_values[i].resize(_count);
-    for (const auto j : make_range(_count))
-    {
-      auto & dual_number = _ad_dof_values[i](j);
-      const auto global_dof_index = _dof_indices[j * n_test + i];
-      dual_number = (*_sys.currentSolution())(global_dof_index);
-      // NOTE!  You have to do this AFTER setting the value!
-      if (do_derivatives)
-        Moose::derivInsert(dual_number.derivatives(), global_dof_index, 1.);
-    }
-  }
-
-  if (_need_ad_u)
-    fill<false>(_ad_u, *_current_phi, _ad_dof_values, nqp, n_test);
-  if (_need_ad_grad_u)
-    fill<false>(_ad_grad_u, *_current_grad_phi, _ad_dof_values, nqp, n_test);
-}
-
 template <typename OutputType>
 template <bool constant_monomial,
           typename DestinationType,
@@ -751,7 +676,7 @@ MooseVariableData<OutputType>::computeValuesInternal()
   }
 
   if (_need_ad)
-    computeAD(num_dofs, nqp);
+    computeAD<constant_monomial>(num_dofs, nqp);
 }
 
 template <typename OutputType>
@@ -777,8 +702,10 @@ MooseVariableData<OutputType>::computeConstantMonomialValues()
 
 template <typename OutputType>
 void
-MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsigned int nqp)
+MooseVariableData<OutputType>::fetchADDofValues()
 {
+  const auto num_dofs = _dof_indices.size();
+
   const bool do_derivatives = Moose::doDerivatives(_subproblem, _sys);
 
   _ad_dof_values.resize(num_dofs);
@@ -789,78 +716,16 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
     for (const auto i : make_range(num_dofs))
       Moose::derivInsert(_ad_dof_values[i].derivatives(), _dof_indices[i], 1.);
 
-  if (_need_ad_u)
+  const bool is_transient = _subproblem.isTransient();
+  if (is_transient && _need_ad_u_dot)
   {
-    _ad_u.resize(nqp);
-    for (const auto qp : make_range(nqp))
-      _ad_u[qp] = _ad_zero;
+    _ad_dofs_dot.resize(num_dofs);
+    if (_need_ad_u_dotdot)
+      _ad_dofs_dotdot.resize(num_dofs);
 
-    for (const auto i : make_range(num_dofs))
-      for (const auto qp : make_range(nqp))
-        _ad_u[qp] += _ad_dof_values[i] * (*_current_phi)[i][qp];
-  }
-
-  if (_need_ad_grad_u)
-  {
-    _ad_grad_u.resize(nqp);
-    for (const auto qp : make_range(nqp))
-      _ad_grad_u[qp] = _ad_zero;
-
-    // The latter check here is for handling the fact that we have not yet implemented
-    // calculation of ad_grad_phi for neighbor and neighbor-face, so if we are in that
-    // situation we need to default to using the non-ad grad_phi
-    if (_displaced && _current_ad_grad_phi)
-      for (const auto i : make_range(num_dofs))
-        for (const auto qp : make_range(nqp))
-          _ad_grad_u[qp] += _ad_dof_values[i] * (*_current_ad_grad_phi)[i][qp];
-    else
-      for (const auto i : make_range(num_dofs))
-        for (const auto qp : make_range(nqp))
-          _ad_grad_u[qp] += _ad_dof_values[i] * (*_current_grad_phi)[i][qp];
-  }
-
-  if (_need_ad_second_u)
-  {
-    _ad_second_u.resize(nqp);
-    for (const auto qp : make_range(nqp))
-      _ad_second_u[qp] = _ad_zero;
-
-    for (const auto i : make_range(num_dofs))
-      for (const auto qp : make_range(nqp))
-        // Note that this will not carry any derivatives with respect to displacements because
-        // those calculations have not yet been implemented in Assembly
-        _ad_second_u[qp] += _ad_dof_values[i] * (*_current_second_phi)[i][qp];
-  }
-
-  if (_need_ad_curl_u)
-  {
-    _ad_curl_u.resize(nqp);
-    for (const auto qp : make_range(nqp))
-      _ad_curl_u[qp] = _ad_zero;
-
-    for (const auto i : make_range(num_dofs))
-      for (const auto qp : make_range(nqp))
-      {
-        mooseAssert(_current_curl_phi,
-                    "We're requiring a curl calculation but have not set a curl shape function!");
-
-        // Note that the current version of _ad_curl_u is not yet implemented for mesh
-        // displacement
-        _ad_curl_u[qp] += _ad_dof_values[i] * (*_current_curl_phi)[i][qp];
-      }
-  }
-
-  bool is_transient = _subproblem.isTransient();
-  if (is_transient)
-  {
-    if (_need_ad_u_dot)
+    if (_time_integrator)
     {
-      _ad_dofs_dot.resize(num_dofs);
-      if (_need_ad_u_dotdot)
-        _ad_dofs_dotdot.resize(num_dofs);
-      _ad_u_dot.resize(nqp);
-
-      if (_time_integrator && _time_integrator->dt())
+      if (_time_integrator->dt())
       {
         for (const auto i : make_range(num_dofs))
           _ad_dofs_dot[i] = _ad_dof_values[i];
@@ -869,19 +734,98 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
                                                      _dof_indices[i],
                                                      _need_ad_u_dotdot ? _ad_dofs_dotdot[i]
                                                                        : _ad_real_dummy);
-
-        for (const auto qp : make_range(nqp))
-          _ad_u_dot[qp] = _ad_zero;
-        for (const auto i : make_range(num_dofs))
-          for (const auto qp : make_range(nqp))
-            _ad_u_dot[qp] += (*_current_phi)[i][qp] * _ad_dofs_dot[i];
       }
+      else
+        // Executing something with a time derivative at initial should not put a NaN
+        for (const auto i : make_range(num_dofs))
+        {
+          _ad_dofs_dot[i] = 0.;
+          if (_need_ad_u_dotdot)
+            _ad_dofs_dotdot[i] = 0;
+        }
+    }
+    // We are too early in the setup to have a time integrator, so we are not really using the
+    // AD-derivatives. We set the AD value of the derivatives to the nonAD value
+    else
+      for (const auto i : make_range(num_dofs))
+      {
+        _ad_dofs_dot[i] = _dof_values_dot[i];
+        if (_need_ad_u_dotdot)
+          _ad_dofs_dotdot[i] = _dof_values_dotdot[i];
+      }
+  }
+}
+
+template <>
+void
+MooseVariableData<RealEigenVector>::fetchADDofValues()
+{
+  const auto num_dofs = _dof_indices.size();
+
+  const bool do_derivatives = Moose::doDerivatives(_subproblem, _sys);
+  const auto n_test = num_dofs / _count;
+  mooseAssert(num_dofs == _count * n_test,
+              "Our assertions around number of dofs, test functions, and count are incorrect");
+
+  _ad_dof_values.resize(n_test);
+  // Test is outer, count is inner
+  for (const auto i : make_range(n_test))
+  {
+    _ad_dof_values[i].resize(_count);
+    for (const auto j : make_range(_count))
+    {
+      auto & dual_number = _ad_dof_values[i](j);
+      const auto global_dof_index = _dof_indices[j * n_test + i];
+      dual_number = (*_sys.currentSolution())(global_dof_index);
+      // NOTE!  You have to do this AFTER setting the value!
+      if (do_derivatives)
+        Moose::derivInsert(dual_number.derivatives(), global_dof_index, 1.);
+    }
+  }
+}
+
+template <typename OutputType>
+template <bool constant_monomial>
+void
+MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsigned int nqp)
+{
+  fetchADDofValues();
+  const auto n_test = num_dofs / _count;
+
+  // Values
+  if (_need_ad_u)
+    fill<constant_monomial>(_ad_u, *_current_phi, _ad_dof_values, nqp, n_test);
+  // Grad
+  if (_need_ad_grad_u)
+  {
+    // The latter check here is for handling the fact that we have not yet implemented
+    // calculation of ad_grad_phi for neighbor and neighbor-face, so if we are in that
+    // situation we need to default to using the non-ad grad_phi
+    if (_displaced && _current_ad_grad_phi)
+      fill<constant_monomial>(_ad_grad_u, *_current_ad_grad_phi, _ad_dof_values, nqp, n_test);
+    else
+      fill<constant_monomial>(_ad_grad_u, *_current_grad_phi, _ad_dof_values, nqp, n_test);
+  }
+  // Second
+  if constexpr (std::is_same_v<OutputType, Real>)
+    if (_need_ad_second_u)
+      fill<constant_monomial>(_ad_second_u, *_current_second_phi, _ad_dof_values, nqp, n_test);
+  // Curl
+  if (_need_ad_curl_u)
+    fill<constant_monomial>(_ad_curl_u, *_current_curl_phi, _ad_dof_values, nqp, n_test);
+
+  const bool is_transient = _subproblem.isTransient();
+  if (is_transient)
+  {
+    if (_need_ad_u_dot)
+    {
+      if (_time_integrator)
+        fill<constant_monomial>(_ad_u_dot, *_current_phi, _ad_dofs_dot, nqp, n_test);
       // We are too early in the setup to have a time integrator, so we are not really using the
       // AD-derivatives. We set the AD value of the derivatives to the nonAD value
-      else if (!_time_integrator)
+      else
       {
-        for (const auto i : make_range(num_dofs))
-          _ad_dofs_dot[i] = _dof_values_dot[i];
+        _ad_u_dot.resize(nqp);
         for (const auto qp : make_range(nqp))
           _ad_u_dot[qp] = _u_dot[qp];
       }
@@ -889,43 +833,34 @@ MooseVariableData<OutputType>::computeAD(const unsigned int num_dofs, const unsi
 
     if (_need_ad_u_dotdot)
     {
-      _ad_u_dotdot.resize(nqp);
-      for (const auto qp : make_range(nqp))
-        _ad_u_dotdot[qp] = _ad_zero;
-
-      if (_time_integrator && _time_integrator->dt())
-        for (const auto i : make_range(num_dofs))
-          for (const auto qp : make_range(nqp))
-            _ad_u_dotdot[qp] += (*_current_phi)[i][qp] * _ad_dofs_dotdot[i];
-      else if (!_time_integrator)
+      if (_time_integrator)
+        fill<constant_monomial>(_ad_u_dotdot, *_current_phi, _ad_dofs_dotdot, nqp, n_test);
+      else
+      {
+        _ad_u_dotdot.resize(nqp);
         for (const auto qp : make_range(nqp))
           _ad_u_dotdot[qp] = _u_dotdot[qp];
+      }
     }
 
     if (_need_ad_grad_u_dot)
     {
-      _ad_grad_u_dot.resize(nqp);
-
-      if (_time_integrator && _time_integrator->dt())
+      if (_time_integrator)
       {
-        for (const auto qp : make_range(nqp))
-          _ad_grad_u_dot[qp] = _ad_zero;
-
         // The latter check here is for handling the fact that we have not yet implemented
         // calculation of ad_grad_phi for neighbor and neighbor-face, so if we are in that
         // situation we need to default to using the non-ad grad_phi
         if (_displaced && _current_ad_grad_phi)
-          for (const auto i : make_range(num_dofs))
-            for (const auto qp : make_range(nqp))
-              _ad_grad_u_dot[qp] += _ad_dofs_dot[i] * (*_current_ad_grad_phi)[i][qp];
+          fill<constant_monomial>(_ad_grad_u_dot, *_current_ad_grad_phi, _ad_dofs_dot, nqp, n_test);
         else
-          for (const auto i : make_range(num_dofs))
-            for (const auto qp : make_range(nqp))
-              _ad_grad_u_dot[qp] += _ad_dofs_dot[i] * (*_current_grad_phi)[i][qp];
+          fill<constant_monomial>(_ad_grad_u_dot, *_current_grad_phi, _ad_dofs_dot, nqp, n_test);
       }
-      else if (!_time_integrator)
+      else
+      {
+        _ad_grad_u_dot.resize(nqp);
         for (const auto qp : make_range(nqp))
           _ad_grad_u_dot[qp] = _grad_u_dot[qp];
+      }
     }
   }
 }
@@ -1408,7 +1343,10 @@ MooseVariableData<OutputType>::computeNodalValues()
     assignNodalValue();
 
     if (_need_ad)
-      fetchADNodalValues();
+    {
+      fetchADDofValues();
+      assignADNodalValue();
+    }
   }
   else
     zeroSizeDofValues();
@@ -1416,61 +1354,21 @@ MooseVariableData<OutputType>::computeNodalValues()
 
 template <typename OutputType>
 void
-MooseVariableData<OutputType>::fetchADNodalValues()
+MooseVariableData<OutputType>::assignADNodalValue()
 {
-  auto n = _dof_indices.size();
-  libmesh_assert(n);
-  _ad_dof_values.resize(n);
-
-  if (_need_ad_u_dot)
-    _ad_dofs_dot.resize(n);
-  if (_need_ad_u_dotdot)
-    _ad_dofs_dotdot.resize(n);
-
-  const bool do_derivatives = Moose::doDerivatives(_subproblem, _sys);
-
-  for (decltype(n) i = 0; i < n; ++i)
-  {
-    _ad_dof_values[i] = _vector_tags_dof_u[_solution_tag][i];
-    if (do_derivatives)
-      Moose::derivInsert(_ad_dof_values[i].derivatives(), _dof_indices[i], 1.);
-    assignADNodalValue(_ad_dof_values[i], i);
-
-    if (_need_ad_u_dot)
-    {
-      if (_time_integrator && _time_integrator->dt())
-      {
-        _ad_dofs_dot[i] = _ad_dof_values[i];
-        _time_integrator->computeADTimeDerivatives(_ad_dofs_dot[i],
-                                                   _dof_indices[i],
-                                                   _need_ad_u_dotdot ? _ad_dofs_dotdot[i]
-                                                                     : _ad_real_dummy);
-      }
-      // Executing something with a time derivative at initial should not put a NaN
-      else if (_time_integrator && !_time_integrator->dt())
-        _ad_dofs_dot[i] = 0.;
-      else
-        mooseError("AD nodal time derivatives not implemented for variables without a time "
-                   "integrator (auxiliary variables)");
-    }
-  }
-}
-
-template <typename OutputType>
-void
-MooseVariableData<OutputType>::assignADNodalValue(const ADDofValue & value,
-                                                  const unsigned int libmesh_dbg_var(comp))
-{
-  mooseAssert(comp == 0, "We should only ever call this with a 0 component");
-  _ad_nodal_value = value;
+  mooseAssert(_ad_dof_values.size(), "The AD dof values container must have size greater than 0");
+  _ad_nodal_value = _ad_dof_values[0];
 }
 
 template <>
 void
-MooseVariableData<RealVectorValue>::assignADNodalValue(const ADDofValue & value,
-                                                       const unsigned int component)
+MooseVariableData<RealVectorValue>::assignADNodalValue()
 {
-  _ad_nodal_value(component) = value;
+  const auto num_dofs = _dof_indices.size();
+  mooseAssert(_ad_dof_values.size() == num_dofs,
+              "Our dof values container size should match the dof indices container size");
+  for (const auto i : make_range(num_dofs))
+    _ad_nodal_value(i) = _ad_dof_values[i];
 }
 
 template <typename OutputType>

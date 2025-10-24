@@ -125,6 +125,7 @@ public:
   /**
    * compute AD things
    */
+  template <bool constant_monomial>
   void computeAD(const unsigned int num_dofs, const unsigned int nqp);
 
   /**
@@ -464,12 +465,16 @@ public:
 
 private:
   /**
-   * Helper methods for assigning nodal values from their corresponding solution values (dof
-   * values as they're referred to here in this class). These methods are only truly meaningful
+   * Helper method for assigning the _ad_dof_* arrays
+   */
+  void fetchADDofValues();
+
+  /**
+   * Helper method for assigning nodal values from their corresponding solution values (dof
+   * values as they're referred to here in this class). This method is only truly meaningful
    * for nodal basis families
    */
-  void assignADNodalValue(const ADDofValue & value, const unsigned int component);
-  void fetchADNodalValues();
+  void assignADNodalValue();
 
   /**
    * Internal method for computeValues() and computeConstantMonomialValues()
