@@ -1196,6 +1196,7 @@ FEProblemBase::initialSetup()
     _markers.sort(tid);
     _markers.initialSetup(tid);
   }
+  _control_warehouse.initialSetup(0);
 
 #ifdef LIBMESH_ENABLE_AMR
 
