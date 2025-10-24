@@ -40,12 +40,9 @@ MFEMDomainSubMesh::buildSubMesh()
   _submesh->bdr_attribute_sets.attr_sets = getMesh().bdr_attribute_sets.attr_sets;
 
   if (isParamSetByUser("submesh_boundary"))
-  {
-    const BoundaryName & submesh_boundary = getParam<BoundaryName>("submesh_boundary");
-    _submesh->bdr_attribute_sets.CreateAttributeSet(submesh_boundary);
-    _submesh->bdr_attribute_sets.AddToAttributeSet(submesh_boundary,
-                                                   getMesh().bdr_attributes.Max() + 1);
-  }
+    _submesh->bdr_attribute_sets.SetAttributeSet(
+        getParam<BoundaryName>("submesh_boundary"),
+        mfem::Array<int>({getMesh().bdr_attributes.Max() + 1}));
 }
 
 #endif

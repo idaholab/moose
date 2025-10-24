@@ -22,6 +22,7 @@ MFEMBoundarySubMesh::validParams()
 
   params.addClassDescription("Class to construct an MFEMSubMesh formed from the subspace of the "
                              "parent mesh restricted to the set of user-specified boundaries.");
+  params.addParam<BoundaryName>("submesh_boundary", "Name to assign submesh boundary.");
   return params;
 }
 
@@ -36,8 +37,12 @@ MFEMBoundarySubMesh::buildSubMesh()
 {
   _submesh = std::make_shared<mfem::ParSubMesh>(
       mfem::ParSubMesh::CreateFromBoundary(getMesh(), getBoundaryAttributes()));
-  _submesh->attribute_sets.attr_sets = getMesh().attribute_sets.attr_sets;
-  _submesh->bdr_attribute_sets.attr_sets = getMesh().bdr_attribute_sets.attr_sets;
+  _submesh->attribute_sets.attr_sets = getMesh().bdr_attribute_sets.attr_sets;
+
+  if (isParamSetByUser("submesh_boundary"))
+    _submesh->bdr_attribute_sets.SetAttributeSet(
+        getParam<BoundaryName>("submesh_boundary"),
+        mfem::Array<int>({getMesh().bdr_attributes.Max() + 1}));
 }
 
 #endif

@@ -68,8 +68,8 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
 {
   int mpi_comm_rank = 0;
   int mpi_comm_size = 1;
-  MPI_Comm_rank(getMFEMProblem().mesh().getMFEMParMesh().GetComm(), &mpi_comm_rank);
-  MPI_Comm_size(getMFEMProblem().mesh().getMFEMParMesh().GetComm(), &mpi_comm_size);
+  MPI_Comm_rank(getMFEMProblem().getComm(), &mpi_comm_rank);
+  MPI_Comm_size(getMFEMProblem().getComm(), &mpi_comm_size);
 
   // First determine face normal based on the first boundary element found on the cut
   // to use when determining orientation relative to the cut
@@ -81,17 +81,12 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
     _cut_normal = findFaceNormal(parent_mesh, parent_mesh.GetBdrElementFaceIndex(reference_face));
     rank_with_submesh = mpi_comm_rank;
   }
-  MPI_Allreduce(MPI_IN_PLACE,
-                &rank_with_submesh,
-                1,
-                MPI_INT,
-                MPI_MAX,
-                getMFEMProblem().mesh().getMFEMParMesh().GetComm());
+  MPI_Allreduce(MPI_IN_PLACE, &rank_with_submesh, 1, MPI_INT, MPI_MAX, getMFEMProblem().getComm());
   MPI_Bcast(_cut_normal.GetData(),
             _cut_normal.Size(),
             MFEM_MPI_REAL_T,
             rank_with_submesh,
-            getMFEMProblem().mesh().getMFEMParMesh().GetComm());
+            getMFEMProblem().getComm());
   // Iterate over all vertices on cut, find elements with those vertices,
   // and declare them transition elements if they are on the +ve side of the cut
   mfem::Array<int> transition_els;
@@ -118,13 +113,8 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
   // share cut verts coords or global ids across all procs
   int n_cut_vertices = global_cut_vert_ids.size();
   std::vector<int> cut_vert_sizes(mpi_comm_size, 0);
-  MPI_Allgather(&n_cut_vertices,
-                1,
-                MPI_INT,
-                &cut_vert_sizes[0],
-                1,
-                MPI_INT,
-                getMFEMProblem().mesh().getMFEMParMesh().GetComm());
+  MPI_Allgather(
+      &n_cut_vertices, 1, MPI_INT, &cut_vert_sizes[0], 1, MPI_INT, getMFEMProblem().getComm());
   // Make an offset array and total the sizes.
   std::vector<int> n_vert_offset(mpi_comm_size, 0);
   for (int i = 1; i < mpi_comm_size; i++)
@@ -142,7 +132,7 @@ MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
                  &cut_vert_sizes[0],
                  &n_vert_offset[0],
                  HYPRE_MPI_BIG_INT,
-                 getMFEMProblem().mesh().getMFEMParMesh().GetComm());
+                 getMFEMProblem().getComm());
 
   // Detect shared vertices and add corresponding elements
   for (int g = 1, sv = 0; g < parent_mesh.GetNGroups(); g++)
@@ -225,49 +215,33 @@ MFEMCutTransitionSubMesh::setAttributes(mfem::ParMesh & parent_mesh,
   // Generate a set of local new attributes for transition region elements
   const int old_max_attr = parent_mesh.attributes.Max();
   mfem::Array<int> new_attrs(old_max_attr);
-  for (int i = 0; i < new_attrs.Size(); ++i)
-    new_attrs[i] = i + 1;
-  for (int i = 0; i < transition_els.Size(); ++i)
+  new_attrs = -1;
+  for (auto const & transition_el : transition_els)
   {
-    const auto & transition_el = transition_els[i];
     const int old_attr = parent_mesh.GetAttribute(transition_el);
-    new_attrs[old_attr - 1] = old_max_attr + old_attr % old_max_attr + 1;
+    new_attrs[old_attr - 1] = old_max_attr + old_attr;
+    // Set the new attribute IDs for transition region elements
+    parent_mesh.SetAttribute(transition_el, new_attrs[old_attr - 1]);
   }
 
   // Distribute local attribute IDs to other MPI ranks to create set of new
   // global attribute IDs for the transition region.
-  mfem::Array<int> global_new_attrs(old_max_attr);
-  global_new_attrs = -1;
-  MPI_Allreduce(new_attrs,
-                global_new_attrs,
-                old_max_attr,
-                MPI_INT,
-                MPI_MAX,
-                getMFEMProblem().mesh().getMFEMParMesh().GetComm());
-
-  // Set the new attribute IDs for transition region elements
-  for (int i = 0; i < transition_els.Size(); ++i)
-  {
-    const auto & transition_el = transition_els[i];
-    const int old_attr = parent_mesh.GetAttribute(transition_el);
-    if (old_attr < old_max_attr + 1)
-      parent_mesh.SetAttribute(transition_el, global_new_attrs[old_attr - 1]);
-  }
+  MPI_Allreduce(
+      MPI_IN_PLACE, new_attrs, old_max_attr, MPI_INT, MPI_MAX, getMFEMProblem().getComm());
 
   mfem::AttributeSets & attr_sets = parent_mesh.attribute_sets;
   mfem::AttributeSets & bdr_attr_sets = parent_mesh.bdr_attribute_sets;
-  // Create attribute set labelling the newly created transition region
-  // on one side of the cut
+  // Create attribute set labelling the newly created transition region on one side of the cut
   attr_sets.CreateAttributeSet(_transition_subdomain);
   // Create attribute set labelling the entire closed geometry
   attr_sets.SetAttributeSet(_closed_subdomain, getSubdomainAttributes());
   // Add the new domain attributes to new attribute sets
   const std::set<std::string> attr_set_names = attr_sets.GetAttributeSetNames();
-  for (int old_attr = 1; old_attr < global_new_attrs.Size() + 1; ++old_attr)
+  for (int old_attr = 1; old_attr <= old_max_attr; ++old_attr)
   {
-    int new_attr = global_new_attrs[old_attr - 1];
+    int new_attr = new_attrs[old_attr - 1];
     // Add attributes only if they're transition region attributes
-    if (new_attr > old_max_attr)
+    if (new_attr != -1)
     {
       attr_sets.AddToAttributeSet(_transition_subdomain, new_attr);
       for (auto const & attr_set_name : attr_set_names)
@@ -282,9 +256,8 @@ MFEMCutTransitionSubMesh::setAttributes(mfem::ParMesh & parent_mesh,
 
   // Create boundary attribute set labelling the exterior of the newly created
   // transition region, excluding the cut
-  bdr_attr_sets.CreateAttributeSet(_transition_subdomain_boundary);
-  bdr_attr_sets.AddToAttributeSet(_transition_subdomain_boundary,
-                                  parent_mesh.bdr_attributes.Max() + 1);
+  bdr_attr_sets.SetAttributeSet(_transition_subdomain_boundary,
+                                mfem::Array<int>({parent_mesh.bdr_attributes.Max() + 1}));
 
   parent_mesh.SetAttributes();
 }
