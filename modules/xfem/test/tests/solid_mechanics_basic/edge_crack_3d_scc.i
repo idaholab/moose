@@ -1,27 +1,34 @@
-[Reporters]
-  [fatigue]
-    type = ParisLaw
-    growth_increment_name = "growth_increment"
-    cycles_to_max_growth_increment_name = "fatigue"
-    crackMeshCut3DUserObject_name = cut_mesh
-    max_growth_increment = 0.1
-    paris_law_c = 1e-13
-    paris_law_m = 2.5
+
+# This takes 11 constant time steps and produces a crack size of the
+# same length as edge_crack_3d_scc_crit after 1 step.
+[Postprocessors]
+  [dt]
+    type = TimestepSize
   []
 []
-
+[Reporters]
+  [scc_crack_growth]
+    type = ParsedVectorReporter
+    name = crack_growth
+    vector_reporter_names = 'II_KI_1/II_KI_1'
+    vector_reporter_symbols = 'ki'
+    scalar_reporter_names = 'dt/value'
+    scalar_reporter_symbols = 'dt'
+    constant_names = 'constant1 constant2'
+    constant_expressions = '10 20'
+    expression = 'if(ki<10,0.0075*dt,if(ki>20,0.015*dt,(0.00075*ki)*dt ))'
+    execute_on = 'XFEM_MARK TIMESTEP_END'
+  []
+[]
 [UserObjects]
   [cut_mesh]
     type = CrackMeshCut3DUserObject
     mesh_generator_name = mesh_cutter
-    growth_dir_method = FUNCTION
+    growth_dir_method = MAX_HOOP_STRESS
     size_control = 1
     n_step_growth = 1
     growth_increment_method = REPORTER
-    growth_direction_x = growth_func_x
-    growth_direction_y = growth_func_y
-    growth_direction_z = growth_func_z
-    growth_reporter = "fatigue/growth_increment"
+    growth_reporter = "scc_crack_growth/crack_growth"
     crack_front_nodes = '7 6 5 4'
   []
 []
@@ -40,22 +47,6 @@
   incremental = true
 []
 
-# function for CrackMeshCut3DUserObject crack
-[Functions]
-  [growth_func_x]
-    type = ParsedFunction
-    expression = 1
-  []
-  [growth_func_y]
-    type = ParsedFunction
-    expression = 0
-  []
-  [growth_func_z]
-    type = ParsedFunction
-    expression = 0
-  []
-[]
-
 #functino for BC on top surface
 [Functions]
   [top_trac_y]
@@ -69,6 +60,9 @@
 []
 
 [Outputs]
-  file_base = edge_crack_3d_fatigue_out
-  json = true
+  file_base = edge_crack_3d_scc_out
+  execute_on = 'FINAL'
+  [csv_out]
+    type = CSV
+  []
 []
