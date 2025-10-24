@@ -234,8 +234,14 @@ greenGaussGradient(const ElemArg & elem_arg,
           grad(i) = x(i);
       }
     }
-    catch (libMesh::LogicError & e)
+    catch (std::exception & e)
     {
+      // Don't ignore any *real* errors; we only handle matrix
+      // singularity (LogicError in older libMesh, DegenerateMap in
+      // newer) here
+      if (!strstr(e.what(), "singular"))
+        throw;
+
       // Retry without two-term
       if (!two_term_boundary_expansion)
         mooseError(
@@ -501,8 +507,14 @@ greenGaussGradient(const ElemArg & elem_arg,
           "We have not yet implemented the correct translation from gradient to divergence for "
           "spherical coordinates yet.");
     }
-    catch (libMesh::LogicError & e)
+    catch (std::exception & e)
     {
+      // Don't ignore any *real* errors; we only handle matrix
+      // singularity (LogicError in older libMesh, DegenerateMap in
+      // newer) here
+      if (!strstr(e.what(), "singular"))
+        throw;
+
       // Log warning and default to simple green Gauss
       mooseWarning(
           "Singular matrix encountered in least squares gradient computation. Falling back "
