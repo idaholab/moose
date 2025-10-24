@@ -1,7 +1,7 @@
 {
     "reporters": {
         "scc_crack_growth": {
-            "type": "StressCorrosionCracking",
+            "type": "StressCorrosionCrackingExponential",
             "values": {
                 "crack_growth": {
                     "type": "std::vector<double>"

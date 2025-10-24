@@ -7,20 +7,20 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "StressCorrosionCracking.h"
+#include "StressCorrosionCrackingExponential.h"
 #include "VectorPostprocessorInterface.h"
 
-registerMooseObject("XFEMApp", StressCorrosionCracking);
+registerMooseObject("XFEMApp", StressCorrosionCrackingExponential);
 
 InputParameters
-StressCorrosionCracking::validParams()
+StressCorrosionCrackingExponential::validParams()
 {
   InputParameters params = CrackGrowthReporterBase::validParams();
   params.addClassDescription(
       "This reporter computes the crack growth increment at all active crack front points "
-      "in the CrackMeshCut3DUserObject for stress corrosion cracking. Crack growth "
-      "rates computed by this reporter are stored in the same order as in the fracture "
-      "integral VectorPostprocessors.");
+      "in the CrackMeshCut3DUserObject for stress corrosion cracking fit to an exponential "
+      "function. Crack growth rates computed by this reporter are stored in the same order as in "
+      "the fracture integral VectorPostprocessors.");
 
   params.addRequiredRangeCheckedParam<Real>("k_low",
                                             "k_low>0",
@@ -47,14 +47,15 @@ StressCorrosionCracking::validParams()
   return params;
 }
 
-StressCorrosionCracking::StressCorrosionCracking(const InputParameters & parameters)
+StressCorrosionCrackingExponential::StressCorrosionCrackingExponential(
+    const InputParameters & parameters)
   : CrackGrowthReporterBase(parameters),
     _k_low(getParam<Real>("k_low")),
     _k_high(getParam<Real>("k_high")),
     _growth_rate_mid_multiplier(getParam<Real>("growth_rate_mid_multiplier")),
     _growth_rate_mid_exp_factor(getParam<Real>("growth_rate_mid_exp_factor")),
 
-    _corrosion_time_step(declareValueByName<Real>(
+    _time_increment(declareValueByName<Real>(
         getParam<ReporterValueName>("time_to_max_growth_increment_name"), REPORTER_MODE_ROOT)),
     _growth_increment(declareValueByName<std::vector<Real>>(
         getParam<ReporterValueName>("growth_increment_name"), REPORTER_MODE_ROOT))
@@ -64,7 +65,7 @@ StressCorrosionCracking::StressCorrosionCracking(const InputParameters & paramet
 }
 
 void
-StressCorrosionCracking::computeGrowth(std::vector<int> & index)
+StressCorrosionCrackingExponential::computeGrowth(std::vector<int> & index)
 {
   _growth_increment.resize(_ki_x.size(), 0.0);
   std::vector<Real> growth_rate(_ki_x.size(), 0.0);
@@ -87,11 +88,11 @@ StressCorrosionCracking::computeGrowth(std::vector<int> & index)
   if (max_growth_rate <= 0)
     mooseError("Negative max growth rate encountered on crack front. ");
 
-  _corrosion_time_step = _max_growth_increment / max_growth_rate;
+  _time_increment = _max_growth_increment / max_growth_rate;
 
   for (std::size_t i = 0; i < _ki_vpp.size(); ++i)
   {
     if (index[i] != -1)
-      _growth_increment[i] = growth_rate[i] * _corrosion_time_step;
+      _growth_increment[i] = growth_rate[i] * _time_increment;
   }
 }

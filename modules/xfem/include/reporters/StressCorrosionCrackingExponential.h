@@ -12,15 +12,15 @@
 #include "CrackGrowthReporterBase.h"
 
 /**
- *  StressCorrosionCracking is a reporter that computs stress corrosion cracking growth size and
- * number of cycles
+ *  StressCorrosionCrackingExponential is a reporter that computs stress corrosion cracking growth
+ * size and number of cycles
  */
 class CrackMeshCut3DUserObject;
-class StressCorrosionCracking : public CrackGrowthReporterBase
+class StressCorrosionCrackingExponential : public CrackGrowthReporterBase
 {
 public:
   static InputParameters validParams();
-  StressCorrosionCracking(const InputParameters & parameters);
+  StressCorrosionCrackingExponential(const InputParameters & parameters);
 
 protected:
   virtual void computeGrowth(std::vector<int> & index) override;
@@ -33,7 +33,7 @@ protected:
   ///@}
 
   /// timestep size to reach max_growth_increment postprocessor
-  Real & _corrosion_time_step;
+  Real & _time_increment;
 
   /// growth increment reporters
   std::vector<Real> & _growth_increment;

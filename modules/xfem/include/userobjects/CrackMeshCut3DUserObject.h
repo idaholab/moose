@@ -145,9 +145,6 @@ protected:
   /// Growth direction for active boundaries
   std::vector<std::vector<Point>> _active_direction;
 
-  /// Growth size for the active boundary in a subcritical simulation
-  std::vector<Real> _growth_size;
-
   /// New boundary after growth
   std::vector<std::vector<dof_id_type>> _front;
 

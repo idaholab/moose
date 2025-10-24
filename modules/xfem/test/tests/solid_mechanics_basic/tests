@@ -59,7 +59,7 @@
     design = 'RectangleCutUserObject.md'
   []
   [mesh_cutter_3d]
-    design = 'CrackMeshCut3DUserObject.md ParsedVectorReporter.md StressCorrosionCracking.md'
+    design = 'CrackMeshCut3DUserObject.md ParsedVectorReporter.md StressCorrosionCrackingExponential.md'
     requirement = 'The XFEM module shall represent a propagating crack in a 3D mechanics model with XFEM, '
                   'where the crack is defined using a topological surface cutting mesh by '
                   'CrackMeshCut3DUserObject and allowed to propagate with'

@@ -3,7 +3,7 @@
 
 [Reporters]
   [scc_crack_growth]
-    type = StressCorrosionCracking
+    type = StressCorrosionCrackingExponential
     growth_increment_name = "crack_growth"
     time_to_max_growth_increment_name = "max_growth_timestep"
     crackMeshCut3DUserObject_name = cut_mesh

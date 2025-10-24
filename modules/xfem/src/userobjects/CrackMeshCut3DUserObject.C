@@ -840,21 +840,21 @@ CrackMeshCut3DUserObject::growFront()
       Point dir = _active_direction[i][j];
 
       Point x;
-      Real growth_size = 0;
+      Real growth_increment = 0;
       switch (_growth_increment_method)
       {
         case GrowthRateEnum::FUNCTION:
         {
-          growth_size = _func_v->value(0, Point(0, 0, 0));
+          growth_increment = _func_v->value(0, Point(0, 0, 0));
           break;
         }
         case GrowthRateEnum::REPORTER:
         {
           int ind = index[j];
           if (index[j] == -1)
-            growth_size = 0;
+            growth_increment = 0;
           else
-            growth_size = _growth_inc_reporter->at(ind);
+            growth_increment = _growth_inc_reporter->at(ind);
           break;
         }
         default:
@@ -864,7 +864,7 @@ CrackMeshCut3DUserObject::growFront()
         }
       }
       for (unsigned int k = 0; k < 3; ++k)
-        x(k) = this_point(k) + dir(k) * growth_size;
+        x(k) = this_point(k) + dir(k) * growth_increment;
 
       this_node = Node::build(x, _cutter_mesh->n_nodes()).release();
       _cutter_mesh->add_node(this_node);
