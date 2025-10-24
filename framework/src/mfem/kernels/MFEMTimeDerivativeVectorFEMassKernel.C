@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMTimeDerivativeVectorFEMassKernel.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMTimeDerivativeVectorFEMassKernel);
 

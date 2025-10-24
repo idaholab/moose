@@ -625,6 +625,7 @@ TimeDependentEquationSystem::BuildMixedBilinearForms()
       const auto & trial_var_name = _trial_var_names.at(j);
       auto td_mblf = std::make_shared<mfem::ParMixedBilinearForm>(_test_pfespaces.at(j),
                                                                   _test_pfespaces.at(i));
+      td_mblf->SetAssemblyLevel(_assembly_level);
       // Register MixedBilinearForm if kernels exist for it, and assemble
       // kernels
       if (_td_kernels_map.Has(test_var_name) &&
@@ -666,7 +667,6 @@ TimeDependentEquationSystem::BuildMixedBilinearForms()
       if (td_mblf->GetDBFI()->Size() || td_mblf->GetBBFI()->Size())
       {
         // Assemble mixed bilinear form
-        td_mblf->SetAssemblyLevel(_assembly_level);
         td_mblf->Assemble();
         // Register mixed bilinear forms associated with a single trial variable
         // for the current test variable
