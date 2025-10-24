@@ -34,7 +34,8 @@ public:
   virtual void syncSolutions(Direction direction) override;
   virtual bool solverSystemConverged(const unsigned int) override;
   virtual void initialSetup() override;
-
+ /// Computes mass flow per channel for block iblock
+  virtual void computeMdot(int iblock);
   /// Function that computes the added heat coming from the fuel pins, for channel i_ch and cell iz
   virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz) = 0;
   /// Function that computes the heat added by the duct, for channel i_ch and cell iz
@@ -53,8 +54,7 @@ protected:
   void computeWijFromSolve(int iblock);
   /// Computes net diversion crossflow per channel for block iblock
   void computeSumWij(int iblock);
-  /// Computes mass flow per channel for block iblock
-  void computeMdot(int iblock);
+ 
   /// Computes turbulent crossflow per gap for block iblock
   void computeWijPrime(int iblock);
   /// Computes turbulent mixing coefficient
