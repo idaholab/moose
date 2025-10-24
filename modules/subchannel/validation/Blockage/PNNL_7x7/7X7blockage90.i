@@ -77,7 +77,6 @@ P_out = 101325 # Pa
   implicit = true
   segregated = false
   staggered_pressure = false
-  monolithic_thermal = false
   interpolation_scheme = central_difference
 []
 
