@@ -71,7 +71,6 @@ MultiAppGeneralFieldNearestLocationTransfer::validParams()
 MultiAppGeneralFieldNearestLocationTransfer::MultiAppGeneralFieldNearestLocationTransfer(
     const InputParameters & parameters)
   : MultiAppGeneralFieldTransfer(parameters),
-    SolutionInvalidInterface(this),
     _num_nearest_points(getParam<unsigned int>("num_nearest_points")),
     _group_subapps(getParam<bool>("group_subapps"))
 {

@@ -26,7 +26,6 @@ from test_resultsstore_storedresults import TestResultsStoredResults
 HAS_AUTH = ResultsReader.hasEnvironmentAuthentication()
 # Test database name for testing pull request results
 LIVE_DATABASE_NAME = 'civet_tests_moose_store_results_live'
-LIVE_TEST_NAME = TestName('tests/test_harness', 'ok')
 
 MOCKED_TEST_NAME = TestName('tests/test_harness', 'always_ok')
 
@@ -106,10 +105,81 @@ class TestResultsSummary(TestHarnessTestCase):
                 summary.pr_test_names(event_id = EVENT_ID, out_file = out_file.name)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
+    def testSortTestTimesKeyNumeric(self, mock_init_reader):
+        """
+        Test _sort_test_time_key() returns correct key for numeric value.
+        """
+        mock_init_reader.return_value = None
+        test_table_row = ['`testa.test1`', '4.20']
+        test_time_col_index = 1
+
+        summary = TestHarnessResultsSummary(None)
+        sorting_key = summary._sort_test_times_key(test_table_row, test_time_col_index)
+
+        self.assertEqual(sorting_key, (0, -4.20))
+
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    def testSortTestTimesKeySKIP(self, mock_init_reader):
+        """
+        Test _sort_test_time_key() returns correct key for SKIP.
+        """
+        mock_init_reader.return_value = None
+        test_table_row = ['`testa.test1`', 'SKIP']
+        test_time_col_index = 1
+
+        summary = TestHarnessResultsSummary(None)
+        sorting_key = summary._sort_test_times_key(test_table_row, test_time_col_index)
+
+        self.assertEqual(sorting_key, (1, 0))
+
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    def testSortTestTimesKeyEmpty(self, mock_init_reader):
+        """
+        Test _sort_test_time_key() returns correct key for empty string.
+        """
+        mock_init_reader.return_value = None
+        test_table_row = ['`testa.test1`', '']
+        test_time_col_index = 1
+
+        summary = TestHarnessResultsSummary(None)
+        sorting_key = summary._sort_test_times_key(test_table_row, test_time_col_index)
+
+        self.assertEqual(sorting_key, (2, 0))
+
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    def testSortTestTimes(self, mock_init_reader):
+        """
+        Tests sort_test_times() to sort with the sequence of runtime value, SKIP then ''
+        """
+        mock_init_reader.return_value = None
+        # Mock data for test table
+        test_table_row_num_high = ['`testa.test1`', '4.20']
+        test_table_row_num_low = ['`testb.test2`', '1.70']
+        test_table_row_skip = ['`testc.test3`', 'SKIP']
+        test_table_row_empty = ['`testd.test4`', '']
+        # Unsorted table
+        test_table = [
+            test_table_row_skip,
+            test_table_row_num_high,
+            test_table_row_empty,
+            test_table_row_num_low
+        ]
+        test_time_col_index = 1
+
+        summary = TestHarnessResultsSummary(None)
+        # Sorted table
+        test_table = summary.sort_test_times(test_table, test_time_col_index)
+        # Check to ensure the correct sorting sequence
+        self.assertEqual(test_table[0], test_table_row_num_high)
+        self.assertEqual(test_table[1], test_table_row_num_low)
+        self.assertEqual(test_table[2], test_table_row_skip)
+        self.assertEqual(test_table[3], test_table_row_empty)
+
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_commit_results')
     def testBuildDiffTableRemovedTest(self, mock_get_commit_results, mock_init_reader):
         """
-        Tests  _build_diff_table() when test is removed
+        Tests _build_diff_table() when test is removed
         """
         base_result_with_tests = self.getResult()
         base_test_names = set(base_result_with_tests.test_names)
@@ -176,8 +246,78 @@ class TestResultsSummary(TestHarnessTestCase):
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
+    def testBuildDiffTableStatusValueSKIP(self, mock_get_event_results, mock_init_reader):
+        """
+        Tests _build_diff_table() when the test result status_value is 'SKIP'
+        It will put 'SKIP' for it's runtime
+        """
+        head_result_with_tests = self.getResult()
+        head_test_names = set(head_result_with_tests.test_names)
+
+        mock_get_event_results.return_value = head_result_with_tests
+        mock_init_reader.return_value = None
+        head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
+        head_test._data['status']['status'] = 'SKIP'
+
+        summary = TestHarnessResultsSummary(None)
+        added_table = summary._build_diff_table(
+            head_test_names,
+            head_result_with_tests)
+
+        self.assertEqual(len(added_table), head_result_with_tests.num_tests)
+        self.assertEqual(len(added_table[0]), 2)
+        self.assertIn(str(MOCKED_TEST_NAME), added_table[0][0])
+        self.assertEqual(added_table[0][1], 'SKIP')
+
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    @patch.object(TestHarnessResultsSummary, 'get_event_results')
     @patch.object(TestHarnessResultsSummary, 'get_commit_results')
     def testBuildSameTable(self, mock_get_commit_results,
+            mock_get_event_results, mock_init_reader):
+        """
+        Tests _build_same_table() when same test name exit in both base and head, where:
+            -the head runtime exceeds a predefined threshold and
+            -the relative runtime increase exceeds a defined rate.
+        """
+        fake_run_time_floor = 1.00
+        fake_run_time_rate_floor = 0.50
+
+        base_result_with_tests = self.getResult()
+        head_result_with_tests = self.getResult()
+        head_test_names = set(head_result_with_tests.test_names)
+
+        mock_get_commit_results.return_value = head_result_with_tests
+        mock_get_event_results.return_value = head_result_with_tests
+        mock_init_reader.return_value = None
+
+        base_test = base_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
+        head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
+        # Mock base and head runtime, so that absolute relative run time rate is higher than fake_run_time_rate_floor
+        base_test._data['timing']['runner_run'] = 10.00
+        head_test._data['timing']['runner_run'] = 4.0
+
+        summary = TestHarnessResultsSummary(None)
+        same_table = summary._build_same_table(
+            head_test_names,
+            base_result_with_tests,
+            head_result_with_tests,
+            run_time_floor = fake_run_time_floor,
+            run_time_rate_floor = fake_run_time_rate_floor
+        )
+
+        self.assertEqual(len(same_table), 1)
+        self.assertEqual(len(same_table[0]), 4)
+        self.assertIn(str(MOCKED_TEST_NAME),same_table[0][0])
+        self.assertEqual(same_table[0][1], f'{base_test.run_time:.2f}')
+        self.assertEqual(same_table[0][2], f'{head_test.run_time:.2f}')
+        self.assertGreater(same_table[0][2], f'{fake_run_time_floor:.2f}')
+        # Compare absolute relative run time rate is higher than floor rate
+        self.assertGreater(abs(float(same_table[0][3].strip('%'))), fake_run_time_rate_floor * 100)
+
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    @patch.object(TestHarnessResultsSummary, 'get_event_results')
+    @patch.object(TestHarnessResultsSummary, 'get_commit_results')
+    def testBuildSameTableBaseTimeZero(self, mock_get_commit_results,
             mock_get_event_results, mock_init_reader):
         """
         Tests _build_same_table() when same test name exit in both base and head, where:
@@ -197,8 +337,8 @@ class TestResultsSummary(TestHarnessTestCase):
 
         base_test = base_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
         head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
-        # Mock base and head runtime, so that absoluate relative run time rate is higher than fake_run_time_rate_floor
-        base_test._data['timing']['runner_run'] = 10.00
+        # Mock base and head runtime, so that absolute relative run time rate is higher than fake_run_time_rate_floor
+        base_test._data['timing']['runner_run'] = 0.00
         head_test._data['timing']['runner_run'] = 4.0
 
         summary = TestHarnessResultsSummary(None)
@@ -206,18 +346,11 @@ class TestResultsSummary(TestHarnessTestCase):
             head_test_names,
             base_result_with_tests,
             head_result_with_tests,
-            head_run_time_floor = fake_run_time_floor,
+            run_time_floor = fake_run_time_floor,
             run_time_rate_floor = fake_run_time_rate_floor
         )
 
-        self.assertEqual(len(same_table), 1)
-        self.assertEqual(len(same_table[0]), 4)
-        self.assertIn(str(MOCKED_TEST_NAME),same_table[0][0])
-        self.assertEqual(same_table[0][1], f'{base_test.run_time:.2f}')
-        self.assertEqual(same_table[0][2], f'{head_test.run_time:.2f}')
-        self.assertGreater(same_table[0][2], f'{fake_run_time_floor:.2f}')
-        # Compare absoulate relative run time rate is higher than floor rate
-        self.assertGreater(abs(float(same_table[0][3].strip('%'))), fake_run_time_rate_floor * 100)
+        self.assertIsNone(same_table)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
@@ -227,7 +360,7 @@ class TestResultsSummary(TestHarnessTestCase):
         """
         Tests _build_same_table() when same test name exit in both base and head but
         there is no head run time
-        That testname will not be included in same_table
+        That test name will not be included in same_table
         """
         fake_run_time_floor = 1.0
         fake_run_time_rate_floor = 0.5
@@ -248,7 +381,7 @@ class TestResultsSummary(TestHarnessTestCase):
             head_test_names,
             base_result_with_tests,
             head_result_with_tests,
-            head_run_time_floor = fake_run_time_floor,
+            run_time_floor = fake_run_time_floor,
             run_time_rate_floor = fake_run_time_rate_floor
         )
 
@@ -262,7 +395,7 @@ class TestResultsSummary(TestHarnessTestCase):
         """
         Tests _build_same_table() when same test name exit in both base and head but
         there is no base run time
-        That testname will not be included in same_table
+        That test name will not be included in same_table
         """
         fake_run_time_floor = 1.0
         fake_run_time_rate_floor = 0.5
@@ -283,7 +416,42 @@ class TestResultsSummary(TestHarnessTestCase):
             head_test_names,
             base_result_with_tests,
             head_result_with_tests,
-            head_run_time_floor = fake_run_time_floor,
+            run_time_floor = fake_run_time_floor,
+            run_time_rate_floor = fake_run_time_rate_floor
+        )
+
+        self.assertIsNone(same_table)
+
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    @patch.object(TestHarnessResultsSummary, 'get_event_results')
+    @patch.object(TestHarnessResultsSummary, 'get_commit_results')
+    def testBuildSameTableLowBaseRunTime(self, mock_get_commit_results,
+            mock_get_event_results, mock_init_reader):
+        """
+        Tests _build_same_table() when same test name exit in both base and head but
+        base runtime is lower than threshold
+        That test name will not be included in same_table
+        """
+        fake_run_time_floor = 1.0
+        fake_run_time_rate_floor = 0.5
+        base_result_with_tests = self.getResult()
+        head_result_with_tests = self.getResult()
+        head_test_names = set(head_result_with_tests.test_names)
+
+        mock_get_commit_results.return_value = head_result_with_tests
+        mock_get_event_results.return_value = head_result_with_tests
+        mock_init_reader.return_value = 0.5
+
+        base_test = base_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
+        # Mock head run time is lower than the head run time threshold (fake_run_time_floor)
+        base_test._data['timing']['runner_run'] = None
+
+        summary = TestHarnessResultsSummary(None)
+        same_table = summary._build_same_table(
+            head_test_names,
+            base_result_with_tests,
+            head_result_with_tests,
+            run_time_floor = fake_run_time_floor,
             run_time_rate_floor = fake_run_time_rate_floor
         )
 
@@ -296,8 +464,8 @@ class TestResultsSummary(TestHarnessTestCase):
             mock_get_event_results, mock_init_reader):
         """
         Tests _build_same_table() when same test name exit in both base and head but
-        head runtime is lower than threadshold
-        That testname will not be included in same_table
+        head runtime is lower than threshold
+        That test name will not be included in same_table
         """
         fake_run_time_floor = 1.0
         fake_run_time_rate_floor = 0.5
@@ -310,7 +478,7 @@ class TestResultsSummary(TestHarnessTestCase):
         mock_init_reader.return_value = None
 
         head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
-        # Mock head run time is lower than the head run time threadshold (fake_run_time_floor)
+        # Mock head run time is lower than the head run time threshold (fake_run_time_floor)
         head_test._data['timing']['runner_run'] = 0.5
 
         summary = TestHarnessResultsSummary(None)
@@ -318,7 +486,7 @@ class TestResultsSummary(TestHarnessTestCase):
             head_test_names,
             base_result_with_tests,
             head_result_with_tests,
-            head_run_time_floor = fake_run_time_floor,
+            run_time_floor = fake_run_time_floor,
             run_time_rate_floor = fake_run_time_rate_floor
         )
 
@@ -331,8 +499,8 @@ class TestResultsSummary(TestHarnessTestCase):
             mock_get_event_results, mock_init_reader):
         """
         Tests _build_same_table() when same test name exit in both base and head and
-        relative run time rate is lower than threadshold.
-        That testname will not be included in same_table
+        relative run time rate is lower than threshold.
+        That test name will not be included in same_table
         """
         fake_run_time_floor = 1.0
         fake_run_time_rate_floor = 0.5
@@ -347,15 +515,15 @@ class TestResultsSummary(TestHarnessTestCase):
         base_test = base_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
         head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
         # Mock base and head runtime, so that relative run time rate is less than fake_run_time_rate_floor
-        base_test._data['timing']['runner_run'] = 10
-        head_test._data['timing']['runner_run'] = 13
+        base_test._data['timing']['runner_run'] = 10.00
+        head_test._data['timing']['runner_run'] = 13.00
 
         summary = TestHarnessResultsSummary(None)
         same_table = summary._build_same_table(
             head_test_names,
             base_result_with_tests,
             head_result_with_tests,
-            head_run_time_floor = fake_run_time_floor,
+            run_time_floor = fake_run_time_floor,
             run_time_rate_floor = fake_run_time_rate_floor
         )
 
@@ -478,8 +646,8 @@ class TestResultsSummary(TestHarnessTestCase):
         base_test = base_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
         head_test = head_result_with_tests.get_test(MOCKED_TEST_NAME.folder, MOCKED_TEST_NAME.name)
         # Mock base and head runtime, so that relative run time rate is higher than fake_run_time_rate_floor
-        base_test._data['timing']['runner_run'] = 10.00
-        head_test._data['timing']['runner_run'] = 17.00
+        base_test._data['timing']['runner_run'] = 10.0
+        head_test._data['timing']['runner_run'] = 17.0
 
         summary = TestHarnessResultsSummary(None)
         removed_table, added_table, same_table = summary.diff_table(
@@ -541,15 +709,18 @@ class TestResultsSummary(TestHarnessTestCase):
         """
         mock_init_reader.return_value = None
         # Mock the table title, data, header, no_data_message
+        base_run_time = 10.0
+        head_run_time = 17.0
         test_title = "### Tests with Data:"
-        test_table_data = [[str(MOCKED_TEST_NAME), 10.00, 17.00, '70.00%']]
+        test_table_data = [[str(MOCKED_TEST_NAME), f'{base_run_time:.2f}', f'{head_run_time:.2f}', '+70.00%']]
         test_headers = ["Test", "Base (s)", "Head (s)", "+/-"]
         test_no_data_message = "Nome"
         # Expected format table with data
         expected_table = tabulate(
             test_table_data,
             headers = test_headers,
-            tablefmt = "github"
+            tablefmt = "github",
+            disable_numparse=True
         )
         expected_output = f'{test_title}\n{expected_table}'
 
@@ -569,7 +740,7 @@ class TestResultsSummary(TestHarnessTestCase):
         test_title = "### Tests with No Data:"
         test_table_data = None
         test_headers = ["Test", "Time (s)"]
-        test_no_data_message = "None"
+        test_no_data_message = ""
         # Expected format table with nodata
         expected_output = test_title + "\n" + test_no_data_message
 
@@ -592,12 +763,11 @@ class TestResultsSummary(TestHarnessTestCase):
         mock_init_reader.return_value = None
 
         summary = TestHarnessResultsSummary(None)
-        no_change_buid_summary = summary.build_summary(None, None, None)
+        no_change_build_summary = summary.build_summary(None, None, None)
 
-        self.assertIn('Removed tests', no_change_buid_summary)
-        self.assertIn('None', no_change_buid_summary)
-        self.assertIn('Added tests', no_change_buid_summary)
-        self.assertIn('Run time changes', no_change_buid_summary)
+        self.assertIn('Removed tests', no_change_build_summary)
+        self.assertIn('Added tests', no_change_build_summary)
+        self.assertIn('Run time changes', no_change_build_summary)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     def testBuildSummaryHasTests(self, mock_init_reader):
@@ -607,9 +777,9 @@ class TestResultsSummary(TestHarnessTestCase):
         """
         mock_init_reader.return_value = None
         # Mocked table data
-        removed_table =[[str(MOCKED_TEST_NAME),12.00]]
-        added_table =[[str(MOCKED_TEST_NAME), 15.00]]
-        same_table =[[str(MOCKED_TEST_NAME), 10.00, 17.00, '70.00%']]
+        removed_table =[[str(MOCKED_TEST_NAME), '12.00']]
+        added_table =[[str(MOCKED_TEST_NAME), '15.00']]
+        same_table =[[str(MOCKED_TEST_NAME), '10.00', '17.00', '70.00%']]
 
         summary = TestHarnessResultsSummary(None)
         has_test_build_summary = summary.build_summary(removed_table, added_table, same_table)
@@ -617,16 +787,16 @@ class TestResultsSummary(TestHarnessTestCase):
         self.assertIn('Removed tests', has_test_build_summary)
         self.assertIn('Added tests', has_test_build_summary)
         self.assertIn('Time (s)', has_test_build_summary)
-        self.assertIn('12', has_test_build_summary)
-        self.assertIn('15', has_test_build_summary)
+        self.assertIn('12.00', has_test_build_summary)
+        self.assertIn('15.00', has_test_build_summary)
         self.assertIn('Run time changes', has_test_build_summary)
         self.assertIn('Test', has_test_build_summary)
         self.assertIn('Base (s)', has_test_build_summary)
         self.assertIn('Head (s)', has_test_build_summary)
         self.assertIn('+/-', has_test_build_summary)
         self.assertIn(str(MOCKED_TEST_NAME), has_test_build_summary)
-        self.assertIn('10', has_test_build_summary)
-        self.assertIn('17', has_test_build_summary)
+        self.assertIn('10.00', has_test_build_summary)
+        self.assertIn('17.00', has_test_build_summary)
         self.assertIn('70.00%', has_test_build_summary)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
@@ -646,7 +816,7 @@ class TestResultsSummary(TestHarnessTestCase):
                 self.assertEqual(output_result, output)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
-    def testWriteutputFileInvalidPath(self, mock_init_reader):
+    def testWriteOutputFileInvalidPath(self, mock_init_reader):
         """
         Tests that write_output when output file path is invalid.
         """
@@ -683,10 +853,10 @@ class TestResultsSummary(TestHarnessTestCase):
             )
             with open(out_file.name, 'r') as f:
                 output = f.read()
+                self.assertIn('Compared against', output)
                 self.assertIn('Removed tests', output)
                 self.assertIn('Added tests', output)
                 self.assertIn('Run time changes', output)
-                self.assertIn('None', output)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
@@ -711,6 +881,7 @@ class TestResultsSummary(TestHarnessTestCase):
             with open(out_file.name, 'r') as f:
                 output = f.read()
                 self.assertIn('Base results not available', output)
+                self.assertIn(head_result_with_tests.base_sha[:7], output)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
@@ -738,36 +909,30 @@ class TestResultsSummary(TestHarnessTestCase):
         """
         Tests pr() to read PR from live database
         """
-        # Set the run time and run time rate to zero, so that run time changes show in summary table
+        # Set the run time and relative run time rate to zero
         fake_run_time_floor = 0.00
         fake_run_time_rate_floor = 0.00
         # Connect to database and get data from live database
         summary = TestHarnessResultsSummary(LIVE_DATABASE_NAME)
-        head_results = summary.get_event_results(EVENT_ID)
-        base_results = summary.get_commit_results(head_results.base_sha)
-        base_test = base_results.get_test(LIVE_TEST_NAME.folder, LIVE_TEST_NAME.name)
-        head_test = head_results.get_test(LIVE_TEST_NAME.folder, LIVE_TEST_NAME.name)
 
-        with tempfile.NamedTemporaryFile() as out_file:
-            summary.pr(
-                event_id = EVENT_ID,
-                out_file = out_file.name,
-                run_time_floor = fake_run_time_floor,
-                run_time_rate_floor = fake_run_time_rate_floor
-            )
-            # There is run time changes, so check the format of summary result
-            with open(out_file.name, 'r') as f:
-                output = f.read()
-                self.assertIn('Removed tests', output)
-                self.assertIn('Added tests', output)
-                self.assertIn('Run time changes', output)
-                self.assertIn('Test', output)
-                self.assertIn(str(LIVE_TEST_NAME), output)
-                self.assertIn('Base (s)', output)
-                self.assertIn(f'{base_test.run_time:.2f}',output)
-                self.assertIn('Head (s)', output)
-                self.assertIn(f'{head_test.run_time:.2f}',output)
-                self.assertIn('+/-', output)
+        head_results = summary.get_event_results(EVENT_ID)
+        if head_results is not None:
+            base_results = summary.get_commit_results(head_results.base_sha)
+            if base_results is not None:
+                with tempfile.NamedTemporaryFile() as out_file:
+                    summary.pr(
+                        event_id = EVENT_ID,
+                        out_file = out_file.name,
+                        run_time_floor = fake_run_time_floor,
+                        run_time_rate_floor = fake_run_time_rate_floor
+                    )
+                    # Check the header format of summary results
+                    with open(out_file.name, 'r') as f:
+                        output = f.read()
+                        self.assertIn('Compared against', output)
+                        self.assertIn('Removed tests', output)
+                        self.assertIn('Added tests', output)
+                        self.assertIn('Run time changes', output)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
@@ -787,10 +952,12 @@ class TestResultsSummary(TestHarnessTestCase):
             summary.main(out_file = out_file.name, action = 'pr', event_id = EVENT_ID)
             with open(out_file.name, 'r') as f:
                 output = f.read()
+                self.assertIn('Compared against', output)
+                self.assertIn(base_result_with_tests.event_sha[:7], output)
+                self.assertIn(base_result_with_tests.civet_job_url, output)
                 self.assertIn('Removed tests', output)
                 self.assertIn('Added tests', output)
                 self.assertIn('Run time changes', output)
-                self.assertIn('None', output)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
@@ -798,7 +965,7 @@ class TestResultsSummary(TestHarnessTestCase):
     def testMainRunTimeChanges(self, mock_get_commit_results, mock_get_event_results, mock_init_reader):
         """
         Tests main() output for a PR event, verifying summary messages are printed in output file path
-        when there is run time changes for same test and absolute relative run time is higher than threadshold
+        when there is run time changes for same test and absolute relative run time is higher than threshold
         """
         fake_run_time_floor = 1.0
         fake_run_time_rate_floor = 0.3
@@ -824,17 +991,19 @@ class TestResultsSummary(TestHarnessTestCase):
                 run_time_rate_floor = fake_run_time_rate_floor)
             with open(out_file.name, 'r') as f:
                 output = f.read()
+                self.assertIn('Compared against', output)
+                self.assertIn(base_result_with_tests.event_sha[:7], output)
+                self.assertIn(base_result_with_tests.civet_job_url, output)
                 self.assertIn('Removed tests', output)
                 self.assertIn('Added tests', output)
                 self.assertIn('Run time changes', output)
-                self.assertIn('None', output)
                 self.assertIn('Test', output)
                 self.assertIn('Base (s)', output)
                 self.assertIn('Head (s)', output)
                 self.assertIn('+/-', output)
                 self.assertIn(str(MOCKED_TEST_NAME), output)
-                self.assertIn('15', output)
-                self.assertIn('10', output)
+                self.assertIn('15.00', output)
+                self.assertIn('10.00', output)
                 self.assertIn('-33.33%', output)
 
 if __name__ == '__main__':

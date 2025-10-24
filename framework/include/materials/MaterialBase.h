@@ -78,8 +78,7 @@ class MaterialBase : public MooseObject,
                      public RandomInterface,
                      public ElementIDInterface,
                      protected GeometricSearchInterface,
-                     protected ADFunctorInterface,
-                     protected SolutionInvalidInterface
+                     protected ADFunctorInterface
 {
 public:
   static InputParameters validParams();

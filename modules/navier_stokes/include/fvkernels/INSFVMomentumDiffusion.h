@@ -16,15 +16,16 @@
 #include "SolutionInvalidInterface.h"
 #include "FVDiffusionInterpolationInterface.h"
 
-class INSFVMomentumDiffusion : public INSFVFluxKernel,
-                               public SolutionInvalidInterface,
-                               public FVDiffusionInterpolationInterface
+class INSFVMomentumDiffusion : public INSFVFluxKernel, public FVDiffusionInterpolationInterface
 {
 public:
   static InputParameters validParams();
   INSFVMomentumDiffusion(const InputParameters & params);
   using INSFVFluxKernel::gatherRCData;
   void gatherRCData(const FaceInfo & fi) override final;
+
+  // To get warnings tracked in the SolutionInvalidityOutput
+  usingCombinedWarningSolutionWarnings;
 
 protected:
   /**
