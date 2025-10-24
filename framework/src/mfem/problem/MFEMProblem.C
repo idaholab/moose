@@ -79,9 +79,10 @@ MFEMProblem::addMFEMNonlinearSolver()
   auto nl_solver = std::make_shared<mfem::NewtonSolver>(getProblemData().comm);
 
   // Defaults to one iteration, without further nonlinear iterations
-  nl_solver->SetRelTol(0.0);
-  nl_solver->SetAbsTol(0.0);
-  nl_solver->SetMaxIter(1);
+  nl_solver->SetRelTol(_nl_rel_tol);
+  nl_solver->SetAbsTol(_nl_abs_tol);
+  nl_solver->SetPrintLevel(_print_level);
+  nl_solver->SetMaxIter(_nl_max_its);
 
   getProblemData().nonlinear_solver = nl_solver;
 }
@@ -326,6 +327,12 @@ MFEMProblem::addFunction(const std::string & type,
                          const std::string & name,
                          InputParameters & parameters)
 {
+  if (type == "MFEMGradientGridFunction")
+  {
+    FEProblemBase::addUserObject(type, name, parameters);
+    return;
+  }
+
   ExternalProblem::addFunction(type, name, parameters);
   auto & func = getFunction(name);
   // FIXME: Do we want to have optimised versions for when functions
@@ -501,6 +508,18 @@ std::shared_ptr<mfem::ParGridFunction>
 MFEMProblem::getGridFunction(const std::string & name)
 {
   return getUserObject<MFEMVariable>(name).getGridFunction();
+}
+
+void
+MFEMProblem::setNewtonParamaters(unsigned int nl_max_its,
+                                 mfem::real_t nl_abs_tol,
+                                 mfem::real_t nl_rel_tol,
+                                 unsigned int print_level)
+{
+  _nl_max_its = nl_max_its;
+  _nl_abs_tol = nl_abs_tol;
+  _nl_rel_tol = nl_rel_tol;
+  _print_level = print_level;
 }
 
 void
