@@ -201,8 +201,6 @@ protected:
   const bool _staggered_pressure_bool;
   /// Segregated solve
   const bool _segregated_bool;
-  /// Thermal monolithic bool
-  const bool _monolithic_thermal_bool;
   /// Boolean to printout information related to subchannel solve
   const bool _verbose_subchannel;
   /// Flag that activates the effect of deformation (pin/duct) based on the auxvalues for displacement, Dpin

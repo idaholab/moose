@@ -91,8 +91,6 @@ SubChannel1PhaseProblem::validParams()
   params.addParam<bool>(
       "segregated", true, "Boolean to define whether to use a segregated solution.");
   params.addParam<bool>(
-      "monolithic_thermal", false, "Boolean to define whether to use thermal monolithic solve.");
-  params.addParam<bool>(
       "verbose_subchannel", false, "Boolean to print out information related to subchannel solve.");
   params.addParam<bool>(
       "deformation",
@@ -148,7 +146,6 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _implicit_bool(getParam<bool>("implicit")),
     _staggered_pressure_bool(getParam<bool>("staggered_pressure")),
     _segregated_bool(getParam<bool>("segregated")),
-    _monolithic_thermal_bool(getParam<bool>("monolithic_thermal")),
     _verbose_subchannel(getParam<bool>("verbose_subchannel")),
     _deformation(getParam<bool>("deformation")),
     _fp(nullptr),
@@ -2044,14 +2041,13 @@ SubChannel1PhaseProblem::computeAddedHeatDuct(unsigned int i_ch, unsigned int iz
 PetscErrorCode
 SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
 {
-  bool lag_block_thermal_solve = true;
   Vec b_nest, x_nest; /* approx solution, RHS, exact solution */
   Mat A_nest;         /* linear system matrix */
   KSP ksp;            /* linear solver context */
   PC pc;              /* preconditioner context */
 
   PetscFunctionBegin;
-  PetscInt Q = _monolithic_thermal_bool ? 4 : 3;
+  PetscInt Q = 3;
   std::vector<Mat> mat_array(Q * Q);
   std::vector<Vec> vec_array(Q);
 
@@ -2075,9 +2071,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   computeP(iblock);
   // Assembling cross fluxes matrix
   computeWijResidual(iblock);
-  // If monolithic solve - Assembling enthalpy matrix
-  if (_monolithic_thermal_bool)
-    computeh(iblock);
 
   if (_verbose_subchannel)
   {
@@ -2100,10 +2093,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   else
   {
     mat_array[Q * field_num + 2] = NULL;
-  }
-  if (_monolithic_thermal_bool)
-  {
-    mat_array[Q * field_num + 3] = NULL;
   }
   LibmeshPetscCall(VecDuplicate(_mc_axial_convection_rhs, &vec_array[field_num]));
   LibmeshPetscCall(VecCopy(_mc_axial_convection_rhs, vec_array[field_num]));
@@ -2148,10 +2137,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   LibmeshPetscCall(MatAssemblyBegin(mat_array[Q * field_num + 1], MAT_FINAL_ASSEMBLY));
   LibmeshPetscCall(MatAssemblyEnd(mat_array[Q * field_num + 1], MAT_FINAL_ASSEMBLY));
   mat_array[Q * field_num + 2] = NULL;
-  if (_monolithic_thermal_bool)
-  {
-    mat_array[Q * field_num + 3] = NULL;
-  }
   LibmeshPetscCall(VecDuplicate(_amc_pressure_force_rhs, &vec_array[field_num]));
   LibmeshPetscCall(VecCopy(_amc_pressure_force_rhs, vec_array[field_num]));
   if (_pressure_axial_momentum_tight_coupling)
@@ -2193,10 +2178,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   LibmeshPetscCall(MatDuplicate(_cmc_sys_Wij_mat, MAT_COPY_VALUES, &mat_array[Q * field_num + 2]));
   LibmeshPetscCall(MatAssemblyBegin(mat_array[Q * field_num + 2], MAT_FINAL_ASSEMBLY));
   LibmeshPetscCall(MatAssemblyEnd(mat_array[Q * field_num + 2], MAT_FINAL_ASSEMBLY));
-  if (_monolithic_thermal_bool)
-  {
-    mat_array[Q * field_num + 3] = NULL;
-  }
 
   LibmeshPetscCall(VecDuplicate(_cmc_sys_Wij_rhs, &vec_array[field_num]));
   LibmeshPetscCall(VecCopy(_cmc_sys_Wij_rhs, vec_array[field_num]));
@@ -2220,33 +2201,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
 
   if (_verbose_subchannel)
     _console << "Cross mom ok." << std::endl;
-
-  // Energy conservation
-  if (_monolithic_thermal_bool)
-  {
-    field_num = 3;
-    mat_array[Q * field_num + 0] = NULL;
-    mat_array[Q * field_num + 1] = NULL;
-    mat_array[Q * field_num + 2] = NULL;
-    LibmeshPetscCall(MatDuplicate(_hc_sys_h_mat, MAT_COPY_VALUES, &mat_array[Q * field_num + 3]));
-    if (lag_block_thermal_solve)
-    {
-      LibmeshPetscCall(MatZeroEntries(mat_array[Q * field_num + 3]));
-      LibmeshPetscCall(MatShift(mat_array[Q * field_num + 3], 1.0));
-    }
-    LibmeshPetscCall(MatAssemblyBegin(mat_array[Q * field_num + 3], MAT_FINAL_ASSEMBLY));
-    LibmeshPetscCall(MatAssemblyEnd(mat_array[Q * field_num + 3], MAT_FINAL_ASSEMBLY));
-    LibmeshPetscCall(VecDuplicate(_hc_sys_h_rhs, &vec_array[field_num]));
-    LibmeshPetscCall(VecCopy(_hc_sys_h_rhs, vec_array[field_num]));
-    if (lag_block_thermal_solve)
-    {
-      LibmeshPetscCall(VecZeroEntries(vec_array[field_num]));
-      LibmeshPetscCall(VecShift(vec_array[field_num], 1.0));
-    }
-
-    if (_verbose_subchannel)
-      _console << "Energy ok." << std::endl;
-  }
 
   // Relaxing linear system
   // Weaker relaxation
@@ -2541,74 +2495,6 @@ SubChannel1PhaseProblem::implicitPetscSolve(int iblock)
   LibmeshPetscCall(populateDenseFromVector<libMesh::DenseMatrix<Real>>(
       sol_Wij, _Wij, first_node, last_node - 1, _n_gaps));
 
-  /// Populating Enthalpy
-  if (_monolithic_thermal_bool)
-  {
-    if (lag_block_thermal_solve)
-    {
-      KSP ksploc;
-      PC pc;
-      Vec sol;
-      LibmeshPetscCall(VecDuplicate(_hc_sys_h_rhs, &sol));
-      LibmeshPetscCall(KSPCreate(PETSC_COMM_SELF, &ksploc));
-      LibmeshPetscCall(KSPSetOperators(ksploc, _hc_sys_h_mat, _hc_sys_h_mat));
-      LibmeshPetscCall(KSPGetPC(ksploc, &pc));
-      LibmeshPetscCall(PCSetType(pc, PCJACOBI));
-      LibmeshPetscCall(KSPSetTolerances(ksploc, _rtol, _atol, _dtol, _maxit));
-      LibmeshPetscCall(KSPSetFromOptions(ksploc));
-      LibmeshPetscCall(KSPSolve(ksploc, _hc_sys_h_rhs, sol));
-      PetscScalar * xx;
-      LibmeshPetscCall(VecGetArray(sol, &xx));
-      for (unsigned int iz = first_node; iz < last_node + 1; iz++)
-      {
-        auto iz_ind = iz - first_node;
-        for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-        {
-          auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-          auto h_out = xx[iz_ind * _n_channels + i_ch];
-          if (h_out < 0)
-          {
-            mooseError(name(),
-                       " : Calculation of negative Enthalpy h_out = : ",
-                       h_out,
-                       " Axial Level= : ",
-                       iz);
-          }
-          _h_soln->set(node_out, h_out);
-        }
-      }
-      LibmeshPetscCall(KSPDestroy(&ksploc));
-      LibmeshPetscCall(VecDestroy(&sol));
-    }
-    else
-    {
-      Vec sol_h;
-      LibmeshPetscCall(VecDuplicate(_hc_sys_h_rhs, &sol_h));
-      LibmeshPetscCall(VecCopy(loc_vecs[3], sol_h));
-      PetscScalar * sol_h_array;
-      LibmeshPetscCall(VecGetArray(sol_h, &sol_h_array));
-      for (unsigned int iz = first_node; iz < last_node + 1; iz++)
-      {
-        auto iz_ind = iz - first_node;
-        for (unsigned int i_ch = 0; i_ch < _n_channels; i_ch++)
-        {
-          auto * node_out = _subchannel_mesh.getChannelNode(i_ch, iz);
-          auto h_out = sol_h_array[iz_ind * _n_channels + i_ch];
-          if (h_out < 0)
-          {
-            mooseError(name(),
-                       " : Calculation of negative Enthalpy h_out = : ",
-                       h_out,
-                       " Axial Level= : ",
-                       iz);
-          }
-          _h_soln->set(node_out, h_out);
-        }
-      }
-      LibmeshPetscCall(VecDestroy(&sol_h));
-    }
-  }
-
   /// Populating sum_Wij
   LibmeshPetscCall(MatMult(_mc_sumWij_mat, sol_Wij, _prod));
   LibmeshPetscCall(populateSolutionChan<SolutionHandle>(
@@ -2697,7 +2583,6 @@ SubChannel1PhaseProblem::externalSolve()
         if (_segregated_bool)
         {
           computeWijFromSolve(iblock);
-
           if (_compute_power)
           {
             computeh(iblock);
@@ -2710,23 +2595,13 @@ SubChannel1PhaseProblem::externalSolve()
           computeWijPrime(iblock);
           if (_verbose_subchannel)
             _console << "Done with main solve." << std::endl;
-          if (_monolithic_thermal_bool)
+          if (_compute_power)
           {
-            // Enthalpy is already solved from the monolithic solve
+            computeh(iblock);
             computeT(iblock);
           }
-          else
-          {
-            if (_verbose_subchannel)
-              _console << "Starting thermal solve." << std::endl;
-            if (_compute_power)
-            {
-              computeh(iblock);
-              computeT(iblock);
-            }
-            if (_verbose_subchannel)
-              _console << "Done with thermal solve." << std::endl;
-          }
+          if (_verbose_subchannel)
+            _console << "Done with thermal solve." << std::endl;
         }
 
         if (_verbose_subchannel)
