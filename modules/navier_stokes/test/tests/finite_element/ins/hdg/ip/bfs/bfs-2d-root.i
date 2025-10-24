@@ -395,6 +395,7 @@ rho = 1
 [Executioner]
   type = Transient
   solve_type = 'PJFNK'
+  petsc_options = '-nl0_condensed_ksp_view'
   petsc_options_iname = '-ksp_type'
   petsc_options_value = 'preonly'
   nl_abs_tol = 1e-7
