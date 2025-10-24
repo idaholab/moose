@@ -24,7 +24,15 @@
 class MFEMKernelTest : public MFEMObjectUnitTest
 {
 public:
-  MFEMKernelTest() : MFEMObjectUnitTest("MooseUnitApp") {}
+  MFEMKernelTest() : MFEMObjectUnitTest("MooseUnitApp")
+  {
+    // Register a dummy (Par)GridFunction for kernels to apply to
+    auto pm = _mfem_mesh_ptr->getMFEMParMeshPtr().get();
+    mfem::common::H1_FESpace fe(pm, 1);
+    mfem::GridFunction gf(&fe);
+    auto pgf = std::make_shared<mfem::ParGridFunction>(pm, &gf);
+    _mfem_problem->getProblemData().gridfunctions.Register("test_variable_name", pgf);
+  }
 };
 
 /**

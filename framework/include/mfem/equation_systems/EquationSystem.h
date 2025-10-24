@@ -48,19 +48,31 @@ public:
   virtual void AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc);
 
   /// Initialise
-  virtual void Init(Moose::MFEM::GridFunctions & gridfunctions,
-                    const Moose::MFEM::FESpaces & fespaces,
-                    mfem::AssemblyLevel assembly_level);
+  virtual void Init(Moose::MFEM::GridFunctions & gridfunctions, mfem::AssemblyLevel assembly_level);
 
   /// Build linear forms and eliminate constrained DoFs
   virtual void BuildLinearForms();
   virtual void ApplyEssentialBCs();
+  virtual void ApplyEssentialBC(const std::string & test_var_name,
+                                mfem::ParGridFunction & trial_gf,
+                                mfem::Array<int> & global_ess_markers);
   virtual void EliminateCoupledVariables();
 
   /// Build bilinear forms
   virtual void BuildBilinearForms();
   virtual void BuildMixedBilinearForms();
   virtual void BuildEquationSystem();
+
+  void assembleJacobian(
+      Moose::MFEM::NamedFieldsMap<mfem::ParBilinearForm> & jac_blfs,
+      Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>> &
+          jac_mblfs,
+      Moose::MFEM::NamedFieldsMap<mfem::ParLinearForm> & rhs_lfs,
+      std::vector<mfem::Array<int>> & ess_tdof_lists,
+      std::vector<std::unique_ptr<mfem::ParGridFunction>> & var_ess_constraints,
+      mfem::OperatorHandle & op,
+      mfem::BlockVector & trueX,
+      mfem::BlockVector & trueRHS);
 
   /// Form linear system, with essential boundary conditions accounted for
   virtual void FormLinearSystem(mfem::OperatorHandle & op,
@@ -298,15 +310,20 @@ EquationSystem::ApplyBoundaryLFIntegrators(
 class TimeDependentEquationSystem : public EquationSystem
 {
 public:
-  TimeDependentEquationSystem();
+  TimeDependentEquationSystem(const Moose::MFEM::TimeDerivativeMap & _time_derivative_map);
 
-  void AddCoupledVariableNameIfMissing(const std::string & coupled_var_name) override;
+  /// Initialise
+  virtual void Init(Moose::MFEM::GridFunctions & gridfunctions,
+                    mfem::AssemblyLevel assembly_level) override;
 
   virtual void SetTimeStep(mfem::real_t dt);
   virtual void UpdateEquationSystem();
 
   virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel) override;
   virtual void BuildBilinearForms() override;
+  virtual void BuildMixedBilinearForms() override;
+  virtual void ApplyEssentialBCs() override;
+  virtual void EliminateCoupledVariables() override;
   virtual void FormLegacySystem(mfem::OperatorHandle & op,
                                 mfem::BlockVector & truedXdt,
                                 mfem::BlockVector & trueRHS) override;
@@ -320,8 +337,16 @@ protected:
 
   Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>
       _td_kernels_map;
-  /// Container to store contributions to weak form of the form (F du/dt, v)
+  /// Containers to store contributions to weak form of the form (F du/dt, v)
   Moose::MFEM::NamedFieldsMap<mfem::ParBilinearForm> _td_blfs;
+  Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>
+      _td_mblfs; // named according to trial variable
+
+  /// Gridfunctions holding essential constraints from Dirichlet BCs
+  std::vector<std::unique_ptr<mfem::ParGridFunction>> _td_var_ess_constraints;
+
+  /// Map between variable names and their time derivatives
+  const Moose::MFEM::TimeDerivativeMap & _time_derivative_map;
 
 private:
   /// Set trial variable names from subset of coupled variables that have an associated test variable.

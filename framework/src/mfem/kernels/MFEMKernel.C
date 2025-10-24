@@ -28,7 +28,12 @@ MFEMKernel::validParams()
 
 MFEMKernel::MFEMKernel(const InputParameters & parameters)
   : MFEMGeneralUserObject(parameters),
-    MFEMBlockRestrictable(parameters, getMFEMProblem().mesh().getMFEMParMesh()),
+    MFEMBlockRestrictable(parameters,
+                          *getMFEMProblem()
+                               .getProblemData()
+                               .gridfunctions.GetRef(getParam<VariableName>("variable"))
+                               .ParFESpace()
+                               ->GetParMesh()),
     _test_var_name(getParam<VariableName>("variable"))
 {
 }

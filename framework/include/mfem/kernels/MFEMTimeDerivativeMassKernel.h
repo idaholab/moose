@@ -26,7 +26,7 @@ public:
 
   /// Get name of the trial variable (gridfunction) the kernel acts on.
   /// Defaults to the name of the test variable labelling the weak form.
-  virtual const VariableName & getTrialVariableName() const override { return _var_dot_name; };
+  virtual const VariableName & getTrialVariableName() const override { return _var_dot_name; }
 
 protected:
   /// Name of variable (gridfunction) representing time derivative of variable.
