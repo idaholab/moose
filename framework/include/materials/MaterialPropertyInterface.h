@@ -917,7 +917,8 @@ MaterialPropertyInterface::getGenericMaterialPropertyByName(const MaterialProper
                                                             const unsigned int state)
 {
   if (_is_kokkos_object)
-    mooseError("Attempted to retrieve a standard MOOSE material property from a Kokkos object.");
+    _mi_moose_object.mooseError(
+        "Attempted to retrieve a standard MOOSE material property from a Kokkos object.");
 
   if (_use_interpolated_state)
   {
@@ -979,7 +980,8 @@ Moose::Kokkos::MaterialProperty<T, dimension>
 MaterialPropertyInterface::getKokkosMaterialPropertyByName(const std::string & prop_name_in)
 {
   if (!_is_kokkos_object)
-    mooseError("Attempted to retrieve a Kokkos material property from a standard MOOSE object.");
+    _mi_moose_object.mooseError(
+        "Attempted to retrieve a Kokkos material property from a standard MOOSE object.");
 
   if constexpr (std::is_same_v<T, Real>)
   {

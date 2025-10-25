@@ -15,26 +15,14 @@ using namespace Moose;
 InputParameters
 Function::validParams()
 {
-  InputParameters params = MooseObject::validParams();
-  params += SetupInterface::validParams();
-
-  // Functions should be executed on the fly
-  params.suppressParameter<ExecFlagEnum>("execute_on");
+  InputParameters params = FunctionBase::validParams();
   params.registerBase("Function");
 
   return params;
 }
 
 Function::Function(const InputParameters & parameters)
-  : MooseObject(parameters),
-    SetupInterface(this),
-    TransientInterface(this),
-    PostprocessorInterface(this),
-    UserObjectInterface(this),
-    Restartable(this, "Functions"),
-    MeshChangedInterface(parameters),
-    ScalarCoupleable(this),
-    Moose::FunctorBase<Real>(name())
+  : FunctionBase(parameters), Moose::FunctorBase<Real>(name())
 {
 }
 
