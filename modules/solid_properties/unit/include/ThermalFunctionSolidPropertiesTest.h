@@ -25,7 +25,7 @@ protected:
   void buildObjects()
   {
     InputParameters rho_pars = _factory.getValidParams("ParsedFunction");
-    rho_pars.set<std::string>("value") = "100.0+t";
+    rho_pars.set<std::string>("expression") = "100.0+t";
     _fe_problem->addFunction("ParsedFunction", "rho", rho_pars);
     Function & rho = _fe_problem->getFunction("rho");
     rho.initialSetup();
@@ -38,7 +38,7 @@ protected:
     cp.initialSetup();
 
     InputParameters k_pars = _factory.getValidParams("ParsedFunction");
-    k_pars.set<std::string>("value") = "12.1+1.e-6*t*t*t+2.0e-4*t*t-0.5*t";
+    k_pars.set<std::string>("expression") = "12.1+1.e-6*t*t*t+2.0e-4*t*t-0.5*t";
     _fe_problem->addFunction("ParsedFunction", "k", k_pars);
     Function & k = _fe_problem->getFunction("k");
     k.initialSetup();

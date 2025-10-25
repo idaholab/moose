@@ -92,7 +92,7 @@
 [Functions]
   [exact]
     type = ParsedFunction
-    value = '-1/6*x*x*x +7/6*x'
+    expression = '-1/6*x*x*x +7/6*x'
   []
 []
 
