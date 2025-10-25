@@ -35,7 +35,7 @@ struct BCTupleKeyComp
  * @param elem_id The id of the element to be split
  * @param converted_elems_ids a vector to record the ids of the newly created TET4 elements
  */
-void hexElemSplitter(ReplicatedMesh & mesh,
+void hexElemSplitter(MeshBase & mesh,
                      const std::vector<libMesh::BoundaryInfo::BCTuple> & bdry_side_list,
                      const dof_id_type elem_id,
                      std::vector<dof_id_type> & converted_elems_ids);
@@ -47,7 +47,7 @@ void hexElemSplitter(ReplicatedMesh & mesh,
  * @param elem_id The id of the element to be split
  * @param converted_elems_ids a vector to record the ids of the newly created TET4 elements
  */
-void pyramidElemSplitter(ReplicatedMesh & mesh,
+void pyramidElemSplitter(MeshBase & mesh,
                          const std::vector<libMesh::BoundaryInfo::BCTuple> & bdry_side_list,
                          const dof_id_type elem_id,
                          std::vector<dof_id_type> & converted_elems_ids);
@@ -59,7 +59,7 @@ void pyramidElemSplitter(ReplicatedMesh & mesh,
  * @param elem_id The id of the element to be split
  * @param converted_elems_ids a vector to record the ids of the newly created TET4 elements
  */
-void prismElemSplitter(ReplicatedMesh & mesh,
+void prismElemSplitter(MeshBase & mesh,
                        const std::vector<libMesh::BoundaryInfo::BCTuple> & bdry_side_list,
                        const dof_id_type elem_id,
                        std::vector<dof_id_type> & converted_elems_ids);
@@ -207,7 +207,7 @@ pyramidNodesToTetNodesDeterminer(std::vector<const Node *> & pyramid_nodes,
  * @param delete_block_to_remove A bool indicating whether the block to be removed will be
  * deleted in this method
  */
-void convert3DMeshToAllTet4(ReplicatedMesh & mesh,
+void convert3DMeshToAllTet4(MeshBase & mesh,
                             const std::vector<std::pair<dof_id_type, bool>> & elems_to_process,
                             std::vector<dof_id_type> & converted_elems_ids_to_track,
                             const subdomain_id_type block_id_to_remove,
@@ -217,7 +217,7 @@ void convert3DMeshToAllTet4(ReplicatedMesh & mesh,
  * Convert all the elements in a 3D mesh consisting of only linear elements into TET4 elements.
  * @param mesh The mesh to be converted
  */
-void convert3DMeshToAllTet4(ReplicatedMesh & mesh);
+void convert3DMeshToAllTet4(MeshBase & mesh);
 
 /**
  * Collect the boundary information of the given element in a mesh.
@@ -241,7 +241,7 @@ elementBoundaryInfoCollector(const std::vector<libMesh::BoundaryInfo::BCTuple> &
  * @param elem_side_info The boundary IDs associated with the sides of the element
  * @param subdomain_id_shift_base the reference id used to shift the subdomain ID for new elements
  */
-void convertElem(ReplicatedMesh & mesh,
+void convertElem(MeshBase & mesh,
                  const dof_id_type & elem_id,
                  const std::vector<unsigned int> & side_indices,
                  const std::vector<std::vector<boundary_id_type>> & elem_side_info,
@@ -255,7 +255,7 @@ void convertElem(ReplicatedMesh & mesh,
  * @param elem_side_info The boundary IDs associated with the sides of the HEX8 element
  * @param subdomain_id_shift_base the reference id used to shift the subdomain ID for new elements
  */
-void convertHex8Elem(ReplicatedMesh & mesh,
+void convertHex8Elem(MeshBase & mesh,
                      const dof_id_type & elem_id,
                      const std::vector<unsigned int> & side_indices,
                      const std::vector<std::vector<boundary_id_type>> & elem_side_info,
@@ -270,7 +270,7 @@ void convertHex8Elem(ReplicatedMesh & mesh,
  * @param side_info The boundary IDs associated with the side of the HEX8 element
  * @param subdomain_id_shift_base the reference id used to shift the subdomain ID for new elements
  */
-void createUnitPyramid5FromHex8(ReplicatedMesh & mesh,
+void createUnitPyramid5FromHex8(MeshBase & mesh,
                                 const dof_id_type & elem_id,
                                 const unsigned int & side_index,
                                 const Node * new_node,
@@ -286,7 +286,7 @@ void createUnitPyramid5FromHex8(ReplicatedMesh & mesh,
  * @param side_info The boundary IDs associated with the side of the HEX8 element
  * @param subdomain_id_shift_base the reference id used to shift the subdomain ID for new elements
  */
-void createUnitTet4FromHex8(ReplicatedMesh & mesh,
+void createUnitTet4FromHex8(MeshBase & mesh,
                             const dof_id_type & elem_id,
                             const unsigned int & side_index,
                             const Node * new_node,
@@ -301,7 +301,7 @@ void createUnitTet4FromHex8(ReplicatedMesh & mesh,
  * @param elem_side_info The boundary IDs associated with the sides of the PRISM6 element
  * @param subdomain_id_shift_base the reference id used to shift the subdomain ID for new elements
  */
-void convertPrism6Elem(ReplicatedMesh & mesh,
+void convertPrism6Elem(MeshBase & mesh,
                        const dof_id_type & elem_id,
                        const std::vector<unsigned int> & side_indices,
                        const std::vector<std::vector<boundary_id_type>> & elem_side_info,
@@ -315,7 +315,7 @@ void convertPrism6Elem(ReplicatedMesh & mesh,
  * @param side_info The boundary IDs associated with the side of the PRISM6 element
  * @param subdomain_id_shift_base the reference id used to shift the subdomain ID for new elements
  */
-void createUnitTet4FromPrism6(ReplicatedMesh & mesh,
+void createUnitTet4FromPrism6(MeshBase & mesh,
                               const dof_id_type & elem_id,
                               const unsigned int & side_index,
                               const Node * new_node,
@@ -332,7 +332,7 @@ void createUnitTet4FromPrism6(ReplicatedMesh & mesh,
  * @param side_info The boundary IDs associated with the side of the PRISM6 element
  * @param subdomain_id_shift_base the reference id used to shift the subdomain ID for new elements
  */
-void createUnitPyramid5FromPrism6(ReplicatedMesh & mesh,
+void createUnitPyramid5FromPrism6(MeshBase & mesh,
                                   const dof_id_type & elem_id,
                                   const unsigned int & side_index,
                                   const Node * new_node,
@@ -346,7 +346,7 @@ void createUnitPyramid5FromPrism6(ReplicatedMesh & mesh,
  * @param elem_side_info The boundary IDs associated with the sides of the PYRAMID
  * @param subdomain_id_shift_base the reference id used to shift the subdomain ID for new elements
  */
-void convertPyramid5Elem(ReplicatedMesh & mesh,
+void convertPyramid5Elem(MeshBase & mesh,
                          const dof_id_type & elem_id,
                          const std::vector<std::vector<boundary_id_type>> & elem_side_info,
                          const SubdomainID & subdomain_id_shift_base);
@@ -357,7 +357,7 @@ void convertPyramid5Elem(ReplicatedMesh & mesh,
  * @param elem_id The ID of the original element
  * @param new_elem_ptr The pointer to the new element that will retain the extra integer
  */
-void retainEEID(ReplicatedMesh & mesh, const dof_id_type & elem_id, Elem * new_elem_ptr);
+void retainEEID(MeshBase & mesh, const dof_id_type & elem_id, Elem * new_elem_ptr);
 
 /**
  * Generate a transition layer of elements with TRI3 surfaces on the given boundaries.
@@ -369,10 +369,11 @@ void retainEEID(ReplicatedMesh & mesh, const dof_id_type & elem_id, Elem * new_e
  * @param external_boundaries_checking Whether to check if the provided boundaries are external
  * boundaries
  */
-void transitionLayerGenerator(ReplicatedMesh & mesh,
+void transitionLayerGenerator(MeshBase & mesh,
                               const std::vector<BoundaryName> & boundary_names,
                               const unsigned int conversion_element_layer_number,
                               const bool external_boundaries_checking);
+
 /**
  * Assign a subdomain name suffix to the converted elements created during transition layer
  * generation.
@@ -385,7 +386,7 @@ void transitionLayerGenerator(ReplicatedMesh & mesh,
  * elements
  */
 void assignConvertedElementsSubdomainNameSuffix(
-    ReplicatedMesh & mesh,
+    MeshBase & mesh,
     const std::set<subdomain_id_type> & original_subdomain_ids,
     const subdomain_id_type sid_shift_base,
     const SubdomainName & tet_suffix,

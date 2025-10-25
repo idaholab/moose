@@ -1,6 +1,6 @@
 [Tests]
   design = 'meshgenerators/XYZDelaunayGenerator.md'
-  issues = '#28297 #29718 #30154'
+  issues = '#28297 #29718 #30154 #31759'
   [xyzdelaunay]
     requirement = "The system shall have the capability of tetrahedralizing a triangulated boundary"
     [basic_3d]
@@ -49,6 +49,19 @@
       valgrind = none # see #31360
       capabilities = 'netgen'
     []
+    [stitching_combined]
+      type = 'CSVDiff'
+      input = 'xyzdelaunay_stitching.i'
+      cli_args = 'Mesh/final_generator=triang
+                  Mesh/triang/stitch_holes="true true"
+                  Mesh/triang/combined_stitching=true
+                  Outputs/file_base=xyzdelaunay_stitching_combined'
+      csvdiff = 'xyzdelaunay_stitching_combined.csv'
+      recover = false
+      detail = "stitching 'hole' meshes into the final mesh by combining all the applicable hole meshes first"
+      valgrind = none # see #31360
+      capabilities = 'netgen'
+    []
     [convert_and_stitch]
       type = 'CSVDiff'
       input = 'xyzdelaunay_stitching.i'
@@ -57,7 +70,23 @@
                   Mesh/final_generator=triang'
       csvdiff = 'xyzdelaunay_stitching_out.csv'
       recover = false
-      detail = "selectively stitching 'hole' meshes into the final mesh after converting non-TET4 meshes"
+      detail = "selectively stitching 'hole' meshes into the final mesh after converting non-TET4 meshes into a pure TET4 mesh"
+      valgrind = none # see #31360
+      capabilities = 'netgen'
+    []
+    [surface_convert_and_stitch]
+      type = 'CSVDiff'
+      input = 'xyzdelaunay_stitching.i'
+      cli_args = 'Mesh/gmg/elem_type=HEX8
+                  Mesh/gmg/nx=3
+                  Mesh/gmg/ny=3
+                  Mesh/gmg/nz=3
+                  Mesh/triang/convert_holes_for_stitching=true
+                  Mesh/triang/conversion_method=SURFACE
+                  Mesh/final_generator=triang'
+      csvdiff = 'xyzdelaunay_stitching_out.csv'
+      recover = false
+      detail = "selectively stitching 'hole' meshes into the final mesh after converting non-TET4 meshes using boundary element conversion"
       valgrind = none # see #31360
       capabilities = 'netgen'
     []
