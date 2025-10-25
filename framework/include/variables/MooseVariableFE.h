@@ -29,17 +29,19 @@ class MooseVariableFE;
 typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<RealVectorValue> VectorMooseVariable;
 typedef MooseVariableFE<RealEigenVector> ArrayMooseVariable;
+// typedef MooseVariableFE<ADRealEigenVector> ADArrayMooseVariable;
 
 /**
  * Class for stuff related to variables
  *
  * Each variable can compute nodal or elemental (at QPs) values.
  *
- * OutputType          OutputShape           OutputData
+ * OutputType          OutputShape           DofValue
  * ----------------------------------------------------
  * Real                Real                  Real
  * RealVectorValue     RealVectorValue       Real
  * RealEigenVector     Real                  RealEigenVector
+ * ADRealEigenVector   ADReal                ADRealEigenVector
  *
  */
 template <typename OutputType>
@@ -77,8 +79,10 @@ public:
   using FieldVariableTestDivergence =
       typename MooseVariableField<OutputType>::FieldVariableTestDivergence;
 
-  using OutputData = typename MooseVariableField<OutputType>::OutputData;
-  using DoFValue = typename MooseVariableField<OutputType>::DoFValue;
+  using typename MooseVariableField<OutputType>::DofValue;
+  using typename MooseVariableField<OutputType>::DofValues;
+  using typename MooseVariableField<OutputType>::ADDofValue;
+  using typename MooseVariableField<OutputType>::ADDofValues;
 
   using FunctorArg = typename Moose::ADType<OutputType>::type;
   using typename Moose::FunctorBase<FunctorArg>::ValueType;
@@ -271,7 +275,7 @@ public:
   {
     return _element_data->vectorTagGradient(tag);
   }
-  const DoFValue & vectorTagDofValue(TagID tag) const override
+  const DofValues & vectorTagDofValue(TagID tag) const override
   {
     return _element_data->vectorTagDofValue(tag);
   }
@@ -510,52 +514,52 @@ public:
 
   virtual void setNodalValue(const OutputType & value, unsigned int idx = 0) override;
 
-  virtual void setDofValue(const OutputData & value, unsigned int index) override;
+  virtual void setDofValue(const DofValue & value, unsigned int index) override;
 
   /**
    * Set local DOF values and evaluate the values on quadrature points
    */
-  virtual void setDofValues(const DenseVector<OutputData> & values) override;
-  virtual void setLowerDofValues(const DenseVector<OutputData> & values) override;
+  virtual void setDofValues(const DenseVector<DofValue> & values) override;
+  virtual void setLowerDofValues(const DenseVector<DofValue> & values) override;
 
   /**
    * Write a nodal value to the passed-in solution vector
    */
-  void insertNodalValue(libMesh::NumericVector<libMesh::Number> & residual, const OutputData & v);
+  void insertNodalValue(libMesh::NumericVector<libMesh::Number> & residual, const DofValue & v);
 
   /**
    * Get the value of this variable at given node
    */
-  OutputData getNodalValue(const Node & node) const;
+  DofValue getNodalValue(const Node & node) const;
   /**
    * Get the old value of this variable at given node
    */
-  OutputData getNodalValueOld(const Node & node) const;
+  DofValue getNodalValueOld(const Node & node) const;
   /**
    * Get the t-2 value of this variable at given node
    */
-  OutputData getNodalValueOlder(const Node & node) const;
+  DofValue getNodalValueOlder(const Node & node) const;
   /**
    * Get the current value of this variable on an element
    * @param[in] elem   Element at which to get value
    * @param[in] idx    Local index of this variable's element DoFs
    * @return Variable value
    */
-  OutputData getElementalValue(const Elem * elem, unsigned int idx = 0) const;
+  DofValue getElementalValue(const Elem * elem, unsigned int idx = 0) const;
   /**
    * Get the old value of this variable on an element
    * @param[in] elem   Element at which to get value
    * @param[in] idx    Local index of this variable's element DoFs
    * @return Variable value
    */
-  OutputData getElementalValueOld(const Elem * elem, unsigned int idx = 0) const;
+  DofValue getElementalValueOld(const Elem * elem, unsigned int idx = 0) const;
   /**
    * Get the older value of this variable on an element
    * @param[in] elem   Element at which to get value
    * @param[in] idx    Local index of this variable's element DoFs
    * @return Variable value
    */
-  OutputData getElementalValueOlder(const Elem * elem, unsigned int idx = 0) const;
+  DofValue getElementalValueOlder(const Elem * elem, unsigned int idx = 0) const;
 
   /**
    * Set the current local DOF values to the input vector
@@ -578,33 +582,33 @@ public:
    */
   void addSolutionNeighbor(const DenseVector<libMesh::Number> & v);
 
-  const DoFValue & dofValue() const;
-  const DoFValue & dofValues() const override;
-  const DoFValue & dofValuesOld() const override;
-  const DoFValue & dofValuesOlder() const override;
-  const DoFValue & dofValuesPreviousNL() const override;
-  const DoFValue & dofValuesNeighbor() const override;
-  const DoFValue & dofValuesOldNeighbor() const override;
-  const DoFValue & dofValuesOlderNeighbor() const override;
-  const DoFValue & dofValuesPreviousNLNeighbor() const override;
-  const DoFValue & dofValuesDot() const override;
-  const DoFValue & dofValuesDotNeighbor() const override;
-  const DoFValue & dofValuesDotNeighborResidual() const;
-  const DoFValue & dofValuesDotOld() const override;
-  const DoFValue & dofValuesDotOldNeighbor() const override;
-  const DoFValue & dofValuesDotDot() const override;
-  const DoFValue & dofValuesDotDotNeighbor() const override;
-  const DoFValue & dofValuesDotDotNeighborResidual() const;
-  const DoFValue & dofValuesDotDotOld() const override;
-  const DoFValue & dofValuesDotDotOldNeighbor() const override;
+  const DofValues & dofValue() const;
+  const DofValues & dofValues() const override;
+  const DofValues & dofValuesOld() const override;
+  const DofValues & dofValuesOlder() const override;
+  const DofValues & dofValuesPreviousNL() const override;
+  const DofValues & dofValuesNeighbor() const override;
+  const DofValues & dofValuesOldNeighbor() const override;
+  const DofValues & dofValuesOlderNeighbor() const override;
+  const DofValues & dofValuesPreviousNLNeighbor() const override;
+  const DofValues & dofValuesDot() const override;
+  const DofValues & dofValuesDotNeighbor() const override;
+  const DofValues & dofValuesDotNeighborResidual() const;
+  const DofValues & dofValuesDotOld() const override;
+  const DofValues & dofValuesDotOldNeighbor() const override;
+  const DofValues & dofValuesDotDot() const override;
+  const DofValues & dofValuesDotDotNeighbor() const override;
+  const DofValues & dofValuesDotDotNeighborResidual() const;
+  const DofValues & dofValuesDotDotOld() const override;
+  const DofValues & dofValuesDotDotOldNeighbor() const override;
   const MooseArray<libMesh::Number> & dofValuesDuDotDu() const override;
   const MooseArray<libMesh::Number> & dofValuesDuDotDuNeighbor() const override;
   const MooseArray<libMesh::Number> & dofValuesDuDotDotDu() const override;
   const MooseArray<libMesh::Number> & dofValuesDuDotDotDuNeighbor() const override;
 
-  const MooseArray<ADReal> & adDofValues() const override;
-  const MooseArray<ADReal> & adDofValuesNeighbor() const override;
-  const MooseArray<ADReal> & adDofValuesDot() const override;
+  const ADDofValues & adDofValues() const override;
+  const ADDofValues & adDofValuesNeighbor() const override;
+  const ADDofValues & adDofValuesDot() const override;
 
   /**
    * Compute and store incremental change in solution at QPs based on increment_vec
@@ -693,8 +697,8 @@ public:
     return _element_data->nodalValueArray(Moose::Older);
   }
 
-  const DoFValue & nodalVectorTagValue(TagID tag) const override;
-  const DoFValue & nodalMatrixTagValue(TagID tag) const override;
+  const DofValues & nodalVectorTagValue(TagID tag) const override;
+  const DofValues & nodalMatrixTagValue(TagID tag) const override;
 
   const typename Moose::ADType<OutputType>::type & adNodalValue() const;
 
@@ -835,21 +839,21 @@ private:
 };
 
 template <typename OutputType>
-inline const MooseArray<ADReal> &
+inline const typename MooseVariableFE<OutputType>::ADDofValues &
 MooseVariableFE<OutputType>::adDofValues() const
 {
   return _element_data->adDofValues();
 }
 
 template <typename OutputType>
-inline const MooseArray<ADReal> &
+inline const typename MooseVariableFE<OutputType>::ADDofValues &
 MooseVariableFE<OutputType>::adDofValuesNeighbor() const
 {
   return _neighbor_data->adDofValues();
 }
 
 template <typename OutputType>
-inline const MooseArray<ADReal> &
+inline const typename MooseVariableFE<OutputType>::ADDofValues &
 MooseVariableFE<OutputType>::adDofValuesDot() const
 {
   return _element_data->adDofValuesDot();

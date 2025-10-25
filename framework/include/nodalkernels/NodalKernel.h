@@ -10,11 +10,12 @@
 #pragma once
 
 #include "NodalKernelBase.h"
+#include "MooseVariableInterface.h"
 
 /**
  * Base class for creating nodal kernels with hand-coded Jacobians
  */
-class NodalKernel : public NodalKernelBase
+class NodalKernel : public NodalKernelBase, public MooseVariableInterface<Real>
 {
 public:
   /**
@@ -49,6 +50,12 @@ public:
    */
   virtual void computeOffDiagJacobian(unsigned int jvar) override;
 
+  /**
+   * Gets the variable this is active on
+   * @return the variable
+   */
+  const MooseVariable & variable() const override { return _var; }
+
 protected:
   /**
    * The user can override this function to compute the residual at a node.
@@ -67,6 +74,9 @@ protected:
    * computing an off-diagonal jacobian component.
    */
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+
+  /// variable this works on
+  MooseVariable & _var;
 
   /// Value of the unknown variable this is acting on
   const VariableValue & _u;

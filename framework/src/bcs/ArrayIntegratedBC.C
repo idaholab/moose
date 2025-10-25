@@ -100,8 +100,6 @@ ArrayIntegratedBC::computeResidual()
   accumulateTaggedLocalResidual();
 
   if (_has_save_in)
-  {
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for (const auto & var : _save_in)
     {
       auto * avar = dynamic_cast<ArrayMooseVariable *>(var);
@@ -110,7 +108,6 @@ ArrayIntegratedBC::computeResidual()
       else
         mooseError("Save-in variable for an array kernel must be an array variable");
     }
-  }
 }
 
 void
@@ -135,7 +132,6 @@ ArrayIntegratedBC::computeJacobian()
   if (_has_diag_save_in)
   {
     DenseVector<Number> diag = _assembly.getJacobianDiagonal(_local_ke);
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for (const auto & var : _diag_save_in)
     {
       auto * avar = dynamic_cast<ArrayMooseVariable *>(var);
@@ -157,14 +153,19 @@ void
 ArrayIntegratedBC::computeOffDiagJacobian(const unsigned int jvar_num)
 {
   const auto & jvar = getVariable(jvar_num);
+  if (!jvar.dofIndices().size())
+    // If we have no dof indices then data like phiSize() can't be trusted. For instance a variable
+    // of constant monomial finite element type that lives only on lower-dimensional subdomains will
+    // have zero dof indices here (assuming this BC is being applied on a higher-D face) but will
+    // have a phiSize() of 1 corresponding to the number of shapes for that finite element type
+    // on the higher-dimensional element.
+    return;
+
+  const auto phi_size = jvar.phiSize();
 
   bool same_var = jvar_num == _var.number();
 
   prepareMatrixTag(_assembly, _var.number(), jvar_num);
-
-  // This (undisplaced) jvar could potentially yield the wrong phi size if this object is acting on
-  // the displaced mesh
-  auto phi_size = jvar.dofIndices().size();
 
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
@@ -174,7 +175,7 @@ ArrayIntegratedBC::computeOffDiagJacobian(const unsigned int jvar_num)
       {
         RealEigenMatrix v = _JxW[_qp] * _coord[_qp] * computeQpOffDiagJacobian(jvar);
         _assembly.saveFullLocalArrayJacobian(
-            _local_ke, _i, _test.size(), _j, jvar.phiSize(), _var.number(), jvar_num, v);
+            _local_ke, _i, _test.size(), _j, phi_size, _var.number(), jvar_num, v);
       }
   }
 
@@ -183,7 +184,6 @@ ArrayIntegratedBC::computeOffDiagJacobian(const unsigned int jvar_num)
   if (_has_diag_save_in && same_var)
   {
     DenseVector<Number> diag = _assembly.getJacobianDiagonal(_local_ke);
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for (const auto & var : _diag_save_in)
     {
       auto * avar = dynamic_cast<ArrayMooseVariable *>(var);

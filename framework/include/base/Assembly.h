@@ -1822,6 +1822,15 @@ public:
       re(i) += v(j);
   }
 
+  void saveLocalADArray(std::vector<ADReal> & re,
+                        unsigned int i,
+                        unsigned int ntest,
+                        const ADRealEigenVector & v) const
+  {
+    for (unsigned int j = 0; j < v.size(); ++j, i += ntest)
+      re[i] += v(j);
+  }
+
   /**
    * Helper function for assembling diagonal Jacobian contriubutions on local
    * quadrature points for an array kernel, bc, etc.
@@ -2090,8 +2099,7 @@ private:
    */
   void processLocalResidual(DenseVector<Number> & res_block,
                             std::vector<dof_id_type> & dof_indices,
-                            const std::vector<Real> & scaling_factor,
-                            bool is_nodal);
+                            const std::vector<Real> & scaling_factor);
 
   /**
    * Add a local residual block to a global residual vector with proper scaling.
@@ -2099,8 +2107,7 @@ private:
   void addResidualBlock(NumericVector<Number> & residual,
                         DenseVector<Number> & res_block,
                         const std::vector<dof_id_type> & dof_indices,
-                        const std::vector<Real> & scaling_factor,
-                        bool is_nodal);
+                        const std::vector<Real> & scaling_factor);
 
   /**
    * Push a local residual block with proper scaling into cache.
@@ -2109,8 +2116,7 @@ private:
                           std::vector<dof_id_type> & cached_residual_rows,
                           DenseVector<Number> & res_block,
                           const std::vector<dof_id_type> & dof_indices,
-                          const std::vector<Real> & scaling_factor,
-                          bool is_nodal);
+                          const std::vector<Real> & scaling_factor);
 
   /**
    * Set a local residual block to a global residual vector with proper scaling.
@@ -2118,8 +2124,7 @@ private:
   void setResidualBlock(NumericVector<Number> & residual,
                         DenseVector<Number> & res_block,
                         const std::vector<dof_id_type> & dof_indices,
-                        const std::vector<Real> & scaling_factor,
-                        bool is_nodal);
+                        const std::vector<Real> & scaling_factor);
 
   /**
    * Add a local Jacobian block to a global Jacobian with proper scaling.

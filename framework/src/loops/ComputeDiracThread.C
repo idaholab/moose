@@ -148,7 +148,6 @@ ComputeDiracThread::onElement(const Elem * elem)
 void
 ComputeDiracThread::postElement(const Elem * /*elem*/)
 {
-  Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
   if (!_is_jacobian)
     _fe_problem.addResidual(_tid);
   else

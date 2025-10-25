@@ -47,7 +47,7 @@ protected:
   /// Value of the unknown variable this BC is acting on
   const typename Moose::ADType<T>::type & _u;
 
-  const std::array<bool, 3> _set_components;
+  std::vector<bool> _set_components;
 
   using Base::_fe_problem;
   using Base::_subproblem;
@@ -67,8 +67,7 @@ private:
   /**
    * process the residual into the global data structures
    */
-  template <typename ADResidual>
-  void addResidual(const ADResidual & residual, const std::vector<dof_id_type> & dof_indices);
+  void addResidual(const T & residual, const std::vector<dof_id_type> & dof_indices);
 
   /**
    * process the Jacobian into the global data structures
@@ -89,3 +88,4 @@ InputParameters ADNodalBCTempl<RealVectorValue, ADDirichletBCBase>::validParams(
 
 using ADNodalBC = ADNodalBCTempl<Real, NodalBCBase>;
 using ADVectorNodalBC = ADNodalBCTempl<RealVectorValue, NodalBCBase>;
+using ADArrayNodalBC = ADNodalBCTempl<RealEigenVector, NodalBCBase>;
