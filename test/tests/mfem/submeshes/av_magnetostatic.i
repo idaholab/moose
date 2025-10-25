@@ -11,6 +11,7 @@
 []
 
 [FESpaces]
+  inactive = L2FESpace
   [HCurlFESpace]
     type = MFEMVectorFESpace
     fec_type = ND
@@ -19,6 +20,11 @@
   [HDivFESpace]
     type = MFEMVectorFESpace
     fec_type = RT
+    fec_order = CONSTANT
+  []
+  [L2FESpace]
+    type = MFEMVectorFESpace
+    fec_type = L2
     fec_order = CONSTANT
   []
 []
@@ -31,6 +37,7 @@
 []
 
 [AuxVariables]
+  inactive = lorentz_force
   [b_field]
     type = MFEMVariable
     fespace = HDivFESpace
@@ -39,13 +46,27 @@
     type = MFEMVariable
     fespace = HCurlFESpace
   []
+  [lorentz_force]
+    type = MFEMVariable
+    fespace = L2FESpace
+  []
 []
 
 [AuxKernels]
+  inactive = cross
   [curl]
     type = MFEMCurlAux
     variable = b_field
     source = a_field
+    scale_factor = 1.0
+    execute_on = TIMESTEP_END
+    execution_order_group = 3
+  []
+  [cross]
+    type = MFEMCrossProductAux
+    variable = lorentz_force
+    u = e_field
+    v = b_field
     scale_factor = 1.0
     execute_on = TIMESTEP_END
     execution_order_group = 3

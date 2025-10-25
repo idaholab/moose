@@ -37,6 +37,9 @@ private:
 
   /// The number of vector components in the reference space.
   const int _range_dim;
+
+  /// Name of the map types VALUE or INTEGRAL to use (meaningfull only for L2)
+  const std::string _fec_map;
 };
 
 #endif
