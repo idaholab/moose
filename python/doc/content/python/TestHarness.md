@@ -125,6 +125,8 @@ that MOOSE [uses](/application_usage/input_syntax.html optional=True). An exampl
 
 !listing moose/test/tests/kernels/simple_diffusion/tests
 
+The available options depend on the Tester type; see the links above for lists of these options. Some common options include `capabilities`, which can for example, restrict the test to conditionally be skipped based on the testing configuration; see [Capabilities.md] for more information.
+
 ## Test Evaluation and Custom Evaluators
 
 MOOSE has various configurations for evaluating whether a created test is successful or not. Depending on what type of Tester you specify in the "test specification" file, these can range from comparing the output of JSON, XML, CSV, or Exodus files, or matching a pattern in the output of the test using a regular expression.
