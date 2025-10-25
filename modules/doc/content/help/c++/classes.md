@@ -1,6 +1,6 @@
 # Classes and Object Oriented Programming
 
-[](---)
+
 
 ## Object Oriented Definitions
 
@@ -15,7 +15,7 @@
   - Also known as an "object"
   - Analogy: You can use one "blue print" to build many buildings. You can use one "class" to build many "objects"
 
-[](---)
+
 
 ## Object Oriented Design
 
@@ -24,7 +24,7 @@
 - Inheritance gives us the ability to abstract or "factor out" common data and functions out of related types into a single location for consistency (avoids code duplication) and enables *code re-use*.
 - Polymorphism gives us the ability to write *generic algorithms* that automatically work with derived types.
 
-[](---)
+
 
 ## Encapsulation (Point.h)
 
@@ -44,7 +44,7 @@ private:
 };
 ```
 
-[](---)
+
 
 ## Constructors
 
@@ -65,7 +65,7 @@ Point::Point(float x, float y) :
 {}  // The body is often empty
 ```
 
-[](---)
+
 
 ## Point Class Definitions (Point.C)
 
@@ -81,7 +81,7 @@ void Point::setY(float y) { _y = y; }
 
 This data is safely encapsulated so we can change the implementation without affecting users of this type.
 
-[](---)
+
 
 ## Changing the implementation (Point.h)
 
@@ -100,7 +100,7 @@ private:
 };
 ```
 
-[](---)
+
 
 ## New Point Class Body (Point.C)
 
@@ -118,7 +118,7 @@ void Point::setX(float x) { _coords[0] = x; }
 void Point::setY(float y) { _coords[1] = y; }
 ```
 
-[](---)
+
 
 ## Using the Point Class (main.C)
 
@@ -134,7 +134,7 @@ int main()
 }
 ```
 
-[](---)
+
 
 ## Operator Overloading
 
@@ -154,7 +154,7 @@ c.setY(a.getY() + b.getY());
 c = a + b;
 ```
 
-[](---)
+
 
 ## Operator Overloading
 
@@ -174,7 +174,7 @@ Point & Point::operator=(const Point & p)
 }
 ```
 
-[](---)
+
 
 ## Using "Point" with Operators
 
@@ -189,7 +189,7 @@ int main()
 }
 ```
 
-[](---)
+
 
 ## A more Advanced Example (Shape.h)
 
@@ -208,7 +208,7 @@ protected:
 };
 ```
 
-[](---)
+
 
 ## The Derived Classes (Rectangle.h)
 
@@ -233,7 +233,7 @@ protected:
 };
 ```
 
-[](---)
+
 
 ## The derived Classes (Circle.h)
 
@@ -256,7 +256,7 @@ protected:
 };
 ```
 
-[](---)
+
 
 ## Inheritance (Is a ...)
 
@@ -274,7 +274,7 @@ Shape & s_ref = rectangle;
 Shape * s_ptr = &rectangle;
 ```
 
-[](---)
+
 
 ## Deciphering Long Declarations
 
@@ -288,7 +288,7 @@ Mesh * mesh;
 InputParameters & params; 
 ```
 
-[](---)
+
 
 ## Writing a Generic Algorithm
 
@@ -310,7 +310,7 @@ void printInformation(const Shape & shape)
 // 28.274
 ```
 
-[](---)
+
 
 ## Homework Ideas
 
