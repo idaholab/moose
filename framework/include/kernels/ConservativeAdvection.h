@@ -31,6 +31,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar) override;
   virtual void computeResidual() override;
   virtual void computeJacobian() override;
+  virtual const GenericReal<is_ad> & getUNodal(const std::size_t n) const { return _u_nodal[n]; }
 
   /// Material property multiplied against the velocity to scale advection strength
   const GenericMaterialProperty<Real, is_ad> & _scalar;

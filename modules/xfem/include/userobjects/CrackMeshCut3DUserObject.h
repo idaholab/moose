@@ -57,12 +57,7 @@ public:
     Get crack front points in the active segment
     -1 means inactive; positive is the point's index in the Crack Front Definition starting from 0
    */
-  std::vector<int> getFrontPointsIndex();
-
-  /**
-    Return growth size at the active boundary to the mesh cutter
-   */
-  void setSubCriticalGrowthSize(std::vector<Real> & growth_size);
+  std::vector<int> getFrontPointsIndex() const;
 
   /**
     Return the total number of crack front points.
@@ -104,11 +99,11 @@ protected:
   /// Enum to for crack growth rate
   enum class GrowthRateEnum
   {
-    FATIGUE,
+    REPORTER,
     FUNCTION
   };
-  /// The rate method for growing mesh at the front
-  const GrowthRateEnum _growth_rate_method;
+  /// The growth increment method for growing mesh at the front
+  const GrowthRateEnum _growth_increment_method;
 
   /// The structural mesh must be 3D only
   const unsigned int _elem_dim = 3;
@@ -149,13 +144,6 @@ protected:
 
   /// Growth direction for active boundaries
   std::vector<std::vector<Point>> _active_direction;
-
-  /// Growth size for the active boundary in a subcritical simulation
-  std::vector<Real> _growth_size;
-
-  /// Fatigue life
-  std::vector<unsigned long int> _dn;
-  std::vector<unsigned long int> _n;
 
   /// New boundary after growth
   std::vector<std::vector<dof_id_type>> _front;
@@ -267,4 +255,11 @@ protected:
   const Function * _func_y;
   const Function * _func_z;
   const Function * _func_v;
+
+  /// Pointer to fracture integral ki if available
+  const std::vector<Real> * const _ki_vpp;
+  /// Pointer to fracture integral kii if available
+  const std::vector<Real> * const _kii_vpp;
+  /// Pointer to reporter with growth increment if available
+  const std::vector<Real> * const _growth_inc_reporter;
 };
