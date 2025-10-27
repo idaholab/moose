@@ -242,7 +242,7 @@ public:
 
   inline static std::string createTimeDerivativeName(std::string_view name)
   {
-    return std::string("d") + name + std::string("_dt");
+    return std::string("d") + std::string(name) + std::string("_dt");
   }
 
 private:
