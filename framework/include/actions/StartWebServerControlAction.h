@@ -14,12 +14,12 @@
 /**
  * Starts the web server(s) for the WebServerControl objects.
  */
-class WebServerControlStartServerAction : public Action
+class StartWebServerControlAction : public Action
 {
 public:
   static InputParameters validParams();
 
-  WebServerControlStartServerAction(const InputParameters & parameters);
+  StartWebServerControlAction(const InputParameters & parameters);
 
   virtual void act() override final;
 };

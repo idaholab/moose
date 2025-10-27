@@ -58,7 +58,7 @@ WebServerControl::~WebServerControl()
 }
 
 void
-WebServerControl::startServer(const Moose::PassKey<WebServerControlStartServerAction>)
+WebServerControl::startServer(const Moose::PassKey<StartWebServerControlAction>)
 {
   // Only start on rank 0
   if (processor_id() == 0)

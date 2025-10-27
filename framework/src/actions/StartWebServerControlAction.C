@@ -7,29 +7,28 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "WebServerControlStartServerAction.h"
+#include "StartWebServerControlAction.h"
 #include "ChainControl.h"
 #include "FEProblemBase.h"
 #include "WebServerControl.h"
 
-registerMooseAction("MooseApp", WebServerControlStartServerAction, "webservercontrol_start_server");
+registerMooseAction("MooseApp", StartWebServerControlAction, "start_webservercontrol");
 
 InputParameters
-WebServerControlStartServerAction::validParams()
+StartWebServerControlAction::validParams()
 {
   InputParameters params = Action::validParams();
   params.addClassDescription("Starts the web server(s) for the WebServerControl objects.");
   return params;
 }
 
-WebServerControlStartServerAction::WebServerControlStartServerAction(
-    const InputParameters & parameters)
+StartWebServerControlAction::StartWebServerControlAction(const InputParameters & parameters)
   : Action(parameters)
 {
 }
 
 void
-WebServerControlStartServerAction::act()
+StartWebServerControlAction::act()
 {
   for (auto & control_ptr : _problem->getControlWarehouse().getObjects())
     if (auto wsc_ptr = dynamic_cast<WebServerControl *>(control_ptr.get()))

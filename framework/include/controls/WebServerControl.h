@@ -21,7 +21,7 @@
 #include <memory>
 #include <thread>
 
-class WebServerControlStartServerAction;
+class StartWebServerControlAction;
 
 /**
  * Starts a webserver that an external process can connect to
@@ -38,9 +38,9 @@ public:
   /**
    * Start the server
    *
-   * Called by the WebServerControlStartServerAction after controls are setup
+   * Called by the StartWebServerControlAction after controls are setup
    */
-  void startServer(const Moose::PassKey<WebServerControlStartServerAction>);
+  void startServer(const Moose::PassKey<StartWebServerControlAction>);
 
   virtual void execute() override final;
 
