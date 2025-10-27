@@ -87,6 +87,17 @@ public:
   getDimensions() const = 0; // pure virtual function
 
   /**
+   * @brief change the value of a dimension parameter for the lattice. Each lattice type shall
+   * determine which dimensions (dim_name) are able to be changed and check for validity of the new
+   * value.
+   *
+   * @param dim_name
+   * @param dim_value
+   */
+  virtual void updateDimension(const std::string & dim_name,
+                               std::any dim_value) = 0; // pure virtual
+
+  /**
    * @brief Checks if the given index location is a valid index for the lattice
    *
    * @param index location
@@ -159,17 +170,6 @@ protected:
    * @return true if valid, otherwise false
    */
   virtual bool hasValidDimensions() const = 0; // pure virtual function
-
-  /**
-   * @brief change the value of a dimension parameter for the lattice. Each lattice type shall
-   * determine which dimensions (dim_name) are able to be changed and check for validity of the new
-   * value.
-   *
-   * @param dim_name
-   * @param dim_value
-   */
-  virtual void updateDimension(const std::string & dim_name,
-                               std::any dim_value) = 0; // pure virtual
 
   // helper function for comparing dimensions maps of various data types (data depends on lattice
   // type)

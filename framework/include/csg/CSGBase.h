@@ -339,19 +339,6 @@ public:
   }
 
   /**
-   * @brief change a dimension of the lattice
-   *
-   * @param lattice lattice to update
-   * @param dim_name name of the dimension to change
-   * @param dim_value new value for the dimension
-   */
-  void
-  updateLatticeDimension(CSGLattice & lattice, const std::string & dim_name, std::any dim_value)
-  {
-    lattice.updateDimension(dim_name, dim_value);
-  }
-
-  /**
    * @brief Get all lattice objects
    *
    * @return list of references to CSGLattice objects in this CSGBase instance
