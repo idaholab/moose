@@ -229,19 +229,19 @@ CSGBase::createCartesianLattice(
 }
 
 void
-CSGBase::addUniverseToLattice(CSGLattice & lattice,
-                              std::reference_wrapper<const CSGUniverse> & universe,
+CSGBase::addUniverseToLattice(const CSGLattice & lattice,
+                              const CSGUniverse & universe,
                               std::pair<int, int> index)
 {
   if (!checkUniverseInBase(universe))
-    mooseError("Cannot add universe " + universe.get().getName() + " to lattice " +
-               lattice.getName() + ". Universe is not in the CSGBase instance.");
-  lattice.setUniverseAtIndex(universe, index);
+    mooseError("Cannot add universe " + universe.getName() + " to lattice " + lattice.getName() +
+               ". Universe is not in the CSGBase instance.");
+  const_cast<CSGLattice &>(lattice).setUniverseAtIndex(std::cref(universe), index);
 }
 
 void
 CSGBase::setLatticeUniverses(
-    CSGLattice & lattice,
+    const CSGLattice & lattice,
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> & universes)
 {
   // make sure all universes are a part of this base instance
@@ -254,6 +254,7 @@ CSGBase::setLatticeUniverses(
                    univ.getName() + " is not in the CSGBase instance.");
     }
   }
+  const_cast<CSGLattice &>(lattice).setUniverses(universes);
 }
 
 void

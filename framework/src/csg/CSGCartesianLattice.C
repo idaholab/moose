@@ -17,8 +17,8 @@ CSGCartesianLattice::CSGCartesianLattice(
     const Real pitch,
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes)
   : CSGLattice(name, MooseUtils::prettyCppType<CSGCartesianLattice>()),
-    _nx0(universes.size()),
-    _nx1(universes[0].size()),
+    _nx0(universes.size()),    // number of rows
+    _nx1(universes[0].size()), // number of columns
     _pitch(pitch)
 {
   setUniverses(universes);
@@ -110,11 +110,11 @@ CSGCartesianLattice::getDimensions() const
 bool
 CSGCartesianLattice::isValidIndex(const std::pair<int, int> index) const
 {
-  auto x0 = index.first;  // must be (0 <= x0 < _nx0)
-  auto x1 = index.second; // must be (0 <= x1 < _nx1)
-  if (x0 < 0 || x0 >= _nx0 || x1 < 0 || x1 >= _nx1)
-    return false;
-  return true;
+  auto x0 = index.first;  // must be (0 <= x0 < _nx0); rows
+  auto x1 = index.second; // must be (0 <= x1 < _nx1); cols
+  if ((0 <= x0 && x0 < _nx0) && (0 <= x1 && x1 < _nx1))
+    return true;
+  return false;
 }
 
 bool
