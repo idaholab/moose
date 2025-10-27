@@ -59,6 +59,18 @@ public:
   virtual std::unordered_map<std::string, std::any> getDimensions() const override;
 
   /**
+   * @brief update the specified lattice geometric dimension to the specified value.
+   * Valid dimensions are: pitch (Real), nx0 (int), and nx1 (int). If the universe
+   * map has already been set on the lattice, nx0 and nx1 cannot be updated.
+   *
+   * NOTE: this might not need to be protected?
+   *
+   * @param dim_name string name of the dimension
+   * @param dim_value new value to set as the dimension.
+   */
+  virtual void updateDimension(const std::string & dim_name, std::any dim_value) override;
+
+  /**
    * @brief Checks if the given index location ((row, column) or (x0, x1)) is a valid index for the
    * lattice. Allowable indices are: 0 <= row < _nx0 and 0 <= column < _nx1.
    *
@@ -85,18 +97,6 @@ protected:
    */
   virtual bool hasValidDimensions() const override;
 
-  /**
-   * @brief update the specified lattice geometric dimension to the specified value.
-   * Valid dimensions are: pitch (Real), nx0 (int), and nx1 (int). If the universe
-   * map has already been set on the lattice, nx0 and nx1 cannot be updated.
-   *
-   * NOTE: this might not need to be protected?
-   *
-   * @param dim_name string name of the dimension
-   * @param dim_value new value to set as the dimension.
-   */
-  virtual void updateDimension(const std::string & dim_name, std::any dim_value) override;
-
   // helper function for comparing dimensions maps of various data types (data depends on lattice
   // type)
   virtual bool compareDimensions(const CSGLattice & other) const override;
@@ -114,11 +114,5 @@ protected:
 
   /// @brief string names of the dimension parameters that defined the geometry of the lattice
   // MooseEnum _dimension_names{"nx0 nx1 pitch"};
-#ifdef MOOSE_UNIT_TEST
-  /// Friends for unit testing
-  ///@{
-  FRIEND_TEST(CSGLatticeTest, testCartUpdateDimension);
-  ///@}
-#endif
 };
 }
