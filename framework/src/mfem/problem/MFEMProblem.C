@@ -50,8 +50,8 @@ MFEMProblem::setMesh()
   auto pmesh = mesh().getMFEMParMeshPtr();
   getProblemData().pmesh = pmesh;
   getProblemData().comm = pmesh->GetComm();
-  MPI_Comm_size(pmesh->GetComm(), &(getProblemData().num_procs));
-  MPI_Comm_rank(pmesh->GetComm(), &(getProblemData().myid));
+  getProblemData().num_procs = pmesh->GetNRanks();
+  getProblemData().myid = pmesh->GetMyRank();
 }
 
 void
@@ -76,7 +76,7 @@ MFEMProblem::addMFEMSolver(const std::string & user_object_name,
 void
 MFEMProblem::addMFEMNonlinearSolver()
 {
-  auto nl_solver = std::make_shared<mfem::NewtonSolver>(getProblemData().comm);
+  auto nl_solver = std::make_shared<mfem::NewtonSolver>(getComm());
 
   // Defaults to one iteration, without further nonlinear iterations
   nl_solver->SetRelTol(0.0);

@@ -66,10 +66,8 @@ MFEMCutTransitionSubMesh::buildSubMesh()
 void
 MFEMCutTransitionSubMesh::labelMesh(mfem::ParMesh & parent_mesh)
 {
-  int mpi_comm_rank = 0;
-  int mpi_comm_size = 1;
-  MPI_Comm_rank(getMFEMProblem().getComm(), &mpi_comm_rank);
-  MPI_Comm_size(getMFEMProblem().getComm(), &mpi_comm_size);
+  int mpi_comm_rank = getMFEMProblem().getProblemData().myid;
+  int mpi_comm_size = getMFEMProblem().getProblemData().num_procs;
 
   // First determine face normal based on the first boundary element found on the cut
   // to use when determining orientation relative to the cut
