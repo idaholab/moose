@@ -262,6 +262,7 @@ CSGBase::joinOtherBase(std::unique_ptr<CSGBase> base)
 {
   joinSurfaceList(base->getSurfaceList());
   joinCellList(base->getCellList());
+  joinLatticeList(base->getLatticeList());
   joinUniverseList(base->getUniverseList());
 }
 
@@ -270,6 +271,7 @@ CSGBase::joinOtherBase(std::unique_ptr<CSGBase> base, std::string & new_root_nam
 {
   joinSurfaceList(base->getSurfaceList());
   joinCellList(base->getCellList());
+  joinLatticeList(base->getLatticeList());
   joinUniverseList(base->getUniverseList(), new_root_name_join);
 }
 
@@ -280,6 +282,7 @@ CSGBase::joinOtherBase(std::unique_ptr<CSGBase> base,
 {
   joinSurfaceList(base->getSurfaceList());
   joinCellList(base->getCellList());
+  joinLatticeList(base->getLatticeList());
   joinUniverseList(base->getUniverseList(), new_root_name_base, new_root_name_join);
 }
 
@@ -300,6 +303,14 @@ CSGBase::joinCellList(CSGCellList & cell_list)
   auto & cell_list_map = cell_list.getCellListMap();
   for (auto & c : cell_list_map)
     _cell_list.addCell(std::move(c.second));
+}
+
+void
+CSGBase::joinLatticeList(CSGLatticeList & lattice_list)
+{
+  auto & lat_list_map = lattice_list.getLatticeListMap();
+  for (auto & lat : lat_list_map)
+    _lattice_list.addLattice(std::move(lat.second));
 }
 
 void
