@@ -32,7 +32,14 @@ FaceInfo::FaceInfo(const ElemInfo * elem_info,
   auto & face = side_builder(*_elem_info->elem(), side);
   _face_area = face.volume();
   _face_centroid = face.vertex_average();
-  _normal = _elem_info->elem()->side_vertex_average_normal(side);
+  // Workaround until libMesh PR#4292 is available
+  if (_elem_info->elem()->first_order_equivalent_type(_elem_info->elem()->type()) != EDGE2)
+    _normal = _elem_info->elem()->side_vertex_average_normal(side);
+  else
+  {
+    const auto v = (_elem_info->elem()->point(0) - _elem_info->elem()->point(1)).unit();
+    _normal = (side == 0) ? v : -v;
+  }
 }
 
 void
