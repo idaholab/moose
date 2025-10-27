@@ -18,7 +18,7 @@ MFEMProblemSolve::validParams()
 {
   InputParameters params = emptyInputParameters();
   params.addClassDescription("Solve object for MFEM problems.");
-  params.addParam<unsigned int>("nl_max_its", 50, "Max Nonlinear Iterations");
+  params.addParam<unsigned int>("nl_max_its", 1, "Max Nonlinear Iterations");
   params.addParam<Real>("nl_abs_tol", 1.0e-50, "Nonlinear Absolute Tolerance");
   params.addParam<Real>("nl_rel_tol", 1.0e-8, "Nonlinear Relative Tolerance");
   params.addParam<unsigned int>("print_level", 1, "Print level");
