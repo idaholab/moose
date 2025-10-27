@@ -15,6 +15,8 @@
 
 #include "libmesh/fe_type.h"
 
+#include <mutex>
+
 class AuxiliarySystem;
 
 /**
@@ -54,4 +56,11 @@ protected:
   BoundaryID _corner_boundary_id;
 
   const VariablePhiGradient & _grad_phi;
+
+private:
+  static std::mutex _nodal_normals_mutex;
+
+  // For access to mutex
+  friend class NodalNormalsCorner;
+  friend class NodalNormalsEvaluator;
 };

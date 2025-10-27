@@ -46,6 +46,8 @@ NodalNormalsEvaluator::execute()
                                                Moose::VarFieldType::VAR_FIELD_STANDARD)
                                   .number()) > 0)
     {
+      std::scoped_lock lock(NodalNormalsPreprocessor::_nodal_normals_mutex);
+
       dof_id_type dof_x =
           _current_node->dof_number(_aux.number(),
                                     _fe_problem
