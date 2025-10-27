@@ -74,7 +74,9 @@ WCNSFVFlowPhysicsBase::validParams()
 
   // Fluid properties
   params.addParam<UserObjectName>(NS::fluid, "Fluid properties userobject");
-  params.addParamNamesToGroup(NS::fluid, "Material properties");
+  params.addParam<FunctionName>(
+      "mu_rampdown", 1, "A function describing a ramp down of viscosity over time");
+  params.addParamNamesToGroup(NS::fluid + " mu_rampdown", "Material properties");
 
   // Parameter groups
   params.addParamNamesToGroup(
@@ -321,11 +323,10 @@ WCNSFVFlowPhysicsBase::addFluidPropertiesFunctorMaterial()
   InputParameters params = getFactory().getValidParams(class_name);
   assignBlocks(params, _blocks);
 
-  params.set<UserObjectName>(NS::fluid) = getParam<UserObjectName>(NS::fluid);
   params.set<MooseFunctorName>(NS::pressure) = _pressure_name;
   params.set<MooseFunctorName>(NS::T_fluid) = _fluid_temperature_name;
   params.set<MooseFunctorName>(NS::speed) = NS::speed;
-  params.set<MooseFunctorName>(NS::density) = _density_name;
+  params.applySpecificParameters(parameters(), {NS::fluid, NS::density, "mu_rampdown"});
   if (!MooseUtils::parsesToReal(_density_name))
     params.set<bool>("force_define_density") = true;
   if (!_porous_medium_treatment)
