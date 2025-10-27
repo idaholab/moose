@@ -620,6 +620,59 @@ TEST(CSGBaseTest, testSetLatticeUniverses)
   }
 }
 
+/// tests CSGBase::renameLattice
+TEST(CSGBaseTest, testRenameLattice)
+{
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  const CSGLattice & lat = csg_obj->createCartesianLattice("original_name", 2, 2, 1.0);
+  {
+    // successful rename
+    csg_obj->renameLattice(lat, "new_name");
+    ASSERT_EQ("new_name", lat.getName());
+  }
+  {
+    // try to rename to existing name
+    const CSGLattice & lat2 = csg_obj->createCartesianLattice("another_lattice", 2, 2, 1.0);
+    Moose::UnitUtils::assertThrows(
+        [&csg_obj, &lat2]() { csg_obj->renameLattice(lat2, "new_name"); },
+        "Lattice with name new_name already exists in geometry.");
+  }
+  {
+    // try to rename lattice that does not exist in this base
+    auto csg_obj2 = std::make_unique<CSG::CSGBase>();
+    const CSGLattice & lat3 = csg_obj2->createCartesianLattice("another_lattice", 2, 2, 1.0);
+    Moose::UnitUtils::assertThrows([&csg_obj, &lat3]()
+                                   { csg_obj->renameLattice(lat3, "some_name"); },
+                                   "another_lattice cannot be renamed to some_name as it does not "
+                                   "exist in this CSGBase instance.");
+  }
+}
+
+/// tests CSGBase::getLatticeByName and CSGBase::getAllLattices
+TEST(CSGBaseTest, testGetLatticeMethods)
+{
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  const CSGLattice & lat = csg_obj->createCartesianLattice("lattice1", 2, 2, 1.0);
+  {
+    // get lattice by name successfully
+    const CSGLattice & lat_get = csg_obj->getLatticeByName("lattice1");
+    ASSERT_EQ(lat, lat_get);
+  }
+  {
+    // try to get lattice by name that does not exist
+    Moose::UnitUtils::assertThrows([&csg_obj]() { csg_obj->getLatticeByName("fake_name"); },
+                                   "No lattice by name fake_name exists in the geometry.");
+  }
+  {
+    // get all lattices
+    const CSGLattice & lat2 = csg_obj->createCartesianLattice("lattice2", 3, 3, 1.0);
+    auto all_lats = csg_obj->getAllLattices();
+    ASSERT_EQ(2, all_lats.size());
+    ASSERT_TRUE(((all_lats[0].get() == lat) && (all_lats[1].get() == lat2)) ||
+                ((all_lats[0].get() == lat2) && (all_lats[1].get() == lat)));
+  }
+}
+
 /**
  * CSGBase::joinOtherBase methods
  */
