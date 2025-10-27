@@ -98,11 +98,7 @@ MFEMVectorFESpace::getFECName() const
   {
     return "L2Int" + basis + "_" + std::to_string(pdim) + "D_P" + std::to_string(_fec_order);
   }
-  else
-  {
-    mooseWarning("INTEGRAL map type is only meaningful for L2");
-  }
-
+ 
   return actual_type + basis + "_" + std::to_string(pdim) + "D_P" + std::to_string(_fec_order);
 }
 

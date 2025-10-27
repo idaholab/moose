@@ -47,8 +47,8 @@
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     restep = false
-[]
-[MFEMDotProductAux.C]
+  []
+  [MFEMDotProductAux.C]
     type = CSVDiff
     input = ../submeshes/av_magnetostatic.i
     cli_args = 'FESpaces/inactive="" '
@@ -65,4 +65,5 @@
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     restep = false
+  []
 []

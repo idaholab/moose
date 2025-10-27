@@ -23,7 +23,7 @@
  *   - scale_factor (mfem::real_t, default=1.0): constant multiplier s(x)=scale_factor
  *
  * Notes:
- *   - Requires variable to be L2_FECollection with map_type = INTEGRAL.
+ *   - Default L2_FECollection with map_type = VALUE and optional map_type = INTEGRAL .
  *   - Currently supports only interior DOFs (no shared/constrained DOFs).
  *   - Enforces 3D: mesh dimension and all involved vdim must be 3.
  */
