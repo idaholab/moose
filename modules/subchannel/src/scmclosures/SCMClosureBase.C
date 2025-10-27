@@ -31,7 +31,6 @@ SCMClosureBase::validParams()
 
 SCMClosureBase::SCMClosureBase(const InputParameters & parameters)
   : ThreadedGeneralUserObject(parameters),
-    SolutionInvalidInterface(this),
     _subchannel_mesh(SCM::getConstMesh<SubChannelMesh>(_subproblem.mesh()))
 {
 }

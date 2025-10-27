@@ -243,8 +243,6 @@ public:
   std::unique_ptr<SolutionHandle> _Tduct_soln;          // Only used for ducted assemblies
   std::unique_ptr<SolutionHandle> _displacement_soln;
   std::unique_ptr<SolutionHandle> _ff_soln;
-  std::unique_ptr<SolutionHandle> _ff_a_soln;
-  std::unique_ptr<SolutionHandle> _ff_b_soln;
 
   /// Petsc Functions
   inline PetscErrorCode createPetscVector(Vec & v, PetscInt n)

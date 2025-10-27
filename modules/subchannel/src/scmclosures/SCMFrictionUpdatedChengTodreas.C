@@ -21,7 +21,8 @@ SCMFrictionUpdatedChengTodreas::validParams()
 SCMFrictionUpdatedChengTodreas::SCMFrictionUpdatedChengTodreas(const InputParameters & parameters)
   : SCMFrictionClosureBase(parameters),
     _is_tri_lattice(dynamic_cast<const TriSubChannelMesh *>(&_subchannel_mesh) != nullptr),
-    _tri_sch_mesh(dynamic_cast<const TriSubChannelMesh *>(&_subchannel_mesh))
+    _tri_sch_mesh(dynamic_cast<const TriSubChannelMesh *>(&_subchannel_mesh)),
+    _quad_sch_mesh(dynamic_cast<const QuadSubChannelMesh *>(&_subchannel_mesh))
 {
 }
 
@@ -224,7 +225,128 @@ SCMFrictionUpdatedChengTodreas::computeTriLatticeFrictionFactor(
 
 Real
 SCMFrictionUpdatedChengTodreas::computeQuadLatticeFrictionFactor(
-    const FrictionStruct & /* friction_args */) const
+    const FrictionStruct & friction_args) const
 {
-  mooseError("Not implemented");
+  auto Re = friction_args.Re;
+  auto i_ch = friction_args.i_ch;
+  /// Todreas-Kazimi NUCLEAR SYSTEMS, second edition, Volume 1, 2011
+  Real aL, b1L, b2L, cL;
+  Real aT, b1T, b2T, cT;
+  auto pitch = _subchannel_mesh.getPitch();
+  auto pin_diameter = _subchannel_mesh.getPinDiameter();
+  // This gap is a constant value for the whole assembly. Might want to make it
+  // subchannel specific in the future if we have duct deformation.
+  auto side_gap = _quad_sch_mesh->getSideGap();
+  auto w = (pin_diameter / 2.0) + (pitch / 2.0) + side_gap;
+  auto p_over_d = pitch / pin_diameter;
+  auto w_over_d = w / pin_diameter;
+  auto ReL = std::pow(10, (p_over_d - 1)) * 320.0;
+  auto ReT = std::pow(10, 0.7 * (p_over_d - 1)) * 1.0E+4;
+  auto psi = std::log(Re / ReL) / std::log(ReT / ReL);
+  auto subch_type = _subchannel_mesh.getSubchannelType(i_ch);
+
+  // Find the coefficients of bare Pin bundle friction factor
+  // correlations for turbulent and laminar flow regimes. Todreas & Kazimi, Nuclear Systems Volume
+  // 1
+  if (subch_type == EChannelType::CENTER)
+  {
+    if (p_over_d < 1.1)
+    {
+      aL = 26.37;
+      b1L = 374.2;
+      b2L = -493.9;
+      aT = 0.09423;
+      b1T = 0.5806;
+      b2T = -1.239;
+    }
+    else
+    {
+      aL = 35.55;
+      b1L = 263.7;
+      b2L = -190.2;
+      aT = 0.1339;
+      b1T = 0.09059;
+      b2T = -0.09926;
+    }
+    // laminar flow friction factor for bare Pin bundle - Center subchannel
+    cL = aL + b1L * (p_over_d - 1) + b2L * Utility::pow<2>((p_over_d - 1));
+    // turbulent flow friction factor for bare Pin bundle - Center subchannel
+    cT = aT + b1T * (p_over_d - 1) + b2T * Utility::pow<2>((p_over_d - 1));
+  }
+  else if (subch_type == EChannelType::EDGE)
+  {
+    if (p_over_d < 1.1)
+    {
+      aL = 26.18;
+      b1L = 554.5;
+      b2L = -1480;
+      aT = 0.09377;
+      b1T = 0.8732;
+      b2T = -3.341;
+    }
+    else
+    {
+      aL = 44.40;
+      b1L = 256.7;
+      b2L = -267.6;
+      aT = 0.1430;
+      b1T = 0.04199;
+      b2T = -0.04428;
+    }
+    // laminar flow friction factor for bare Pin bundle - Edge subchannel
+    cL = aL + b1L * (w_over_d - 1) + b2L * Utility::pow<2>((w_over_d - 1));
+    // turbulent flow friction factor for bare Pin bundle - Edge subchannel
+    cT = aT + b1T * (w_over_d - 1) + b2T * Utility::pow<2>((w_over_d - 1));
+  }
+  else
+  {
+    if (p_over_d < 1.1)
+    {
+      aL = 28.62;
+      b1L = 715.9;
+      b2L = -2807;
+      aT = 0.09755;
+      b1T = 1.127;
+      b2T = -6.304;
+    }
+    else
+    {
+      aL = 58.83;
+      b1L = 160.7;
+      b2L = -203.5;
+      aT = 0.1452;
+      b1T = 0.02681;
+      b2T = -0.03411;
+    }
+    // laminar flow friction factor for bare Pin bundle - Corner subchannel
+    cL = aL + b1L * (w_over_d - 1) + b2L * Utility::pow<2>((w_over_d - 1));
+    // turbulent flow friction factor for bare Pin bundle - Corner subchannel
+    cT = aT + b1T * (w_over_d - 1) + b2T * Utility::pow<2>((w_over_d - 1));
+  }
+  // laminar friction factor and turbulent friction factor coefficients (power-law form)
+  const Real bL = -1.0;
+  const Real bT = -0.18;
+
+  Real a, b;
+  if (Re < ReL)
+  {
+    // laminar flow
+    a = cL;
+    b = bL;
+  }
+  else if (Re > ReT)
+  {
+    // turbulent flow
+    a = cT;
+    b = bT;
+  }
+  else
+  {
+    // transitional regime: enforce f = a * Re^{b} with log-space blending
+    const Real b_eff = (1.0 - psi) * bL + psi * bT;
+    const Real a_eff = std::exp((1.0 - psi) * std::log(cL) + psi * std::log(cT));
+    a = a_eff;
+    b = b_eff;
+  }
+  return a * std::pow(Re, b);
 }
