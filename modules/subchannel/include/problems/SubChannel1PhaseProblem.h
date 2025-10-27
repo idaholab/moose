@@ -13,13 +13,15 @@
 #include "SubChannelApp.h"
 #include "QuadSubChannelMesh.h"
 #include "SolutionHandle.h"
-#include "SinglePhaseFluidProperties.h"
 #include <petscdm.h>
 #include <petscdmda.h>
 #include <petscksp.h>
 #include <petscsys.h>
 #include <petscvec.h>
 #include <petscsnes.h>
+
+class SinglePhaseFluidProperties;
+class SCMFrictionClosureBase;
 
 /**
  * Base class for the 1-phase steady-state/transient subchannel solver.
@@ -40,17 +42,13 @@ public:
   /// Function that computes the heat added by the duct, for channel i_ch and cell iz
   Real computeAddedHeatDuct(unsigned int i_ch, unsigned int iz);
 
-protected:
   struct FrictionStruct
   {
     unsigned int i_ch, iz;
     Real Re, S, w_perim;
   } _friction_args;
 
-  /// populates friction factor at specific subchannel node: fi = ai*Rei^bi
-  void computeFrictionFactor(FrictionStruct friction_args);
-  /// populates friction factor parameters at specific subchannel node
-  virtual void computeFrictionFactorParameters(FrictionStruct friction_args) = 0;
+protected:
   /// Computes diversion crossflow per gap for block iblock
   void computeWijFromSolve(int iblock);
   /// Computes net diversion crossflow per channel for block iblock
@@ -185,8 +183,12 @@ protected:
   /// Flag that activates the effect of deformation (pin/duct) based on the auxvalues for displacement, Dpin
   const bool _deformation;
 
-  /// Solutions handles and link to TH tables properties
+  /// Fluid properties object
   const SinglePhaseFluidProperties * _fp;
+  /// Friction closure object
+  const SCMFrictionClosureBase * _friction_closure;
+
+  /// Solutions handles and link to TH tables properties
   std::unique_ptr<SolutionHandle> _mdot_soln;
   std::unique_ptr<SolutionHandle> _SumWij_soln;
   std::unique_ptr<SolutionHandle> _P_soln;
