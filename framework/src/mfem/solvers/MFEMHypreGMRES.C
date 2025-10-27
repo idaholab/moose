@@ -39,8 +39,19 @@ MFEMHypreGMRES::MFEMHypreGMRES(const InputParameters & parameters) : MFEMSolverB
 void
 MFEMHypreGMRES::constructSolver(const InputParameters &)
 {
-  auto solver =
-      std::make_unique<mfem::HypreGMRES>(getMFEMProblem().mesh().getMFEMParMesh().GetComm());
+  // Patch mfem::HypreGMRES to reset preconditioning matrix at every iteration
+  class HypreGMRESPatched : public mfem::HypreGMRES
+  {
+  public:
+    using mfem::HypreGMRES::HypreGMRES;
+    void SetOperator(const mfem::Operator & op)
+    {
+      mfem::HypreGMRES::SetOperator(op);
+      HYPRE_GMRESSetPrecondMatrix(HYPRE_Solver(*this), NULL);
+    }
+  };
+
+  auto solver = std::make_unique<HypreGMRESPatched>(getMFEMProblem().getComm());
   solver->SetTol(getParam<mfem::real_t>("l_tol"));
   solver->SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
   solver->SetMaxIter(getParam<int>("l_max_its"));

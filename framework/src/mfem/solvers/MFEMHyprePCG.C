@@ -38,8 +38,19 @@ MFEMHyprePCG::MFEMHyprePCG(const InputParameters & parameters) : MFEMSolverBase(
 void
 MFEMHyprePCG::constructSolver(const InputParameters &)
 {
-  auto solver =
-      std::make_unique<mfem::HyprePCG>(getMFEMProblem().mesh().getMFEMParMesh().GetComm());
+  // Patch mfem::HyprePCG to reset preconditioning matrix at every iteration
+  class HyprePCGPatched : public mfem::HyprePCG
+  {
+  public:
+    using mfem::HyprePCG::HyprePCG;
+    void SetOperator(const mfem::Operator & op)
+    {
+      mfem::HyprePCG::SetOperator(op);
+      HYPRE_PCGSetPrecondMatrix(HYPRE_Solver(*this), NULL);
+    }
+  };
+
+  auto solver = std::make_unique<HyprePCGPatched>(getMFEMProblem().getComm());
   solver->SetTol(getParam<mfem::real_t>("l_tol"));
   solver->SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
   solver->SetMaxIter(getParam<int>("l_max_its"));
