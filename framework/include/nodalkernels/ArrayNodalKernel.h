@@ -27,7 +27,7 @@ public:
   ArrayNodalKernel(const InputParameters & parameters);
 
   /**
-   * Compute the residual at the current node.
+   * Compute and assemble the residual at the current node
    *
    * Note: This is NOT what a user would normally want to override.
    * Usually a user would override computeQpResidual()
@@ -35,7 +35,7 @@ public:
   virtual void computeResidual() override;
 
   /**
-   * Compute the Jacobian at one node.
+   * Compute and assemble the Jacobian at one node.
    *
    * Note: This is NOT what a user would normally want to override.
    * Usually a user would override computeQpJacobian()
@@ -47,6 +47,7 @@ public:
    *
    * Note: This is NOT what a user would normally want to override.
    * Usually a user would override computeQpOffDiagJacobian()
+   * @param jvar Coupled variable for the off-diagonal Jacobian contribution
    */
   virtual void computeOffDiagJacobian(unsigned int jvar) override;
 
@@ -58,7 +59,8 @@ public:
 
 protected:
   /**
-   * The user can override this function to compute the residual at a node.
+   * The user must override this function to compute the residual at a node.
+   * @param residual Reference to the residual, computed by this method
    */
   virtual void computeQpResidual(RealEigenVector & residual) = 0;
 
@@ -66,12 +68,15 @@ protected:
    * The user can override this function to compute the "on-diagonal"
    * Jacobian contribution.  If not overriden,
    * returns an array of 1s.
+   * @return On-diagonal Jacobian contribution
    */
   virtual RealEigenVector computeQpJacobian();
 
   /**
    * This is the virtual that derived classes should override for
    * computing an off-diagonal jacobian component.
+   * @param Coupled variable for the off-diagonal Jacobian contribution
+   * @return Off-diagonal Jacobian contribution
    */
   virtual RealEigenMatrix computeQpOffDiagJacobian(const MooseVariableFieldBase & jvar);
 
@@ -86,7 +91,7 @@ protected:
 
 private:
   /**
-   * Prepare our array ivar degrees of freedom
+   * Prepare our array variable degrees of freedom
    */
   void prepareDofs();
 

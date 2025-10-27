@@ -2,7 +2,7 @@
 
 ## Description
 
-This class is the same as [ReactionNodalKernel.md] except instead of being applied to a classic MOOSE variable, it's applied to an array variable.
+This class is the same as [ReactionNodalKernel.md] except instead of being applied to a standard field variable, it's applied to an [array variable](ArrayMooseVariable.md).
 
 ## Example Syntax
 

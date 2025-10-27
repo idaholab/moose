@@ -17,7 +17,8 @@ InputParameters
 ArrayReactionNodalKernel::validParams()
 {
   InputParameters params = ArrayNodalKernel::validParams();
-  params.addClassDescription("Implements a simple consuming reaction term at nodes");
+  params.addClassDescription(
+      "Implements a simple consuming reaction term at nodes for an array variable");
   params.addRequiredParam<RealEigenVector>("coeff",
                                            "Coefficients for multiplying the reaction term");
   return params;

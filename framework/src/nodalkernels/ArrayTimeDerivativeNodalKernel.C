@@ -17,9 +17,9 @@ ArrayTimeDerivativeNodalKernel::validParams()
   InputParameters params = ArrayNodalKernel::validParams();
   params.set<MultiMooseEnum>("vector_tags") = "time";
   params.set<MultiMooseEnum>("matrix_tags") = "system time";
-  params.addClassDescription(
-      "Forms the contribution to the residual and jacobian of the time derivative term from an ODE "
-      "being solved at all nodes.");
+  params.addClassDescription("Forms the contribution to the residual and jacobian of the time "
+                             "derivative term  for an array variable for ODEs "
+                             "being solved at all nodes.");
   return params;
 }
 
