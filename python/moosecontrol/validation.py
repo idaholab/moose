@@ -45,6 +45,42 @@ class WebServerControlResponse:
         return self._data is not None
 
 
+@dataclass(frozen=True)
+class WebServerInitializedData:
+    """Data received about the server on initialize."""
+
+    # The underlying data
+    _data: dict
+
+    def __post_init__(self):
+        """Perform type checking."""
+        assert isinstance(self.data, dict)
+        assert isinstance(self.control_name, str)
+        assert isinstance(self.control_type, str)
+        assert isinstance(self.execute_on_flags, list)
+        assert all(isinstance(v, str) for v in self.execute_on_flags)
+
+    @property
+    def data(self) -> dict:
+        """The underlying data."""
+        return self._data
+
+    @property
+    def control_type(self) -> str:
+        """Type of the WebServerControl."""
+        return self.data["control_type"]
+
+    @property
+    def control_name(self) -> str:
+        """Name of the WebServerControl."""
+        return self.data["control_name"]
+
+    @property
+    def execute_on_flags(self) -> list[str]:
+        """Execute on flags the WebServerControl is listening on."""
+        return self.data["execute_on_flags"]
+
+
 @staticmethod
 def process_response(
     response: Response, require_status: Optional[int] = None
@@ -75,6 +111,7 @@ def process_response(
     data = None
     if response.headers.get("content-type") == "application/json":
         data = response.json()
+        assert isinstance(data, dict)
         if error := data.get("error"):
             raise WebServerControlError(response, error)
 

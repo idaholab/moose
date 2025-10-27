@@ -14,9 +14,11 @@
 import logging
 import os
 from copy import deepcopy
+from getpass import getuser
 from numbers import Number
+from socket import getfqdn
 from typing import Any, Optional, Tuple
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
 from common import (
@@ -156,24 +158,86 @@ class TestMooseControl(MooseControlTestCase):
         control.finalize.assert_called_once()
         control.cleanup.assert_not_called()
 
+    BASE_GET_INITIALIZE_DATA = {
+        "name": "Python MooseControl",
+        "host": getfqdn(),
+        "user": getuser(),
+    }
+
+    def test_get_initialized_data(self):
+        """Test get_initialize_data()."""
+        control = MooseControl(BaseRunnerTest())
+        data = control.get_initialize_data()
+        self.assertEqual(data, self.BASE_GET_INITIALIZE_DATA)
+
+    def test_get_initialized_data_override(self):
+        """Test get_initialize_data() when a derived class adds data."""
+        extra_data = {"foo": "bar"}
+
+        class MooseControlDerived(MooseControl):
+            def additional_initialize_data(self):
+                return extra_data
+
+        control = MooseControlDerived(BaseRunnerTest())
+        data = control.get_initialize_data()
+        gold = deepcopy(self.BASE_GET_INITIALIZE_DATA)
+        gold["name"] = "Python MooseControlDerived"
+        gold.update(extra_data)
+        self.assertEqual(data, gold)
+
+    def test_get_initialized_data_bad_override(self):
+        """Test get_initialize_data() when a derived class overrides base data."""
+        bad_key = "name"
+
+        class MooseControlDerived(MooseControl):
+            def additional_initialize_data(self):
+                return {bad_key: "foo"}
+
+        with self.assertRaises(KeyError) as e:
+            MooseControlDerived(BaseRunnerTest()).get_initialize_data()
+        self.assertEqual(
+            str(e.exception),
+            f"'Cannot override entry \"{bad_key}\" in additional_initialize_data()'",
+        )
+
     def test_initialize(self):
         """
         Test initialize().
 
-        Should call the underlying runner's initialize() and wait().
+        Should call the underlying runner's initialize() and wait()
+        and query the daat from initialize.
         """
         control = MooseControl(BaseRunnerTest())
 
-        def set_initialize():
+        def set_initialize(data):
             control.runner._initialized = True
 
-        control.runner.initialize = MagicMock(side_effect=set_initialize)
+        initialized_data = {
+            "control_name": "control",
+            "control_type": "type",
+            "execute_on_flags": ["foo", "bar"],
+        }
         control.wait = MagicMock()
-
-        control.initialize()
+        control.runner.initialize = MagicMock(side_effect=set_initialize)
+        with patch(
+            f"{BASERUNNER}.initialized_data", new_callable=PropertyMock
+        ) as mock_initialized_data:
+            mock_initialized_data.return_value = initialized_data
+            control.initialize()
 
         control.runner.initialize.assert_called_once()
         control.wait.assert_called_once()
+        self.assertEqual(control.initialized_data.data, initialized_data)
+        self.assertEqual(control.control_name, initialized_data["control_name"])
+        self.assertEqual(control.control_type, initialized_data["control_type"])
+        self.assertEqual(control.execute_on_flags, initialized_data["execute_on_flags"])
+        first_log = self.assert_in_log(
+            f"Initialized connection with {control.control_type}"
+            f' "{control.control_name}"'
+        )
+        self.assert_in_log(
+            "Control is listening on flags: foo, bar", after_index=first_log
+        )
 
     def test_finalize(self):
         """
@@ -279,6 +343,7 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
         if paths is None:
             paths = []
         runner = self.control.runner
+        runner._initialized = True
 
         if waiting is not None:
             if waiting:
@@ -317,6 +382,7 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
 
         paths = deepcopy(paths)
         runner = self.control.runner
+        runner._initialized = True
 
         orig = runner._session.post
 

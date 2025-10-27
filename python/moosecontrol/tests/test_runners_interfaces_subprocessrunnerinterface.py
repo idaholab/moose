@@ -20,6 +20,9 @@ from common import MooseControlTestCase, setup_moose_python_path
 setup_moose_python_path()
 
 from moosecontrol.runners.interfaces import SubprocessRunnerInterface
+from moosecontrol.runners.interfaces.subprocessrunnerinterface import (
+    DEFAULT_CLEANUP_KILL_TIMEOUT,
+)
 from moosecontrol.runners.utils import SubprocessReader
 
 COMMAND = ["/path/to/moose-opt", "-i", "input.i"]
@@ -65,6 +68,7 @@ class TestSubprocessRunnerInterface(MooseControlTestCase):
         self.assertEqual(runner.moose_control_name, MOOSE_CONTROL_NAME)
         self.assertEqual(runner.directory, os.getcwd())
         self.assertTrue(runner.use_subprocess_reader)
+        self.assertEqual(runner.cleanup_kill_timeout, DEFAULT_CLEANUP_KILL_TIMEOUT)
 
     def test_init_directory(self):
         """Test __init__() with a directory provided."""
@@ -75,6 +79,12 @@ class TestSubprocessRunnerInterface(MooseControlTestCase):
         """Test __init__() with use_subprocess_reader=False."""
         runner = SubprocessRunnerInterfaceTest(**ARGS, use_subprocess_reader=False)
         self.assertFalse(runner.use_subprocess_reader)
+
+    def test_init_cleanup_kill_timeout(self):
+        """Test __init__() with test_init_cleanup_kill_timeout."""
+        value = 1.234
+        runner = SubprocessRunnerInterfaceTest(**ARGS, cleanup_kill_timeout=value)
+        self.assertEqual(runner.cleanup_kill_timeout, value)
 
     def test_initialize_no_directory(self):
         """Test initialize() when the directory doesn't exist."""
@@ -256,11 +266,27 @@ class TestSubprocessRunnerInterface(MooseControlTestCase):
         self.assertIsNone(runner._subprocess_reader)
         self.assert_log_size(0)
 
+    def test_cleanup_no_kill_process(self):
+        """Test cleanup() not killing a dummy process when one is running."""
+        runner = SubprocessRunnerInterfaceTest(**ARGS, cleanup_kill_timeout=0.1)
+
+        runner._process = runner.start_process(["sleep", "0.01"])
+        self.assertTrue(runner.is_process_running())
+
+        self._caplog.clear()
+        runner.cleanup()
+
+        self.assertFalse(runner.is_process_running())
+
+        self.assert_log_size(2)
+        self.assert_log_message(0, "MOOSE process still running on cleanup")
+        self.assert_log_message(1, "MOOSE process ended gracefully")
+
     def test_cleanup_kill_process(self):
         """Test cleanup() killing a dummy process."""
         self.allow_log_warnings = True
 
-        runner = SubprocessRunnerInterfaceTest(**ARGS)
+        runner = SubprocessRunnerInterfaceTest(**ARGS, cleanup_kill_timeout=0.001)
 
         runner._process = runner.start_process(["sleep", "0.1"])
         self.assertTrue(runner.is_process_running())
@@ -270,9 +296,12 @@ class TestSubprocessRunnerInterface(MooseControlTestCase):
 
         self.assertFalse(runner.is_process_running())
 
-        self.assert_log_size(3)
+        self.assert_log_size(4)
+        self.assert_log_message(0, "MOOSE process still running on cleanup")
         self.assert_log_message(
-            0, "MOOSE process still running on cleanup; killing", levelname="WARNING"
+            1,
+            "MOOSE process still running after 0.00 seconds; killing",
+            levelname="WARNING",
         )
 
     def test_cleanup_wait_subprocess_reader(self):

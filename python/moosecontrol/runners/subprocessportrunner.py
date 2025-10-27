@@ -87,8 +87,16 @@ class SubprocessPortRunner(SubprocessRunnerInterface, PortRunner):
         control_socket = f"{control_path}/port={self.port}"
         return [control_socket, "--color=off"]
 
-    def initialize(self):
-        """Spawn the process and wait for the server to be listening."""
+    def initialize(self, data: dict):
+        """
+        Spawn the process and wait for the server to be listening.
+
+        Parameters
+        ----------
+        data : dict
+            The data to be passed to /initialize.
+
+        """
         self.initialize_start()
 
         if not self.port_is_available(self.port):
@@ -97,7 +105,7 @@ class SubprocessPortRunner(SubprocessRunnerInterface, PortRunner):
         # Start the subprocess
         SubprocessRunnerInterface.initialize(self)
         # And then wait for a connection
-        PortRunner.initialize(self)
+        PortRunner.initialize(self, data)
 
     def finalize(self):
         """Finalize the process and the connection."""

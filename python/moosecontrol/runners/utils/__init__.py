@@ -10,6 +10,6 @@
 
 from .poker import Poker
 from .subprocessreader import SubprocessReader
-from .timedpollhelper import TimedPollHelper
+from .timedpoller import TimedPoller
 
-__all__ = ["Poker", "SubprocessReader", "TimedPollHelper"]
+__all__ = ["Poker", "SubprocessReader", "TimedPoller"]

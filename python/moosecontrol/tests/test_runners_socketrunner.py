@@ -31,7 +31,7 @@ from test_runners_baserunner import check_baserunner_cleanup_live
 
 setup_moose_python_path()
 
-from moosecontrol import SocketRunner
+from moosecontrol import MooseControl, SocketRunner
 from moosecontrol.requests_unixsocket import Session
 
 DUMMY_SOCKET_PATH = "/foo/bar.sock"
@@ -103,7 +103,7 @@ class TestSocketRunner(MooseControlTestCase):
             patch_base("initialize") as parent_initialize,
             patch_runner("socket_exists", return_value=True) as socket_exists,
         ):
-            runner.initialize()
+            runner.initialize({})
 
         parent_initialize.assert_called_once()
         socket_exists.assert_called_once()
@@ -125,7 +125,7 @@ class TestSocketRunner(MooseControlTestCase):
             patch_base("initialize") as parent_initialize,
             patch_runner("socket_exists", new=mock_socket_exists),
         ):
-            runner.initialize()
+            runner.initialize({})
 
         parent_initialize.assert_called_once()
         self.assert_log_size(2)
@@ -216,8 +216,9 @@ class TestSocketRunner(MooseControlTestCase):
                 return_value=mock_response(),
             ),
             patch_runner("socket_exists", return_value=True),
+            patch_base("post_initialize", return_value={"foo", "bar"}),
         ):
-            runner.initialize()
+            runner.initialize({})
 
         runner.finalize()
         self.assertFalse(os.path.exists(socket))
@@ -241,7 +242,8 @@ class TestSocketRunner(MooseControlTestCase):
 
         # Initialize; wait for socket and connection
         runner = SocketRunner(socket_path, **LIVE_BASERUNNER_KWARGS)
-        runner.initialize()
+        data = MooseControl.required_initialize_data(self)
+        runner.initialize(data)
         socket_i = self.assert_in_log(f"Found connection socket {socket_path}")
         self.assert_in_log("MOOSE webserver is listening", after_index=socket_i)
 

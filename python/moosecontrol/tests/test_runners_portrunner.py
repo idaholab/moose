@@ -27,7 +27,7 @@ from requests import Session
 
 setup_moose_python_path()
 
-from moosecontrol import PortRunner
+from moosecontrol import MooseControl, PortRunner
 from moosecontrol.runners.portrunner import DEFAULT_HOST
 from test_runners_baserunner import check_baserunner_cleanup_live
 
@@ -93,7 +93,8 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
 
         # Initialize; wait for connection
         runner = PortRunner(port, **LIVE_BASERUNNER_KWARGS)
-        runner.initialize()
+        data = MooseControl.required_initialize_data(self)
+        runner.initialize(data)
         self.assert_in_log("MOOSE webserver is listening")
 
         # Input has one continue on INITIAL

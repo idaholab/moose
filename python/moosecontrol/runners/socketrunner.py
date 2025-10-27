@@ -77,8 +77,16 @@ class SocketRunner(BaseRunner):
             raise FileNotFoundError(f"Path {socket_path} is not a socket")
         return True
 
-    def initialize(self):
-        """Wait for the socket to exist and call the parent initialize."""
+    def initialize(self, data: dict):
+        """
+        Wait for the socket to exist and call the parent initialize.
+
+        Parameters
+        ----------
+        data : dict
+            The data to be passed to /initialize.
+
+        """
         self.initialize_start()
 
         socket_path = self.socket_path
@@ -94,7 +102,7 @@ class SocketRunner(BaseRunner):
         logger.info(f"Found connection socket {socket_path}")
 
         # Let the parent initialize
-        super().initialize()
+        super().initialize(data)
 
     def delete_socket(self):
         """Delete the socket."""

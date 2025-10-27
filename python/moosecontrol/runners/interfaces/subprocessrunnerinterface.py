@@ -15,11 +15,14 @@ from abc import ABC, abstractmethod
 from logging import getLogger
 from typing import Optional
 
-from moosecontrol.runners.utils import SubprocessReader
+from moosecontrol.runners.utils import SubprocessReader, TimedPoller
 
 logger = getLogger("SubprocessRunnerInterface")
 
+# Default argument for 'directory' in the SubprocessRunnerInterface
 DEFAULT_DIRECTORY = os.getcwd()
+# Default argument for 'cleanup_kill_timeout' in the SubprocesRunnerInterface
+DEFAULT_CLEANUP_KILL_TIMEOUT: float = 5.0
 
 
 class SubprocessRunnerInterface(ABC):
@@ -36,6 +39,7 @@ class SubprocessRunnerInterface(ABC):
         moose_control_name: str,
         directory: str = DEFAULT_DIRECTORY,
         use_subprocess_reader: bool = True,
+        cleanup_kill_timeout: float = DEFAULT_CLEANUP_KILL_TIMEOUT,
     ):
         """
         Initialize state.
@@ -55,6 +59,9 @@ class SubprocessRunnerInterface(ABC):
         use_subprocess_reader : bool
             Whether or not to spawn a separate reader thread
             to collect subprocess output. Defaults to true.
+        cleanup_kill_timeout : float
+            How long in seconds to wait in cleanup() to
+            kill the process.
 
         """
         assert isinstance(command, list)
@@ -71,6 +78,8 @@ class SubprocessRunnerInterface(ABC):
         self._directory: str = str(os.path.abspath(directory))
         # Whether or not to use the reader thread
         self._use_subprocess_reader: bool = use_subprocess_reader
+        # Time to wait for the process to finish in cleanup()
+        self._cleanup_kill_timeout: float = float(cleanup_kill_timeout)
 
         # The underlying process
         self._process: Optional[subprocess.Popen] = None
@@ -96,6 +105,11 @@ class SubprocessRunnerInterface(ABC):
     def use_subprocess_reader(self) -> bool:
         """Whether or not to use the reader thread."""
         return self._use_subprocess_reader
+
+    @property
+    def cleanup_kill_timeout(self) -> float:
+        """WTime to wait for the process to finish in cleanup()."""
+        return self._cleanup_kill_timeout
 
     def initialize(self):
         """
@@ -142,8 +156,20 @@ class SubprocessRunnerInterface(ABC):
     def cleanup(self):
         """Stop the process and subprocess reader."""
         if self.is_process_running():
-            logger.warning("MOOSE process still running on cleanup; killing")
-            self.kill_process()
+            logger.info("MOOSE process still running on cleanup")
+
+            # Wait for it to gracefully if we can
+            with TimedPoller(0.001, self.cleanup_kill_timeout) as poller:
+                try:
+                    poller.poll(lambda: not self.is_process_running())
+                except TimedPoller.PollTimeout:
+                    logger.warning(
+                        "MOOSE process still running after "
+                        f"{self.cleanup_kill_timeout:.2f} seconds; killing"
+                    )
+                    self.kill_process()
+                else:
+                    logger.info("MOOSE process ended gracefully")
 
         if self._subprocess_reader is not None and self._subprocess_reader.is_alive():
             logger.warning("Reader thread still running on cleanup; waiting")

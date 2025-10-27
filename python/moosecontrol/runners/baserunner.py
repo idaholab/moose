@@ -22,7 +22,7 @@ from requests.exceptions import ConnectionError
 from moosecontrol.exceptions import InitializeTimeout
 from moosecontrol.validation import WebServerControlResponse, process_response
 
-from .utils import Poker, TimedPollHelper
+from .utils import Poker, TimedPoller
 
 logger = getLogger("BaseRunner")
 
@@ -79,14 +79,16 @@ class BaseRunner(ABC):
             None if poke_poll_time is None else float(poke_poll_time)
         )
 
-        # Setup the TimedPollHelper for use in keeping track
+        # Setup the TimedPoller for use in keeping track
         # of timing and polling during initialize()
-        self._initialize_poller: TimedPollHelper = TimedPollHelper(
+        self._initialize_poller: TimedPoller = TimedPoller(
             self.poll_time, initialize_timeout
         )
 
         # Whether or not initialize() has been called
         self._initialized: bool = False
+        # The data received calling the initial /initialize
+        self._initialized_data: Optional[dict] = None
 
         # The Session for the main thread, started in initialize()
         self._session: Optional[Session] = None
@@ -112,11 +114,6 @@ class BaseRunner(ABC):
         return self._initialize_poller.timeout_time
 
     @property
-    def initialized(self) -> bool:
-        """Whether or not initialize() has been called."""
-        return self._initialized
-
-    @property
     @abstractmethod
     def url(self) -> str:
         """
@@ -125,6 +122,17 @@ class BaseRunner(ABC):
         Must be overridden.
         """
         raise NotImplementedError  # pragma: no cover
+
+    @property
+    def initialized(self) -> bool:
+        """Whether or not initialize() has been called."""
+        return self._initialized
+
+    @property
+    def initialized_data(self) -> dict:
+        """Get the data received when sending /initialize."""
+        assert self._initialized_data is not None
+        return self._initialized_data
 
     @staticmethod
     @abstractmethod
@@ -171,22 +179,36 @@ class BaseRunner(ABC):
         """
         try:
             self._initialize_poller.poll(should_exit)
-        except TimedPollHelper.StartNotCalled as e:
+        except TimedPoller.StartNotCalled as e:
             raise NotImplementedError(
                 "initialize_start() was not called within initialize()"
             ) from e
-        except TimedPollHelper.PollTimeout as e:
+        except TimedPoller.PollTimeout as e:
             raise InitializeTimeout(e.waited_time) from e
 
-    def initialize(self):
+    def post_initialize(self, data: dict) -> dict:
+        """Send /initialize to the server, storing the data."""
+        logger.debug(f"Sending initialize to webserver, data={data}")
+        initialize_response = self.post("initialize", data, require_status=200)
+        return initialize_response.data
+
+    def initialize(self, data: dict):
         """
         Initialize the connection; waits for the web server to be available.
 
         Derived classes that need to override initialize should call
         this implementation of initialize() last and should call
         initialize_start() first.
+
+        Parameters
+        ----------
+        data : dict
+            The data to be passed to /initialize.
+
         """
+        assert isinstance(data, dict)
         assert not self._initialized
+        assert self._initialized_data is None
 
         # Derived classes should also call this if they override initialize()
         self.initialize_start()
@@ -200,15 +222,16 @@ class BaseRunner(ABC):
 
         logger.info("MOOSE webserver is listening")
 
-        # Poke for the first time now that we are listening
-        self.get("poke", require_status=200)
+        # Call initialize
+        self._initialized_data = self.post_initialize(data)
+        assert self.initialized_data is not None
 
-        # Start the poke thread now that the webserver is listening
+        # Start the poke thread now that we are initialized
         if self.poke_poll_time is not None:
             self._poker = self._build_poker()
             self._poker.start()
 
-        # We're done with initialize, so mark it as such
+        # Finalize the initialize time
         self._initialize_poller.end()
 
         # Mark that we've initialized
@@ -217,10 +240,11 @@ class BaseRunner(ABC):
     def stop_poker(self):
         """Stop the poke thread if it is running."""
         if self._poker is not None and self._poker.is_alive():
-            logger.info("Stopping poke poll thread")
+            logger.debug("Stopping poke poll thread")
             self._poker.stop()
             self._poker.join()
             self._poker = None
+            logger.debug("Poked poll thread stopped")
 
     def finalize(self):
         """Finalize method; performs cleanup in a structured manner."""
@@ -233,10 +257,8 @@ class BaseRunner(ABC):
         # Wait for the MOOSE webserver to stop listening
         if self.is_listening():
             logger.info("Waiting for the MOOSE webserver to stop listening...")
-            while True:
+            while self.is_listening():
                 sleep(self.poll_time)
-                if not self.is_listening():
-                    break
             logger.info("MOOSE webserver is no longer listening")
 
         # Close the session
@@ -324,7 +346,11 @@ class BaseRunner(ABC):
         return Poker(self.poke_poll_time, self.build_session(), f"{self.url}/poke")
 
     def kill(self):
-        """Send the kill command via GET /kill if the webserver is listening."""
+        """
+        Send the kill command via GET /kill if the webserver is listening.
+
+        Waits for the server to no longer be listening after /kill.
+        """
         if self.is_listening():
             logger.info("Killing MOOSE webserver")
 
@@ -332,3 +358,8 @@ class BaseRunner(ABC):
             # really guarantee any valid response after this
             with suppress(Exception):
                 self.get("kill")
+
+            # Wait for it to stop
+            while self.is_listening():
+                sleep(self.poll_time)
+            logger.info("Webserver is no longer listening after kill")

@@ -21,6 +21,8 @@
 #include <memory>
 #include <thread>
 
+class WebServerControlStartServerAction;
+
 /**
  * Starts a webserver that an external process can connect to
  * in order to send JSON messages to control the solve
@@ -33,57 +35,47 @@ public:
   WebServerControl(const InputParameters & parameters);
   ~WebServerControl();
 
-  virtual void execute() override;
-
   /**
-   * @return A string representation of \p json_type
-   */
-  static std::string stringifyJSONType(const miniJson::JsonType & json_type);
-
-  /**
-   * @return A c++ representation of the scalar value of \p json_value with
-   * the given expected json type
-   */
-  template <typename T, miniJson::JsonType json_type>
-  static T getScalarJSONValue(const miniJson::Json & json_value);
-
-  /**
-   * Convert values to a miniJson::Json node.
+   * Start the server
    *
-   * @tparam T Data type
-   * @param value The value to be converted.
-   * @return miniJson::Json The miniJson::Json node of the converted value.
+   * Called by the WebServerControlStartServerAction after controls are setup
    */
-  template <typename T>
-  static miniJson::Json toMiniJson(const T & value);
+  void startServer(const Moose::PassKey<WebServerControlStartServerAction>);
 
-  using ValueBase = Moose::WebServerControlTypeRegistry::ValueBase;
+  virtual void execute() override final;
+
+  using ControlledValueBase = Moose::WebServerControlTypeRegistry::ControlledValueBase;
 
   /**
-   * Base class for a controllable value with a given type and name
+   * Class containing a value to be controlled.
+   *
+   * Is responsible for building the value from JSON input,
+   * broadcasting the value over all ranks, and setting the
+   * value on all ranks.
+   *
+   * These objects are registered in
+   * Moose::WebServerControlTypeRegistration.
    */
-  template <typename T>
-  class TypedValueBase : public ValueBase
+  template <class T>
+  class ControlledValue : public ControlledValueBase
   {
   public:
-    TypedValueBase(const std::string & name, const std::string & type) : ValueBase(name, type) {}
-    TypedValueBase(const std::string & name, const std::string & type, const T & value)
-      : ValueBase(name, type), _value(value)
+    ControlledValue(const std::string & name, const std::string & type)
+      : ControlledValueBase(name, type)
+    {
+    }
+    ControlledValue(const std::string & name, const std::string & type, const T & value)
+      : ControlledValueBase(name, type), _value(value)
     {
     }
 
     /// The underlying type of the value
     using value_type = T;
 
-    /**
-     * @return The underlying value
-     */
-    const T & value() const { return _value; }
-
     virtual void setControllableValue(WebServerControl & control) override final
     {
       control.comm().broadcast(_value);
-      control.setControllableValueByName<T>(name(), value());
+      control.setControllableValueByName<T>(name(), _value);
     }
 
   private:
@@ -91,154 +83,298 @@ public:
     T _value;
   };
 
+protected:
   /**
-   * Class that stores a scalar controllable value to be set
+   * Define the valid methods for a client request.
    */
-  template <typename T, miniJson::JsonType json_type>
-  class ScalarValue : public TypedValueBase<T>
+  enum class RequestMethod
   {
-  public:
-    ScalarValue(const std::string & name, const std::string & type) : TypedValueBase<T>(name, type)
-    {
-    }
-    ScalarValue(const std::string & name,
-                const std::string & type,
-                const miniJson::Json & json_value)
-      : TypedValueBase<T>(name, type, getScalarJSONValue<T, json_type>(json_value))
-    {
-    }
+    GET,
+    POST
   };
 
   /**
-   * Class that stores a vector controllable value to be set
+   * Represents a request from the client.
    */
-  template <typename T, miniJson::JsonType json_type>
-  class VectorValue : public TypedValueBase<std::vector<T>>
+  struct Request
   {
-  public:
-    VectorValue(const std::string & name, const std::string & type)
-      : TypedValueBase<std::vector<T>>(name, type)
+    Request() = default;
+
+    /**
+     * @return Whether or not the request has JSON data
+     */
+    bool hasJSON() const { return _json.has_value(); }
+
+    /**
+     * @return Get the JSON data from the request
+     */
+    const nlohmann::json & getJSON() const;
+
+    /**
+     * Set the JSON data in the request.
+     */
+    void setJSON(const nlohmann::json & json, const Moose::PassKey<WebServerControl>)
     {
-    }
-    VectorValue(const std::string & name,
-                const std::string & type,
-                const miniJson::Json & json_value)
-      : TypedValueBase<std::vector<T>>(name, type, getVectorJSONValue(json_value))
-    {
+      _json = json;
     }
 
-    static std::vector<T> getVectorJSONValue(const miniJson::Json & json_value)
-    {
-      const auto from_json_type = json_value.getType();
-      if (from_json_type != miniJson::JsonType::kArray)
-        throw ValueBase::Exception("The value '" + json_value.serialize() + "' of type " +
-                                   stringifyJSONType(from_json_type) + " is not an array");
-
-      const auto & array_value = json_value.toArray();
-      std::vector<T> value(array_value.size());
-      for (const auto i : index_range(array_value))
-        value[i] = getScalarJSONValue<T, json_type>(array_value[i]);
-      return value;
-    }
+  private:
+    /// The underlying JSON data, if any
+    std::optional<nlohmann::json> _json;
   };
 
   /**
-   * Class that stores a RealEigenMatrix controllable value to be set
+   * Represents a response to the client from the server.
    */
-  class RealEigenMatrixValue : public TypedValueBase<RealEigenMatrix>
+  struct Response
   {
-  public:
-    RealEigenMatrixValue(const std::string & name, const std::string & type);
-    RealEigenMatrixValue(const std::string & name,
-                         const std::string & type,
-                         const miniJson::Json & json_value);
-    static RealEigenMatrix getMatrixJSONValue(const miniJson::Json & json_value);
+    Response() = default;
+
+    /**
+     * Construct a response given a status code.
+     */
+    Response(const unsigned int status_code);
+    /**
+     * Construct a response given a status code and JSON data.
+     */
+    Response(const unsigned int status_code, const nlohmann::json & json);
+
+    /**
+     * @return The status code for the response
+     */
+    unsigned int getStatusCode() const { return _status_code; }
+
+    /**
+     * @return Whether or not the response has JSON data
+     */
+    bool hasJSON() const { return _json.has_value(); }
+    /**
+     * @return Get the JSON data in the response if it exists
+     */
+    const nlohmann::json & getJSON() const;
+
+    /**
+     * @return Whether or not the response is an error
+     */
+    bool hasError() const { return _error.has_value(); }
+    /**
+     * @return Get the error message if it exists
+     */
+    const std::string & getError() const;
+
+  protected:
+    /**
+     * See the error message.
+     */
+    void setError(const std::string & error) { _error = error; }
+
+  private:
+    /// The status code
+    unsigned int _status_code = 0;
+    /// The JSON data, if any
+    std::optional<nlohmann::json> _json;
+    /// The error message, if any
+    std::optional<std::string> _error;
   };
 
   /**
-   * Registers a scalar parameter type to be controlled
+   * Represents an error response to the client from the server.
    */
-  template <typename T, miniJson::JsonType json_type>
-  static char registerScalarType(const std::string type_name)
+  struct ErrorResponse : public Response
   {
-    return Moose::WebServerControlTypeRegistry().add<ScalarValue<T, json_type>>(type_name);
-  }
-  /**
-   * Registers a vector parameter type to be controlled
-   */
-  template <typename T, miniJson::JsonType json_type>
-  static char registerVectorType(const std::string type_name)
+    ErrorResponse(const std::string & error, const unsigned int status_code = 400);
+  };
+
+  struct ServerActionOptions
   {
-    return Moose::WebServerControlTypeRegistry().add<VectorValue<T, json_type>>("std::vector<" +
-                                                                                type_name + ">");
-  }
+    bool require_waiting = true;
+    bool require_initialized = true;
+
+    const std::set<std::string> getRequiredJSONKeys() const { return _required_json_keys; }
+    void requireJSONKey(const std::string & key) { _required_json_keys.insert(key); }
+    void requireJSONKeys(std::initializer_list<std::string> && keys)
+    {
+      _required_json_keys.insert(keys);
+    }
+
+  private:
+    std::set<std::string> _required_json_keys;
+  };
 
   /**
-   * Registers a vector parameter type to be controlled
+   * Adds an action for the server to perform at the given path.
+   *
+   * @param path The path for the webserver to act on
+   * @param action The action to perform
+   * @param options Options to apply to the endpoint
    */
-  static char registerRealEigenMatrix()
+  template <RequestMethod method>
+  void addServerAction(const std::string & path,
+                       std::function<Response(const Request &, WebServerControl &)> && action,
+                       const ServerActionOptions & options = {});
+
+  /**
+   * Entrypoint for controls derived from this one to add additional actions
+   */
+  virtual void addServerActions() {};
+
+  /**
+   * Helper for converting a value to JSON for the given key
+   *
+   * Will raise exceptions with the context of the key if encountered
+   */
+  template <class value_T, class key_T>
+  static value_T convertJSON(const nlohmann::json & json_value, const key_T & key);
+
+  /**
+   * Get whether or not the control is currently waiting
+   */
+  bool isCurrentlyWaiting() const { return _currently_waiting.load(); }
+
+  /**
+   * Stores the information sent by the client on initialize
+   */
+  struct ClientInfo
   {
-    return Moose::WebServerControlTypeRegistry().add<RealEigenMatrixValue>("RealEigenMatrix");
-  }
+    /// Client name
+    std::string name;
+    /// Client host
+    std::string host;
+    /// Client user
+    std::string user;
+    /// Raw data
+    nlohmann::json data;
+  };
+
+  /**
+   * Get the information sent by the client on initialize
+   */
+  ClientInfo getClientInfo() const;
+
+  /**
+   * Output a message with the prefix of this control type and name
+   */
+  void outputMessage(const std::string & message) const;
 
 private:
   /**
-   * Internal method for starting the server
+   * Adds the internal actions to the server
+   *
+   * Enables derived classes to override addServerActions()
+   * without mucking with the standard actions.
    */
-  void startServer();
+  void addServerActionsInternal();
 
   /**
-   * @return Whether or not the server is currently waiting
+   * Set the ClientInfo object received from the client during /initialize
    */
-  bool currentlyWaiting() const { return _currently_waiting.load(); }
+  void setClientInfo(const ClientInfo & info);
 
+  /**
+   * Store a client's poke, which is a timing used to determine the client timeout
+   */
+  void clientPoke();
+
+  /**
+   * Whether or not the client has called /initialize
+   */
+  bool isClientInitialized() const { return _client_initialized.load(); }
+  /**
+   * Set that the client has called /initialized; used by the server
+   */
+  void setClientInitialized() { _client_initialized.store(true); }
+
+  /**
+   * Set that the control is currently waiting; used by the server
+   */
+  void setCurrentlyWaiting(const bool value = true) { _currently_waiting.store(value); }
+
+  /**
+   * Whether or not the client has called /terminate
+   */
+  bool isTerminateRequested() const { return _terminate_requested.load(); }
+  /**
+   * Set for the control to terminate the solve; used by /terminate in the server
+   */
+  void setTerminateRequested(const bool value = true) { _terminate_requested.store(value); }
+
+  /**
+   * Get whether or not the client sent the kill command.
+   */
+  bool isKillRequested() const { return _kill_requested.load(); }
+  /**
+   * Set for the control to kill the solve; used by /kill in the server
+   */
+  void setKillRequested() { _kill_requested.store(true); }
+
+  /**
+   * Output a timing message with the prefix of this control
+   */
+  void outputClientTiming(const std::string & message,
+                          const std::chrono::time_point<std::chrono::steady_clock> & start) const;
+
+  /**
+   * Helper for producing an error message about a client timeout
+   *
+   * Used for both the initial and during-run timeout
+   */
+  std::string clientTimeoutErrorMessage(const Real timeout,
+                                        const std::string & timeout_param_name,
+                                        const std::optional<std::string> & suffix = {}) const;
+
+  /**
+   * Stop the server if it exists and is running
+   */
+  void stopServer();
+
+  /// Port to listen on, if any
+  const unsigned int * const _port;
+  /// File socket to listen on, if any
+  const FileName * const _file_socket;
   /// Time in seconds to allow the client to initially communicate before timing out
   const Real _initial_client_timeout;
   /// Time in seconds to allow the client to communicate after init before timing out
   const Real _client_timeout;
 
+  /// Whether or not the client has called /initialize
+  std::atomic<bool> _client_initialized = false;
   /// Whether or not the Control is currently waiting
-  std::atomic<bool> _currently_waiting;
+  std::atomic<bool> _currently_waiting = false;
   /// Whether or not the solve should be terminated in the next execute() call
-  std::atomic<bool> _terminate_requested;
+  std::atomic<bool> _terminate_requested = false;
+  /// Whether or not the client has called /kill
+  std::atomic<bool> _kill_requested = false;
   /// The most recent time we've heard from the client
-  std::atomic<int64_t> _last_client_poke;
-  /// Whether or not to kill the client timeout thread
-  std::atomic<bool> _kill_client_timeout_thread;
+  std::atomic<int64_t> _last_client_poke = 0;
 
-  /// The server
-  std::unique_ptr<HttpServer> _server;
+  /// Client information received on /initialize by the server
+  std::optional<ClientInfo> _client_info;
+  /// Lock for _client_info as it is written by the server thread
+  mutable std::mutex _client_info_lock;
+
+  /// Weak pointer to the server; the server itself is owned by the server thread
+  std::weak_ptr<HttpServer> _server_weak_ptr;
   /// The server thread
-  std::unique_ptr<std::thread> _server_thread;
-  /// The client timeout thread
-  std::unique_ptr<std::thread> _client_timeout_thread;
+  std::unique_ptr<std::thread> _server_thread_ptr;
 
   /// The values received to control; filled on rank 0 from the server and then broadcast
-  std::vector<std::unique_ptr<ValueBase>> _controlled_values;
+  std::vector<std::unique_ptr<ControlledValueBase>> _controlled_values;
   /// Mutex to prevent threaded writes to _controlled_values
   std::mutex _controlled_values_mutex;
 };
 
-template <typename T, miniJson::JsonType json_type>
-T
-WebServerControl::getScalarJSONValue(const miniJson::Json & json_value)
+template <class value_T, class key_T>
+value_T
+WebServerControl::convertJSON(const nlohmann::json & json_value, const key_T & key)
 {
-  const auto from_json_type = json_value.getType();
-  if (from_json_type != json_type)
-    throw ValueBase::Exception("The value " + json_value.serialize() + " of JSON type " +
-                               stringifyJSONType(from_json_type) +
-                               " is not of the expected JSON type " + stringifyJSONType(json_type));
-
-  if constexpr (json_type == miniJson::JsonType::kBool)
-    return json_value.toBool();
-  else if constexpr (json_type == miniJson::JsonType::kNumber)
-    return json_value.toDouble();
-  else if constexpr (json_type == miniJson::JsonType::kString)
-    return json_value.toString();
-  ::mooseError("WebServerControl::getScalarJSONValue(): Not configured for parsing type ",
-               stringifyJSONType(from_json_type));
+  try
+  {
+    return json_value[key].template get<value_T>();
+  }
+  catch (const std::exception & e)
+  {
+    std::ostringstream message;
+    message << "While parsing '" << key << "' " << e.what();
+    throw std::runtime_error(message.str());
+  }
 }
-
-// Explicit specialization
-template <>
-miniJson::Json WebServerControl::toMiniJson(const nlohmann::json & value);

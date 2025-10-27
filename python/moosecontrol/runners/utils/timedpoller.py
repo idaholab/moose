@@ -7,14 +7,14 @@
 # Licensed under LGPL 2.1, please see LICENSE for details
 # https://www.gnu.org/licenses/lgpl-2.1.html
 
-"""Defines the TimedPollHelper."""
+"""Defines the TimedPoller."""
 
 from numbers import Number
 from time import monotonic, sleep
 from typing import Callable, Optional
 
 
-class TimedPollHelper:
+class TimedPoller:
     """
     Wrapped for performing an action in a polled fashion.
 
@@ -22,7 +22,7 @@ class TimedPollHelper:
 
     Example:
     -------
-    >>>> helper = TimedPollHelper(poll_time=0.1, timeout_time=10)
+    >>>> helper = TimedPoller(poll_time=0.1, timeout_time=10)
     >>>> helper.start()
     >>>>
     >>>> # Develop some criteria on when to exit
@@ -142,11 +142,28 @@ class TimedPollHelper:
             super().__init__(message)
 
     class StartNotCalled(Exception):
-        """Exception for calling poll() without start() in TimedPollHelper."""
+        """Exception for calling poll() without start() in TimedPoller."""
 
         def __init__(self):
             """Store the timeout message."""
             super().__init__("poll() was called without calling start()")
+
+    def __enter__(self) -> "TimedPoller":
+        """
+        Enter a context manager for the TimedPoller.
+
+        Will call start().
+        """
+        self.start()
+        return self
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        """
+        Exit a context manager for the TimedPoller.
+
+        Will call end().
+        """
+        self.end()
 
     def poll(self, should_exit: Callable[[], bool]):
         """

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
 import json
 import math
@@ -15,32 +15,30 @@ from testmoosecontrol import TestMooseControl
 
 # This should be called by the test harness with the get_postprocessor.i
 # input file to obtain changing postprocessor values from the web server
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Open the gold file associated with this test, which contains the
     # results of the reporter values that we're trying to read from
-    with open('gold/get_reporter_out.json', 'r', encoding='utf-8') as f:
+    with open("gold/get_reporter_out.json", "r", encoding="utf-8") as f:
         data = json.load(f)
 
-    nsteps = len(data['time_steps'])
+    nsteps = len(data["time_steps"])
     gold = {}
-    for obj_name, entry in data['reporters'].items():
-        for val_name in entry['values'].keys():
-            rname = f'{obj_name}/{val_name}'
+    for obj_name, entry in data["reporters"].items():
+        for val_name in entry["values"]:
+            rname = f"{obj_name}/{val_name}"
             gold[rname] = []
             for i in range(nsteps):
-                gold[rname].append(data['time_steps'][i][obj_name][val_name])
+                gold[rname].append(data["time_steps"][i][obj_name][val_name])
 
     def expect_close(v1, v2):
-        """
-        Helper for erroring if some values aren't close.
-        """
+        """Error if some values aren't close."""
         if isinstance(v1, int):
             v1 = float(v1)
         if isinstance(v2, int):
             v2 = float(v2)
 
         if not isinstance(v1, type(v2)):
-            raise TypeError(f'{v1} is type {type(v1)} and {v2} is {type(v2)}.')
+            raise TypeError(f"{v1} is type {type(v1)} and {v2} is {type(v2)}.")
 
         # Dicts (points)
         if isinstance(v1, dict):
@@ -61,15 +59,15 @@ if __name__ == '__main__':
             success = v1 == v2
         # Unknown type
         else:
-            raise TypeError(f'Cannot compare {type(v1)}s')
+            raise TypeError(f"Cannot compare {type(v1)}s")
 
         if not success:
             raise ValueError(f'"{v1}" != "{v2}"')
         return success
 
-    with TestMooseControl('web_server') as control:
+    with TestMooseControl("web_server") as control:
         # Wait until the server is ready, where it should be at INITIAL
-        control.wait('INITIAL')
+        control.wait("INITIAL")
 
         # Get the initial value of the reporters and compare to the gold
         for rep, gold_values in gold.items():
@@ -82,7 +80,7 @@ if __name__ == '__main__':
         # Control through the timesteps (determined by length of the gold file)
         for t in range(nsteps - 1):
             # Wait, where we shold be at TIMESTEP_BEGIN
-            control.wait('TIMESTEP_END')
+            control.wait("TIMESTEP_END")
 
             # Get the current value of the postprocessor and compare to the gold
             for rep, gold_values in gold.items():

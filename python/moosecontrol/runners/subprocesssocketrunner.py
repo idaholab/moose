@@ -98,8 +98,16 @@ class SubprocessSocketRunner(SubprocessRunnerInterface, SocketRunner):
         control_socket = f'{control_path}/file_socket="{self.socket_path}"'
         return [control_socket, "--color=off"]
 
-    def initialize(self):
-        """Spawn the process and wait for the server to be listening."""
+    def initialize(self, data: dict):
+        """
+        Spawn the process and wait for the server to be listening.
+
+        Parameters
+        ----------
+        data : dict
+            The data to be passed to /initialize.
+
+        """
         self.initialize_start()
 
         if os.path.exists(self.socket_path):
@@ -108,7 +116,7 @@ class SubprocessSocketRunner(SubprocessRunnerInterface, SocketRunner):
         # Start the subprocess
         SubprocessRunnerInterface.initialize(self)
         # And then wait for a connection
-        SocketRunner.initialize(self)
+        SocketRunner.initialize(self, data)
 
     def finalize(self):
         """Finalize the process and the connection."""

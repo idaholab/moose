@@ -19,4 +19,14 @@ WebServerControlTypeRegistry::getRegistry()
     registry_singleton = new WebServerControlTypeRegistry;
   return *registry_singleton;
 }
+
+const WebServerControlTypeRegistry::RegisteredTypeBase &
+WebServerControlTypeRegistry::get(const std::string & type)
+{
+  auto & registry = getRegistry();
+  const auto it = registry._name_map.find(type);
+  if (it == registry._name_map.end())
+    mooseError("WebServerControlTypeRegistry: The type '", type, "' is not registered");
+  return *it->second;
+}
 }

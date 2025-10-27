@@ -11,7 +11,9 @@
 
 import logging
 from dataclasses import dataclass
+from getpass import getuser
 from numbers import Number
+from socket import getfqdn
 from time import sleep
 from typing import Any, Iterable, Optional, Tuple, Type
 
@@ -21,7 +23,7 @@ import numpy.typing as npt
 from moosecontrol.exceptions import ControlNotWaiting, UnexpectedFlag
 from moosecontrol.runners import BaseRunner
 from moosecontrol.runners.baserunner import WebServerControlResponse
-from moosecontrol.validation import check_response_data
+from moosecontrol.validation import WebServerInitializedData, check_response_data
 
 # Common logger for the MooseControl
 logger = logging.getLogger("MooseControl")
@@ -70,6 +72,9 @@ class MooseControl:
         # The underlying runner
         self._runner: BaseRunner = runner
 
+        # The data received on initialize from the server
+        self._initialized_data: Optional[WebServerInitializedData] = None
+
         # Setup logger
         if not quiet:
             logging.basicConfig(
@@ -97,6 +102,62 @@ class MooseControl:
         """Whether or not we have initialized."""
         return self.runner.initialized
 
+    @property
+    def initialized_data(self) -> WebServerInitializedData:
+        """Data received on /initialize with the server."""
+        assert self._initialized_data is not None
+        return self._initialized_data
+
+    @property
+    def control_type(self) -> str:
+        """Type of WebServerControl being controlled."""
+        return self.initialized_data.control_type
+
+    @property
+    def control_name(self) -> str:
+        """Name of the WebServerControl being controlled."""
+        return self.initialized_data.control_name
+
+    @property
+    def execute_on_flags(self) -> list[str]:
+        """Execute on flags the WebServerControl is listening on."""
+        return self.initialized_data.execute_on_flags
+
+    @staticmethod
+    def required_initialize_data(object: object) -> dict:
+        """Get the base required data for /initialize as needed by the control."""
+        return {
+            "name": f"Python {object.__class__.__name__}",
+            "host": getfqdn(),
+            "user": getuser(),
+        }
+
+    def get_initialize_data(self) -> dict:
+        """
+        Get the data to add when initializing on POST /initialize.
+
+        Takes the base data and adds on any additional data
+        that a derived class may also want to initialize with.
+        """
+        # Base data to be included in all requests
+        data = self.required_initialize_data(self)
+
+        # Any data from a derived class, which cannot overwrite
+        # the base data
+        derived_data = self.additional_initialize_data()
+        for key in derived_data:
+            if key in data:
+                raise KeyError(
+                    f'Cannot override entry "{key}" in additional_initialize_data()'
+                )
+        data.update(derived_data)
+
+        return data
+
+    def additional_initialize_data(self) -> dict:
+        """Entrypoint for derived classes to add additional data on initialize."""
+        return {}
+
     def initialize(self):
         """
         Initialize the runner and waits for the process to start.
@@ -105,8 +166,19 @@ class MooseControl:
         context manager calls initialize() on enter.
         """
         assert not self.initialized
-        self.runner.initialize()
+        initialize_data = self.get_initialize_data()
+        self.runner.initialize(initialize_data)
         assert self.initialized
+
+        # Load the data from initialize
+        self._initialized_data = WebServerInitializedData(self.runner.initialized_data)
+
+        # Output information about the control
+        logger.info(
+            f'Initialized connection with {self.control_type} "{self.control_name}"'
+        )
+        combined_flags = ", ".join(self.execute_on_flags)
+        logger.info(f"Control is listening on flags: {combined_flags}")
 
         self.wait()
 
@@ -192,6 +264,7 @@ class MooseControl:
             The combined response, along with the JSON data if any.
 
         """
+        assert self.initialized
         self.require_waiting()
         return self.runner.get(path, require_status=require_status)
 
@@ -221,6 +294,7 @@ class MooseControl:
             The combined response, along with the JSON data if any.
 
         """
+        assert self.initialized
         self.require_waiting()
         return self.runner.post(path, data, require_status=require_status)
 

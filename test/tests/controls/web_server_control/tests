@@ -202,7 +202,7 @@
       input = 'wait_initial.i'
       command_proxy = 'errors.py set_controllable_no_exist'
       required_python_packages = requests
-      expect_err = "The controllable parameter 'no_exist' was not found"
+      expect_err = 'Request to set/controllable: Controllable parameter \'no_exist\' not found'
       detail = 'setting a controllable parameter that does not exist'
       valgrind = none
     []
@@ -211,7 +211,7 @@
       input = 'wait_initial.i'
       command_proxy = 'errors.py postprocessor_no_exist'
       required_python_packages = requests
-      expect_err = "The postprocessor 'no_exist' was not found"
+      expect_err = 'Request to get/postprocessor: Postprocessor \'no_exist\' not found'
       detail = 'getting a postprocessor that does not exist'
       valgrind = none
     []
@@ -220,7 +220,7 @@
       input = 'wait_initial.i'
       command_proxy = 'errors.py set_controllable_unregistered_type'
       required_python_packages = requests
-      expect_err = "The type 'BadType' is not registered for setting a controllable parameter"
+      expect_err = 'Request to set/controllable: Type \'BadType\' not registered for setting a controllable parameter'
       detail = 'setting a controllable parameter whose type is not supported'
       valgrind = none
     []
@@ -230,7 +230,7 @@
       command_proxy = 'errors.py set_controllable_bad_convert'
       required_python_packages = requests
       cli_args = 'Outputs/json/type=JSON'
-      expect_err = 'The value "foo" of JSON type string is not of the expected JSON type bool'
+      expect_err = 'Request to set/controllable: While parsing \'value\': (.*) type must be boolean, but is string'
       detail = 'setting a controllable parameter with an incompatible JSON type'
       valgrind = none
     []
@@ -241,7 +241,7 @@
       required_python_packages = requests
       cli_args = 'Reporters/test/type=WebServerControlTestReporter
                   Reporters/test/vec_real_value=0'
-      expect_err = 'The value \'1234\' of type number is not an array'
+      expect_err = 'Request to set/controllable: While parsing \'value\': (.*) type must be array, but is number'
       detail = 'setting a controllable parameter with a type that does not match'
       valgrind = none
     []
@@ -251,7 +251,7 @@
       command_proxy = 'errors.py set_realeigenmatrix_bad_convert1'
       required_python_packages = requests
       cli_args = 'Reporters/test/matrix_value="0 1"'
-      expect_err = 'The value \'1234\' of type number is not an array'
+      expect_err = 'Request to set/controllable: While parsing \'value\': (.*) type must be array, but is number'
       detail = 'setting a matrix controllable parameter that is not an array'
       valgrind = 'none' # http library is not completely valgrind clean
     []
@@ -261,8 +261,7 @@
       command_proxy = 'errors.py set_realeigenmatrix_bad_convert2'
       required_python_packages = requests
       cli_args = 'Reporters/test/matrix_value="0 1"'
-      expect_err = 'Element 0 of \'[ 1234 ]\' of type number is not an array'
-      match_literal = true
+      expect_err = 'Request to set/controllable: While parsing \'value\': (.*) type must be array, but is number'
       valgrind = 'none' # http library is not completely valgrind clean
       detail = 'setting a matrix controllable parameter that is not an array of arrays'
     []
@@ -272,7 +271,7 @@
       command_proxy = 'errors.py set_realeigenmatrix_jagged'
       required_python_packages = requests
       cli_args = 'Reporters/test/matrix_value="0 1"'
-      expect_err = 'The matrix \'[ [ 11, 12 ], [ 21 ] ]\' is jagged.'
+      expect_err = 'Request to set/controllable: While parsing \'value\': Matrix is jagged'
       match_literal = true
       valgrind = 'none' # http library is not completely valgrind clean
       detail = 'setting a matrix controllable parameter that is jagged'
@@ -303,7 +302,7 @@
     input = 'wait_initial.i'
     command_proxy = 'kill.py'
     required_python_packages = requests
-    expect_err = 'WebServerControl "web_server": Kill requested'
+    expect_err = "Client sent kill command; exiting"
     valgrind = 'none' # http library is not completely valgrind clean
     requirement = 'The system shall support killing a running MOOSE simulation via a REST API'
   []
@@ -312,8 +311,9 @@
     type = RunException
     input = 'wait_initial.i'
     command_proxy = 'initial_timeout.py'
+    required_python_packages = requests
     cli_args = 'Controls/web_server/initial_client_timeout=0.01'
-    expect_err = 'WebServerControl "web_server": Client timed out on initial(.*)The timeout is 0.01 seconds and is set by the initial_client_timeout parameter'
+    expect_err = "The client timed out during initialization(.*)The timeout is 0.01 seconds and is set by the 'initial_client_timeout' parameter"
     valgrind = 'none' # http library is not completely valgrind clean
     requirement = 'The system shall support timing out during initialization when running a MOOSE simulation via a REST API'
   []
@@ -322,8 +322,9 @@
     type = RunException
     input = 'wait_initial.i'
     command_proxy = 'timeout.py'
+    required_python_packages = requests
     cli_args = 'Controls/web_server/client_timeout=0.01'
-    expect_err = 'WebServerControl "web_server": Client timed out(.*)The timeout is 0.01 seconds and is set by the client_timeout parameter'
+    expect_err = "The client timed out(.*)The timeout is 0.01 seconds and is set by the 'client_timeout' parameter"
     valgrind = 'none' # http library is not completely valgrind clean
     requirement = 'The system shall support timing out during a solve when running a MOOSE simulation via a REST API'
   []

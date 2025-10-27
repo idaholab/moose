@@ -25,7 +25,7 @@ from common import (
 
 setup_moose_python_path()
 
-from moosecontrol import SubprocessPortRunner
+from moosecontrol import MooseControl, SubprocessPortRunner
 from test_runners_baserunner import check_baserunner_cleanup_live
 from test_runners_interfaces_subprocessrunnerinterface import (
     ARGS,
@@ -78,7 +78,7 @@ class TestSubprocessPortRunner(MooseControlTestCase):
         with patch_runner("port_is_available", return_value=False):
             regex = f"Port {FAKE_PORT} is already used"
             with self.assertRaisesRegex(ConnectionRefusedError, regex):
-                runner.initialize()
+                runner.initialize({})
 
     def test_initialize(self):
         """Tests initialize() calling initialize() on the parents in order."""
@@ -88,7 +88,7 @@ class TestSubprocessPortRunner(MooseControlTestCase):
             INTERFACE + ".initialize",
             PORT_RUNNER + ".initialize",
         ]
-        self.assert_methods_called_in_order(methods, lambda: runner.initialize())
+        self.assert_methods_called_in_order(methods, lambda: runner.initialize({}))
 
     def test_finalize(self):
         """Test finalize() calling finalize() on the parents in order."""
@@ -117,7 +117,9 @@ class TestSubprocessPortRunner(MooseControlTestCase):
         )
         full_command = runner.get_full_command()
 
-        runner.initialize()
+        data = MooseControl.required_initialize_data(self)
+        runner.initialize(data)
+
         pid = runner.get_pid()
         self.assertIsNotNone(pid)
         self.assert_in_log(f"Starting MOOSE process with command {full_command}")
@@ -158,6 +160,6 @@ class TestSubprocessPortRunner(MooseControlTestCase):
         self.assertFalse(runner.is_process_running())
 
         # Check state versus what the BaseRunner tests say it should be
-        output = get_process_output(self, runner)
+        output = "\n".join(get_process_output(self, runner))
         returncode = runner.get_return_code()
         check_baserunner_cleanup_live(self, runner, output, returncode)

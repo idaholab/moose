@@ -15,6 +15,7 @@ from common import (
     FAKE_URL,
     FakeSession,
     MooseControlTestCase,
+    fake_response,
     mock_response,
     setup_moose_python_path,
 )
@@ -67,7 +68,9 @@ def check_baserunner_cleanup_live(
     poke_alive = test.assert_in_log(
         "Poke thread is still alive on cleanup; stopping", levelname="WARNING"
     )
-    stop_poke = test.assert_in_log("Stopping poke poll thread", after_index=poke_alive)
+    stop_poke = test.assert_in_log(
+        "Stopping poke poll thread", after_index=poke_alive, levelname="DEBUG"
+    )
     webserver_alive = test.assert_in_log(
         "MOOSE webserver is still listening on cleanup; killing",
         levelname="WARNING",
@@ -77,7 +80,7 @@ def check_baserunner_cleanup_live(
 
     test.assertIsInstance(process_returncode, int)
     test.assertNotEqual(process_returncode, 0)
-    test.assertIn('WebServerControl "web_server": Kill requested', process_output)
+    test.assertIn("Client sent kill command; exiting", process_output)
 
 
 class TestBaseRunner(MooseControlTestCase):
@@ -159,7 +162,7 @@ class TestBaseRunner(MooseControlTestCase):
         runner.is_listening = MagicMock(return_value=False)
 
         with self.assertRaises(InitializeTimeout):
-            runner.initialize()
+            runner.initialize({})
         runner._session = None
 
         self.assertFalse(runner.initialized)
@@ -172,18 +175,28 @@ class TestBaseRunner(MooseControlTestCase):
     def test_initialize_listening_immediate(self):
         """Test initialize() when the server is immediately listening."""
         runner = BaseRunnerTest(poll_time=0.001, poke_poll_time=None)
-        runner.is_listening = MagicMock(return_value=True)
-        runner.get = MagicMock()
 
-        with self._caplog.at_level("INFO"):
-            runner.initialize()
+        runner.is_listening = MagicMock(return_value=True)
+        initialize_data = {"name": "foo"}
+        initialized_data = {"foo": "bar"}
+        with patch("common.FakeSession.post") as mock_post:
+            mock_post.return_value = fake_response(data=initialized_data)
+            runner.initialize(initialize_data)
         runner._session = None
 
         runner.is_listening.assert_called_once()
-        runner.get.assert_called_once_with("poke", require_status=200)
+        mock_post.assert_called_once_with(
+            f"{FAKE_URL}/initialize", json=initialize_data
+        )
         self.assertTrue(runner.initialized)
-        self.assert_log_size(1)
+        self.assertEqual(runner.initialized_data, initialized_data)
+        self.assert_log_size(2)
         self.assert_log_message(0, "MOOSE webserver is listening")
+        self.assert_log_message(
+            1,
+            f"Sending initialize to webserver, data={initialize_data}",
+            levelname="DEBUG",
+        )
         self.assertGreater(runner._initialize_poller.total_time, 0)
 
     def test_initialize_listening_eventual(self):
@@ -197,24 +210,38 @@ class TestBaseRunner(MooseControlTestCase):
             return is_listening_calls == listening_after_num
 
         runner = BaseRunnerTest(poll_time=0.001, poke_poll_time=None)
-        runner.get = MagicMock()
-        with patch_baserunner("is_listening", new=mock_is_listening):
-            runner.initialize()
+        initialize_data = {"name": "foo"}
+        initialized_data = {"foo": "bar"}
+        with (
+            patch_baserunner("is_listening", new=mock_is_listening),
+            patch("common.FakeSession.post") as mock_post,
+        ):
+            mock_post.return_value = fake_response(data=initialized_data)
+            runner.initialize(initialize_data)
         runner._session = None
 
-        runner.get.assert_called_once_with("poke", require_status=200)
+        mock_post.assert_called_once_with(
+            f"{FAKE_URL}/initialize", json=initialize_data
+        )
         self.assertTrue(runner.initialized)
+        self.assertEqual(runner.initialized_data, initialized_data)
         self.assertGreater(runner._initialize_poller.total_time, 0)
         self.assertEqual(is_listening_calls, listening_after_num)
-        self.assert_log_size(2)
+        self.assert_log_size(3)
         self.assert_log_message(0, "Waiting for MOOSE webserver to be listening...")
         self.assert_log_message(1, "MOOSE webserver is listening")
+        self.assert_log_message(
+            2,
+            f"Sending initialize to webserver, data={initialize_data}",
+            levelname="DEBUG",
+        )
 
     def test_initialize_start_poker(self):
         """Test initialize() starting the poke thread."""
         runner = BaseRunnerTest()
 
-        runner.initialize()
+        with patch(f"{BASERUNNER}.post_initialize", return_value={"foo": "bar"}):
+            runner.initialize({})
         runner._session = None
 
         self.assertTrue(runner._poker.is_alive())
@@ -234,7 +261,7 @@ class TestBaseRunner(MooseControlTestCase):
 
         self.assertIsNone(runner._poker)
         self.assertFalse(poke_thread.is_alive())
-        self.assert_in_log("Stopping poke poll thread")
+        self.assert_in_log("Stopping poke poll thread", levelname="DEBUG")
 
         # Can be ran again
         self._caplog.clear()
@@ -270,7 +297,7 @@ class TestBaseRunner(MooseControlTestCase):
         runner.finalize()
 
         runner.is_listening.assert_called_once()
-        self.assert_in_log("Stopping poke poll thread")
+        self.assert_in_log("Stopping poke poll thread", levelname="DEBUG")
         self.assertFalse(poke_thread.is_alive())
         self.assertIsNone(runner._poker)
 
@@ -356,20 +383,19 @@ class TestBaseRunner(MooseControlTestCase):
         with self._caplog.at_level("INFO"):
             runner.cleanup()
         self.assertFalse(poke_thread.is_alive())
-        self.assert_log_size(2)
+        self.assert_log_size(1)
         self.assert_log_message(
             0, "Poke thread is still alive on cleanup; stopping", levelname="WARNING"
         )
-        self.assert_log_message(1, "Stopping poke poll thread")
 
     def test_cleanup_kill(self):
         """Test cleanup() stopping webserver via kill()."""
         self.allow_log_warnings = True
 
-        runner = BaseRunnerTest(poke_poll_time=None)
+        runner = BaseRunnerTest(poke_poll_time=None, poll_time=0.001)
         runner._session = runner.build_session()
-        runner.is_listening = MagicMock(return_value=True)
         runner.kill = MagicMock()
+        runner.is_listening = MagicMock(return_value=True)
 
         runner.cleanup()
 
@@ -423,26 +449,43 @@ class TestBaseRunner(MooseControlTestCase):
 
     def test_kill_listening(self):
         """Test kill() sending /kill to the webserver because it is listening."""
-        runner = BaseRunnerTest()
-        runner.is_listening = MagicMock(return_value=True)
+        runner = BaseRunnerTest(poll_time=0.001)
         runner.get = MagicMock()
 
-        runner.kill()
+        is_listening_calls = 0
+        not_listening_after_num = 3
 
-        runner.is_listening.assert_called_once()
+        def mock_is_listening(*args, **kwargs):
+            nonlocal is_listening_calls
+            is_listening_calls += 1
+            return is_listening_calls != not_listening_after_num
+
+        with patch_baserunner("is_listening", new=mock_is_listening):
+            runner.kill()
+
+        self.assertEqual(not_listening_after_num, is_listening_calls)
         runner.get.assert_called_once_with("kill")
-        self.assert_log_size(1)
+        self.assert_log_size(2)
         self.assert_log_message(0, "Killing MOOSE webserver")
+        self.assert_log_message(1, "Webserver is no longer listening after kill")
 
     def test_kill_raise(self):
         """Test the get() call raising in kill() being ignored."""
-        runner = BaseRunnerTest()
-        runner.is_listening = MagicMock(return_value=True)
+        runner = BaseRunnerTest(poll_time=0.001)
         runner.get = MagicMock(side_effect=Exception)
 
-        runner.kill()
+        is_listening_calls = 0
+        not_listening_after_num = 2
 
-        runner.is_listening.assert_called_once()
+        def mock_is_listening(*args, **kwargs):
+            nonlocal is_listening_calls
+            is_listening_calls += 1
+            return is_listening_calls != not_listening_after_num
+
+        with patch_baserunner("is_listening", new=mock_is_listening):
+            runner.kill()
+
+        self.assertEqual(not_listening_after_num, is_listening_calls)
         runner.get.assert_called_once()
 
     def test_kill_not_listening(self):

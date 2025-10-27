@@ -302,6 +302,7 @@ addActionTypes(Syntax & syntax)
   registerTask("add_default_steady_state_convergence", true);
 
   registerTask("chain_control_setup", true);
+  registerTask("webservercontrol_start_server", true);
 
   // Action for setting up the signal-based checkpoint
   registerTask("auto_checkpoint_action", true);
@@ -424,6 +425,7 @@ addActionTypes(Syntax & syntax)
                            "(init_problem)"
                            "(add_control, add_chain_control)"
                            "(chain_control_setup)"
+                           "(webservercontrol_start_server)"
                            "(check_output)"
                            "(check_integrity)"
                            "(create_application_block)");
