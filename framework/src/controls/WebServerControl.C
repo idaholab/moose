@@ -326,11 +326,11 @@ WebServerControl::addServerAction(
         return error("Request should have JSON");
 
       // Option requires initialization
-      if (options.require_initialized && !control.isClientInitialized())
+      if (options.getRequireInitialized() && !control.isClientInitialized())
         return error("Client has not initialized the control");
 
       // Option requires waiting
-      if (options.require_waiting && !control.isCurrentlyWaiting())
+      if (options.getRequireWaiting() && !control.isCurrentlyWaiting())
         return error("Control is not currently waiting for data");
 
       // Call the action method to act on the request
@@ -402,8 +402,8 @@ WebServerControl::addServerActionsInternal()
     { return Response{200}; };
 
     ServerActionOptions options;
-    options.require_waiting = false;
-    options.require_initialized = false;
+    options.setRequireWaiting(false, {});
+    options.setRequireInitialized(false, {});
 
     addServerAction<RequestMethod::GET>("check", check, options);
   }
@@ -473,8 +473,8 @@ WebServerControl::addServerActionsInternal()
     };
 
     ServerActionOptions options;
-    options.require_waiting = false;
-    options.require_initialized = false;
+    options.setRequireWaiting(false, {});
+    options.setRequireInitialized(false, {});
     options.requireJSONKeys({"host", "name", "user"});
 
     addServerAction<RequestMethod::POST>("initialize", initialize, options);
@@ -492,7 +492,7 @@ WebServerControl::addServerActionsInternal()
     };
 
     ServerActionOptions options;
-    options.require_waiting = false;
+    options.setRequireWaiting(false, {});
 
     addServerAction<RequestMethod::GET>("poke", poke, options);
   }
@@ -539,7 +539,7 @@ WebServerControl::addServerActionsInternal()
     };
 
     ServerActionOptions options;
-    options.require_waiting = false;
+    options.setRequireWaiting(false, {});
 
     addServerAction<RequestMethod::GET>("waiting", waiting, options);
   }

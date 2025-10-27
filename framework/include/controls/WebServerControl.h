@@ -185,19 +185,59 @@ protected:
     ErrorResponse(const std::string & error, const unsigned int status_code = 400);
   };
 
+  /**
+   * Options to be passed to addServerAction
+   */
   struct ServerActionOptions
   {
-    bool require_waiting = true;
-    bool require_initialized = true;
+    ServerActionOptions() = default;
 
+    /**
+     * @return Whether or not to require waiting
+     */
+    bool getRequireWaiting() const { return _require_waiting; }
+    /**
+     * Set the require waiting flag; only accessible by the WebServerControl
+     */
+    void setRequireWaiting(const bool value, const Moose::PassKey<WebServerControl>)
+    {
+      _require_waiting = value;
+    }
+
+    /**
+     * @return Whether or not to require initialization
+     */
+    bool getRequireInitialized() const { return _require_initialized; }
+    /**
+     * Set the require initialized flag; only accessible by the WebServerControl
+     */
+    void setRequireInitialized(const bool value, const Moose::PassKey<WebServerControl>)
+    {
+      _require_initialized = value;
+    }
+
+    /**
+     * @return The JSON keys that are required in the request data
+     */
     const std::set<std::string> getRequiredJSONKeys() const { return _required_json_keys; }
+    /**
+     * Append a key to be required in JSON in the request data
+     */
     void requireJSONKey(const std::string & key) { _required_json_keys.insert(key); }
+    /**
+     * Append keys to be required in JSON in the request data
+     */
     void requireJSONKeys(std::initializer_list<std::string> && keys)
     {
       _required_json_keys.insert(keys);
     }
 
   private:
+    /// Whether or not to require waiting
+    bool _require_waiting = true;
+    /// Whether or not to require initialization
+    bool _require_initialized = true;
+    /// JSON keys that are required in the data
     std::set<std::string> _required_json_keys;
   };
 
