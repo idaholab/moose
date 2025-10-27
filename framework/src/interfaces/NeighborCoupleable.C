@@ -27,6 +27,9 @@ const VariableValue &
 NeighborCoupleable::coupledNeighborValue(const std::string & var_name, unsigned int comp) const
 {
   const auto * var = getVarHelper<MooseVariableField<Real>>(var_name, comp);
+  if (!var)
+    return *getDefaultValue(var_name, comp);
+
   if (_neighbor_nodal)
     return (_c_is_implicit) ? var->dofValuesNeighbor() : var->dofValuesOldNeighbor();
   else
