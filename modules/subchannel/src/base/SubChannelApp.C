@@ -60,6 +60,11 @@ SubChannelApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
   /* register custom execute flags, action syntax, etc. here */
   SubChannel::associateSyntax(s, af);
 
+  // Register new syntax for SCMClosures
+  auto & syntax = s;
+  registerSyntaxTask("AddSCMClosureAction", "SCMClosures/*", "add_scm_closure");
+  registerMooseObjectTask("add_scm_closure", SCMClosureBase, /*default task*/ false);
+
   FluidPropertiesApp::registerAll(f, af, s);
   HeatTransferApp::registerAll(f, af, s);
   ReactorApp::registerAll(f, af, s);
