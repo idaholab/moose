@@ -597,4 +597,8 @@ private:
   ///@}
 #endif
 };
+
+// helper function to convert std::any to json
+nlohmann::json anyToJson(const std::any & data);
+
 } // namespace CSG

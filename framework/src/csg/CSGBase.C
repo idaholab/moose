@@ -488,6 +488,7 @@ CSGBase::generateOutput() const
   csg_json["surfaces"] = {};
   csg_json["cells"] = {};
   csg_json["universes"] = {};
+  csg_json["lattices"] = {};
 
   // get all surfaces information
   auto all_surfs = getAllSurfaces();
@@ -526,6 +527,22 @@ CSGBase::generateOutput() const
       csg_json["universes"][univ_name]["root"] = u.isRoot();
   }
 
+  // print out lattice information
+  auto all_lats = getAllLattices();
+  for (const CSGLattice & lat : all_lats)
+  {
+    const auto & lat_name = lat.getName();
+    // write out dimensions dictionary
+    const auto & lat_dims = lat.getDimensions();
+    csg_json["lattices"][lat_name]["dimensions"] = {};
+    for (const auto & dim : lat_dims)
+    {
+      csg_json["lattices"][lat_name]["dimensions"][dim.first] = anyToJson(dim.second);
+    }
+    // write the map of universe names: list of lists
+    csg_json["lattices"][lat_name]["universes"] = lat.getUniverseNames();
+  }
+
   return csg_json;
 }
 
@@ -546,6 +563,31 @@ bool
 CSGBase::operator!=(const CSGBase & other) const
 {
   return !(*this == other);
+}
+
+nlohmann::json
+anyToJson(const std::any & data)
+{
+  if (data.type() == typeid(int))
+  {
+    return nlohmann::json(std::any_cast<int>(data));
+  }
+  else if (data.type() == typeid(std::string))
+  {
+    return nlohmann::json(std::any_cast<std::string>(data));
+  }
+  else if (data.type() == typeid(Real))
+  {
+    return nlohmann::json(std::any_cast<Real>(data));
+  }
+  else if (data.type() == typeid(bool))
+  {
+    return nlohmann::json(std::any_cast<bool>(data));
+  }
+  else
+  {
+    mooseError("Unsupported any data type to convert to JSON.");
+  }
 }
 
 } // namespace CSG
