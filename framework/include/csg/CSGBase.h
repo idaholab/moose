@@ -475,6 +475,13 @@ private:
   CSGUniverseList & getUniverseList() { return _universe_list; }
 
   /**
+   * @brief Get the CSGLatticeList object
+   *
+   * @return CSGLatticeList
+   */
+  CSGLatticeList & getLatticeList() { return _lattice_list; }
+
+  /**
    * @brief join a separate CSGSurfaceList object to this one
    *
    * @param surf_list CSGSurfaceList from a separate CSGBase object
@@ -487,6 +494,13 @@ private:
    * @param cell_list CSGCellList from a separate CSGBase object
    */
   void joinCellList(CSGCellList & cell_list);
+
+  /**
+   * @brief join a separate CSGLatticeList object to this one
+   *
+   * @param lattice_list CSGLatticeList from a separate CSGBase object
+   */
+  void joinLatticeList(CSGLatticeList & lattice_list);
 
   /**
    * @brief join a separate CSGUniverseList object to this one;
