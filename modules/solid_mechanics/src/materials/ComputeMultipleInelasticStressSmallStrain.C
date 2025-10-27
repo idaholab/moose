@@ -7,48 +7,53 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ComputeMultipleInelasticStress.h"
+#include "ComputeMultipleInelasticStressSmallStrain.h"
 
 #include "StressUpdateBase.h"
 #include "MooseException.h"
-#include "DamageBase.h"
 #include "MultipleInelasticStressHelper.h"
 #include "libmesh/int_range.h"
 
-registerMooseObject("SolidMechanicsApp", ComputeMultipleInelasticStress);
+registerMooseObject("SolidMechanicsApp", ComputeMultipleInelasticStressSmallStrain);
 
 InputParameters
-ComputeMultipleInelasticStress::validParams()
+ComputeMultipleInelasticStressSmallStrain::validParams()
 {
-  InputParameters params = ComputeMultipleInelasticStressBase::validParams();
+  InputParameters params = ComputeMultipleInelasticStressSmallStrainBase::validParams();
   params.addRequiredParam<std::vector<MaterialName>>(
       "inelastic_models",
       "The material objects to use to calculate stress and inelastic strains. "
       "Note: specify creep models first and plasticity models second.");
+  params.addClassDescription("Compute state (stress and internal parameters such as plastic "
+                             "strains and internal parameters) using an iterative process with "
+                             "small strain formulation. Combinations of creep models and plastic "
+                             "models may be used.");
   return params;
 }
 
-ComputeMultipleInelasticStress::ComputeMultipleInelasticStress(const InputParameters & parameters)
-  : ComputeMultipleInelasticStressBase(parameters)
+ComputeMultipleInelasticStressSmallStrain::ComputeMultipleInelasticStressSmallStrain(
+    const InputParameters & parameters)
+  : ComputeMultipleInelasticStressSmallStrainBase(parameters)
 {
 }
 
 std::vector<MaterialName>
-ComputeMultipleInelasticStress::getInelasticModelNames()
+ComputeMultipleInelasticStressSmallStrain::getInelasticModelNames()
 {
   return getParam<std::vector<MaterialName>>("inelastic_models");
 }
 
 void
-ComputeMultipleInelasticStress::updateQpState(RankTwoTensor & elastic_strain_increment,
-                                              RankTwoTensor & combined_inelastic_strain_increment)
+ComputeMultipleInelasticStressSmallStrain::updateQpState(RankTwoTensor & elastic_strain,
+                                                         RankTwoTensor & inelastic_strain)
 {
   if (_internal_solve_full_iteration_history == true)
   {
     _console << std::endl
-             << "iteration output for ComputeMultipleInelasticStress solve:"
+             << "iteration output for ComputeMultipleInelasticStressSmallStrain solve:"
              << " time=" << _t << " int_pt=" << _qp << std::endl;
   }
+
   Real l2norm_delta_stress;
   Real first_l2norm_delta_stress = 1.0;
   unsigned int counter = 0;
@@ -67,32 +72,25 @@ ComputeMultipleInelasticStress::updateQpState(RankTwoTensor & elastic_strain_inc
     {
       _models[i_rmm]->setQp(_qp);
 
-      // initially assume the strain is completely elastic
-      elastic_strain_increment = _strain_increment[_qp];
-      // and subtract off all inelastic strain increments calculated so far
-      // except the one that we're about to calculate
+      // Compute current elastic strain by subtracting all other inelastic strains
+      // Start with total mechanical strain
+      RankTwoTensor current_elastic_strain = _mechanical_strain[_qp] - _inelastic_strain_old[_qp];
+
+      // Subtract all inelastic strain increments calculated so far except the current one
       for (const auto j_rmm : make_range(_num_models))
         if (i_rmm != j_rmm)
-          elastic_strain_increment -= inelastic_strain_increment[j_rmm];
+          current_elastic_strain -= inelastic_strain_increment[j_rmm];
 
-      // form the trial stress, with the check for changed elasticity constants
-      if (_is_elasticity_tensor_guaranteed_isotropic || !_perform_finite_strain_rotations)
-        _stress[_qp] =
-            _elasticity_tensor[_qp] * (_elastic_strain_old[_qp] + elastic_strain_increment);
-      else
-      {
-        if (_damage_model)
-          _stress[_qp] = _undamaged_stress_old + _elasticity_tensor[_qp] * elastic_strain_increment;
-        else
-          _stress[_qp] = _stress_old[_qp] + _elasticity_tensor[_qp] * elastic_strain_increment;
-      }
+      // Form the trial stress
+      _stress[_qp] = _elasticity_tensor[_qp] * current_elastic_strain;
 
-      // given a trial stress (_stress[_qp]) and a strain increment (elastic_strain_increment)
-      // let the i^th model produce an admissible stress (as _stress[_qp]), and decompose
-      // the strain increment into an elastic part (elastic_strain_increment) and an
-      // inelastic part (inelastic_strain_increment[i_rmm])
+      // Compute strain increment for this iteration
+      RankTwoTensor strain_increment = current_elastic_strain - _elastic_strain[_qp];
+
+      // Given a trial stress and strain increment, let the model produce an admissible stress
+      // and decompose the strain into elastic and inelastic parts
       computeAdmissibleState(i_rmm,
-                             elastic_strain_increment,
+                             elastic_strain,
                              inelastic_strain_increment[i_rmm],
                              _consistent_tangent_operator[i_rmm]);
 
@@ -101,11 +99,11 @@ ComputeMultipleInelasticStress::updateQpState(RankTwoTensor & elastic_strain_inc
           _stress[_qp], stress_max, stress_min, i_rmm == 0);
     }
 
-    // now check convergence in the stress:
-    // once the change in stress is within tolerance after each recompute material
+    // Check convergence: once the change in stress is within tolerance after each model
     // consider the stress to be converged
     l2norm_delta_stress =
         MultipleInelasticStressHelper::computeStressDifferenceNorm(stress_max, stress_min);
+
     if (counter == 0 && l2norm_delta_stress > 0.0)
       first_l2norm_delta_stress = l2norm_delta_stress;
 
@@ -127,11 +125,18 @@ ComputeMultipleInelasticStress::updateQpState(RankTwoTensor & elastic_strain_inc
 
   if (counter == _max_iterations && l2norm_delta_stress > _absolute_tolerance &&
       (l2norm_delta_stress / first_l2norm_delta_stress) > _relative_tolerance)
-    throw MooseException("Max stress iteration hit during ComputeMultipleInelasticStress solve!");
+    throw MooseException(
+        "Max stress iteration hit during ComputeMultipleInelasticStressSmallStrain solve!");
 
-  combined_inelastic_strain_increment =
-      MultipleInelasticStressHelper::computeCombinedInelasticStrainIncrement(
-          inelastic_strain_increment, _inelastic_weights, _num_models);
+  // Combine inelastic strains from all models
+  inelastic_strain = MultipleInelasticStressHelper::computeCombinedInelasticStrainIncrement(
+      inelastic_strain_increment, _inelastic_weights, _num_models);
+
+  // Add to old inelastic strain
+  inelastic_strain += _inelastic_strain_old[_qp];
+
+  // Compute final elastic strain
+  elastic_strain = _mechanical_strain[_qp] - inelastic_strain;
 
   if (_fe_problem.currentlyComputingJacobian())
     computeQpJacobianMult();
