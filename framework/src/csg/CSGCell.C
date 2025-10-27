@@ -30,6 +30,12 @@ CSGCell::CSGCell(const std::string & name, const CSGUniverse * univ, const CSGRe
   _fill_type = "UNIVERSE";
 }
 
+CSGCell::CSGCell(const std::string & name, const CSGLattice * lattice, const CSGRegion & region)
+  : _name(name), _fill_name(lattice->getName()), _region(region), _fill_lattice(lattice)
+{
+  _fill_type = "LATTICE";
+}
+
 const CSGUniverse &
 CSGCell::getFillUniverse() const
 {
@@ -48,6 +54,15 @@ CSGCell::getFillMaterial() const
     return _fill_name;
 }
 
+const CSGLattice &
+CSGCell::getFillLattice() const
+{
+  if (getFillType() != "LATTICE")
+    mooseError("Cell '" + getName() + "' has " + getFillType() + " fill, not LATTICE.");
+  else
+    return *_fill_lattice;
+}
+
 bool
 CSGCell::operator==(const CSG::CSGCell & other) const
 {
@@ -61,6 +76,8 @@ CSGCell::operator==(const CSG::CSGCell & other) const
       return this->getFillMaterial() == other.getFillMaterial();
     else if (this->getFillType() == "UNIVERSE")
       return this->getFillUniverse() == other.getFillUniverse();
+    else if (this->getFillType() == "LATTICE")
+      return this->getFillLattice() == other.getFillLattice();
     else
       return true;
   }

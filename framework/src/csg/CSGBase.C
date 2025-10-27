@@ -137,6 +137,38 @@ CSGBase::createCell(const std::string & name,
   return cell;
 }
 
+const CSGCell &
+CSGBase::createCell(const std::string & name,
+                    const CSGLattice & fill_lattice,
+                    const CSGRegion & region,
+                    const CSGUniverse * add_to_univ)
+{
+  checkRegionSurfaces(region);
+
+  // check that cell is not being added to a universe that exists in the lattice itself
+  if (add_to_univ)
+  {
+    for (auto univ_list : fill_lattice.getUniverses())
+    {
+      for (const auto & univ_ref : univ_list)
+      {
+        const CSGUniverse & univ_in_lattice = univ_ref.get();
+        if (&univ_in_lattice == add_to_univ)
+          mooseError("Cell " + name +
+                     " cannot be filled with a lattice containing the same universe to which it is "
+                     "being added.");
+      }
+    }
+  }
+
+  auto & cell = _cell_list.addLatticeCell(name, fill_lattice, region);
+  if (add_to_univ)
+    addCellToUniverse(*add_to_univ, cell);
+  else
+    addCellToUniverse(getRootUniverse(), cell);
+  return cell;
+}
+
 void
 CSGBase::updateCellRegion(const CSGCell & cell, const CSGRegion & region)
 {
