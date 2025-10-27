@@ -38,7 +38,7 @@ MFEMHyprePCG::MFEMHyprePCG(const InputParameters & parameters) : MFEMSolverBase(
 void
 MFEMHyprePCG::constructSolver(const InputParameters &)
 {
-  auto solver = std::make_unique<mfem::HyprePCG>(getMFEMProblem().getComm());
+  auto solver = std::make_unique<mfem::patched::HyprePCG>(getMFEMProblem().getComm());
   solver->SetTol(getParam<mfem::real_t>("l_tol"));
   solver->SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
   solver->SetMaxIter(getParam<int>("l_max_its"));

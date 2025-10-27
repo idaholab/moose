@@ -39,7 +39,7 @@ MFEMHypreGMRES::MFEMHypreGMRES(const InputParameters & parameters) : MFEMSolverB
 void
 MFEMHypreGMRES::constructSolver(const InputParameters &)
 {
-  auto solver = std::make_unique<mfem::HypreGMRES>(getMFEMProblem().getComm());
+  auto solver = std::make_unique<mfem::patched::HypreGMRES>(getMFEMProblem().getComm());
   solver->SetTol(getParam<mfem::real_t>("l_tol"));
   solver->SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
   solver->SetMaxIter(getParam<int>("l_max_its"));
