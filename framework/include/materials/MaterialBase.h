@@ -34,7 +34,6 @@
 #include "Assembly.h"
 #include "GeometricSearchInterface.h"
 #include "ADFunctorInterface.h"
-#include "SolutionInvalidInterface.h"
 #include "MaterialPropertyInterface.h"
 
 #define usingMaterialBaseMembers                                                                   \

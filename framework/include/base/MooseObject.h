@@ -16,7 +16,7 @@
 #include "ConsoleStreamInterface.h"
 #include "Registry.h"
 #include "MooseObjectParameterName.h"
-#include "SolutionInvalidInterface.h"
+#include "MooseVerbosityHelper.h"
 
 #define usingMooseObjectMembers                                                                    \
   usingMooseBaseMembers;                                                                           \
@@ -25,9 +25,7 @@
 /**
  * Every object that can be built by the factory should be derived from this class.
  */
-class MooseObject : public ParallelParamObject,
-                    public SolutionInvalidInterface,
-                    public std::enable_shared_from_this<MooseObject>
+class MooseObject : public ParallelParamObject, public std::enable_shared_from_this<MooseObject>
 {
 public:
   static InputParameters validParams();
@@ -64,9 +62,6 @@ public:
    */
   bool isKokkosObject() const { return parameters().isParamValid(MooseBase::kokkos_object_param); }
 #endif
-
-  // To get warnings tracked in the SolutionInvalidityOutput
-  usingCombinedWarningSolutionWarnings;
 
 protected:
   /// Reference to the "enable" InputParameters, used by Controls for toggling on/off MooseObjects

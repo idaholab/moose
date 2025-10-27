@@ -56,7 +56,6 @@ Action::Action(const InputParameters & parameters)
             (parameters.isParamValid("task") && parameters.get<std::string>("task") != ""
                  ? std::string("::") + parameters.get<std::string>("task")
                  : "")),
-    SolutionInvalidInterface(this, parameters),
     _registered_identifier(isParamValid("registered_identifier")
                                ? getParam<std::string>("registered_identifier")
                                : ""),

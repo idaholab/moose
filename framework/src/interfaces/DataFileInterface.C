@@ -20,19 +20,20 @@ DataFileInterface::DataFileInterface(const ParallelParamObject & parent) : _pare
 std::string
 DataFileInterface::getDataFileName(const std::string & param) const
 {
-  _parent.mooseDeprecated("getDataFileName() is deprecated. The file path is now directly set "
-                          "within the InputParameters.\nUse getParam<DataFileName>(\"",
-                          param,
-                          "\") instead.");
+  _parent.untrackedMooseDeprecated(
+      "getDataFileName() is deprecated. The file path is now directly set "
+      "within the InputParameters.\nUse getParam<DataFileName>(\"",
+      param,
+      "\") instead.");
   return _parent.getParam<DataFileName>(param);
 }
 
 std::string
 DataFileInterface::getDataFileNameByName(const std::string & relative_path) const
 {
-  _parent.mooseDeprecated("getDataFileNameByName() is deprecated. Use getDataFilePath(\"",
-                          relative_path,
-                          "\") instead.");
+  _parent.untrackedMooseDeprecated("getDataFileNameByName() is deprecated. Use getDataFilePath(\"",
+                                   relative_path,
+                                   "\") instead.");
   return getDataFilePath(relative_path);
 }
 
@@ -42,9 +43,9 @@ DataFileInterface::getDataFilePath(const std::string & relative_path) const
   // This should only ever be used with relative paths. There is no point to
   // use this search path with an absolute path.
   if (std::filesystem::path(relative_path).is_absolute())
-    _parent.mooseWarning("While using getDataFilePath(\"",
-                         relative_path,
-                         "\"): This API should not be used for absolute paths.");
+    _parent.untrackedMooseWarning("While using getDataFilePath(\"",
+                                  relative_path,
+                                  "\"): This API should not be used for absolute paths.");
 
   // This will search the data paths for this relative path
   std::optional<std::string> error;
