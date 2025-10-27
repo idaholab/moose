@@ -136,6 +136,21 @@ public:
                              const CSGUniverse * add_to_univ = nullptr);
 
   /**
+   * @brief Create a Lattice Cell object
+   *
+   * @param name unique cell name
+   * @param fill_lattice lattice that will fill the cell
+   * @param region cell region
+   * @param add_to_univ (optional) universe to which this cell will be added (default is root
+   * universe)
+   * @return reference to cell that is created
+   */
+  const CSGCell & createCell(const std::string & name,
+                             const CSGLattice & fill_lattice,
+                             const CSGRegion & region,
+                             const CSGUniverse * add_to_univ = nullptr);
+
+  /**
    * @brief Get all cell objects
    *
    * @return list of references to all CSGCell objects in CSGBase

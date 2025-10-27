@@ -143,6 +143,14 @@ TEST(CSGBaseTest, testCreateCell)
   // root universe to check in tests
   auto & root_univ = csg_obj->getRootUniverse();
 
+  // create lattice to be used as fill
+  auto & lat_univ1 = csg_obj->createUniverse("latt_univ1");
+  const CSGLattice & lattice = csg_obj->createCartesianLattice(
+      "lat1",
+      1.0,
+      std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>>{
+          {std::cref(lat_univ1), std::cref(lat_univ1)}});
+
   // make void cells and check universe ownership
   {
     // create cell to be auto added to root universe
@@ -207,6 +215,33 @@ TEST(CSGBaseTest, testCreateCell)
         [&csg_obj, &add_to_univ, &reg1]()
         { csg_obj->createCell("c", add_to_univ, reg1, &add_to_univ); },
         "cannot be filled with the same universe to which it is being added");
+  }
+  // make lattice cells and check universe ownership
+  {
+    // create cell to be auto added to root universe
+    std::string cname1 = "latt_cell1";
+    // create a lattice-filled cell with name cname1, a fill of lattice,
+    // and defined by region reg1
+    csg_obj->createCell(cname1, lattice, reg1);
+    // create a cell and add to different universe, not root
+    std::string cname2 = "latt_cell2";
+    csg_obj->createCell(cname2, lattice, reg1, &add_to_univ);
+
+    // cname1 should exist in root but not the other universe
+    ASSERT_TRUE(root_univ.hasCell(cname1));
+    ASSERT_FALSE(add_to_univ.hasCell(cname1));
+
+    // cname2 should exist in add_to_univ but not root
+    ASSERT_TRUE(add_to_univ.hasCell(cname2));
+    ASSERT_FALSE(root_univ.hasCell(cname2));
+  }
+  // expected error: create a lattice cell and add it to a universe that exists in the lattice
+  // itself
+  {
+    Moose::UnitUtils::assertThrows(
+        [&csg_obj, &lattice, &lat_univ1, &reg1]()
+        { csg_obj->createCell("c", lattice, reg1, &lat_univ1); },
+        "cannot be filled with a lattice containing the same universe to which it is being added");
   }
   // expect error: create a cell with existing name
   {

@@ -65,6 +65,19 @@ protected:
   addUniverseCell(const std::string & name, const CSGUniverse & univ, const CSGRegion & region);
 
   /**
+   * @brief Get non-const map of all names to cells in cell list
+   * @brief Add a Lattice Cell object to cell list
+   *
+   * @param name unique cell name
+   * @param lattice lattice
+   * @param region cell region
+   * @return reference to CSGCell with lattice fill that was created and
+   * added to this CSGCellList
+   */
+  CSGCell &
+  addLatticeCell(const std::string & name, const CSGLattice & lattice, const CSGRegion & region);
+
+  /**
    * @brief return whether cell with given name exists in cell list
    *
    * @param name name of cell
@@ -73,7 +86,7 @@ protected:
   bool hasCell(const std::string & name) const { return _cells.find(name) != _cells.end(); }
 
   /**
-   * @brief Get non-const map of all names to cells in cell list
+   * @brief Get map of all names to cells in cell list
    *
    * @return map of all names to CSGCell pointers
    */
