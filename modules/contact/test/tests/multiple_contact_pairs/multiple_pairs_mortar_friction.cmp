@@ -1,0 +1,15 @@
+COORDINATES absolute 1.e-6    # min separation not calculated
+
+TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:              18 @ t10
+
+NODAL VARIABLES relative 1.0e-5 floor 1.0e-8
+	disp_x                     # min:               0 @ t1,n1	max:       0.2323557 @ t10,n40
+	disp_y                     # min:               0 @ t1,n1	max:            0.21 @ t1,n31
+	first_pair_normal_lm       # min:               0 @ t1,n1	max:       205918.31 @ t10,n38
+	first_pair_tangential_lm   # min:               0 @ t1,n1	max:       41183.661 @ t10,n38
+	second_pair_normal_lm      # min:               0 @ t1,n1	max:       185609.91 @ t10,n47
+	second_pair_tangential_lm  # min:               0 @ t1,n1	max:       37121.982 @ t10,n47
+
+ELEMENT VARIABLES relative 1.0e-5 floor 1.0e-8
+	stress_xx  # min:               0 @ t1,b1,e1	max:       40566.956 @ t10,b3,e26
+

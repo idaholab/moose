@@ -474,6 +474,18 @@ private:
   void
   householderOrthogolization(const Point & normal, Point & tangent_one, Point & tangent_two) const;
 
+  /**
+   * Process aligned nodes
+   * @returns whether mortar segment(s) were created
+   */
+  bool processAlignedNodes(const Node & secondary_node,
+                           const Node & primary_node,
+                           const std::vector<const Elem *> * secondary_node_neighbors,
+                           const std::vector<const Elem *> * primary_node_neighbors,
+                           const VectorValue<Real> & nodal_normal,
+                           const Elem & candidate_element,
+                           std::set<const Elem *> & rejected_element_candidates);
+
   /// Whether to print debug output
   const bool _debug;
 
@@ -506,6 +518,13 @@ private:
 
   /// Storage for the input parameters used by the mortar nodal geometry output
   std::unique_ptr<InputParameters> _output_params;
+
+  /// Debugging container for printing information about fraction of successful projections for
+  /// secondary nodes. If !_debug then this should always be empty
+  std::unordered_set<dof_id_type> _projected_secondary_nodes;
+
+  /// Secondary nodes that failed to project
+  std::unordered_set<dof_id_type> _failed_secondary_node_projections;
 
   friend class MortarNodalGeometryOutput;
   friend class AugmentSparsityOnInterface;

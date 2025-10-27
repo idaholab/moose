@@ -4,7 +4,7 @@
     input = 'frictionless_lm.i'
     exodiff = 'frictionless_lm_out.e'
     heavy = true
-    abs_zero = 1e-6
+    custom_cmp = frictionless_lm.cmp
     design = 'Constraints/index.md'
     issues = '#13080 #20773'
     requirement = 'We shall be able to run our canonical frictional sliding block problem with lagrange multipliers and the mortar method'

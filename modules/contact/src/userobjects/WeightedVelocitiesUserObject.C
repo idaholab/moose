@@ -14,6 +14,7 @@
 #include "MortarUtils.h"
 #include "MooseUtils.h"
 #include "MortarContactUtils.h"
+#include "AutomaticMortarGeneration.h"
 #include "libmesh/quadrature.h"
 
 InputParameters

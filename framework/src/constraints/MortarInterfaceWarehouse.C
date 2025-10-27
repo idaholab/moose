@@ -7,26 +7,28 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MortarData.h"
+#include "MortarInterfaceWarehouse.h"
 #include "SubProblem.h"
 #include "MooseMesh.h"
 #include "MooseError.h"
 #include "MortarExecutorInterface.h"
+#include "AutomaticMortarGeneration.h"
 
-MortarData::MortarData(const libMesh::ParallelObject & other)
+MortarInterfaceWarehouse::MortarInterfaceWarehouse(const libMesh::ParallelObject & other)
   : libMesh::ParallelObject(other), _mortar_initd(false)
 {
 }
 
 void
-MortarData::createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundary_key,
-                                  const std::pair<SubdomainID, SubdomainID> & subdomain_key,
-                                  SubProblem & subproblem,
-                                  bool on_displaced,
-                                  bool periodic,
-                                  const bool debug,
-                                  const bool correct_edge_dropping,
-                                  const Real minimum_projection_angle)
+MortarInterfaceWarehouse::createMortarInterface(
+    const std::pair<BoundaryID, BoundaryID> & boundary_key,
+    const std::pair<SubdomainID, SubdomainID> & subdomain_key,
+    SubProblem & subproblem,
+    bool on_displaced,
+    bool periodic,
+    const bool debug,
+    const bool correct_edge_dropping,
+    const Real minimum_projection_angle)
 {
   _mortar_subdomain_coverage.insert(subdomain_key.first);
   _mortar_subdomain_coverage.insert(subdomain_key.second);
@@ -61,19 +63,19 @@ MortarData::createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boun
   // Generate lower-d mesh
   if (mortar_interfaces.find(boundary_key) == mortar_interfaces.end())
   {
-    auto [it, inserted] =
-        mortar_interfaces.emplace(boundary_key,
-                                  AutomaticMortarGeneration(subproblem.getMooseApp(),
-                                                            mesh,
-                                                            boundary_key,
-                                                            subdomain_key,
-                                                            on_displaced,
-                                                            periodic,
-                                                            debug,
-                                                            correct_edge_dropping,
-                                                            minimum_projection_angle));
+    auto [it, inserted] = mortar_interfaces.emplace(
+        boundary_key,
+        std::make_unique<AutomaticMortarGeneration>(subproblem.getMooseApp(),
+                                                    mesh,
+                                                    boundary_key,
+                                                    subdomain_key,
+                                                    on_displaced,
+                                                    periodic,
+                                                    debug,
+                                                    correct_edge_dropping,
+                                                    minimum_projection_angle));
     if (inserted)
-      it->second.initOutput();
+      it->second->initOutput();
   }
 
   // See whether to query the mesh
@@ -113,51 +115,43 @@ MortarData::createMortarInterface(const std::pair<BoundaryID, BoundaryID> & boun
 }
 
 const AutomaticMortarGeneration &
-MortarData::getMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundary_key,
-                               const std::pair<SubdomainID, SubdomainID> & /*subdomain_key*/,
-                               bool on_displaced) const
+MortarInterfaceWarehouse::getMortarInterface(
+    const std::pair<BoundaryID, BoundaryID> & boundary_key,
+    const std::pair<SubdomainID, SubdomainID> & /*subdomain_key*/,
+    bool on_displaced) const
 {
-  if (on_displaced)
-  {
-    if (_displaced_mortar_interfaces.find(boundary_key) == _displaced_mortar_interfaces.end())
-      mooseError(
-          "The requested mortar interface AutomaticMortarGeneration object does not yet exist!");
-
-    return _displaced_mortar_interfaces.at(boundary_key);
-  }
-  else
-  {
-    if (_mortar_interfaces.find(boundary_key) == _mortar_interfaces.end())
-      mooseError(
-          "The requested mortar interface AutomaticMortarGeneration object does not yet exist!");
-
-    return _mortar_interfaces.at(boundary_key);
-  }
+  auto & mortar_interfaces = on_displaced ? _displaced_mortar_interfaces : _mortar_interfaces;
+  auto it = mortar_interfaces.find(boundary_key);
+  if (it == mortar_interfaces.end())
+    mooseError(
+        "The requested mortar interface AutomaticMortarGeneration object does not yet exist!");
+  return *it->second;
 }
 
 AutomaticMortarGeneration &
-MortarData::getMortarInterface(const std::pair<BoundaryID, BoundaryID> & boundary_key,
-                               const std::pair<SubdomainID, SubdomainID> & subdomain_key,
-                               bool on_displaced)
+MortarInterfaceWarehouse::getMortarInterface(
+    const std::pair<BoundaryID, BoundaryID> & boundary_key,
+    const std::pair<SubdomainID, SubdomainID> & subdomain_key,
+    bool on_displaced)
 {
   return const_cast<AutomaticMortarGeneration &>(
-      const_cast<const MortarData *>(this)->getMortarInterface(
+      const_cast<const MortarInterfaceWarehouse *>(this)->getMortarInterface(
           boundary_key, subdomain_key, on_displaced));
 }
 
 void
-MortarData::update()
+MortarInterfaceWarehouse::update()
 {
   for (auto & mortar_pair : _mortar_interfaces)
-    update(mortar_pair.second);
+    update(*mortar_pair.second);
   for (auto & mortar_pair : _displaced_mortar_interfaces)
-    update(mortar_pair.second);
+    update(*mortar_pair.second);
 
   _mortar_initd = true;
 }
 
 void
-MortarData::update(AutomaticMortarGeneration & amg)
+MortarInterfaceWarehouse::update(AutomaticMortarGeneration & amg)
 {
   // Clear exiting data
   amg.clear();
@@ -191,23 +185,24 @@ MortarData::update(AutomaticMortarGeneration & amg)
 }
 
 const std::set<SubdomainID> &
-MortarData::getHigherDimSubdomainIDs(SubdomainID lower_d_subdomain_id) const
+MortarInterfaceWarehouse::getHigherDimSubdomainIDs(SubdomainID lower_d_subdomain_id) const
 {
   if (_lower_d_sub_to_higher_d_subs.find(lower_d_subdomain_id) ==
       _lower_d_sub_to_higher_d_subs.end())
-    mooseError(
-        "The lower dimensional ID ", lower_d_subdomain_id, " has not been added to MortarData yet");
+    mooseError("The lower dimensional ID ",
+               lower_d_subdomain_id,
+               " has not been added to MortarInterfaceWarehouse yet");
   return _lower_d_sub_to_higher_d_subs.at(lower_d_subdomain_id);
 }
 
 void
-MortarData::notifyWhenMortarSetup(MortarExecutorInterface * const mei_obj)
+MortarInterfaceWarehouse::notifyWhenMortarSetup(MortarExecutorInterface * const mei_obj)
 {
   _mei_objs.insert(mei_obj);
 }
 
 void
-MortarData::dontNotifyWhenMortarSetup(MortarExecutorInterface * const mei_obj)
+MortarInterfaceWarehouse::dontNotifyWhenMortarSetup(MortarExecutorInterface * const mei_obj)
 {
   _mei_objs.erase(mei_obj);
 }

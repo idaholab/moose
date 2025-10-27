@@ -11,6 +11,7 @@
 #include "DisplacedProblem.h"
 #include "MortarContactUtils.h"
 #include "Assembly.h"
+#include "AutomaticMortarGeneration.h"
 #include "metaphysicl/dualsemidynamicsparsenumberarray.h"
 #include "metaphysicl/parallel_dualnumber.h"
 #include "metaphysicl/parallel_dynamic_std_array_wrapper.h"
@@ -107,7 +108,8 @@ ComputeWeightedGapCartesianLMMechanicalContact::ComputeWeightedGapCartesianLMMec
         mooseError("Normal contact constraints only support elemental variables of CONSTANT order");
 }
 
-ADReal ComputeWeightedGapCartesianLMMechanicalContact::computeQpResidual(Moose::MortarType)
+ADReal
+ComputeWeightedGapCartesianLMMechanicalContact::computeQpResidual(Moose::MortarType)
 {
   mooseError("We should never call computeQpResidual for ComputeWeightedGapLMMechanicalContact");
 }

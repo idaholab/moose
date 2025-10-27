@@ -11,6 +11,7 @@
 #include "MortarContactUtils.h"
 #include "DisplacedProblem.h"
 #include "Assembly.h"
+#include "AutomaticMortarGeneration.h"
 #include "metaphysicl/dualsemidynamicsparsenumberarray.h"
 #include "metaphysicl/parallel_dualnumber.h"
 #include "metaphysicl/parallel_dynamic_std_array_wrapper.h"

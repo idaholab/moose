@@ -61,7 +61,7 @@
     exodiff = 'test_balance_out.e'
     abs_zero = 1.0e-4
     allow_warnings = true
-    method = '!dbg'
+    capabilities = 'method!=dbg'
     prereq = 'test_balance'
     cli_args ='Executioner/TimeIntegrator/use_constant_mass=true Mesh/patch_update_strategy=always'
     restep = false # ExplicitMixedOrder cannot handle repeating a timestep
@@ -76,7 +76,7 @@
     prereq = 'exp_constant_mass'
     abs_zero = 1.0e-4
     allow_warnings = true
-    method = '!dbg'
+    capabilities = 'method!=dbg'
     restep = false # ExplicitMixedOrder cannot handle repeating a timestep
     requirement = 'The system shall be able to solve an explicit contact problem quickly, omitting verbose output.'
   []

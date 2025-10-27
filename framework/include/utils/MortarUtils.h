@@ -13,6 +13,7 @@
 #include "FEProblemBase.h"
 #include "MaterialBase.h"
 #include "MaterialWarehouse.h"
+#include "AutomaticMortarGeneration.h"
 
 #include "libmesh/quadrature.h"
 #include "libmesh/elem.h"

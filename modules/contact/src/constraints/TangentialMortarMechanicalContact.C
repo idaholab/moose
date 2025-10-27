@@ -9,6 +9,7 @@
 
 #include "TangentialMortarMechanicalContact.h"
 #include "WeightedVelocitiesUserObject.h"
+#include "AutomaticMortarGeneration.h"
 
 registerMooseObject("ContactApp", TangentialMortarMechanicalContact);
 

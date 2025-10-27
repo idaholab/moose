@@ -9,5 +9,6 @@
     expect_out = '0 of 42 singular values'
     absent_out = '[1-9]+[0-9]* of 42 singular values'
     mesh_mode = 'REPLICATED'
+    custom_cmp = custom.cmp
   []
 []
