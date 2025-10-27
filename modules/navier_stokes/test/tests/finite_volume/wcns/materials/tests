@@ -28,6 +28,20 @@
     # Warning from setting AD derivatives to 0 in h_from_p_T(p, T, h, dh_dp, dh_dT)
     allow_warnings = true
   []
+  [transient_using_h-physics-defines-functormats]
+    type = 'Exodiff'
+    input = 2d-transient-physics.i
+    exodiff = 2d-transient-physics_out.e
+    capabilities = 'method!=dbg'
+    requirement = 'The system shall be able to use realistic fluid properties in a weakly compressible flow simulation and define the functor properties automatically within the shorthand syntax.'
+    rel_err = 7e-5
+    # The non-linear tolerance is actually fairly tight, but the variable values
+    # are small at the no-slip boundary conditions, and this leads to absolute diffs of around 1e-15,
+    # triggering the default relative tolerance error criterion
+    valgrind = HEAVY
+    # Warning from setting AD derivatives to 0 in h_from_p_T(p, T, h, dh_dp, dh_dT)
+    allow_warnings = true
+  []
   [fluidprops]
     type = 'Exodiff'
     input = functorfluidprops.i
