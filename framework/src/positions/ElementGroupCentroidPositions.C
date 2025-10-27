@@ -25,7 +25,7 @@ ElementGroupCentroidPositions::validParams()
   params.addParam<MooseEnum>("grouping_type", groupTypeEnum(), "Type of group of elements");
   params.addParam<std::vector<ExtraElementIDName>>("extra_id_name",
                                                    "Name(s) of the extra element ID(s) to use");
-  params.addParam<std::vector<std::vector<unsigned int>>>(
+  params.addParam<std::vector<std::vector<dof_id_type>>>(
       "extra_id",
       "Specific ID(s), for each extra id name, for grouping elements. "
       "If empty, all *valid* ids will be used to bin");
@@ -52,7 +52,7 @@ ElementGroupCentroidPositions::ElementGroupCentroidPositions(const InputParamete
       _extra_id_indices.push_back(_mesh.getMesh().get_elem_integer_index(name));
 
     if (isParamValid("extra_id"))
-      _extra_id_group_indices = getParam<std::vector<std::vector<unsigned int>>>("extra_id");
+      _extra_id_group_indices = getParam<std::vector<std::vector<dof_id_type>>>("extra_id");
     else
       _extra_id_group_indices.resize(_extra_id_names.size());
 
@@ -81,7 +81,7 @@ ElementGroupCentroidPositions::ElementGroupCentroidPositions(const InputParamete
     _blocks_in_use = true;
     _extra_id_names.insert(_extra_id_names.begin(), "block");
     _extra_id_indices.insert(_extra_id_indices.begin(), std::numeric_limits<unsigned short>::max());
-    _extra_id_group_indices.insert(_extra_id_group_indices.begin(), std::vector<unsigned int>());
+    _extra_id_group_indices.insert(_extra_id_group_indices.begin(), std::vector<dof_id_type>());
     // Add real block restriction
     if (blockRestricted())
       for (const auto & block : blockIDs())
@@ -113,9 +113,13 @@ ElementGroupCentroidPositions::initialize()
     auto & indices = _extra_id_group_indices[i];
     if (indices.empty())
     {
-      std::set<unsigned int> ids;
+      std::set<dof_id_type> ids;
       for (const auto & elem : _mesh.getMesh().active_local_element_ptr_range())
-        ids.insert(id(*elem, _extra_id_indices[i], _blocks_in_use && i == 0));
+      {
+        auto eeid = id(*elem, _extra_id_indices[i], _blocks_in_use && i == 0);
+        if (eeid != DofObject::invalid_id)
+          ids.insert(eeid);
+      }
       _mesh.comm().set_union(ids);
       for (const auto & id : ids)
         indices.push_back(id);
@@ -373,7 +377,7 @@ ElementGroupCentroidPositions::initialize()
   _initialized = true;
 }
 
-unsigned int
+dof_id_type
 ElementGroupCentroidPositions::id(const Elem & elem, unsigned int id_index, bool use_subdomains)
 {
   mooseAssert(!use_subdomains || (id_index == std::numeric_limits<unsigned short>::max()),

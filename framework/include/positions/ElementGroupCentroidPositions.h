@@ -44,8 +44,8 @@ public:
   /// The indices of the extra element ids to use to make groups
   std::vector<unsigned int> _extra_id_indices;
   /// The particular extra id values, for each extra id of interest
-  std::vector<std::vector<unsigned int>> _extra_id_group_indices;
+  std::vector<std::vector<dof_id_type>> _extra_id_group_indices;
 
 private:
-  unsigned int id(const Elem & elem, unsigned int id_index, bool use_subdomains);
+  dof_id_type id(const Elem & elem, unsigned int id_index, bool use_subdomains);
 };
