@@ -170,9 +170,7 @@ EquationSystem::ApplyEssentialBC(const std::string & var_name,
       bc->ApplyBC(trial_gf);
       mfem::Array<int> ess_bdrs(bc->getBoundaryMarkers());
       for (auto it = 0; it != trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max(); ++it)
-      {
         global_ess_markers[it] = std::max(global_ess_markers[it], ess_bdrs[it]);
-      }
     }
   }
 }
@@ -183,9 +181,8 @@ EquationSystem::ApplyEssentialBCs()
   _ess_tdof_lists.resize(_test_var_names.size());
   for (const auto i : index_range(_test_var_names))
   {
-
-    const auto test_var_name = _test_var_names.at(i);
-    mfem::ParGridFunction & trial_gf(*(_var_ess_constraints.at(i)));
+    const auto & test_var_name = _test_var_names.at(i);
+    mfem::ParGridFunction & trial_gf = *(_var_ess_constraints.at(i));
     mfem::Array<int> global_ess_markers(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
     global_ess_markers = 0;
     // Set default value of gridfunction used in essential BC. Values
@@ -472,10 +469,8 @@ TimeDependentEquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
 {
   EquationSystem::Init(gridfunctions, assembly_level);
   for (auto & test_var_name : _test_var_names)
-  {
     _td_var_ess_constraints.emplace_back(
         std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));
-  }
 }
 
 void
@@ -526,8 +521,8 @@ TimeDependentEquationSystem::SetTrialVariableNames()
 void
 TimeDependentEquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
 {
-  auto trial_var_name = kernel->getTrialVariableName();
-  auto test_var_name = kernel->getTestVariableName();
+  const auto & trial_var_name = kernel->getTrialVariableName();
+  const auto & test_var_name = kernel->getTestVariableName();
 
   if (_time_derivative_map.isTimeDerivative(trial_var_name))
   {
@@ -612,12 +607,12 @@ TimeDependentEquationSystem::BuildMixedBilinearForms()
 {
   EquationSystem::BuildMixedBilinearForms();
   // Register mixed bilinear forms. Note that not all combinations may
-  // have a kernel
+  // have a kernel.
 
   // Create mblf for each test/trial variable pair with an added kernel
   for (const auto i : index_range(_test_var_names))
   {
-    auto test_var_name = _test_var_names.at(i);
+    const auto & test_var_name = _test_var_names.at(i);
     auto test_td_mblfs =
         std::make_shared<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>();
     for (const auto j : index_range(_trial_var_names))
@@ -684,16 +679,15 @@ TimeDependentEquationSystem::ApplyEssentialBCs()
   _ess_tdof_lists.resize(_test_var_names.size());
   for (const auto i : index_range(_test_var_names))
   {
-
-    const auto test_var_name = _test_var_names.at(i);
+    const auto & test_var_name = _test_var_names.at(i);
     const auto time_derivative_test_var_name =
         _time_derivative_map.getTimeDerivativeName(test_var_name);
-    mfem::ParGridFunction & trial_gf(*(_var_ess_constraints.at(i)));
-    mfem::ParGridFunction & trial_gf_time_derivative(*(_td_var_ess_constraints.at(i)));
+    mfem::ParGridFunction & trial_gf = *(_var_ess_constraints.at(i));
+    mfem::ParGridFunction & trial_gf_time_derivative = *(_td_var_ess_constraints.at(i));
     mfem::Array<int> global_ess_markers(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
     global_ess_markers = 0;
     // Set default value of gridfunction used in essential BC. Values
-    // overwritten in applyEssentialBCs
+    // overwritten in ApplyEssentialBCs
     EquationSystem::ApplyEssentialBC(test_var_name, trial_gf, global_ess_markers);
     // Update solution values on Dirichlet values to be in terms of du/dt instead of u
     *_td_var_ess_constraints.at(i).get() = *(_var_ess_constraints.at(i).get());

@@ -199,7 +199,7 @@ public:
   inline void addTimeDerivativeAssociation(const std::string & var_name,
                                            const std::string & time_derivative_var_name)
   {
-    _field_map.insert({var_name, time_derivative_var_name});
+    _field_map.emplace(var_name, time_derivative_var_name);
   }
 
   inline bool isTimeDerivative(const std::string & time_derivative_var_name) const
@@ -240,13 +240,13 @@ public:
     return null_str;
   }
 
-  inline static std::string createTimeDerivativeName(std::string name)
+  inline static std::string createTimeDerivativeName(std::string_view name)
   {
     return std::string("d") + name + std::string("_dt");
   }
 
 private:
-  MapType _field_map{};
+  MapType _field_map;
   const std::string null_str;
 };
 

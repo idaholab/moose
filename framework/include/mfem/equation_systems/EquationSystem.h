@@ -310,7 +310,7 @@ EquationSystem::ApplyBoundaryLFIntegrators(
 class TimeDependentEquationSystem : public EquationSystem
 {
 public:
-  TimeDependentEquationSystem(const Moose::MFEM::TimeDerivativeMap & _time_derivative_map);
+  TimeDependentEquationSystem(const Moose::MFEM::TimeDerivativeMap & time_derivative_map);
 
   /// Initialise
   virtual void Init(Moose::MFEM::GridFunctions & gridfunctions,
