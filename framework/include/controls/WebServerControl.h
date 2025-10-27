@@ -190,7 +190,7 @@ protected:
    */
   struct ServerActionOptions
   {
-    ServerActionOptions() = default;
+    ServerActionOptions() : _require_waiting(true), _require_initialized(true) {}
 
     /**
      * @return Whether or not to require waiting
@@ -234,9 +234,9 @@ protected:
 
   private:
     /// Whether or not to require waiting
-    bool _require_waiting = true;
+    bool _require_waiting;
     /// Whether or not to require initialization
-    bool _require_initialized = true;
+    bool _require_initialized;
     /// JSON keys that are required in the data
     std::set<std::string> _required_json_keys;
   };
