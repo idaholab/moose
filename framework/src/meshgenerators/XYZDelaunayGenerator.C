@@ -89,7 +89,7 @@ XYZDelaunayGenerator::validParams()
       conversion_method,
       "The method to convert 3D hole meshes into compatible meshes. Options are "
       "ALL: convert all elements into TET4; SURFACE: convert only the surface elements "
-      "that are subject to stitching");
+      "that are stitched to the generated Delaunay mesh.");
 
   params.addParam<bool>(
       "combined_stitching",
@@ -217,6 +217,7 @@ XYZDelaunayGenerator::generate()
                      "converting them to TET4. Consider setting convert_holes_for_stitching=true.");
         else if (_stitch_holes.size() && _stitch_holes[hole_i] && _conversion_method == "SURFACE")
         {
+          // Create a transition layer with triangle sides on the external boundary of the hole
           BoundaryID temp_ext_bid = MooseMeshUtils::getNextFreeBoundaryID(hole_mesh);
           for (const auto & hees : hole_elem_external_sides)
             hole_mesh.get_boundary_info().add_side(hees.first, hees.second, temp_ext_bid);
@@ -583,7 +584,7 @@ XYZDelaunayGenerator::generate()
                                                          _verbose_stitching,
                                                          use_binary_search);
     if (!n_nodes_stitched)
-      mooseError("Failed to stitch hole meshes to new tetrahedralization.");
+      mooseError("Failed to stitch combined hole meshes to new tetrahedralization.");
   }
 
   // Add user-specified sideset names
