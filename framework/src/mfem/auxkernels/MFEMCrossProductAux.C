@@ -54,7 +54,6 @@ MFEMCrossProductAux::MFEMCrossProductAux(const InputParameters & parameters)
   if (fes->GetTrueVSize() != fes->GetVSize())
     mooseError("MFEMCrossProductAux currently supports only L2 spaces with interior DOFs "
                "(no shared/constrained DOFs).");
-
 }
 
 void

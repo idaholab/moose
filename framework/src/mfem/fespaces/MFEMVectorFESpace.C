@@ -98,7 +98,7 @@ MFEMVectorFESpace::getFECName() const
   {
     return "L2Int" + basis + "_" + std::to_string(pdim) + "D_P" + std::to_string(_fec_order);
   }
- 
+
   return actual_type + basis + "_" + std::to_string(pdim) + "D_P" + std::to_string(_fec_order);
 }
 
