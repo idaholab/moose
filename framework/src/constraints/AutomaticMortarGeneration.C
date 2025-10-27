@@ -1901,9 +1901,9 @@ AutomaticMortarGeneration::processAlignedNodes(
   //  the cross product). Doing the same with the aligned primary node, if we pick the top primary
   //  element, then the cross product also points out of the screen. Because the cross products
   //  point in the same direction (positive dot product), then we know to associate the
-  //  secondary-primary pair. If we had picked the bottom primary element whose cross product points
-  //  into the screen, then clearly the cross products point in the opposite direction and we don't
-  //  have a match
+  //  secondary-primary element pair. If we had picked the bottom primary element whose cross
+  //  product points into the screen, then clearly the cross products point in the opposite
+  //  direction and we don't have a match
   std::array<Real, 2> secondary_node_neighbor_cps, primary_node_neighbor_cps;
 
   for (const auto nn : index_range(*secondary_node_neighbors))
@@ -1963,7 +1963,7 @@ AutomaticMortarGeneration::processAlignedNodes(
   }
 
   // We need to handle the case where we've exactly projected a secondary node onto a
-  // primary node, but our secondary node is at one of the secondary face endpoints and
+  // primary node, but our secondary node is at one of the secondary boundary face endpoints and
   // our primary node is not.
   if (secondary_node_neighbors->size() == 1 && primary_node_neighbors->size() == 2)
     for (const auto i : index_range(primary_elems_mapped))

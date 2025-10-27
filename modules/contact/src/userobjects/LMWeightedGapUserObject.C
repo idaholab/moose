@@ -59,22 +59,22 @@ LMWeightedGapUserObject::LMWeightedGapUserObject(const InputParameters & paramet
 
 void
 LMWeightedGapUserObject::checkInput(const MooseVariable * const var,
-                                    const std::string & var_name) const
+                                    const std::string & var_param_name) const
 {
-  if (isCoupledConstant(var_name))
-    paramError(var_name,
+  if (isCoupledConstant(var_param_name))
+    paramError(var_param_name,
                "The Lagrange multiplier variable must be an actual variable and not a constant.");
   else if (!var)
-    paramError(var_name,
+    paramError(var_param_name,
                "The Lagrange multiplier variables must be provided and be actual variables.");
 }
 
 void
 LMWeightedGapUserObject::verifyLagrange(const MooseVariable & var,
-                                        const std::string & var_name) const
+                                        const std::string & var_param_name) const
 {
   if (var.feType().family != LAGRANGE)
-    paramError(var_name, "The Lagrange multiplier variables must be of Lagrange type");
+    paramError(var_param_name, "The Lagrange multiplier variables must be of Lagrange type");
 }
 
 const VariableTestValue &

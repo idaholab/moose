@@ -64,7 +64,7 @@ class MultiMooseEnum;
 class MaterialPropertyStorage;
 class MaterialData;
 class MooseEnum;
-class MortarData;
+class MortarInterfaceWarehouse;
 class Assembly;
 class JacobianBlock;
 class Control;
@@ -2404,8 +2404,8 @@ public:
   /**
    * Returns the mortar data object
    */
-  const MortarData & mortarData() const { return *_mortar_data; }
-  MortarData & mortarData() { return *_mortar_data; }
+  const MortarInterfaceWarehouse & mortarData() const { return *_mortar_data; }
+  MortarInterfaceWarehouse & mortarData() { return *_mortar_data; }
 
   /**
    * Whether the simulation has neighbor coupling
@@ -3046,7 +3046,7 @@ protected:
   MooseMesh * _displaced_mesh;
   std::shared_ptr<DisplacedProblem> _displaced_problem;
   GeometricSearchData _geometric_search_data;
-  std::unique_ptr<MortarData> _mortar_data;
+  std::unique_ptr<MortarInterfaceWarehouse> _mortar_data;
 
   /// Whether to call DisplacedProblem::reinitElem when this->reinitElem is called
   bool _reinit_displaced_elem;

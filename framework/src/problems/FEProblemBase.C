@@ -120,7 +120,7 @@
 #include "MortarUserObjectThread.h"
 #include "RedistributeProperties.h"
 #include "Checkpoint.h"
-#include "MortarData.h"
+#include "MortarInterfaceWarehouse.h"
 #include "AutomaticMortarGeneration.h"
 
 #include "libmesh/exodusII_io.h"
@@ -459,7 +459,7 @@ FEProblemBase::FEProblemBase(const InputParameters & parameters)
 #endif
     _displaced_mesh(nullptr),
     _geometric_search_data(*this, _mesh),
-    _mortar_data(std::make_unique<MortarData>(*this)),
+    _mortar_data(std::make_unique<MortarInterfaceWarehouse>(*this)),
     _reinit_displaced_elem(false),
     _reinit_displaced_face(false),
     _reinit_displaced_neighbor(false),
