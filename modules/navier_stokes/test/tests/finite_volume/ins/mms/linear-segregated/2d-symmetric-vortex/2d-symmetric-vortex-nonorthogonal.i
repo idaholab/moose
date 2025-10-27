@@ -1,5 +1,5 @@
-mu = 1.2
-rho = 1.5
+mu = 1.0
+rho = 1.0
 advected_interp_method = 'average'
 
 [Problem]
@@ -13,6 +13,7 @@ advected_interp_method = 'average'
     dim = 2
     nx = 2
     ny = 2
+    elem_type=TRI3
   []
 []
 
@@ -24,6 +25,7 @@ advected_interp_method = 'average'
     pressure = pressure
     rho = ${rho}
     p_diffusion_kernel = p_diffusion
+    body_force_kernel_names = "u_forcing; v_forcing"
   []
 []
 
@@ -56,7 +58,7 @@ advected_interp_method = 'average'
     v = vel_y
     momentum_component = 'x'
     rhie_chow_user_object = 'rc'
-    use_nonorthogonal_correction = false
+    use_nonorthogonal_correction = true
   []
   [v_advection_stress]
     type = LinearWCNSFVMomentumFlux
@@ -67,7 +69,7 @@ advected_interp_method = 'average'
     v = vel_y
     momentum_component = 'y'
     rhie_chow_user_object = 'rc'
-    use_nonorthogonal_correction = false
+    use_nonorthogonal_correction = true
   []
   [u_pressure]
     type = LinearFVMomentumPressure
@@ -95,8 +97,8 @@ advected_interp_method = 'average'
     type = LinearFVAnisotropicDiffusion
     variable = pressure
     diffusion_tensor = 'Ainv' # Functor created in the RhieChowMassFlux UO
-    use_nonorthogonal_correction = false
-    use_nonorthogonal_correction_on_boundary = false
+    use_nonorthogonal_correction = true
+    use_nonorthogonal_correction_on_boundary = true
   []
   [HbyA_divergence]
     type = LinearFVDivergence
@@ -135,17 +137,31 @@ advected_interp_method = 'average'
     v = vel_y
     momentum_component = y
   []
-  [pressure-extrapolation]
-    type = LinearFVExtrapolatedPressureBC
-    boundary = 'left right top'
-    variable = pressure
-    use_two_term_expansion = false
-  []
+  # [pressure-extrapolation]
+  #   type = LinearFVExtrapolatedPressureBC
+  #   boundary = 'left right top'
+  #   variable = pressure
+  #   use_two_term_expansion = false
+  # []
+  # [pressure-extrapolation]
+  #   type = LinearFVPressureFluxBC
+  #   boundary = 'top left right'
+  #   variable = pressure
+  #   HbyA_flux = HbyA
+  #   Ainv = Ainv
+  # []
   [pressure-symmetry]
     type = LinearFVPressureSymmetryBC
     boundary = 'bottom'
     variable = pressure
     HbyA_flux = 'HbyA' # Functor created in the RhieChowMassFlux UO
+  []
+  [pressure-symmetry]
+    type = LinearFVPressureFluxBC
+    boundary = 'bottom'
+    variable = pressure
+    HbyA_flux = HbyA
+    Ainv = Ainv
   []
 []
 

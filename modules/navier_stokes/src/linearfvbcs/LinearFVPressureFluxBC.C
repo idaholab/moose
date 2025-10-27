@@ -57,7 +57,7 @@ LinearFVPressureFluxBC::computeBoundaryNormalGradient() const
   const Real distance = computeCellToFaceDistance();
 
   return -_HbyA_flux(face_arg, determineState()) /
-         std::max(_Ainv(face_arg, determineState())(0), 1e-8) * distance;
+         std::max(_Ainv(face_arg, determineState())(0), 1e-8);
 }
 
 Real

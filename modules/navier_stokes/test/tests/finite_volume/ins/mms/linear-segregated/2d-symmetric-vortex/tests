@@ -4,7 +4,7 @@
   [vortex-orthogonal]
     type = PythonUnitTest
     input = test.py
-    test_case = TestVortexOrthogonal
+    test_case = TestSymmetricVortexOrthogonal
     method = '!dbg'
     min_parallel = 2
     requirement = 'The system shall be able to solve the Navier Stokes equations using the SIMPLE algorithm and obtain second order spatial convergence for velocity and at least first order spatial convergence for pressure on an orthogonal grid.'
@@ -15,7 +15,7 @@
   [vortex-nonorthogonal]
     type = PythonUnitTest
     input = test.py
-    test_case = TestVortexNonorthogonal
+    test_case = TestSymmetricVortexNonorthogonal
     method = '!dbg'
     min_parallel = 4
     requirement = 'The system shall be able to solve the Navier Stokes equations using the SIMPLE algorithm and obtain second order spatial convergence for velocity and at least first order spatial convergence for pressure on a nonorthogonal grid.'
