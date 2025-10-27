@@ -33,4 +33,6 @@ protected:
   bool _is_tri_lattice;
   /// Pointer to the tri lattice mesh
   const TriSubChannelMesh * const _tri_sch_mesh;
+  /// Pointer to the quad lattice mesh
+  const QuadSubChannelMesh * const _quad_sch_mesh;
 };

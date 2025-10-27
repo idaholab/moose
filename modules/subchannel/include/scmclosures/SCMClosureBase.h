@@ -10,13 +10,12 @@
 #pragma once
 
 #include "ThreadedGeneralUserObject.h"
-#include "SolutionInvalidInterface.h"
 #include "SubChannelMesh.h"
 
 /**
  * Base class for SCM closures
  */
-class SCMClosureBase : public ThreadedGeneralUserObject, public SolutionInvalidInterface
+class SCMClosureBase : public ThreadedGeneralUserObject
 {
 public:
   static InputParameters validParams();
