@@ -8,12 +8,12 @@
 
 ## Overview
 
-AuxKernel for calculating the inner product of two fields and projecting onto an L2 finite element space mfem auxvariable.
+AuxKernel for calculating the inner product of two vector fields and projecting onto an L2 finite element space mfem auxvariable.
 
 !equation
-s(x)(u\cdot v), \,\,\,
+s u\cdot v, \,\,\,
 
-where $u$ and $u$ are the two fields and $s(x)$ is an optional scaling.
+where $u$ and $v$ are the two fields and $s(x)$ is an optional scaling.
 
 ## Example Input File Syntax
 

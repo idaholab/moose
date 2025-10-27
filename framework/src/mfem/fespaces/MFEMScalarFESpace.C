@@ -32,7 +32,7 @@ MFEMScalarFESpace::validParams()
   params.addParam<MooseEnum>(
       "fec_map",
       fec_maps,
-      "Specify the FE map type used VALUE or INTEGRAL (meaningfull for L2 only)");
+      "Specify the FE map type used VALUE or INTEGRAL (meaningful for L2 only)");
 
   return params;
 }

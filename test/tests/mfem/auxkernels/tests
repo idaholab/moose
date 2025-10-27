@@ -41,7 +41,7 @@
                 OutputDate/InnerProduct/Run0/Cycle000001/proc000000.vtu'
     design = 'MFEMDotProductAux.md'
     issues = '#31613'
-    requirement = 'The system shall have the abillity to calculate the inner product of two gridfucntions onto an MFEM auxvariable'
+    requirement = 'The system shall have the ability to project the inner product of two gridfunctions onto an MFEM auxvariable'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
@@ -59,7 +59,7 @@
     csvdiff = 'OutputData/CrossProduct.csv'
     design = 'MFEMCrossProductAux.md'
     issues = '#31613'
-    requirement = 'The system shall have the abillity to calculate the cross product of two gridfucntions onto an MFEM vector auxvariable'
+    requirement = 'The system shall have the ability to project the cross product of two grid functions onto an MFEM vector auxvariable'
     capabilities = 'mfem'
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks

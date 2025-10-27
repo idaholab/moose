@@ -13,7 +13,7 @@ AuxKernel for calculating the cross product of two vector fields and projecting 
 !equation
 s(x)(u\times v), \,\,\,
 
-where $u$ and $u$ are the two vector fields and $s(x)$ is an optional scaling.
+where $u$ and $v$ are the two vector fields and $s(x)$ is an optional scaling.
 
 ## Example Input File Syntax
 

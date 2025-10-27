@@ -48,7 +48,7 @@ MFEMVectorFESpace::validParams()
   params.addParam<MooseEnum>(
       "fec_map",
       fec_maps,
-      "Specify the FE map type used VALUE or INTEGRAL (meaningfull for L2 only)");
+      "Specify the FE map type used VALUE or INTEGRAL (meaningful for L2 only)");
 
   return params;
 }
@@ -100,7 +100,7 @@ MFEMVectorFESpace::getFECName() const
   }
   else
   {
-    mooseWarning("INTEGRAL map type is only meaningfull for L2");
+    mooseWarning("INTEGRAL map type is only meaningful for L2");
   }
 
   return actual_type + basis + "_" + std::to_string(pdim) + "D_P" + std::to_string(_fec_order);
