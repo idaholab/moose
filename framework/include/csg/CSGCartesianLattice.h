@@ -37,8 +37,8 @@ public:
    * NOT initialize a _universe_map of the specified size. That must be provided using setUniverses.
    *
    * @param name unique identifying name of lattice
-   * @param nx0 number of elements in the first dimension of the lattice
-   * @param nx1 number of elements in the second dimension of the lattice
+   * @param nx0 number of elements in the first dimension of the lattice (rows)
+   * @param nx1 number of elements in the second dimension of the lattice (columns)
    * @param pitch pitch of lattice elements
    */
   CSGCartesianLattice(const std::string & name, const int nx0, const int nx1, const Real pitch);
@@ -50,8 +50,8 @@ public:
 
   /**
    * @brief get the map of data that defines the geometric dimensions of the lattice:
-   *  - nx0: number of mesh elements in the first dimension (int)
-   *  - nx1: number of mesh elements in the second dimension (int)
+   *  - nx0: number of mesh elements in the first dimension (int); ie, rows
+   *  - nx1: number of mesh elements in the second dimension (int); ie, columns
    *  - pitch: pitch of the mesh element (Real)
    *
    * @return map of string dimension name to value of that dimension
@@ -59,9 +59,10 @@ public:
   virtual std::unordered_map<std::string, std::any> getDimensions() const override;
 
   /**
-   * @brief Checks if the given index location is a valid index for the lattice
+   * @brief Checks if the given index location ((row, column) or (x0, x1)) is a valid index for the
+   * lattice. Allowable indices are: 0 <= row < _nx0 and 0 <= column < _nx1.
    *
-   * @param index location
+   * @param index location in (row, column) or (x0, x1) form
    * @return true if index is valid for the lattice
    */
   virtual bool isValidIndex(const std::pair<int, int> index) const override;
@@ -108,6 +109,8 @@ protected:
 
   /// pitch
   Real _pitch;
+
+  friend class CSGBase;
 
   /// @brief string names of the dimension parameters that defined the geometry of the lattice
   // MooseEnum _dimension_names{"nx0 nx1 pitch"};

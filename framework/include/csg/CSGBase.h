@@ -294,8 +294,8 @@ public:
    * this must be done by using setLatticeUniverses.
    *
    * @param name unique name identifier for the lattice
-   * @param nx0 number of lattice elements in the first dimension
-   * @param nx1 number of lattice elements in the second dimension
+   * @param nx0 number of lattice elements in the first dimension (rows)
+   * @param nx1 number of lattice elements in the second dimension (columns)
    * @param pitch flat-to-flat size of the lattice elements
    * @return reference to new Cartesian lattice
    */
@@ -312,8 +312,8 @@ public:
    * @param universe universe to set at the location
    * @param index index of the lattice element (int, int)
    */
-  void addUniverseToLattice(CSGLattice & lattice,
-                            std::reference_wrapper<const CSGUniverse> & universe,
+  void addUniverseToLattice(const CSGLattice & lattice,
+                            const CSGUniverse & universe,
                             std::pair<int, int> index);
 
   /**
@@ -324,7 +324,7 @@ public:
    * dimensions
    */
   void setLatticeUniverses(
-      CSGLattice & lattice,
+      const CSGLattice & lattice,
       std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> & universes);
 
   /**

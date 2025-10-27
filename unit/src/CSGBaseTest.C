@@ -503,6 +503,7 @@ TEST(CSGBaseTest, testGetUniverse)
  * Tests associated with CSGLattice or CSGLatticeList functionality through CSGBase
  */
 
+/// tests CSGBase::createXLattice methods
 TEST(CSGBaseTest, testCreateLattice)
 {
   auto csg_obj = std::make_unique<CSG::CSGBase>();
@@ -547,6 +548,75 @@ TEST(CSGBaseTest, testCreateLattice)
     Moose::UnitUtils::assertThrows(
         [&csg_obj, &univs]() { csg_obj->createCartesianLattice("harry", 1.0, univs); },
         "Cannot create Cartesian lattice harry. Universe univ1 is not in the CSGBase instance.");
+  }
+}
+
+/// tests the CSGBase::addUniverseToLattice method
+TEST(CSGBaseTest, testAddUniverseToLattice)
+{
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  auto & univ1 = csg_obj->createUniverse("spidey");
+  auto & univ2 = csg_obj->createUniverse("spin");
+  std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> univs = {{univ1},
+                                                                                    {univ1}};
+  const CSGLattice & lat = csg_obj->createCartesianLattice("spiderverse", 1.0, univs);
+  {
+    // test valid add new univ
+    csg_obj->addUniverseToLattice(lat, univ2, std::make_pair<int, int>(1, 0));
+    auto all_univs = lat.getUniverses();
+    ASSERT_EQ(all_univs[0][0].get(), univ1);
+    ASSERT_EQ(all_univs[1][0].get(), univ2);
+  }
+  {
+    // try to add a universe that is not from this base
+    auto csg_obj2 = std::make_unique<CSG::CSGBase>();
+    auto & univ3 = csg_obj2->createUniverse("spidey");
+    Moose::UnitUtils::assertThrows(
+        [&csg_obj, &lat, &univ3]()
+        { csg_obj->addUniverseToLattice(lat, univ3, std::make_pair<int, int>(1, 0)); },
+        "Cannot add universe spidey to lattice spiderverse. Universe is not in the CSGBase "
+        "instance.");
+  }
+}
+
+/// tests the CSGBase::setLatticeUniverses method
+TEST(CSGBaseTest, testSetLatticeUniverses)
+{
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
+  auto & univ1 = csg_obj->createUniverse("batman");
+  auto & univ2 = csg_obj->createUniverse("robin");
+  std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> univs = {{univ1},
+                                                                                    {univ1}};
+  const CSGLattice & lat = csg_obj->createCartesianLattice("batverse", 1.0, univs);
+  {
+    // test valid set universes - overwrite old universes
+    std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> new_univs = {{univ2},
+                                                                                          {univ2}};
+    csg_obj->setLatticeUniverses(lat, new_univs);
+    auto all_univs = lat.getUniverses();
+    ASSERT_EQ(all_univs[0][0].get(), univ2);
+    ASSERT_EQ(all_univs[1][0].get(), univ2);
+  }
+  {
+    // try to set universes with one that is not from this base
+    auto csg_obj2 = std::make_unique<CSG::CSGBase>();
+    auto & univ3 = csg_obj2->createUniverse("batman");
+    std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> new_univs = {{univ3},
+                                                                                          {univ2}};
+    Moose::UnitUtils::assertThrows(
+        [&csg_obj, &lat, &new_univs]() { csg_obj->setLatticeUniverses(lat, new_univs); },
+        "Cannot set universes for lattice batverse. Universe batman is not in the CSGBase "
+        "instance.");
+  }
+  {
+    // set universes to lattice without universes already specified
+    const CSGLattice & lat2 = csg_obj->createCartesianLattice("batmobile", 2, 1, 1.0);
+    std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> new_univs = {{univ1},
+                                                                                          {univ1}};
+    csg_obj->setLatticeUniverses(lat2, new_univs);
+    auto all_univs = lat2.getUniverses();
+    ASSERT_EQ(all_univs[0][0].get(), univ1);
+    ASSERT_EQ(all_univs[1][0].get(), univ1);
   }
 }
 
