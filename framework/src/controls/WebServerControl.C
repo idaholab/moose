@@ -92,8 +92,9 @@ WebServerControl::startServer(const Moose::PassKey<WebServerControlStartServerAc
 
       // Start the server thread, giving the thread the server
       // shared_ptr, as the control only has a weak_ptr to the server
+      auto console = _console;
       _server_thread_ptr = std::make_unique<std::thread>(
-          [server_ptr](const auto port, const auto file_socket)
+          [server_ptr, console](const auto port, const auto file_socket)
           {
             mooseAssert(server_ptr, "Null server");
             auto & server = *server_ptr;
@@ -108,7 +109,7 @@ WebServerControl::startServer(const Moose::PassKey<WebServerControlStartServerAc
             }
             catch (std::exception & e)
             {
-              std::cerr << "Server failed with exception: " << e.what() << std::endl;
+              console << "Server failed with exception: " << e.what() << std::endl;
             }
           },
           _port,
@@ -793,9 +794,8 @@ WebServerControl::stopServer()
       _server_thread_ptr->join();
       _server_thread_ptr.reset();
     }
-    catch (std::exception & e)
+    catch (...)
     {
-      std::cerr << "Server shutdown raised exception: " << e.what() << std::endl;
     }
   }
 }
