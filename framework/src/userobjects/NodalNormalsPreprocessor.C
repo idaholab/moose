@@ -18,6 +18,8 @@
 #include "libmesh/numeric_vector.h"
 #include "libmesh/quadrature.h"
 
+std::mutex NodalNormalsPreprocessor::_nodal_normals_mutex;
+
 registerMooseObject("MooseApp", NodalNormalsPreprocessor);
 
 InputParameters
@@ -151,6 +153,8 @@ NodalNormalsPreprocessor::execute()
 
           for (unsigned int qp = 0; qp < _qrule->n_points(); qp++)
           {
+            std::scoped_lock lock(_nodal_normals_mutex);
+
             sln.add(dof_x, _JxW[qp] * _grad_phi[i][qp](0));
             sln.add(dof_y, _JxW[qp] * _grad_phi[i][qp](1));
             sln.add(dof_z, _JxW[qp] * _grad_phi[i][qp](2));
