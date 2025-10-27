@@ -1,3 +1,3 @@
-# AddChainControlAction
+# StartWebServerControlAction
 
-Starts the listening webserver for all [WebServerControl.md] objects.
+Starts the webserver for all [WebServerControl.md] objects.

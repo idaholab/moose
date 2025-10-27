@@ -209,5 +209,4 @@ WebServerControlTypeRegistry::add(
                  "\" is already registered");
   return 0;
 }
-
 }
