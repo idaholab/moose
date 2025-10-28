@@ -1350,16 +1350,20 @@ class TestHarness:
 
     # Helper tuple for storing information about a cluster
     HPCCluster = namedtuple('HPCCluster', ['scheduler', 'apptainer_modules'])
-    # The modules that we want to load when running in a non-moduled
-    # container on INL HPC
-    inl_modules = ['use.moose', 'moose-dev-container-openmpi/5.0.5_0']
     # Define INL HPC clusters
-    # Bitterroot and windriver share software
-    br_wr_config = HPCCluster(scheduler='slurm', apptainer_modules=inl_modules)
-    hpc_configs = {'sawtooth': HPCCluster(scheduler='pbs',
-                                          apptainer_modules=inl_modules),
-                   'bitterroot': br_wr_config,
-                   'windriver': br_wr_config}
+    sawtooth_config = HPCCluster(
+        scheduler='slurm',
+        apptainer_modules=['container-openmpi/5.0.8-gcc13.4.0-ucx1.19.0']
+    )
+    br_wr_config = HPCCluster(
+        scheduler='slurm',
+        apptainer_modules=['container-openmpi/5.0.5-gcc13.2.0']
+    )
+    hpc_configs = {
+        'sawtooth': sawtooth_config,
+        'bitterroot': br_wr_config,
+        'windriver': br_wr_config
+    }
 
     @staticmethod
     def queryHPCCluster(hostname: str):
