@@ -3,10 +3,10 @@
 #!/bin/bash
 # Base executable and input file
 EXEC=/data/lindad/projects/moose4/modules/navier_stokes/navier_stokes-oprof
-INPUT=bfs-2d-ilu.i
+INPUT=bfs-2d-hpddm.i
 
 # Starting parameters
-procs=1
+procs=2
 refine=0
 
 # Number of runs
@@ -14,7 +14,7 @@ num_cases=3
 
 for ((case=1; case<=num_cases; case++)); do
     # Build identifiers
-    tag="strumpack-${procs}proc-${refine}refine-coarse09-mesh"
+    tag="hpddm-${procs}proc-${refine}refine-coarse06-mesh"
 
     echo "=== Running case ${case}: ${procs} ranks, refine=${refine} ==="
     export MOOSE_PROFILE_BASE="$tag"
