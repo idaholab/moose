@@ -700,7 +700,8 @@ PinMeshGenerator::generate()
 std::unique_ptr<CSG::CSGBase>
 PinMeshGenerator::generateCSG()
 {
-  auto csg_obj = std::move(getCSGBaseByName(_reactor_params));
+  auto rmp_csg = std::move(getCSGBaseByName(_reactor_params));
+  auto csg_obj = std::make_unique<CSG::CSGBase>();
 
   unsigned int radial_index = 0;
   std::vector<std::vector<std::reference_wrapper<const CSG::CSGSurface>>> surfaces_by_radial_region;
@@ -719,13 +720,13 @@ PinMeshGenerator::generateCSG()
   // Add surfaces corresponding to pin ducts
   for (const auto & duct_halfpitch : _duct_halfpitch)
   {
-    const auto & duct_surfaces = getHexCartSurfaces(radial_index, duct_halfpitch, csg_obj);
+    const auto & duct_surfaces = getOuterRadialSurfaces(radial_index, duct_halfpitch, *csg_obj);
     surfaces_by_radial_region.push_back(duct_surfaces);
     ++radial_index;
   }
 
   // Add surfaces corresponding to outer pin boundary
-  const auto & duct_surfaces = getHexCartSurfaces(radial_index, _pitch / 2., csg_obj);
+  const auto & duct_surfaces = getOuterRadialSurfaces(radial_index, _pitch / 2., *csg_obj);
   surfaces_by_radial_region.push_back(duct_surfaces);
 
   // Define all radial regions
@@ -736,11 +737,14 @@ PinMeshGenerator::generateCSG()
     CSG::CSGRegion radial_region;
     if (inner_region.getRegionType() == CSG::CSGRegion::RegionType::EMPTY)
     {
+      // We are in the innermost radial region, the radial region is inner_region
       inner_region = getInnerRegion(radial_surfaces);
       radial_region = inner_region;
     }
     else
     {
+      // For all other regions, the radial region is the intersection of inner_region and
+      // outer_region
       outer_region = ~inner_region;
       inner_region = getInnerRegion(radial_surfaces);
       radial_region = inner_region & outer_region;
@@ -809,9 +813,9 @@ PinMeshGenerator::generateCSG()
 }
 
 std::vector<std::reference_wrapper<const CSG::CSGSurface>>
-PinMeshGenerator::getHexCartSurfaces(unsigned int radial_index,
-                                     Real halfpitch,
-                                     std::unique_ptr<CSG::CSGBase> & csg_obj)
+PinMeshGenerator::getOuterRadialSurfaces(unsigned int radial_index,
+                                         Real halfpitch,
+                                         CSG::CSGBase & csg_obj)
 {
   std::vector<std::reference_wrapper<const CSG::CSGSurface>> duct_surfaces;
   auto n_surfaces = _mesh_geometry == "Square" ? 4 : 6;
@@ -834,13 +838,12 @@ PinMeshGenerator::getHexCartSurfaces(unsigned int radial_index,
     libMesh::Point p0(radius * std::cos(current_angle), radius * std::sin(current_angle), 0.);
     libMesh::Point p1(radius * std::cos(next_angle), radius * std::sin(next_angle), 0.);
     libMesh::Point p2 = (p0 + p1) / 2.;
-    // Modify z-coordinate of third point to arbitrary value to ensure three points on plane aren't
-    // collinear
+    // Place third point above the two others to form a vertical plane
     p2(2) = angle_offset_degrees;
 
     std::unique_ptr<CSG::CSGSurface> duct_surf_ptr =
         std::make_unique<CSG::CSGPlane>(surf_name, p0, p1, p2);
-    const auto & duct_surf = csg_obj->addSurface(std::move(duct_surf_ptr));
+    const auto & duct_surf = csg_obj.addSurface(std::move(duct_surf_ptr));
     duct_surfaces.push_back(duct_surf);
   }
 
@@ -849,14 +852,14 @@ PinMeshGenerator::getHexCartSurfaces(unsigned int radial_index,
 
 CSG::CSGRegion
 PinMeshGenerator::getInnerRegion(
-    const std::vector<std::reference_wrapper<const CSG::CSGSurface>> & radial_surfaces)
+    const std::vector<std::reference_wrapper<const CSG::CSGSurface>> & radial_surfaces,
+    const libMesh::Point & origin)
 {
   CSG::CSGRegion inner_region;
-  libMesh::Point p(0, 0, 0); // Point used to determine region halfspace
   for (const auto & surf_ref : radial_surfaces)
   {
     const auto & surf = surf_ref.get();
-    const auto direction = surf.getHalfspaceFromPoint(p);
+    const auto direction = surf.getHalfspaceFromPoint(origin);
     auto halfspace = (direction == CSG::CSGSurface::Halfspace::POSITIVE) ? +surf : -surf;
     inner_region = (inner_region.getRegionType() == CSG::CSGRegion::RegionType::EMPTY)
                        ? halfspace

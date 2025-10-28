@@ -187,9 +187,9 @@
   design = 'meshgenerators/PinMeshGenerator.md'
   issues = '#31733'
   [csg]
-    requirement = 'The system shall generate the Constructive Solid Geoemtry (CSG) representation of a '
+    requirement = 'The system shall generate the Constructive Solid Geometry (CSG) representation of a '
     [2d_hex]
-      detail = '2D hexgaonal pin'
+      detail = '2D hexagonal pin'
       type = JSONDiff
       input = pin_hex.i
       cli_args = 'Outputs/file_base=pin_hex_2d
@@ -199,7 +199,7 @@
       mesh_mode = REPLICATED
     []
     [3d_hex]
-      detail = '3D hexgaonal pin'
+      detail = '3D hexagonal pin'
       type = JSONDiff
       input = pin_hex.i
       cli_args = "Mesh/rmp/dim=3
