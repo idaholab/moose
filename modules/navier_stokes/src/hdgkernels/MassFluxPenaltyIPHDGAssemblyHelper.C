@@ -18,8 +18,6 @@ MassFluxPenaltyIPHDGAssemblyHelper::validParams()
   InputParameters params = IPHDGAssemblyHelper::validParams();
   params.addRequiredParam<NonlinearVariableName>("u", "The x-velocity");
   params.addRequiredParam<NonlinearVariableName>("v", "The y-velocity");
-  params.addParam<NonlinearVariableName>("u_face", "The x-velocity on the face");
-  params.addParam<NonlinearVariableName>("v_face", "The y-velocity on the face");
   params.addRequiredRangeCheckedParam<unsigned short>(
       "component", "0<=component<=1", "The velocity component this object is being applied to");
   params.addRequiredParam<Real>("gamma", "The penalty to multiply the jump");
