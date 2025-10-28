@@ -60,47 +60,45 @@ public:
       mooseError("Integrator not set");
   }
 
-  virtual void SetIntRule(const mfem::IntegrationRule * ir);
+  virtual void SetIntRule(const mfem::IntegrationRule * ir) override;
 
   virtual void AssembleElementMatrix(const mfem::FiniteElement & el,
                                      mfem::ElementTransformation & Trans,
-                                     mfem::DenseMatrix & elmat);
+                                     mfem::DenseMatrix & elmat) override;
   virtual void AssembleElementMatrix2(const mfem::FiniteElement & trial_fe,
                                       const mfem::FiniteElement & test_fe,
                                       mfem::ElementTransformation & Trans,
-                                      mfem::DenseMatrix & elmat);
+                                      mfem::DenseMatrix & elmat) override;
 
-  using mfem::BilinearFormIntegrator::AssembleFaceMatrix;
   virtual void AssembleFaceMatrix(const mfem::FiniteElement & el1,
                                   const mfem::FiniteElement & el2,
                                   mfem::FaceElementTransformations & Trans,
-                                  mfem::DenseMatrix & elmat);
+                                  mfem::DenseMatrix & elmat) override;
 
-  using mfem::BilinearFormIntegrator::AssemblePA;
-  virtual void AssemblePA(const mfem::FiniteElementSpace & fes);
+  virtual void AssemblePA(const mfem::FiniteElementSpace & fes) override;
 
-  virtual void AssembleDiagonalPA(mfem::Vector & diag);
+  virtual void AssembleDiagonalPA(mfem::Vector & diag) override;
 
-  virtual void AssemblePAInteriorFaces(const mfem::FiniteElementSpace & fes);
+  virtual void AssemblePAInteriorFaces(const mfem::FiniteElementSpace & fes) override;
 
-  virtual void AssemblePABoundaryFaces(const mfem::FiniteElementSpace & fes);
+  virtual void AssemblePABoundaryFaces(const mfem::FiniteElementSpace & fes) override;
 
-  virtual void AddMultTransposePA(const mfem::Vector & x, mfem::Vector & y) const;
+  virtual void AddMultTransposePA(const mfem::Vector & x, mfem::Vector & y) const override;
 
-  virtual void AddMultPA(const mfem::Vector & x, mfem::Vector & y) const;
+  virtual void AddMultPA(const mfem::Vector & x, mfem::Vector & y) const override;
 
   virtual void
-  AssembleEA(const mfem::FiniteElementSpace & fes, mfem::Vector & emat, const bool add);
+  AssembleEA(const mfem::FiniteElementSpace & fes, mfem::Vector & emat, const bool add) override;
 
   virtual void AssembleEABoundary(const mfem::FiniteElementSpace & fes,
                                   mfem::Vector & emat,
                                   const bool add) override;
 
-  virtual void AssembleMF(const mfem::FiniteElementSpace & fes);
+  virtual void AssembleMF(const mfem::FiniteElementSpace & fes) override;
 
-  virtual void AddMultMF(const mfem::Vector & x, mfem::Vector & y) const;
+  virtual void AddMultMF(const mfem::Vector & x, mfem::Vector & y) const override;
 
-  virtual void AssembleDiagonalMF(mfem::Vector & diag);
+  virtual void AssembleDiagonalMF(mfem::Vector & diag) override;
 
   virtual ~ScaleIntegrator();
 };
