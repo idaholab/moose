@@ -13,13 +13,11 @@
 
 #include "MooseParsedFunction.h"
 #include "FunctionParserUtils.h"
-
-// Forward declaration
-class MFEMProblem;
+#include "MFEMProblem.h"
 
 /**
- * Defines arbitrary parsed function of position, time, and any number of
- * problem coefficients, including any problem variables.
+ * Scalar, parsed function of position, time, and any number of scalar problem
+ * coefficients, including any scalar variables, postprocessors or functions
  */
 class MFEMParsedFunction : public MooseParsedFunction, public FunctionParserUtils<false>
 {

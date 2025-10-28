@@ -15,10 +15,10 @@
 #include "FunctionParserUtils.h"
 
 /**
- * Define a coefficient that, given a set of (possibly gridfunction) coefficients
- * u, v, w, ..., and a function func, returns func(x, y, z, t, u, v, w, ...)
+ * Scalar coefficient that, given a set of scalar (possibly, but not necessarily, gridfunction)
+ * coefficients u, v, w, ..., and a scalar, parsed function f, returns f(u, v, w, ..., x, y, z, t)
  */
-class MFEMScalarParsedCoefficient : public mfem::Coefficient
+class MFEMParsedCoefficient : public mfem::Coefficient
 {
 private:
   const std::vector<std::reference_wrapper<mfem::Coefficient>> & _coefficients;
@@ -27,9 +27,9 @@ private:
   mfem::Vector _transip;
 
 public:
-  MFEMScalarParsedCoefficient(const unsigned & arity,
-                              const std::vector<std::reference_wrapper<mfem::Coefficient>> & coefs,
-                              const FunctionParserUtils<false>::SymFunctionPtr & sym_function);
+  MFEMParsedCoefficient(const unsigned & arity,
+                        const std::vector<std::reference_wrapper<mfem::Coefficient>> & coefs,
+                        const FunctionParserUtils<false>::SymFunctionPtr & sym_function);
 
   mfem::real_t Eval(mfem::ElementTransformation & T, const mfem::IntegrationPoint & ip) override;
 };

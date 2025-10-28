@@ -9,9 +9,9 @@
 
 #ifdef MOOSE_MFEM_ENABLED
 
-#include "MFEMScalarParsedCoefficient.h"
+#include "MFEMParsedCoefficient.h"
 
-MFEMScalarParsedCoefficient::MFEMScalarParsedCoefficient(
+MFEMParsedCoefficient::MFEMParsedCoefficient(
     const unsigned & arity,
     const std::vector<std::reference_wrapper<mfem::Coefficient>> & coefficients,
     const FunctionParserUtils<false>::SymFunctionPtr & sym_function)
@@ -20,8 +20,7 @@ MFEMScalarParsedCoefficient::MFEMScalarParsedCoefficient(
 }
 
 mfem::real_t
-MFEMScalarParsedCoefficient::Eval(mfem::ElementTransformation & T,
-                                  const mfem::IntegrationPoint & ip)
+MFEMParsedCoefficient::Eval(mfem::ElementTransformation & T, const mfem::IntegrationPoint & ip)
 {
   for (unsigned i = 0; i < _coefficients.size(); i++)
     _vals[i] = _coefficients[i].get().Eval(T, ip);
