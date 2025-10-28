@@ -161,7 +161,7 @@ protected:
 
   protected:
     /**
-     * See the error message.
+     * Set the error message
      */
     void setError(const std::string & error) { _error = error; }
 
