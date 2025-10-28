@@ -92,6 +92,10 @@ public:
   virtual void
   AssembleEA(const mfem::FiniteElementSpace & fes, mfem::Vector & emat, const bool add);
 
+  virtual void AssembleEABoundary(const mfem::FiniteElementSpace & fes,
+                                  mfem::Vector & emat,
+                                  const bool add) override;
+
   virtual void AssembleMF(const mfem::FiniteElementSpace & fes);
 
   virtual void AddMultMF(const mfem::Vector & x, mfem::Vector & y) const;

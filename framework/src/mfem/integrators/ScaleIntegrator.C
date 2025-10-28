@@ -122,6 +122,26 @@ ScaleIntegrator::AssembleEA(const mfem::FiniteElementSpace & fes,
 }
 
 void
+ScaleIntegrator::AssembleEABoundary(const mfem::FiniteElementSpace & fes,
+                                    mfem::Vector & emat,
+                                    const bool add)
+{
+  CheckIntegrator();
+  if (add)
+  {
+    mfem::Vector emat_scale(emat.Size());
+    _integrator->AssembleEABoundary(fes, emat_scale, false);
+    emat_scale *= _scale;
+    emat += emat_scale;
+  }
+  else
+  {
+    _integrator->AssembleEABoundary(fes, emat, add);
+    emat *= _scale;
+  }
+}
+
+void
 ScaleIntegrator::AssembleMF(const mfem::FiniteElementSpace & fes)
 {
   CheckIntegrator();
