@@ -96,6 +96,15 @@ unheated_length_exit = 0.855 #m
   interpolation_scheme = 'upwind'
   verbose_subchannel = true
   deformation = true
+
+  # friction model
+  friction_closure = 'cheng'
+[]
+
+[SCMClosures]
+  [cheng]
+    type = SCMFrictionUpdatedChengTodreas
+  []
 []
 
 [ICs]

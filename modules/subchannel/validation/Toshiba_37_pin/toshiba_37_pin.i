@@ -40,6 +40,14 @@ P_out = 2.0e5 # Pa
   staggered_pressure = false
   verbose_multiapps = true
   verbose_subchannel = false
+  # friction model
+  friction_closure = 'cheng'
+[]
+
+[SCMClosures]
+  [cheng]
+    type = SCMFrictionUpdatedChengTodreas
+  []
 []
 
 [ICs]

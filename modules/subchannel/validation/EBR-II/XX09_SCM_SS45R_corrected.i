@@ -106,12 +106,6 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   [ff]
     block = subchannel
   []
-  [ff_a]
-    block = subchannel
-  []
-  [ff_b]
-    block = subchannel
-  []
   [q_prime]
     block = fuel_pins
   []
@@ -154,6 +148,14 @@ unheated_length_exit = '${fparse 26.9*scale_factor}'
   # Heat Transfer Correlations
   pin_htc_correlation = 'gnielinski'
   duct_htc_correlation = 'gnielinski'
+  # friction model
+  friction_closure = 'cheng'
+[]
+
+[SCMClosures]
+  [cheng]
+    type = SCMFrictionUpdatedChengTodreas
+  []
 []
 
 [ICs]

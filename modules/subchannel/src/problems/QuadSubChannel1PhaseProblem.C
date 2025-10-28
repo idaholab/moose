@@ -23,11 +23,6 @@ QuadSubChannel1PhaseProblem::validParams()
   params.addRequiredParam<Real>("beta",
                                 "Thermal diffusion coefficient used in turbulent crossflow.");
   params.addParam<bool>(
-      "default_friction_model",
-      true,
-      "Boolean to define which friction model to use (default: Pang, B. et al. "
-      "KIT, 2013. / non-default: Todreas-Kazimi NUCLEAR SYSTEMS, second edition, Volume 1, 2011)");
-  params.addParam<bool>(
       "constant_beta",
       true,
       "Boolean to define the use of a constant beta or beta correlation (Kim and Chung, 2001)");

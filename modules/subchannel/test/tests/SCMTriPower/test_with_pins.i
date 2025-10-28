@@ -68,6 +68,14 @@ num_cells = 40
 
   # Heat Transfer Correlations
   pin_htc_correlation = 'gnielinski'
+  # friction model
+  friction_closure = 'cheng'
+[]
+
+[SCMClosures]
+  [cheng]
+    type = SCMFrictionUpdatedChengTodreas
+  []
 []
 
 [ICs]

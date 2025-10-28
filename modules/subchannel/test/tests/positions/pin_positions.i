@@ -109,6 +109,9 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   [displacement]
     block = subchannel
   []
+  [ff]
+    block = subchannel
+  []
   [q_prime]
     block = fuel_pins
   []
@@ -154,6 +157,15 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   compute_power = true
   verbose_multiapps = true
   verbose_subchannel = false
+
+  # friction model
+  friction_closure = 'cheng'
+[]
+
+[SCMClosures]
+  [cheng]
+    type = SCMFrictionUpdatedChengTodreas
+  []
 []
 
 [Executioner]

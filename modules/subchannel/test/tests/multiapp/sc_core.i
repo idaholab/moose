@@ -150,6 +150,14 @@ duct_inside = '${fparse 11.43*2*scale_factor}'
   # Heat Transfer Correlations
   pin_htc_correlation = 'gnielinski'
   duct_htc_correlation = 'gnielinski'
+  # friction model
+  friction_closure = 'cheng'
+[]
+
+[SCMClosures]
+  [cheng]
+    type = SCMFrictionUpdatedChengTodreas
+  []
 []
 
 [ICs]
