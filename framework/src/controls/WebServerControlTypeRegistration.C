@@ -9,6 +9,10 @@
 
 #include "WebServerControlTypeRegistration.h"
 
+#include <string>
+
+#include "libmesh/parallel_eigen.h"
+
 /**
  * Registers the base parameter types that are controllable
  * in the WebServerControl.

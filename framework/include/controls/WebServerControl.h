@@ -11,17 +11,14 @@
 
 #include "Control.h"
 
-#include "WebServerControlTypeRegistry.h"
-
-#include "libmesh/parallel_eigen.h"
-
-#include "tinyhttp/http.h"
-
 #include <atomic>
 #include <memory>
 #include <thread>
 
+#include "WebServerControlTypeRegistry.h"
+
 class StartWebServerControlAction;
+class HttpServer;
 
 /**
  * Starts a webserver that an external process can connect to

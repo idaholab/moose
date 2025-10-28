@@ -12,6 +12,7 @@
 #include "MooseApp.h"
 
 #include "minijson/minijson.h"
+#include "tinyhttp/http.h"
 
 registerMooseObject("MooseApp", WebServerControl);
 

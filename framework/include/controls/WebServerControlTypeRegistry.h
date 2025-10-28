@@ -15,10 +15,10 @@
 #include <type_traits>
 #include <typeindex>
 
+#include "nlohmann/json.h"
+
 #include "MooseError.h"
 #include "MooseUtils.h"
-
-#include "nlohmann/json.h"
 
 class WebServerControl;
 
