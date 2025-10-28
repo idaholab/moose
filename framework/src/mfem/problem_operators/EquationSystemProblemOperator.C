@@ -54,7 +54,11 @@ EquationSystemProblemOperator::Solve()
   zero_vec = 0.0;
   _problem_data.nonlinear_solver->SetSolver(_problem_data.jacobian_solver->getSolver());
   _problem_data.nonlinear_solver->SetOperator(*GetEquationSystem());
-  _problem_data.nonlinear_solver->Mult(zero_vec, _true_x);
+
+  if (!(GetEquationSystem()->_non_linear))
+    _problem_data.nonlinear_solver->Mult(_true_rhs, _true_x);
+  else
+    _problem_data.nonlinear_solver->Mult(zero_vec, _true_x);
 
   GetEquationSystem()->RecoverFEMSolution(_true_x, _problem_data.gridfunctions);
 }

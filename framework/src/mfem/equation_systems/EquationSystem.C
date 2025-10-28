@@ -284,7 +284,7 @@ EquationSystem::AssembleJacobian(
     mfem::Vector aux_x, aux_rhs;
     mfem::HypreParMatrix * aux_a = new mfem::HypreParMatrix;
     blf->FormLinearSystem(
-        ess_tdof_lists.at(i), *(var_ess_constraints.at(i)), *lf, *aux_a, aux_x, aux_rhs);
+        ess_tdof_lists.at(i), *(_var_ess_constraints.at(i)), *lf, *aux_a, aux_x, aux_rhs);
     _h_blocks(i, i) = aux_a;
     trueX.GetBlock(i) = aux_x;
     trueRHS.GetBlock(i) = aux_rhs;
@@ -356,35 +356,29 @@ EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
 
   _BlockResidual = 0.0;
 
-  for (unsigned int i = 0; i < _test_var_names.size(); i++)
+  if (_non_linear)
   {
-    auto & test_var_name = _test_var_names.at(i);
+    for (unsigned int i = 0; i < _test_var_names.size(); i++)
+    {
+      auto & test_var_name = _test_var_names.at(i);
 
-    int offset = _BlockResidual.GetBlock(i).Size();
-    mfem::Vector b(offset);
+      int offset = _BlockResidual.GetBlock(i).Size();
+      mfem::Vector b(offset);
 
-    auto lf = _lfs.GetShared(test_var_name);
-    lf->Assemble();
-    lf->ParallelAssemble(b);
+      auto lf = _lfs.GetShared(test_var_name);
+      lf->Assemble();
+      lf->ParallelAssemble(b);
 
-    auto nlf = _nlfs.GetShared(test_var_name);
-    nlf->Assemble();
-    nlf->ParallelAssemble(_BlockResidual.GetBlock(i));
+      auto nlf = _nlfs.GetShared(test_var_name);
+      nlf->Assemble();
+      nlf->ParallelAssemble(_BlockResidual.GetBlock(i));
 
-    _BlockResidual.GetBlock(i) -= b;
-    _BlockResidual.GetBlock(i) *= -1;
+      _BlockResidual.GetBlock(i) -= b;
+      _BlockResidual.GetBlock(i) *= -1;
 
-    if (_non_linear)
       _BlockResidual.GetBlock(i).SetSubVector(_ess_tdof_lists.at(i), 0.0);
-  }
+    }
 
-  if (!_non_linear)
-  {
-    const_cast<EquationSystem *>(this)->FormLinearSystem(_jacobian, _trueBlockSol, _BlockResidual);
-    const_cast<EquationSystem *>(this)->CopyVec(_BlockResidual, residual);
-  }
-  else
-  {
     const_cast<EquationSystem *>(this)->CopyVec(_BlockResidual, residual);
     const_cast<EquationSystem *>(this)->FormLinearSystem(_jacobian, _trueBlockSol, _BlockResidual);
   }
@@ -393,7 +387,9 @@ EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
 
   if (!_non_linear)
   {
-    _jacobian->AddMult(sol, residual);
+    //_jacobian->AddMult(sol, residual);
+    residual = 0.0;
+    _jacobian->Mult(sol, residual);
   }
 
   sol.HostRead();

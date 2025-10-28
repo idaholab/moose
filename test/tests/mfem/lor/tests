@@ -21,6 +21,7 @@
     recover = false
     max_threads = 1
     platform = 'linux'
+    max_time = 1000
     abs_zero = 1e-6
   []
   [MFEMDiffusionLOR]
