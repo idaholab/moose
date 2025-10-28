@@ -859,6 +859,18 @@ TEST(CSGBaseTest, testUniverseLinking)
   // no warning should be raised because it is a part of c1, which is a part of root
   // linking tree: ROOT_UNIVERSE -> c1 -> univ1
   ASSERT_NO_THROW(csg_obj->checkUniverseLinking());
+
+  // create a lattice of universes that is not linked to root, should raise warning when checked
+  auto & univ2 = csg_obj->createUniverse("univ2");
+  std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> univs = {{univ2}};
+  const CSGLattice & lat = csg_obj->createCartesianLattice("lat1", 1.0, univs);
+  Moose::UnitUtils::assertThrows([&csg_obj]() { csg_obj->checkUniverseLinking(); },
+                                 "Universe with name univ2 is not linked to root universe.");
+
+  // fill a new cell with the lattice, linking it to root, confirm no warning is raised when checked
+  // linking tree: ROOT_UNIVERSE -> c2 -> lat1 -> univ2
+  csg_obj->createCell("c2", lat, +s1);
+  ASSERT_NO_THROW(csg_obj->checkUniverseLinking());
 }
 
 /**
