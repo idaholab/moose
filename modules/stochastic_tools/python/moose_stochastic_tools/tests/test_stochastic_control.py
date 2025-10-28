@@ -19,7 +19,9 @@ import pyhit
 import moosetree
 
 if importlib.util.find_spec("moose_stochastic_tools") is None:
-    _moose_dir = os.environ.get("MOOSE_DIR", os.path.join(os.path.dirname(__file__), *([".."] * 5)))
+    _moose_dir = os.environ.get(
+        "MOOSE_DIR", os.path.join(os.path.dirname(__file__), *([".."] * 5))
+    )
     _stm_python_path = os.path.abspath(
         os.path.join(_moose_dir, "modules", "stochastic_tools", "python")
     )
@@ -512,6 +514,7 @@ class TestStochasticControlRun(unittest.TestCase):
         qois = ["foo/bar", "bar/value"]
         opts = StochasticRunOptions(input_name=self.input_file_name)
         control = StochasticControl("foo-opt", "bar.i", ["bar_param"], qois, opts)
+        control.runner._initialized = True
 
         # Create a mock for getReporterValue
         y_expected = np.random.rand(3, 2)
@@ -524,7 +527,7 @@ class TestStochasticControlRun(unittest.TestCase):
             return y_expected[:, ind]
 
         control.wait = mock.MagicMock()
-        control.get_reporter_value = mock.MagicMock(side_effect=mock_reporter_value)
+        control.get_reporter = mock.MagicMock(side_effect=mock_reporter_value)
 
         # Test we get what is expected
         y = control.getOutput()
