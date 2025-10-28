@@ -49,10 +49,7 @@ public:
      * @param name The name that the value is for (typically a controllable path)
      * @param type The string representationg of the type
      */
-    ControlledValueBase(const std::string & name, const std::string & type)
-      : _name(name), _type(type)
-    {
-    }
+    ControlledValueBase(const std::string & name, const std::string & type);
 
     virtual ~ControlledValueBase() {}
 
@@ -69,7 +66,7 @@ public:
      * Sets the controllable value given the name and type via the controllable
      * interface in \p control.
      *
-     * Will broadcast the value for setting it.
+     * Will broadcast the value and set it in the derived, type-aware class.
      */
     virtual void setControllableValue(WebServerControl & control) = 0;
 
@@ -81,42 +78,13 @@ public:
   };
 
   /**
-   * Registers a type with string name \p type_name and the given derived type.
-   */
-  template <class DerivedValueBase, class ValueType>
-  static char add(const std::string & type_name,
-                  std::function<ValueType(const nlohmann::json &)> && parse_function);
-
-  /**
-   * @return Whether or not the type \p type is registered.
-   */
-  static bool isRegistered(const std::string & type) { return getRegistry()._name_map.count(type); }
-
-  /**
-   * Builds a value with the type \p type, name \p name, and a default value.
-   */
-  static std::unique_ptr<ControlledValueBase> build(const std::string & type,
-                                                    const std::string & name)
-  {
-    return get(type).build(name);
-  }
-  /**
-   * Builds a value with the type \p type, name \p name, and a value parsed from \p json_value.
-   */
-  static std::unique_ptr<ControlledValueBase>
-  build(const std::string & type, const std::string & name, const nlohmann::json & json_value)
-  {
-    return get(type).build(name, json_value);
-  }
-
-private:
-  /**
    * Base registry class for a type that is used to build values.
    */
   class RegisteredTypeBase
   {
   public:
-    RegisteredTypeBase(const std::string & type) : _type(type) {}
+    RegisteredTypeBase(const std::string & type);
+
     virtual ~RegisteredTypeBase() {}
 
     /**
@@ -126,15 +94,19 @@ private:
     /**
      * Builds a value with the given type, name \p name, and JSON value \p json_value.
      *
-     * This will parse the JSON value into the underlying type and will be called
-     * on only rank 0 where server listens.
+     * This will be called on receipt of a controllable value on rank 0 in the
+     * WebServerControl. It will at that point parse the value from JSON and store it.
+     * Later on during sync, it will be used to broadcast the value and then locally
+     * set it.
      */
     virtual std::unique_ptr<ControlledValueBase> build(const std::string & name,
                                                        const nlohmann::json & json_value) const = 0;
     /**
      * Builds a value with the given type, name \p name, and a default value.
      *
-     * This will be called on processors that are not rank 0 for cloning.
+     * This will be called by the WebServerControl on ranks that are not rank 0.
+     * It will be used during the sync step, where the value is broadcasted to the
+     * rest of the ranks and then set locally.
      */
     virtual std::unique_ptr<ControlledValueBase> build(const std::string & name) const = 0;
 
@@ -147,13 +119,17 @@ private:
    * Derived registry item.
    *
    * Stores how to build the value and how to parse the value from JSON.
+   *
+   * @tparam ControlledValue The derived ControlledValueBase class that contains
+   * the implementation for setting the controllable value
+   * @tparam ValueType The underlying type of the value to be controlled
    */
   template <class ControlledValue, class ValueType>
   struct RegisteredType : public RegisteredTypeBase
   {
     RegisteredType(const std::string & type,
                    std::function<ValueType(const nlohmann::json &)> && parse_function)
-      : RegisteredTypeBase(type), _parse_function(std::move(parse_function))
+      : RegisteredTypeBase(type), _parse_function(parse_function)
     {
     }
 
@@ -170,14 +146,33 @@ private:
 
   private:
     /// Function that converts from json -> the value for the ValueType
-    std::function<ValueType(const nlohmann::json &)> _parse_function;
+    const std::function<ValueType(const nlohmann::json &)> _parse_function;
   };
 
   /**
-   * Internal getter for the registration object for type \p type.
+   * Register a type in the registry
+   *
+   * @tparam ControlledValue The derived ControlledValueBase class that contains
+   * the implementation for setting the controllable value
+   * @tparam ValueType The underlying type of the value to be controlled
+   * @param type_name Human readable name for the type of the value to be controlled
+   * @param parse_function Function used to parse the value from JSON
+   */
+  template <class ControlledValue, class ValueType>
+  static char add(const std::string & type_name,
+                  std::function<ValueType(const nlohmann::json &)> && parse_function);
+
+  /**
+   * Query the registration for the given type.
+   */
+  static const RegisteredTypeBase * query(const std::string & type);
+
+  /**
+   * Get the registration for the given type, erroring if it isn't registered.
    */
   static const RegisteredTypeBase & get(const std::string & type);
 
+private:
   /// The registration data
   std::map<std::string, std::unique_ptr<RegisteredTypeBase>> _name_map;
   /// The registered value types, to avoid registering the same underlying
@@ -185,18 +180,17 @@ private:
   std::set<std::type_index> _value_types;
 };
 
-template <class DerivedValueBase, class ValueType>
+template <class ControlledValue, class ValueType>
 char
 WebServerControlTypeRegistry::add(
     const std::string & type_name,
     std::function<ValueType(const nlohmann::json &)> && parse_function)
 {
-  static_assert(std::is_base_of_v<ControlledValueBase, DerivedValueBase>,
+  static_assert(std::is_base_of_v<ControlledValueBase, ControlledValue>,
                 "Is not derived from ControlledValueBase");
-  static_assert(std::is_same_v<typename DerivedValueBase::value_type, ValueType>,
-                "Is not the same");
+  static_assert(std::is_same_v<typename ControlledValue::value_type, ValueType>, "Is not the same");
 
-  auto entry = std::make_unique<RegisteredType<DerivedValueBase, ValueType>>(
+  auto entry = std::make_unique<RegisteredType<ControlledValue, ValueType>>(
       type_name, std::move(parse_function));
   if (!getRegistry()._name_map.emplace(type_name, std::move(entry)).second)
     ::mooseError(

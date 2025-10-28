@@ -228,7 +228,7 @@ WebServerControl::execute()
   comm().broadcast(name_and_types);
   if (processor_id() != 0)
     for (const auto & [name, type] : name_and_types)
-      _controlled_values.emplace_back(Moose::WebServerControlTypeRegistry::build(type, name));
+      _controlled_values.emplace_back(Moose::WebServerControlTypeRegistry::get(type).build(name));
 
   // Set all of the values
   for (auto & value_ptr : _controlled_values)
@@ -693,7 +693,8 @@ WebServerControl::addServerActionsInternal()
 
       // Get the parameter type
       const auto type = convertJSON<std::string>(json, "type");
-      if (!Moose::WebServerControlTypeRegistry::isRegistered(type))
+      const auto registered_type = Moose::WebServerControlTypeRegistry::query(type);
+      if (!registered_type)
         return ErrorResponse("Type '" + type +
                              "' not registered for setting a controllable parameter");
 
@@ -713,7 +714,7 @@ WebServerControl::addServerActionsInternal()
         std::unique_ptr<ControlledValueBase> value;
         try
         {
-          value = Moose::WebServerControlTypeRegistry::build(type, name, *value_it);
+          value = registered_type->build(name, *value_it);
         }
         catch (std::exception & e)
         {
