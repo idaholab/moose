@@ -60,7 +60,7 @@ SubChannel1PhaseProblem::validParams()
   // Enumerations
   MooseEnum schemes("upwind downwind central_difference exponential", "central_difference");
   MooseEnum gravity_direction("counter_flow co_flow none", "counter_flow");
-  MooseEnum htc_correlations("dittus-boelter gnielinski kazimi-carelli hausen", "dittus-boelter");
+  MooseEnum htc_correlations("dittus-boelter gnielinski kazimi-carelli", "dittus-boelter");
 
   // Inputs
   InputParameters params = ExternalProblem::validParams();

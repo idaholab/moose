@@ -46,6 +46,14 @@ P_out = 2.0e5 # Pa
 
   # Heat Transfer Correlations
   duct_htc_correlation = 'gnielinski'
+  # friction model
+  friction_closure = 'cheng'
+[]
+
+[SCMClosures]
+  [cheng]
+    type = SCMFrictionUpdatedChengTodreas
+  []
 []
 
 [ICs]
