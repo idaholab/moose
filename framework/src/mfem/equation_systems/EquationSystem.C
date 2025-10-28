@@ -575,28 +575,8 @@ TimeDependentEquationSystem::BuildBilinearForms()
 
     // Recover and scale integrators from blf. This is to apply the dt*du/dt contributions from the
     // operator on the trial variable in the implicit integration scheme
-    auto blf = _blfs.Get(test_var_name);
-    auto integs = blf->GetDBFI();
-    auto b_integs = blf->GetBBFI();
-    auto markers = blf->GetBBFI_Marker();
-
-    // If implicit contributions exist, scale them by timestep and add to td_blf
-    if (integs->Size() || b_integs->Size())
-    {
-      mfem::SumIntegrator * sum = new mfem::SumIntegrator(false);
-      ScaleIntegrator * scaled_sum = new ScaleIntegrator(sum, _dt_coef.constant, true);
-
-      for (int i = 0; i < integs->Size(); ++i)
-        sum->AddIntegrator(*integs[i]);
-
-      for (int i = 0; i < b_integs->Size(); ++i)
-        td_blf->AddBoundaryIntegrator(new ScaleIntegrator(*b_integs[i], _dt_coef.constant, false),
-                                      *(*markers[i]));
-
-      // scaled_sum is owned by td_blf
-      td_blf->AddDomainIntegrator(scaled_sum);
-    }
-
+    auto blf = _blfs.GetShared(test_var_name);
+    ScaleAndAddBLFIntegrators(blf, td_blf, _dt_coef.constant);
     // Assemble form
     td_blf->Assemble();
   }
@@ -639,23 +619,8 @@ TimeDependentEquationSystem::BuildMixedBilinearForms()
       {
         // Recover and scale integrators from mblf. This is to apply the dt*du/dt contributions
         // from the operator on the trial variable in the implicit integration scheme
-        auto mblf = _mblfs.Get(test_var_name)->Get(trial_var_time_integral_name);
-        auto integs = mblf->GetDBFI();
-        auto b_integs = mblf->GetBBFI();
-        auto markers = mblf->GetBBFI_Marker();
-        // If implicit contributions exist, scale them by timestep and add to td_mblf
-        if (integs->Size() || b_integs->Size())
-        {
-          mfem::SumIntegrator * sum = new mfem::SumIntegrator(false);
-          ScaleIntegrator * scaled_sum = new ScaleIntegrator(sum, _dt_coef.constant, true);
-          for (int i = 0; i < integs->Size(); ++i)
-            sum->AddIntegrator(*integs[i]);
-          for (int i = 0; i < b_integs->Size(); ++i)
-            td_mblf->AddBoundaryIntegrator(
-                new ScaleIntegrator(*b_integs[i], _dt_coef.constant, false), *(*markers[i]));
-          // scaled_sum is owned by td_mblf
-          td_mblf->AddDomainIntegrator(scaled_sum);
-        }
+        auto mblf = _mblfs.Get(test_var_name)->GetShared(trial_var_time_integral_name);
+        ScaleAndAddBLFIntegrators(mblf, td_mblf, _dt_coef.constant);
       }
       // If implicit contributions exist, scale them by timestep and add to td_mblf
       if (td_mblf->GetDBFI()->Size() || td_mblf->GetBBFI()->Size())
