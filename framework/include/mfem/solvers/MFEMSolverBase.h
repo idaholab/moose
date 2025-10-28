@@ -15,6 +15,7 @@
 #include <mfem.hpp>
 #include "libmesh/restore_warnings.h"
 #include <memory>
+#include "MFEMHyprePatch.h"
 
 /**
  * Base class for wrapping mfem::Solver-derived classes.

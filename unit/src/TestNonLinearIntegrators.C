@@ -5,6 +5,7 @@
 #include "mfem.hpp"
 #include "libmesh/restore_warnings.h"
 #include "Moose.h"
+#include "MFEMHyprePatch.h"
 
 class VectorPowerLawNLFIntegrator : public mfem::NonlinearFormIntegrator
 {
@@ -219,21 +220,8 @@ TEST(CheckData, NonlinearIntegratorTest)
 
   // Solver for the Jacobian solve in the Newton method
   mfem::Solver * jacobian_solver;
-
-  // Patch mfem::HyprePCG to reset preconditioning matrix at every nonlinear iteration
-  class HyprePCGPatched : public mfem::HyprePCG
-  {
-  public:
-    using mfem::HyprePCG::HyprePCG;
-    void SetOperator(const mfem::Operator & op)
-    {
-      mfem::HyprePCG::SetOperator(op);
-      HYPRE_PCGSetPrecondMatrix(HYPRE_Solver(*this), NULL);
-    }
-  };
-
   // Set up the Jacobian solver
-  HyprePCGPatched j_pcg(h_curl_fe_space.GetComm());
+  mfem::patched::HyprePCG j_pcg(h_curl_fe_space.GetComm());
   mfem::HypreAMS ams(&h_curl_fe_space);
   ams.SetPrintLevel(1);
   j_pcg.SetTol(1e-7);

@@ -48,11 +48,6 @@ MFEMSolverBase::setPreconditioner(T & solver)
         mooseError("hypre solver preconditioners must themselves be hypre solvers");
     else
       solver.SetPreconditioner(mfem_pre);
-
-    if constexpr (std::is_same_v<mfem::HypreGMRES, T>)
-      HYPRE_GMRESSetPrecondMatrix(HYPRE_Solver(solver), NULL);
-    else if constexpr (std::is_same_v<mfem::HyprePCG, T>)
-      HYPRE_PCGSetPrecondMatrix(HYPRE_Solver(solver), NULL);
   }
 }
 
@@ -61,6 +56,9 @@ template void MFEMSolverBase::setPreconditioner(mfem::GMRESSolver &);
 template void MFEMSolverBase::setPreconditioner(mfem::HypreFGMRES &);
 template void MFEMSolverBase::setPreconditioner(mfem::HypreGMRES &);
 template void MFEMSolverBase::setPreconditioner(mfem::HyprePCG &);
+
+template void MFEMSolverBase::setPreconditioner(mfem::patched::HypreGMRES &);
+template void MFEMSolverBase::setPreconditioner(mfem::patched::HyprePCG &);
 
 void
 MFEMSolverBase::checkSpectralEquivalence(mfem::ParBilinearForm & blf) const

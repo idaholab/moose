@@ -38,8 +38,7 @@ MFEMGMRESSolver::MFEMGMRESSolver(const InputParameters & parameters) : MFEMSolve
 void
 MFEMGMRESSolver::constructSolver(const InputParameters &)
 {
-  auto solver =
-      std::make_unique<mfem::GMRESSolver>(getMFEMProblem().mesh().getMFEMParMesh().GetComm());
+  auto solver = std::make_unique<mfem::GMRESSolver>(getMFEMProblem().getComm());
   solver->SetRelTol(getParam<mfem::real_t>("l_tol"));
   solver->SetAbsTol(getParam<mfem::real_t>("l_abs_tol"));
   solver->SetMaxIter(getParam<int>("l_max_its"));
