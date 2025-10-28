@@ -2,9 +2,6 @@
   issues = '#23359 #27909 #31755'
   design = 'syntax/Controls/index.md source/controls/WebServerControl.md'
 
-  # Not really sure if all of these prereqs are required as I can't guarantee
-  # if we'll get unique ports if we call them all at once
-
   [control]
     requirement = 'The system shall support controlling a parameter via a REST API with a parameter type of a'
     [bool]
@@ -193,8 +190,6 @@
     valgrind = 'none' # http library is not completely valgrind clean
   []
 
-  # We cannot run these tests with valgrind because they come from the python script, which will terminate
-  # the MOOSE process early and therefore we won't receive and of the valgrind summary output
   [errors]
     requirement = 'The system shall report a reasonable error when interacting with the REST API when'
     [set_controllable_no_exist]
