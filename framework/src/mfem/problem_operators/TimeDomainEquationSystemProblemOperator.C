@@ -73,7 +73,13 @@ TimeDomainEquationSystemProblemOperator::ImplicitSolve(const mfem::real_t dt,
 
   _problem_data.nonlinear_solver->SetSolver(_problem_data.jacobian_solver->getSolver());
   _problem_data.nonlinear_solver->SetOperator(*GetEquationSystem());
-  _problem_data.nonlinear_solver->Mult(zero_vec, dX_dt);
+
+  if (!(GetEquationSystem()->_non_linear))
+    _problem_data.nonlinear_solver->Mult(_true_rhs, dX_dt);
+  else
+    _problem_data.nonlinear_solver->Mult(zero_vec, dX_dt);
+
+  //_problem_data.nonlinear_solver->Mult(zero_vec, dX_dt);
   SetTrialVariablesFromTrueVectors();
 }
 

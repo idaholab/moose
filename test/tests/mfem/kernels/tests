@@ -34,6 +34,7 @@
     max_threads = 1
     platform = 'linux'
     abs_zero = 1e-6
+    max_time = 1000  
   []
   [MFEMDiffusion]
     type = XMLDiff
