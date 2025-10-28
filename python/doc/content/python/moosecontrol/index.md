@@ -73,7 +73,7 @@ They can only be called when the [WebServerControl.md] is waiting (i.e., when `i
 
 ### Setting simulation values id=set_methods
 
-As the [WebServerControl.md] is a [Controls/index.md](Control.md) object, the most common way to change the state of a running simulation is by changing controllable parameters. The following methods are used to change controllable parameters:
+As the [WebServerControl.md] is a [`Control`](Controls/index.md) object, the most common way to change the state of a running simulation is by changing controllable parameters. The following methods are used to change controllable parameters:
 
 !table
 | Method | Parameter type |
