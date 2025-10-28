@@ -34,6 +34,8 @@ MFEMProblem::MFEMProblem(const InputParameters & params) : ExternalProblem(param
 {
   // Initialise Hypre for all MFEM problems.
   mfem::Hypre::Init();
+  // Disable multithreading for all MFEM problems (including any libMesh or MFEM subapps).
+  libMesh::libMeshPrivateData::_n_threads = 1;
   setMesh();
 }
 
