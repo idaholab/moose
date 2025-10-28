@@ -17,13 +17,13 @@
 #include "randistrs.h"
 
 // STL includes
-#include <map>
+#include <unordered_map>
 
 /**
  * A deterministic, indexable random number generator built on top of the
  * `randistrs` library.
  *
- * This class provides per-stream, seed-able random generators that can produce
+ * This class provides seed-able random generators that can produce
  * the n-th sample in a reproducible sequence without maintaining large
  * generator states between calls. It achieves this by keeping a small cached
  * generator state for efficient sequential access, while still allowing
@@ -32,23 +32,20 @@
  * Usage Example:
  *
  * ```cpp
- * MooseRandomStateless rng;
- * rng.seed(0, 12345);
+ * MooseRandomStateless rng(12345);
  *
- * Real x = rng.rand(0, 5);  // 6th random number for stream 0
- * unsigned int y = rng.randl(0, 10);  // 11th integer in full 32-bit range
- * unsigned int z = rng.randl(0, 7, 0, 100);  // 8th integer in [0, 100)
+ * Real x = rng.rand(5);  // 6th random number
+ * unsigned int y = rng.randl(10);  // 11th integer in full 32-bit range
+ * unsigned int z = rng.randl(7, 0, 100);  // 8th integer in [0, 100)
  *
  * rng.advance(100);  // Advance cache by 100 for speedier access
  * Real x = rng.rand(0, 17);  // The 117th number in the sequence
- * rng.seed(0, 12345);  // Undo the advancement
  * ```
  *
  * Thread Safety:
- * - Accessing different stream indices (`i`) concurrently is safe.
- * - Concurrent access to the same index is not thread-safe, since
- *   internal generator state is cached and mutated during calls to
- *   `evaluate()`. If you need concurrency, create separate stream indices.
+ * - Concurrent access is not thread-safe, since internal generator state is
+ *   cached and mutated during calls to `evaluate()`. If you need concurrency,
+ *   create separate objects per thread.
  *
  * Performance:
  * - Sequential access (e.g., `n = k, k+1, k+2, ...`) is O(1) per call.
@@ -57,9 +54,7 @@
  *   re-evaluation up to `n`, which is *O(n)* in the distance skipped.
  *
  * Design Overview:
- * - Each stream index (`i`) has an independent `GeneratorHandler`, created
- *   through `seed(i, seed)`.
- * - `GeneratorHandler` owns several `Generator<T>` instances, each
+ * - `MooseRandomStatless` owns several `Generator<T>` instances, each
  *   parameterized by a distribution:
  *     - `mts_ldrand`: Uniform real [0, 1)
  *     - `mts_lrand`: Uniform unsigned int
@@ -70,10 +65,6 @@
  *     - A stateless, deterministic evaluation method `evaluate(n)`
  * - The random distributions use the same algorithm and seeding semantics
  *   as MOOSE's existing `MooseRandom` class.
- *
- * Limitations:
- * - Not thread-safe for simultaneous access to the same stream ID.
- * - Large backward jumps are linearly expensive.
  *
  * Implementation Notes:
  * - `evaluate()` is declared `const` but mutates internal state marked as
@@ -90,63 +81,77 @@
 class MooseRandomStateless
 {
 public:
+  /// Deleted copy constructor and assignment to prevent deep-copy of mutable state
+  MooseRandomStateless(const MooseRandomStateless &) = delete;
+  MooseRandomStateless & operator=(const MooseRandomStateless &) = delete;
+
   /**
-   * @brief Seed a specific generator index with a given seed value.
+   * @brief Construct a new MooseRandomStateless with a given seed.
    *
-   * Creates a new `GeneratorHandler` for the provided stream index `i`.
-   * Re-seeding an existing index replaces its handler and resets its state.
+   * Initializes internal generators for real and integer distributions.
    *
-   * @param i Stream index (e.g., element or processor ID)
-   * @param seed Base seed for random number generation
+   * @param seed Base seed value for all RNGs in this handler
    */
-  void seed(std::size_t i, unsigned int seed)
+  MooseRandomStateless(unsigned int seed)
+    : _seed(seed), _rand_generator(mts_ldrand, seed), _randl_generator(mts_lrand, seed)
   {
-    _generators[i] = std::make_unique<GeneratorHandler>(seed);
   }
 
   /**
-   * @brief Return the n-th uniform Real random number in [0, 1) for a stream.
+   * @brief Get the seed value used to initialize this handler's RNGs
+   *
+   * @return unsigned int
+   */
+  unsigned int getSeed() const { return _seed; }
+
+  /**
+   * @brief Get the amount that the RNGs have advanced by advance(count) calls.
+   *
+   * @return std::size_t
+   */
+  std::size_t getAdvanceCount() const { return _advance_count; }
+
+  /**
+   * @brief Return the n-th uniform Real random number in [0, 1).
    *
    * Uses the cached state for sequential access; otherwise, recomputes from seed.
    *
-   * @param i Stream index (previously seeded)
    * @param n 0-based index of the random number to generate
    * @return Random Real number in [0, 1)
    */
-  Real rand(std::size_t i, std::size_t n) const
-  {
-    return getGenerator(i).getRandGenerator().evaluate(n);
-  }
+  Real rand(std::size_t n) const { return _rand_generator.evaluate(n); }
 
   /**
    * @brief Return the n-th unsigned integer from the full 32-bit uniform range.
    * This is useful for generating seeds for new generators.
    *
-   * @param i Stream index
    * @param n 0-based index of the random number to generate
    * @return Unsigned integer sampled uniformly in [0, 2^32)
    */
-  unsigned int randl(std::size_t i, std::size_t n) const
-  {
-    return getGenerator(i).getRandlGenerator().evaluate(n);
-  }
+  unsigned int randl(std::size_t n) const { return _randl_generator.evaluate(n); }
 
   /**
    * @brief Return the n-th bounded integer random number in [lower, upper).
    *
    * Uses a cached generator per unique range.
    *
-   * @param i Stream index
    * @param n 0-based index of the random number to generate
    * @param lower Lower bound (inclusive)
    * @param upper Upper bound (exclusive)
    * @return Unsigned integer sampled uniformly in [lower, upper)
    */
-  unsigned int randl(std::size_t i, std::size_t n, unsigned int lower, unsigned int upper) const
+  unsigned int randl(std::size_t n, unsigned int lower, unsigned int upper) const
   {
     mooseAssert(upper >= lower, "randl: upper < lower");
     const auto range = upper - lower;
-    return lower + getGenerator(i).getRandlbGenerator(range).evaluate(n);
+
+    auto [it, is_new] = _randlb_generators.try_emplace(
+        range, [&range](mt_state * state) { return rds_iuniform(state, 0, range); }, _seed);
+
+    if (is_new)
+      it->second.advance(_advance_count);
+
+    return lower + it->second.evaluate(n);
   }
 
   /**
@@ -156,8 +161,11 @@ public:
    */
   void advance(std::size_t count)
   {
-    for (auto & [i, handler] : _generators)
-      handler->advance(count);
+    _rand_generator.advance(count);
+    _randl_generator.advance(count);
+    for (auto & [range, gen] : _randlb_generators)
+      gen.advance(count);
+    _advance_count += count;
   }
 
   /**
@@ -246,141 +254,52 @@ public:
   };
 
 private:
-  /**
-   * @brief Container class that manages multiple generators per stream.
-   *
-   * Each `GeneratorHandler` manages:
-   *  - One Real generator for `mts_ldrand`
-   *  - One unsigned int generator for `mts_lrand`
-   *  - A set of bounded integer generators keyed by their range
-   */
-  class GeneratorHandler
-  {
-  public:
-    /// Deleted copy constructor and assignment to prevent deep-copy of mutable state
-    GeneratorHandler(const GeneratorHandler &) = delete;
-    GeneratorHandler & operator=(const GeneratorHandler &) = delete;
+  /// Seed shared by all internal generators
+  const unsigned int _seed;
+  /// Uniform Real [0, 1)
+  Generator<Real> _rand_generator;
+  /// Uniform uint32
+  Generator<unsigned int> _randl_generator;
+  /// Bounded uniform uint32 (indexed based on bounding range)
+  mutable std::unordered_map<unsigned int, Generator<unsigned int>> _randlb_generators;
 
-    /**
-     * @brief Construct a new GeneratorHandler with a given seed.
-     *
-     * Initializes internal generators for real and integer distributions.
-     *
-     * @param seed Base seed value for all RNGs in this handler
-     */
-    GeneratorHandler(unsigned int seed)
-      : _seed(seed), _rand_generator(mts_ldrand, seed), _randl_generator(mts_lrand, seed)
-    {
-    }
-
-    /// @return Reference to the uniform Real generator
-    const Generator<Real> & getRandGenerator() const { return _rand_generator; }
-
-    /// @return Reference to the full-range integer generator
-    const Generator<unsigned int> & getRandlGenerator() const { return _randl_generator; }
-
-    /**
-     * @brief Get or create a bounded integer generator for a given range.
-     *
-     * Creates a new generator if one for this range does not exist.
-     *
-     * @param range The integer range of bounded integer (upper - lower)
-     * @return Reference to the corresponding Generator instance
-     */
-    const Generator<unsigned int> & getRandlbGenerator(unsigned int range) const
-    {
-      auto rng_func = [&range](mt_state * state) { return rds_iuniform(state, 0, range); };
-      auto [it, is_new] = _randlb_generators.try_emplace(range, rng_func, _seed);
-      if (is_new)
-        it->second.advance(_advance_count);
-      return it->second;
-    }
-
-    /**
-     * @brief Advance the RNGs by a fixed count.
-     *
-     * @param count Number of RNG calls to skip
-     */
-    void advance(std::size_t count)
-    {
-      _rand_generator.advance(count);
-      _randl_generator.advance(count);
-      for (auto & [range, gen] : _randlb_generators)
-        gen.advance(count);
-      _advance_count += count;
-    }
-
-  private:
-    /// Seed shared by all internal generators
-    const unsigned int _seed;
-    /// Uniform Real [0, 1)
-    Generator<Real> _rand_generator;
-    /// Uniform uint32
-    Generator<unsigned int> _randl_generator;
-    /// Bounded uniform uint32 (indexed based on bounding range)
-    mutable std::map<unsigned int, Generator<unsigned int>> _randlb_generators;
-
-    /// The number of counts the generators have advanced
-    /// This needs to be kept around for generation of new randlb generators
-    std::size_t _advance_count = 0;
-
-    // for restart capability
-    friend void dataStore<MooseRandomStateless>(std::ostream & stream,
-                                                MooseRandomStateless & v,
-                                                void * context);
-    friend void
-    dataLoad<MooseRandomStateless>(std::istream & stream, MooseRandomStateless & v, void * context);
-  };
-
-  /**
-   * @brief Retrieve an existing generator for a given stream index.
-   *
-   * @param i Stream index
-   * @return Reference to the associated `GeneratorHandler`
-   * @throws MooseError if no generator has been seeded for this index
-   */
-  const GeneratorHandler & getGenerator(std::size_t i) const
-  {
-    auto it = _generators.find(i);
-    if (it == _generators.end())
-      mooseError("No random generator initialized for id: ", i);
-    return *it->second;
-  }
-
-  /// Map of per-stream generators (indexed by stream ID)
-  std::map<std::size_t, std::unique_ptr<GeneratorHandler>> _generators;
-
-  // for restart capability
-  friend void
-  dataStore<MooseRandomStateless>(std::ostream & stream, MooseRandomStateless & v, void * context);
-  friend void
-  dataLoad<MooseRandomStateless>(std::istream & stream, MooseRandomStateless & v, void * context);
+  /// The number of counts the generators have advanced
+  /// This needs to be kept around for generation of new randlb generators
+  std::size_t _advance_count = 0;
 };
 
 template <>
 inline void
 dataStore(std::ostream & stream, MooseRandomStateless & v, void * context)
 {
-  // Stream ID -> (seed, advance count)
-  std::map<std::size_t, std::pair<unsigned int, std::size_t>> generator_data;
-  for (const auto & [i, gen] : v._generators)
-    generator_data.try_emplace(i, gen->_seed, gen->_advance_count);
-
-  storeHelper(stream, generator_data, context);
+  std::size_t count = v.getAdvanceCount();
+  storeHelper(stream, count, context);
 }
 
 template <>
 inline void
 dataLoad(std::istream & stream, MooseRandomStateless & v, void * context)
 {
-  // Stream ID -> (seed, advance count)
-  std::map<std::size_t, std::pair<unsigned int, std::size_t>> generator_data;
-  loadHelper(stream, generator_data, context);
+  std::size_t count;
+  loadHelper(stream, count, context);
+  v.advance(count);
+}
 
-  for (const auto & [i, pr] : generator_data)
-  {
-    const auto [seed, count] = pr;
-    v.seed(i, seed);
-    v._generators[i]->advance(count);
-  }
+template <>
+inline void
+dataStore(std::ostream & stream, std::unique_ptr<MooseRandomStateless> & v, void * context)
+{
+  unsigned int seed = v->getSeed();
+  storeHelper(stream, seed, context);
+  storeHelper(stream, *v, context);
+}
+
+template <>
+inline void
+dataLoad(std::istream & stream, std::unique_ptr<MooseRandomStateless> & v, void * context)
+{
+  unsigned int seed;
+  loadHelper(stream, seed, context);
+  v = std::make_unique<MooseRandomStateless>(seed);
+  loadHelper(stream, *v, context);
 }
