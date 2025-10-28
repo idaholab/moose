@@ -559,7 +559,7 @@ XYZDelaunayGenerator::generate()
       main_subdomain_map.insert(increment_subdomain_map.begin(), increment_subdomain_map.end());
 
       if (_combined_stitching)
-        MooseMeshUtils::copyIntoMesh(*mesh, hole_mesh, false, false, _communicator);
+        MooseMeshUtils::copyIntoMesh(*this, *mesh, hole_mesh, false, false, _communicator);
       else
       {
         std::size_t n_nodes_stitched = mesh->stitch_meshes(hole_mesh,

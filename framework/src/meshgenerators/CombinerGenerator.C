@@ -167,7 +167,12 @@ CombinerGenerator::generate()
             *other_mesh, _positions[i](0), _positions[i](1), _positions[i](2));
       }
 
-      copyIntoMesh(*mesh, *other_mesh);
+      MooseMeshUtils::copyIntoMesh(*this,
+                                   *mesh,
+                                   *other_mesh,
+                                   _avoid_merging_subdomains,
+                                   _avoid_merging_boundaries,
+                                   _communicator);
     }
 
     mesh->set_isnt_prepared();
@@ -215,7 +220,12 @@ CombinerGenerator::generate()
           *translated_mesh, _positions[i](0), _positions[i](1), _positions[i](2));
 
       // Copy into final mesh
-      copyIntoMesh(*final_mesh, *translated_mesh);
+      MooseMeshUtils::copyIntoMesh(*this,
+                                   *final_mesh,
+                                   *translated_mesh,
+                                   _avoid_merging_subdomains,
+                                   _avoid_merging_boundaries,
+                                   _communicator);
 
       // Reset nodal coordinates
       for (auto translated_node_ptr : translated_mesh->node_ptr_range())
@@ -230,22 +240,5 @@ CombinerGenerator::generate()
 
     final_mesh->set_isnt_prepared();
     return dynamic_pointer_cast<MeshBase>(final_mesh);
-  }
-}
-
-void
-CombinerGenerator::copyIntoMesh(UnstructuredMesh & destination, const UnstructuredMesh & source)
-{
-  try
-  {
-    MooseMeshUtils::copyIntoMesh(
-        destination, source, _avoid_merging_subdomains, _avoid_merging_boundaries, _communicator);
-  }
-  catch (const MooseException & e)
-  {
-    if (((std::string)e.what()).compare(12, 10, "boundaries") == 0)
-      paramError("avoid_merging_boundaries", e.what());
-    else
-      paramError("avoid_merging_subdomains", e.what());
   }
 }
