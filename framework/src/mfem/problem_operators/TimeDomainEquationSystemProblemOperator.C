@@ -26,7 +26,7 @@ void
 TimeDomainEquationSystemProblemOperator::Init(mfem::BlockVector & X)
 {
   TimeDomainProblemOperator::Init(X);
-  GetEquationSystem()->BuildEquationSystem();
+  GetEquationSystem()->BuildEquationSystem(_problem_data.gridfunctions, _block_true_offsets);
   // Set timestepper
   auto & ode_solver = _problem_data.ode_solver;
   ode_solver = std::make_unique<mfem::BackwardEulerSolver>();
@@ -47,10 +47,11 @@ TimeDomainEquationSystemProblemOperator::Solve()
 
 void
 TimeDomainEquationSystemProblemOperator::ImplicitSolve(const mfem::real_t dt,
-                                                       const mfem::Vector & /*X*/,
+                                                       const mfem::Vector & X,
                                                        mfem::Vector & dX_dt)
 {
   dX_dt = 0.0;
+  GetEquationSystem()->UpdateEssDerivativeVals(dt, X);
   SetTestVariablesFromTrueVectors();
   for (unsigned int ind = 0; ind < _trial_variables.size(); ++ind)
   {
@@ -67,9 +68,18 @@ TimeDomainEquationSystemProblemOperator::ImplicitSolve(const mfem::real_t dt,
       *_equation_system->_blfs.Get(_equation_system->_test_var_names.at(0)),
       _equation_system->_ess_tdof_lists.at(0));
 
+  mfem::Vector zero_vec(_true_rhs.Size());
+  zero_vec = 0.0;
+
   _problem_data.nonlinear_solver->SetSolver(_problem_data.jacobian_solver->getSolver());
   _problem_data.nonlinear_solver->SetOperator(*GetEquationSystem());
-  _problem_data.nonlinear_solver->Mult(_true_rhs, dX_dt);
+
+  if (!(GetEquationSystem()->_non_linear))
+    _problem_data.nonlinear_solver->Mult(_true_rhs, dX_dt);
+  else
+    _problem_data.nonlinear_solver->Mult(zero_vec, dX_dt);
+
+  //_problem_data.nonlinear_solver->Mult(zero_vec, dX_dt);
   SetTrialVariablesFromTrueVectors();
 }
 
@@ -77,7 +87,7 @@ void
 TimeDomainEquationSystemProblemOperator::BuildEquationSystemOperator(mfem::real_t dt)
 {
   GetEquationSystem()->SetTimeStep(dt);
-  GetEquationSystem()->UpdateEquationSystem();
+  GetEquationSystem()->UpdateEquationSystem(_problem_data.gridfunctions, _block_true_offsets);
   GetEquationSystem()->BuildJacobian(_true_x, _true_rhs);
 }
 
