@@ -42,12 +42,4 @@ protected:
   const bool _avoid_merging_subdomains;
   /// Boolean to control whether to prevent merging boundaries
   const bool _avoid_merging_boundaries;
-
-  /**
-   * Copy the contents of one mesh into another, taking into account
-   * the merging options specified in class attributes.
-   * @param destination The mesh to copy into
-   * @param source The mesh to copy from
-   */
-  void copyIntoMesh(UnstructuredMesh & destination, const UnstructuredMesh & source);
 };

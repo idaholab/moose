@@ -455,6 +455,7 @@ void convertBlockToMesh(std::unique_ptr<MeshBase> & source_mesh,
 
 /**
  * Helper function for copying one mesh into another
+ * @param mg The mesh generator calling this function
  * @param destination The mesh to copy into
  * @param source The mesh to copy from
  * @param avoid_merging_subdomains If true, subdomain IDs in the source mesh will
@@ -463,7 +464,8 @@ void convertBlockToMesh(std::unique_ptr<MeshBase> & source_mesh,
  * be offset to avoid merging with boundary IDs in the destination mesh
  * @param communicator The communicator for parallel operations
  */
-void copyIntoMesh(UnstructuredMesh & destination,
+void copyIntoMesh(MeshGenerator & mg,
+                  UnstructuredMesh & destination,
                   const UnstructuredMesh & source,
                   const bool avoid_merging_subdomains,
                   const bool avoid_merging_boundaries,

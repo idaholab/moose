@@ -874,7 +874,8 @@ convertBlockToMesh(std::unique_ptr<MeshBase> & source_mesh,
 }
 
 void
-copyIntoMesh(UnstructuredMesh & destination,
+copyIntoMesh(MeshGenerator & mg,
+             UnstructuredMesh & destination,
              const UnstructuredMesh & source,
              const bool avoid_merging_subdomains,
              const bool avoid_merging_boundaries,
@@ -959,15 +960,19 @@ copyIntoMesh(UnstructuredMesh & destination,
   // Check for the case with two block ids sharing the same name
   if (avoid_merging_subdomains)
   {
+    mooseAssert(mg.parameters().isParamDefined("avoid_merging_subdomains"),
+                "Missing parameter in the mesh generator calling this function: "
+                "avoid_merging_subdomains. Considering setting avoid_merging_subdomains to true.");
     for (const auto & [block_id, block_name] : destination.get_subdomain_name_map())
       for (const auto & [source_id, source_name] : source.get_subdomain_name_map())
         if (block_name == source_name)
-          throw MooseException(
+          mg.paramWarning(
+              "avoid_merging_subdomains",
               "Not merging subdomains is creating two subdomains with the same name '" +
-              block_name + "' but different ids: " + std::to_string(source_id) + " & " +
-              std::to_string(block_id + block_offset) +
-              ".\n We recommend using a RenameBlockGenerator to prevent this as you "
-              "will get errors reading the Exodus output later.");
+                  block_name + "' but different ids: " + std::to_string(source_id) + " & " +
+                  std::to_string(block_id + block_offset) +
+                  ".\n We recommend using a RenameBlockGenerator to prevent this as you "
+                  "will get errors reading the Exodus output later.");
   }
 
   for (const auto & [block_id, block_name] : source.get_subdomain_name_map())
@@ -977,24 +982,29 @@ copyIntoMesh(UnstructuredMesh & destination,
   // Check for the case with two boundary ids sharing the same name
   if (avoid_merging_boundaries)
   {
+    mooseAssert(mg.parameters().isParamDefined("avoid_merging_boundaries"),
+                "Missing parameter in the mesh generator calling this function: "
+                "avoid_merging_boundaries. Considering setting avoid_merging_boundaries to true.");
     for (const auto & [b_id, b_name] : other_boundary.get_sideset_name_map())
       for (const auto & [source_id, source_name] : boundary.get_sideset_name_map())
         if (b_name == source_name)
-          throw MooseException(
+          mg.paramWarning(
+              "avoid_merging_boundaries",
               "Not merging boundaries is creating two sidesets with the same name '" + b_name +
-              "' but different ids: " + std::to_string(source_id) + " & " +
-              std::to_string(b_id + bid_offset) +
-              ".\n We recommend using a RenameBoundaryGenerator to prevent this as you "
-              "will get errors reading the Exodus output later.");
+                  "' but different ids: " + std::to_string(source_id) + " & " +
+                  std::to_string(b_id + bid_offset) +
+                  ".\n We recommend using a RenameBoundaryGenerator to prevent this as you "
+                  "will get errors reading the Exodus output later.");
     for (const auto & [b_id, b_name] : other_boundary.get_nodeset_name_map())
       for (const auto & [source_id, source_name] : boundary.get_nodeset_name_map())
         if (b_name == source_name)
-          throw MooseException(
+          mg.paramWarning(
+              "avoid_merging_boundaries",
               "Not merging boundaries is creating two nodesets with the same name '" + b_name +
-              "' but different ids: " + std::to_string(source_id) + " & " +
-              std::to_string(b_id + bid_offset) +
-              ".\n We recommend using a RenameBoundaryGenerator to prevent this as you "
-              "will get errors reading the Exodus output later.");
+                  "' but different ids: " + std::to_string(source_id) + " & " +
+                  std::to_string(b_id + bid_offset) +
+                  ".\n We recommend using a RenameBoundaryGenerator to prevent this as you "
+                  "will get errors reading the Exodus output later.");
   }
 
   for (const auto & [nodeset_id, nodeset_name] : other_boundary.get_nodeset_name_map())
