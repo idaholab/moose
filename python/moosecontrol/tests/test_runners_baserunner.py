@@ -380,7 +380,7 @@ class TestBaseRunner(MooseControlTestCase):
         poke_thread.start()
         self.assertTrue(poke_thread.is_alive())
 
-        with self._caplog.at_level("INFO"):
+        with self._caplog.at_level("WARNING"):
             runner.cleanup()
         self.assertFalse(poke_thread.is_alive())
         self.assert_log_size(1)
