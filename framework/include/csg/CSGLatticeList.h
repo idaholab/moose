@@ -66,6 +66,29 @@ protected:
   addCartesianLattice(const std::string & name, const int nx0, const int nx1, const Real pitch);
 
   /**
+   * @brief Add a hexagonal lattice of concentric rings
+   * @param name unique lattice name
+   * @param num_rings number of concentric rings around the center (>=1)
+   * @param pitch  flat‐to‐flat distance between adjacent centers
+   */
+  CSGLattice &
+  addHexagonalLattice(const std::string & name, int num_rings, Real pitch, std::string orientation);
+
+  /**
+   * @brief add a Cartesian lattice whose layout is defined by the set of universes
+   *
+   * @param name unique name identifier of the lattice
+   * @param pitch flat-to-flat size of the lattice elements
+   * @param universes list of list of universes that define the lattice layout
+   * @return reference to new Cartesian lattice
+   */
+  CSGLattice & addHexagonalLattice(
+      const std::string & name,
+      const Real pitch,
+      std::string orientation,
+      std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes);
+
+  /**
    * @brief add an existing universe to list. Ownership of universe will be transferred to universe
    * list object that calls this function
    *
