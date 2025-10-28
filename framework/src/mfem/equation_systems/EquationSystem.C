@@ -203,7 +203,10 @@ EquationSystem::EliminateCoupledVariables()
       if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(eliminated_var_name))
       {
         auto mblf = _mblfs.Get(test_var_name)->Get(eliminated_var_name);
-        mblf->AddMult(*_eliminated_variables.Get(eliminated_var_name), *lf, -1.0);
+        // The AddMult method in mfem::BilinearForm is not defined for non-legacy assembly
+        mfem::Vector lf_prev(lf->Size());
+        mblf->Mult(*_eliminated_variables.Get(eliminated_var_name), lf_prev);
+        *lf -= lf_prev;
       }
     }
   }
