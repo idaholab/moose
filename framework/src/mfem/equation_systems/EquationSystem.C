@@ -344,8 +344,9 @@ EquationSystem::BuildJacobian(mfem::BlockVector & trueX, mfem::BlockVector & tru
 void
 EquationSystem::Mult(const mfem::Vector & sol, mfem::Vector & residual) const
 {
-  const_cast<EquationSystem *>(this)->CopyVec(sol, _trueBlockSol);
-
+  // const_cast<EquationSystem *>(this)->CopyVec(sol, _trueBlockSol);
+  //_trueBlockSol.mfem::Vector::operator=(sol);
+  static_cast<mfem::Vector &>(_trueBlockSol) = sol;
   for (unsigned int i = 0; i < _trial_var_names.size(); i++)
   {
     auto & trial_var_name = _trial_var_names.at(i);
@@ -403,9 +404,11 @@ TimeDependentEquationSystem::UpdateEssDerivativeVals(const mfem::real_t & dt,
   // Update the old vector
   mfem::BlockVector block_x_old;
   block_x_old.Update(*_block_true_offsets);
+  mfem::ParGridFunction u_old_gf;
 
   // Update the old vector
   CopyVec(x_old, block_x_old);
+  // mfem::BlockVector block_x_old(const_cast<mfem::Vector &>(x_old), *_block_true_offsets);
 
   // Update the xs boundary conditions
   ApplyEssentialBCs();
@@ -413,7 +416,9 @@ TimeDependentEquationSystem::UpdateEssDerivativeVals(const mfem::real_t & dt,
   // Update the dxdts boundary conditions
   for (unsigned int i = 0; i < _test_var_names.size(); i++)
   {
-    *(_var_ess_constraints.at(i)) -= block_x_old.GetBlock(i);
+    u_old_gf.SetSpace(_test_pfespaces[i]);
+    u_old_gf.SetFromTrueDofs(block_x_old.GetBlock(i));
+    *(_var_ess_constraints.at(i)) -= u_old_gf;
     *(_var_ess_constraints.at(i)) /= dt;
   }
 }
