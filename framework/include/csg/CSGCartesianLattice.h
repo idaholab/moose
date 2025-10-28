@@ -52,7 +52,7 @@ public:
    * @brief get the map of data that defines the geometric dimensions of the lattice:
    *  - nx0: number of mesh elements in the first dimension (int); ie, rows
    *  - nx1: number of mesh elements in the second dimension (int); ie, columns
-   *  - pitch: pitch of the mesh element (Real)
+   *  - pitch: pitch of the lattice element (Real)
    *
    * @return map of string dimension name to value of that dimension
    */
@@ -62,8 +62,6 @@ public:
    * @brief update the specified lattice geometric dimension to the specified value.
    * Valid dimensions are: pitch (Real), nx0 (int), and nx1 (int). If the universe
    * map has already been set on the lattice, nx0 and nx1 cannot be updated.
-   *
-   * NOTE: this might not need to be protected?
    *
    * @param dim_name string name of the dimension
    * @param dim_value new value to set as the dimension.

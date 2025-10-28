@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "CSGLatticeList.h"
+#include "CSGHexagonalLattice.h"
 
 namespace CSG
 {
@@ -30,6 +31,25 @@ CSGLatticeList::addCartesianLattice(const std::string & name,
                                     const Real pitch)
 {
   return addLattice(std::make_unique<CSGCartesianLattice>(name, nx0, nx1, pitch));
+}
+
+CSGLattice &
+CSGLatticeList::addHexagonalLattice(const std::string & name,
+                                    int num_rings,
+                                    Real pitch,
+                                    std::string orientation)
+{
+  return addLattice(std::make_unique<CSGHexagonalLattice>(name, num_rings, pitch, orientation));
+}
+
+CSGLattice &
+CSGLatticeList::addHexagonalLattice(
+    const std::string & name,
+    const Real pitch,
+    std::string orientation,
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes)
+{
+  return addLattice(std::make_unique<CSGHexagonalLattice>(name, pitch, orientation, universes));
 }
 
 CSGLattice &

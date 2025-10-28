@@ -321,6 +321,39 @@ public:
   }
 
   /**
+   * @brief Create an empty hexagonal lattice. NOTE: this will not create an empty universe mapping;
+   * this must be done by using setLatticeUniverses.
+   *
+   * @param name unique name identifier for the lattice
+   * @param num_rings number of rings in the lattice
+   * @param pitch flat-to-flat size of the lattice elements
+   * @param orientation orientation of the hex lattice, either "x" or "y"
+   * @return reference to new hexagonal lattice
+   */
+  const CSGLattice & createHexagonalLattice(const std::string & name,
+                                            int num_rings,
+                                            Real pitch,
+                                            std::string orientation)
+  {
+    return _lattice_list.addHexagonalLattice(name, num_rings, pitch, orientation);
+  }
+
+  /**
+   * @brief Create a hexagonal Lattice from the provided universes
+   *
+   * @param name unique name identifier for the lattice
+   * @param pitch flat-to-flat size of the lattice elements
+   * @param orientation orientation of the hex lattice, either "x" or "y"
+   * @param universes list of list of universes that define the layout of the lattice
+   * @return reference to new hexagonal lattice
+   */
+  const CSGLattice & createHexagonalLattice(
+      const std::string & name,
+      const Real pitch,
+      std::string orientation,
+      std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes);
+
+  /**
    * @brief add the universe to the lattice at the specified location
    *
    * @param lattice lattice to update
