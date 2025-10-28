@@ -89,6 +89,13 @@ P_out = 101325 # Pa
   implicit = true
   segregated = false
   monolithic_thermal = false
+  friction_closure = 'Pang'
+[]
+
+[SCMClosures]
+  [Pang]
+    type = SCMFrictionBoPang
+  []
 []
 
 [ICs]

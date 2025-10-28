@@ -48,6 +48,13 @@ pin_diameter = 0.00950
   verbose_subchannel = true
   implicit = true
   segregated = true
+  friction_closure = 'Pang'
+[]
+
+[SCMClosures]
+  [Pang]
+    type = SCMFrictionBoPang
+  []
 []
 
 [ICs]

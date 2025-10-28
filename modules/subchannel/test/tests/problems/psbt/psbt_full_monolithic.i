@@ -49,6 +49,13 @@ pin_diameter = 0.00950
   implicit = true
   segregated = false
   monolithic_thermal = true
+  friction_closure = 'Pang'
+[]
+
+[SCMClosures]
+  [Pang]
+    type = SCMFrictionBoPang
+  []
 []
 
 [ICs]

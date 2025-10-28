@@ -52,6 +52,13 @@ heated_length = 1.0
   compute_viscosity = true
   compute_power = true
   P_out = ${P_out}
+  friction_closure = 'Pang'
+[]
+
+[SCMClosures]
+  [Pang]
+    type = SCMFrictionBoPang
+  []
 []
 
 [ICs]

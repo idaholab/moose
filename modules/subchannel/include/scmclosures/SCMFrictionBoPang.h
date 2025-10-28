@@ -10,30 +10,26 @@
 #pragma once
 
 #include "SCMFrictionClosureBase.h"
-#include "TriSubChannelMesh.h"
 #include "QuadSubChannelMesh.h"
 
 /**
- * Class that calculates the friction factor based on the updated Cheng & Todreas correlations
- * (Cheng et all 2018). It is used for both quad and tri lattices.
+ * Class that calculates the friction factor based on the Bo Pang correlations
+ * (Bo Pang. 2018). It is used for quad lattices.
  */
-class SCMFrictionUpdatedChengTodreas : public SCMFrictionClosureBase
+class SCMFrictionBoPang : public SCMFrictionClosureBase
 {
 public:
   static InputParameters validParams();
 
-  SCMFrictionUpdatedChengTodreas(const InputParameters & parameters);
+  SCMFrictionBoPang(const InputParameters & parameters);
 
   virtual Real computeFrictionFactor(const FrictionStruct & friction_info) const override;
 
 protected:
-  Real computeTriLatticeFrictionFactor(const FrictionStruct & friction_info) const;
   Real computeQuadLatticeFrictionFactor(const FrictionStruct & friction_info) const;
 
   /// Keep track of the lattice type
-  bool _is_tri_lattice;
-  /// Pointer to the tri lattice mesh
-  const TriSubChannelMesh * const _tri_sch_mesh;
+  bool _is_quad_lattice;
   /// Pointer to the quad lattice mesh
   const QuadSubChannelMesh * const _quad_sch_mesh;
 };
