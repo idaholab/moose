@@ -404,11 +404,12 @@ rho = 1
     time_sequence = '1 10 50 100 150 200 250 350 400 600 800 1000 1200 1400 1600 1800 2000 2200 2400 2600 2800 3000 3200 3400 3600 3800 4000 4200 4400 4600 4800 5000 5200 5400 5600 5800 6000 6200 6400 6600 6800 7000 7200 7400 7600 7800 8000 8200 8400 8600 8800 9000 9200 9400 9600 9800 10000'
     use_last_t_for_end_time = true
   []
+  abort_on_solve_fail = true
 []
 
 [Outputs]
   print_linear_residuals = false
-  exodus = true
+  exodus = false
   checkpoint = true
   perf_graph = true
 []
