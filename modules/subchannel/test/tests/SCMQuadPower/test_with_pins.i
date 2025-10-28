@@ -66,6 +66,13 @@ length = 0.5
   verbose_subchannel = true
   implicit = true
   segregated = false
+  friction_closure = 'Pang'
+[]
+
+[SCMClosures]
+  [Pang]
+    type = SCMFrictionBoPang
+  []
 []
 
 [AuxKernels]

@@ -46,8 +46,14 @@ pin_diameter = 0.00950
   compute_power = true
   P_out = report_pressure_outlet
   verbose_subchannel = true
-  friction_model = non_default
   constant_beta = false
+  friction_closure = 'Cheng'
+[]
+
+[SCMClosures]
+  [Cheng]
+    type = SCMFrictionUpdatedChengTodreas
+  []
 []
 
 [ICs]

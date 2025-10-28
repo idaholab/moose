@@ -55,6 +55,13 @@ heated_length = 1.0
 
   # Heat Transfer Correlations
   pin_htc_correlation = 'dittus-boelter'
+  friction_closure = 'Pang'
+[]
+
+[SCMClosures]
+  [Pang]
+    type = SCMFrictionBoPang
+  []
 []
 
 [ICs]

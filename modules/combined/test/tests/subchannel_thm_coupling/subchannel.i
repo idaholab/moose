@@ -109,6 +109,13 @@ heated_length = 1.0
   verbose_subchannel = false
   interpolation_scheme = 'upwind'
   pin_htc_correlation = 'gnielinski'
+  friction_closure = 'Cheng'
+[]
+
+[SCMClosures]
+  [Pang]
+    type = SCMFrictionUpdatedChengTodreas
+  []
 []
 
 [ICs]

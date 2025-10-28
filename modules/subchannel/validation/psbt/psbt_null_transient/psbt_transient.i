@@ -50,6 +50,14 @@ P_out = 4.923e6 # Pa
   P_out = ${P_out}
   restart_file_base = psbt_SS_out_cp/LATEST
   skip_additional_restart_data = true
+  # friction model
+  friction_closure = 'Pang'
+[]
+
+[SCMClosures]
+  [Pang]
+    type = SCMFrictionBoPang
+  []
 []
 
 [Functions]

@@ -88,6 +88,14 @@ P_out = 101325 # Pa
   P_out = ${P_out}
   implicit = true
   segregated = false
+  monolithic_thermal = false
+  friction_closure = 'Pang'
+[]
+
+[SCMClosures]
+  [Pang]
+    type = SCMFrictionBoPang
+  []
 []
 
 [ICs]
