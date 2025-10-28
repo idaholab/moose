@@ -70,11 +70,13 @@ public:
                                       mfem::ElementTransformation & Trans,
                                       mfem::DenseMatrix & elmat) override;
 
+  using mfem::BilinearFormIntegrator::AssembleFaceMatrix;
   virtual void AssembleFaceMatrix(const mfem::FiniteElement & el1,
                                   const mfem::FiniteElement & el2,
                                   mfem::FaceElementTransformations & Trans,
                                   mfem::DenseMatrix & elmat) override;
 
+  using mfem::BilinearFormIntegrator::AssemblePA;
   virtual void AssemblePA(const mfem::FiniteElementSpace & fes) override;
 
   virtual void AssembleDiagonalPA(mfem::Vector & diag) override;
