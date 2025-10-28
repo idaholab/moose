@@ -1,7 +1,7 @@
 [Mesh]
   type = MFEMMesh
   file = ../../mesh/square.msh
-  dim = 3
+  dim = 2
 []
 
 [Problem]
