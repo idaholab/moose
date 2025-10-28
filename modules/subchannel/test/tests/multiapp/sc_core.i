@@ -146,6 +146,15 @@ duct_inside = '${fparse 11.43*2*scale_factor}'
   compute_density = false
   compute_viscosity = false
   compute_power = false
+
+  # friction model
+  friction_closure = 'cheng'
+[]
+
+[SCMClosures]
+  [cheng]
+    type = SCMFrictionUpdatedChengTodreas
+  []
 []
 
 [ICs]

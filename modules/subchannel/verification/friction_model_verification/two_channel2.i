@@ -40,7 +40,14 @@ P_out = 155e+5 # Pa
   compute_viscosity = true
   compute_power = true
   P_out = ${P_out}
-  friction_model = non_default
+  # friction model
+  friction_closure = 'cheng'
+[]
+
+[SCMClosures]
+  [cheng]
+    type = SCMFrictionUpdatedChengTodreas
+  []
 []
 
 [ICs]

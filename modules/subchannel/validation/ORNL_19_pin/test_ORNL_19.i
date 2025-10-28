@@ -77,6 +77,14 @@ P_out = 2.0e5 # Pa
   monolithic_thermal = false
   verbose_multiapps = true
   verbose_subchannel = false
+  # friction model
+  friction_closure = 'cheng'
+[]
+
+[SCMClosures]
+  [cheng]
+    type = SCMFrictionUpdatedChengTodreas
+  []
 []
 
 [ICs]

@@ -42,6 +42,15 @@ P_out = 1.0e5 # Pa
   segregated = false
   verbose_subchannel = true
   interpolation_scheme = upwind
+
+  # friction model
+  friction_closure = 'cheng'
+[]
+
+[SCMClosures]
+  [cheng]
+    type = SCMFrictionUpdatedChengTodreas
+  []
 []
 
 [ICs]

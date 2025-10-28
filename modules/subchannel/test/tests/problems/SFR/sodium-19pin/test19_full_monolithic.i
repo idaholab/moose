@@ -45,6 +45,15 @@ P_out = 2.0e5 # Pa
   implicit = true
   segregated = false
   monolithic_thermal = true
+
+  # friction model
+  friction_closure = 'cheng'
+[]
+
+[SCMClosures]
+  [cheng]
+    type = SCMFrictionUpdatedChengTodreas
+  []
 []
 
 [ICs]

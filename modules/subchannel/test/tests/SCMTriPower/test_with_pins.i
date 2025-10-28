@@ -65,6 +65,14 @@ num_cells = 40
   segregated = false
   verbose_subchannel = true
   interpolation_scheme = upwind
+  # friction model
+  friction_closure = 'cheng'
+[]
+
+[SCMClosures]
+  [cheng]
+    type = SCMFrictionUpdatedChengTodreas
+  []
 []
 
 [ICs]
