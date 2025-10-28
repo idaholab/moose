@@ -475,6 +475,18 @@ CSGBase::getLinkedUniverses(const CSGUniverse & univ,
   for (const CSGCell & cell : univ_cells)
     if (cell.getFillType() == "UNIVERSE")
       getLinkedUniverses(cell.getFillUniverse(), linked_universe_names);
+    else if (cell.getFillType() == "LATTICE")
+    {
+      const auto & lattice = cell.getFillLattice();
+      for (const auto & univ_list : lattice.getUniverses())
+      {
+        for (const auto & univ_ref : univ_list)
+        {
+          const CSGUniverse & lattice_univ = univ_ref.get();
+          getLinkedUniverses(lattice_univ, linked_universe_names);
+        }
+      }
+    }
 }
 
 nlohmann::json
@@ -534,10 +546,10 @@ CSGBase::generateOutput() const
     const auto & lat_name = lat.getName();
     // write out dimensions dictionary
     const auto & lat_dims = lat.getDimensions();
-    csg_json["lattices"][lat_name]["dimensions"] = {};
+    csg_json["lattices"][lat_name] = {};
     for (const auto & dim : lat_dims)
     {
-      csg_json["lattices"][lat_name]["dimensions"][dim.first] = anyToJson(dim.second);
+      csg_json["lattices"][lat_name][dim.first] = anyToJson(dim.second);
     }
     // write the map of universe names: list of lists
     csg_json["lattices"][lat_name]["universes"] = lat.getUniverseNames();
