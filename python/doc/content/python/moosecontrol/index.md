@@ -7,10 +7,10 @@ The general workflow is as follows:
 1. Spawn a MOOSE process that has a listening [WebServerControl.md] object. This can be maintained by the `MooseControl` if utilizing one of the subprocess runners (see below).
 1. Wait for the MOOSE process to be listening. Done by `MooseControl.initialize()` or automatically on enter if using the `MooseControl` as a Python context manager.
 1. Wait for the MOOSE process to be waiting for external input within the [WebServerControl.md]. Done by `MooseControl.wait()`, which will poll for MOOSE to be waiting.
-1. Interact with the MOOSE process: reading values or setting values. Done by the various `get` and `set` methods (see [!ref](read_methods) and [!ref](set_methods) respectively).
+1. Interact with the MOOSE process: reading values or setting values. Done by the various methods in `MooseControl`.
 1. Tell the MOOSE process to continue with its solve. Done by `MooseControl.set_continue()`.
 1. Repeat steps 3-5 until the simulation is done, or use `MooseControl.set_terminate()` to tell the simulation to terminate early.
-1. Wait for the MOOSE process to cleanup (finish running and listening). Done by `MooseControl.finalize()`, or automatically on exit of using the `MooseControl` as a Python context manager,
+1. Wait for the MOOSE process to cleanup (finish running and listening). Done by `MooseControl.finalize()`, or automatically on exit of using the `MooseControl` as a Python context manager.
 
 ## Runners
 
@@ -29,6 +29,8 @@ All runners share the following optional arguments:
 - `poke_poll_time`: How often in seconds to "poke" the running MOOSE executable. The [WebServerControl.md] has two timeout parameters, [!param](/Controls/WebServerControl/initial_client_timeout) and [!param](/Controls/WebServerControl/client_timeout), which require that the MOOSE simulation hears from the client every so often otherwise it will error. This ensures that the MOOSE simulation does not sit around indefinitely as a zombie waiting for a message from the control.
 - `initialize_timeout`: How long in seconds to wait for the MOOSE simulation to start listening. If this timeout is hit, the `MooseControl` will raise an exception and exit. This prevents your Python script from hanging indefinitely while waiting for a MOOSE simulation that is likely not running.
 
+For most cases, the default values for these arguments will suffice.
+
 ### Subprocess Runners
 
 `SubprocessPortRunner` and `SubprocessSocketRunner` are the subprocess runners. They enable you to execute a MOOSE simulation and write your coupling logic within the same Python script. They take the same optional arguments as all runners as described above, in addition to:
@@ -39,13 +41,13 @@ All runners share the following optional arguments:
 
 ## Interacting with MOOSE
 
-The `MooseControl` class contains the methods to be used to interact with the running process.
+The `MooseControl` class contains the methods for interacting with the running process.
 
 ### General methods
 
 The following methods are the general methods used to interact with the process:
 
-!table caption=General `MooseControl` methods
+!table
 | Method | Description |
 | - | - |
 | `get_waiting_flag()` | Get the `EXECUTE_ON` flag the [WebServerControl.md] is waiting on, if any |
@@ -59,7 +61,7 @@ The following methods are the general methods used to interact with the process:
 
 The following methods are used to read data from the running simulation:
 
-!table caption=`MooseControl` methods for reading data
+!table
 | Method | Description |
 | - | - |
 | `get_postprocessor()` | Get a [`Postprocessor`](Postprocessors/index.md) value by name |
@@ -73,7 +75,7 @@ They can only be called when the [WebServerControl.md] is waiting (i.e., when `i
 
 As the [WebServerControl.md] is a [Controls/index.md](Control.md) object, the most common way to change the state of a running simulation is by changing controllable parameters. The following methods are used to change controllable parameters:
 
-!table caption=`MooseControl` methods for controlling parameters
+!table
 | Method | Parameter type |
 | - | - |
 | `set_bool()` | `bool` |
@@ -98,17 +100,32 @@ from moosecontrol.runners import SubprocessPortRunner
 
 # Define the runner that will spawn MOOSE over a port
 # with the input file "input.i"
-moose_command = ['mpiexec', '-n', '2', '/path/to/app-opt', 'i', 'input.i']
+moose_command = [
+    'mpiexec',
+    '-n',
+    '2',
+    '/path/to/app-opt',
+    'i',
+    'input.i'
+]
 runner = SubprocessPortRunner(
     moose_command, # The command to run
     'web_server'   # The name of the WebServerControl in input
 )
 
-# Initialize the MooseControl with our runner
+# Create the MooseControl with our runner
 control = MooseControl(runner)
 ```
 
-You should know which execution flags the webserver will be listening on, and how many times it will be listening. An example loop over an expected number of timesteps and action on `TIMESTEP_BEGIN` and `TIMESTEP_END` is as follows:
+You should know which execution flags the webserver will be listening on, and how many times it will be listening.
+
+In the example case that follows, assume that an input exists with:
+
+- The [WebServerControl.md] that executes on `TIMESTEP_BEGIN` and `TIMESTEP_END`
+- A postprocessor named `cool_postprocessor`; what it computes is not important
+- A boundary condition called `left` which has a controllable `Real` parameter of type `Real`
+
+As the simulation begins (on `TIMESTEP_BEGIN`), we will get the value of the postprocessor in Python. As the simulation ends (on `TIMESTEP_END`), we will modify the boundary condition value in `BCs/left/value`, setting it to a value scaled by the postprocessor value we received at the beginning of the timestep. This is done as follows:
 
 ```language=python
 # The number of timesteps
@@ -123,7 +140,7 @@ with control:
         control.wait('TIMESTEP_BEGIN')
 
         # Get a postprocessor value
-        pp_value = control.get_postprocessor('postprocesor_name')
+        pp_value = control.get_postprocessor('cool_postprocessor')
 
         # Tell moose to continue on TIMESTEP_BEGIN
         control.set_continue()
