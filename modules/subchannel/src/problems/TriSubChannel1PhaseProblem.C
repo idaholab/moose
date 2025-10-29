@@ -10,6 +10,8 @@
 #include "TriSubChannel1PhaseProblem.h"
 #include "AuxiliarySystem.h"
 #include "TriSubChannelMesh.h"
+#include "SubChannel1PhaseProblem.h"
+#include "SinglePhaseFluidProperties.h"
 #include "SCM.h"
 #include <limits> // for std::numeric_limits
 #include <cmath>  // for std::isnan

@@ -780,7 +780,6 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         _friction_args.i_ch = i_ch;
         _friction_args.S = S;
         _friction_args.w_perim = w_perim;
-        _friction_args.iz = iz;
         Real ff = _friction_closure->computeFrictionFactor(_friction_args);
         _ff_soln->set(node_out, ff);
         /// Upwind local form loss
@@ -846,7 +845,6 @@ SubChannel1PhaseProblem::computeDP(int iblock)
           _friction_args.i_ch = i_ch;
           _friction_args.S = S_interp;
           _friction_args.w_perim = w_perim_interp;
-          _friction_args.iz = iz;
           Real ff = _friction_closure->computeFrictionFactor(_friction_args);
           _ff_soln->set(node_out, ff);
           /// Upwind local form loss
@@ -1086,7 +1084,6 @@ SubChannel1PhaseProblem::computeDP(int iblock)
         _friction_args.i_ch = i_ch;
         _friction_args.S = S_interp;
         _friction_args.w_perim = w_perim_interp;
-        _friction_args.iz = iz;
         Real ff = _friction_closure->computeFrictionFactor(_friction_args);
         _ff_soln->set(node_out, ff);
         /// Upwind local form loss

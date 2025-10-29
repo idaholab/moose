@@ -16,24 +16,6 @@
 #include "MooseSyntax.h"
 #include "SubChannelSyntax.h"
 
-const std::string SubChannelApp::MASS_FLOW_RATE = "mdot";
-const std::string SubChannelApp::SURFACE_AREA = "S";
-const std::string SubChannelApp::SUM_CROSSFLOW = "SumWij";
-const std::string SubChannelApp::PRESSURE = "P";
-const std::string SubChannelApp::PRESSURE_DROP = "DP";
-const std::string SubChannelApp::ENTHALPY = "h";
-const std::string SubChannelApp::TEMPERATURE = "T";
-const std::string SubChannelApp::PIN_TEMPERATURE = "Tpin";
-const std::string SubChannelApp::PIN_DIAMETER = "Dpin";
-const std::string SubChannelApp::DENSITY = "rho";
-const std::string SubChannelApp::VISCOSITY = "mu";
-const std::string SubChannelApp::WETTED_PERIMETER = "w_perim";
-const std::string SubChannelApp::LINEAR_HEAT_RATE = "q_prime";
-const std::string SubChannelApp::DUCT_HEAT_FLUX = "duct_heat_flux";
-const std::string SubChannelApp::DUCT_TEMPERATURE = "Tduct";
-const std::string SubChannelApp::DISPLACEMENT = "displacement";
-const std::string SubChannelApp::FRICTION_FACTOR = "ff";
-
 InputParameters
 SubChannelApp::validParams()
 {

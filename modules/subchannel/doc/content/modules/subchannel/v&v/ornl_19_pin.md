@@ -81,12 +81,6 @@ For more information about the mesh generator, pelase consult the website docume
 
 !listing /validation/ORNL_19_pin/ORNL_19.i block=TriSubChannelMesh language=moose
 
-### Variables
-
-This block defines the subchannel variables for the SCM solve. This block is not necessary for the solver to run if the there is there is a SubChannel block
-
-!listing /validation/ORNL_19_pin/ORNL_19.i block=AuxVariables language=moose
-
 ### FluidProperties
 
 The FluidProperties block specifies the thermophysical properties used in the SCM solve.

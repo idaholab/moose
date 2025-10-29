@@ -12,6 +12,7 @@
 #include "ActionFactory.h"
 #include "AddAuxVariableAction.h"
 #include "SubChannelApp.h"
+#include <string_view>
 
 registerMooseAction("SubChannelApp", SubChannelAddVariablesAction, "meta_action");
 
