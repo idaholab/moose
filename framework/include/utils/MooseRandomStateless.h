@@ -75,7 +75,7 @@
  * - There are separate generators for every instance of `rds_iuniform` with
  *   unique ranges (upper - lower). This is because `rds_iuniform` increments
  *   its state differently for each of these ranges. Creating separate
- *   generators for each inputted range is unfortunate, but necessary for
+ *   generators for each input range is unfortunate, but necessary for
  *   stateless-ness.
  */
 class MooseRandomStateless
