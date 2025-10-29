@@ -160,15 +160,16 @@ EquationSystem::ApplyEssentialBC(const std::string & var_name,
                                  mfem::ParGridFunction & trial_gf,
                                  mfem::Array<int> & global_ess_markers)
 {
-  // Set default value of gridfunction used in essential BC. Values
-  // overwritten in applyEssentialBCs
   if (_essential_bc_map.Has(var_name))
   {
-    auto bcs = _essential_bc_map.GetRef(var_name);
+    auto & bcs = _essential_bc_map.GetRef(var_name);
     for (auto & bc : bcs)
     {
+      // Set constrained DoFs values on essential boundaries
       bc->ApplyBC(trial_gf);
+      // Fetch marker array labelling essential boundaries of current BC
       mfem::Array<int> ess_bdrs(bc->getBoundaryMarkers());
+      // Add these boundary markers to the set of markers labelling all essential boundaries
       for (auto it = 0; it != trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max(); ++it)
         global_ess_markers[it] = std::max(global_ess_markers[it], ess_bdrs[it]);
     }
@@ -185,8 +186,8 @@ EquationSystem::ApplyEssentialBCs()
     mfem::ParGridFunction & trial_gf = *(_var_ess_constraints.at(i));
     mfem::Array<int> global_ess_markers(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
     global_ess_markers = 0;
-    // Set default value of gridfunction used in essential BC. Values
-    // overwritten in applyEssentialBCs
+    // Set strongly constrained DoFs of trial_gf on essential boundaries and add markers for all
+    // essential boundaries to the global_ess_markers array
     ApplyEssentialBC(test_var_name, trial_gf, global_ess_markers);
     trial_gf.ParFESpace()->GetEssentialTrueDofs(global_ess_markers, _ess_tdof_lists.at(i));
   }
@@ -257,7 +258,7 @@ EquationSystem::FormSystem(mfem::OperatorHandle & op,
 }
 
 void
-EquationSystem::assembleJacobian(
+EquationSystem::AssembleJacobian(
     Moose::MFEM::NamedFieldsMap<mfem::ParBilinearForm> & jac_blfs,
     Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>> &
         jac_mblfs,
@@ -326,7 +327,7 @@ EquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
                                  mfem::BlockVector & trueX,
                                  mfem::BlockVector & trueRHS)
 {
-  assembleJacobian(_blfs, _mblfs, _lfs, _ess_tdof_lists, _var_ess_constraints, op, trueX, trueRHS);
+  AssembleJacobian(_blfs, _mblfs, _lfs, _ess_tdof_lists, _var_ess_constraints, op, trueX, trueRHS);
 }
 
 void
@@ -383,7 +384,7 @@ EquationSystem::BuildLinearForms()
     lf->Assemble();
   }
 
-  // Apply boundary conditions
+  // Apply essential boundary conditions
   ApplyEssentialBCs();
 
   // Eliminate trivially eliminated variables by subtracting contributions from linear forms
@@ -654,8 +655,8 @@ TimeDependentEquationSystem::ApplyEssentialBCs()
     mfem::ParGridFunction & trial_gf_time_derivative = *(_td_var_ess_constraints.at(i));
     mfem::Array<int> global_ess_markers(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
     global_ess_markers = 0;
-    // Set default value of gridfunction used in essential BC. Values
-    // overwritten in ApplyEssentialBCs
+    // Set strongly constrained DoFs of trial_gf on essential boundaries and add markers for all
+    // essential boundaries to the global_ess_markers array
     EquationSystem::ApplyEssentialBC(test_var_name, trial_gf, global_ess_markers);
     // Update solution values on Dirichlet values to be in terms of du/dt instead of u
     *_td_var_ess_constraints.at(i).get() = *(_var_ess_constraints.at(i).get());
@@ -693,7 +694,7 @@ TimeDependentEquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
                                               mfem::BlockVector & trueRHS)
 {
   // Form linear system for operator acting on vector of du/dt
-  assembleJacobian(
+  AssembleJacobian(
       _td_blfs, _td_mblfs, _lfs, _ess_tdof_lists, _td_var_ess_constraints, op, truedXdt, trueRHS);
 }
 

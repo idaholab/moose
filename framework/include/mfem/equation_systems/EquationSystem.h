@@ -45,6 +45,8 @@ public:
   /// Add kernels.
   virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel);
   virtual void AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> kernel);
+
+  /// Add BC associated with essentially constrained DoFs on boundaries.
   virtual void AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc);
 
   /// Initialise
@@ -52,18 +54,28 @@ public:
 
   /// Build linear forms and eliminate constrained DoFs
   virtual void BuildLinearForms();
-  virtual void ApplyEssentialBCs();
+
+  /// Apply essential BC(s) associated with test_var_name to set true DoFs of trial_gf and update
+  /// markers of all essential boundaries
   virtual void ApplyEssentialBC(const std::string & test_var_name,
                                 mfem::ParGridFunction & trial_gf,
                                 mfem::Array<int> & global_ess_markers);
+  /// Update all essentially constrained true DoF markers and values on boundaries
+  virtual void ApplyEssentialBCs();
+
+  /// Perform trivial eliminations of coupled variables lacking corresponding test variables
   virtual void EliminateCoupledVariables();
 
-  /// Build bilinear forms
+  /// Build bilinear forms (diagonal Jacobian contributions)
   virtual void BuildBilinearForms();
+  /// Build mixed bilinear forms (off-diagonal Jacobian contributions)
   virtual void BuildMixedBilinearForms();
+  /// Build all forms comprising this EquationSystem
   virtual void BuildEquationSystem();
 
-  void assembleJacobian(
+  /// Form Jacobian operator based on on- and off-diagonal bilinear form contributions, populate
+  /// solution and RHS vectors of true DoFs, and apply constraints
+  void AssembleJacobian(
       Moose::MFEM::NamedFieldsMap<mfem::ParBilinearForm> & jac_blfs,
       Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>> &
           jac_mblfs,

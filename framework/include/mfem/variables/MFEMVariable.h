@@ -30,7 +30,7 @@ public:
   /// Returns a reference to the fespace used by the gridfunction.
   inline const MFEMFESpace & getFESpace() const { return _fespace; }
 
-  /// Returns a shared pointer to the constructed gridfunction.
+  /// Returns the variable name corresponding to the time derivative of the MFEMVariable.
   inline const VariableName & getTimeDerivativeName() const { return _time_derivative_name; }
 
 protected:

@@ -189,7 +189,8 @@ private:
   MapType _field_map{};
 };
 
-/// Lightweight adaptor over an std::map from strings to pointer to T
+/// Lightweight adaptor over a std::map relating names of GridFunctions with the name of their time
+/// derivatives
 class TimeDerivativeMap
 {
 public:
