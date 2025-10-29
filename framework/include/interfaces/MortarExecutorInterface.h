@@ -14,7 +14,7 @@
 #include <deque>
 
 class FEProblemBase;
-class MortarData;
+class MortarInterfaceWarehouse;
 class MaterialBase;
 
 /**

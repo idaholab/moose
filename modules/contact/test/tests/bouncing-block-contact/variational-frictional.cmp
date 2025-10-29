@@ -1,0 +1,10 @@
+COORDINATES absolute 1.e-6    # min separation not calculated
+
+TIME STEPS relative 1.e-6 floor 0.0     # min:               0 @ t1 max:             200 @ t41
+
+NODAL VARIABLES relative 5.5e-6 floor 1e-10
+	contact_action_normal_lm      # min:               0 @ t1,n1	max:      0.81678426 @ t29,n4
+	contact_action_tangential_lm  # min:               0 @ t1,n1	max:     0.081678426 @ t29,n4
+	disp_x                        # min:               0 @ t1,n1	max:               2 @ t41,n11
+	disp_y                        # min:               0 @ t1,n1	max:            0.21 @ t1,n11
+

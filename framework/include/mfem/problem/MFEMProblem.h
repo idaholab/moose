@@ -188,7 +188,7 @@ public:
   /**
    * Return the MPI communicator associated with this FE problem's mesh.
    */
-  MPI_Comm getComm() { return mesh().getMFEMParMesh().GetComm(); }
+  MPI_Comm getComm() { return getProblemData().comm; }
 
   /**
    * Displace the mesh, if mesh displacement is enabled.

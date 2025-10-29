@@ -81,31 +81,31 @@
 
 [AuxKernels]
   [penalty_normal_pressure]
-    type = PenaltyMortarUserObjectAux
+    type = MortarUserObjectAux
     variable = penalty_normal_pressure
     user_object = friction_uo
     contact_quantity = normal_pressure
   []
   [penalty_frictional_pressure]
-    type = PenaltyMortarUserObjectAux
+    type = MortarUserObjectAux
     variable = penalty_frictional_pressure
     user_object = friction_uo
     contact_quantity = tangential_pressure_one
   []
   [penalty_accumulated_slip]
-    type = PenaltyMortarUserObjectAux
+    type = MortarUserObjectAux
     variable = accumulated_slip_one
     user_object = friction_uo
     contact_quantity = accumulated_slip_one
   []
   [penalty_tangential_vel]
-    type = PenaltyMortarUserObjectAux
+    type = MortarUserObjectAux
     variable = tangential_vel_one
     user_object = friction_uo
     contact_quantity = tangential_velocity_one
   []
   [penalty_gap]
-    type = PenaltyMortarUserObjectAux
+    type = MortarUserObjectAux
     variable = normal_gap
     user_object = friction_uo
     contact_quantity = normal_gap

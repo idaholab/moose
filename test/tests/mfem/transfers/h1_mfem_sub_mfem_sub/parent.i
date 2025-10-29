@@ -1,7 +1,7 @@
 [Mesh]
   type = MFEMMesh
   file = ../../mesh/square.msh
-  dim = 3
+  dim = 2
 []
 
 [Problem]
@@ -16,13 +16,6 @@
     fec_order = FIRST
   []
 []
-
-#[AuxVariables]
-#  [recv]
-#    type = MFEMVariable
-#    fespace = H1FESpace
-#  []
-#[]
 
 [MultiApps]
   [recv_app]
@@ -43,11 +36,11 @@
 []
 
 [Transfers]
-    [to_sub]
-        type = MultiAppMFEMCopyTransfer
-        source_variable = send
-        variable = recv
-        from_multi_app = send_app
-        to_multi_app = recv_app
-    []
+  [to_sub]
+    type = MultiAppMFEMCopyTransfer
+    source_variable = send
+    variable = recv
+    from_multi_app = send_app
+    to_multi_app = recv_app
+  []
 []

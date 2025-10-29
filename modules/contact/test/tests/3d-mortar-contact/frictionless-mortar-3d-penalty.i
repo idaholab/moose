@@ -15,7 +15,7 @@ offset = 0.00
 
 [AuxKernels]
   [penalty_normal_pressure_auxk]
-    type = PenaltyMortarUserObjectAux
+    type = MortarUserObjectAux
     variable = penalty_normal_pressure
     user_object = normal_uo
     contact_quantity = normal_pressure

@@ -139,7 +139,7 @@ offset = 1e-2
 [Outputs]
   [exodus]
     type = Exodus
-    hide = 'procid contact_pressure nodal_area penetration'
+    hide = 'procid'
   []
 []
 

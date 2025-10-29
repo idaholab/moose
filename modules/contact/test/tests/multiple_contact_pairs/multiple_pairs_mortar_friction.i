@@ -141,13 +141,3 @@ offset = 1e-2
     postprocessor = num_nl
   []
 []
-
-[VectorPostprocessors]
-  [cont_press]
-    type = NodalValueSampler
-    variable = contact_pressure
-    boundary = '10 101'
-    sort_by = x
-    execute_on = NONLINEAR
-  []
-[]

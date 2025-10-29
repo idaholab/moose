@@ -726,7 +726,7 @@ public:
   /**
    * Get the associated BoundaryID for the boundary name.
    *
-   * @return param boundary_name The name of the boundary.
+   * @param boundary_name The name of the boundary.
    * @return the boundary id from the passed boundary name.
    */
   BoundaryID getBoundaryID(const BoundaryName & boundary_name) const;
@@ -734,7 +734,7 @@ public:
   /**
    * Get the associated BoundaryID for the boundary names that are passed in.
    *
-   * @return param boundary_name The names of the boundaries.
+   * @param boundary_name The names of the boundaries.
    * @return the boundary ids from the passed boundary names.
    */
   std::vector<BoundaryID> getBoundaryIDs(const std::vector<BoundaryName> & boundary_name,

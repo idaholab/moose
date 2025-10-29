@@ -16,7 +16,7 @@
 class InputParameters;
 class MooseObject;
 class MooseMesh;
-class MortarData;
+class MortarInterfaceWarehouse;
 class AutomaticMortarGeneration;
 class SubProblem;
 class Assembly;
@@ -99,7 +99,7 @@ protected:
 
   /// A reference to the mortar data object that holds all the mortar
   /// mesh information
-  const MortarData & _mortar_data;
+  const MortarInterfaceWarehouse & _mortar_data;
 
   /// Boundary ID for the secondary surface
   const BoundaryID _secondary_id;
