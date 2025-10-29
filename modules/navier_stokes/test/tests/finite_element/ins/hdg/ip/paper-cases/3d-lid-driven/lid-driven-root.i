@@ -1,7 +1,7 @@
 rho = 1
 l = 1
 U = 1
-n = 4
+n = 6
 gamma = 1e4
 degree = 2
 alpha = '${fparse 10 * degree^2}'
