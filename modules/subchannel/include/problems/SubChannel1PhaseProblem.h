@@ -55,13 +55,22 @@ protected:
     Real Re, Pr;
     unsigned int i_pin, iz, i_ch;
     MooseEnum htc_correlation;
-
-    NusseltStruct()
-      : Re(1.0), Pr(1.0), i_pin(0), iz(0), i_ch(0), htc_correlation(MooseEnum("dittus-boelter"))
+    // parameterized constructor
+    NusseltStruct(Real Re_,
+                  Real Pr_,
+                  unsigned int i_pin_,
+                  unsigned int iz_,
+                  unsigned int i_ch_,
+                  const MooseEnum & htc_corr)
+      : Re(Re_), Pr(Pr_), i_pin(i_pin_), iz(iz_), i_ch(i_ch_), htc_correlation(htc_corr)
     {
-    } // Default constructor
+    }
   };
 
+  /// The correlation used for computing the heat transfer correlation near the pin
+  const MooseEnum _pin_htc_correlation;
+  /// The correlation used for computing the heat transfer correlation near the duct
+  const MooseEnum _duct_htc_correlation;
   NusseltStruct _nusselt_args;
 
   /// Function that computes the Nusselt number given a heat exchange correlation
@@ -183,10 +192,6 @@ protected:
   const PetscInt & _maxit;
   /// The interpolation method used in constructing the systems
   const MooseEnum _interpolation_scheme;
-  /// The correlation used for computing the heat transfer correlation near the pin
-  const MooseEnum _pin_htc_correlation;
-  /// The correlation used for computing the heat transfer correlation near the duct
-  const MooseEnum _duct_htc_correlation;
   /// The direction of gravity
   const MooseEnum _gravity_direction;
   const Real _dir_grav;
