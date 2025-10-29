@@ -43,12 +43,12 @@ P_out = 155e+5 # Pa
   compute_viscosity = true
   compute_power = true
   P_out = ${P_out}
-  friction_closure = 'Pang'
+  friction_closure = 'MATRA'
 []
 
 [SCMClosures]
-  [Pang]
-    type = SCMFrictionBoPang
+  [MATRA]
+    type = SCMFrictionMATRA
   []
 []
 

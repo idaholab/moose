@@ -46,12 +46,12 @@ pin_diameter = 0.00950
   compute_power = true
   P_out = ${P_out}
   verbose_subchannel = true
-  friction_closure = 'Pang'
+  friction_closure = 'MATRA'
 []
 
 [SCMClosures]
-  [Pang]
-    type = SCMFrictionBoPang
+  [MATRA]
+    type = SCMFrictionMATRA
   []
 []
 

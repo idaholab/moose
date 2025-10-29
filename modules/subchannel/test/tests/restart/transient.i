@@ -46,12 +46,12 @@ P_out = 4.923e6 # Pa
   restart_file_base = steady_out_cp/LATEST
   skip_additional_restart_data = true
   allow_initial_conditions_with_restart = true
-  friction_closure = 'Pang'
+  friction_closure = 'MATRA'
 []
 
 [SCMClosures]
-  [Pang]
-    type = SCMFrictionBoPang
+  [MATRA]
+    type = SCMFrictionMATRA
   []
 []
 

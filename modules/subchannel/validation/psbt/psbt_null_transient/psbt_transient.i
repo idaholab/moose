@@ -51,12 +51,12 @@ P_out = 4.923e6 # Pa
   restart_file_base = psbt_SS_out_cp/LATEST
   skip_additional_restart_data = true
   # friction model
-  friction_closure = 'Pang'
+  friction_closure = 'MATRA'
 []
 
 [SCMClosures]
-  [Pang]
-    type = SCMFrictionBoPang
+  [MATRA]
+    type = SCMFrictionMATRA
   []
 []
 

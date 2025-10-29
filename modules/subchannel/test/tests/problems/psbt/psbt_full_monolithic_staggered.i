@@ -50,12 +50,12 @@ pin_diameter = 0.00950
   segregated = false
   monolithic_thermal = true
   staggered_pressure = true
-  friction_closure = 'Pang'
+  friction_closure = 'MATRA'
 []
 
 [SCMClosures]
-  [Pang]
-    type = SCMFrictionBoPang
+  [MATRA]
+    type = SCMFrictionMATRA
   []
 []
 

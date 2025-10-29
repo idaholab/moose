@@ -7,18 +7,20 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "SCMFrictionBoPang.h"
+#include "SCMFrictionMATRA.h"
 
-registerMooseObject("SubChannelApp", SCMFrictionBoPang);
+registerMooseObject("SubChannelApp", SCMFrictionMATRA);
 
 InputParameters
-SCMFrictionBoPang::validParams()
+SCMFrictionMATRA::validParams()
 {
   InputParameters params = SCMFrictionClosureBase::validParams();
+  params.addClassDescription(
+      "Class that models the axial friction factor using the MATRA correlation.");
   return params;
 }
 
-SCMFrictionBoPang::SCMFrictionBoPang(const InputParameters & parameters)
+SCMFrictionMATRA::SCMFrictionMATRA(const InputParameters & parameters)
   : SCMFrictionClosureBase(parameters),
     _is_quad_lattice(dynamic_cast<const QuadSubChannelMesh *>(&_subchannel_mesh) != nullptr),
     _quad_sch_mesh(dynamic_cast<const QuadSubChannelMesh *>(&_subchannel_mesh))
@@ -26,7 +28,7 @@ SCMFrictionBoPang::SCMFrictionBoPang(const InputParameters & parameters)
 }
 
 Real
-SCMFrictionBoPang::computeFrictionFactor(const FrictionStruct & friction_args) const
+SCMFrictionMATRA::computeFrictionFactor(const FrictionStruct & friction_args) const
 {
   if (_is_quad_lattice)
     return computeQuadLatticeFrictionFactor(friction_args);
@@ -37,7 +39,7 @@ SCMFrictionBoPang::computeFrictionFactor(const FrictionStruct & friction_args) c
 }
 
 Real
-SCMFrictionBoPang::computeQuadLatticeFrictionFactor(const FrictionStruct & friction_args) const
+SCMFrictionMATRA::computeQuadLatticeFrictionFactor(const FrictionStruct & friction_args) const
 {
   auto Re = friction_args.Re;
   Real a, b;
