@@ -113,7 +113,7 @@ heated_length = 1.0
 []
 
 [SCMClosures]
-  [Pang]
+  [Cheng]
     type = SCMFrictionUpdatedChengTodreas
   []
 []

@@ -34,7 +34,7 @@ SCMFrictionMATRA::computeFrictionFactor(const FrictionStruct & friction_args) co
     return computeQuadLatticeFrictionFactor(friction_args);
   else
     mooseError(name(),
-               ": This closure model applies only for assemblies with bare fuel pins is a square "
+               ": This closure model applies only for assemblies with bare fuel pins in a square "
                "lattice. ");
 }
 
@@ -43,7 +43,6 @@ SCMFrictionMATRA::computeQuadLatticeFrictionFactor(const FrictionStruct & fricti
 {
   auto Re = friction_args.Re;
   Real a, b;
-  /// Pang, B. et al. KIT, 2013
   if (Re < 1)
   {
     a = 64.0;
@@ -54,6 +53,7 @@ SCMFrictionMATRA::computeQuadLatticeFrictionFactor(const FrictionStruct & fricti
     a = 64.0;
     b = -1.0;
   }
+  /// Pang, B. et al. KIT, 2013
   else if (Re >= 5000 and Re < 30000)
   {
     a = 0.316;

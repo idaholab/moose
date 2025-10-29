@@ -44,7 +44,7 @@ public:
 
   struct FrictionStruct
   {
-    unsigned int i_ch, iz;
+    unsigned int i_ch;
     Real Re, S, w_perim;
   } _friction_args;
 

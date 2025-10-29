@@ -12,7 +12,7 @@
 #include "AddUserObjectAction.h"
 
 /**
- * This class p-------------
+ * Action for building an SCMClosures block
  */
 class AddSCMClosureAction : public AddUserObjectAction
 {
