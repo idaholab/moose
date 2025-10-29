@@ -24,25 +24,25 @@ advected_interp_method = 'average'
     pressure = pressure
     rho = ${rho}
     p_diffusion_kernel = p_diffusion
+    body_force_kernel_names = "u_forcing; v_forcing"
   []
 []
-
 
 [Variables]
   [vel_x]
     type = MooseLinearVariableFVReal
-    initial_condition = 0.1
+    initial_condition = 0.0
     solver_sys = u_system
   []
   [vel_y]
     type = MooseLinearVariableFVReal
     solver_sys = v_system
-    initial_condition = 0.2
+    initial_condition = 0.0
   []
   [pressure]
     type = MooseLinearVariableFVReal
     solver_sys = pressure_system
-    initial_condition = 0.2
+    initial_condition = 0.0
   []
 []
 
@@ -136,10 +136,11 @@ advected_interp_method = 'average'
     momentum_component = y
   []
   [pressure-extrapolation]
-    type = LinearFVExtrapolatedPressureBC
-    boundary = 'left right top'
+    type = LinearFVPressureFluxBC
+    boundary = 'top left right'
     variable = pressure
-    use_two_term_expansion = false
+    HbyA_flux = HbyA
+    Ainv = Ainv
   []
   [pressure-symmetry]
     type = LinearFVPressureSymmetryBC
@@ -164,7 +165,7 @@ advected_interp_method = 'average'
   []
   [forcing_u]
     type = ParsedFunction
-    symbol_names  = 'mu rho'
+    symbol_names = 'mu rho'
     symbol_values = '${mu} ${rho}'
     expression = 'rho*( (x^2*(1-x)^2)*(2*x - 6*x^2 + 4*x^3)*
                         ( (8*y^3 - 9*y^2 + 1)^2
@@ -174,7 +175,7 @@ advected_interp_method = 'average'
   []
   [forcing_v]
     type = ParsedFunction
-    symbol_names  = 'mu rho'
+    symbol_names = 'mu rho'
     symbol_values = '${mu} ${rho}'
     expression = 'rho*( (8*y^3 - 9*y^2 + 1)*(2*y^4 - 3*y^3 + y)*
                         ( (2*x - 6*x^2 + 4*x^3)^2
@@ -194,11 +195,11 @@ advected_interp_method = 'average'
   rhie_chow_user_object = 'rc'
   momentum_systems = 'u_system v_system'
   pressure_system = 'pressure_system'
-  momentum_equation_relaxation = 0.7
+  momentum_equation_relaxation = 0.8
   pressure_variable_relaxation = 0.3
   num_iterations = 10000
-  pressure_absolute_tolerance = 1e-8
-  momentum_absolute_tolerance = 1e-8
+  pressure_absolute_tolerance = 1e-7
+  momentum_absolute_tolerance = 1e-7
   momentum_petsc_options_iname = '-pc_type -pc_hypre_type'
   momentum_petsc_options_value = 'hypre boomeramg'
   pressure_petsc_options_iname = '-pc_type -pc_hypre_type'

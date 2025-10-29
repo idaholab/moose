@@ -110,7 +110,8 @@ LinearFVVelocitySymmetryBC::computeBoundaryValueMatrixContribution() const
   // No matter if we have a one-term or two-term expansion we will always
   // have a contribution to the matrix
   const auto normal_component = _current_face_info->normal()(_index);
-  return 1.0 - abs(normal_component);
+  const auto normal_component_sq = normal_component * normal_component;
+  return 1.0 - normal_component_sq;
 }
 
 Real
@@ -127,17 +128,19 @@ LinearFVVelocitySymmetryBC::computeBoundaryValueRHSContribution() const
 
   auto current_bd_value = computeBoundaryValue();
   const auto normal_component = _current_face_info->normal()(_index);
+  const auto normal_component_sq = normal_component * normal_component;
 
   return current_bd_value -
-         (1.0 - abs(normal_component)) * _var.getElemValue(*elem_info, determineState());
+         (1.0 - normal_component_sq) * _var.getElemValue(*elem_info, determineState());
 }
 
 Real
 LinearFVVelocitySymmetryBC::computeBoundaryGradientMatrixContribution() const
 {
   const auto normal_component = _current_face_info->normal()(_index);
+  const auto normal_component_sq = normal_component * normal_component;
 
-  return abs(normal_component) / computeCellToFaceDistance();
+  return normal_component_sq / computeCellToFaceDistance();
 }
 
 Real
@@ -150,6 +153,7 @@ LinearFVVelocitySymmetryBC::computeBoundaryGradientRHSContribution() const
 
   auto boundary_value = _var.getElemValue(*elem_info, determineState());
   const auto normal_component = _current_face_info->normal()(_index);
+  const auto normal_component_sq = normal_component * normal_component;
   return computeBoundaryNormalGradient() -
-         abs(normal_component) / computeCellToFaceDistance() * boundary_value;
+         normal_component_sq / computeCellToFaceDistance() * boundary_value;
 }
