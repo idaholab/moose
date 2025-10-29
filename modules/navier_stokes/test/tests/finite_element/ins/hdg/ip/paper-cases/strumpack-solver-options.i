@@ -19,7 +19,7 @@
       vars = 'pressure_bar'
       petsc_options = '-ksp_converged_reason'
       petsc_options_iname = '-pc_type -pc_jacobi_type -ksp_type -ksp_rtol -ksp_gmres_restart -ksp_pc_side -ksp_max_it -ksp_atol -ksp_norm_type'
-      petsc_options_value = 'jacobi   rowsum          fgmres    1e-2      300                right        300         1e-8      unpreconditioned'
+      petsc_options_value = 'jacobi   diagonal        fgmres    1e-2      300                right        300         1e-8      unpreconditioned'
     []
   []
 []
