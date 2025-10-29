@@ -52,6 +52,15 @@ MassContinuityAssemblyHelper::MassContinuityAssemblyHelper(
   for (const auto & face_vel_functor_name :
        moose_obj->getParam<std::vector<MooseFunctorName>>("face_velocity_functors"))
     _face_vels.push_back(&getFunctorByName<ADReal>(face_vel_functor_name));
+
+  if (mesh.dimension() != _interior_vels.size())
+    moose_obj->paramError(
+        "interior_velocity_vars",
+        "The number of interior velocity variables must be equal to the mesh dimension");
+  if (mesh.dimension() != _face_vels.size())
+    moose_obj->paramError(
+        "face_velocity_functors",
+        "The number of face velocity functors must be equal to the mesh dimension");
 }
 
 void
