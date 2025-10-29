@@ -26,6 +26,7 @@ public:
   MassFluxPenaltyIPHDGAssemblyHelper(const MooseObject * const moose_obj,
                                      MooseVariableDependencyInterface * const mvdi,
                                      const TransientInterface * const ti,
+                                     const MooseMesh & mesh,
                                      SystemBase & sys,
                                      const Assembly & assembly,
                                      const THREAD_ID tid,
@@ -47,6 +48,7 @@ public:
   const MooseVariableField<Real> & _vel_y_var;
   const ADVariableValue & _vel_x;
   const ADVariableValue & _vel_y;
+  const ADVariableValue * const _vel_z;
   const unsigned short _comp;
   const Real _gamma;
   const Moose::Functor<ADRealVectorValue> & _face_velocity;

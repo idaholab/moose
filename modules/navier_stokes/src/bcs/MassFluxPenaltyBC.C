@@ -28,7 +28,7 @@ MassFluxPenaltyBC::validParams()
 MassFluxPenaltyBC::MassFluxPenaltyBC(const InputParameters & params)
   : IPHDGBC(params),
     _iphdg_helper(std::make_unique<MassFluxPenaltyIPHDGAssemblyHelper>(
-        this, this, this, _sys, _assembly, _tid, std::set<SubdomainID>{}, boundaryIDs())),
+        this, this, this, _mesh, _sys, _assembly, _tid, std::set<SubdomainID>{}, boundaryIDs())),
     _dirichlet_boundary(getParam<bool>("dirichlet_boundary"))
 {
 }

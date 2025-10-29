@@ -25,7 +25,7 @@ MassFluxPenaltyIPHDG::validParams()
 MassFluxPenaltyIPHDG::MassFluxPenaltyIPHDG(const InputParameters & params)
   : IPHDGKernel(params),
     _iphdg_helper(std::make_unique<MassFluxPenaltyIPHDGAssemblyHelper>(
-        this, this, this, _sys, _assembly, _tid, blockIDs(), std::set<BoundaryID>{}))
+        this, this, this, _mesh, _sys, _assembly, _tid, blockIDs(), std::set<BoundaryID>{}))
 {
 }
 
