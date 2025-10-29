@@ -220,8 +220,9 @@ public:
 
   inline const std::string & getTimeDerivativeName(const std::string & var_name) const
   {
-    if (hasTimeDerivative(var_name))
-      return _field_map.at(var_name);
+    auto it = _field_map.find(var_name);
+    if (it != _field_map.end())
+      return it->second;
     else
     {
       mooseError("No variable representing the time derivative of ", var_name, " found.");
