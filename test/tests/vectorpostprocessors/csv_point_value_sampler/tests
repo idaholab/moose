@@ -1,0 +1,19 @@
+[Tests]
+  issues = '#31810'
+  design = 'CSVPointValueSampler.md'
+  [test]
+    type = 'CSVDiff'
+    allow_warnings = true
+    input = 'csv_point_sampler.i'
+    csvdiff = 'csv_point_sampler_out_point_sample_0001.csv csv_point_sampler_out_point_sample_0002.csv csv_point_sampler_out_point_sample_x_0002.csv'
+    requirement = 'The system shall support the ability to sample field variables at user specified points imported via csv file.'
+  []
+  [error]
+    type = 'RunException'
+    allow_warnings = true
+    input = 'csv_point_sampler.i'
+    cli_args = "VectorPostprocessors/point_sample/point_xcoord=dummy"
+    expect_err = "Column with name 'dummy or y or z' missing from measurement file"
+    requirement = 'The system shall report error when column requested is not named in csv file.'
+  []
+[]
