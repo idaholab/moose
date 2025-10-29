@@ -18,6 +18,7 @@ MassFluxPenaltyIPHDGAssemblyHelper::validParams()
   InputParameters params = IPHDGAssemblyHelper::validParams();
   params.addRequiredParam<NonlinearVariableName>("u", "The x-velocity");
   params.addRequiredParam<NonlinearVariableName>("v", "The y-velocity");
+  params.addParam<NonlinearVariableName>("w", "The z-velocity");
   params.addRequiredRangeCheckedParam<unsigned short>(
       "component", "0<=component<=1", "The velocity component this object is being applied to");
   params.addRequiredParam<Real>("gamma", "The penalty to multiply the jump");
@@ -32,6 +33,7 @@ MassFluxPenaltyIPHDGAssemblyHelper::MassFluxPenaltyIPHDGAssemblyHelper(
     const MooseObject * const moose_obj,
     MooseVariableDependencyInterface * const mvdi,
     const TransientInterface * const ti,
+    const MooseMesh & mesh,
     SystemBase & sys,
     const Assembly & assembly,
     const THREAD_ID tid,
@@ -43,11 +45,17 @@ MassFluxPenaltyIPHDGAssemblyHelper::MassFluxPenaltyIPHDGAssemblyHelper(
     _vel_y_var(sys.getFieldVariable<Real>(tid, moose_obj->getParam<NonlinearVariableName>("v"))),
     _vel_x(_vel_x_var.adSln()),
     _vel_y(_vel_y_var.adSln()),
+    _vel_z(moose_obj->isParamValid("w")
+               ? &sys.getFieldVariable<Real>(tid, moose_obj->getParam<NonlinearVariableName>("w"))
+                      .adSln()
+               : nullptr),
     _comp(moose_obj->getParam<unsigned short>("component")),
     _gamma(moose_obj->getParam<Real>("gamma")),
     _face_velocity(getFunctor<ADRealVectorValue>("face_velocity")),
     _hmax(0)
 {
+  if ((mesh.dimension() > 2) && !moose_obj->isParamValid("w"))
+    moose_obj->paramError("w", "For 3D meshes, the z-velocity must be provided");
 }
 
 void
@@ -80,6 +88,8 @@ ADReal
 MassFluxPenaltyIPHDGAssemblyHelper::computeQpResidualOnSide(const unsigned int qp)
 {
   ADRealVectorValue soln_jump(_vel_x[qp], _vel_y[qp], 0);
+  if (_vel_z)
+    soln_jump(2) = (*_vel_z)[qp];
   soln_jump -= _face_velocity(
       Moose::ElemSideQpArg{
           _ip_current_elem, _ip_current_side, qp, _ip_qrule_face, _ip_q_point_face[qp]},
