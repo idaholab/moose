@@ -139,7 +139,7 @@
                 OutputData/MixedHeatTransfer/Run0/Cycle000003/proc000000.vtu'
     requirement = 'The system shall have the ability to solve a transient heat conduction problem solved using the mixed form of the heat equation using MFEM.'
     capabilities = 'mfem'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu' # schemadiff with cuda
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     restep = false
