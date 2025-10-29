@@ -126,7 +126,8 @@ TEST(MooseFunctorTest, testArgs)
 
   ElemInfo ei(elem.get());
   ElemInfo ni(neighbor.get());
-  FaceInfo fi(&ei, 1, 0);
+  libMesh::ElemSideBuilder side_builder;
+  FaceInfo fi(&ei, 1, 0, side_builder);
   fi.computeInternalCoefficients(&ni);
 
   QGauss qrule(1, CONSTANT);
