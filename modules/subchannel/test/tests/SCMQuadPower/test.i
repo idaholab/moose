@@ -43,12 +43,12 @@ P_out = 4.923e6 # Pa
   verbose_subchannel = true
   implicit = true
   segregated = false
-  friction_closure = 'Pang'
+  friction_closure = 'MATRA'
 []
 
 [SCMClosures]
-  [Pang]
-    type = SCMFrictionBoPang
+  [MATRA]
+    type = SCMFrictionMATRA
   []
 []
 

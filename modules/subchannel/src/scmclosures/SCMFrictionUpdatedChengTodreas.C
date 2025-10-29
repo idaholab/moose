@@ -15,6 +15,8 @@ InputParameters
 SCMFrictionUpdatedChengTodreas::validParams()
 {
   InputParameters params = SCMFrictionClosureBase::validParams();
+  params.addClassDescription(
+      "Class that models the axial friction factor using the updated Cheng Todreas correlations.");
   return params;
 }
 

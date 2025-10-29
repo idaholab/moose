@@ -13,15 +13,16 @@
 #include "QuadSubChannelMesh.h"
 
 /**
- * Class that calculates the friction factor based on the Bo Pang correlations
- * (Bo Pang. 2018). It is used for quad lattices.
+ * Class that calculates the friction factor based on the MATRA correlation
+ * (Numerical study of void drift in rod bundle with subchannel and CFD codes Bo Pang. 2018 KIT). It
+ * is used for quad lattices.
  */
-class SCMFrictionBoPang : public SCMFrictionClosureBase
+class SCMFrictionMATRA : public SCMFrictionClosureBase
 {
 public:
   static InputParameters validParams();
 
-  SCMFrictionBoPang(const InputParameters & parameters);
+  SCMFrictionMATRA(const InputParameters & parameters);
 
   virtual Real computeFrictionFactor(const FrictionStruct & friction_info) const override;
 

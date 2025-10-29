@@ -42,12 +42,12 @@ n_cells = 20
   compute_viscosity = true
   compute_power = true
   P_out = ${P_out}
-  friction_closure = 'Pang'
+  friction_closure = 'MATRA'
 []
 
 [SCMClosures]
-  [Pang]
-    type = SCMFrictionBoPang
+  [MATRA]
+    type = SCMFrictionMATRA
   []
 []
 

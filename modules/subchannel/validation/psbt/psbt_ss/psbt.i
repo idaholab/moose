@@ -93,12 +93,12 @@ P_out = 14.72e6 # Pa
   interpolation_scheme = exponential
   deformation = true # this flag allows the re-calculation of subchannel geometric parameters based on the dpin value
   # friction model
-  friction_closure = 'Pang'
+  friction_closure = 'MATRA'
 []
 
 [SCMClosures]
-  [Pang]
-    type = SCMFrictionBoPang
+  [MATRA]
+    type = SCMFrictionMATRA
   []
 []
 

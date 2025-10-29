@@ -66,12 +66,12 @@ length = 0.5
   verbose_subchannel = true
   implicit = true
   segregated = false
-  friction_closure = 'Pang'
+  friction_closure = 'MATRA'
 []
 
 [SCMClosures]
-  [Pang]
-    type = SCMFrictionBoPang
+  [MATRA]
+    type = SCMFrictionMATRA
   []
 []
 
