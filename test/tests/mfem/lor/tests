@@ -1,6 +1,7 @@
 [Tests]
   design = 'MFEMSolverBase.md'
   issues = '#30591'
+  parallel_scheduling = true
   [MFEMCurlCurlLOR]
     type = XMLDiff
     input = ../kernels/curlcurl.i
