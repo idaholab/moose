@@ -19,10 +19,10 @@ MFEMSumAux::validParams()
 {
   InputParameters params = MFEMAuxKernel::validParams();
   params.addClassDescription(
-      "Calculates the sum of two variables sharing an FE space, each optionally scaled by a real "
-      "constant, and stores the result in a third.");
+      "Calculates the sum of an arbitrary number of variables sharing an FE space, each "
+      "optionally scaled by a real constant, and stores the result in an auxiliary variable.");
   params.addRequiredParam<std::vector<VariableName>>("source_variables",
-                                                     "The names of MFEM variables to sum over");
+                                                     "The names of the MFEM variables to sum");
   params.addParam<std::vector<mfem::real_t>>(
       "scale_factors", "The factors to scale each MFEM variable by during summation");
   return params;
