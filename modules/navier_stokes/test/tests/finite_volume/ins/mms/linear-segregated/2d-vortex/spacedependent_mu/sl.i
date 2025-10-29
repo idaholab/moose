@@ -188,8 +188,8 @@ advected_interp_method = 'average'
 
 [Executioner]
   type = SIMPLE
-  momentum_l_abs_tol = 1e-14
-  pressure_l_abs_tol = 1e-14
+  momentum_l_abs_tol = 1e-10
+  pressure_l_abs_tol = 1e-10
   momentum_l_max_its = 30
   pressure_l_max_its = 30
   momentum_l_tol = 0.0
