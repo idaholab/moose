@@ -52,8 +52,8 @@ if [[ -n "$help" ]]; then
   echo "*************************************************************************************"
   echo ""
 
-  if [ -e "${LIBMESH_SRC_DIR}/configure" ]; then
-    ${LIBMESH_SRC_DIR} -h
+  if [ -x "${LIBMESH_SRC_DIR}/configure" ]; then
+    "${LIBMESH_SRC_DIR}/configure" -h
   fi
   exit 0
 fi

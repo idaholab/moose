@@ -90,7 +90,7 @@ function configure_petsc()
     EXTRA_CONFIGURE_OPTIONS+=("--with-hdf5-dir=${FOUND_HDF5_DIR}")
   # Otherwise, download it via PETSc and patch if on apple silicon
   else
-    EXTRA_CONFIGURE_OPTIONS+=("--download-hdf5=1" "--with-hdf5-fortran-bindings=0" "--download-hdf5-configure-arguments='--with-zlib'")
+    EXTRA_CONFIGURE_OPTIONS+=("--download-hdf5=1" "--with-hdf5-fortran-bindings=0" "--with-zlib")
     echo 'INFO: HDF5 library not detected, opting to download via PETSc...'
     if [ -n "$IS_APPLE_SILICON" ]; then
       echo 'INFO: Patching PETSc to support HDF5 download and installation on Apple Silicon...'
