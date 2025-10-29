@@ -34,7 +34,8 @@
     exodiff = 2d-transient-physics_out.e
     capabilities = 'method!=dbg'
     requirement = 'The system shall be able to use realistic fluid properties in a weakly compressible flow simulation and define the functor properties automatically within the shorthand syntax.'
-    rel_err = 7e-5
+    rel_err = 1e-5
+    abs_zero = 1e-6
     # The non-linear tolerance is actually fairly tight, but the variable values
     # are small at the no-slip boundary conditions, and this leads to absolute diffs of around 1e-15,
     # triggering the default relative tolerance error criterion

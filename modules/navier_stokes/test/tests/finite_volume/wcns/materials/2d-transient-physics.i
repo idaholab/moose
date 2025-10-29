@@ -33,7 +33,7 @@ inlet_v = 0.001
         dynamic_viscosity = 'mu'
         mu_rampdown = 'mu_rampdown'
 
-        initial_velocity = '${inlet_v} 1e-15 0'
+        initial_velocity = '${inlet_v} 0 0'
         initial_pressure = '${outlet_pressure}'
 
         inlet_boundaries = 'left'
