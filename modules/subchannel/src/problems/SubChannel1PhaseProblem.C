@@ -113,6 +113,15 @@ SubChannel1PhaseProblem::validParams()
 SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
   : ExternalProblem(params),
     PostprocessorInterface(this),
+    _pin_htc_correlation(getParam<MooseEnum>("pin_htc_correlation")),
+    _duct_htc_correlation(getParam<MooseEnum>("duct_htc_correlation")),
+    _nusselt_args(
+        /*Re*/ 1.0,
+        /*Pr*/ 1.0,
+        /*i_pin*/ std::numeric_limits<unsigned int>::max(), // sentinel (duct) default
+        /*iz*/ 0,
+        /*i_ch*/ 0,
+        /*htc_corr*/ _pin_htc_correlation),
     _subchannel_mesh(SCM::getMesh<SubChannelMesh>(_mesh)),
     _n_blocks(getParam<unsigned int>("n_blocks")),
     _Wij(declareRestartableData<libMesh::DenseMatrix<Real>>("Wij")),
@@ -134,8 +143,6 @@ SubChannel1PhaseProblem::SubChannel1PhaseProblem(const InputParameters & params)
     _dtol(getParam<PetscReal>("dtol")),
     _maxit(getParam<PetscInt>("maxit")),
     _interpolation_scheme(getParam<MooseEnum>("interpolation_scheme")),
-    _pin_htc_correlation(getParam<MooseEnum>("pin_htc_correlation")),
-    _duct_htc_correlation(getParam<MooseEnum>("duct_htc_correlation")),
     _gravity_direction(getParam<MooseEnum>("gravity")),
     _dir_grav(computeGravityDir(_gravity_direction)),
     _implicit_bool(getParam<bool>("implicit")),
@@ -386,10 +393,10 @@ SubChannel1PhaseProblem::computeNusseltNumber(const NusseltStruct & nusselt_args
   // Geometry Specific Parameters
   const auto pitch = _subchannel_mesh.getPitch();
   Real D;
-  bool valid_pin_indices = (nusselt_args.i_pin >= std::numeric_limits<unsigned int>::max() - 1 ||
-                            nusselt_args.iz <= std::numeric_limits<unsigned int>::max() - 1);
+  // Use sentinel i_pin == max() to denote duct; otherwise it's a pin
+  const bool is_duct = (nusselt_args.i_pin == std::numeric_limits<unsigned int>::max());
 
-  if (!valid_pin_indices) // this is for the pin temperature
+  if (!is_duct) // pin temperature path
   {
     const auto * pin_node = _subchannel_mesh.getPinNode(nusselt_args.i_pin, nusselt_args.iz);
     if ((*_Dpin_soln)(pin_node) > 0)
@@ -399,8 +406,10 @@ SubChannel1PhaseProblem::computeNusseltNumber(const NusseltStruct & nusselt_args
                  "The diameter of the pin is equal or smaller than zero, "
                  "please initialize the auxiliary variable Dpin.");
   }
-  else // this is for the duct temperature
+  else // duct temperature path
+  {
     D = _subchannel_mesh.getPinDiameter();
+  }
 
   const auto poD = pitch / D;
   auto subch_type = _subchannel_mesh.getSubchannelType(nusselt_args.i_ch);
@@ -2823,17 +2832,18 @@ SubChannel1PhaseProblem::externalSolve()
       if (_duct_htc_correlation == "kazimi-carelli")
         mooseError("'kazimi-carelli' is not yet supported for the 'duct_htc_correlation'.");
 
-      // Create nusselt number structure
-      NusseltStruct nusselt_struct;
-      nusselt_struct.Re = Re;
-      nusselt_struct.Pr = Pr;
-      nusselt_struct.i_pin =
-          std::numeric_limits<unsigned int>::max(); // don't care about this - large value
-      const auto channel_node = _subchannel_mesh.getChannelNodeFromDuct(dn);
-      const libMesh::Point & node_point = *channel_node;
-      nusselt_struct.iz = _subchannel_mesh.getZIndex(node_point);
-      nusselt_struct.i_ch = _subchannel_mesh.channelIndex(node_point);
-      nusselt_struct.htc_correlation = _duct_htc_correlation;
+      // Create nusselt number structure (consistent with pin case)
+      const libMesh::Point & node_point = *_subchannel_mesh.getChannelNodeFromDuct(dn);
+      const unsigned int iz = _subchannel_mesh.getZIndex(node_point);
+      const unsigned int i_ch = _subchannel_mesh.channelIndex(node_point);
+
+      NusseltStruct nusselt_struct(
+          Re,
+          Pr,
+          std::numeric_limits<unsigned int>::max(), // sentinel pin index for duct
+          iz,
+          i_ch,
+          _duct_htc_correlation);
 
       // Compute Nusselt number
       auto Nu = this->computeNusseltNumber(nusselt_struct);
