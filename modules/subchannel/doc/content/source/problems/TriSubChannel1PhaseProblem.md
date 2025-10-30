@@ -77,8 +77,8 @@ The modeling of each regime is explained below.
 The following relation is used depending on the subchannel type~\cite{Todreas}:
 
 \begin{equation}
-\text{Nu}_{\text{laminar}} = 
-\begin{cases} 
+\text{Nu}_{\text{laminar}} =
+\begin{cases}
 4.0 & \text{if subchannel is CENTER} \\
 3.7 & \text{if subchannel is EDGE} \\
 3.3 & \text{if subchannel is CORNER}

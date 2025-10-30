@@ -58,7 +58,7 @@ SubChannel1PhaseProblem::validParams()
   // Enumerations
   MooseEnum schemes("upwind downwind central_difference exponential", "central_difference");
   MooseEnum gravity_direction("counter_flow co_flow none", "counter_flow");
-  MooseEnum htc_correlations("dittus-boelter gnielinski kazimi-carelli", "dittus-boelter");
+  MooseEnum htc_correlations("dittus-boelter gnielinski kazimi-carelli hausen", "dittus-boelter");
 
   // Inputs
   InputParameters params = ExternalProblem::validParams();
@@ -388,7 +388,7 @@ SubChannel1PhaseProblem::computeNusseltNumber(const NusseltStruct & nusselt_args
   // Correlation Specific Parameters
   const auto htc_correlation = nusselt_args.htc_correlation;
   const auto Re = nusselt_args.Re;
-  const auto Pr = nusselt_args.Pr;
+  auto Pr = nusselt_args.Pr;
 
   // Geometry Specific Parameters
   const auto pitch = _subchannel_mesh.getPitch();
@@ -473,6 +473,9 @@ SubChannel1PhaseProblem::computeNusseltNumber(const NusseltStruct & nusselt_args
       friction_args.w_perim = (*_w_perim_soln)(node);
       Real f_darcy = computeFrictionFactor(friction_args) / 8.0;
 
+      /// Pr -> Pr + 0.01. We start flattening out the Nusselt profile in the correlation,
+      /// which is what we should see in practice, i.e., for very low Pr numbers the heat exchange
+      /// will be dominated by conduction and Nu profile should be flat.
       const auto NuT = f_darcy * (Re - 1e3) * (Pr + 0.01) /
                        (1 + 12.7 * std::sqrt(f_darcy) * (std::pow(Pr + 0.01, 2. / 3.) - 1.));
       return blended_Nu(NuT);
