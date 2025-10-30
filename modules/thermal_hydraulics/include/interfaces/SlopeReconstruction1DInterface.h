@@ -265,6 +265,8 @@ SlopeReconstruction1DInterface<is_ad>::getElementSlopes(
   mooseAssert(x_neighbor.size() == W_neighbor.size(),
               "Neighbor positions size must equal neighbor solutions size.");
 
+  using std::abs, std::min, std::max;
+
   // get the number of slopes to be stored
   const unsigned int n_slopes = W_elem.size();
 
@@ -323,7 +325,7 @@ SlopeReconstruction1DInterface<is_ad>::getElementSlopes(
       {
         if ((slopes_one_sided[0][m] * slopes_one_sided[1][m]) > 0.0)
         {
-          if (std::abs(slopes_one_sided[0][m]) < std::abs(slopes_one_sided[1][m]))
+          if (abs(slopes_one_sided[0][m]) < abs(slopes_one_sided[1][m]))
             slopes_limited[m] = slopes_one_sided[0][m];
           else
             slopes_limited[m] = slopes_one_sided[1][m];
@@ -337,12 +339,12 @@ SlopeReconstruction1DInterface<is_ad>::getElementSlopes(
       for (unsigned int m = 0; m < n_slopes; m++)
       {
         if (slopes_central[m] > 0.0 && slopes_one_sided[0][m] > 0.0 && slopes_one_sided[1][m] > 0.0)
-          slopes_limited[m] = std::min(
-              slopes_central[m], 2.0 * std::min(slopes_one_sided[0][m], slopes_one_sided[1][m]));
+          slopes_limited[m] =
+              min(slopes_central[m], 2.0 * min(slopes_one_sided[0][m], slopes_one_sided[1][m]));
         else if (slopes_central[m] < 0.0 && slopes_one_sided[0][m] < 0.0 &&
                  slopes_one_sided[1][m] < 0.0)
-          slopes_limited[m] = std::max(
-              slopes_central[m], 2.0 * std::max(slopes_one_sided[0][m], slopes_one_sided[1][m]));
+          slopes_limited[m] =
+              max(slopes_central[m], 2.0 * max(slopes_one_sided[0][m], slopes_one_sided[1][m]));
       }
       break;
 
@@ -356,21 +358,21 @@ SlopeReconstruction1DInterface<is_ad>::getElementSlopes(
 
         // calculate slope1 with minmod
         if (slopes_one_sided[1][m] > 0.0 && slopes_one_sided[0][m] > 0.0)
-          slope1 = std::min(slopes_one_sided[1][m], 2.0 * slopes_one_sided[0][m]);
+          slope1 = min(slopes_one_sided[1][m], 2.0 * slopes_one_sided[0][m]);
         else if (slopes_one_sided[1][m] < 0.0 && slopes_one_sided[0][m] < 0.0)
-          slope1 = std::max(slopes_one_sided[1][m], 2.0 * slopes_one_sided[0][m]);
+          slope1 = max(slopes_one_sided[1][m], 2.0 * slopes_one_sided[0][m]);
 
         // calculate slope2 with minmod
         if (slopes_one_sided[1][m] > 0.0 && slopes_one_sided[0][m] > 0.0)
-          slope2 = std::min(2.0 * slopes_one_sided[1][m], slopes_one_sided[0][m]);
+          slope2 = min(2.0 * slopes_one_sided[1][m], slopes_one_sided[0][m]);
         else if (slopes_one_sided[1][m] < 0.0 && slopes_one_sided[0][m] < 0.0)
-          slope2 = std::max(2.0 * slopes_one_sided[1][m], slopes_one_sided[0][m]);
+          slope2 = max(2.0 * slopes_one_sided[1][m], slopes_one_sided[0][m]);
 
         // calculate slope with maxmod
         if (slope1 > 0.0 && slope2 > 0.0)
-          slopes_limited[m] = std::max(slope1, slope2);
+          slopes_limited[m] = max(slope1, slope2);
         else if (slope1 < 0.0 && slope2 < 0.0)
-          slopes_limited[m] = std::min(slope1, slope2);
+          slopes_limited[m] = min(slope1, slope2);
       }
       break;
 

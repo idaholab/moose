@@ -22,16 +22,6 @@
 #include "VectorCompositeFunctor.h"
 #include "FVElementalKernel.h"
 
-#include "libmesh/mesh_base.h"
-#include "libmesh/elem_range.h"
-#include "libmesh/parallel_algebra.h"
-#include "libmesh/remote_elem.h"
-#include "metaphysicl/dualsemidynamicsparsenumberarray.h"
-#include "metaphysicl/parallel_dualnumber.h"
-#include "metaphysicl/parallel_dynamic_std_array_wrapper.h"
-#include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
-#include "timpi/parallel_sync.h"
-
 using namespace libMesh;
 
 InputParameters

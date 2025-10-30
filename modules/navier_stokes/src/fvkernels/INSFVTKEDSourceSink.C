@@ -86,6 +86,8 @@ INSFVTKEDSourceSink::initialSetup()
 ADReal
 INSFVTKEDSourceSink::computeQpResidual()
 {
+  using std::max, std::sqrt, std::pow, std::min;
+
   ADReal residual = 0.0;
   ADReal production = 0.0;
   ADReal destruction = 0.0;
@@ -96,7 +98,7 @@ INSFVTKEDSourceSink::computeQpResidual()
   const auto mu = _mu(elem_arg, state);
   const auto rho = _rho(elem_arg, state);
   const auto TKE_old =
-      _newton_solve ? std::max(_k(elem_arg, old_state), 1e-10) : _k(elem_arg, old_state);
+      _newton_solve ? max(_k(elem_arg, old_state), 1e-10) : _k(elem_arg, old_state);
   ADReal y_plus;
 
   if (_wall_bounded.find(_current_elem) != _wall_bounded.end())
@@ -123,14 +125,14 @@ INSFVTKEDSourceSink::computeQpResidual()
       mooseAssert(distance > 0, "Should be at a non-zero distance");
 
       if (_wall_treatment == NS::WallTreatmentEnum::NEQ) // Non-equilibrium / Non-iterative
-        y_plus = distance * std::sqrt(std::sqrt(_C_mu) * TKE_old) * rho / mu;
+        y_plus = distance * sqrt(sqrt(_C_mu) * TKE_old) * rho / mu;
       else
       {
         // Equilibrium / Iterative
         const auto parallel_speed = NS::computeSpeed<ADReal>(
             velocity - velocity * face_info_vec[i]->normal() * face_info_vec[i]->normal());
 
-        y_plus = NS::findyPlus<ADReal>(mu, rho, std::max(parallel_speed, 1e-10), distance);
+        y_plus = NS::findyPlus<ADReal>(mu, rho, max(parallel_speed, 1e-10), distance);
       }
 
       y_plus_vec.push_back(y_plus);
@@ -153,7 +155,7 @@ INSFVTKEDSourceSink::computeQpResidual()
                        Utility::pow<2>(distance_vec[i]) / tot_weight;
       }
       else
-        destruction += std::pow(_C_mu, 0.75) * std::pow(TKE_old, 1.5) /
+        destruction += pow(_C_mu, 0.75) * pow(TKE_old, 1.5) /
                        (NS::von_karman_constant * distance_vec[i]) / tot_weight;
     }
 
@@ -219,10 +221,10 @@ INSFVTKEDSourceSink::computeQpResidual()
     ADReal production_k = _mu_t(elem_arg, state) * symmetric_strain_tensor_sq_norm;
     // Compute production limiter (needed for flows with stagnation zones)
     const auto eps_old =
-        _newton_solve ? std::max(_var(elem_arg, old_state), 1e-10) : _var(elem_arg, old_state);
+        _newton_solve ? max(_var(elem_arg, old_state), 1e-10) : _var(elem_arg, old_state);
     const ADReal production_limit = _C_pl * rho * eps_old;
     // Apply production limiter
-    production_k = std::min(production_k, production_limit);
+    production_k = min(production_k, production_limit);
 
     const auto time_scale = raw_value(TKE_old) / raw_value(eps_old);
     production = _C1_eps * production_k / time_scale;

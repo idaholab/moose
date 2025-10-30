@@ -55,6 +55,8 @@ GapConductanceStatefulConstraint::GapConductanceStatefulConstraint(
 ADReal
 GapConductanceStatefulConstraint::computeQpResidual(Moose::MortarType mortar_type)
 {
+  using std::max, std::abs;
+
   switch (mortar_type)
   {
     case Moose::MortarType::Primary:
@@ -76,9 +78,8 @@ GapConductanceStatefulConstraint::computeQpResidual(Moose::MortarType mortar_typ
           ad_phys_points_secondary(i).derivatives() = (*_disp_secondary[i])[_qp].derivatives();
         }
 
-      auto l =
-          std::max((ad_phys_points_primary - ad_phys_points_secondary) * _normals[_qp], _min_gap);
-      return (_lambda[_qp] - (_k + std::abs(_stress_old[_qp] + _stress_neighbor_old[_qp])) *
+      auto l = max((ad_phys_points_primary - ad_phys_points_secondary) * _normals[_qp], _min_gap);
+      return (_lambda[_qp] - (_k + abs(_stress_old[_qp] + _stress_neighbor_old[_qp])) *
                                  (_u_primary[_qp] - _u_secondary[_qp]) / l) *
              _test[_i][_qp];
     }

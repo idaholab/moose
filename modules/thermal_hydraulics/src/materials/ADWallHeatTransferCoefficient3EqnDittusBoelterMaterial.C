@@ -52,10 +52,12 @@ ADWallHeatTransferCoefficient3EqnDittusBoelterMaterial::
 void
 ADWallHeatTransferCoefficient3EqnDittusBoelterMaterial::computeQpProperties()
 {
+  using std::max, std::pow;
+
   ADReal Pr = THM::Prandtl(_cp[_qp], _mu[_qp], _k[_qp]);
-  ADReal Re = std::max(1.0, THM::Reynolds(1., _rho[_qp], _vel[_qp], _D_h[_qp], _mu[_qp]));
+  ADReal Re = max(1.0, THM::Reynolds(1., _rho[_qp], _vel[_qp], _D_h[_qp], _mu[_qp]));
   ADReal n = (_T[_qp] < _T_wall[_qp]) ? 0.4 : 0.3;
-  ADReal Nu = 0.023 * std::pow(Re, 4. / 5.) * std::pow(Pr, n);
+  ADReal Nu = 0.023 * pow(Re, 4. / 5.) * pow(Pr, n);
 
   _Hw[_qp] = THM::wallHeatTransferCoefficient(Nu, _k[_qp], _D_h[_qp]);
 }

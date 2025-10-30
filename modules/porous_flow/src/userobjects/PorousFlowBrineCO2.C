@@ -400,6 +400,8 @@ PorousFlowBrineCO2::fugacityCoefficientsLowTemp(const ADReal & pressure,
                                                 ADReal & fco2,
                                                 ADReal & fh2o) const
 {
+  using std::log, std::exp, std::pow;
+
   if (temperature.value() > 373.15)
     mooseError(name(),
                ": fugacityCoefficientsLowTemp() is not valid for T > 373.15K. Use "
@@ -417,21 +419,21 @@ PorousFlowBrineCO2::fugacityCoefficientsLowTemp(const ADReal & pressure,
   const Real aCO2H2O = 7.89e7;
   const Real bH2O = 18.18;
 
-  const ADReal t15 = std::pow(temperature, 1.5);
+  const ADReal t15 = pow(temperature, 1.5);
 
   // The fugacity coefficients for H2O and CO2
   auto lnPhi = [V, aCO2, bCO2, t15, this](ADReal a, ADReal b)
   {
-    return std::log(V / (V - bCO2)) + b / (V - bCO2) -
-           2.0 * a / (_Rbar * t15 * bCO2) * std::log((V + bCO2) / V) +
-           aCO2 * b / (_Rbar * t15 * bCO2 * bCO2) * (std::log((V + bCO2) / V) - bCO2 / (V + bCO2));
+    return log(V / (V - bCO2)) + b / (V - bCO2) -
+           2.0 * a / (_Rbar * t15 * bCO2) * log((V + bCO2) / V) +
+           aCO2 * b / (_Rbar * t15 * bCO2 * bCO2) * (log((V + bCO2) / V) - bCO2 / (V + bCO2));
   };
 
-  const ADReal lnPhiH2O = lnPhi(aCO2H2O, bH2O) - std::log(pbar * V / (_Rbar * temperature));
-  const ADReal lnPhiCO2 = lnPhi(aCO2, bCO2) - std::log(pbar * V / (_Rbar * temperature));
+  const ADReal lnPhiH2O = lnPhi(aCO2H2O, bH2O) - log(pbar * V / (_Rbar * temperature));
+  const ADReal lnPhiCO2 = lnPhi(aCO2, bCO2) - log(pbar * V / (_Rbar * temperature));
 
-  fh2o = std::exp(lnPhiH2O);
-  fco2 = std::exp(lnPhiCO2);
+  fh2o = exp(lnPhiH2O);
+  fco2 = exp(lnPhiCO2);
 }
 
 void
@@ -459,6 +461,8 @@ PorousFlowBrineCO2::fugacityCoefficientH2OHighTemp(const ADReal & pressure,
                                                    const ADReal & xco2,
                                                    const ADReal & yh2o) const
 {
+  using std::sqrt, std::pow, std::log, std::exp;
+
   // Need pressure in bar
   const ADReal pbar = pressure * 1.0e-5;
   // Molar volume in cm^3/mol
@@ -477,25 +481,25 @@ PorousFlowBrineCO2::fugacityCoefficientH2OHighTemp(const ADReal & pressure,
   const ADReal kH2OCO2 = KH2OCO2 * yh2o + KCO2H2O * yco2;
   const ADReal kCO2H2O = KCO2H2O * yh2o + KH2OCO2 * yco2;
 
-  const ADReal aH2OCO2 = std::sqrt(aCO2 * aH2O) * (1.0 - kH2OCO2);
-  const ADReal aCO2H2O = std::sqrt(aCO2 * aH2O) * (1.0 - kCO2H2O);
+  const ADReal aH2OCO2 = sqrt(aCO2 * aH2O) * (1.0 - kH2OCO2);
+  const ADReal aCO2H2O = sqrt(aCO2 * aH2O) * (1.0 - kCO2H2O);
 
   const ADReal amix = yh2o * yh2o * aH2O + yh2o * yco2 * (aH2OCO2 + aCO2H2O) + yco2 * yco2 * aCO2;
   const ADReal bmix = yh2o * bH2O + yco2 * bCO2;
 
-  const ADReal t15 = std::pow(temperature, 1.5);
+  const ADReal t15 = pow(temperature, 1.5);
 
   ADReal lnPhiH2O = bH2O / bmix * (pbar * V / (_Rbar * temperature) - 1.0) -
-                    std::log(pbar * (V - bmix) / (_Rbar * temperature));
+                    log(pbar * (V - bmix) / (_Rbar * temperature));
   ADReal term3 = (2.0 * yh2o * aH2O + yco2 * (aH2OCO2 + aCO2H2O) -
-                  yh2o * yco2 * std::sqrt(aH2O * aCO2) * (kH2OCO2 - kCO2H2O) * (yh2o - yco2) +
-                  xh2o * xco2 * std::sqrt(aH2O * aCO2) * (kH2OCO2 - kCO2H2O)) /
+                  yh2o * yco2 * sqrt(aH2O * aCO2) * (kH2OCO2 - kCO2H2O) * (yh2o - yco2) +
+                  xh2o * xco2 * sqrt(aH2O * aCO2) * (kH2OCO2 - kCO2H2O)) /
                  amix;
   term3 -= bH2O / bmix;
-  term3 *= amix / (bmix * _Rbar * t15) * std::log(V / (V + bmix));
+  term3 *= amix / (bmix * _Rbar * t15) * log(V / (V + bmix));
   lnPhiH2O += term3;
 
-  return std::exp(lnPhiH2O);
+  return exp(lnPhiH2O);
 }
 
 ADReal
@@ -505,6 +509,8 @@ PorousFlowBrineCO2::fugacityCoefficientCO2HighTemp(const ADReal & pressure,
                                                    const ADReal & xco2,
                                                    const ADReal & yh2o) const
 {
+  using std::sqrt, std::pow, std::log, std::exp;
+
   // Need pressure in bar
   const ADReal pbar = pressure * 1.0e-5;
   // Molar volume in cm^3/mol
@@ -523,30 +529,32 @@ PorousFlowBrineCO2::fugacityCoefficientCO2HighTemp(const ADReal & pressure,
   const ADReal kH2OCO2 = KH2OCO2 * yh2o + KCO2H2O * yco2;
   const ADReal kCO2H2O = KCO2H2O * yh2o + KH2OCO2 * yco2;
 
-  const ADReal aH2OCO2 = std::sqrt(aCO2 * aH2O) * (1.0 - kH2OCO2);
-  const ADReal aCO2H2O = std::sqrt(aCO2 * aH2O) * (1.0 - kCO2H2O);
+  const ADReal aH2OCO2 = sqrt(aCO2 * aH2O) * (1.0 - kH2OCO2);
+  const ADReal aCO2H2O = sqrt(aCO2 * aH2O) * (1.0 - kCO2H2O);
 
   const ADReal amix = yh2o * yh2o * aH2O + yh2o * yco2 * (aH2OCO2 + aCO2H2O) + yco2 * yco2 * aCO2;
   const ADReal bmix = yh2o * bH2O + yco2 * bCO2;
 
-  const ADReal t15 = std::pow(temperature, 1.5);
+  const ADReal t15 = pow(temperature, 1.5);
 
   ADReal lnPhiCO2 = bCO2 / bmix * (pbar * V / (_Rbar * temperature) - 1.0) -
-                    std::log(pbar * (V - bmix) / (_Rbar * temperature));
+                    log(pbar * (V - bmix) / (_Rbar * temperature));
 
   ADReal term3 = (2.0 * yco2 * aCO2 + yh2o * (aH2OCO2 + aCO2H2O) -
-                  yh2o * yco2 * std::sqrt(aH2O * aCO2) * (kH2OCO2 - kCO2H2O) * (yh2o - yco2) +
-                  xh2o * xco2 * std::sqrt(aH2O * aCO2) * (kCO2H2O - kH2OCO2)) /
+                  yh2o * yco2 * sqrt(aH2O * aCO2) * (kH2OCO2 - kCO2H2O) * (yh2o - yco2) +
+                  xh2o * xco2 * sqrt(aH2O * aCO2) * (kCO2H2O - kH2OCO2)) /
                  amix;
 
-  lnPhiCO2 += (term3 - bCO2 / bmix) * amix / (bmix * _Rbar * t15) * std::log(V / (V + bmix));
+  lnPhiCO2 += (term3 - bCO2 / bmix) * amix / (bmix * _Rbar * t15) * log(V / (V + bmix));
 
-  return std::exp(lnPhiCO2);
+  return exp(lnPhiCO2);
 }
 
 ADReal
 PorousFlowBrineCO2::activityCoefficientH2O(const ADReal & temperature, const ADReal & xco2) const
 {
+  using std::exp;
+
   if (temperature.value() <= 373.15)
     return 1.0;
   else
@@ -555,13 +563,15 @@ PorousFlowBrineCO2::activityCoefficientH2O(const ADReal & temperature, const ADR
     const ADReal xh2o = 1.0 - xco2;
     const ADReal Am = -3.084e-2 * Tref + 1.927e-5 * Tref * Tref;
 
-    return std::exp((Am - 2.0 * Am * xh2o) * xco2 * xco2);
+    return exp((Am - 2.0 * Am * xh2o) * xco2 * xco2);
   }
 }
 
 ADReal
 PorousFlowBrineCO2::activityCoefficientCO2(const ADReal & temperature, const ADReal & xco2) const
 {
+  using std::exp;
+
   if (temperature.value() <= 373.15)
     return 1.0;
   else
@@ -570,7 +580,7 @@ PorousFlowBrineCO2::activityCoefficientCO2(const ADReal & temperature, const ADR
     const ADReal xh2o = 1.0 - xco2;
     const ADReal Am = -3.084e-2 * Tref + 1.927e-5 * Tref * Tref;
 
-    return std::exp(2.0 * Am * xco2 * xh2o * xh2o);
+    return exp(2.0 * Am * xco2 * xh2o * xh2o);
   }
 }
 
@@ -579,6 +589,8 @@ PorousFlowBrineCO2::activityCoefficient(const ADReal & pressure,
                                         const ADReal & temperature,
                                         const ADReal & Xnacl) const
 {
+  using std::log, std::exp;
+
   // Need pressure in bar
   const ADReal pbar = pressure * 1.0e-5;
   // Need NaCl molality (mol/kg)
@@ -587,19 +599,21 @@ PorousFlowBrineCO2::activityCoefficient(const ADReal & pressure,
   const ADReal lambda = -0.411370585 + 6.07632013e-4 * temperature + 97.5347708 / temperature -
                         0.0237622469 * pbar / temperature +
                         0.0170656236 * pbar / (630.0 - temperature) +
-                        1.41335834e-5 * temperature * std::log(pbar);
+                        1.41335834e-5 * temperature * log(pbar);
 
   const ADReal xi = 3.36389723e-4 - 1.9829898e-5 * temperature +
                     2.12220830e-3 * pbar / temperature -
                     5.24873303e-3 * pbar / (630.0 - temperature);
 
-  return std::exp(2.0 * lambda * mnacl + xi * mnacl * mnacl);
+  return exp(2.0 * lambda * mnacl + xi * mnacl * mnacl);
 }
 
 ADReal
 PorousFlowBrineCO2::activityCoefficientHighTemp(const ADReal & temperature,
                                                 const ADReal & Xnacl) const
 {
+  using std::exp;
+
   // Need NaCl molality (mol/kg)
   const ADReal mnacl = Xnacl / (1.0 - Xnacl) / _Mnacl;
 
@@ -609,12 +623,14 @@ PorousFlowBrineCO2::activityCoefficientHighTemp(const ADReal & temperature,
   const ADReal lambda = 2.217e-4 * temperature + 1.074 / temperature + 2648.0 / T2;
   const ADReal xi = 1.3e-5 * temperature - 20.12 / temperature + 5259.0 / T2;
 
-  return (1.0 - mnacl / _invMh2o) * std::exp(2.0 * lambda * mnacl + xi * mnacl * mnacl);
+  return (1.0 - mnacl / _invMh2o) * exp(2.0 * lambda * mnacl + xi * mnacl * mnacl);
 }
 
 ADReal
 PorousFlowBrineCO2::equilibriumConstantH2O(const ADReal & temperature) const
 {
+  using std::pow;
+
   // Uses temperature in Celsius
   const ADReal Tc = temperature - _T_c2k;
   const ADReal Tc2 = Tc * Tc;
@@ -636,12 +652,14 @@ PorousFlowBrineCO2::equilibriumConstantH2O(const ADReal & temperature) const
   else // 109 <= Tc <= 300
     logK0H2O = -2.1077 + 2.8127e-2 * Tc - 8.4298e-5 * Tc2 + 1.4969e-7 * Tc3 - 1.1812e-10 * Tc4;
 
-  return std::pow(10.0, logK0H2O);
+  return pow(10.0, logK0H2O);
 }
 
 ADReal
 PorousFlowBrineCO2::equilibriumConstantCO2(const ADReal & temperature) const
 {
+  using std::pow;
+
   // Uses temperature in Celsius
   const ADReal Tc = temperature - _T_c2k;
   const ADReal Tc2 = Tc * Tc;
@@ -662,7 +680,7 @@ PorousFlowBrineCO2::equilibriumConstantCO2(const ADReal & temperature) const
   else // 109 <= Tc <= 300
     logK0CO2 = 1.668 + 3.992e-3 * Tc - 1.156e-5 * Tc2 + 1.593e-9 * Tc3;
 
-  return std::pow(10.0, logK0CO2);
+  return pow(10.0, logK0CO2);
 }
 
 void
@@ -831,6 +849,8 @@ PorousFlowBrineCO2::funcABLowTemp(const ADReal & pressure,
                                   ADReal & A,
                                   ADReal & B) const
 {
+  using std::exp;
+
   if (temperature.value() > 373.15)
     mooseError(name(),
                ": funcABLowTemp() is not valid for T > 373.15K. Use funcABHighTemp() instead");
@@ -854,8 +874,8 @@ PorousFlowBrineCO2::funcABLowTemp(const ADReal & pressure,
   ADReal phiH2O, phiCO2;
   fugacityCoefficientsLowTemp(pressure, temperature, co2_density, phiCO2, phiH2O);
 
-  A = K0H2O / (phiH2O * pbar) * std::exp(delta_pbar * vH2O / Rt);
-  B = phiCO2 * pbar / (_invMh2o * K0CO2) * std::exp(-delta_pbar * vCO2 / Rt);
+  A = K0H2O / (phiH2O * pbar) * exp(delta_pbar * vH2O / Rt);
+  B = phiCO2 * pbar / (_invMh2o * K0CO2) * exp(-delta_pbar * vCO2 / Rt);
 }
 
 void
@@ -868,6 +888,8 @@ PorousFlowBrineCO2::funcABHighTemp(Real pressure,
                                    Real & A,
                                    Real & B) const
 {
+  using std::exp;
+
   if (temperature <= 373.15)
     mooseError(name(),
                ": funcABHighTemp() is not valid for T <= 373.15K. Use funcABLowTemp() instead");
@@ -911,9 +933,8 @@ PorousFlowBrineCO2::funcABHighTemp(Real pressure,
   const ADReal X = Xnacl;
   const Real gamma = activityCoefficientHighTemp(T, X).value();
 
-  A = K0H2O * gammaH2O / (phiH2O.value() * pbar) * std::exp(delta_pbar * vH2O / Rt);
-  B = phiCO2.value() * pbar / (_invMh2o * K0CO2 * gamma * gammaCO2) *
-      std::exp(-delta_pbar * vCO2 / Rt);
+  A = K0H2O * gammaH2O / (phiH2O.value() * pbar) * exp(delta_pbar * vH2O / Rt);
+  B = phiCO2.value() * pbar / (_invMh2o * K0CO2 * gamma * gammaCO2) * exp(-delta_pbar * vCO2 / Rt);
 }
 
 void
@@ -1075,6 +1096,8 @@ PorousFlowBrineCO2::totalMassFraction(
 ADReal
 PorousFlowBrineCO2::henryConstant(const ADReal & temperature, const ADReal & Xnacl) const
 {
+  using std::pow;
+
   // Henry's constant for dissolution in water
   const ADReal Kh_h2o = _brine_fp.henryConstant(temperature, _co2_henry);
 
@@ -1086,13 +1109,13 @@ PorousFlowBrineCO2::henryConstant(const ADReal & temperature, const ADReal & Xna
 
   ADReal kb = 0.0;
   for (unsigned int i = 0; i < b.size(); ++i)
-    kb += b[i] * std::pow(Tc, i);
+    kb += b[i] * pow(Tc, i);
 
   // Need salt mass fraction in molality
   const ADReal xmol = Xnacl / (1.0 - Xnacl) / _Mnacl;
 
   // Henry's constant and its derivative wrt temperature and salt mass fraction
-  return Kh_h2o * std::pow(10.0, xmol * kb);
+  return Kh_h2o * pow(10.0, xmol * kb);
 }
 
 ADReal

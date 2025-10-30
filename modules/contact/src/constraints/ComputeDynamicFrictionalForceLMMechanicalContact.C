@@ -14,9 +14,14 @@
 #include "MortarContactUtils.h"
 #include "AutomaticMortarGeneration.h"
 
+#include "metaphysicl/metaphysicl_version.h"
 #include "metaphysicl/dualsemidynamicsparsenumberarray.h"
 #include "metaphysicl/parallel_dualnumber.h"
+#if METAPHYSICL_MAJOR_VERSION < 2
 #include "metaphysicl/parallel_dynamic_std_array_wrapper.h"
+#else
+#include "metaphysicl/parallel_dynamic_array_wrapper.h"
+#endif
 #include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
 #include "timpi/parallel_sync.h"
 

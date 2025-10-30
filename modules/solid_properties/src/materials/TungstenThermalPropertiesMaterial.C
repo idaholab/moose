@@ -57,6 +57,8 @@ template <bool is_ad>
 void
 TungstenThermalPropertiesMaterialTempl<is_ad>::computeQpProperties()
 {
+  using std::pow;
+
   if (_temperature[_qp] < 5 || _temperature[_qp] > 3600)
     flagInvalidSolution("The temperature is out of bounds to calculate tungsten density. "
                         "Temperature has to be between 5 K and 3600 K.");
@@ -72,7 +74,7 @@ TungstenThermalPropertiesMaterialTempl<is_ad>::computeQpProperties()
   const auto temperature_scaled = _temperature[_qp] / 1000;
 
   _k[_qp] = (_temperature[_qp] < 55)
-                ? _kA0 * std::pow(temperature_scaled, 8.740e-01) /
+                ? _kA0 * pow(temperature_scaled, 8.740e-01) /
                       (1 + _kA1 * temperature_scaled + _kA2 * Utility::pow<2>(temperature_scaled) +
                        _kA3 * Utility::pow<3>(temperature_scaled))
                 : (_kB0 + _kB1 * temperature_scaled + _kB2 * Utility::pow<2>(temperature_scaled) +
@@ -81,7 +83,7 @@ TungstenThermalPropertiesMaterialTempl<is_ad>::computeQpProperties()
 
   _c_p[_qp] =
       (_temperature[_qp] <= 293)
-          ? _cA0 * std::pow(temperature_scaled, 3.030) /
+          ? _cA0 * pow(temperature_scaled, 3.030) /
                 (1 + _cA1 * temperature_scaled + _cA2 * Utility::pow<2>(temperature_scaled) +
                  _cA3 * Utility::pow<3>(temperature_scaled))
           : _cB0 + _cB1 * temperature_scaled + _cB2 * Utility::pow<2>(temperature_scaled) +

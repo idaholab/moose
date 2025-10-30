@@ -74,6 +74,8 @@ GeneralFluidProps::GeneralFluidProps(const InputParameters & parameters)
 void
 GeneralFluidProps::computeQpProperties()
 {
+  using std::max;
+
   auto raw_pressure = MetaPhysicL::raw_value(_pressure[_qp]);
   auto raw_T_fluid = MetaPhysicL::raw_value(_T_fluid[_qp]);
 
@@ -92,7 +94,7 @@ GeneralFluidProps::computeQpProperties()
 
   static constexpr Real small_number = 1e-8;
 
-  _Pr[_qp] = HeatTransferUtils::prandtl(_cp[_qp], _mu[_qp], std::max(_k[_qp], small_number));
+  _Pr[_qp] = HeatTransferUtils::prandtl(_cp[_qp], _mu[_qp], max(_k[_qp], small_number));
   _dPr_dp[_qp] = NS::prandtlPropertyDerivative(MetaPhysicL::raw_value(_mu[_qp]),
                                                MetaPhysicL::raw_value(_cp[_qp]),
                                                MetaPhysicL::raw_value(_k[_qp]),
@@ -109,9 +111,9 @@ GeneralFluidProps::computeQpProperties()
   // (pore / particle) Reynolds number based on superficial velocity and
   // characteristic length. Only call Reynolds() one time to compute all three so that
   // we don't redundantly check that viscosity is not too close to zero.
-  _Re[_qp] = std::max(HeatTransferUtils::reynolds(
-                          _rho[_qp], _eps[_qp] * _speed[_qp], _d, std::max(_mu[_qp], small_number)),
-                      1.0);
+  _Re[_qp] = max(HeatTransferUtils::reynolds(
+                     _rho[_qp], _eps[_qp] * _speed[_qp], _d, max(_mu[_qp], small_number)),
+                 1.0);
   _dRe_dp[_qp] = NS::reynoldsPropertyDerivative(MetaPhysicL::raw_value(_Re[_qp]),
                                                 MetaPhysicL::raw_value(_rho[_qp]),
                                                 MetaPhysicL::raw_value(_mu[_qp]),
@@ -124,7 +126,7 @@ GeneralFluidProps::computeQpProperties()
                                                 _dmu_dT[_qp]);
 
   // (hydraulic) Reynolds number
-  _Re_h[_qp] = _Re[_qp] / std::max(1 - _eps[_qp], small_number);
+  _Re_h[_qp] = _Re[_qp] / max(1 - _eps[_qp], small_number);
 
   // (interstitial) Reynolds number
   _Re_i[_qp] = _Re[_qp] / _eps[_qp];
