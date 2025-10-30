@@ -67,25 +67,26 @@ protected:
 
   /**
    * @brief Add a hexagonal lattice of concentric rings
+   *
    * @param name unique lattice name
    * @param num_rings number of concentric rings around the center (>=1)
    * @param pitch  flat‐to‐flat distance between adjacent centers
+   * @return reference to new hexagonal lattice
    */
-  CSGLattice &
-  addHexagonalLattice(const std::string & name, int num_rings, Real pitch, std::string orientation);
+  CSGLattice & addHexagonalLattice(const std::string & name, int num_rings, Real pitch);
 
   /**
-   * @brief add a Cartesian lattice whose layout is defined by the set of universes
+   * @brief add a hexagonal lattice whose layout is defined by the set of universes. Universes
+   * should be arranged by rows and correspond to a hexagonal lattice with x-orientation.
    *
    * @param name unique name identifier of the lattice
    * @param pitch flat-to-flat size of the lattice elements
    * @param universes list of list of universes that define the lattice layout
-   * @return reference to new Cartesian lattice
+   * @return reference to new hexagonal lattice
    */
   CSGLattice & addHexagonalLattice(
       const std::string & name,
       const Real pitch,
-      std::string orientation,
       std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes);
 
   /**

@@ -264,7 +264,6 @@ const CSGLattice &
 CSGBase::createHexagonalLattice(
     const std::string & name,
     const Real pitch,
-    std::string orientation,
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes)
 {
   // make sure all universes are a part of this base instance
@@ -277,7 +276,7 @@ CSGBase::createHexagonalLattice(
                    " is not in the CSGBase instance.");
     }
   }
-  auto & lattice = _lattice_list.addHexagonalLattice(name, pitch, orientation, universes);
+  auto & lattice = _lattice_list.addHexagonalLattice(name, pitch, universes);
   return lattice;
 }
 
