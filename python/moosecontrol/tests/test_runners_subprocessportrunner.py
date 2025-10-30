@@ -16,18 +16,12 @@ from time import sleep
 from unittest.mock import patch
 
 import pytest
-from common import (
-    BASE_INPUT,
-    LIVE_BASERUNNER_KWARGS,
-    MooseControlTestCase,
-    setup_moose_python_path,
-)
-
-setup_moose_python_path()
 
 from moosecontrol import MooseControl, SubprocessPortRunner
-from test_runners_baserunner import check_baserunner_cleanup_live
-from test_runners_interfaces_subprocessrunnerinterface import (
+
+from .common import BASE_INPUT, LIVE_BASERUNNER_KWARGS, MooseControlTestCase
+from .test_runners_baserunner import check_baserunner_cleanup_live
+from .test_runners_interfaces_subprocessrunnerinterface import (
     ARGS,
     COMMAND,
     MOOSE_CONTROL_NAME,
@@ -108,7 +102,7 @@ class TestSubprocessPortRunner(MooseControlTestCase):
         with open(input_file, "w") as f:
             f.write(BASE_INPUT)
 
-        command = [self.get_moose_exe(), "-i", input_file]
+        command = [self.moose_exe, "-i", input_file]
         runner = SubprocessPortRunner(
             command=command,
             directory=self.directory.name,
@@ -162,4 +156,4 @@ class TestSubprocessPortRunner(MooseControlTestCase):
         # Check state versus what the BaseRunner tests say it should be
         output = "\n".join(get_process_output(self, runner))
         returncode = runner.get_return_code()
-        check_baserunner_cleanup_live(self, runner, output, returncode)
+        check_baserunner_cleanup_live(self, output, returncode)

@@ -67,3 +67,12 @@ class InitializeTimeout(Exception):
         self.waited_time: float = waited_time
         message = f"Initialization timed out after {waited_time:.2f} seconds"
         super().__init__(message)
+
+
+class NotInitialized(Exception):
+    """Exception for when something is not initialized."""
+
+    def __init__(self, thing: str):
+        """Initialize with the name of the thing that isn't initialized."""
+        message = f"{thing} is not initialized"
+        super().__init__(message)

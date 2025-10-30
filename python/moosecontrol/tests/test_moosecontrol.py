@@ -21,25 +21,23 @@ from typing import Any, Optional, Tuple
 from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
-from common import (
-    BASE_INPUT,
-    FAKE_URL,
-    MooseControlTestCase,
-    mock_response,
-    setup_moose_python_path,
-)
-
-setup_moose_python_path()
 
 from moosecontrol import MooseControl, SubprocessSocketRunner
-from moosecontrol.exceptions import ControlNotWaiting, UnexpectedFlag
+from moosecontrol.exceptions import ControlNotWaiting, NotInitialized, UnexpectedFlag
 from moosecontrol.moosecontrol import (
     DEBUG_LOG_FORMAT,
     DEFAULT_LOG_FORMAT,
     STREAM_HANDLER,
     MooseControlContextManager,
 )
-from test_runners_baserunner import BaseRunnerTest
+
+from .common import (
+    BASE_INPUT,
+    FAKE_URL,
+    MooseControlTestCase,
+    mock_response,
+)
+from .test_runners_baserunner import BaseRunnerTest
 
 MOOSECONTROL = "moosecontrol.MooseControl"
 BASERUNNER = "moosecontrol.runners.BaseRunner"
@@ -68,9 +66,10 @@ class TestMooseControl(MooseControlTestCase):
 
     def test_init_quiet_and_verbose(self):
         """Test __init__() with quiet and verbose set."""
-        with self.assertRaises(ValueError) as e:
+        with self.assertRaisesRegex(
+            ValueError, "Cannot set quiet=True and verbose=True"
+        ):
             MooseControl(BaseRunnerTest(), quiet=True, verbose=True)
-        self.assertEqual(str(e.exception), "Cannot set quiet=True and verbose=True")
 
     def test_init_quiet(self):
         """Test __init__() with quiet=True, which does not add a logging handler."""
@@ -193,19 +192,18 @@ class TestMooseControl(MooseControlTestCase):
             def additional_initialize_data(self):
                 return {bad_key: "foo"}
 
-        with self.assertRaises(KeyError) as e:
+        with self.assertRaisesRegex(
+            KeyError,
+            rf"'Cannot override entry \"{bad_key}\" in additional_initialize_data\(\)'",
+        ):
             MooseControlDerived(BaseRunnerTest()).get_initialize_data()
-        self.assertEqual(
-            str(e.exception),
-            f"'Cannot override entry \"{bad_key}\" in additional_initialize_data()'",
-        )
 
     def test_initialize(self):
         """
         Test initialize().
 
         Should call the underlying runner's initialize() and wait()
-        and query the daat from initialize.
+        and query the data from initialize.
         """
         control = MooseControl(BaseRunnerTest())
 
@@ -270,7 +268,7 @@ class TestMooseControl(MooseControlTestCase):
         with open(input_file, "w") as f:
             f.write(BASE_INPUT)
 
-        command = [self.get_moose_exe(), "-i", input_file]
+        command = [self.moose_exe, "-i", input_file]
         runner = SubprocessSocketRunner(
             command=command,
             moose_control_name="web_server",
@@ -431,6 +429,16 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
             self.control.require_waiting()
         self.assertGetPaths(["waiting"])
 
+    def test_get_not_initialized(self):
+        """Test get() raising when not initialized."""
+        with self.assertRaisesRegex(NotInitialized, "MooseControl is not initialized"):
+            self.control.get("unused")
+
+    def test_post_not_initialized(self):
+        """Test post() raising when not initialized."""
+        with self.assertRaisesRegex(NotInitialized, "MooseControl is not initialized"):
+            self.control.post("unused", {})
+
     def test_set_continue(self):
         """Test set_continue()."""
         with self.mock_get(waiting=True, paths=[("continue", {})]):
@@ -570,9 +578,10 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
 
     def test_set_controllable_scalar_bad_type(self):
         """Test set_controllable_scalar() with a bad type."""
-        with self.assertRaises(TypeError) as e:
+        with self.assertRaisesRegex(
+            TypeError, r"Type str is not of allowed type\(s\) Number"
+        ):
             self.control.set_controllable_scalar("unused", "unused", (Number,), "foo")
-        self.assertEqual(str(e.exception), "Type str is not of allowed type(s) Number")
 
     def test_set_controllable_scalar_convert_type(self):
         """Test set_controllable_scalar() converting input values."""
@@ -637,16 +646,15 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
 
     def test_set_controllable_vector_bad_type(self):
         """Test set_controllable_vector() with a bad type."""
-        with self.assertRaises(TypeError) as e:
+        with self.assertRaisesRegex(
+            TypeError, r"At index 0: type list is not of allowed type\(s\) Number"
+        ):
             self.control.set_controllable_vector(
                 "unused",
                 "unused",
                 (Number,),
                 ["foo"],
             )
-        self.assertEqual(
-            str(e.exception), "At index 0: type list is not of allowed type(s) Number"
-        )
 
     def test_set_controllable_vector_convert_type(self):
         """Test set_controllable_vector() converting input values."""
@@ -700,10 +708,11 @@ class TestMooseControlSetUpControl(MooseControlTestCase):
     def test_set_realeigenmatrix_non_1D_2D(self):
         """Tests set_realeigenmatrix() when the value is not 1D or 2D."""
         value = [[[1]]]
-        with self.assertRaises(ValueError) as e:
+        with self.assertRaisesRegex(
+            ValueError, r"Value not convertible to a 1- or 2-D array"
+        ):
             self.run_test_set_controllable(
                 value,
                 "RealEigenMatrix",
                 "realeigenmatrix",
             )
-        self.assertEqual(str(e.exception), "Value not convertible to a 1- or 2-D array")

@@ -11,13 +11,9 @@
 
 # ruff: noqa: E402
 
-from typing import Any
 from unittest import TestCase
 
-from common import FAKE_URL, fake_response, setup_moose_python_path
 from requests import HTTPError
-
-setup_moose_python_path()
 
 from moosecontrol.exceptions import (
     UnexpectedResponse,
@@ -29,6 +25,8 @@ from moosecontrol.validation import (
     check_response_data,
     process_response,
 )
+
+from .common import FAKE_URL, fake_response
 
 
 def fake_ws_response(**kwargs) -> WebServerControlResponse:
@@ -111,13 +109,13 @@ class TestValidation(TestCase):
             [("optional_str", str), ("optional_int", int)],
         )
 
-    def test_check_response_any(self):
-        """Test check_response_data() with the Any type."""
+    def test_check_response_none(self):
+        """Test check_response_data() with None, meaning don't check it."""
         data = {
             "value": 0,
         }
         response = fake_ws_response(data=data)
-        check_response_data(response, [("value", Any)])
+        check_response_data(response, [("value", None)])
 
     def test_check_response_multiple_types(self):
         """Test check_response_data() with keys that could be multiple types."""

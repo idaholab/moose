@@ -20,7 +20,7 @@ from typing import Any, Iterable, Optional, Tuple, Type
 import numpy as np
 import numpy.typing as npt
 
-from moosecontrol.exceptions import ControlNotWaiting, UnexpectedFlag
+from moosecontrol.exceptions import ControlNotWaiting, NotInitialized, UnexpectedFlag
 from moosecontrol.runners import BaseRunner
 from moosecontrol.runners.baserunner import WebServerControlResponse
 from moosecontrol.validation import WebServerInitializedData, check_response_data
@@ -264,7 +264,9 @@ class MooseControl:
             The combined response, along with the JSON data if any.
 
         """
-        assert self.initialized
+        if not self.initialized:
+            raise NotInitialized(self.__class__.__name__)
+
         self.require_waiting()
         return self.runner.get(path, require_status=require_status)
 
@@ -294,7 +296,9 @@ class MooseControl:
             The combined response, along with the JSON data if any.
 
         """
-        assert self.initialized
+        if not self.initialized:
+            raise NotInitialized(self.__class__.__name__)
+
         self.require_waiting()
         return self.runner.post(path, data, require_status=require_status)
 
@@ -360,7 +364,7 @@ class MooseControl:
         logger.debug(f'Getting reporter value for "{name}"')
 
         response = self.post("get/reporter", {"name": name})
-        check_response_data(response, [("value", Any)])
+        check_response_data(response, [("value", None)])
         return response.data["value"]
 
     def get_time(self) -> float:

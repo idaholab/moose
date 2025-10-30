@@ -13,10 +13,6 @@
 
 from unittest import TestCase
 
-from common import setup_moose_python_path
-
-setup_moose_python_path()
-
 from moosecontrol.runners.utils import TimedPoller
 
 DEFAULT_POLL_TIME = 0.001

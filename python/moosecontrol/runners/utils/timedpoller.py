@@ -22,20 +22,20 @@ class TimedPoller:
 
     Example:
     -------
-    >>>> helper = TimedPoller(poll_time=0.1, timeout_time=10)
-    >>>> helper.start()
-    >>>>
-    >>>> # Develop some criteria on when to exit
-    >>>> should_exit = lambda: True # fake criteria
-    >>>>
-    >>>> # Poll until should_exit is true, which can be done
-    >>>> # multiple times. If the timeout time is reached,
-    >>>> # these calls to poll() will raise TimedPollTimeout
-    >>>> helper.poll(should_exit)
-    >>>> helper.poll(should_exit)
-    >>>>
-    >>>> # Finalize timing if it succeeds
-    >>>> helper.end()
+    >>> helper = TimedPoller(poll_time=0.1, timeout_time=10)
+    >>> helper.start()
+    >>>
+    >>> # Develop some criteria on when to exit
+    >>> should_exit = lambda: True # fake criteria
+    >>>
+    >>> # Poll until should_exit is true, which can be done
+    >>> # multiple times. If the timeout time is reached,
+    >>> # these calls to poll() will raise TimedPollTimeout
+    >>> helper.poll(should_exit)
+    >>> helper.poll(should_exit)
+    >>>
+    >>> # Finalize timing if it succeeds
+    >>> helper.end()
 
     """
 

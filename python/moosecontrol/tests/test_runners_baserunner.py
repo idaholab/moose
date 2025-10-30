@@ -11,14 +11,9 @@
 
 from unittest.mock import MagicMock, patch
 
-from common import (
-    FAKE_URL,
-    FakeSession,
-    MooseControlTestCase,
-    fake_response,
-    mock_response,
-    setup_moose_python_path,
-)
+from requests import Session
+from requests.exceptions import ConnectionError
+
 from moosecontrol.exceptions import InitializeTimeout
 from moosecontrol.runners import BaseRunner
 from moosecontrol.runners.baserunner import (
@@ -26,10 +21,14 @@ from moosecontrol.runners.baserunner import (
     DEFAULT_POKE_POLL_TIME,
     DEFAULT_POLL_TIME,
 )
-from requests import Session
-from requests.exceptions import ConnectionError
 
-setup_moose_python_path()
+from .common import (
+    FAKE_URL,
+    FakeSession,
+    MooseControlTestCase,
+    fake_response,
+    mock_response,
+)
 
 BASERUNNER = "moosecontrol.runners.BaseRunner"
 
@@ -55,7 +54,6 @@ def patch_baserunner(name: str, **kwargs):
 
 def check_baserunner_cleanup_live(
     test: MooseControlTestCase,
-    runner: BaseRunner,
     process_output: str,
     process_returncode: int,
 ):
@@ -137,13 +135,11 @@ class TestBaseRunner(MooseControlTestCase):
             poll_time=poll_time, initialize_timeout=initialize_timeout
         )
         runner.initialize_start()
-        with self.assertRaises(InitializeTimeout) as e_cm:
+        with self.assertRaisesRegex(
+            InitializeTimeout,
+            r"Initialization timed out after \d.\d{2} seconds",
+        ):
             runner.initialize_poll(lambda: False)
-        self.assertEqual(
-            str(e_cm.exception),
-            f"Initialization timed out after "
-            f"{runner._initialize_poller.total_time:.2f} seconds",
-        )
         self.assertFalse(runner.initialized)
 
     def test_initialize_poll_no_start(self):
@@ -179,7 +175,7 @@ class TestBaseRunner(MooseControlTestCase):
         runner.is_listening = MagicMock(return_value=True)
         initialize_data = {"name": "foo"}
         initialized_data = {"foo": "bar"}
-        with patch("common.FakeSession.post") as mock_post:
+        with patch(__name__ + ".FakeSession.post") as mock_post:
             mock_post.return_value = fake_response(data=initialized_data)
             runner.initialize(initialize_data)
         runner._session = None
@@ -214,7 +210,7 @@ class TestBaseRunner(MooseControlTestCase):
         initialized_data = {"foo": "bar"}
         with (
             patch_baserunner("is_listening", new=mock_is_listening),
-            patch("common.FakeSession.post") as mock_post,
+            patch(__name__ + ".FakeSession.post") as mock_post,
         ):
             mock_post.return_value = fake_response(data=initialized_data)
             runner.initialize(initialize_data)

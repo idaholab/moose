@@ -21,7 +21,7 @@ DEFAULT_HOST = "http://localhost"
 class PortRunner(BaseRunner):
     """Runner that interacts with an already-running webserver over a port."""
 
-    def __init__(self, port: int, host: str = DEFAULT_HOST, **kwargs):
+    def __init__(self, port: int, host: str = DEFAULT_HOST, *args, **kwargs):
         """
         Initialize state.
 
@@ -29,6 +29,8 @@ class PortRunner(BaseRunner):
         ----------
         port : int
             The port.
+        args : list
+            See BaseRunner.__init__().
 
         Optional Parameters
         -------------------
@@ -46,7 +48,7 @@ class PortRunner(BaseRunner):
         # The host
         self._host: str = host
 
-        super().__init__(**kwargs)
+        super().__init__(*args, **kwargs)
 
     @property
     def url(self) -> str:

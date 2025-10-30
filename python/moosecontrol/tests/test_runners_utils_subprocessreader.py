@@ -13,11 +13,9 @@
 
 from subprocess import PIPE, Popen
 
-from common import MooseControlTestCase, setup_moose_python_path
-
-setup_moose_python_path()
-
 from moosecontrol.runners.utils import SubprocessReader
+
+from .common import MooseControlTestCase
 
 
 class TestSubprocessReader(MooseControlTestCase):

@@ -32,6 +32,7 @@ class SubprocessPortRunner(SubprocessRunnerInterface, PortRunner):
         port: Optional[int] = None,
         directory: str = DEFAULT_DIRECTORY,
         use_subprocess_reader: bool = True,
+        *args,
         **kwargs,
     ):
         """
@@ -43,6 +44,8 @@ class SubprocessPortRunner(SubprocessRunnerInterface, PortRunner):
             The command to spawn the subprocess.
         moose_control_name : str
             The name of the WebServerControl in input.
+        args : list
+            See PortRunner.__init__().
 
         Optional Parameters
         -------------------
@@ -73,7 +76,7 @@ class SubprocessPortRunner(SubprocessRunnerInterface, PortRunner):
         if port is None:
             port = PortRunner.find_available_port()
 
-        PortRunner.__init__(self, port=port, **kwargs)
+        PortRunner.__init__(self, port=port, *args, **kwargs)
 
     def get_additional_command(self) -> list[str]:
         """

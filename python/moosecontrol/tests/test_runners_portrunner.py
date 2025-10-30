@@ -17,19 +17,13 @@ from time import sleep
 from typing import Tuple
 
 import pytest
-from common import (
-    BASE_INPUT,
-    LIVE_BASERUNNER_KWARGS,
-    MooseControlTestCase,
-    setup_moose_python_path,
-)
 from requests import Session
-
-setup_moose_python_path()
 
 from moosecontrol import MooseControl, PortRunner
 from moosecontrol.runners.portrunner import DEFAULT_HOST
-from test_runners_baserunner import check_baserunner_cleanup_live
+
+from .common import BASE_INPUT, LIVE_BASERUNNER_KWARGS, MooseControlTestCase
+from .test_runners_baserunner import check_baserunner_cleanup_live
 
 DUMMY_PORT = 13579
 
@@ -83,7 +77,7 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
         with open(input_path, "w") as f:
             f.write(BASE_INPUT)
         command = [
-            self.get_moose_exe(),
+            self.moose_exe,
             "-i",
             input_path,
             f"Controls/web_server/port={port}",
@@ -134,4 +128,4 @@ class TestSubprocessSocketRunner(MooseControlTestCase):
         _, stderr = process.communicate()
 
         # Check state versus what the BaseRunner tests say it should be
-        check_baserunner_cleanup_live(self, runner, stderr, process.returncode)
+        check_baserunner_cleanup_live(self, stderr, process.returncode)

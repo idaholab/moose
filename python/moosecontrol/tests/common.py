@@ -9,10 +9,7 @@
 
 """Holds common utilities for moosecontrol testing."""
 
-import os
-import sys
 from contextlib import ExitStack
-from importlib.util import find_spec
 from json import dumps
 from tempfile import TemporaryDirectory
 from typing import Callable, Optional
@@ -26,20 +23,6 @@ from requests import Response, Session
 FAKE_URL = "http://127.0.0.1:13579"
 
 
-def setup_moose_python_path():
-    """
-    Add the moose python path to PATH if needed.
-
-    Used in each unit test to avoid having to set
-    PYTHONPATH at test time.
-    """
-    if find_spec("moosecontrol") is None:
-        this_dir = os.path.dirname(__file__)
-        moose_python = os.path.join(this_dir, "..", "..")
-        sys.path.append(moose_python)
-        assert find_spec("moosecontrol")
-
-
 class MooseControlTestCase(TestCase):
     """Base TestCase for MooseControl tests."""
 
@@ -48,8 +31,8 @@ class MooseControlTestCase(TestCase):
         """Inject pytest fixtures."""
         # Allow unittest access to the caplog
         self._caplog: pytest.LogCaptureFixture = caplog
-        # Allow unittest access to the --moose-exe arg
-        self._moose_exe_arg = moose_exe
+        # Get the found moose executable during init, if any
+        self.moose_exe: Optional[str] = moose_exe
 
     def setUp(self):
         """
@@ -78,40 +61,12 @@ class MooseControlTestCase(TestCase):
         and they are not allowed and cleans up
         the temporary directory.
         """
-        super().setUp()
+        super().tearDown()
 
         if not self.allow_log_warnings:
             self.assert_no_warning_logs()
 
         self.directory.cleanup()
-
-    def get_moose_exe(self) -> str:
-        """
-        Get the path to the MOOSE executable to run.
-
-        Will first use the --moose-exe command line option
-        if it is set. Will then search for moose_test-<METHOD>
-        for all of the valid methods in the relative test folder.
-
-        Will raise an exception if one was not found.
-        """
-        arg = self._moose_exe_arg
-        if arg is not None:
-            if not os.path.exists(arg):
-                raise FileNotFoundError(f"--moose-exe={arg} does not exist")
-            return arg
-
-        this_dir = os.path.dirname(__file__)
-        moose_dir = os.path.join(this_dir, "..", "..", "..", "test")
-        for method in ["dbg", "devel", "oprof", "opt"]:
-            exe = os.path.abspath(os.path.join(moose_dir, f"moose_test-{method}"))
-            if os.path.exists(exe):
-                return exe
-
-        raise FileNotFoundError(
-            "Failed to find a MOOSE executable; either set --moose-exe "
-            "to a moose executable or skip moose tests with --no-moose"
-        )
 
     def printable_logs(self) -> str:
         """Get all logs in a printable form."""
@@ -124,11 +79,11 @@ class MooseControlTestCase(TestCase):
         """Assert that there are exactly the given number of logs."""
         records = self._caplog.records
         num_records = len(records)
-        if num_records != num:
-            raise AssertionError(
-                f"Num logs {num_records} != {num}; "
-                f"present logs:\n{self.printable_logs()}"
-            )
+        self.assertEqual(
+            num_records,
+            num,
+            f"Num logs {num_records} != {num}; present logs:\n{self.printable_logs()}",
+        )
 
     def assert_log_message(
         self, i: int, message: str, levelname: str = "INFO", name: Optional[str] = None
@@ -202,12 +157,13 @@ class MooseControlTestCase(TestCase):
     def assert_no_warning_logs(self):
         """Assert that no logs of level WARNING or higher exist."""
         for record in self._caplog.records:
-            if record.levelname == "WARNING":
-                raise AssertionError(
-                    f"Warning found in logs:\n"
-                    f"Name: {record.name}\n"
-                    f'Message: "{record.message}"'
-                )
+            self.assertNotEqual(
+                record.levelname,
+                "WARNING",
+                f"Warning found in logs:\n"
+                f"Name: {record.name}\n"
+                f'Message: "{record.message}"',
+            )
 
     def assert_methods_called_in_order(
         self, methods: list[str], action: Callable[[], None]
@@ -264,7 +220,6 @@ def set_fake_response(
             response.json.return_value = data
 
 
-@staticmethod
 def mock_response(**kwargs) -> MagicMock:
     """
     Create a mocked Response.
@@ -280,7 +235,6 @@ def mock_response(**kwargs) -> MagicMock:
     return response
 
 
-@staticmethod
 def fake_response(**kwargs) -> Response:
     """
     Create a faked Response.
@@ -338,9 +292,9 @@ BASE_INPUT = """
 []
 """
 
-# Keyword arguments to pass to the BaseRunner for live tests
 LIVE_BASERUNNER_KWARGS = {
     "initialize_timeout": 60,
     "poll_time": 0.01,
     "poke_poll_time": 0.01,
 }
+"Keyword arguments to pass to the BaseRunner for live tests"

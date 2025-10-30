@@ -15,15 +15,13 @@ import os
 import subprocess
 from unittest.mock import MagicMock, PropertyMock, patch
 
-from common import MooseControlTestCase, setup_moose_python_path
-
-setup_moose_python_path()
-
 from moosecontrol.runners.interfaces import SubprocessRunnerInterface
 from moosecontrol.runners.interfaces.subprocessrunnerinterface import (
     DEFAULT_CLEANUP_KILL_TIMEOUT,
 )
 from moosecontrol.runners.utils import SubprocessReader
+
+from .common import MooseControlTestCase
 
 COMMAND = ["/path/to/moose-opt", "-i", "input.i"]
 ADDITIONAL_COMMAND = ["--color=off"]

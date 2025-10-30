@@ -20,19 +20,17 @@ from typing import Tuple
 from unittest.mock import patch
 
 import pytest
-from common import (
+
+from moosecontrol import MooseControl, SocketRunner
+from moosecontrol.requests_unixsocket import Session
+
+from .common import (
     BASE_INPUT,
     LIVE_BASERUNNER_KWARGS,
     MooseControlTestCase,
     mock_response,
-    setup_moose_python_path,
 )
-from test_runners_baserunner import check_baserunner_cleanup_live
-
-setup_moose_python_path()
-
-from moosecontrol import MooseControl, SocketRunner
-from moosecontrol.requests_unixsocket import Session
+from .test_runners_baserunner import check_baserunner_cleanup_live
 
 DUMMY_SOCKET_PATH = "/foo/bar.sock"
 
@@ -232,7 +230,7 @@ class TestSocketRunner(MooseControlTestCase):
         with open(input_path, "w") as f:
             f.write(BASE_INPUT)
         command = [
-            self.get_moose_exe(),
+            self.moose_exe,
             "-i",
             input_path,
             f"Controls/web_server/file_socket={socket_path}",
@@ -286,6 +284,6 @@ class TestSocketRunner(MooseControlTestCase):
         _, stderr = process.communicate()
 
         # Check state versus what the BaseRunner tests say it should be
-        check_baserunner_cleanup_live(self, runner, stderr, process.returncode)
+        check_baserunner_cleanup_live(self, stderr, process.returncode)
 
         self.assertFalse(os.path.exists(runner.socket_path))

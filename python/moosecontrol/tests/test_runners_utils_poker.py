@@ -14,17 +14,11 @@
 from time import sleep
 from unittest.mock import patch
 
-from common import (
-    FakeSession,
-    MooseControlTestCase,
-    mock_response,
-    setup_moose_python_path,
-)
 from requests import ConnectionError, HTTPError
 
-setup_moose_python_path()
-
 from moosecontrol.runners.utils import Poker
+
+from .common import FakeSession, MooseControlTestCase, mock_response
 
 
 class TestPoker(MooseControlTestCase):

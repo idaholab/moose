@@ -10,7 +10,7 @@
 """Defines structures and methods for validating WebServerControl responses."""
 
 from dataclasses import dataclass
-from typing import Any, Optional, Tuple, Type
+from typing import Optional, Tuple, Type
 
 from requests import Response
 
@@ -81,7 +81,6 @@ class WebServerInitializedData:
         return self.data["execute_on_flags"]
 
 
-@staticmethod
 def process_response(
     response: Response, require_status: Optional[int] = None
 ) -> WebServerControlResponse:
@@ -127,22 +126,25 @@ def process_response(
 
 def check_response_data(
     ws_response: WebServerControlResponse,
-    expected: list[Tuple[str, Type | Any | Tuple[Type]]],
-    optional: Optional[list[Tuple[str, Type | Any | Tuple[Type]]]] = None,
+    expected: list[Tuple[str, Optional[Type | Tuple[Type]]]],
+    optional: Optional[list[Tuple[str, Optional[Type | Tuple[Type]]]]] = None,
 ):
     """
     Check data from a webserver response containing expected values.
+
+    None passed as an expected or optional type implies that
+    the type can be anything and should not be checked.
 
     Parameters
     ----------
     ws_response : WebServerControlResponse
         The response to check.
-    expected : list[Tuple[str, Type | Tuple[Type]]]:
+    expected : list[Tuple[str, Optional[Type | Tuple[Type]]]]:
         List of expected key name -> type/types.
 
     Additional Parameters
     ---------------------
-    optional : list[Tuple[str, Type | Tuple[Type]]]:
+    optional : Optional[list[Tuple[str, Optional[Type | Tuple[Type]]]]]:
         List of optional key name -> type/types.
 
     """
@@ -177,7 +179,7 @@ def check_response_data(
 
     # Values with the wrong type
     for key, v_type in expected + optional:
-        if v_type is not Any and key in data and not isinstance(data[key], v_type):
+        if v_type is not None and key in data and not isinstance(data[key], v_type):
             raise UnexpectedResponse(
                 response=response,
                 message=f'key "{key}" has unexpected type "{type(data[key]).__name__}"',

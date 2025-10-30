@@ -36,6 +36,7 @@ class SubprocessSocketRunner(SubprocessRunnerInterface, SocketRunner):
         socket_path: Optional[str] = None,
         directory: str = DEFAULT_DIRECTORY,
         use_subprocess_reader: bool = True,
+        *args,
         **kwargs,
     ):
         """
@@ -47,6 +48,8 @@ class SubprocessSocketRunner(SubprocessRunnerInterface, SocketRunner):
             The command to spawn the subprocess.
         moose_control_name : str
             The name of the WebServerControl in input.
+        args : list
+            See SocketRunner.__init__().
 
         Optional Parameters
         -------------------
@@ -77,7 +80,7 @@ class SubprocessSocketRunner(SubprocessRunnerInterface, SocketRunner):
         else:
             socket_path = os.path.abspath(socket_path)
 
-        SocketRunner.__init__(self, socket_path=socket_path, **kwargs)
+        SocketRunner.__init__(self, socket_path=socket_path, *args, **kwargs)
 
     @staticmethod
     def random_socket_path() -> str:

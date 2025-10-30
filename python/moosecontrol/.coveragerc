@@ -4,6 +4,7 @@ branch = True
 omit =
     conftest.py
     requests_unixsocket/*
+    tests/*
 parallel = False
 
 [report]

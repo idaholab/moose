@@ -14,8 +14,7 @@ import stat
 from logging import getLogger
 
 from moosecontrol.requests_unixsocket import Session
-
-from .baserunner import BaseRunner
+from moosecontrol.runners import BaseRunner
 
 logger = getLogger("SocketRunner")
 
@@ -23,7 +22,7 @@ logger = getLogger("SocketRunner")
 class SocketRunner(BaseRunner):
     """Runner that interacts with an already-running webserver over a socket."""
 
-    def __init__(self, socket_path: str, **kwargs):
+    def __init__(self, socket_path: str, *args, **kwargs):
         """
         Initialize state.
 
@@ -31,6 +30,8 @@ class SocketRunner(BaseRunner):
         ----------
         socket_path : str
             The path to the socket.
+        args : list
+            See BaseRunner.__init__().
 
         Optional Parameters
         -------------------
@@ -44,7 +45,7 @@ class SocketRunner(BaseRunner):
         # Whether or not we've used the socket (used in cleanup())
         self._socket_used: bool = False
 
-        super().__init__(**kwargs)
+        super().__init__(*args, **kwargs)
 
     @property
     def url(self) -> str:
