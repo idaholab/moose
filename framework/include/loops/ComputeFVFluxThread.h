@@ -329,7 +329,7 @@ ThreadedFaceLoop<RangeType>::operator()(const RangeType & range, bool bypass_thr
       // Continue if we find a libMesh degenerate map exception, but
       // just throw for any real error
       if (!strstr(e.what(), "Jacobian") && !strstr(e.what(), "singular"))
-        throw e;
+        throw;
 
       mooseException("We caught a libMesh exception: ", e.what());
     }
