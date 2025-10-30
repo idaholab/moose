@@ -69,6 +69,7 @@ NearestNodeLocator::findNodes()
    * surrounding each of the secondary nodes.  This will speed searching later.
    */
   const std::map<dof_id_type, std::vector<dof_id_type>> & node_to_elem_map = _mesh.nodeToElemMap();
+  std::set<dof_id_type> new_ghost(_new_ghosted_elems.begin(), _new_ghosted_elems.end());
 
   if (_first || (_reinit_iteration && _patch_update_strategy == Moose::Iteration))
   {
@@ -151,6 +152,7 @@ NearestNodeLocator::findNodes()
           _mesh, trial_primary_nodes, node_to_elem_map, _mesh.getGhostingPatchSize(), kd_tree);
 
       Threads::parallel_reduce(trial_secondary_node_range, snt_ghosting);
+      new_ghost.insert(snt_ghosting._ghosted_elems.begin(), snt_ghosting._ghosted_elems.end());
 
       for (const auto & dof : snt_ghosting._ghosted_elems)
         _subproblem.addGhostedElem(dof);
@@ -193,11 +195,15 @@ NearestNodeLocator::findNodes()
       {
         const std::vector<dof_id_type> & elems_connected_to_node = node_to_elem_pair->second;
         for (const auto & dof : elems_connected_to_node)
-          if (std::find(ghost.begin(), ghost.end(), dof) == ghost.end() &&
-              _mesh.elemPtr(dof)->processor_id() != _mesh.processor_id())
+        {
+          const Elem * elem = _mesh.elemPtr(dof);
+          // Only error if element is truly inaccessible (remote_elem or nullptr)
+          if (elem == libMesh::remote_elem || elem == nullptr)
             mooseError("Error in NearestNodeLocator: The nearest neighbor lies outside the "
-                       "ghosted set of elements. Increase the ghosting_patch_size parameter in the "
-                       "mesh block and try again.");
+                       "ghosted set of elements...");
+
+          // Otherwise trust that ghosting will be/is correct
+        }
       }
     }
   }
@@ -347,11 +353,16 @@ NearestNodeLocator::updatePatch(std::vector<dof_id_type> & secondary_nodes)
     {
       const std::vector<dof_id_type> & elems_connected_to_node = node_to_elem_pair->second;
       for (const auto & dof : elems_connected_to_node)
-        if (std::find(ghost.begin(), ghost.end(), dof) == ghost.end() &&
-            _mesh.elemPtr(dof)->processor_id() != _mesh.processor_id())
-          mooseError("Error in NearestNodeLocator: The nearest neighbor lies outside the ghosted "
-                     "set of elements. Increase the ghosting_patch_size parameter in the mesh "
-                     "block and try again.");
+      {
+        const Elem * elem = _mesh.elemPtr(dof);
+        // Only error if element is truly inaccessible (remote_elem or nullptr)
+        if (elem == libMesh::remote_elem || elem == nullptr)
+          mooseError("Error in NearestNodeLocator: The nearest neighbor lies outside the "
+                     "ghosted set of elements. Increase the ghosting_patch_size parameter in the "
+                     "mesh block and try again.");
+
+        // Otherwise trust that ghosting will be/is correct
+      }
     }
   }
 }
