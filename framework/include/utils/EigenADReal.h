@@ -11,6 +11,7 @@
 
 #include "ADReal.h"
 #include "metaphysicl/raw_type.h"
+#include "metaphysicl/metaphysicl_version.h"
 
 namespace Eigen
 {
@@ -36,14 +37,22 @@ template <typename V, typename D, bool asd>
 inline MetaPhysicL::DualNumber<V, D, asd>
 sqrt(const MetaPhysicL::DualNumber<V, D, asd> & a)
 {
+#if METAPHYSICL_MAJOR_VERSION < 2
+  return std::sqrt(a);
+#else
   return MetaPhysicL::sqrt(a);
+#endif
 }
 
 template <typename V, typename D, bool asd>
 inline MetaPhysicL::DualNumber<V, D, asd>
 abs(const MetaPhysicL::DualNumber<V, D, asd> & a)
 {
+#if METAPHYSICL_MAJOR_VERSION < 2
+  return std::abs(a);
+#else
   return MetaPhysicL::abs(a);
+#endif
 }
 }
 } // namespace Eigen
