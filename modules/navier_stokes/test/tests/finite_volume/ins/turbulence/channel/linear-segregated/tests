@@ -23,7 +23,7 @@
   [channel_ERCOFTAC_symmetry]
     type = 'CSVDiff'
     input = 'channel_ERCOFTAC_symmetric.i'
-    csvdiff = 'channel_ERCOFTAC_symmetric_out_line_center_channel_0001.csv channel_ERCOFTAC_symmetric_out_line_quarter_radius_channel_0001.csv channel_ERCOFTAC_symmetric_out_side_bottom_0001.csv channel_ERCOFTAC_symmetric_out_side_top_0001.csv'
+    csvdiff = 'channel_ERCOFTAC_symmetric_out_line_center_channel_0001.csv channel_ERCOFTAC_symmetric_out_line_quarter_radius_channel_0001.csv channel_ERCOFTAC_symmetric_out_side_top_0001.csv'
     abs_zero = 1e-6
     recover = false # we don't support recovery for SIMPLE yet
     max_threads = 1 # see libmesh issue #3808

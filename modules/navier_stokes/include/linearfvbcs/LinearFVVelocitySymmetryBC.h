@@ -34,9 +34,6 @@ public:
   virtual Real computeBoundaryGradientRHSContribution() const override;
 
 protected:
-  /// Helper to compute the linear boundary value coefficients (alpha, beta)
-  void computeBoundaryCoefficients(Real & alpha, Real & beta) const;
-
   /// The dimension of the mesh
   const unsigned int _dim;
 

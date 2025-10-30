@@ -96,20 +96,6 @@ INSFVSymmetryVelocityBC::computeSegregatedContribution()
   matrix_contribution += mu_b / d_perpendicular * normal_squared * vel_C(_index);
   rhs_contribution += mu_b / d_perpendicular * (normal_x_normal * vel_C_old)(_index);
 
-  // std::cout << "Matrix adv: " << face_flux * (1 - normal_squared) * _face_info->faceArea()
-  //           << std::endl;
-  // std::cout << "MAtrix dif: " << mu_b / d_perpendicular * normal_squared * _face_info->faceArea()
-  //           << std::endl;
-
-  // std::cout << "Rhs adv: "
-  //           << face_flux * (normal_x_normal * vel_C_old)(_index)*_face_info->faceArea()
-  //           << std::endl;
-
-  // std::cout << "Rhs dif: "
-  //           << mu_b / d_perpendicular * (normal_x_normal *
-  //           vel_C_old)(_index)*_face_info->faceArea()
-  //           << std::endl;
-
   return matrix_contribution - rhs_contribution;
 }
 
