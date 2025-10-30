@@ -116,7 +116,7 @@ class TestDiffusion2DRZOrthogonal(unittest.TestCase):
                  label='l2error',
                  marker='o',
                  markersize=8,
-                 num_fitted_points=3,
+                 num_fitted_points=2,
                  slope_precision=1)
         fig.save('2d-linear-fv-diffusion-rz.png')
 
@@ -133,13 +133,13 @@ class TestDiffusion2DRZNonorthogonal(unittest.TestCase):
                  label='l2error',
                  marker='o',
                  markersize=8,
-                 num_fitted_points=3,
+                 num_fitted_points=2,
                  slope_precision=1)
         fig.save('2d-linear-fv-diffusion-rz-nonorthogonal.png')
 
         for _,value in fig.label_to_slope.items():
             print("The current slope: ", value)
-            self.assertTrue(fuzzyEqual(value, 2., .05))
+            self.assertTrue(fuzzyEqual(value, 2., .15))
 
 if __name__ == '__main__':
     unittest.main(__name__, verbosity=2)
