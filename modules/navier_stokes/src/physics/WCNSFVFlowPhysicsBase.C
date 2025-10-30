@@ -335,6 +335,7 @@ WCNSFVFlowPhysicsBase::addFluidPropertiesFunctorMaterial()
     params.set<MooseFunctorName>("characteristic_length") = "1";
   }
   else
+    // not implemented yet
     paramWarning(
         NS::fluid,
         "Specifying the fluid properties user object does not define the GeneralFunctorFluidProps "
@@ -353,7 +354,8 @@ WCNSFVFlowPhysicsBase::addFluidPropertiesFunctorMaterial()
   }
   params.set<Point>("gravity") = getParam<RealVectorValue>("gravity");
 
-  getProblem().addFunctorMaterial(class_name, prefix() + "functor_fluidprops", params);
+  if (!_porous_medium_treatment)
+    getProblem().addFunctorMaterial(class_name, prefix() + "functor_fluidprops", params);
 }
 
 void
