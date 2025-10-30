@@ -33,9 +33,9 @@
   [MFEMDotProductAux.C]
     type = XMLDiff
     input = ../kernels/curlcurl.i
-    cli_args = 'FESpaces/inactive="" '
-               'AuxVariables/inactive="" '
-               'AuxKernels/inactive="" '
+    cli_args = 'FESpaces/inactive="" 
+               'AuxVariables/inactive="" 
+               'AuxKernels/inactive="" 
                'Outputs/ParaViewDataCollection/file_base=OutputData/InnerProduct'
     xmldiff = 'OutputData/InnerProduct/Run0/Run0.pvd
                 OutputData/InnerProduct/Run0/Cycle000001/proc000000.vtu'
@@ -51,11 +51,12 @@
   [MFEMCrossProductAux.C]
     type = CSVDiff
     input = ../submeshes/av_magnetostatic.i
-    cli_args = 'FESpaces/inactive="" '
-               'AuxVariables/inactive="" '
-               'AuxKernels/inactive="" '
-               'Outputs/ParaViewDataCollection/file_base=OutputData/CrossProduct'
-               'Outputs/ReportedPostprocessors/file_base=OutputData/CrossProductCSV'
+    cli_args = 'FESpaces/inactive="" 
+                AuxVariables/inactive="" 
+                AuxKernels/inactive="" 
+                Postprocessors/inactive="CoilPower" 
+                Outputs/inactive="ParaViewDataCollection"
+                Outputs/ReportedPostprocessors/file_base=OutputData/CrossProductCSV'
     csvdiff = 'OutputData/CrossProductCSV.csv'
     design = 'MFEMCrossProductAux.md'
     issues = '#31613'

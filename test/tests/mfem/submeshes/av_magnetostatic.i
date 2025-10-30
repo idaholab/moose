@@ -11,7 +11,7 @@
 []
 
 [FESpaces]
-  inactive = L2FESpace
+#  inactive = L2FESpace
   [HCurlFESpace]
     type = MFEMVectorFESpace
     fec_type = ND
@@ -37,7 +37,7 @@
 []
 
 [AuxVariables]
-  inactive = lorentz_force
+ # inactive = lorentz_force
   [b_field]
     type = MFEMVariable
     fespace = HDivFESpace
@@ -53,7 +53,7 @@
 []
 
 [AuxKernels]
-  inactive = cross
+ # inactive = cross
   [curl]
     type = MFEMCurlAux
     variable = b_field
@@ -67,9 +67,9 @@
     variable = lorentz_force
     u = e_field
     v = b_field
-    scale_factor = 1.0
+    scale_factor = 1
     execute_on = TIMESTEP_END
-    execution_order_group = 3
+    execution_order_group = 4
   []
 []
 
@@ -169,16 +169,24 @@
     primal_variable = e_field
     block = 'TorusCore TorusSheath'
   []
+  [LorentzL2Sq]
+    type = MFEMVectorL2InnerProductIntegralPostprocessor
+    coefficient = conductivity
+    dual_variable = lorentz_force
+    primal_variable = lorentz_force
+    block = 'TorusSheath'
+  []
 []
 
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/MagnetostaticClosedCoil
+    file_base = OutputData/MagnetostaticClosedCoiltest
     vtk_format = ASCII
   []
   [ReportedPostprocessors]
     type = CSV
-    file_base = OutputData/AVMagnetostaticClosedCoilCSV
+    #file_base = OutputData/AVMagnetostaticClosedCoilCSV
+    file_base = OutputData/LorentzCSV
   []
 []
