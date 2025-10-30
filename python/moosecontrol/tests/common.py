@@ -117,7 +117,7 @@ class MooseControlTestCase(TestCase):
         message: str,
         name: Optional[str] = None,
         levelname: str = "INFO",
-        after_index: Optional[int] = None,
+        after_index: int = -1,
     ) -> int:
         """
         Assert that a log message exists in the log.
@@ -133,7 +133,7 @@ class MooseControlTestCase(TestCase):
             The name in the log; if not provided, don't check.
         levelname : str
             The log level name. Defaults to INFO.
-        after_index : Optional[int]
+        after_index : int
             If set, assert that this log exists after this index.
 
         Returns
@@ -142,10 +142,11 @@ class MooseControlTestCase(TestCase):
             The index at which the message was found in the records.
 
         """
+        assert after_index >= -1
+
         records = self._caplog.records
-        if after_index is not None:
-            self.assertGreater(len(records), after_index + 1)
-            records = records[after_index + 1 :]
+        self.assertGreater(len(records), after_index + 1)
+        records = records[after_index + 1 :]
         for i, record in enumerate(records):
             if record.message == message:
                 if name is not None:
