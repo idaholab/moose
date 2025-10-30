@@ -121,8 +121,12 @@ def pytest_configure(config):
                 f"\"{' '.join(cmd)}\":\n\n{process.stdout}"
             )
 
+        print(f"INFO: Using moose executable {moose_exe}")
         # Set in shared state to be used as a fixture
         config.moose_exe = moose_exe
+    # Not using moose
+    else:
+        print("INFO: Not running tests that require moose")
 
 
 def pytest_collection_modifyitems(config, items):
