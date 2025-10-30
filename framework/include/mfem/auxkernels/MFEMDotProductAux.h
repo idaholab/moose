@@ -41,9 +41,6 @@ protected:
   const mfem::ParGridFunction & _u_var;
   const mfem::ParGridFunction & _v_var;
 
-  // Optional scalar scale field s(x)
-  // const mfem::ParGridFunction * _scale_var; // nullptr if not provided
-
   // Constant multiplier
   const mfem::real_t _scale_factor;
 };
