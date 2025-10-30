@@ -51,6 +51,7 @@
 []
 
 [AuxKernels]
+  inactive = "joule_Q_aux"
   [curl]
     type = MFEMCurlAux
     variable = db_dt_field
