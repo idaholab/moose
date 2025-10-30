@@ -345,7 +345,6 @@ BreakMeshByBlockGenerator::generate()
                       unsigned int connected_elem_side,
                       bool need_to_switch)
               {
-                std::cout <<"block pair: "<<blocks_pair.first<<" "<<blocks_pair.second<<std::endl;
                 _neighboring_block_list.insert(blocks_pair);
                 _new_boundary_sides_map[blocks_pair].insert(
                     std::make_pair(!need_to_switch ? current_elem : connected_elem, side));
