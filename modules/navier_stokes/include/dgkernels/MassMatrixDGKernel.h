@@ -30,9 +30,11 @@ public:
   virtual void computeResidual() override {}
 
 protected:
+  void precalculateJacobian() override;
   virtual Real computeQpResidual(Moose::DGResidualType) override;
-
   virtual Real computeQpJacobian(const Moose::DGJacobianType type) override;
 
   const Real _density;
+  /// Facet characteristic length for correct norm computations
+  Real _hmax;
 };

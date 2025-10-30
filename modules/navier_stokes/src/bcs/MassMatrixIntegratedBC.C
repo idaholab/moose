@@ -28,7 +28,7 @@ MassMatrixIntegratedBC::validParams()
 }
 
 MassMatrixIntegratedBC::MassMatrixIntegratedBC(const InputParameters & parameters)
-  : IntegratedBC(parameters), _density(getParam<Real>("density"))
+  : IntegratedBC(parameters), _density(getParam<Real>("density")), _hmax(0)
 {
   if (!isParamValid("matrix_tags") && !isParamValid("extra_matrix_tags"))
     mooseError("One of 'matrix_tags' or 'extra_matrix_tags' must be provided");
@@ -40,8 +40,14 @@ MassMatrixIntegratedBC::computeQpResidual()
   mooseError("should never be called");
 }
 
+void
+MassMatrixIntegratedBC::precalculateJacobian()
+{
+  _hmax = _current_side_elem->hmax();
+}
+
 Real
 MassMatrixIntegratedBC::computeQpJacobian()
 {
-  return _test[_i][_qp] * _density * _phi[_j][_qp];
+  return _test[_i][_qp] * _density * _hmax * _phi[_j][_qp];
 }
