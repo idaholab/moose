@@ -16,7 +16,7 @@ p_f = p_P, \qquad \frac{\partial p}{\partial n}\biggr\rvert_f = 0,
 and the residual contribution stemming from the Rhie-Chow momentum-flux correction is
 
 \begin{equation}
-R_f = -\left(A^{-1} H\right)_f,
+R_f = -\left(A^{-1} H\right)_f \cdot \vec{n}_f,
 \end{equation}
 
 where $A^{-1} H$ is provided through [RhieChowMassFlux.md] to provide the
