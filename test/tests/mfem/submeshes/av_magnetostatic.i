@@ -175,7 +175,6 @@
     coefficient = conductivity
     dual_variable = lorentz_force
     primal_variable = lorentz_force
-    block = 'TorusSheath'
   []
 []
 
