@@ -134,7 +134,7 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   []
 []
 
-[Problem]
+[SubChannel]
   type = TriSubChannel1PhaseProblem
   fp = sodium
   P_out = ${P_out}
@@ -157,6 +157,13 @@ duct_inside = '${fparse duct_outside - 2 * duct_thickness}'
   compute_power = true
   verbose_multiapps = true
   verbose_subchannel = false
+  friction_closure = 'Cheng'
+[]
+
+[SCMClosures]
+  [Cheng]
+    type = SCMFrictionUpdatedChengTodreas
+  []
 []
 
 [ICs]

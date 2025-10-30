@@ -22,28 +22,6 @@ P_out = 4.923e6 # Pa
 [AuxVariables]
   [q_prime_aux]
   []
-  [q_prime]
-  []
-  [mdot]
-  []
-  [SumWij]
-  []
-  [P]
-  []
-  [DP]
-  []
-  [h]
-  []
-  [T]
-  []
-  [rho]
-  []
-  [mu]
-  []
-  [S]
-  []
-  [w_perim]
-  []
 []
 
 [FluidProperties]
@@ -65,6 +43,13 @@ P_out = 4.923e6 # Pa
   verbose_subchannel = true
   implicit = true
   segregated = false
+  friction_closure = 'MATRA'
+[]
+
+[SCMClosures]
+  [MATRA]
+    type = SCMFrictionMATRA
+  []
 []
 
 [AuxKernels]

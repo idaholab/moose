@@ -98,6 +98,13 @@ heated_length = 1.0
     P_out = ${P_out}
     verbose_subchannel = true
     deformation = true
+  friction_closure = 'MATRA'
+[]
+
+[SCMClosures]
+  [MATRA]
+    type = SCMFrictionMATRA
+  []
 []
 
 [ICs]

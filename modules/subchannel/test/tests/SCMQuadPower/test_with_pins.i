@@ -35,51 +35,15 @@ length = 0.5
 [Functions]
   [axial_heat_rate]
     type = ParsedFunction
-    value = '(pi/2)*sin(pi*z/L)'
-    vars = 'L'
-    vals = '${length}'
+    expression = '(pi/2)*sin(pi*z/L)'
+    symbol_names = 'L'
+    symbol_values = '${length}'
   []
 []
 
 [AuxVariables]
   [q_prime_aux]
     block = fuel_pins
-  []
-  [q_prime]
-    block = fuel_pins
-  []
-  [mdot]
-    block = sub_channel
-  []
-  [SumWij]
-    block = sub_channel
-  []
-  [P]
-    block = sub_channel
-  []
-  [DP]
-    block = sub_channel
-  []
-  [h]
-    block = sub_channel
-  []
-  [T]
-    block = sub_channel
-  []
-  [Tpin]
-    block = fuel_pins
-  []
-  [rho]
-    block = sub_channel
-  []
-  [mu]
-    block = sub_channel
-  []
-  [S]
-    block = sub_channel
-  []
-  [w_perim]
-    block = sub_channel
   []
 []
 
@@ -102,6 +66,13 @@ length = 0.5
   verbose_subchannel = true
   implicit = true
   segregated = false
+  friction_closure = 'MATRA'
+[]
+
+[SCMClosures]
+  [MATRA]
+    type = SCMFrictionMATRA
+  []
 []
 
 [AuxKernels]

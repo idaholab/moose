@@ -25,12 +25,6 @@ public:
 
 protected:
   virtual void initializeSolution() override;
-  /**
-   * Computes the axial friction factor for the sodium coolant and
-   * for each subchannel.
-   * Upgraded Cheng-Todreas Correlation (2018).
-   */
-  virtual Real computeFrictionFactor(FrictionStruct friction_args) override;
   virtual Real computeAddedHeatPin(unsigned int i_ch, unsigned int iz) override;
   virtual Real getSubChannelPeripheralDuctWidth(unsigned int i_ch) override;
   virtual Real computeBeta(unsigned int i_gap, unsigned int iz, bool enthalpy) override;

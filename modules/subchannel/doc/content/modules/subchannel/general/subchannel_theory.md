@@ -81,7 +81,7 @@ The default friction factor for assemblies with bare pins in a quadrilateral lat
 \begin{equation}
 f_w \rightarrow
 \begin{cases}
-\frac{1}{64} , & Re < 1\\
+64, & Re < 1\\
 \frac{64}{Re}, &1 \leq Re<5000\\
 0.316 Re^{-0.25}, &5000 \leq Re < 30000\\
 0.184 Re^{-0.20}, &30000 \leq Re
