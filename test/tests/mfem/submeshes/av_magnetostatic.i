@@ -67,9 +67,9 @@
     variable = lorentz_force
     u = e_field
     v = b_field
-    scale_factor = 1
+    scale_factor = 1 # Represents the conductivity here since the joule heating = J.E
     execute_on = TIMESTEP_END
-    execution_order_group = 4
+    execution_order_group = 3
   []
 []
 
@@ -172,9 +172,9 @@
   []
   [LorentzL2Sq]
     type = MFEMVectorL2InnerProductIntegralPostprocessor
-    coefficient = conductivity
     dual_variable = lorentz_force
     primal_variable = lorentz_force
+    execution_order_group = 4
   []
 []
 
