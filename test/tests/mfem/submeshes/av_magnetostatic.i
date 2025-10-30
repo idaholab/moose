@@ -182,7 +182,7 @@
 [Outputs]
   [ParaViewDataCollection]
     type = MFEMParaViewDataCollection
-    file_base = OutputData/MagnetostaticClosedCoiltest
+    file_base = OutputData/MagnetostaticClosedCoil
     vtk_format = ASCII
   []
   [ReportedPostprocessors]
