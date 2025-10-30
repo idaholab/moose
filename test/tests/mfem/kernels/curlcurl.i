@@ -44,7 +44,7 @@
     type = MFEMVariable
     fespace = HDivFESpace
   []
-  [joule_heating] 
+  [joule_heating]
     type = MFEMVariable
     fespace = L2FESpace
   []
@@ -63,7 +63,7 @@
     variable = joule_heating
     u = e_field
     v = e_field
-    scale_factor = 1.0 
+    scale_factor = 1.0
     execute_on = TIMESTEP_END
   []
 []
