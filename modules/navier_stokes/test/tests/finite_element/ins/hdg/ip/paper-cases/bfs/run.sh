@@ -1,6 +1,4 @@
 #!/bin/bash
-
-#!/bin/bash
 # Base executable and input file
 EXEC=/data/lindad/projects/moose4/modules/navier_stokes/navier_stokes-oprof
 INPUT=bfs-2d-ilu.i
@@ -14,7 +12,7 @@ num_cases=3
 
 for ((case=1; case<=num_cases; case++)); do
     # Build identifiers
-    tag="strumpack-${procs}proc-${refine}refine-coarse09-mesh"
+    tag="strumpack-${procs}proc-${refine}refine-coarse12-mesh"
 
     echo "=== Running case ${case}: ${procs} ranks, refine=${refine} ==="
     export MOOSE_PROFILE_BASE="$tag"

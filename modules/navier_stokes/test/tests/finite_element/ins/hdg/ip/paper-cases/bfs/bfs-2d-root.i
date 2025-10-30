@@ -6,7 +6,7 @@ rho = 1
 [Mesh]
   [file]
     type = FileMeshGenerator
-    file = coarse06.msh
+    file = coarse12.msh
   []
   second_order = true
 []
