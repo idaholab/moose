@@ -7,7 +7,6 @@
       type = CSVDiff
       input = 'XX09_SCM_SS17.i'
       csvdiff  = 'dittus_boelter.csv'
-      heavy = true
       capabilities = 'method!=dbg'
       abs_zero = 1e-5
       valgrind = NONE
@@ -20,7 +19,6 @@
       type = CSVDiff
       input = 'XX09_SCM_SS17.i'
       csvdiff  = 'gnielinski.csv'
-      heavy = true
       capabilities = 'method!=dbg'
       abs_zero = 1e-5
       valgrind = NONE
@@ -33,7 +31,6 @@
       type = CSVDiff
       input = 'XX09_SCM_SS17.i'
       csvdiff  = 'kazimi-carelli.csv'
-      heavy = true
       capabilities = 'method!=dbg'
       abs_zero = 1e-5
       valgrind = NONE
