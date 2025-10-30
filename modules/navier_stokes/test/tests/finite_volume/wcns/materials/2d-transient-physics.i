@@ -1,11 +1,5 @@
 l = 10
-
-# Artificial fluid properties
-# For a real case, use a GeneralFluidFunctorProperties and a viscosity rampdown
-# or initialize very well!
-k = 1
-cp = 1000
-mu = 1e2
+advected_interp_method = 'average'
 
 # Operating conditions
 inlet_temp = 300
@@ -30,13 +24,16 @@ inlet_v = 0.001
     [Flow]
       [flow]
         compressibility = 'weakly-compressible'
+        fp = 'fp'
 
-        velocity_variable = 'vel_x vel_y'
+        velocity_variable = 'u v'
+        fluid_temperature_variable = 'T'
 
         density = 'rho'
         dynamic_viscosity = 'mu'
+        mu_rampdown = 'mu_rampdown'
 
-        initial_velocity = '${inlet_v} 1e-15 0'
+        initial_velocity = '${inlet_v} 0 0'
         initial_pressure = '${outlet_pressure}'
 
         inlet_boundaries = 'left'
@@ -50,14 +47,16 @@ inlet_v = 0.001
         momentum_outlet_types = 'fixed-pressure'
         pressure_functors = '${outlet_pressure}'
 
-        mass_advection_interpolation = 'average'
-        momentum_advection_interpolation = 'average'
+        mass_advection_interpolation = ${advected_interp_method}
+        momentum_advection_interpolation = ${advected_interp_method}
       []
     []
     [FluidHeatTransfer]
       [energy]
         coupled_flow_physics = flow
+        fluid_temperature_variable = 'T'
 
+        fp = 'fp'
         thermal_conductivity = 'k'
         specific_heat = 'cp'
 
@@ -82,6 +81,9 @@ inlet_v = 0.001
 []
 
 [AuxVariables]
+  [velocity_norm]
+    type = MooseVariableFVReal
+  []
   [power_density]
     type = MooseVariableFVReal
     initial_condition = 1e4
@@ -91,20 +93,25 @@ inlet_v = 0.001
 [FluidProperties]
   [fp]
     type = FlibeFluidProperties
+    # AD-version of h_from_p_T(p, T, h, dh_dp, dh_dT) not implemented
+    allow_imperfect_jacobians = true
   []
 []
 
-[FunctorMaterials]
-  [const_functor]
-    type = ADGenericFunctorMaterial
-    prop_names = 'cp k mu'
-    prop_values = '${cp} ${k} ${mu}'
+[AuxKernels]
+  [speed]
+    type = VectorMagnitudeAux
+    variable = 'velocity_norm'
+    x = u
+    y = v
   []
-  [rho]
-    type = RhoFromPTFunctorMaterial
-    fp = fp
-    temperature = T_fluid
-    pressure = pressure
+[]
+
+[Functions]
+  [mu_rampdown]
+    type = PiecewiseLinear
+    x = '1 2 3 4'
+    y = '1e3 1e2 1e1 1'
   []
 []
 
@@ -121,7 +128,7 @@ inlet_v = 0.001
   []
   end_time = 15
 
-  nl_abs_tol = 1e-9
+  nl_abs_tol = 1e-12
   nl_max_its = 50
   line_search = 'none'
 
