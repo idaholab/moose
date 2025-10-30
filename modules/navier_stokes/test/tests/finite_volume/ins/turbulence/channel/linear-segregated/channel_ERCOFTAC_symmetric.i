@@ -23,11 +23,11 @@ eps_init = '${fparse C_mu^0.75 * k_init^1.5 / (2*H)}'
 
 ### Modeling parameters ###
 bulk_wall_treatment = false
-walls = 'top bottom'
+walls = 'top'
 wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized, neq
 
 [Mesh]
-  [block_1]
+  [gmg]
     type = GeneratedMeshGenerator
     dim = 2
     xmin = 0
@@ -38,26 +38,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     ny = 4
     bias_y = 0.7
   []
-  [block_2]
-    type = GeneratedMeshGenerator
-    dim = 2
-    xmin = 0
-    xmax = ${L}
-    ymin = '${fparse -H}'
-    ymax = 0
-    nx = 4
-    ny = 4
-    bias_y = '${fparse 1/0.7}'
-  []
-  [smg]
-    type = StitchedMeshGenerator
-    inputs = 'block_1 block_2'
-    clear_stitched_boundary_ids = true
-    stitch_boundaries_pairs = 'bottom top'
-    merge_boundaries_with_same_name = true
-  []
-  # Prevent test diffing on distributed parallel element numbering
-  allow_renumbering = false
 []
 
 [Problem]
@@ -255,15 +235,31 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   []
   [walls-u]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'top bottom'
+    boundary = ${walls}
     variable = vel_x
     functor = 0.0
   []
   [walls-v]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
-    boundary = 'top bottom'
+    boundary = ${walls}
     variable = vel_y
     functor = 0.0
+  []
+  [symmetry-u]
+    type = LinearFVVelocitySymmetryBC
+    variable = vel_x
+    boundary = 'bottom'
+    momentum_component = 'x'
+    u = 'vel_x'
+    v = 'vel_y'
+  []
+  [symmetry-v]
+    type = LinearFVVelocitySymmetryBC
+    variable = vel_y
+    boundary = 'bottom'
+    momentum_component = 'y'
+    u = 'vel_x'
+    v = 'vel_y'
   []
   [outlet_u]
     type = LinearFVAdvectionDiffusionOutflowBC
@@ -276,6 +272,12 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     boundary = 'right'
     variable = vel_y
     use_two_term_expansion = false
+  []
+  [symmetry-p]
+    type = LinearFVPressureSymmetryBC
+    variable = pressure
+    boundary = 'bottom'
+    HbyA_flux = 'HbyA' # Functor created in the RhieChowMassFlux UO
   []
   [outlet_p]
     type = LinearFVAdvectionDiffusionFunctorDirichletBC
@@ -310,7 +312,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
   []
   [walls_mu_t]
     type = LinearFVTurbulentViscosityWallFunctionBC
-    boundary = 'bottom top'
+    boundary = ${walls}
     variable = 'mu_t'
     u = vel_x
     v = vel_y
@@ -398,6 +400,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
 
 [Outputs]
   csv = true
+  execute_on = 'TIMESTEP_END'
 []
 
 [AuxVariables]
@@ -418,13 +421,6 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
 []
 
 [VectorPostprocessors]
-  [side_bottom]
-    type = SideValueSampler
-    boundary = 'bottom'
-    variable = 'vel_x vel_y pressure_over_density TKE TKED'
-    sort_by = 'x'
-    execute_on = 'timestep_end'
-  []
   [side_top]
     type = SideValueSampler
     boundary = 'top'
@@ -436,7 +432,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     type = LineValueSampler
     start_point = '${fparse 0.125 * L} ${fparse 0.0001} 0'
     end_point = '${fparse 0.875 * L} ${fparse 0.0001} 0'
-    num_points = ${Mesh/block_1/nx}
+    num_points = ${Mesh/gmg/nx}
     variable = 'vel_x vel_y pressure_over_density TKE TKED'
     sort_by = 'x'
     execute_on = 'timestep_end'
@@ -445,7 +441,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     type = LineValueSampler
     start_point = '${fparse 0.125 * L} ${fparse 0.5 * H} 0'
     end_point = '${fparse 0.875 * L} ${fparse 0.5 * H} 0'
-    num_points = ${Mesh/block_1/nx}
+    num_points = ${Mesh/gmg/nx}
     variable = 'vel_x vel_y pressure_over_density TKE TKED'
     sort_by = 'x'
     execute_on = 'timestep_end'
