@@ -11,7 +11,7 @@
 []
 
 [FESpaces]
-#  inactive = L2FESpace
+ inactive = L2FESpace
   [HCurlFESpace]
     type = MFEMVectorFESpace
     fec_type = ND
@@ -37,7 +37,7 @@
 []
 
 [AuxVariables]
- # inactive = lorentz_force
+  inactive = lorentz_force
   [b_field]
     type = MFEMVariable
     fespace = HDivFESpace
@@ -53,7 +53,7 @@
 []
 
 [AuxKernels]
- # inactive = cross
+  inactive = cross
   [curl]
     type = MFEMCurlAux
     variable = b_field
@@ -162,6 +162,7 @@
 []
 
 [Postprocessors]
+  inactive = LorentzL2Sq
   [CoilPower]
     type = MFEMVectorFEInnerProductIntegralPostprocessor
     coefficient = conductivity
@@ -186,7 +187,6 @@
   []
   [ReportedPostprocessors]
     type = CSV
-    #file_base = OutputData/AVMagnetostaticClosedCoilCSV
-    file_base = OutputData/LorentzCSV
+    file_base = OutputData/AVMagnetostaticClosedCoilCSV
   []
 []
