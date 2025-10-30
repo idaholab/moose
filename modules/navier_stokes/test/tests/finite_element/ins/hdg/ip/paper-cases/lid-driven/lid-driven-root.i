@@ -304,6 +304,7 @@ alpha = '${fparse 10 * degree^2}'
   print_linear_residuals = 'false'
   exodus = false
   checkpoint = true
+  perf_graph = true
 []
 
 [Postprocessors]

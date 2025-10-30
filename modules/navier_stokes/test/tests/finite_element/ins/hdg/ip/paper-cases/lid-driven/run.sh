@@ -2,7 +2,7 @@
 
 #!/bin/bash
 # Base executable and input file
-EXEC=/data/lindad/projects/moose4/modules/navier_stokes/navier_stokes-opt
+EXEC=/data/lindad/projects/moose4/modules/navier_stokes/navier_stokes-oprof
 INPUT=lid-driven-strumpack.i
 
 # Starting parameters
@@ -19,7 +19,7 @@ for ((case=1; case<=num_cases; case++)); do
     echo "=== Running case ${case}: ${procs} ranks, refine=${refine} ==="
 
     # Run the case
-    mpiexec -np "$procs" "$EXEC" -i "$INPUT" Mesh/uniform_refine="$refine" Outputs/file_base="${tag}" --color off \
+    MOOSE_PROFILE_BASE="${tag}" mpiexec -np "$procs" "$EXEC" -i "$INPUT" Mesh/uniform_refine="$refine" Outputs/file_base="${tag}" --color off \
         2>&1 | tee "${tag}.log"
 
     echo "=== Finished case ${case} ==="
