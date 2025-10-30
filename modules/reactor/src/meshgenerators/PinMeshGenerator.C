@@ -17,6 +17,7 @@
 #include "CSGZCylinder.h"
 #include "CSGPlane.h"
 #include "CSGRegion.h"
+#include "CSGUtils.h"
 #include "libmesh/elem.h"
 
 registerMooseObject("ReactorApp", PinMeshGenerator);
@@ -738,7 +739,7 @@ PinMeshGenerator::generateCSG()
     if (inner_region.getRegionType() == CSG::CSGRegion::RegionType::EMPTY)
     {
       // We are in the innermost radial region, the radial region is inner_region
-      inner_region = getInnerRegion(radial_surfaces);
+      inner_region = CSGUtils::getInnerRegion(radial_surfaces);
       radial_region = inner_region;
     }
     else
@@ -746,7 +747,7 @@ PinMeshGenerator::generateCSG()
       // For all other regions, the radial region is the intersection of inner_region and
       // outer_region
       outer_region = ~inner_region;
-      inner_region = getInnerRegion(radial_surfaces);
+      inner_region = CSGUtils::getInnerRegion(radial_surfaces);
       radial_region = inner_region & outer_region;
     }
     radial_regions.push_back(radial_region);
@@ -848,22 +849,4 @@ PinMeshGenerator::getOuterRadialSurfaces(unsigned int radial_index,
   }
 
   return duct_surfaces;
-}
-
-CSG::CSGRegion
-PinMeshGenerator::getInnerRegion(
-    const std::vector<std::reference_wrapper<const CSG::CSGSurface>> & radial_surfaces,
-    const libMesh::Point & origin)
-{
-  CSG::CSGRegion inner_region;
-  for (const auto & surf_ref : radial_surfaces)
-  {
-    const auto & surf = surf_ref.get();
-    const auto direction = surf.getHalfspaceFromPoint(origin);
-    auto halfspace = (direction == CSG::CSGSurface::Halfspace::POSITIVE) ? +surf : -surf;
-    inner_region = (inner_region.getRegionType() == CSG::CSGRegion::RegionType::EMPTY)
-                       ? halfspace
-                       : inner_region & halfspace;
-  }
-  return inner_region;
 }
