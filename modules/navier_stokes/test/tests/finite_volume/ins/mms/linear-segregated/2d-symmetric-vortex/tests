@@ -5,9 +5,9 @@
     type = PythonUnitTest
     input = test.py
     test_case = TestSymmetricVortexOrthogonal
-    method = '!dbg'
+    capabilities = 'method=opt'
     min_parallel = 2
-    requirement = 'The system shall be able to solve the Navier Stokes equations using the SIMPLE algorithm and obtain second order spatial convergence for velocity and at least first order spatial convergence for pressure on an orthogonal grid.'
+    requirement = 'The system shall be able to solve the Navier Stokes equations with symmetry boundary conditions using the SIMPLE algorithm and obtain second order spatial convergence for velocity and at least first order spatial convergence for pressure on an orthogonal grid.'
     required_python_packages = 'pandas matplotlib'
     installation_type = in_tree
     max_threads = 1 # see libmesh issue #3808
@@ -16,9 +16,9 @@
     type = PythonUnitTest
     input = test.py
     test_case = TestSymmetricVortexNonorthogonal
-    method = '!dbg'
+    capabilities = 'method=opt'
     min_parallel = 4
-    requirement = 'The system shall be able to solve the Navier Stokes equations using the SIMPLE algorithm and obtain second order spatial convergence for velocity and at least first order spatial convergence for pressure on a nonorthogonal grid.'
+    requirement = 'The system shall be able to solve the Navier Stokes equations with symmetry boundary conditions using the SIMPLE algorithm and obtain second order spatial convergence for velocity and at least first order spatial convergence for pressure on a nonorthogonal grid.'
     # TODO: Figure out how to make pressure second order, pressure shift maybe instead of pin
     required_python_packages = 'pandas matplotlib'
     installation_type = in_tree
