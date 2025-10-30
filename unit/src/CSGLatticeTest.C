@@ -10,6 +10,7 @@
 #include "gtest/gtest.h"
 
 #include "CSGCartesianLattice.h"
+#include "CSGHexagonalLattice.h"
 #include "CSGUniverse.h"
 
 #include "MooseUnitUtils.h"
@@ -28,10 +29,9 @@ TEST(CSGLatticeTest, testCreateCartLatticeValid)
     // initialize without universes: nx0=2, nx1=3, pitch=1.0
     auto cart_lattice = CSGCartesianLattice("cartlat", 2, 3, 1.0);
     // check dimensions
-    auto dims_map = cart_lattice.getDimensions();
-    ASSERT_EQ(*std::any_cast<int>(&dims_map["nx0"]), 2);
-    ASSERT_EQ(*std::any_cast<int>(&dims_map["nx1"]), 3);
-    ASSERT_EQ(*std::any_cast<Real>(&dims_map["pitch"]), 1.0);
+    ASSERT_EQ(cart_lattice.getNRows(), 2);
+    ASSERT_EQ(cart_lattice.getNCols(), 3);
+    ASSERT_EQ(cart_lattice.getPitch(), 1.0);
     // expect no universe map to be present yet
     ASSERT_EQ(cart_lattice.getUniverses().size(), 0);
     // check other attributes
@@ -41,16 +41,14 @@ TEST(CSGLatticeTest, testCreateCartLatticeValid)
   {
     // initialize with an array of universes, pitch=1.0
     const auto univ1 = CSGUniverse("univ1", false);
-    const auto univ2 = CSGUniverse("univ2", false);
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
-        {std::cref(univ1), std::cref(univ2), std::cref(univ1)},
-        {std::cref(univ2), std::cref(univ1), std::cref(univ2)}};
+        {std::cref(univ1), std::cref(univ1), std::cref(univ1)},
+        {std::cref(univ1), std::cref(univ1), std::cref(univ1)}};
     auto cart_lattice = CSGCartesianLattice("cartlat", 1.0, univ_map);
     // check dimensions
-    auto dims_map = cart_lattice.getDimensions();
-    ASSERT_EQ(*std::any_cast<int>(&dims_map["nx0"]), 2);
-    ASSERT_EQ(*std::any_cast<int>(&dims_map["nx1"]), 3);
-    ASSERT_EQ(*std::any_cast<Real>(&dims_map["pitch"]), 1.0);
+    ASSERT_EQ(cart_lattice.getNRows(), 2);
+    ASSERT_EQ(cart_lattice.getNCols(), 3);
+    ASSERT_EQ(cart_lattice.getPitch(), 1.0);
     // expect 2x3 array
     ASSERT_EQ(cart_lattice.getUniverses().size(), 2);
     ASSERT_EQ(cart_lattice.getUniverses()[0].size(), 3);
@@ -86,6 +84,108 @@ TEST(CSGLatticeTest, testCreateCartLatticeInvalid)
                           "dimensions for lattice type CSG::CSGCartesianLattice";
     Moose::UnitUtils::assertThrows([&univ_map]() { CSGCartesianLattice("cartlat", 1.0, univ_map); },
                                    exp_msg);
+  }
+}
+
+/// tests valiud CSGHexagonalLattice construction
+TEST(CSGLatticeTest, testCreateHexLatticeValid)
+{
+  {
+    // intiialize without universes: num_rings=3, pitch=1.0
+    auto hex_lat = CSGHexagonalLattice("hexlat", 3, 1.0);
+    // check dimensions and properties
+    ASSERT_EQ(hex_lat.getNRings(), 3);
+    ASSERT_EQ(hex_lat.getPitch(), 1.0);
+    ASSERT_EQ(hex_lat.getNRows(), 5);            // should be 2*nring -1 (auto calculated)
+    ASSERT_EQ(hex_lat.getUniverses().size(), 0); // no universe map yet
+    ASSERT_TRUE(hex_lat.getName() == "hexlat");
+    ASSERT_TRUE(hex_lat.getType() == "CSG::CSGHexagonalLattice");
+  }
+  {
+    // initialize with universe map, pitch=1.0
+    const auto univ1 = CSGUniverse("univ1", false);
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
+        {std::cref(univ1), std::cref(univ1), std::cref(univ1)},
+        {std::cref(univ1), std::cref(univ1), std::cref(univ1), std::cref(univ1)},
+        {std::cref(univ1), std::cref(univ1), std::cref(univ1), std::cref(univ1), std::cref(univ1)},
+        {std::cref(univ1), std::cref(univ1), std::cref(univ1), std::cref(univ1)},
+        {std::cref(univ1), std::cref(univ1), std::cref(univ1)}};
+    auto hex_lat = CSGHexagonalLattice("hexlat", 1.0, univ_map);
+    ASSERT_EQ(hex_lat.getNRings(), 3);
+    ASSERT_EQ(hex_lat.getPitch(), 1.0);
+    ASSERT_EQ(hex_lat.getNRows(), 5); // should be 2*nring -1 (auto calculated)
+    ASSERT_EQ(hex_lat.getUniverses().size(), 5);
+    ASSERT_EQ(hex_lat.getUniverses()[0].size(), 3);
+    ASSERT_EQ(hex_lat.getUniverses()[1].size(), 4);
+    ASSERT_EQ(hex_lat.getUniverses()[2].size(), 5);
+    ASSERT_EQ(hex_lat.getUniverses()[3].size(), 4);
+    ASSERT_EQ(hex_lat.getUniverses()[4].size(), 3);
+    ASSERT_TRUE(hex_lat.getName() == "hexlat");
+    ASSERT_TRUE(hex_lat.getType() == "CSG::CSGHexagonalLattice");
+  }
+}
+
+/// tests invalid CSGHexagonalLattice construction
+TEST(CSGLatticeTest, testCreateHexLatticeInvalid)
+{
+  {
+    // try initialize empty by providing invalid dimensions
+    Moose::UnitUtils::assertThrows(
+        []() { CSGHexagonalLattice("hexlat", -2, 1.0); },
+        "Cannot convert number of rings -2 to number of rows in hexagonal lattice. Number of rings "
+        "must be >= 1."); // invalid num_rings
+    Moose::UnitUtils::assertThrows([]() { CSGHexagonalLattice("hexlat", 2, -1.0); },
+                                   "Hex lattice hexlat has invalid dimensions. Must have number of "
+                                   "rings > 0 and pitch > 0."); // invalid pitch
+  }
+  {
+    // create universe map with invalid dimensions (even number of rows)
+    const auto univ1 = CSGUniverse("univ1", false);
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
+        {std::cref(univ1), std::cref(univ1), std::cref(univ1)},
+        {std::cref(univ1), std::cref(univ1), std::cref(univ1), std::cref(univ1)},
+        {std::cref(univ1), std::cref(univ1), std::cref(univ1), std::cref(univ1)},
+        {std::cref(univ1), std::cref(univ1), std::cref(univ1)}};
+    std::string exp_msg = "Cannot set lattice hexlat with universes. Does not have valid "
+                          "dimensions for lattice type CSG::CSGHexagonalLattice";
+    Moose::UnitUtils::assertThrows([&univ_map]() { CSGHexagonalLattice("hexlat", 1.0, univ_map); },
+                                   exp_msg);
+  }
+  {
+    // create universe map with invalid dimensions (one row has wrong number of elements)
+    const auto univ1 = CSGUniverse("univ1", false);
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
+        {std::cref(univ1), std::cref(univ1), std::cref(univ1)},
+        {std::cref(univ1), std::cref(univ1), std::cref(univ1), std::cref(univ1)},
+        {std::cref(univ1),
+         std::cref(univ1),
+         std::cref(univ1),
+         std::cref(univ1)}, // should have 5 elements
+        {std::cref(univ1), std::cref(univ1), std::cref(univ1), std::cref(univ1)},
+        {std::cref(univ1), std::cref(univ1), std::cref(univ1)}};
+    std::string exp_msg = "Cannot set lattice hexlat with universes. Does not have valid "
+                          "dimensions for lattice type CSG::CSGHexagonalLattice";
+    Moose::UnitUtils::assertThrows([&univ_map]() { CSGHexagonalLattice("hexlat", 1.0, univ_map); },
+                                   exp_msg);
+  }
+}
+
+TEST(CSGLatticeTest, testGetDimensions)
+{
+  {
+    // cartesian lattice
+    auto cart_lattice = CSGCartesianLattice("cartlat", 2, 3, 1.0);
+    auto dims_map = cart_lattice.getDimensions();
+    ASSERT_EQ(*std::any_cast<int>(&dims_map["nx0"]), 2);
+    ASSERT_EQ(*std::any_cast<int>(&dims_map["nx1"]), 3);
+    ASSERT_EQ(*std::any_cast<Real>(&dims_map["pitch"]), 1.0);
+  }
+  {
+    // hexagonal lattice
+    auto hex_lattice = CSGHexagonalLattice("hexlat", 3, 1.0);
+    auto dims_map = hex_lattice.getDimensions();
+    ASSERT_EQ(*std::any_cast<int>(&dims_map["nrow"]), 5); // should be 2*nring -1
+    ASSERT_EQ(*std::any_cast<Real>(&dims_map["pitch"]), 1.0);
   }
 }
 
@@ -351,5 +451,10 @@ TEST(CSGLatticeTest, testCartUpdateDimension)
     Moose::UnitUtils::assertThrows([&cart_lattice]() { cart_lattice.updateDimension("elmo", 3); },
                                    "Dimension elmo is not an allowable dimension for lattice type");
   }
+}
+
+TEST(CSGLatticeTest, testConvert)
+{
+  // test converting ring to row indices for hex lattices and vice versa
 }
 }
