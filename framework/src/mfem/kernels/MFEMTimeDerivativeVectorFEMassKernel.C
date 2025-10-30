@@ -10,6 +10,7 @@
 #ifdef MOOSE_MFEM_ENABLED
 
 #include "MFEMTimeDerivativeVectorFEMassKernel.h"
+#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMTimeDerivativeVectorFEMassKernel);
 
@@ -27,7 +28,8 @@ MFEMTimeDerivativeVectorFEMassKernel::validParams()
 MFEMTimeDerivativeVectorFEMassKernel::MFEMTimeDerivativeVectorFEMassKernel(
     const InputParameters & parameters)
   : MFEMVectorFEMassKernel(parameters),
-    _var_dot_name(Moose::MFEM::GetTimeDerivativeName(_test_var_name))
+    _var_dot_name(
+        getMFEMProblem().getProblemData().time_derivative_map.getTimeDerivativeName(_test_var_name))
 {
 }
 

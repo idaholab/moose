@@ -45,22 +45,46 @@ public:
   /// Add kernels.
   virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel);
   virtual void AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> kernel);
+
+  /// Add BC associated with essentially constrained DoFs on boundaries.
   virtual void AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc);
 
   /// Initialise
-  virtual void Init(Moose::MFEM::GridFunctions & gridfunctions,
-                    const Moose::MFEM::FESpaces & fespaces,
-                    mfem::AssemblyLevel assembly_level);
+  virtual void Init(Moose::MFEM::GridFunctions & gridfunctions, mfem::AssemblyLevel assembly_level);
 
   /// Build linear forms and eliminate constrained DoFs
   virtual void BuildLinearForms();
+
+  /// Apply essential BC(s) associated with test_var_name to set true DoFs of trial_gf and update
+  /// markers of all essential boundaries
+  virtual void ApplyEssentialBC(const std::string & test_var_name,
+                                mfem::ParGridFunction & trial_gf,
+                                mfem::Array<int> & global_ess_markers);
+  /// Update all essentially constrained true DoF markers and values on boundaries
   virtual void ApplyEssentialBCs();
+
+  /// Perform trivial eliminations of coupled variables lacking corresponding test variables
   virtual void EliminateCoupledVariables();
 
-  /// Build bilinear forms
+  /// Build bilinear forms (diagonal Jacobian contributions)
   virtual void BuildBilinearForms();
+  /// Build mixed bilinear forms (off-diagonal Jacobian contributions)
   virtual void BuildMixedBilinearForms();
+  /// Build all forms comprising this EquationSystem
   virtual void BuildEquationSystem();
+
+  /// Form Jacobian operator based on on- and off-diagonal bilinear form contributions, populate
+  /// solution and RHS vectors of true DoFs, and apply constraints
+  void AssembleJacobian(
+      Moose::MFEM::NamedFieldsMap<mfem::ParBilinearForm> & jac_blfs,
+      Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>> &
+          jac_mblfs,
+      Moose::MFEM::NamedFieldsMap<mfem::ParLinearForm> & rhs_lfs,
+      std::vector<mfem::Array<int>> & ess_tdof_lists,
+      std::vector<std::unique_ptr<mfem::ParGridFunction>> & var_ess_constraints,
+      mfem::OperatorHandle & op,
+      mfem::BlockVector & trueX,
+      mfem::BlockVector & trueRHS);
 
   /// Form linear system, with essential boundary conditions accounted for
   virtual void FormLinearSystem(mfem::OperatorHandle & op,
@@ -298,15 +322,20 @@ EquationSystem::ApplyBoundaryLFIntegrators(
 class TimeDependentEquationSystem : public EquationSystem
 {
 public:
-  TimeDependentEquationSystem();
+  TimeDependentEquationSystem(const Moose::MFEM::TimeDerivativeMap & time_derivative_map);
 
-  void AddCoupledVariableNameIfMissing(const std::string & coupled_var_name) override;
+  /// Initialise
+  virtual void Init(Moose::MFEM::GridFunctions & gridfunctions,
+                    mfem::AssemblyLevel assembly_level) override;
 
   virtual void SetTimeStep(mfem::real_t dt);
   virtual void UpdateEquationSystem();
 
   virtual void AddKernel(std::shared_ptr<MFEMKernel> kernel) override;
   virtual void BuildBilinearForms() override;
+  virtual void BuildMixedBilinearForms() override;
+  virtual void ApplyEssentialBCs() override;
+  virtual void EliminateCoupledVariables() override;
   virtual void FormLegacySystem(mfem::OperatorHandle & op,
                                 mfem::BlockVector & truedXdt,
                                 mfem::BlockVector & trueRHS) override;
@@ -314,14 +343,44 @@ public:
                           mfem::BlockVector & truedXdt,
                           mfem::BlockVector & trueRHS) override;
 
+  /// Fetch all integrators on a source bilinear form, scale them by a real factor, and add to a second target bilienar form.
+  /// Useful for scaling bilinear form integrators by timesteps.
+  template <class FormType>
+  void ScaleAndAddBLFIntegrators(std::shared_ptr<FormType> source_blf,
+                                 std::shared_ptr<FormType> target_blf,
+                                 mfem::real_t scale_factor)
+  {
+    // Add and scale all domain integrators existing on source_blf to target_blf
+    auto domain_integrators = source_blf->GetDBFI();
+    auto domain_markers = source_blf->GetDBFI_Marker();
+    for (int i = 0; i < domain_integrators->Size(); ++i)
+      target_blf->AddDomainIntegrator(
+          new ScaleIntegrator(*domain_integrators[i], scale_factor, false), *(*domain_markers[i]));
+    // Add and scale all boundary integrators existing on source_blf to target_blf
+    auto boundary_integrators = source_blf->GetBBFI();
+    auto boundary_markers = source_blf->GetBBFI_Marker();
+    for (int i = 0; i < boundary_integrators->Size(); ++i)
+      target_blf->AddBoundaryIntegrator(
+          new ScaleIntegrator(*boundary_integrators[i], scale_factor, false),
+          *(*boundary_markers[i]));
+  }
+
 protected:
   /// Coefficient for timestep scaling
   mfem::ConstantCoefficient _dt_coef;
 
   Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>
       _td_kernels_map;
-  /// Container to store contributions to weak form of the form (F du/dt, v)
+  /// Containers to store contributions to weak form of the form (F du/dt, v)
   Moose::MFEM::NamedFieldsMap<mfem::ParBilinearForm> _td_blfs;
+  Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>
+      _td_mblfs; // named according to trial variable
+
+  /// Gridfunctions holding essential constraints from Dirichlet BCs
+  std::vector<std::unique_ptr<mfem::ParGridFunction>> _td_var_ess_constraints;
+
+  /// Map between variable names and their time derivatives
+  const Moose::MFEM::TimeDerivativeMap & _time_derivative_map;
 
 private:
   /// Set trial variable names from subset of coupled variables that have an associated test variable.

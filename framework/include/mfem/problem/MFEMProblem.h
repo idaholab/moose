@@ -184,6 +184,7 @@ public:
    * current data specifying the FE problem.
    */
   MFEMProblemData & getProblemData() { return _problem_data; }
+  const MFEMProblemData & getProblemData() const { return _problem_data; }
 
   /**
    * Return the MPI communicator associated with this FE problem's mesh.
