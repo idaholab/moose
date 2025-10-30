@@ -87,6 +87,27 @@ public:
   virtual bool isValidUniverseMap(
       std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes) const override;
 
+  /**
+   * @brief get the number of rows
+   *
+   * @return number of rows
+   */
+  int getNRows() const { return _nx0; }
+
+  /**
+   * @brief get number of columns
+   *
+   * @return number of columns
+   */
+  int getNCols() const { return _nx1; }
+
+  /**
+   * @brief get lattice pitch
+   *
+   * @return pitch
+   */
+  Real getPitch() const { return _pitch; }
+
 protected:
   /**
    * @brief For the lattice type, check that the dimension of _universe_map are valid
@@ -99,10 +120,10 @@ protected:
   // type)
   virtual bool compareDimensions(const CSGLattice & other) const override;
 
-  /// number of elements in the first dimension
+  /// number of elements in the first dimension (rows)
   int _nx0;
 
-  /// number of elements in the second direction
+  /// number of elements in the second direction (columns)
   int _nx1;
 
   /// pitch
