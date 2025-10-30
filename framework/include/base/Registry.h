@@ -126,6 +126,7 @@ struct RegistryEntryBase : public RegistryEntryData
   virtual ~RegistryEntryBase() {}
   /// proxy functions
   virtual std::unique_ptr<MooseObject> build(const InputParameters & parameters) = 0;
+  virtual std::shared_ptr<MooseObject> buildShared(const InputParameters & parameters) = 0;
   virtual std::shared_ptr<Action> buildAction(const InputParameters & parameters) = 0;
   virtual InputParameters buildParameters() = 0;
   /// resolve the name from _classname, _alias, and _name
@@ -143,8 +144,9 @@ struct RegistryEntryBase : public RegistryEntryData
 template <typename T>
 struct RegistryEntry : public RegistryEntryBase
 {
-  RegistryEntry(const RegistryEntryData & data) : RegistryEntryBase(data) {}
+  RegistryEntry(const RegistryEntryData & data);
   virtual std::unique_ptr<MooseObject> build(const InputParameters & parameters) override;
+  virtual std::shared_ptr<MooseObject> buildShared(const InputParameters & parameters) override;
   virtual std::shared_ptr<Action> buildAction(const InputParameters & parameters) override;
   virtual InputParameters buildParameters() override;
 };
@@ -281,7 +283,7 @@ private:
   FRIEND_TEST(RegistryTest, appNameFromAppPathFailed);
   ///@}
 
-  Registry(){};
+  Registry() {};
 
   /**
    * Manually set the data file paths.
@@ -330,12 +332,27 @@ Registry::getRegisteredName()
 }
 
 template <typename T>
+RegistryEntry<T>::RegistryEntry(const RegistryEntryData & data) : RegistryEntryBase(data)
+{
+  static_assert(std::is_base_of_v<MooseObject, T> || std::is_base_of_v<Action, T>,
+                "Not derived from MooseObject or Action");
+}
+
+template <typename T>
 std::unique_ptr<MooseObject>
 RegistryEntry<T>::build(const InputParameters & parameters)
 {
   if constexpr (std::is_base_of_v<MooseObject, T>)
     return std::make_unique<T>(parameters);
-  mooseError("The object to be built is not derived from MooseObject.");
+  mooseError(MooseUtils::prettyCppType<T>(), " to be built is not a MooseObject.");
+}
+template <typename T>
+std::shared_ptr<MooseObject>
+RegistryEntry<T>::buildShared(const InputParameters & parameters)
+{
+  if constexpr (std::is_base_of_v<MooseObject, T>)
+    return std::make_shared<T>(parameters);
+  mooseError(MooseUtils::prettyCppType<T>(), " to be built is not a MooseObject.");
 }
 
 template <typename T>
