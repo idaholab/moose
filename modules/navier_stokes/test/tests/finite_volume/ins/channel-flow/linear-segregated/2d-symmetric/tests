@@ -1,6 +1,6 @@
 [Tests]
   issues = '#27756'
-  design = 'SIMPLE.md LinearFVPressureSymmetryBC.md LinearFVVelcoitySymmetryBC.md'
+  design = 'SIMPLE.md LinearFVPressureSymmetryBC.md LinearFVVelocitySymmetryBC.md'
   [symmetry]
     requirement = "The system shall be able to solve the Navier-Stokes equations with the linear finite volume method using a symmetry boundary condition "
     [cartesian]

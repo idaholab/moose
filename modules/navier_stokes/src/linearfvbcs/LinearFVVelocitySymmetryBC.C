@@ -9,7 +9,7 @@
 
 #include "LinearFVVelocitySymmetryBC.h"
 
-registerMooseObject("MooseApp", LinearFVVelocitySymmetryBC);
+registerMooseObject("NavierStokesApp", LinearFVVelocitySymmetryBC);
 
 InputParameters
 LinearFVVelocitySymmetryBC::validParams()
