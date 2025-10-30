@@ -34,22 +34,18 @@ CSGLatticeList::addCartesianLattice(const std::string & name,
 }
 
 CSGLattice &
-CSGLatticeList::addHexagonalLattice(const std::string & name,
-                                    int num_rings,
-                                    Real pitch,
-                                    std::string orientation)
+CSGLatticeList::addHexagonalLattice(const std::string & name, int num_rings, Real pitch)
 {
-  return addLattice(std::make_unique<CSGHexagonalLattice>(name, num_rings, pitch, orientation));
+  return addLattice(std::make_unique<CSGHexagonalLattice>(name, num_rings, pitch));
 }
 
 CSGLattice &
 CSGLatticeList::addHexagonalLattice(
     const std::string & name,
     const Real pitch,
-    std::string orientation,
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes)
 {
-  return addLattice(std::make_unique<CSGHexagonalLattice>(name, pitch, orientation, universes));
+  return addLattice(std::make_unique<CSGHexagonalLattice>(name, pitch, universes));
 }
 
 CSGLattice &

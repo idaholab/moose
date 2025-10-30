@@ -321,36 +321,32 @@ public:
   }
 
   /**
-   * @brief Create an empty hexagonal lattice. NOTE: this will not create an empty universe mapping;
-   * this must be done by using setLatticeUniverses.
+   * @brief Create an empty hexagonal lattice with x orientation.
+   * NOTE: this will not create an empty universe mapping; this must be done by using
+   * setLatticeUniverses.
    *
    * @param name unique name identifier for the lattice
    * @param num_rings number of rings in the lattice
    * @param pitch flat-to-flat size of the lattice elements
-   * @param orientation orientation of the hex lattice, either "x" or "y"
    * @return reference to new hexagonal lattice
    */
-  const CSGLattice & createHexagonalLattice(const std::string & name,
-                                            int num_rings,
-                                            Real pitch,
-                                            std::string orientation)
+  const CSGLattice & createHexagonalLattice(const std::string & name, int num_rings, Real pitch)
   {
-    return _lattice_list.addHexagonalLattice(name, num_rings, pitch, orientation);
+    return _lattice_list.addHexagonalLattice(name, num_rings, pitch);
   }
 
   /**
-   * @brief Create a hexagonal Lattice from the provided universes
+   * @brief Create a hexagonal Lattice from the provided universes. Universes should be arranged
+   * by rows and correspond to a hexagonal lattice with x-orientation.
    *
    * @param name unique name identifier for the lattice
    * @param pitch flat-to-flat size of the lattice elements
-   * @param orientation orientation of the hex lattice, either "x" or "y"
    * @param universes list of list of universes that define the layout of the lattice
    * @return reference to new hexagonal lattice
    */
   const CSGLattice & createHexagonalLattice(
       const std::string & name,
       const Real pitch,
-      std::string orientation,
       std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes);
 
   /**
