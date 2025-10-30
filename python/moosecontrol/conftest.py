@@ -84,7 +84,7 @@ def pytest_configure(config):
     config.moose_exe = None
 
     # --no-moose not set, running with MOOSE
-    if config.getoption("--no-moose") is not None:
+    if not config.getoption("--no-moose"):
         # Paths searched; used in error handling
         searched: Optional[list[str]] = None
 
