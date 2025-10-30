@@ -34,16 +34,9 @@ public:
                                       const Real poissons_ratio) override;
 
 protected:
-
   /// Residual stress after full softening
   const Real & _residual_stress;
 
   /// Fracture toughness
   const Real & _fracture_toughness;
-
-  /// Strain rate exponent 
-  const Real & _rate_exponent; 
-
-  /// Reference strain rate 
-  const Real & _ref_strain_rate;
 };

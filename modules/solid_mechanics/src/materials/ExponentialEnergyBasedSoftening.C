@@ -29,35 +29,23 @@ ExponentialEnergyBasedSoftening::validParams()
       "fracture_toughness",
       "fracture_toughness > 0",
       "Fracture toughness used to calculate the softening slope. ");
-  params.addRangeCheckedParam<Real>(
-      "rate_exponent", 
-      1.0, 
-      "rate_exponent >= 0", 
-      "Exponent on normalized strain rate. ");
-  params.addRangeCheckedParam<Real>(
-      "reference_strain_rate", 
-      1.0, 
-      "reference_strain_rate > 0", 
-      "Reference strain rate for strain rate sensitivity. ");
   return params;
 }
 
 ExponentialEnergyBasedSoftening::ExponentialEnergyBasedSoftening(const InputParameters & parameters)
   : SmearedCrackSofteningBase(parameters),
     _residual_stress(getParam<Real>("residual_stress")),
-    _fracture_toughness(getParam<Real>("fracture_toughness")), 
-    _rate_exponent(getParam<Real>("rate_exponent")), 
-    _ref_strain_rate(getParam<Real>("reference_strain_rate"))
+    _fracture_toughness(getParam<Real>("fracture_toughness"))
 {
 }
 
 void
 ExponentialEnergyBasedSoftening::computeCrackingRelease(Real & stress,
                                              Real & stiffness_ratio,
-                                             const Real strain,
+                                             const Real /*strain*/,
                                              const Real crack_initiation_strain,
                                              const Real crack_max_strain,
-                                             const Real crack_max_strain_old,
+                                             const Real /*crack_max_strain_old*/,
                                              const Real cracking_stress,
                                              const Real youngs_modulus, 
                                              const Real poissons_ratio)
@@ -75,12 +63,8 @@ ExponentialEnergyBasedSoftening::computeCrackingRelease(Real & stress,
     ele_len = std::sqrt(_current_elem->volume());
   }
 
-  const Real strainrate = (crack_max_strain - crack_max_strain_old) / _dt;
-  const Real normalizing = 1.0 + std::pow(1e-4 / _ref_strain_rate, _rate_exponent);
-
   // Calculate initial slope of exponential curve
-  const Real ratetoughness = _fracture_toughness * (1 + std::pow(strainrate / _ref_strain_rate, _rate_exponent)) / normalizing;
-  const Real energy_release_rate = (ratetoughness * ratetoughness) * (1 - poissons_ratio * poissons_ratio) / youngs_modulus;
+  const Real energy_release_rate = (_fracture_toughness * _fracture_toughness) * (1 - poissons_ratio * poissons_ratio) / youngs_modulus;
   const Real frac_stress_sqr = cracking_stress * cracking_stress;
   const Real l_max = 2 * energy_release_rate * youngs_modulus / frac_stress_sqr;
 
@@ -90,14 +74,10 @@ ExponentialEnergyBasedSoftening::computeCrackingRelease(Real & stress,
     initial_slope = -frac_stress_sqr / (energy_release_rate / ele_len - frac_stress_sqr / (2*youngs_modulus));
 
   // Compute stress that follows exponental curve
-  // const Real new
   stress = cracking_stress *
            (_residual_stress + (1.0 - _residual_stress)
              * std::exp(initial_slope / cracking_stress *
                        (crack_max_strain - crack_initiation_strain)));
   // Compute ratio of current stiffness to original stiffness
-  // stiffness_ratio = youngs_modulus / (stress / crack_max_strain);
-  const Real new_stiffness_ratio = stress * crack_initiation_strain / (crack_max_strain * cracking_stress);
-  if (new_stiffness_ratio < stiffness_ratio) 
-      stiffness_ratio = new_stiffness_ratio;
+  stiffness_ratio = stress * crack_initiation_strain / (crack_max_strain * cracking_stress);
 }
