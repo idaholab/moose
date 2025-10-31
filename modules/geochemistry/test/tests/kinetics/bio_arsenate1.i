@@ -87,7 +87,7 @@
     type = ParsedFunction
     vars = 'dt reaction_rate_times_dt'
     vals = 'dt reaction_rate_times_dt'
-    value = 'reaction_rate_times_dt / dt'
+    expression = 'reaction_rate_times_dt / dt'
   []
 []
 [Postprocessors]

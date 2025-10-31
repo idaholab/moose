@@ -56,7 +56,7 @@
 [Functions]
   [moving_gauss]
     type = ParsedFunction
-    value = 'exp(-((x+0.5-t)^2+(y)^2)/0.25)'
+    expression = 'exp(-((x+0.5-t)^2+(y)^2)/0.25)'
   []
 []
 
