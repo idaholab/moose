@@ -73,52 +73,72 @@ ElementJacobianDamper::computeDamping(const NumericVector<Number> & /* solution 
   // Vector for storing the original node coordinates
   std::vector<Point> point_copies;
 
-  // Loop over elements in the mesh
-  for (auto & current_elem : _mesh->getMesh().active_local_element_ptr_range())
+  PARALLEL_TRY
   {
-    point_copies.clear();
-    point_copies.reserve(current_elem->n_nodes());
-
-    // Displace nodes with current Newton increment
-    for (unsigned int i = 0; i < current_elem->n_nodes(); ++i)
+    try
     {
-      Node & displaced_node = current_elem->node_ref(i);
-
-      point_copies.push_back(displaced_node);
-
-      for (unsigned int j = 0; j < _ndisp; ++j)
+      // Loop over elements in the mesh
+      for (auto & current_elem : _mesh->getMesh().active_local_element_ptr_range())
       {
-        dof_id_type disp_dof_num =
-            displaced_node.dof_number(_sys.number(), _disp_var[j]->number(), 0);
-        displaced_node(j) += update(disp_dof_num);
+        point_copies.clear();
+        point_copies.reserve(current_elem->n_nodes());
+
+        // Displace nodes with current Newton increment
+        for (unsigned int i = 0; i < current_elem->n_nodes(); ++i)
+        {
+          Node & displaced_node = current_elem->node_ref(i);
+
+          point_copies.push_back(displaced_node);
+
+          for (unsigned int j = 0; j < _ndisp; ++j)
+          {
+            dof_id_type disp_dof_num =
+                displaced_node.dof_number(_sys.number(), _disp_var[j]->number(), 0);
+            displaced_node(j) += update(disp_dof_num);
+          }
+        }
+
+        // Reinit element to compute Jacobian of displaced element
+        _assembly.reinit(current_elem);
+        JxW_displaced = _JxW;
+
+        // Un-displace nodes
+        for (unsigned int i = 0; i < current_elem->n_nodes(); ++i)
+        {
+          Node & displaced_node = current_elem->node_ref(i);
+
+          for (unsigned int j = 0; j < _ndisp; ++j)
+            displaced_node(j) = point_copies[i](j);
+        }
+
+        // Reinit element to compute Jacobian before displacement
+        _assembly.reinit(current_elem);
+
+        for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
+        {
+          Real diff = std::abs(JxW_displaced[qp] - _JxW[qp]) / _JxW[qp];
+          if (diff > max_difference)
+            max_difference = diff;
+        }
+
+        JxW_displaced.release();
       }
     }
-
-    // Reinit element to compute Jacobian of displaced element
-    _assembly.reinit(current_elem);
-    JxW_displaced = _JxW;
-
-    // Un-displace nodes
-    for (unsigned int i = 0; i < current_elem->n_nodes(); ++i)
+    catch (MooseException & e)
     {
-      Node & displaced_node = current_elem->node_ref(i);
-
-      for (unsigned int j = 0; j < _ndisp; ++j)
-        displaced_node(j) = point_copies[i](j);
+      _fe_problem.setException(e.what());
     }
-
-    // Reinit element to compute Jacobian before displacement
-    _assembly.reinit(current_elem);
-
-    for (unsigned int qp = 0; qp < _qrule->n_points(); ++qp)
+    catch (std::exception & e)
     {
-      Real diff = std::abs(JxW_displaced[qp] - _JxW[qp]) / _JxW[qp];
-      if (diff > max_difference)
-        max_difference = diff;
+      // Allow the libmesh error/exception on negative jacobian
+      const std::string & message = e.what();
+      if (message.find("Jacobian") == std::string::npos)
+        throw e;
+      else
+        _fe_problem.setException(message);
     }
-
-    JxW_displaced.release();
   }
+  PARALLEL_CATCH;
 
   _communicator.max(max_difference);
 

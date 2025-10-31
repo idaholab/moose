@@ -4,6 +4,9 @@
   nx = 5
   ny = 5
   nz = 5
+  xmax = 5
+  ymax = 5
+  zmax = 5
   elem_type = HEX8
 []
 
@@ -14,18 +17,58 @@
 [Functions]
   [tdisp]
     type = ParsedFunction
-    expression = '-3* t'
+    expression = '-4 * t'
   []
 []
 
-[Physics]
-  [SolidMechanics]
-    [QuasiStatic]
-      [all]
-        strain = FINITE
-        add_variables = true
-      []
-    []
+[AuxVariables]
+  [pid]
+    family = MONOMIAL
+    order = CONSTANT
+  []
+[]
+
+[AuxKernels]
+  [pid]
+    type = ProcessorIDAux
+    variable = pid
+    execute_on = 'initial'
+  []
+[]
+
+[Variables]
+  [disp_x]
+  []
+  [disp_y]
+  []
+  [disp_z]
+  []
+[]
+
+[Kernels]
+  [time_x]
+    type = TimeDerivative
+    variable = disp_x
+  []
+  [time_y]
+    type = TimeDerivative
+    variable = disp_y
+  []
+  [time_z]
+    type = TimeDerivative
+    variable = disp_z
+  []
+  [rxn_x]
+    type = Reaction
+    variable = disp_x
+  []
+  [rxn_y]
+    type = Reaction
+    variable = disp_y
+  []
+  [rxn_z]
+    type = Reaction
+    variable = disp_z
   []
 []
 
@@ -50,20 +93,10 @@
   []
   [tdisp]
     type = FunctionDirichletBC
-    variable = disp_z
-    boundary = front
+    variable = disp_x
+    boundary = right
     function = tdisp
-  []
-[]
-
-[Materials]
-  [elasticity_tensor]
-    type = ComputeElasticityTensor
-    C_ijkl = '1.684e5 0.176e5 0.176e5 1.684e5 0.176e5 1.684e5 0.754e5 0.754e5 0.754e5'
-    fill_method = symmetric9
-  []
-  [stress]
-    type = ComputeFiniteStrainElasticStress
+    preset = false
   []
 []
 
@@ -73,29 +106,20 @@
     full = true
   []
 []
+
 [Dampers]
   [jac]
     type = ElementJacobianDamper
   []
 []
+
 [Executioner]
   type = Transient
   solve_type = NEWTON
-
-  petsc_options_iname = -pc_hypre_type
-  petsc_options_value = boomeramg
-  automatic_scaling = true
+  petsc_options_iname = '-pc_type -pc_factor_mat_solver_type'
+  petsc_options_value = 'lu       mumps'
   line_search = none
-
-  nl_rel_tol = 1e-10
-  nl_abs_tol = 1e-10
-  nl_rel_step_tol = 1e-10
-  nl_abs_step_tol = 1e-10
-
-  dt = 0.05
-  num_steps = 2
-[]
-
-[Outputs]
-  print_linear_residuals=false
+  dt = 1
+  num_steps = 1
+  nl_max_its = 5
 []
