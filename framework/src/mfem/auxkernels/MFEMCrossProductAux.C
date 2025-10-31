@@ -33,9 +33,14 @@ MFEMCrossProductAux::MFEMCrossProductAux(const InputParameters & parameters)
     _v_var_name(getParam<VariableName>("v")),
     _u_var(*getMFEMProblem().getProblemData().gridfunctions.Get(_u_var_name)),
     _v_var(*getMFEMProblem().getProblemData().gridfunctions.Get(_v_var_name)),
-    _scale_factor(getParam<mfem::real_t>("scale_factor"))
+    _scale_factor(getParam<mfem::real_t>("scale_factor")),
+    _u_coef(&_u_var),
+    _v_coef(&_v_var),
+    _cross_uv(_u_coef, _v_coef),
+    _scale_c(_scale_factor),
+    _final_vec(_scale_c, _cross_uv)
 {
-  // // Must be vector L2 with INTEGRAL map and interior DOFs
+  // // Must be vector L2 with interior DOFs
   mfem::ParFiniteElementSpace * fes = _result_var.ParFESpace();
   const int mesh_dim = fes->GetMesh()->Dimension();
 
@@ -59,18 +64,18 @@ MFEMCrossProductAux::MFEMCrossProductAux(const InputParameters & parameters)
 void
 MFEMCrossProductAux::execute()
 {
-  // Build vector coefficient: s(x) * (U x V)
-  mfem::VectorGridFunctionCoefficient Ucoef(const_cast<mfem::ParGridFunction *>(&_u_var));
-  mfem::VectorGridFunctionCoefficient Vcoef(const_cast<mfem::ParGridFunction *>(&_v_var));
-  mfem::VectorCrossProductCoefficient cross_uv(Ucoef, Vcoef); // vector-valued
+  // // Build vector coefficient: s(x) * (U x V)
+  // mfem::VectorGridFunctionCoefficient Ucoef(&_u_var);
+  // mfem::VectorGridFunctionCoefficient Vcoef(&_v_var);
+  // mfem::VectorCrossProductCoefficient cross_uv(Ucoef, Vcoef); // vector-valued
 
-  // s(x) = constant scale factor for now
-  mfem::ConstantCoefficient scoef(_scale_factor);
-  mfem::ScalarVectorProductCoefficient final_vec(scoef, cross_uv); // vector-valued
+  // // s(x) = constant scale factor for now
+  // mfem::ConstantCoefficient scoef(_scale_factor);
+  // mfem::ScalarVectorProductCoefficient final_vec(scoef, cross_uv); // vector-valued
 
   // MFEM element projection for L2
   _result_var = 0.0;
-  _result_var.ProjectCoefficient(final_vec);
+  _result_var.ProjectCoefficient(_final_vec);
 }
 
 #endif // MOOSE_MFEM_ENABLED
