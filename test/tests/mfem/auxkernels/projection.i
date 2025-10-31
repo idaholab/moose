@@ -83,7 +83,7 @@
   [essential]
     type = MFEMScalarDirichletBC
     variable = Az
-    boundary = 1
+    boundary = outer
     coefficient = 1
   []
 []
