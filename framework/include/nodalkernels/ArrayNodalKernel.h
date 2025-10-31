@@ -15,7 +15,7 @@
 /**
  * Base class for creating nodal kernels with hand-coded Jacobians
  */
-class NodalKernel : public NodalKernelBase, public MooseVariableInterface<Real>
+class ArrayNodalKernel : public NodalKernelBase, public MooseVariableInterface<RealEigenVector>
 {
 public:
   /**
@@ -24,10 +24,10 @@ public:
    */
   static InputParameters validParams();
 
-  NodalKernel(const InputParameters & parameters);
+  ArrayNodalKernel(const InputParameters & parameters);
 
   /**
-   * Compute the residual at the current node.
+   * Compute and assemble the residual at the current node
    *
    * Note: This is NOT what a user would normally want to override.
    * Usually a user would override computeQpResidual()
@@ -35,7 +35,7 @@ public:
   virtual void computeResidual() override;
 
   /**
-   * Compute the Jacobian at one node.
+   * Compute and assemble the Jacobian at one node.
    *
    * Note: This is NOT what a user would normally want to override.
    * Usually a user would override computeQpJacobian()
@@ -47,6 +47,7 @@ public:
    *
    * Note: This is NOT what a user would normally want to override.
    * Usually a user would override computeQpOffDiagJacobian()
+   * @param jvar Coupled variable for the off-diagonal Jacobian contribution
    */
   virtual void computeOffDiagJacobian(unsigned int jvar) override;
 
@@ -54,40 +55,49 @@ public:
    * Gets the variable this is active on
    * @return the variable
    */
-  const MooseVariable & variable() const override { return _var; }
+  const MooseVariableFE<RealEigenVector> & variable() const override { return _var; }
 
 protected:
   /**
-   * The user can override this function to compute the residual at a node.
+   * The user must override this function to compute the residual at a node.
+   * @param residual Reference to the residual, computed by this method
    */
-  virtual Real computeQpResidual() = 0;
+  virtual void computeQpResidual(RealEigenVector & residual) = 0;
 
   /**
    * The user can override this function to compute the "on-diagonal"
    * Jacobian contribution.  If not overriden,
-   * returns 1.
+   * returns an array of 1s.
+   * @return On-diagonal Jacobian contribution
    */
-  virtual Real computeQpJacobian();
+  virtual RealEigenVector computeQpJacobian();
 
   /**
    * This is the virtual that derived classes should override for
    * computing an off-diagonal jacobian component.
+   * @param Coupled variable for the off-diagonal Jacobian contribution
+   * @return Off-diagonal Jacobian contribution
    */
-  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  virtual RealEigenMatrix computeQpOffDiagJacobian(const MooseVariableFieldBase & jvar);
 
   /// variable this works on
-  MooseVariable & _var;
+  MooseVariableFE<RealEigenVector> & _var;
 
   /// Value of the unknown variable this is acting on
-  const VariableValue & _u;
+  const ArrayVariableValue & _u;
 
-  /// The aux variables to save the residual contributions to
-  bool _has_save_in;
-  std::vector<MooseVariableFEBase *> _save_in;
-  std::vector<AuxVariableName> _save_in_strings;
+  /// Number of components of the array variable
+  const unsigned int _count;
 
-  /// The aux variables to save the diagonal Jacobian contributions to
-  bool _has_diag_save_in;
-  std::vector<MooseVariableFEBase *> _diag_save_in;
-  std::vector<AuxVariableName> _diag_save_in_strings;
+private:
+  /**
+   * Prepare our array variable degrees of freedom
+   */
+  void prepareDofs();
+
+  /// Work vector for residual
+  RealEigenVector _work_vector;
+
+  /// Work vector for the degree of freedom indices
+  std::vector<dof_id_type> _work_dofs;
 };

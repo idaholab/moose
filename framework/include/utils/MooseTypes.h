@@ -49,6 +49,7 @@
 #include <memory>
 #include <type_traits>
 #include <functional>
+#include <iterator> // std::data
 
 #if !defined(INCLUDE_NLOHMANN_JSON_HPP_) && !defined(MOOSE_NLOHMANN_INCLUDED)
 #undef INCLUDE_NLOHMANN_JSON_FWD_HPP_
@@ -998,6 +999,23 @@ std::string stringify(const Moose::TimeIntegratorType & t);
 struct DerivativeStringClass
 {
 };
+
+/**
+ * ContainerElement<R>:
+ *  - We use std::declval<R&>() (note the '&') to model an *lvalue* of R.
+ *    This forces std::data to pick the lvalue-qualified overload and yields
+ *    the element type with correct constness (e.g., const double* for a
+ *    const container). Using std::declval<R>() would model an rvalue and can
+ *    select different overloads or constness, which is not what typical code
+ *    sees when accessing a container's data().
+ *  - Assumes R exposes contiguous storage (std::data) and a size().
+ *  - Strips cv/ref qualifiers from the dereferenced pointer to get the element.
+ *
+ * Type trait created with assistance of ChatGPT 5
+ */
+template <class Container>
+using ContainerElement =
+    std::remove_cv_t<std::remove_reference_t<decltype(*std::data(std::declval<Container &>()))>>;
 
 } // namespace Moose
 

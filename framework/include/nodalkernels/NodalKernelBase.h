@@ -15,8 +15,8 @@
 #include "BlockRestrictable.h"
 #include "BoundaryRestrictable.h"
 #include "CoupleableMooseVariableDependencyIntermediateInterface.h"
-#include "MooseVariableInterface.h"
 #include "MooseFunctorArguments.h"
+#include "MooseVariableFieldBase.h"
 
 /**
  * Base class for creating new types of nodal kernels
@@ -25,8 +25,7 @@ class NodalKernelBase : public ResidualObject,
                         public BlockRestrictable,
                         public BoundaryRestrictable,
                         public GeometricSearchInterface,
-                        public CoupleableMooseVariableDependencyIntermediateInterface,
-                        public MooseVariableInterface<Real>
+                        public CoupleableMooseVariableDependencyIntermediateInterface
 {
 public:
   /**
@@ -37,12 +36,6 @@ public:
 
   NodalKernelBase(const InputParameters & parameters);
 
-  /**
-   * Gets the variable this is active on
-   * @return the variable
-   */
-  const MooseVariable & variable() const override { return _var; }
-
   void setSubdomains(const std::set<SubdomainID> & sub_ids) { _sub_ids = &sub_ids; }
 
 protected:
@@ -50,9 +43,6 @@ protected:
 
   /// Reference to FEProblemBase
   FEProblemBase & _fe_problem;
-
-  /// variable this works on
-  MooseVariable & _var;
 
   /// current node being processed
   const Node * const & _current_node;
