@@ -79,7 +79,7 @@
         variable = lorentz_force
         u = e_field
         v = b_field
-        scale_factor = 1 
+        scale_factor = 1
         execute_on = TIMESTEP_END
     []
 []

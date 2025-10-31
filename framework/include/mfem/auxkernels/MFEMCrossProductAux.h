@@ -51,7 +51,7 @@ protected:
   mfem::VectorGridFunctionCoefficient _v_coef;
   mfem::VectorCrossProductCoefficient _cross_uv;
   mfem::ConstantCoefficient _scale_c;
-  mfem::ScalarVectorProductCoefficient _final_vec; //coef suffix !! 
+  mfem::ScalarVectorProductCoefficient _final_vec; // coef suffix !!
 
   // Constant multiplier
   // const mfem::real_t _scale_factor;
