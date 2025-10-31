@@ -39,11 +39,29 @@ protected:
   CSGUniverse & addUniverse(const std::string & name);
 
   /**
-   * @brief Get map of all names to universes in universe list
+   * @brief return whether universe with given name exists in universe list
+   *
+   * @param name name of universe
+   * @return true if universe name exists, false otherwise
+   */
+  bool hasUniverse(const std::string & name) { return _universes.find(name) != _universes.end(); }
+
+  /**
+   * @brief Get non-const map of all names to universes in universe list
    *
    * @return map of all names to CSGUniverse pointers
    */
   std::unordered_map<std::string, std::unique_ptr<CSGUniverse>> & getUniverseListMap()
+  {
+    return _universes;
+  }
+
+  /**
+   * @brief Get const map of all names to universes in universe list
+   *
+   * @return map of all names to CSGUniverse pointers
+   */
+  const std::unordered_map<std::string, std::unique_ptr<CSGUniverse>> & getUniverseListMap() const
   {
     return _universes;
   }

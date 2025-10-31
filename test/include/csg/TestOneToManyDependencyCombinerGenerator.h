@@ -11,12 +11,12 @@
 
 #include "MeshGenerator.h"
 
-class TestCSGAxialSurfaceMeshGenerator : public MeshGenerator
+class TestOneToManyDependencyCombinerGenerator : public MeshGenerator
 {
 public:
   static InputParameters validParams();
 
-  TestCSGAxialSurfaceMeshGenerator(const InputParameters & parameters);
+  TestOneToManyDependencyCombinerGenerator(const InputParameters & parameters);
 
   std::unique_ptr<MeshBase> generate() override;
 
@@ -26,9 +26,7 @@ public:
 
 protected:
   /// Pointer to the input mesh
-  std::unique_ptr<MeshBase> & _mesh_ptr;
-  /// the axial height to set the input mesh to
-  const Real _axial_height;
-  /// Holds the generated CSGBase object
-  std::unique_ptr<CSG::CSGBase> * _build_csg;
+  std::vector<std::unique_ptr<MeshBase> *> _mesh_ptr;
+  /// List of pointers to all CSG bases created by input mesh generators
+  std::vector<std::unique_ptr<CSG::CSGBase> *> _build_csg_bases;
 };

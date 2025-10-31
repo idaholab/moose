@@ -65,11 +65,29 @@ protected:
   addUniverseCell(const std::string & name, const CSGUniverse & univ, const CSGRegion & region);
 
   /**
-   * @brief Get map of all names to cells in cell list
+   * @brief return whether cell with given name exists in cell list
+   *
+   * @param name name of cell
+   * @return true if cell name exists, false otherwise
+   */
+  bool hasCell(const std::string & name) { return _cells.find(name) != _cells.end(); }
+
+  /**
+   * @brief Get non-const map of all names to cells in cell list
    *
    * @return map of all names to CSGCell pointers
    */
   std::unordered_map<std::string, std::unique_ptr<CSGCell>> & getCellListMap() { return _cells; }
+
+  /**
+   * @brief Get const map of all names to cells in cell list
+   *
+   * @return map of all names to CSGCell pointers
+   */
+  const std::unordered_map<std::string, std::unique_ptr<CSGCell>> & getCellListMap() const
+  {
+    return _cells;
+  }
 
   /**
    * @brief Get all the cells in CSGBase instance

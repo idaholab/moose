@@ -16,11 +16,13 @@ CSGPlane::CSGPlane(const std::string & name, const Point & p1, const Point & p2,
   : CSGSurface(name, MooseUtils::prettyCppType<CSGPlane>())
 {
   coeffsFromPoints(p1, p2, p3);
+  normalizePlaneCoefficients();
 }
 
 CSGPlane::CSGPlane(const std::string & name, const Real a, const Real b, const Real c, const Real d)
   : CSGSurface(name, MooseUtils::prettyCppType<CSGPlane>()), _a(a), _b(b), _c(c), _d(d)
 {
+  normalizePlaneCoefficients();
 }
 
 std::unordered_map<std::string, Real>
@@ -47,6 +49,16 @@ CSGPlane::coeffsFromPoints(const Point & p1, const Point & p2, const Point & p3)
   _b = cross(1);
   _c = cross(2);
   _d = cross * (RealVectorValue)p1;
+}
+
+void
+CSGPlane::normalizePlaneCoefficients()
+{
+  const auto k = 1. / std::sqrt(_a * _a + _b * _b + _c * _c);
+  _a *= k;
+  _b *= k;
+  _c *= k;
+  _d *= k;
 }
 
 Real

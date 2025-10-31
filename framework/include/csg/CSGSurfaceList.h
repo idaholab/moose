@@ -26,16 +26,31 @@ protected:
   CSGSurfaceList();
 
   /**
+   * Copy constructor
+   */
+  CSGSurfaceList(const CSGSurfaceList & other_surface_list);
+
+  /**
    * Destructor
    */
   virtual ~CSGSurfaceList() = default;
 
   /**
-   * @brief Get map of all names to surfaces in surface list
+   * @brief Get non-const map of all names to surfaces in surface list
    *
    * @return map of all names to CSGSurface pointers
    */
   std::unordered_map<std::string, std::unique_ptr<CSGSurface>> & getSurfaceListMap()
+  {
+    return _surfaces;
+  }
+
+  /**
+   * @brief Get const map of all names to surfaces in surface list
+   *
+   * @return map of all names to CSGSurface pointers
+   */
+  const std::unordered_map<std::string, std::unique_ptr<CSGSurface>> & getSurfaceListMap() const
   {
     return _surfaces;
   }
