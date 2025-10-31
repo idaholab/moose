@@ -36,7 +36,6 @@ protected:
   // Names of vector sources
   const VariableName _u_var_name;
   const VariableName _v_var_name;
-  
 
   // References to the vector ParGridFunctions
   const mfem::ParGridFunction & _u_var;
