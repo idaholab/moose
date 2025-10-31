@@ -24,7 +24,7 @@ alpha = '${fparse 10 * degree^2}'
   type = NavierStokesProblem
   extra_tag_matrices = 'mass'
   mass_matrix = 'mass'
-  use_pressure_mass_matrix = true
+  set_schur_pre = A11_AND_MASS
 []
 
 [Variables]

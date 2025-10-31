@@ -34,10 +34,11 @@ NavierStokesProblem::validParams()
       {},
       "if not provided then the top field split is assumed to be the "
       "Schur split. This is a vector to allow recursive nesting");
-  params.addParam<bool>("use_pressure_mass_matrix",
-                        false,
-                        "Whether to just use the pressure mass matrix as the preconditioner for "
-                        "the Schur complement");
+  MooseEnum set_schur_pre("false mass a11_and_mass", "false");
+  params.addParam<MooseEnum>(
+      "set_schur_pre",
+      set_schur_pre,
+      "Whether and what to set as the user-provided Schur complement preconditioner");
   params.addParam<bool>(
       "commute_lsc",
       false,
@@ -58,7 +59,7 @@ NavierStokesProblem::NavierStokesProblem(const InputParameters & parameters) : F
     _L_matrix(getParam<TagName>("L_matrix")),
     _have_mass_matrix(!_mass_matrix.empty()),
     _have_L_matrix(!_L_matrix.empty()),
-    _pressure_mass_matrix_as_pre(getParam<bool>("use_pressure_mass_matrix")),
+    _set_schur_pre((getParam<MooseEnum>("set_schur_pre").getEnum<SetSchurPreType>())),
     _schur_fs_index(getParam<std::vector<unsigned int>>("schur_fs_index"))
 {
   if (_commute_lsc)
@@ -78,9 +79,11 @@ NavierStokesProblem::NavierStokesProblem(const InputParameters & parameters) : F
                "automatically using system matrix data (e.g. the off-diagonal blocks in the "
                "velocity-pressure system).");
 
-  if (_pressure_mass_matrix_as_pre && !_have_mass_matrix)
-    paramError("mass_matrix",
-               "If 'use_pressure_mass_matrix', then a pressure 'mass_matrix' must be provided");
+  if ((_set_schur_pre != SetSchurPreType::FALSE) && !_have_mass_matrix)
+    paramError(
+        "mass_matrix",
+        "If requesting to use the mass matrix as part of the Schur complement preconditioner via "
+        "'set_schur_pre', then a pressure 'mass_matrix' must be provided");
 }
 
 NavierStokesProblem::~NavierStokesProblem()
@@ -265,7 +268,7 @@ NavierStokesProblem::setupLSCMatrices(KSP schur_ksp)
   auto create_q_scale_submat =
       [our_parent_Q, this, velocity_is, pressure_is](const auto & mat_initialization)
   {
-    if (_commute_lsc || _pressure_mass_matrix_as_pre)
+    if (_commute_lsc || (_set_schur_pre != SetSchurPreType::FALSE))
     {
       // If we are doing Olshanskii or we are using the pressure matrix directly as the
       // preconditioner (no LSC), then we must have access to a pressure mass matrix
@@ -312,14 +315,21 @@ NavierStokesProblem::setupLSCMatrices(KSP schur_ksp)
   // velocity dof KSP is at index 0)
   schur_complement_ksp = subksp[1];
 
-  if (_pressure_mass_matrix_as_pre)
+  if (_set_schur_pre != SetSchurPreType::FALSE)
   {
     mooseAssert(_Q_scale, "This should be non-null");
-    Mat S;
+    Mat S, A11;
+
+    // Get the Schur complement operator S, which in generic KSP speak is used for the operator A
+    LibmeshPetscCall(KSPGetOperators(schur_complement_ksp, &S, nullptr));
+    if (_set_schur_pre == SetSchurPreType::A11_AND_MASS)
+    {
+      LibmeshPetscCall(
+          MatSchurComplementGetSubMatrices(S, nullptr, nullptr, nullptr, nullptr, &A11));
+      LibmeshPetscCall(MatAXPY(_Q_scale, 1, A11, DIFFERENT_NONZERO_PATTERN));
+    }
     // Set the Schur complement preconditioner to be the pressure mass matrix
     LibmeshPetscCall(PCFieldSplitSetSchurPre(schur_pc, PC_FIELDSPLIT_SCHUR_PRE_USER, _Q_scale));
-    // Get the Schur complement operator S, which in generic KSP speak is used for the operator A
-    LibmeshPetscCall(KSPGetOperators(schur_complement_ksp, &S, NULL));
     // Set, in generic KSP speak, the operators A and P respectively. So our pressure mass matrix is
     // P
     LibmeshPetscCall(KSPSetOperators(schur_complement_ksp, S, _Q_scale));
@@ -334,7 +344,7 @@ NavierStokesProblem::setupLSCMatrices(KSP schur_ksp)
       mooseError("Not an LSC PC. Please check the 'schur_fs_index' parameter");
 
     // Get the LSC preconditioner
-    LibmeshPetscCall(PCGetOperators(lsc_pc, NULL, &lsc_pc_pmat));
+    LibmeshPetscCall(PCGetOperators(lsc_pc, nullptr, &lsc_pc_pmat));
 
     if (_commute_lsc)
     {
