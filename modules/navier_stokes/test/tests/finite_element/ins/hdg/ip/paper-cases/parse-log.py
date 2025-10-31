@@ -42,22 +42,22 @@ def parse_moose_petsc_log(text: str, times=None) -> pd.DataFrame:
         nl_matches = list(re.finditer(r"^\s*(\d+)\s+Nonlinear\b", scan_text, re.MULTILINE))
         nonlinear_its = int(nl_matches[-1].group(1)) if nl_matches else 0
 
-        outer_matches = re.findall(
-            r"Linear\s+nl0_condensed_\s+solve\s+converged.*?iterations\s+(\d+)",
-            block, re.IGNORECASE
-        )
-        max_outer = max((int(x) for x in outer_matches), default=0)
+        def _find_max_iterations(block: str, solver_name: str) -> int:
+            """
+            Return the maximum 'iterations N' seen for lines like:
+              Linear <solver_name> solve converged due to ... iterations N
+              Linear <solver_name> solve did not converge due to ... iterations N
+            """
+            pat = re.compile(
+                rf"^\s*Linear\s+{re.escape(solver_name)}\s+solve\s+(?:converged|did\s+not\s+converge)\s+due\s+to\s+\S+\s+iterations\s+(\d+)\s*$",
+                re.IGNORECASE | re.MULTILINE
+            )
+            vals = [int(x) for x in pat.findall(block)]
+            return max(vals) if vals else 0
 
-        p_matches = re.findall(
-            r"Linear\s+nl0_condensed_fieldsplit_p_\s+solve\s+converged.*?iterations\s+(\d+)",
-            block, re.IGNORECASE
-        )
-        u_matches = re.findall(
-            r"Linear\s+nl0_condensed_fieldsplit_u_\s+solve\s+converged.*?iterations\s+(\d+)",
-            block, re.IGNORECASE
-        )
-        max_p = max((int(x) for x in p_matches), default=0)
-        max_u = max((int(x) for x in u_matches), default=0)
+        max_outer = _find_max_iterations(block, "nl0_condensed_")
+        max_p     = _find_max_iterations(block, "nl0_condensed_fieldsplit_p_")
+        max_u     = _find_max_iterations(block, "nl0_condensed_fieldsplit_u_")
 
         rows.append({
             "Re": tval,
