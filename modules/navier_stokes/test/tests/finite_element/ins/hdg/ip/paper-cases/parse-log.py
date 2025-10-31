@@ -158,7 +158,9 @@ def main():
 
     num_elems = parse_num_elems(text)
     num_dofs = parse_num_dofs(text)
-    num_condensed_dofs = parse_mat_aij_rows("nl0_condensed_fieldsplit_u_", text)
+    num_condensed_u_dofs = parse_mat_aij_rows("nl0_condensed_fieldsplit_u_", text)
+    num_condensed_p_dofs = parse_mat_aij_rows("nl0_condensed_fieldsplit_p_", text)
+    num_condensed_dofs = num_condensed_u_dofs + num_condensed_p_dofs
     solve_avg = parse_perf_solve_avg(text)
 
     if args.csv:
