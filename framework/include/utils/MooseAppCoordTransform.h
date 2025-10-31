@@ -188,6 +188,11 @@ public:
    */
   bool hasScalingOrRotationTransformation() const;
 
+  /**
+   * Returns true if the app has rotation transformation
+   */
+  bool hasNonScalingTransformation() const;
+
 private:
   /**
    * If the coordinate system type is RZ, then we return the provided argument. Otherwise we return
