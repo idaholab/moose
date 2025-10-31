@@ -30,9 +30,7 @@ bool
 EquationSystem::VectorContainsName(const std::vector<std::string> & the_vector,
                                    const std::string & name) const
 {
-
   auto iter = std::find(the_vector.begin(), the_vector.end(), name);
-
   return (iter != the_vector.end());
 }
 
@@ -113,7 +111,6 @@ EquationSystem::AddIntegratedBC(std::shared_ptr<MFEMIntegratedBC> bc)
 void
 EquationSystem::AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc)
 {
-  AddTestVariableNameIfMissing(bc->getTestVariableName());
   auto test_var_name = bc->getTestVariableName();
   if (!_essential_bc_map.Has(test_var_name))
   {
@@ -124,9 +121,7 @@ EquationSystem::AddEssentialBC(std::shared_ptr<MFEMEssentialBC> bc)
 }
 
 void
-EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
-                     const Moose::MFEM::FESpaces & /*fespaces*/,
-                     mfem::AssemblyLevel assembly_level)
+EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions, mfem::AssemblyLevel assembly_level)
 {
   _assembly_level = assembly_level;
 
@@ -146,12 +141,12 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
         std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));
   }
 
+  // Extract which coupled variables are to be trivially eliminated and which are trial variables
+  SetTrialVariableNames();
+
   // Store pointers to FESpaces of all coupled variables
   for (auto & coupled_var_name : _coupled_var_names)
     _coupled_pfespaces.push_back(gridfunctions.Get(coupled_var_name)->ParFESpace());
-
-  // Extract which coupled variables are to be trivially eliminated and which are trial variables
-  SetTrialVariableNames();
 
   // Store pointers to coupled variable GridFunctions that are to be eliminated prior to forming the
   // jacobian
@@ -161,35 +156,40 @@ EquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
 }
 
 void
+EquationSystem::ApplyEssentialBC(const std::string & var_name,
+                                 mfem::ParGridFunction & trial_gf,
+                                 mfem::Array<int> & global_ess_markers)
+{
+  if (_essential_bc_map.Has(var_name))
+  {
+    auto & bcs = _essential_bc_map.GetRef(var_name);
+    for (auto & bc : bcs)
+    {
+      // Set constrained DoFs values on essential boundaries
+      bc->ApplyBC(trial_gf);
+      // Fetch marker array labelling essential boundaries of current BC
+      mfem::Array<int> ess_bdrs(bc->getBoundaryMarkers());
+      // Add these boundary markers to the set of markers labelling all essential boundaries
+      for (auto it = 0; it != trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max(); ++it)
+        global_ess_markers[it] = std::max(global_ess_markers[it], ess_bdrs[it]);
+    }
+  }
+}
+
+void
 EquationSystem::ApplyEssentialBCs()
 {
   _ess_tdof_lists.resize(_test_var_names.size());
   for (const auto i : index_range(_test_var_names))
   {
-    auto test_var_name = _test_var_names.at(i);
-    if (!_essential_bc_map.Has(test_var_name))
-      continue;
-
-    // Set default value of gridfunction used in essential BC. Values
-    // overwritten in applyEssentialBCs
-    mfem::ParGridFunction & trial_gf(*(_var_ess_constraints.at(i)));
-    auto * const pmesh = _test_pfespaces.at(i)->GetParMesh();
-    mooseAssert(pmesh, "parallel mesh is null");
-
-    auto bcs = _essential_bc_map.GetRef(test_var_name);
-    mfem::Array<int> global_ess_markers(pmesh->bdr_attributes.Max());
+    const auto & test_var_name = _test_var_names.at(i);
+    mfem::ParGridFunction & trial_gf = *(_var_ess_constraints.at(i));
+    mfem::Array<int> global_ess_markers(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
     global_ess_markers = 0;
-    for (auto & bc : bcs)
-    {
-      bc->ApplyBC(trial_gf);
-
-      mfem::Array<int> ess_bdrs(bc->getBoundaryMarkers());
-      for (auto it = 0; it != pmesh->bdr_attributes.Max(); ++it)
-      {
-        global_ess_markers[it] = std::max(global_ess_markers[it], ess_bdrs[it]);
-      }
-    }
-    trial_gf.FESpace()->GetEssentialTrueDofs(global_ess_markers, _ess_tdof_lists.at(i));
+    // Set strongly constrained DoFs of trial_gf on essential boundaries and add markers for all
+    // essential boundaries to the global_ess_markers array
+    ApplyEssentialBC(test_var_name, trial_gf, global_ess_markers);
+    trial_gf.ParFESpace()->GetEssentialTrueDofs(global_ess_markers, _ess_tdof_lists.at(i));
   }
 }
 
@@ -204,7 +204,10 @@ EquationSystem::EliminateCoupledVariables()
       if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(eliminated_var_name))
       {
         auto mblf = _mblfs.Get(test_var_name)->Get(eliminated_var_name);
-        mblf->AddMult(*_eliminated_variables.Get(eliminated_var_name), *lf, -1.0);
+        // The AddMult method in mfem::BilinearForm is not defined for non-legacy assembly
+        mfem::Vector lf_prev(lf->Size());
+        mblf->Mult(*_eliminated_variables.Get(eliminated_var_name), lf_prev);
+        *lf -= lf_prev;
       }
     }
   }
@@ -255,11 +258,17 @@ EquationSystem::FormSystem(mfem::OperatorHandle & op,
 }
 
 void
-EquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
-                                 mfem::BlockVector & trueX,
-                                 mfem::BlockVector & trueRHS)
+EquationSystem::AssembleJacobian(
+    Moose::MFEM::NamedFieldsMap<mfem::ParBilinearForm> & jac_blfs,
+    Moose::MFEM::NamedFieldsMap<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>> &
+        jac_mblfs,
+    Moose::MFEM::NamedFieldsMap<mfem::ParLinearForm> & rhs_lfs,
+    std::vector<mfem::Array<int>> & ess_tdof_lists,
+    std::vector<std::unique_ptr<mfem::ParGridFunction>> & var_ess_constraints,
+    mfem::OperatorHandle & op,
+    mfem::BlockVector & trueX,
+    mfem::BlockVector & trueRHS)
 {
-
   // Allocate block operator
   DeleteAllBlocks();
   _h_blocks.SetSize(_test_var_names.size(), _test_var_names.size());
@@ -267,12 +276,12 @@ EquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
   for (const auto i : index_range(_test_var_names))
   {
     auto & test_var_name = _test_var_names.at(i);
-    auto blf = _blfs.Get(test_var_name);
-    auto lf = _lfs.Get(test_var_name);
+    auto blf = jac_blfs.Get(test_var_name);
+    auto lf = rhs_lfs.Get(test_var_name);
     mfem::Vector aux_x, aux_rhs;
     mfem::HypreParMatrix * aux_a = new mfem::HypreParMatrix;
     blf->FormLinearSystem(
-        _ess_tdof_lists.at(i), *(_var_ess_constraints.at(i)), *lf, *aux_a, aux_x, aux_rhs);
+        ess_tdof_lists.at(i), *(var_ess_constraints.at(i)), *lf, *aux_a, aux_x, aux_rhs);
     _h_blocks(i, i) = aux_a;
     trueX.GetBlock(i) = aux_x;
     trueRHS.GetBlock(i) = aux_rhs;
@@ -289,13 +298,13 @@ EquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
       mfem::Vector aux_x, aux_rhs;
       mfem::ParLinearForm aux_lf(_test_pfespaces.at(i));
       aux_lf = 0.0;
-      if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(trial_var_name))
+      if (jac_mblfs.Has(test_var_name) && jac_mblfs.Get(test_var_name)->Has(trial_var_name))
       {
-        auto mblf = _mblfs.Get(test_var_name)->Get(trial_var_name);
+        auto mblf = jac_mblfs.Get(test_var_name)->Get(trial_var_name);
         mfem::HypreParMatrix * aux_a = new mfem::HypreParMatrix;
-        mblf->FormRectangularLinearSystem(_ess_tdof_lists.at(j),
-                                          _ess_tdof_lists.at(i),
-                                          *(_var_ess_constraints.at(j)),
+        mblf->FormRectangularLinearSystem(ess_tdof_lists.at(j),
+                                          ess_tdof_lists.at(i),
+                                          *(var_ess_constraints.at(j)),
                                           aux_lf,
                                           *aux_a,
                                           aux_x,
@@ -306,14 +315,19 @@ EquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
     }
   }
   // Sync memory
-  for (const auto i : index_range(_test_var_names))
-  {
-    trueX.GetBlock(i).SyncAliasMemory(trueX);
-    trueRHS.GetBlock(i).SyncAliasMemory(trueRHS);
-  }
+  trueX.SyncFromBlocks();
+  trueRHS.SyncFromBlocks();
 
   // Create monolithic matrix
   op.Reset(mfem::HypreParMatrixFromBlocks(_h_blocks));
+}
+
+void
+EquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
+                                 mfem::BlockVector & trueX,
+                                 mfem::BlockVector & trueRHS)
+{
+  AssembleJacobian(_blfs, _mblfs, _lfs, _ess_tdof_lists, _var_ess_constraints, op, trueX, trueRHS);
 }
 
 void
@@ -361,9 +375,6 @@ EquationSystem::BuildLinearForms()
     _lfs.GetRef(test_var_name) = 0.0;
   }
 
-  // Apply boundary conditions
-  ApplyEssentialBCs();
-
   for (auto & test_var_name : _test_var_names)
   {
     // Apply kernels
@@ -372,6 +383,9 @@ EquationSystem::BuildLinearForms()
     ApplyBoundaryLFIntegrators(test_var_name, lf, _integrated_bc_map);
     lf->Assemble();
   }
+
+  // Apply essential boundary conditions
+  ApplyEssentialBCs();
 
   // Eliminate trivially eliminated variables by subtracting contributions from linear forms
   EliminateCoupledVariables();
@@ -402,9 +416,11 @@ void
 EquationSystem::BuildMixedBilinearForms()
 {
   // Register mixed bilinear forms. Note that not all combinations may
-  // have a kernel
+  // have a kernel.
 
-  // Create mblf for each test/coupled variable pair with an added kernel
+  // Create mblf for each test/coupled variable pair with an added kernel.
+  // Mixed bilinear forms with coupled variables that are not trial variables are
+  // associated with contributions from eliminated variables.
   for (const auto i : index_range(_test_var_names))
   {
     auto test_var_name = _test_var_names.at(i);
@@ -445,17 +461,20 @@ EquationSystem::BuildEquationSystem()
   BuildLinearForms();
 }
 
-TimeDependentEquationSystem::TimeDependentEquationSystem() : _dt_coef(1.0) {}
+TimeDependentEquationSystem::TimeDependentEquationSystem(
+    const Moose::MFEM::TimeDerivativeMap & time_derivative_map)
+  : _dt_coef(1.0), _time_derivative_map(time_derivative_map)
+{
+}
 
 void
-TimeDependentEquationSystem::AddCoupledVariableNameIfMissing(const std::string & coupled_var_name)
+TimeDependentEquationSystem::Init(Moose::MFEM::GridFunctions & gridfunctions,
+                                  mfem::AssemblyLevel assembly_level)
 {
-  /// The TimeDependentEquationSystem operator expects to act on a vector of variable time
-  /// derivatives, so the coupled variable must be the time derivative of the 'base' variable
-  EquationSystem::AddCoupledVariableNameIfMissing(GetTimeDerivativeName(coupled_var_name));
-  /// When implicit, also register test_var_name in _eliminated_variables
-  /// for the elimination of 'old' variable values from the previous timestep
-  EquationSystem::AddCoupledVariableNameIfMissing(coupled_var_name);
+  EquationSystem::Init(gridfunctions, assembly_level);
+  for (auto & test_var_name : _test_var_names)
+    _td_var_ess_constraints.emplace_back(
+        std::make_unique<mfem::ParGridFunction>(gridfunctions.Get(test_var_name)->ParFESpace()));
 }
 
 void
@@ -476,50 +495,57 @@ TimeDependentEquationSystem::SetTimeStep(mfem::real_t dt)
 void
 TimeDependentEquationSystem::SetTrialVariableNames()
 {
-  // If a coupled variable has an equation associated with it,
-  // add it to the set of trial variables.
-  for (const auto & coupled_var_name : _coupled_var_names)
+  // The TimeDependentEquationSystem operator expects to act on a vector of variable time
+  // derivatives, so the trial variable must be the time derivative of the 'base' variable. The base
+  // variable (test_var_name) without derivatives applied must also be coupled in implicit
+  // timestepping schemes for the elimination of 'old' variable values from the previous timestep
+  for (const auto & test_var_name : _test_var_names)
   {
-    for (const auto & test_var_name : _test_var_names)
+    AddCoupledVariableNameIfMissing(test_var_name);
+    AddCoupledVariableNameIfMissing(_time_derivative_map.getTimeDerivativeName(test_var_name));
+  }
+
+  // If a coupled variable does not have an equation associated with it,
+  // add it to the set of eliminated variables.
+  for (const auto & test_var_name : _test_var_names)
+  {
+    const auto time_derivative_test_var_name =
+        _time_derivative_map.getTimeDerivativeName(test_var_name);
+    for (const auto & coupled_var_name : _coupled_var_names)
     {
-      const auto time_derivative_test_var_name = GetTimeDerivativeName(test_var_name);
-      if (time_derivative_test_var_name == coupled_var_name)
-      {
-        if (!VectorContainsName(_trial_var_names, coupled_var_name))
-          _trial_var_names.push_back(coupled_var_name);
-      }
-      else
-      {
-        if (!VectorContainsName(_eliminated_var_names, coupled_var_name))
-          _eliminated_var_names.push_back(coupled_var_name);
-      }
+      if (time_derivative_test_var_name != coupled_var_name &&
+          !VectorContainsName(_eliminated_var_names, coupled_var_name))
+        _eliminated_var_names.push_back(coupled_var_name);
     }
+    if (!VectorContainsName(_trial_var_names, time_derivative_test_var_name))
+      _trial_var_names.push_back(time_derivative_test_var_name);
   }
 }
 
 void
 TimeDependentEquationSystem::AddKernel(std::shared_ptr<MFEMKernel> kernel)
 {
-  if (kernel->getTrialVariableName() == GetTimeDerivativeName(kernel->getTestVariableName()))
-  {
-    auto trial_var_name = kernel->getTrialVariableName();
-    auto test_var_name = kernel->getTestVariableName();
-    AddTestVariableNameIfMissing(test_var_name);
-    AddCoupledVariableNameIfMissing(test_var_name);
+  const auto & trial_var_name = kernel->getTrialVariableName();
+  const auto & test_var_name = kernel->getTestVariableName();
 
+  if (_time_derivative_map.isTimeDerivative(trial_var_name))
+  {
+    AddTestVariableNameIfMissing(test_var_name);
+    AddCoupledVariableNameIfMissing(trial_var_name);
+
+    // Register new kernels map if not present for the test variable
     if (!_td_kernels_map.Has(test_var_name))
     {
       auto kernel_field_map =
           std::make_shared<Moose::MFEM::NamedFieldsMap<std::vector<std::shared_ptr<MFEMKernel>>>>();
       _td_kernels_map.Register(test_var_name, std::move(kernel_field_map));
     }
-    // Register new kernels map if not present for the test variable
-    if (!_td_kernels_map.Get(test_var_name)->Has(test_var_name))
+    if (!_td_kernels_map.Get(test_var_name)->Has(trial_var_name))
     {
       auto kernels = std::make_shared<std::vector<std::shared_ptr<MFEMKernel>>>();
-      _td_kernels_map.Get(test_var_name)->Register(test_var_name, std::move(kernels));
+      _td_kernels_map.Get(test_var_name)->Register(trial_var_name, std::move(kernels));
     }
-    _td_kernels_map.GetRef(test_var_name).Get(test_var_name)->push_back(std::move(kernel));
+    _td_kernels_map.GetRef(test_var_name).Get(trial_var_name)->push_back(std::move(kernel));
   }
   else
   {
@@ -546,35 +572,120 @@ TimeDependentEquationSystem::BuildBilinearForms()
     ApplyBoundaryBLFIntegrators<mfem::ParBilinearForm>(
         test_var_name, test_var_name, td_blf, _integrated_bc_map);
     ApplyDomainBLFIntegrators<mfem::ParBilinearForm>(
-        test_var_name, test_var_name, td_blf, _td_kernels_map);
+        _time_derivative_map.getTimeDerivativeName(test_var_name),
+        test_var_name,
+        td_blf,
+        _td_kernels_map);
 
     // Recover and scale integrators from blf. This is to apply the dt*du/dt contributions from the
     // operator on the trial variable in the implicit integration scheme
-    auto blf = _blfs.Get(test_var_name);
-    auto integs = blf->GetDBFI();
-    auto b_integs = blf->GetBBFI();
-    auto markers = blf->GetBBFI_Marker();
-
-    // If implicit contributions exist, scale them by timestep and add to td_blf
-    if (integs->Size() || b_integs->Size())
-    {
-      mfem::SumIntegrator * sum = new mfem::SumIntegrator(false);
-      ScaleIntegrator * scaled_sum = new ScaleIntegrator(sum, _dt_coef.constant, true);
-
-      for (int i = 0; i < integs->Size(); ++i)
-        sum->AddIntegrator(*integs[i]);
-
-      for (int i = 0; i < b_integs->Size(); ++i)
-        td_blf->AddBoundaryIntegrator(new ScaleIntegrator(*b_integs[i], _dt_coef.constant, false),
-                                      *(*markers[i]));
-
-      // scaled_sum is owned by td_blf
-      td_blf->AddDomainIntegrator(scaled_sum);
-    }
-
+    auto blf = _blfs.GetShared(test_var_name);
+    ScaleAndAddBLFIntegrators(blf, td_blf, _dt_coef.constant);
     // Assemble form
     td_blf->Assemble();
   }
+}
+
+void
+TimeDependentEquationSystem::BuildMixedBilinearForms()
+{
+  EquationSystem::BuildMixedBilinearForms();
+  // Register mixed bilinear forms. Note that not all combinations may
+  // have a kernel.
+
+  // Create mblf for each test/trial variable pair with an added kernel
+  for (const auto i : index_range(_test_var_names))
+  {
+    const auto & test_var_name = _test_var_names.at(i);
+    auto test_td_mblfs =
+        std::make_shared<Moose::MFEM::NamedFieldsMap<mfem::ParMixedBilinearForm>>();
+    for (const auto j : index_range(_trial_var_names))
+    {
+      const auto & trial_var_name = _trial_var_names.at(j);
+      auto td_mblf = std::make_shared<mfem::ParMixedBilinearForm>(_test_pfespaces.at(j),
+                                                                  _test_pfespaces.at(i));
+      // Register MixedBilinearForm if kernels exist for it, and assemble
+      // kernels
+      if (_td_kernels_map.Has(test_var_name) &&
+          _td_kernels_map.Get(test_var_name)->Has(trial_var_name) &&
+          _time_derivative_map.getTimeDerivativeName(test_var_name) != trial_var_name)
+      {
+        // Apply all mixed kernels with this test/trial pair
+        ApplyDomainBLFIntegrators<mfem::ParMixedBilinearForm>(
+            trial_var_name, test_var_name, td_mblf, _td_kernels_map);
+      }
+      // Recover and scale integrators from the mblf acting on the time integral of the trial
+      // variable corresponding to coupled_var_name. This is to apply the dt*du/dt contributions
+      // from the operator on the trial variable in the implicit integration scheme
+      const auto & trial_var_time_integral_name =
+          _time_derivative_map.getTimeIntegralName(trial_var_name);
+      if (_mblfs.Has(test_var_name) && _mblfs.Get(test_var_name)->Has(trial_var_time_integral_name))
+      {
+        // Recover and scale integrators from mblf. This is to apply the dt*du/dt contributions
+        // from the operator on the trial variable in the implicit integration scheme
+        auto mblf = _mblfs.Get(test_var_name)->GetShared(trial_var_time_integral_name);
+        ScaleAndAddBLFIntegrators(mblf, td_mblf, _dt_coef.constant);
+      }
+      // If implicit contributions exist, scale them by timestep and add to td_mblf
+      if (td_mblf->GetDBFI()->Size() || td_mblf->GetBBFI()->Size())
+      {
+        // Assemble mixed bilinear form
+        td_mblf->SetAssemblyLevel(_assembly_level);
+        td_mblf->Assemble();
+        // Register mixed bilinear forms associated with a single trial variable
+        // for the current test variable
+        test_td_mblfs->Register(trial_var_name, td_mblf);
+      }
+    }
+    // Register all mixed bilinear forms associated with a single test variable
+    _td_mblfs.Register(test_var_name, test_td_mblfs);
+  }
+}
+
+void
+TimeDependentEquationSystem::ApplyEssentialBCs()
+{
+  _ess_tdof_lists.resize(_test_var_names.size());
+  for (const auto i : index_range(_test_var_names))
+  {
+    const auto & test_var_name = _test_var_names.at(i);
+    const auto time_derivative_test_var_name =
+        _time_derivative_map.getTimeDerivativeName(test_var_name);
+    mfem::ParGridFunction & trial_gf = *(_var_ess_constraints.at(i));
+    mfem::ParGridFunction & trial_gf_time_derivative = *(_td_var_ess_constraints.at(i));
+    mfem::Array<int> global_ess_markers(trial_gf.ParFESpace()->GetParMesh()->bdr_attributes.Max());
+    global_ess_markers = 0;
+    // Set strongly constrained DoFs of trial_gf on essential boundaries and add markers for all
+    // essential boundaries to the global_ess_markers array
+    EquationSystem::ApplyEssentialBC(test_var_name, trial_gf, global_ess_markers);
+    // Update solution values on Dirichlet values to be in terms of du/dt instead of u
+    *_td_var_ess_constraints.at(i).get() = *(_var_ess_constraints.at(i).get());
+    *_td_var_ess_constraints.at(i).get() -= *_eliminated_variables.Get(test_var_name);
+    *_td_var_ess_constraints.at(i).get() /= _dt_coef.constant;
+    // Apply any remaining Dirichlet BCs specified directly on du/dt
+    EquationSystem::ApplyEssentialBC(
+        time_derivative_test_var_name, trial_gf_time_derivative, global_ess_markers);
+    trial_gf.ParFESpace()->GetEssentialTrueDofs(global_ess_markers, _ess_tdof_lists.at(i));
+  }
+}
+
+void
+TimeDependentEquationSystem::EliminateCoupledVariables()
+{
+  // Eliminate contributions from variables at previous timestep.
+  for (const auto i : index_range(_test_var_names))
+  {
+    auto & test_var_name = _test_var_names.at(i);
+    auto blf = _blfs.Get(test_var_name);
+    auto lf = _lfs.Get(test_var_name);
+    // if implicit, add contribution to linear form from terms involving state
+    // The AddMult method in mfem::BilinearForm is not defined for non-legacy assembly
+    mfem::Vector lf_prev(lf->Size());
+    blf->Mult(*_eliminated_variables.Get(test_var_name), lf_prev);
+    *lf -= lf_prev;
+  }
+  // Eliminate contributions from other coupled variables.
+  EquationSystem::EliminateCoupledVariables();
 }
 
 void
@@ -582,40 +693,9 @@ TimeDependentEquationSystem::FormLegacySystem(mfem::OperatorHandle & op,
                                               mfem::BlockVector & truedXdt,
                                               mfem::BlockVector & trueRHS)
 {
-
-  // Allocate block operator
-  DeleteAllBlocks();
-  _h_blocks.SetSize(_test_var_names.size(), _test_var_names.size());
-  // Form diagonal blocks.
-  for (const auto i : index_range(_test_var_names))
-  {
-    auto & test_var_name = _test_var_names.at(i);
-    auto td_blf = _td_blfs.Get(test_var_name);
-    auto blf = _blfs.Get(test_var_name);
-    auto lf = _lfs.Get(test_var_name);
-    // if implicit, add contribution to linear form from terms involving state
-    // variable at previous timestep: {
-    blf->AddMult(*_eliminated_variables.Get(test_var_name), *lf, -1.0);
-    // }
-    mfem::Vector aux_x, aux_rhs;
-    // Update solution values on Dirichlet values to be in terms of du/dt instead of u
-    mfem::Vector bc_x = *(_var_ess_constraints.at(i).get());
-    bc_x -= *_eliminated_variables.Get(test_var_name);
-    bc_x /= _dt_coef.constant;
-
-    // Form linear system for operator acting on vector of du/dt
-    mfem::HypreParMatrix * aux_a = new mfem::HypreParMatrix;
-    td_blf->FormLinearSystem(_ess_tdof_lists.at(i), bc_x, *lf, *aux_a, aux_x, aux_rhs);
-    _h_blocks(i, i) = aux_a;
-    truedXdt.GetBlock(i) = aux_x;
-    trueRHS.GetBlock(i) = aux_rhs;
-  }
-
-  truedXdt.SyncFromBlocks();
-  trueRHS.SyncFromBlocks();
-
-  // Create monolithic matrix
-  op.Reset(mfem::HypreParMatrixFromBlocks(_h_blocks));
+  // Form linear system for operator acting on vector of du/dt
+  AssembleJacobian(
+      _td_blfs, _td_mblfs, _lfs, _ess_tdof_lists, _td_var_ess_constraints, op, truedXdt, trueRHS);
 }
 
 void
@@ -625,25 +705,13 @@ TimeDependentEquationSystem::FormSystem(mfem::OperatorHandle & op,
 {
   auto & test_var_name = _test_var_names.at(0);
   auto td_blf = _td_blfs.Get(test_var_name);
-  auto blf = _blfs.Get(test_var_name);
   auto lf = _lfs.Get(test_var_name);
-  // if implicit, add contribution to linear form from terms involving state
-  // variable at previous timestep: {
-
-  // The AddMult method in mfem::BilinearForm is not defined for non-legacy assembly
-  mfem::Vector lf_prev(lf->Size());
-  blf->Mult(*_eliminated_variables.Get(test_var_name), lf_prev);
-  *lf -= lf_prev;
-  // }
-  mfem::Vector aux_x, aux_rhs;
-  // Update solution values on Dirichlet values to be in terms of du/dt instead of u
-  mfem::Vector bc_x = *(_var_ess_constraints.at(0).get());
-  bc_x -= *_eliminated_variables.Get(test_var_name);
-  bc_x /= _dt_coef.constant;
 
   // Form linear system for operator acting on vector of du/dt
   mfem::OperatorPtr aux_a;
-  td_blf->FormLinearSystem(_ess_tdof_lists.at(0), bc_x, *lf, aux_a, aux_x, aux_rhs);
+  mfem::Vector aux_x, aux_rhs;
+  td_blf->FormLinearSystem(
+      _ess_tdof_lists.at(0), *(_td_var_ess_constraints.at(0)), *lf, aux_a, aux_x, aux_rhs);
 
   truedXdt.GetBlock(0) = aux_x;
   trueRHS.GetBlock(0) = aux_rhs;

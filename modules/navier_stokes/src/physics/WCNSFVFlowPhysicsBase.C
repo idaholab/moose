@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "WCNSFVFlowPhysicsBase.h"
+#include "WCNSLinearFVFlowPhysics.h"
 #include "WCNSFVTurbulencePhysics.h"
 #include "NSFVBase.h"
 #include "MapConversionUtils.h"
@@ -70,6 +71,12 @@ WCNSFVFlowPhysicsBase::validParams()
   params.addParam<MooseEnum>("mu_interp_method",
                              coeff_interp_method,
                              "Switch that can select face interpolation method for the viscosity.");
+
+  // Fluid properties
+  params.addParam<UserObjectName>(NS::fluid, "Fluid properties userobject");
+  params.addParam<FunctionName>(
+      "mu_rampdown", 1, "A function describing a ramp down of viscosity over time");
+  params.addParamNamesToGroup(NS::fluid + " mu_rampdown", "Material properties");
 
   // Parameter groups
   params.addParamNamesToGroup(
@@ -268,6 +275,9 @@ WCNSFVFlowPhysicsBase::addMaterials()
     addPorousMediumSpeedMaterial();
   else
     addNonPorousMediumSpeedMaterial();
+
+  if (isParamValid(NS::fluid))
+    addFluidPropertiesFunctorMaterial();
 }
 
 void
@@ -284,7 +294,8 @@ WCNSFVFlowPhysicsBase::addPorousMediumSpeedMaterial()
     params.set<MooseFunctorName>(NS::porosity) = "1";
   params.set<bool>("define_interstitial_velocity_components") = _porous_medium_treatment;
 
-  getProblem().addMaterial("PINSFVSpeedFunctorMaterial", prefix() + "pins_speed_material", params);
+  getProblem().addFunctorMaterial(
+      "PINSFVSpeedFunctorMaterial", prefix() + "pins_speed_material", params);
 }
 
 void
@@ -299,7 +310,52 @@ WCNSFVFlowPhysicsBase::addNonPorousMediumSpeedMaterial()
     params.set<MooseFunctorName>(param_names[dim_i]) = _velocity_names[dim_i];
   params.set<MooseFunctorName>("vector_magnitude_name") = NS::speed;
 
-  getProblem().addMaterial(class_name, prefix() + "ins_speed_material", params);
+  getProblem().addFunctorMaterial(class_name, prefix() + "ins_speed_material", params);
+}
+
+void
+WCNSFVFlowPhysicsBase::addFluidPropertiesFunctorMaterial()
+{
+  // Not very future-proof but it works
+  const bool use_ad = !dynamic_cast<WCNSLinearFVFlowPhysics *>(this);
+  const std::string class_name =
+      use_ad ? "GeneralFunctorFluidProps" : "NonADGeneralFunctorFluidProps";
+  InputParameters params = getFactory().getValidParams(class_name);
+  assignBlocks(params, _blocks);
+
+  params.set<MooseFunctorName>(NS::pressure) = _pressure_name;
+  params.set<MooseFunctorName>(NS::T_fluid) = _fluid_temperature_name;
+  params.set<MooseFunctorName>(NS::speed) = NS::speed;
+  params.applySpecificParameters(parameters(), {NS::fluid, NS::density, "mu_rampdown"});
+  if (!MooseUtils::parsesToReal(_density_name))
+    params.set<bool>("force_define_density") = true;
+  if (!_porous_medium_treatment)
+  {
+    params.set<MooseFunctorName>(NS::porosity) = "1";
+    params.set<MooseFunctorName>("characteristic_length") = "1";
+  }
+  else
+    // not implemented yet
+    paramWarning(
+        NS::fluid,
+        "Specifying the fluid properties user object does not define the GeneralFunctorFluidProps "
+        "when using the porous medium treatment. You have to define this object in the input");
+
+  // Dynamic pressure
+  params.set<bool>("solving_for_dynamic_pressure") = _solve_for_dynamic_pressure;
+  if (_solve_for_dynamic_pressure)
+  {
+    params.set<Point>("reference_pressure_point") = getParam<Point>("reference_pressure_point");
+    if (!isParamSetByUser("reference_pressure_point"))
+      paramWarning("reference_pressure_point",
+                   "Default value of (0,0,0) used. If this point is outside the flow domain, the "
+                   "simulation will error");
+    params.set<Real>("reference_pressure") = getParam<Real>("reference_pressure");
+  }
+  params.set<Point>("gravity") = getParam<RealVectorValue>("gravity");
+
+  if (!_porous_medium_treatment)
+    getProblem().addFunctorMaterial(class_name, prefix() + "functor_fluidprops", params);
 }
 
 void

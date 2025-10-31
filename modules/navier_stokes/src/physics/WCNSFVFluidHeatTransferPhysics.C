@@ -518,6 +518,7 @@ WCNSFVFluidHeatTransferPhysics::addMaterials()
     {
       params.set<bool>("assumed_constant_cp") = false;
       params.set<UserObjectName>(NS::fluid) = getParam<UserObjectName>(NS::fluid);
+      params.set<MooseFunctorName>(NS::pressure) = _flow_equations_physics->getPressureName();
     }
   }
   if (_solve_for_enthalpy)
