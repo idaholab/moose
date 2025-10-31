@@ -1,47 +1,45 @@
+AD = ''
+
 [Mesh]
-  [./square]
+  [square]
     type = GeneratedMeshGenerator
     nx = 2
     ny = 2
     dim = 2
-  [../]
+  []
 []
 
 [Variables]
-  [./u]
-  [../]
+  [u]
+  []
 []
 
 [Kernels]
-  [./diff]
-    type = ADDiffusion
+  [diff]
+    type = ${AD}Diffusion
     variable = u
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
-    type = DirichletBC
+  [left]
+    type = ${AD}DirichletBC
     variable = u
     boundary = 3
     value = 0
-  [../]
-
-  [./right]
-    type = ADNeumannBC
+  []
+  [right]
+    type = ${AD}NeumannBC
     variable = u
     boundary = 1
     value = 1
-  [../]
+  []
 []
 
 [Executioner]
   type = Steady
-
-  solve_type = 'PJFNK'
 []
 
 [Outputs]
-  file_base = neumannbc_out
   exodus = true
 []
