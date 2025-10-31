@@ -61,7 +61,9 @@ ADWallHeatTransferCoefficientSchadMaterial::ADWallHeatTransferCoefficientSchadMa
 void
 ADWallHeatTransferCoefficientSchadMaterial::computeQpProperties()
 {
-  ADReal Pe = std::max(1.0, THM::Peclet(1., _cp[_qp], _rho[_qp], _vel[_qp], _D_h[_qp], _k[_qp]));
+  using std::max, std::pow;
+
+  ADReal Pe = max(1.0, THM::Peclet(1., _cp[_qp], _rho[_qp], _vel[_qp], _D_h[_qp], _k[_qp]));
 
   if (_PoD > 1.5 || _PoD < 1.1 || Pe > 1000)
   {
@@ -72,12 +74,12 @@ ADWallHeatTransferCoefficientSchadMaterial::computeQpProperties()
 
   if (Pe < 150)
   {
-    ADReal Nu = 4.496 * (-16.15 + 24.96 * _PoD - 8.55 * std::pow(_PoD, 2));
+    ADReal Nu = 4.496 * (-16.15 + 24.96 * _PoD - 8.55 * pow(_PoD, 2));
     _Hw[_qp] = THM::wallHeatTransferCoefficient(Nu, _k[_qp], _D_h[_qp]);
   }
   else
   {
-    ADReal Nu = (-16.15 + 24.96 * _PoD - 8.55 * std::pow(_PoD, 2)) * std::pow(Pe, 0.3);
+    ADReal Nu = (-16.15 + 24.96 * _PoD - 8.55 * pow(_PoD, 2)) * pow(Pe, 0.3);
     _Hw[_qp] = THM::wallHeatTransferCoefficient(Nu, _k[_qp], _D_h[_qp]);
   }
 }

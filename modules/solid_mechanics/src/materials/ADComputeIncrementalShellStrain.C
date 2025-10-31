@@ -290,6 +290,8 @@ ADComputeIncrementalShellStrain::computeProperties()
 void
 ADComputeIncrementalShellStrain::computeGMatrix()
 {
+  using std::sqrt;
+
   // quadrature points in isoparametric space
   _2d_points = _qrule->get_points(); // would be in 2D
 
@@ -389,15 +391,15 @@ ADComputeIncrementalShellStrain::computeGMatrix()
       gmn(2, 1) = gmn(1, 2);
 
       ADRankTwoTensor gmninv_temp = gmn.inverse();
-      (*_J_map[j])[i] = std::sqrt(gmn.det());
+      (*_J_map[j])[i] = sqrt(gmn.det());
       (*_covariant_transformation_matrix[j])[i] = J;
 
       (*_contravariant_transformation_matrix[j])[i] =
           (*_covariant_transformation_matrix[j])[i].inverse();
 
-      Real normx = std::sqrt(J(0, 0) * J(0, 0) + J(0, 1) * J(0, 1) + J(0, 2) * J(0, 2));
-      Real normy = std::sqrt(J(1, 0) * J(1, 0) + J(1, 1) * J(1, 1) + J(1, 2) * J(1, 2));
-      Real normz = std::sqrt(J(2, 0) * J(2, 0) + J(2, 1) * J(2, 1) + J(2, 2) * J(2, 2));
+      Real normx = sqrt(J(0, 0) * J(0, 0) + J(0, 1) * J(0, 1) + J(0, 2) * J(0, 2));
+      Real normy = sqrt(J(1, 0) * J(1, 0) + J(1, 1) * J(1, 1) + J(1, 2) * J(1, 2));
+      Real normz = sqrt(J(2, 0) * J(2, 0) + J(2, 1) * J(2, 1) + J(2, 2) * J(2, 2));
 
       J(0, 0) /= normx;
       J(0, 1) /= normx;
@@ -457,6 +459,8 @@ ADComputeIncrementalShellStrain::computeGMatrix()
 void
 ADComputeIncrementalShellStrain::computeLocalCoordinates()
 {
+  using std::abs;
+
   // default option for the first local vector:the global X-axis is projected on the shell plane
   // alternatively the reference first local vector provided by the user can be used to define the
   // 1st local axis
@@ -471,7 +475,7 @@ ADComputeIncrementalShellStrain::computeLocalCoordinates()
 
   // The reference first local axis and the normal are considered parallel if the angle between them
   // is less than 0.05 degrees
-  if (MooseUtils::absoluteFuzzyEqual(std::abs(_e1 * _e3), 1.0, 0.05 * libMesh::pi / 180.0))
+  if (MooseUtils::absoluteFuzzyEqual(abs(_e1 * _e3), 1.0, 0.05 * libMesh::pi / 180.0))
   {
     mooseError("The reference first local axis must not be perpendicular to any of the shell "
                "elements ");

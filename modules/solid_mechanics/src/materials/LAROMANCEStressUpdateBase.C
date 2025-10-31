@@ -1080,18 +1080,19 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::convertOutput(const unsigned int p,
                                                      const GenericReal<is_ad> & drom_output,
                                                      const bool derivative)
 {
+  using std::exp;
   if (out_index == _strain_output_index)
   {
     if (derivative)
-      return std::exp(rom_output) * _dt * drom_output;
+      return exp(rom_output) * _dt * drom_output;
     else
-      return std::exp(rom_output) * _dt;
+      return exp(rom_output) * _dt;
   }
 
   if (derivative)
     return 0.0;
 
-  GenericReal<is_ad> expout = std::exp(rom_output);
+  GenericReal<is_ad> expout = exp(rom_output);
   mooseAssert(expout > 0.0, "ROM calculated strain increment must be positive");
 
   if (expout > _cutoff[p])
@@ -1282,6 +1283,8 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::sigmoid(const Real lower,
                                                const GenericReal<is_ad> & val,
                                                const bool derivative)
 {
+  using std::exp;
+
   mooseAssert(std::isfinite(MetaPhysicL::raw_value(val)), "Sigmoid value should must be infinite");
   mooseAssert(MetaPhysicL::raw_value(val) >= lower, "Input value must be greater than lower limit");
   mooseAssert(MetaPhysicL::raw_value(val) <= upper, "Input value must be greater than upper limit");
@@ -1305,8 +1308,8 @@ LAROMANCEStressUpdateBaseTempl<is_ad>::sigmoid(const Real lower,
   }
   else if (x < 1.0 && x > -1.0)
   {
-    const GenericReal<is_ad> plus = std::exp(-2.0 / (1.0 + x));
-    const GenericReal<is_ad> minus = std::exp(-2.0 / (1.0 - x));
+    const GenericReal<is_ad> plus = exp(-2.0 / (1.0 + x));
+    const GenericReal<is_ad> minus = exp(-2.0 / (1.0 - x));
 
     if (!derivative)
       return 1.0 - plus / (plus + minus);

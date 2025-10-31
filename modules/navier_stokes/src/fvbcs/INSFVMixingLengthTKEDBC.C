@@ -39,6 +39,7 @@ INSFVMixingLengthTKEDBC::boundaryValue(const FaceInfo & fi, const Moose::StateAr
 {
   const auto boundary_face = singleSidedFaceArg(&fi);
 
-  return std::pow(_C_mu(boundary_face, state), 0.75) * std::pow(_k(boundary_face, state), 1.5) /
+  using std::pow;
+  return pow(_C_mu(boundary_face, state), 0.75) * pow(_k(boundary_face, state), 1.5) /
          (0.07 * _characteristic_length(boundary_face, state));
 }

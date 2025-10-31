@@ -60,6 +60,8 @@ INSFVMixingLengthReynoldsStress::INSFVMixingLengthReynoldsStress(const InputPara
 ADReal
 INSFVMixingLengthReynoldsStress::computeStrongResidual(const bool populate_a_coeffs)
 {
+  using std::sqrt;
+
   constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
 
   const auto face = makeCDFace(*_face_info);
@@ -95,7 +97,7 @@ INSFVMixingLengthReynoldsStress::computeStrongResidual(const bool populate_a_coe
                                       Utility::pow<2>(grad_v(2) + grad_w(1));
   }
 
-  symmetric_strain_tensor_norm = std::sqrt(symmetric_strain_tensor_norm + offset);
+  symmetric_strain_tensor_norm = sqrt(symmetric_strain_tensor_norm + offset);
 
   // Interpolate the mixing length to the face
   const ADReal mixing_len = _mixing_len(face, state);

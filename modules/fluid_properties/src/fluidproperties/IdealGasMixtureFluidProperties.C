@@ -377,11 +377,13 @@ IdealGasMixtureFluidProperties::c_from_p_T_templ(const CppType & /*p*/,
                                                  const CppType & T,
                                                  const std::vector<CppType> & x_secondary) const
 {
+  using std::sqrt;
+
   const auto x = secondaryToAllMassFractions(x_secondary);
   const auto M = mixtureMolarMass(x);
   const auto gamma = mixtureSpecificHeatRatio(x);
 
-  return std::sqrt(gamma * _R * T / M);
+  return sqrt(gamma * _R * T / M);
 }
 
 ADReal

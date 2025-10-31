@@ -33,7 +33,8 @@ ADReal
 reynolds(const ADReal & rho, const ADReal & vel, const ADReal & L, const ADReal & mu)
 {
   deprecatedMessage();
-  return rho * std::fabs(vel) * L / mu;
+  using std::fabs;
+  return rho * fabs(vel) * L / mu;
 }
 
 Real
@@ -68,8 +69,8 @@ grashof(const ADReal & beta,
         const ADReal & gravity_magnitude)
 {
   deprecatedMessage();
-  return gravity_magnitude * beta * std::abs(T_s - T_bulk) * std::pow(L, 3) * (rho * rho) /
-         (mu * mu);
+  using std::abs, std::pow;
+  return gravity_magnitude * beta * abs(T_s - T_bulk) * pow(L, 3) * (rho * rho) / (mu * mu);
 }
 
 Real
@@ -111,7 +112,8 @@ ADReal
 peclet(const ADReal & vel, const ADReal & L, const ADReal & diffusivity)
 {
   deprecatedMessage();
-  return std::fabs(vel) * L / diffusivity;
+  using std::fabs;
+  return fabs(vel) * L / diffusivity;
 }
 
 } // namespace fp

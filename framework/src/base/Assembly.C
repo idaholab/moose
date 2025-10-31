@@ -1168,7 +1168,8 @@ Assembly::computeSinglePointMapAD(const Elem * elem,
         det.value() = TOLERANCE * TOLERANCE;
 
       const auto inv_det = 1. / det;
-      _ad_jac[p] = std::sqrt(det);
+      using std::sqrt;
+      _ad_jac[p] = sqrt(det);
 
       _ad_JxW[p] = _ad_jac[p] * qw[p];
 
@@ -1539,7 +1540,8 @@ Assembly::computeFaceMap(const Elem & elem, const unsigned int side, const std::
 
         const auto g22 = (dxdeta * dxdeta + dydeta * dydeta + dzdeta * dzdeta);
 
-        const auto the_jac = std::sqrt(g11 * g22 - g12 * g21);
+        using std::sqrt;
+        const auto the_jac = sqrt(g11 * g22 - g12 * g21);
 
         _ad_JxW_face[p] = the_jac * qw[p];
 

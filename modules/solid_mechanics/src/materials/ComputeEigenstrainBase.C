@@ -76,8 +76,8 @@ ComputeEigenstrainBaseTempl<is_ad>::computeVolumetricStrainComponent(
   // epsilon_log = log(cbrt(volumetric_strain + 1.0))
   // or:
   // epsilon_log = (1/3) log(volumetric_strain + 1.0)
-
-  return std::log(volumetric_strain + 1.0) / 3.0;
+  using std::log;
+  return log(volumetric_strain + 1.0) / 3.0;
 }
 
 template class ComputeEigenstrainBaseTempl<false>;

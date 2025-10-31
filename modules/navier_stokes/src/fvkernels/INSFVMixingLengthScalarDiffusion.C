@@ -61,6 +61,8 @@ INSFVMixingLengthScalarDiffusion::INSFVMixingLengthScalarDiffusion(const InputPa
 ADReal
 INSFVMixingLengthScalarDiffusion::computeQpResidual()
 {
+  using std::sqrt;
+
   constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
 
   auto face = makeCDFace(*_face_info);
@@ -82,7 +84,7 @@ INSFVMixingLengthScalarDiffusion::computeQpResidual()
     }
   }
 
-  symmetric_strain_tensor_norm = std::sqrt(symmetric_strain_tensor_norm + offset);
+  symmetric_strain_tensor_norm = sqrt(symmetric_strain_tensor_norm + offset);
 
   // Interpolate the mixing length to the face
   ADReal mixing_len = _mixing_len(face, state);

@@ -65,6 +65,8 @@ ElectrostaticContactCondition::ElectrostaticContactCondition(const InputParamete
 ADReal
 ElectrostaticContactCondition::computeQpResidual(Moose::DGResidualType type)
 {
+  using std::pow;
+
   ADReal res = 0.0;
   ADReal contact_conductance = 0.0;
 
@@ -76,8 +78,7 @@ ElectrostaticContactCondition::computeQpResidual(Moose::DGResidualType type)
   else if (_mean_hardness_was_set && !_conductance_was_set)
     contact_conductance =
         _alpha_electric * mean_conductivity *
-        std::pow((_mechanical_pressure.value(_t, _q_point[_qp]) / _mean_hardness[_qp]),
-                 _beta_electric);
+        pow((_mechanical_pressure.value(_t, _q_point[_qp]) / _mean_hardness[_qp]), _beta_electric);
 
   switch (type)
   {

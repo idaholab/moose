@@ -46,6 +46,8 @@ DittusBoelterFunctorMaterialTempl<is_ad>::DittusBoelterFunctorMaterialTempl(
       "Hw",
       [this](const auto & r, const auto & t) -> GenericReal<is_ad>
       {
+        using std::pow;
+
         const Real n =
             (MetaPhysicL::raw_value(_T(r, t)) < MetaPhysicL::raw_value(_T_wall(r, t))) ? 0.4 : 0.3;
         const auto Re = _reynolds(r, t);
@@ -56,7 +58,7 @@ DittusBoelterFunctorMaterialTempl<is_ad>::DittusBoelterFunctorMaterialTempl(
         if (const auto raw_Pr = MetaPhysicL::raw_value(Pr); raw_Pr < 0.7 || raw_Pr > 160)
           flagSolutionWarning(
               "Prandtl number out of the range of validity of the Dittus-Boelter correlation");
-        const auto Nu = 0.023 * std::pow(Re, 0.8) * std::pow(Pr, n);
+        const auto Nu = 0.023 * pow(Re, 0.8) * pow(Pr, n);
         return NS::wallHeatTransferCoefficient(Nu, _k(r, t), _D_h(r, t));
       });
 }

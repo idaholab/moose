@@ -45,16 +45,16 @@ PorousFlowDiffusivityMillingtonQuirkTempl<is_ad>::computeQpProperties()
 {
   PorousFlowDiffusivityBaseTempl<is_ad>::computeQpProperties();
 
+  using std::cbrt, std::pow;
+
   for (unsigned int ph = 0; ph < _num_phases; ++ph)
   {
-    _tortuosity[_qp][ph] =
-        std::cbrt(_porosity_qp[_qp]) * std::pow(_saturation_qp[_qp][ph], 10.0 / 3.0);
+    _tortuosity[_qp][ph] = cbrt(_porosity_qp[_qp]) * pow(_saturation_qp[_qp][ph], 10.0 / 3.0);
 
     if (!is_ad)
       for (unsigned int var = 0; var < _num_var; ++var)
         (*_dtortuosity_dvar)[_qp][ph][var] = MetaPhysicL::raw_value(
-            1.0 / 3.0 * std::cbrt(_porosity_qp[_qp]) *
-            std::pow(_saturation_qp[_qp][ph], 7.0 / 3.0) *
+            1.0 / 3.0 * cbrt(_porosity_qp[_qp]) * pow(_saturation_qp[_qp][ph], 7.0 / 3.0) *
             (_saturation_qp[_qp][ph] / _porosity_qp[_qp] * (*_dporosity_qp_dvar)[_qp][var] +
              10.0 * (*_dsaturation_qp_dvar)[_qp][ph][var]));
   }

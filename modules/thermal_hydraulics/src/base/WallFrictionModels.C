@@ -40,11 +40,12 @@ FanningFrictionFactorChurchill(Real Re, Real roughness, Real Dh)
 ADReal
 FanningFrictionFactorChurchill(ADReal Re, ADReal roughness, ADReal Dh)
 {
-  ADReal Re_limit = std::max(Re, 10.0);
+  using std::max, std::pow, std::log;
 
-  ADReal a =
-      std::pow(2.457 * std::log(1.0 / (std::pow(7.0 / Re_limit, 0.9) + 0.27 * roughness / Dh)), 16);
-  ADReal b = std::pow(3.753e4 / Re_limit, 16);
-  return 2.0 * std::pow(std::pow(8.0 / Re_limit, 12) + 1.0 / std::pow(a + b, 1.5), 1.0 / 12.0);
+  ADReal Re_limit = max(Re, 10.0);
+
+  ADReal a = pow(2.457 * log(1.0 / (pow(7.0 / Re_limit, 0.9) + 0.27 * roughness / Dh)), 16);
+  ADReal b = pow(3.753e4 / Re_limit, 16);
+  return 2.0 * pow(pow(8.0 / Re_limit, 12) + 1.0 / pow(a + b, 1.5), 1.0 / 12.0);
 }
 }

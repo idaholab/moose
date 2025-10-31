@@ -71,7 +71,8 @@ ADSmoothTransitionTestMaterial::f1(const ADReal & x) const
 ADReal
 ADSmoothTransitionTestMaterial::f2(const ADReal & x) const
 {
-  return -0.5 * std::pow(x - 1, 2) + 1;
+  using std::pow;
+  return -0.5 * pow(x - 1, 2) + 1;
 }
 ADReal
 ADSmoothTransitionTestMaterial::df1dx(const ADReal & /*x*/) const

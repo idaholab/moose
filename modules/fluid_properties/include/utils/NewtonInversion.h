@@ -52,15 +52,17 @@ NewtonSolve(const T & x,
 
   std::function<bool(const T &, const T &)> abs_tol_check =
       [tolerance](const T & R, const T & /*y*/)
-  { return MetaPhysicL::raw_value(std::abs(R)) < tolerance; };
+  { return std::abs(MetaPhysicL::raw_value(R)) < tolerance; };
   std::function<bool(const T &, const T &)> rel_tol_check = [tolerance](const T & R, const T & y)
-  { return MetaPhysicL::raw_value(std::abs(R / y)) < tolerance; };
+  { return std::abs(MetaPhysicL::raw_value(R / y)) < tolerance; };
   auto convergence_check = MooseUtils::absoluteFuzzyEqual(MetaPhysicL::raw_value(y), 0, tolerance)
                                ? abs_tol_check
                                : rel_tol_check;
 
   T z = z_initial_guess, R, new_y, dy_dx, dy_dz;
   unsigned int iteration = 0;
+
+  using std::isnan;
 
   do
   {
@@ -85,7 +87,7 @@ NewtonSolve(const T & x,
     z += -(R / dy_dz);
 
     // Check for NaNs
-    if (std::isnan(z))
+    if (isnan(z))
       mooseException(caller_name + ": NaN detected in Newton solve");
 
     if (converged)
@@ -141,11 +143,13 @@ NewtonSolve2D(const T & f,
   // R represents a residual equal to y - y_in
   auto convergence_check = [&targets, &tolerances](const auto & minus_R)
   {
+    using std::abs;
+
     for (const auto i : index_range(minus_R))
     {
-      const auto error = std::abs(MooseUtils::absoluteFuzzyEqual(targets(i), 0, tolerances(i))
-                                      ? minus_R(i)
-                                      : minus_R(i) / targets(i));
+      const auto error = abs(MooseUtils::absoluteFuzzyEqual(targets(i), 0, tolerances(i))
+                                 ? minus_R(i)
+                                 : minus_R(i) / targets(i));
       if (error >= tolerances(i))
         return false;
     }
@@ -170,6 +174,8 @@ NewtonSolve2D(const T & f,
     y_final = u(1);
   };
 
+  using std::isnan, std::max, std::abs;
+
   do
   {
     for (const auto i : make_range(system_size))
@@ -186,7 +192,7 @@ NewtonSolve2D(const T & f,
     // Check for NaNs before proceeding to system solve. We may simultaneously not have NaNs in z
     // but have NaNs in the function evaluation
     for (const auto i : make_range(system_size))
-      if (std::isnan(minus_R(i)))
+      if (isnan(minus_R(i)))
       {
         assign_solution();
         mooseException("NaN detected in Newton solve");
@@ -195,7 +201,7 @@ NewtonSolve2D(const T & f,
     // Do some Jacobi (rowmax) preconditioning
     for (const auto i : make_range(system_size))
     {
-      const auto rowmax = std::max(std::abs(J(i, 0)), std::abs(J(i, 1)));
+      const auto rowmax = max(abs(J(i, 0)), abs(J(i, 1)));
       for (const auto j : make_range(system_size))
         J(i, j) /= rowmax;
       minus_R(i) /= rowmax;
@@ -222,7 +228,7 @@ NewtonSolve2D(const T & f,
 
     // Check for NaNs
     for (const auto i : make_range(system_size))
-      if (std::isnan(u(i)))
+      if (isnan(u(i)))
       {
         assign_solution();
         mooseException("NaN detected in Newton solve");

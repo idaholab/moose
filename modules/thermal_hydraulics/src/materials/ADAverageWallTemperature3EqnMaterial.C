@@ -63,11 +63,13 @@ ADAverageWallTemperature3EqnMaterial::ADAverageWallTemperature3EqnMaterial(
 void
 ADAverageWallTemperature3EqnMaterial::computeQpProperties()
 {
+  using std::abs;
+
   ADReal denominator = 0;
   for (unsigned int i = 0; i < _n_values; i++)
     denominator += (*(_Hw_sources[i]))[_qp] * (*(_P_hf_sources[i]))[_qp];
 
-  if (std::abs(denominator) < 1e-15)
+  if (abs(denominator) < 1e-15)
   {
     // use alternate definition to avoid division by zero: heated-perimeter-weighted average
     ADReal numerator = 0;

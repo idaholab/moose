@@ -51,9 +51,11 @@ INSFVTKEDWallFunctionBC::INSFVTKEDWallFunctionBC(const InputParameters & params)
 ADReal
 INSFVTKEDWallFunctionBC::boundaryValue(const FaceInfo & fi, const Moose::StateArg & state) const
 {
+  using std::pow, std::abs;
+
   const bool use_elem = (fi.faceType(std::make_pair(_var.number(), _var.sys().number())) ==
                          FaceInfo::VarFaceNeighbors::ELEM);
-  const Real dist = std::abs(
+  const Real dist = abs(
       ((use_elem ? fi.elemCentroid() : fi.neighborCentroid()) - fi.faceCentroid()) * fi.normal());
   const Elem * const elem_ptr = use_elem ? fi.elemPtr() : fi.neighborPtr();
   const auto elem_arg = makeElemArg(elem_ptr);
@@ -88,7 +90,7 @@ INSFVTKEDWallFunctionBC::boundaryValue(const FaceInfo & fi, const Moose::StateAr
 
   if (y_plus <= 5.0) // sub-laminar layer
   {
-    const auto laminar_value = 2.0 * weight * TKE * mu / std::pow(dist, 2);
+    const auto laminar_value = 2.0 * weight * TKE * mu / pow(dist, 2);
     if (!_newton_solve)
       return laminar_value;
     else
@@ -98,8 +100,8 @@ INSFVTKEDWallFunctionBC::boundaryValue(const FaceInfo & fi, const Moose::StateAr
   }
   else if (y_plus >= 30.0) // log-layer
   {
-    const auto turbulent_value = weight * _C_mu(elem_arg, state) * std::pow(std::abs(TKE), 1.5) /
-                                 (_mu_t(elem_arg, state) * dist);
+    const auto turbulent_value =
+        weight * _C_mu(elem_arg, state) * pow(abs(TKE), 1.5) / (_mu_t(elem_arg, state) * dist);
     if (!_newton_solve)
       return turbulent_value;
     else
@@ -108,9 +110,9 @@ INSFVTKEDWallFunctionBC::boundaryValue(const FaceInfo & fi, const Moose::StateAr
   }
   else // blending function
   {
-    const auto laminar_value = 2.0 * weight * TKE * mu / std::pow(dist, 2);
-    const auto turbulent_value = weight * _C_mu(elem_arg, state) * std::pow(std::abs(TKE), 1.5) /
-                                 (_mu_t(elem_arg, state) * dist);
+    const auto laminar_value = 2.0 * weight * TKE * mu / pow(dist, 2);
+    const auto turbulent_value =
+        weight * _C_mu(elem_arg, state) * pow(abs(TKE), 1.5) / (_mu_t(elem_arg, state) * dist);
     const auto interpolation_coef = (y_plus - 5.0) / 25.0;
     return (interpolation_coef * (turbulent_value - laminar_value) + laminar_value);
   }

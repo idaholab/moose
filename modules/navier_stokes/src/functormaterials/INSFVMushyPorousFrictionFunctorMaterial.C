@@ -50,12 +50,14 @@ INSFVMushyPorousFrictionFunctorMaterial::INSFVMushyPorousFrictionFunctorMaterial
       getParam<MooseFunctorName>("Darcy_coef_name"),
       [this](const auto & r, const auto & t) -> ADReal
       {
+        using std::atan;
+
         constexpr Real epsilon = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
         const auto fs = 1.0 - _fl(r, t);
         mooseAssert(_dendrite_spacing_scaling(r, t) > 0,
                     "Dendrite spacing scaling should be positive!");
         const auto cs = _c / Utility::pow<2>(_dendrite_spacing_scaling(r, t));
-        const auto Fk = 0.5 + std::atan(_s * (fs - _fs_crit)) / libMesh::pi;
+        const auto Fk = 0.5 + atan(_s * (fs - _fs_crit)) / libMesh::pi;
         const auto K =
             Utility::pow<3>(_fl(r, t)) / ((Utility::pow<2>(fs) + epsilon) * Fk * cs) + epsilon;
         return _mu(r, t) / K;
@@ -65,14 +67,16 @@ INSFVMushyPorousFrictionFunctorMaterial::INSFVMushyPorousFrictionFunctorMaterial
       getParam<MooseFunctorName>("Forchheimer_coef_name"),
       [this](const auto & r, const auto & t) -> ADReal
       {
+        using std::atan, std::sqrt;
+
         constexpr Real epsilon = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
         const auto fs = 1.0 - _fl(r, t);
         mooseAssert(_dendrite_spacing_scaling(r, t) > 0,
                     "Dendrite spacing scaling should be positive!");
         const auto cs = _c / Utility::pow<2>(_dendrite_spacing_scaling(r, t));
-        const auto Fk = 0.5 + std::atan(_s * (fs - _fs_crit)) / libMesh::pi;
+        const auto Fk = 0.5 + atan(_s * (fs - _fs_crit)) / libMesh::pi;
         const auto K =
             Utility::pow<3>(_fl(r, t)) / ((Utility::pow<2>(fs) + epsilon) * Fk * cs) + epsilon;
-        return _forchheimer_coef * _rho_l(r, t) / std::sqrt(K);
+        return _forchheimer_coef * _rho_l(r, t) / sqrt(K);
       });
 }

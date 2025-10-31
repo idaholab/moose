@@ -102,7 +102,8 @@ relativePermeabilityW(const T & seff, Real lambda)
   else if (MetaPhysicL::raw_value(seff) >= 1.0)
     return 1.0;
 
-  return std::pow(seff, (2.0 + 3.0 * lambda) / lambda);
+  using std::pow;
+  return pow(seff, (2.0 + 3.0 * lambda) / lambda);
 }
 
 /**
@@ -128,7 +129,8 @@ relativePermeabilityNW(const T & seff, Real lambda)
   else if (MetaPhysicL::raw_value(seff) >= 1.0)
     return 1.0;
 
-  return seff * seff * (1.0 - std::pow(1.0 - seff, (2.0 + lambda) / lambda));
+  using std::pow;
+  return seff * seff * (1.0 - pow(1.0 - seff, (2.0 + lambda) / lambda));
 }
 
 /**

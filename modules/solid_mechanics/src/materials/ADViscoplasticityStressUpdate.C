@@ -82,6 +82,8 @@ ADViscoplasticityStressUpdate::updateState(ADRankTwoTensor & elastic_strain_incr
                                            bool /*compute_full_tangent_operator = false*/,
                                            RankFourTensor & /*tangent_operator = _identityTensor*/)
 {
+  using std::sqrt;
+
   // Compute initial hydrostatic stress and porosity
   if (_pore_shape == PoreShapeModel::CYLINDRICAL)
     _hydro_stress = (stress(0, 0) + stress(1, 1)) / 2.0;
@@ -93,7 +95,7 @@ ADViscoplasticityStressUpdate::updateState(ADRankTwoTensor & elastic_strain_incr
   // Compute intermediate equivalent stress
   const ADRankTwoTensor dev_stress = stress.deviatoric();
   const ADReal dev_stress_squared = dev_stress.doubleContraction(dev_stress);
-  const ADReal equiv_stress = dev_stress_squared == 0.0 ? 0.0 : std::sqrt(1.5 * dev_stress_squared);
+  const ADReal equiv_stress = dev_stress_squared == 0.0 ? 0.0 : sqrt(1.5 * dev_stress_squared);
 
   computeStressInitialize(equiv_stress, elasticity_tensor);
 
@@ -140,7 +142,7 @@ ADViscoplasticityStressUpdate::updateState(ADRankTwoTensor & elastic_strain_incr
   const ADRankTwoTensor new_dev_stress = stress.deviatoric();
   const ADReal new_dev_stress_squared = new_dev_stress.doubleContraction(new_dev_stress);
   const ADReal new_equiv_stress =
-      new_dev_stress_squared == 0.0 ? 0.0 : std::sqrt(1.5 * new_dev_stress_squared);
+      new_dev_stress_squared == 0.0 ? 0.0 : sqrt(1.5 * new_dev_stress_squared);
 
   if (MooseUtils::relativeFuzzyGreaterThan(new_equiv_stress, equiv_stress))
     mooseException("In ",
@@ -176,7 +178,9 @@ ADReal
 ADViscoplasticityStressUpdate::computeResidual(const ADReal & equiv_stress,
                                                const ADReal & trial_gauge)
 {
-  const ADReal M = std::abs(_hydro_stress) / trial_gauge;
+  using std::abs, std::cosh, std::sinh;
+
+  const ADReal M = abs(_hydro_stress) / trial_gauge;
   const ADReal dM_dtrial_gauge = -M / trial_gauge;
 
   const ADReal residual_left = Utility::pow<2>(equiv_stress / trial_gauge);
@@ -193,9 +197,9 @@ ADViscoplasticityStressUpdate::computeResidual(const ADReal & equiv_stress,
 
   if (_model == ViscoplasticityModel::GTN)
   {
-    residual += 2.0 * _intermediate_porosity * std::cosh(_pore_shape_factor * M) - 1.0 -
+    residual += 2.0 * _intermediate_porosity * cosh(_pore_shape_factor * M) - 1.0 -
                 Utility::pow<2>(_intermediate_porosity);
-    _derivative += 2.0 * _intermediate_porosity * std::sinh(_pore_shape_factor * M) *
+    _derivative += 2.0 * _intermediate_porosity * sinh(_pore_shape_factor * M) *
                    _pore_shape_factor * dM_dtrial_gauge;
   }
   else
@@ -224,16 +228,18 @@ ADViscoplasticityStressUpdate::computeResidual(const ADReal & equiv_stress,
 ADReal
 ADViscoplasticityStressUpdate::computeH(const Real n, const ADReal & M, const bool derivative)
 {
-  const ADReal mod = std::pow(M * _pore_shape_factor, (n + 1.0) / n);
+  using std::pow;
+
+  const ADReal mod = pow(M * _pore_shape_factor, (n + 1.0) / n);
 
   // Calculate derivative with respect to M
   if (derivative)
   {
     const ADReal dmod_dM = (n + 1.0) / n * mod / M;
-    return dmod_dM * std::pow(1.0 + mod / n, n - 1.0);
+    return dmod_dM * pow(1.0 + mod / n, n - 1.0);
   }
 
-  return std::pow(1.0 + mod / n, n);
+  return pow(1.0 + mod / n, n);
 }
 
 ADRankTwoTensor
@@ -242,9 +248,11 @@ ADViscoplasticityStressUpdate::computeDGaugeDSigma(const ADReal & gauge_stress,
                                                    const ADRankTwoTensor & dev_stress,
                                                    const ADRankTwoTensor & stress)
 {
+  using std::abs, std::sinh;
+
   // Compute the derivative of the gauge stress with respect to the equivalent and hydrostatic
   // stress components
-  const ADReal M = std::abs(_hydro_stress) / gauge_stress;
+  const ADReal M = abs(_hydro_stress) / gauge_stress;
   const ADReal h = computeH(_power, M);
 
   // Compute the derviative of the residual with respect to the hydrostatic stress
@@ -254,7 +262,7 @@ ADViscoplasticityStressUpdate::computeDGaugeDSigma(const ADReal & gauge_stress,
     const ADReal dM_dhydro_stress = M / _hydro_stress;
     if (_model == ViscoplasticityModel::GTN)
     {
-      dresidual_dhydro_stress = 2.0 * _intermediate_porosity * std::sinh(_pore_shape_factor * M) *
+      dresidual_dhydro_stress = 2.0 * _intermediate_porosity * sinh(_pore_shape_factor * M) *
                                 _pore_shape_factor * dM_dhydro_stress;
     }
     else
@@ -294,13 +302,14 @@ ADViscoplasticityStressUpdate::computeInelasticStrainIncrement(
     const ADRankTwoTensor & dev_stress,
     const ADRankTwoTensor & stress)
 {
+  using std::sqrt, std::pow;
+
   // If hydrostatic stress and porosity present, compute non-linear gauge stress
   if (_intermediate_porosity == 0.0)
     gauge_stress = equiv_stress;
   else if (_hydro_stress == 0.0)
-    gauge_stress =
-        equiv_stress / std::sqrt(1.0 - (1.0 + _power_factor) * _intermediate_porosity +
-                                 _power_factor * Utility::pow<2>(_intermediate_porosity));
+    gauge_stress = equiv_stress / sqrt(1.0 - (1.0 + _power_factor) * _intermediate_porosity +
+                                       _power_factor * Utility::pow<2>(_intermediate_porosity));
   else
     returnMappingSolve(equiv_stress, gauge_stress, _console);
 
@@ -308,7 +317,7 @@ ADViscoplasticityStressUpdate::computeInelasticStrainIncrement(
               "Gauge stress calculated in inner Newton solve is less than the equivalent stress.");
 
   // Compute stress potential
-  dpsi_dgauge = _coefficient[_qp] * std::pow(gauge_stress, _power);
+  dpsi_dgauge = _coefficient[_qp] * pow(gauge_stress, _power);
 
   // Compute strain increment from stress potential and the gauge stress derivative with respect
   // to the stress stress. The current form is explicit, and should eventually be changed
@@ -333,6 +342,6 @@ ADViscoplasticityStressUpdate::computeReferenceResidual(const ADReal & /*effecti
                                                         const ADReal & gauge_stress)
 {
   // Use gauge stress for relative tolerance criteria, defined as:
-  // std::abs(residual / gauge_stress) <= _relative_tolerance
+  // abs(residual / gauge_stress) <= _relative_tolerance
   return MetaPhysicL::raw_value(gauge_stress);
 }

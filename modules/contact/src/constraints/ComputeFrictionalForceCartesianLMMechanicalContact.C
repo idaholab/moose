@@ -12,9 +12,14 @@
 #include "DisplacedProblem.h"
 #include "Assembly.h"
 #include "AutomaticMortarGeneration.h"
+#include "metaphysicl/metaphysicl_version.h"
 #include "metaphysicl/dualsemidynamicsparsenumberarray.h"
 #include "metaphysicl/parallel_dualnumber.h"
+#if METAPHYSICL_MAJOR_VERSION < 2
 #include "metaphysicl/parallel_dynamic_std_array_wrapper.h"
+#else
+#include "metaphysicl/parallel_dynamic_array_wrapper.h"
+#endif
 #include "metaphysicl/parallel_semidynamicsparsenumberarray.h"
 #include "timpi/parallel_sync.h"
 
@@ -200,6 +205,8 @@ void
 ComputeFrictionalForceCartesianLMMechanicalContact::enforceConstraintOnDof(
     const DofObject * const dof)
 {
+  using std::abs, std::sqrt, std::max, std::min;
+
   const auto & weighted_gap = *_weighted_gap_ptr;
   const Real c = _normalize_c ? _c / *_normalization_ptr : _c;
   const Real c_t = _normalize_c ? _c_t / *_normalization_ptr : _c_t;
@@ -242,7 +249,7 @@ ComputeFrictionalForceCartesianLMMechanicalContact::enforceConstraintOnDof(
                                     lm_z * _dof_to_tangent_vectors[dof][1](2);
   }
 
-  ADReal normal_dof_residual = std::min(normal_pressure_value, weighted_gap * c);
+  ADReal normal_dof_residual = min(normal_pressure_value, weighted_gap * c);
   ADReal tangential_dof_residual;
   ADReal tangential_dof_residual_dir;
 
@@ -255,11 +262,10 @@ ComputeFrictionalForceCartesianLMMechanicalContact::enforceConstraintOnDof(
       tangential_dof_residual = tangential_pressure_value;
     else
     {
-      const auto term_1 =
-          std::max(_mu * (normal_pressure_value + c * weighted_gap),
-                   std::abs(tangential_pressure_value + c_t * tangential_vel * _dt)) *
-          tangential_pressure_value;
-      const auto term_2 = _mu * std::max(0.0, normal_pressure_value + c * weighted_gap) *
+      const auto term_1 = max(_mu * (normal_pressure_value + c * weighted_gap),
+                              abs(tangential_pressure_value + c_t * tangential_vel * _dt)) *
+                          tangential_pressure_value;
+      const auto term_2 = _mu * max(0.0, normal_pressure_value + c * weighted_gap) *
                           (tangential_pressure_value + c_t * tangential_vel * _dt);
 
       tangential_dof_residual = term_1 - term_2;
@@ -282,21 +288,19 @@ ComputeFrictionalForceCartesianLMMechanicalContact::enforceConstraintOnDof(
       lambda_t_plus_ctu[0] = tangential_pressure_value + c_t * (*_tangential_vel_ptr[0]) * _dt;
       lambda_t_plus_ctu[1] = tangential_pressure_value_dir + c_t * (*_tangential_vel_ptr[1]) * _dt;
 
-      const auto term_1_x =
-          std::max(_mu * lamdba_plus_cg,
-                   std::sqrt(lambda_t_plus_ctu[0] * lambda_t_plus_ctu[0] +
-                             lambda_t_plus_ctu[1] * lambda_t_plus_ctu[1] + epsilon_sqrt)) *
-          tangential_pressure_value;
+      const auto term_1_x = max(_mu * lamdba_plus_cg,
+                                sqrt(lambda_t_plus_ctu[0] * lambda_t_plus_ctu[0] +
+                                     lambda_t_plus_ctu[1] * lambda_t_plus_ctu[1] + epsilon_sqrt)) *
+                            tangential_pressure_value;
 
-      const auto term_1_y =
-          std::max(_mu * lamdba_plus_cg,
-                   std::sqrt(lambda_t_plus_ctu[0] * lambda_t_plus_ctu[0] +
-                             lambda_t_plus_ctu[1] * lambda_t_plus_ctu[1] + epsilon_sqrt)) *
-          tangential_pressure_value_dir;
+      const auto term_1_y = max(_mu * lamdba_plus_cg,
+                                sqrt(lambda_t_plus_ctu[0] * lambda_t_plus_ctu[0] +
+                                     lambda_t_plus_ctu[1] * lambda_t_plus_ctu[1] + epsilon_sqrt)) *
+                            tangential_pressure_value_dir;
 
-      const auto term_2_x = _mu * std::max(0.0, lamdba_plus_cg) * lambda_t_plus_ctu[0];
+      const auto term_2_x = _mu * max(0.0, lamdba_plus_cg) * lambda_t_plus_ctu[0];
 
-      const auto term_2_y = _mu * std::max(0.0, lamdba_plus_cg) * lambda_t_plus_ctu[1];
+      const auto term_2_y = _mu * max(0.0, lamdba_plus_cg) * lambda_t_plus_ctu[1];
 
       tangential_dof_residual = term_1_x - term_2_x;
       tangential_dof_residual_dir = term_1_y - term_2_y;
@@ -325,11 +329,11 @@ ComputeFrictionalForceCartesianLMMechanicalContact::enforceConstraintOnDof(
   unsigned int component_normal = 0;
 
   // Consider constraint orientation to improve Jacobian structure
-  const Real threshold_for_Jacobian = _has_disp_z ? 1.0 / std::sqrt(3.0) : 1.0 / std::sqrt(2.0);
+  const Real threshold_for_Jacobian = _has_disp_z ? 1.0 / sqrt(3.0) : 1.0 / sqrt(2.0);
 
-  if (std::abs(ny) > threshold_for_Jacobian)
+  if (abs(ny) > threshold_for_Jacobian)
     component_normal = 1;
-  else if (std::abs(nz) > threshold_for_Jacobian)
+  else if (abs(nz) > threshold_for_Jacobian)
     component_normal = 2;
 
   addResidualsAndJacobian(

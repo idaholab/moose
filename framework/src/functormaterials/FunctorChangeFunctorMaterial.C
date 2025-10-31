@@ -58,7 +58,10 @@ FunctorChangeFunctorMaterialTempl<is_ad>::FunctorChangeFunctorMaterialTempl(
 
         const auto change = _functor(r, t) - _functor(r, _ref_state);
         if (_take_absolute_value)
-          return std::abs(change);
+        {
+          using std::abs;
+          return abs(change);
+        }
         else
           return change;
       },

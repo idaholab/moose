@@ -51,6 +51,7 @@ ADNumericalFlux3EqnHLLC::calcFlux(const std::vector<ADReal> & UL,
                                   std::vector<ADReal> & FR) const
 {
   // extract the conserved variables and area
+  using std::sqrt, std::min, std::max;
 
   const ADReal rhoAL = UL[THMVACE3D::RHOA];
   const ADReal rhouAL = UL[THMVACE3D::RHOUA];
@@ -97,8 +98,8 @@ ADNumericalFlux3EqnHLLC::calcFlux(const std::vector<ADReal> & UL,
   if (_wave_speed_formulation == WaveSpeedFormulation::EINFELDT)
   {
     // compute Roe-averaged variables
-    const ADReal sqrt_rhoL = std::sqrt(rhoL);
-    const ADReal sqrt_rhoR = std::sqrt(rhoR);
+    const ADReal sqrt_rhoL = sqrt(rhoL);
+    const ADReal sqrt_rhoR = sqrt(rhoR);
     const ADReal un_roe = (sqrt_rhoL * unL + sqrt_rhoR * unR) / (sqrt_rhoL + sqrt_rhoR);
     const ADReal ut1_roe = (sqrt_rhoL * ut1L + sqrt_rhoR * ut1R) / (sqrt_rhoL + sqrt_rhoR);
     const ADReal ut2_roe = (sqrt_rhoL * ut2L + sqrt_rhoR * ut2R) / (sqrt_rhoL + sqrt_rhoR);
@@ -107,18 +108,18 @@ ADNumericalFlux3EqnHLLC::calcFlux(const std::vector<ADReal> & UL,
     const ADReal H_roe = (sqrt_rhoL * HL + sqrt_rhoR * HR) / (sqrt_rhoL + sqrt_rhoR);
     const ADRealVectorValue uvec_roe(un_roe, ut1_roe, ut2_roe);
     const ADReal h_roe = H_roe - 0.5 * uvec_roe * uvec_roe;
-    const ADReal rho_roe = std::sqrt(rhoL * rhoR);
+    const ADReal rho_roe = sqrt(rhoL * rhoR);
     const ADReal v_roe = 1.0 / rho_roe;
     const ADReal e_roe = _fp.e_from_v_h(v_roe, h_roe);
     const ADReal c_roe = _fp.c_from_v_e(v_roe, e_roe);
 
-    sL = std::min(unL - cL, un_roe - c_roe);
-    sR = std::max(unR + cR, un_roe + c_roe);
+    sL = min(unL - cL, un_roe - c_roe);
+    sR = max(unR + cR, un_roe + c_roe);
   }
   else if (_wave_speed_formulation == WaveSpeedFormulation::DAVIS)
   {
-    sL = std::min(unL - cL, unR - cR);
-    sR = std::max(unL + cL, unR + cR);
+    sL = min(unL - cL, unR - cR);
+    sR = max(unL + cL, unR + cR);
   }
   else
   {

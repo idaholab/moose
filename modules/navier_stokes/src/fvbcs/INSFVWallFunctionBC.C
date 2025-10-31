@@ -51,6 +51,8 @@ INSFVWallFunctionBC::computeSegregatedContribution()
 ADReal
 INSFVWallFunctionBC::computeStrongResidual()
 {
+  using std::abs;
+
   // Get the velocity vector
   const FaceInfo & fi = *_face_info;
   const Elem & elem = fi.elem();
@@ -64,7 +66,7 @@ INSFVWallFunctionBC::computeStrongResidual()
 
   // Compute the velocity magnitude (parallel_speed) and
   // direction of the tangential velocity component (parallel_dir)
-  ADReal dist = std::abs((fi.elemCentroid() - fi.faceCentroid()) * _normal);
+  ADReal dist = abs((fi.elemCentroid() - fi.faceCentroid()) * _normal);
   ADReal perpendicular_speed = velocity * _normal;
   ADRealVectorValue parallel_velocity = velocity - perpendicular_speed * _normal;
   ADReal parallel_speed = parallel_velocity.norm();

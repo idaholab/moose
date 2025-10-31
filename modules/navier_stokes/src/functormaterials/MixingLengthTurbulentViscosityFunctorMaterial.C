@@ -47,6 +47,8 @@ MixingLengthTurbulentViscosityFunctorMaterial::MixingLengthTurbulentViscosityFun
       NS::total_viscosity,
       [this](const auto & r, const auto & t) -> ADReal
       {
+        using std::sqrt;
+
         constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
 
         const auto grad_u = _u_vel.gradient(r, t);
@@ -67,7 +69,7 @@ MixingLengthTurbulentViscosityFunctorMaterial::MixingLengthTurbulentViscosityFun
                                             Utility::pow<2>(grad_v(2) + grad_w(1));
           }
         }
-        symmetric_strain_tensor_norm = std::sqrt(symmetric_strain_tensor_norm + offset);
+        symmetric_strain_tensor_norm = sqrt(symmetric_strain_tensor_norm + offset);
 
         // Return the sum of turbulent viscosity and dynamic viscosity
         return _mu(r, t) +

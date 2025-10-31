@@ -78,18 +78,19 @@ template <bool is_ad>
 void
 ScalarDamageBaseTempl<is_ad>::updateDamage()
 {
+  using std::min;
   updateQpDamageIndex();
-  _damage_index[_qp] = std::min(_maximum_damage, _damage_index[_qp]);
+  _damage_index[_qp] = min(_maximum_damage, _damage_index[_qp]);
 }
 
 template <bool is_ad>
 void
 ScalarDamageBaseTempl<is_ad>::updateStressForDamage(GenericRankTwoTensor<is_ad> & stress_new)
 {
+  using std::max;
   // Avoid multiplying by a small negative number, which could occur if damage_index
   // is slightly greater than 1.0
-  stress_new *=
-      std::max((1.0 - (_use_old_damage ? _damage_index_old[_qp] : _damage_index[_qp])), 0.0);
+  stress_new *= max((1.0 - (_use_old_damage ? _damage_index_old[_qp] : _damage_index[_qp])), 0.0);
 }
 
 template <bool is_ad>

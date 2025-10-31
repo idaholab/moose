@@ -72,19 +72,20 @@ template <typename T, typename P>
 T
 PeriodicFunction::valueInternal(const T & t, const P & p) const
 {
-  T t_base = std::fmod(t, _period_time);
+  using std::fmod;
+  T t_base = fmod(t, _period_time);
   if (t_base < 0.0)
     t_base += _period_time;
 
-  T x_base = std::fmod(p(0), _period_x);
+  T x_base = fmod(p(0), _period_x);
   if (x_base < 0.0)
     x_base += _period_x;
 
-  T y_base = std::fmod(p(1), _period_y);
+  T y_base = fmod(p(1), _period_y);
   if (y_base < 0.0)
     y_base += _period_y;
 
-  T z_base = std::fmod(p(2), _period_z);
+  T z_base = fmod(p(2), _period_z);
   if (z_base < 0.0)
     z_base += _period_z;
 

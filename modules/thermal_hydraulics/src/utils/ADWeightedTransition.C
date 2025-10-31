@@ -31,5 +31,6 @@ ADWeightedTransition::value(const ADReal & x, const ADReal & f1, const ADReal & 
 ADReal
 ADWeightedTransition::weight(const ADReal & x) const
 {
-  return 0.5 * (std::cos(libMesh::pi / (_x2 - _x1) * (x - _x1)) + 1.0);
+  using std::cos;
+  return 0.5 * (cos(libMesh::pi / (_x2 - _x1) * (x - _x1)) + 1.0);
 }

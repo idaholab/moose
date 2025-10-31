@@ -64,6 +64,8 @@ template <typename T>
 T
 findUStar(const T & mu, const T & rho, const T & u, const Real dist)
 {
+  using std::log, std::sqrt, std::pow, std::max, std::abs;
+
   // usually takes about 3-4 iterations
   constexpr int MAX_ITERS{50};
   constexpr Real REL_TOLERANCE{1e-6};
@@ -78,22 +80,22 @@ findUStar(const T & mu, const T & rho, const T & u, const Real dist)
 
   // Wall-function linearized guess
   const Real a_c = 1 / NS::von_karman_constant;
-  const T b_c = 1.0 / NS::von_karman_constant * (std::log(NS::E_turb_constant * dist / mu) + 1.0);
+  const T b_c = 1.0 / NS::von_karman_constant * (log(NS::E_turb_constant * dist / mu) + 1.0);
   const T & c_c = u;
 
   /// This is important to reduce the number of nonlinear iterations
-  T u_star = std::max(1e-20, (-b_c + std::sqrt(std::pow(b_c, 2) + 4.0 * a_c * c_c)) / (2.0 * a_c));
+  T u_star = max(1e-20, (-b_c + sqrt(pow(b_c, 2) + 4.0 * a_c * c_c)) / (2.0 * a_c));
 
   // Newton-Raphson method to solve for u_star (friction velocity).
   for (int i = 0; i < MAX_ITERS; ++i)
   {
     T residual =
-        u_star / NS::von_karman_constant * std::log(NS::E_turb_constant * u_star * dist / nu) - u;
-    T deriv = (1.0 + std::log(NS::E_turb_constant * u_star * dist / nu)) / NS::von_karman_constant;
-    T new_u_star = std::max(1e-20, u_star - residual / deriv);
+        u_star / NS::von_karman_constant * log(NS::E_turb_constant * u_star * dist / nu) - u;
+    T deriv = (1.0 + log(NS::E_turb_constant * u_star * dist / nu)) / NS::von_karman_constant;
+    T new_u_star = max(1e-20, u_star - residual / deriv);
 
     Real rel_err =
-        std::abs(MetaPhysicL::raw_value(new_u_star - u_star) / MetaPhysicL::raw_value(new_u_star));
+        abs(MetaPhysicL::raw_value(new_u_star - u_star) / MetaPhysicL::raw_value(new_u_star));
 
     u_star = new_u_star;
     if (rel_err < REL_TOLERANCE)
@@ -118,6 +120,8 @@ template <typename T>
 T
 findyPlus(const T & mu, const T & rho, const T & u, const Real dist)
 {
+  using std::max, std::log, std::abs;
+
   // Fixed point iteration method to find y_plus
   // It should take 3 or 4 iterations
   constexpr int MAX_ITERS{10};
@@ -139,13 +143,14 @@ findyPlus(const T & mu, const T & rho, const T & u, const Real dist)
   {
     yPlusLast = MetaPhysicL::raw_value(yPlus);
     // Negative y plus does not make sense
-    yPlus = std::max(NS::min_y_plus, yPlus);
-    yPlus = (kappa_time_Re + yPlus) / (1.0 + std::log(NS::E_turb_constant * yPlus));
-  } while (std::abs(rev_yPlusLam * (MetaPhysicL::raw_value(yPlus) - yPlusLast)) > REL_TOLERANCE &&
+    yPlus = max(NS::min_y_plus, yPlus);
+    yPlus = (kappa_time_Re + yPlus) / (1.0 + log(NS::E_turb_constant * yPlus));
+  } while (abs(rev_yPlusLam * (MetaPhysicL::raw_value(yPlus) - yPlusLast)) > REL_TOLERANCE &&
            ++iters < MAX_ITERS);
 
-  return std::max(NS::min_y_plus, yPlus);
+  return max(NS::min_y_plus, yPlus);
 }
+
 template Real findyPlus<Real>(const Real & mu, const Real & rho, const Real & u, Real dist);
 template ADReal
 findyPlus<ADReal>(const ADReal & mu, const ADReal & rho, const ADReal & u, Real dist);

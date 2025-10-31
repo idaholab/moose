@@ -61,6 +61,8 @@ HSCoupler2D2DRadiationUserObject::initialize()
 void
 HSCoupler2D2DRadiationUserObject::execute()
 {
+  using std::pow;
+
   // store element IDs corresponding to this side
   std::vector<dof_id_type> elem_ids;
   elem_ids.push_back(_current_elem->id());
@@ -84,13 +86,13 @@ HSCoupler2D2DRadiationUserObject::execute()
     {
       if (_include_environment && i == _n_surfaces - 1) // environment surface
       {
-        emittances(i) = HeatConduction::Constants::sigma * std::pow(_T_environment, 4);
+        emittances(i) = HeatConduction::Constants::sigma * pow(_T_environment, 4);
         matrix(i, i) = 1.0;
       }
       else // heat structure surface
       {
         emittances(i) =
-            _emissivities[i] * HeatConduction::Constants::sigma * std::pow(temperatures[i][qp], 4);
+            _emissivities[i] * HeatConduction::Constants::sigma * pow(temperatures[i][qp], 4);
         matrix(i, i) = 1.0;
         for (unsigned int j = 0; j < _n_surfaces; ++j)
           matrix(i, j) -= (1 - _emissivities[i]) * _view_factors[i][j];

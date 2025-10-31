@@ -667,7 +667,8 @@ SymmetricRankTwoTensorTempl<T>::L2norm() const
   T norm = _vals[0] * _vals[0];
   for (unsigned int i = 1; i < N; ++i)
     norm += _vals[i] * _vals[i];
-  return norm == 0.0 ? 0.0 : std::sqrt(norm);
+  using std::sqrt;
+  return norm == 0.0 ? 0.0 : sqrt(norm);
 }
 
 template <typename T>

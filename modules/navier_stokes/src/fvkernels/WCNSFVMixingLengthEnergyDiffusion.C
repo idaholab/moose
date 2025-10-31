@@ -66,6 +66,8 @@ WCNSFVMixingLengthEnergyDiffusion::WCNSFVMixingLengthEnergyDiffusion(const Input
 ADReal
 WCNSFVMixingLengthEnergyDiffusion::computeQpResidual()
 {
+  using std::sqrt;
+
   constexpr Real offset = 1e-15; // prevents explosion of sqrt(x) derivative to infinity
 
   const auto face = makeCDFace(*_face_info);
@@ -87,7 +89,7 @@ WCNSFVMixingLengthEnergyDiffusion::computeQpResidual()
     }
   }
 
-  symmetric_strain_tensor_norm = std::sqrt(symmetric_strain_tensor_norm + offset);
+  symmetric_strain_tensor_norm = sqrt(symmetric_strain_tensor_norm + offset);
 
   // Interpolate the mixing length to the face
   ADReal mixing_len = _mixing_len(face, state);

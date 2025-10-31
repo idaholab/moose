@@ -101,6 +101,8 @@ HillCreepStressUpdateTempl<is_ad>::computeResidual(
     const GenericDenseVector<is_ad> & stress_new,
     const GenericReal<is_ad> & delta_gamma)
 {
+  using std::pow;
+
   GenericReal<is_ad> qsigma_changed;
   GenericRankTwoTensor<is_ad> stress_changed;
 
@@ -109,7 +111,7 @@ HillCreepStressUpdateTempl<is_ad>::computeResidual(
   computeQsigmaChanged(qsigma_changed, stress_new, delta_gamma, stress_changed);
 
   GenericReal<is_ad> creep_rate =
-      _coefficient * std::pow(qsigma_changed, _n_exponent) * _exponential * _exp_time;
+      _coefficient * pow(qsigma_changed, _n_exponent) * _exponential * _exp_time;
 
   if (_prefactor_function)
     creep_rate *= _prefactor_function->value(_t, _q_point[_qp]);
@@ -137,6 +139,8 @@ HillCreepStressUpdateTempl<is_ad>::computeDerivative(
     const GenericDenseVector<is_ad> & stress_new,
     const GenericReal<is_ad> & delta_gamma)
 {
+  using std::pow;
+
   GenericReal<is_ad> qsigma_changed;
   GenericRankTwoTensor<is_ad> stress_changed;
 
@@ -205,8 +209,8 @@ HillCreepStressUpdateTempl<is_ad>::computeDerivative(
       d_qsigma_d_inelasticStrainIncrement.dot(d_qsigma_d_sigma);
 
   GenericReal<is_ad> creep_rate_derivative = _coefficient * d_qsigma_d_deltaGamma * _n_exponent *
-                                             std::pow(qsigma_changed, _n_exponent - 1.0) *
-                                             _exponential * _exp_time;
+                                             pow(qsigma_changed, _n_exponent - 1.0) * _exponential *
+                                             _exp_time;
 
   if (_prefactor_function)
     creep_rate_derivative *= _prefactor_function->value(_t, _q_point[_qp]);
@@ -222,6 +226,8 @@ HillCreepStressUpdateTempl<is_ad>::computeStrainFinalize(
     const GenericDenseVector<is_ad> & stress_dev,
     const GenericReal<is_ad> & delta_gamma)
 {
+  using std::sqrt;
+
   GenericReal<is_ad> qsigma_square;
   if (!this->_use_transformation)
   {
@@ -261,7 +267,7 @@ HillCreepStressUpdateTempl<is_ad>::computeStrainFinalize(
   }
 
   // Use Hill-type flow rule to compute the time step inelastic increment.
-  GenericReal<is_ad> prefactor = delta_gamma / std::sqrt(qsigma_square);
+  GenericReal<is_ad> prefactor = delta_gamma / sqrt(qsigma_square);
 
   if (!this->_use_transformation)
   {
@@ -321,6 +327,8 @@ HillCreepStressUpdateTempl<is_ad>::computeStressFinalize(
     const GenericRankTwoTensor<is_ad> & stress_old,
     const GenericRankFourTensor<is_ad> & elasticity_tensor)
 {
+  using std::abs;
+
   // Class only valid for isotropic elasticity (for now)
   stress_new -= elasticity_tensor * creepStrainIncrement;
 
@@ -333,7 +341,7 @@ HillCreepStressUpdateTempl<is_ad>::computeStressFinalize(
       MetaPhysicL::raw_value((elasticity_tensor(0, 0, 0, 0) + elasticity_tensor(1, 1, 1, 1) +
                               elasticity_tensor(2, 2, 2, 2)));
 
-  if (std::abs(stress_dif) > TOLERANCE * TOLERANCE)
+  if (abs(stress_dif) > TOLERANCE * TOLERANCE)
     this->_max_integration_error_time_step =
         _dt / (stress_dif / elasticity_value / this->_max_integration_error);
   else
@@ -348,6 +356,8 @@ HillCreepStressUpdateTempl<is_ad>::computeQsigmaChanged(
     const GenericReal<is_ad> & delta_gamma,
     GenericRankTwoTensor<is_ad> & stress_changed)
 {
+  using std::sqrt;
+
   GenericReal<is_ad> qsigma_square;
 
   // Hill constants, some constraints apply
@@ -374,7 +384,7 @@ HillCreepStressUpdateTempl<is_ad>::computeQsigmaChanged(
     qsigma_square = Ms.dot(stress_new);
   }
 
-  GenericReal<is_ad> qsigma = std::sqrt(qsigma_square);
+  GenericReal<is_ad> qsigma = sqrt(qsigma_square);
 
   if (!_anisotropic_elasticity)
     qsigma_changed = qsigma - 1.5 * _two_shear_modulus * delta_gamma;
@@ -416,7 +426,7 @@ HillCreepStressUpdateTempl<is_ad>::computeQsigmaChanged(
     qsigma_square_changed += 2 * L * stress_changed(1, 2) * stress_changed(1, 2);
     qsigma_square_changed += 2 * M * stress_changed(0, 2) * stress_changed(0, 2);
     qsigma_square_changed += 2 * N * stress_changed(0, 1) * stress_changed(0, 1);
-    qsigma_changed = std::sqrt(qsigma_square_changed);
+    qsigma_changed = sqrt(qsigma_square_changed);
   }
 }
 

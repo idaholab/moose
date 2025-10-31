@@ -51,6 +51,7 @@ auto
 FanningFrictionFactorCheng(
     const T1 & Re, const T2 & a, const T3 & b, const T4 & c, const T5 & n, const T6 & PoD)
 {
-  return (a + b * (PoD - 1) + c * std::pow(PoD - 1, 2)) / std::pow(std::max(Re, 10.0), n);
+  using std::pow, std::max;
+  return (a + b * (PoD - 1) + c * pow(PoD - 1, 2)) / pow(max(Re, 10.0), n);
 }
 }

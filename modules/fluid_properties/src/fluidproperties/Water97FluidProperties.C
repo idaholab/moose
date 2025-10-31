@@ -543,6 +543,7 @@ Water97FluidProperties::vaporPressure(Real temperature) const
 ADReal
 Water97FluidProperties::vaporTemperature_ad(const ADReal & pressure) const
 {
+  using std::pow, std::sqrt;
   // Check whether the input pressure is within the region of validity of this equation.
   // Valid for 611.213 Pa <= p <= 22.064 MPa
   if (pressure.value() < 611.23 || pressure.value() > _p_critical)
@@ -550,14 +551,14 @@ Water97FluidProperties::vaporTemperature_ad(const ADReal & pressure) const
                    pressure.value(),
                    " is outside range 611.213 Pa <= p <= 22.064 MPa");
 
-  const ADReal beta = std::pow(pressure / 1.e6, 0.25);
+  const ADReal beta = pow(pressure / 1.e6, 0.25);
   const ADReal beta2 = beta * beta;
   const ADReal e = beta2 + _n4[2] * beta + _n4[5];
   const ADReal f = _n4[0] * beta2 + _n4[3] * beta + _n4[6];
   const ADReal g = _n4[1] * beta2 + _n4[4] * beta + _n4[7];
-  const ADReal d = 2.0 * g / (-f - std::sqrt(f * f - 4.0 * e * g));
+  const ADReal d = 2.0 * g / (-f - sqrt(f * f - 4.0 * e * g));
 
-  return (_n4[9] + d - std::sqrt((_n4[9] + d) * (_n4[9] + d) - 4.0 * (_n4[8] + _n4[9] * d))) / 2.0;
+  return (_n4[9] + d - sqrt((_n4[9] + d) * (_n4[9] + d) - 4.0 * (_n4[8] + _n4[9] * d))) / 2.0;
 }
 
 Real
@@ -793,12 +794,14 @@ Water97FluidProperties::T_from_p_h_ad(const ADReal & pressure, const ADReal & en
 ADReal
 Water97FluidProperties::temperature_from_ph1(const ADReal & pressure, const ADReal & enthalpy) const
 {
+  using std::pow;
+
   const ADReal pi = pressure / 1.0e6;
   const ADReal eta = enthalpy / 2500.0e3;
   ADReal sum = 0.0;
 
   for (std::size_t i = 0; i < _nph1.size(); ++i)
-    sum += _nph1[i] * std::pow(pi, _Iph1[i]) * std::pow(eta + 1.0, _Jph1[i]);
+    sum += _nph1[i] * pow(pi, _Iph1[i]) * pow(eta + 1.0, _Jph1[i]);
 
   return sum;
 }
@@ -807,16 +810,17 @@ ADReal
 Water97FluidProperties::temperature_from_ph2a(const ADReal & pressure,
                                               const ADReal & enthalpy) const
 {
+  using std::pow, std::abs;
+
   const ADReal pi = pressure / 1.0e6;
   const ADReal eta = enthalpy / 2000.0e3;
   ADReal sum = 0.0;
 
-  // Factor out the negative in std::pow(eta - 2.1, _Jph2a[i]) to avoid fpe in dbg (see #13163)
+  // Factor out the negative in pow(eta - 2.1, _Jph2a[i]) to avoid fpe in dbg (see #13163)
   const Real sgn = MathUtils::sign(eta.value() - 2.1);
 
   for (std::size_t i = 0; i < _nph2a.size(); ++i)
-    sum += _nph2a[i] * std::pow(pi, _Iph2a[i]) * std::pow(std::abs(eta - 2.1), _Jph2a[i]) *
-           std::pow(sgn, _Jph2a[i]);
+    sum += _nph2a[i] * pow(pi, _Iph2a[i]) * pow(abs(eta - 2.1), _Jph2a[i]) * pow(sgn, _Jph2a[i]);
 
   return sum;
 }
@@ -825,18 +829,20 @@ ADReal
 Water97FluidProperties::temperature_from_ph2b(const ADReal & pressure,
                                               const ADReal & enthalpy) const
 {
+  using std::pow, std::abs;
+
   const ADReal pi = pressure / 1.0e6;
   const ADReal eta = enthalpy / 2000.0e3;
   ADReal sum = 0.0;
 
-  // Factor out the negatives in std::pow(pi - 2.0, _Iph2b[i])* std::pow(eta - 2.6, _Jph2b[i])
+  // Factor out the negatives in pow(pi - 2.0, _Iph2b[i])* pow(eta - 2.6, _Jph2b[i])
   // to avoid fpe in dbg (see #13163)
   const Real sgn0 = MathUtils::sign(pi.value() - 2.0);
   const Real sgn1 = MathUtils::sign(eta.value() - 2.6);
 
   for (std::size_t i = 0; i < _nph2b.size(); ++i)
-    sum += _nph2b[i] * std::pow(std::abs(pi - 2.0), _Iph2b[i]) * std::pow(sgn0, _Iph2b[i]) *
-           std::pow(std::abs(eta - 2.6), _Jph2b[i]) * std::pow(sgn1, _Jph2b[i]);
+    sum += _nph2b[i] * pow(abs(pi - 2.0), _Iph2b[i]) * pow(sgn0, _Iph2b[i]) *
+           pow(abs(eta - 2.6), _Jph2b[i]) * pow(sgn1, _Jph2b[i]);
 
   return sum;
 }
@@ -845,16 +851,18 @@ ADReal
 Water97FluidProperties::temperature_from_ph2c(const ADReal & pressure,
                                               const ADReal & enthalpy) const
 {
+  using std::pow, std::abs;
+
   const ADReal pi = pressure / 1.0e6;
   const ADReal eta = enthalpy / 2000.0e3;
   ADReal sum = 0.0;
 
-  // Factor out the negative in std::pow(eta - 1.8, _Jph2c[i]) to avoid fpe in dbg (see #13163)
+  // Factor out the negative in pow(eta - 1.8, _Jph2c[i]) to avoid fpe in dbg (see #13163)
   const Real sgn = MathUtils::sign(eta.value() - 1.8);
 
   for (std::size_t i = 0; i < _nph2c.size(); ++i)
-    sum += _nph2c[i] * std::pow(pi + 25.0, _Iph2c[i]) * std::pow(std::abs(eta - 1.8), _Jph2c[i]) *
-           std::pow(sgn, _Jph2c[i]);
+    sum += _nph2c[i] * pow(pi + 25.0, _Iph2c[i]) * pow(abs(eta - 1.8), _Jph2c[i]) *
+           pow(sgn, _Jph2c[i]);
 
   return sum;
 }
@@ -878,12 +886,14 @@ ADReal
 Water97FluidProperties::temperature_from_ph3a(const ADReal & pressure,
                                               const ADReal & enthalpy) const
 {
+  using std::pow;
+
   const ADReal pi = pressure / 100.0e6;
   const ADReal eta = enthalpy / 2300.0e3;
   ADReal sum = 0.0;
 
   for (std::size_t i = 0; i < _nph3a.size(); ++i)
-    sum += _nph3a[i] * std::pow(pi + 0.24, _Iph3a[i]) * std::pow(eta - 0.615, _Jph3a[i]);
+    sum += _nph3a[i] * pow(pi + 0.24, _Iph3a[i]) * pow(eta - 0.615, _Jph3a[i]);
 
   return sum * 760.0;
 }
@@ -892,12 +902,14 @@ ADReal
 Water97FluidProperties::temperature_from_ph3b(const ADReal & pressure,
                                               const ADReal & enthalpy) const
 {
+  using std::pow;
+
   const ADReal pi = pressure / 100.0e6;
   const ADReal eta = enthalpy / 2800.0e3;
   ADReal sum = 0.0;
 
-  for (std::size_t i = 0; i < _nph3b.size(); ++i)
-    sum += _nph3b[i] * std::pow(pi + 0.298, _Iph3b[i]) * std::pow(eta - 0.72, _Jph3b[i]);
+  for (size_t i = 0; i < _nph3b.size(); ++i)
+    sum += _nph3b[i] * pow(pi + 0.298, _Iph3b[i]) * pow(eta - 0.72, _Jph3b[i]);
 
   return sum * 860.0;
 }

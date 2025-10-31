@@ -34,5 +34,6 @@ ADHydraulicDiameterCircularMaterial::ADHydraulicDiameterCircularMaterial(
 void
 ADHydraulicDiameterCircularMaterial::computeQpProperties()
 {
-  _D_h[_qp] = std::sqrt(4. * _area[_qp] / libMesh::pi);
+  using std::sqrt;
+  _D_h[_qp] = sqrt(4. * _area[_qp] / libMesh::pi);
 }

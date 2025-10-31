@@ -117,6 +117,8 @@ ADShaftConnectedTurbine1PhaseUserObject::computeFluxesAndResiduals(const unsigne
 {
   ADVolumeJunction1PhaseUserObject::computeFluxesAndResiduals(c);
 
+  using std::abs;
+
   // inlet c=0 established in component
   if (c == 0)
   {
@@ -145,9 +147,9 @@ ADShaftConnectedTurbine1PhaseUserObject::computeFluxesAndResiduals(const unsigne
     }
     else
     {
-      _friction_torque = sign * (_tau_fr_coeff[0] + _tau_fr_coeff[1] * std::abs(alpha) +
-                                 _tau_fr_coeff[2] * alpha * alpha +
-                                 _tau_fr_coeff[3] * std::abs(alpha * alpha * alpha));
+      _friction_torque =
+          sign * (_tau_fr_coeff[0] + _tau_fr_coeff[1] * abs(alpha) +
+                  _tau_fr_coeff[2] * alpha * alpha + _tau_fr_coeff[3] * abs(alpha * alpha * alpha));
     }
 
     _driving_torque =
@@ -161,9 +163,9 @@ ADShaftConnectedTurbine1PhaseUserObject::computeFluxesAndResiduals(const unsigne
     }
     else
     {
-      _moment_of_inertia += _inertia_coeff[0] + _inertia_coeff[1] * std::abs(alpha) +
+      _moment_of_inertia += _inertia_coeff[0] + _inertia_coeff[1] * abs(alpha) +
                             _inertia_coeff[2] * alpha * alpha +
-                            _inertia_coeff[3] * std::abs(alpha * alpha * alpha);
+                            _inertia_coeff[3] * abs(alpha * alpha * alpha);
     }
 
     // compute momentum and energy source terms

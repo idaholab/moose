@@ -27,7 +27,9 @@ template <typename T1, typename T2, typename T3, typename T4>
 auto
 reynolds(const T1 & rho, const T2 & vel, const T3 & L, const T4 & mu)
 {
-  return rho * std::fabs(vel) * L / mu;
+  using std::fabs;
+
+  return rho * fabs(vel) * L / mu;
 }
 
 /**
@@ -67,8 +69,9 @@ grashof(const T1 & beta,
         const T6 & mu,
         Real gravity_magnitude)
 {
-  return gravity_magnitude * beta * std::abs(T_s - T_bulk) * std::pow(L, 3) * (rho * rho) /
-         (mu * mu);
+  using std::abs, std::pow;
+
+  return gravity_magnitude * beta * abs(T_s - T_bulk) * pow(L, 3) * (rho * rho) / (mu * mu);
 }
 
 /**
@@ -114,7 +117,9 @@ template <typename T1, typename T2, typename T3>
 auto
 peclet(const T1 & vel, const T2 & L, const T3 & diffusivity)
 {
-  return std::fabs(vel) * L / diffusivity;
+  using std::fabs;
+
+  return fabs(vel) * L / diffusivity;
 }
 
 } // namespace HeatTransferUtils

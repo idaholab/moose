@@ -47,6 +47,8 @@ ADInterfaceOrientationMaterial::ADInterfaceOrientationMaterial(const InputParame
 void
 ADInterfaceOrientationMaterial::computeQpProperties()
 {
+  using std::max, std::min, std::sqrt, std::acos, std::cos, std::sin;
+
   const Real tol = 1e-9;
   const Real cutoff = 1.0 - tol;
 
@@ -54,10 +56,10 @@ ADInterfaceOrientationMaterial::computeQpProperties()
   ADReal n = 0.0;
   const ADReal nsq = _grad_op[_qp].norm_sq();
   if (nsq > tol)
-    n = std::max(-cutoff, std::min(_grad_op[_qp](0) / std::sqrt(nsq), cutoff));
+    n = max(-cutoff, min(_grad_op[_qp](0) / sqrt(nsq), cutoff));
 
   // Calculate interfacial parameter epsilon and its derivative
-  const ADReal angle = std::acos(n) * MathUtils::sign(_grad_op[_qp](1));
-  _eps[_qp] = _eps_bar * (_delta * std::cos(_j * (angle - _theta0 * libMesh::pi / 180.0)) + 1.0);
-  _deps[_qp] = -_eps_bar * _delta * _j * std::sin(_j * (angle - _theta0 * libMesh::pi / 180.0));
+  const ADReal angle = acos(n) * MathUtils::sign(_grad_op[_qp](1));
+  _eps[_qp] = _eps_bar * (_delta * cos(_j * (angle - _theta0 * libMesh::pi / 180.0)) + 1.0);
+  _deps[_qp] = -_eps_bar * _delta * _j * sin(_j * (angle - _theta0 * libMesh::pi / 180.0));
 }

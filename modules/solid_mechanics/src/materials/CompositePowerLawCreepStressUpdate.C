@@ -91,9 +91,11 @@ CompositePowerLawCreepStressUpdateTempl<is_ad>::computeStressInitialize(
     const GenericReal<is_ad> & effective_trial_stress,
     const GenericRankFourTensor<is_ad> & elasticity_tensor)
 {
+  using std::pow;
+
   RadialReturnStressUpdateTempl<is_ad>::computeStressInitialize(effective_trial_stress,
                                                                 elasticity_tensor);
-  _exp_time = std::pow(_t - _start_time, _m_exponent);
+  _exp_time = pow(_t - _start_time, _m_exponent);
 }
 
 template <bool is_ad>
@@ -102,13 +104,14 @@ ScalarType
 CompositePowerLawCreepStressUpdateTempl<is_ad>::computeResidualInternal(
     const GenericReal<is_ad> & effective_trial_stress, const ScalarType & scalar)
 {
+  using std::pow, std::exp;
+
   const ScalarType stress_delta = effective_trial_stress - _three_shear_modulus * scalar;
   ScalarType creep_rate = 0.0;
   for (const auto n : make_range(_num_materials))
   {
-    creep_rate +=
-        _coefficient[n] * std::pow(stress_delta, _n_exponent[n]) * (*_switchingFunc[n])[_qp] *
-        std::exp(-_activation_energy[n] / (_gas_constant * (*_temperature)[_qp])) * _exp_time;
+    creep_rate += _coefficient[n] * pow(stress_delta, _n_exponent[n]) * (*_switchingFunc[n])[_qp] *
+                  exp(-_activation_energy[n] / (_gas_constant * (*_temperature)[_qp])) * _exp_time;
   }
   return creep_rate * _dt - scalar;
 }
@@ -118,14 +121,16 @@ GenericReal<is_ad>
 CompositePowerLawCreepStressUpdateTempl<is_ad>::computeDerivative(
     const GenericReal<is_ad> & effective_trial_stress, const GenericReal<is_ad> & scalar)
 {
+  using std::pow, std::exp;
+
   const GenericReal<is_ad> stress_delta = effective_trial_stress - _three_shear_modulus * scalar;
   GenericReal<is_ad> creep_rate_derivative = 0.0;
   for (const auto n : make_range(_num_materials))
   {
-    creep_rate_derivative +=
-        -_coefficient[n] * _three_shear_modulus * _n_exponent[n] *
-        std::pow(stress_delta, _n_exponent[n] - 1.0) * (*_switchingFunc[n])[_qp] *
-        std::exp(-_activation_energy[n] / (_gas_constant * (*_temperature)[_qp])) * _exp_time;
+    creep_rate_derivative += -_coefficient[n] * _three_shear_modulus * _n_exponent[n] *
+                             pow(stress_delta, _n_exponent[n] - 1.0) * (*_switchingFunc[n])[_qp] *
+                             exp(-_activation_energy[n] / (_gas_constant * (*_temperature)[_qp])) *
+                             _exp_time;
   }
   return creep_rate_derivative * _dt - 1.0;
 }

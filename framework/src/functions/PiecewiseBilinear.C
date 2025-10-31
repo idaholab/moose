@@ -132,7 +132,8 @@ PiecewiseBilinear::valueInternal(T t, const P & p) const
   {
     const auto rx = p(_xaxis) * p(_xaxis);
     const auto ry = p(_yaxis) * p(_yaxis);
-    const auto r = std::sqrt(rx + ry);
+    using std::sqrt;
+    const auto r = sqrt(rx + ry);
     retVal = _bilinear_interp->sample(r, t);
   }
   else if (_axisValid)
