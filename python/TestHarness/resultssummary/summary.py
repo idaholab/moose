@@ -474,7 +474,11 @@ class TestHarnessResultsSummary:
                 - Removed tests
                 - Added tests with runtime
                 - Same tests with high relative runtime rate
-            If no tests are present in a category, None is displayed
+            If all table is None, 'No change' will display.
+            If one or more table is available:
+                - there is no removed_table, Removed tests portion won't display
+                - there is no same_table, Run time changes portion won't display
+                - there is no added_table, 'No added tests' will display
         """
         assert isinstance(removed_table, (list, NoneType))
         assert isinstance(added_table, (list, NoneType))
