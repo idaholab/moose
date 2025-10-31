@@ -823,7 +823,14 @@ protected:
    * Enforce nodal constraints
    */
   void enforceNodalConstraintsResidual(NumericVector<Number> & residual);
-  void enforceNodalConstraintsJacobian();
+
+  /**
+   * Enforce nodal constraints in the Jacobian
+   * @param jacobian The Jacobian to read from while constructing the Jacobians corresponding to the
+   * nodal constraints
+   * @returns Whether there were active nodal constraints
+   */
+  bool enforceNodalConstraintsJacobian(const SparseMatrix<Number> & jacobian);
 
   /**
    * Do mortar constraint residual/jacobian computations

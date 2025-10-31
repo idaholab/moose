@@ -20,8 +20,8 @@ public:
 
   virtual void meshChanged() override;
 
-  virtual void computeResidual(NumericVector<Number> & residual) override;
-  virtual void computeJacobian(SparseMatrix<Number> & jacobian) override;
+  virtual void computeResidual(const NumericVector<Number> & residual) override;
+  virtual void computeJacobian(const SparseMatrix<Number> & jacobian) override;
   using NodalConstraint::computeJacobian;
   using NodalConstraint::computeResidual;
 

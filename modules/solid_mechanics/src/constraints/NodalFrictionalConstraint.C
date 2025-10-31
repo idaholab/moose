@@ -214,7 +214,7 @@ NodalFrictionalConstraint::updateConstrainedNodes()
 }
 
 void
-NodalFrictionalConstraint::computeResidual(NumericVector<Number> &
+NodalFrictionalConstraint::computeResidual(const NumericVector<Number> &
                                            /*residual*/)
 {
   const auto & primarydof = _var.dofIndices();
@@ -261,7 +261,7 @@ NodalFrictionalConstraint::computeQpResidual(Moose::ConstraintType type)
 }
 
 void
-NodalFrictionalConstraint::computeJacobian(SparseMatrix<Number> & /*jacobian*/)
+NodalFrictionalConstraint::computeJacobian(const SparseMatrix<Number> & /*jacobian*/)
 {
   // Calculate Jacobian entries and cache those entries along with the row and column indices
   std::vector<dof_id_type> secondarydof = _var.dofIndicesNeighbor();

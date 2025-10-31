@@ -1,0 +1,17 @@
+[Tests]
+  design = 'TiedValueConstraint.md LinearNodalConstraint.md'
+  issues = '#31804'
+  [results]
+    type = Exodiff
+    input = nodal-plus-node-face-constraints.i
+    exodiff = nodal-plus-node-face-constraints_out.e
+    requirement = 'The system shall be able to enforce both nodal and node-face constraints in the same simulation.'
+  []
+  [jac]
+    type = PetscJacobianTester
+    input = nodal-plus-node-face-constraints.i
+    run_sim = True
+    requirement = 'The system shall be able to compute a perfect Jacobian for a mix of nodal and node-face constraints.'
+    difference_tol = 1e2
+  []
+[]

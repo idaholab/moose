@@ -46,7 +46,7 @@ public:
   {
     mooseError("NodalConstraint do not need computeResidual()");
   }
-  virtual void computeResidual(NumericVector<Number> & residual);
+  virtual void computeResidual(const NumericVector<Number> & residual);
 
   /**
    * Computes the jacobian for the current element.
@@ -55,7 +55,7 @@ public:
   {
     mooseError("NodalConstraint do not need computeJacobian()");
   }
-  virtual void computeJacobian(SparseMatrix<Number> & jacobian);
+  virtual void computeJacobian(const SparseMatrix<Number> & jacobian);
 
   /**
    * The variable number that this object operates on.

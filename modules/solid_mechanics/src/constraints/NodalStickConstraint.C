@@ -192,7 +192,7 @@ NodalStickConstraint::updateConstrainedNodes()
 }
 
 void
-NodalStickConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
+NodalStickConstraint::computeJacobian(const SparseMatrix<Number> & jacobian)
 {
   // Calculate Jacobian enteries and cache those entries along with the row and column indices
   std::vector<dof_id_type> secondarydof = _var.dofIndicesNeighbor();
@@ -236,7 +236,7 @@ NodalStickConstraint::computeJacobian(SparseMatrix<Number> & jacobian)
 }
 
 void
-NodalStickConstraint::computeResidual(NumericVector<Number> & residual)
+NodalStickConstraint::computeResidual(const NumericVector<Number> & residual)
 {
   std::vector<dof_id_type> primarydof = _var.dofIndices();
   std::vector<dof_id_type> secondarydof = _var.dofIndicesNeighbor();
