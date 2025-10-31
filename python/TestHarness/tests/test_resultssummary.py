@@ -765,9 +765,69 @@ class TestResultsSummary(TestHarnessTestCase):
         summary = TestHarnessResultsSummary(None)
         no_change_build_summary = summary.build_summary(None, None, None)
 
-        self.assertIn('Removed tests', no_change_build_summary)
+        self.assertIn('No change', no_change_build_summary)
+
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    def testBuildSummaryNoRemovedTests(self, mock_init_reader):
+        """
+        Tests building a summary when there are no removed tests.
+        """
+        mock_init_reader.return_value = None
+        added_table =[[str(MOCKED_TEST_NAME), '15.00']]
+        same_table =[[str(MOCKED_TEST_NAME), '10.00', '17.00', '70.00%']]
+        summary = TestHarnessResultsSummary(None)
+        no_change_build_summary = summary.build_summary(None, added_table, same_table)
+
+        self.assertNotIn('Removed tests', no_change_build_summary)
         self.assertIn('Added tests', no_change_build_summary)
+        self.assertIn('Time (s)', no_change_build_summary)
+        self.assertIn('15.00', no_change_build_summary)
         self.assertIn('Run time changes', no_change_build_summary)
+        self.assertIn('Test', no_change_build_summary)
+        self.assertIn('Base (s)', no_change_build_summary)
+        self.assertIn('Head (s)', no_change_build_summary)
+        self.assertIn('+/-', no_change_build_summary)
+        self.assertIn(str(MOCKED_TEST_NAME), no_change_build_summary)
+        self.assertIn('10.00', no_change_build_summary)
+        self.assertIn('17.00', no_change_build_summary)
+        self.assertIn('70.00%', no_change_build_summary)
+
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    def testBuildSummaryNoRemovedAddedTests(self, mock_init_reader):
+        """
+        Tests building a summary when there are no removed and added test
+        """
+        mock_init_reader.return_value = None
+        same_table =[[str(MOCKED_TEST_NAME), '10.00', '17.00', '70.00%']]
+        summary = TestHarnessResultsSummary(None)
+        no_change_build_summary = summary.build_summary(None, None, same_table)
+
+        self.assertNotIn('Removed tests', no_change_build_summary)
+        self.assertIn('No added tests', no_change_build_summary)
+        self.assertIn('Run time changes', no_change_build_summary)
+        self.assertIn('Test', no_change_build_summary)
+        self.assertIn('Base (s)', no_change_build_summary)
+        self.assertIn('Head (s)', no_change_build_summary)
+        self.assertIn('+/-', no_change_build_summary)
+        self.assertIn(str(MOCKED_TEST_NAME), no_change_build_summary)
+        self.assertIn('10.00', no_change_build_summary)
+        self.assertIn('17.00', no_change_build_summary)
+        self.assertIn('70.00%', no_change_build_summary)
+
+    @patch.object(TestHarnessResultsSummary, 'init_reader')
+    def testBuildSummaryNoAddedRunTimeChanges(self, mock_init_reader):
+        """
+        Tests building a summary when there is no added test and no run time changes.
+        """
+        mock_init_reader.return_value = None
+        removed_table =[[str(MOCKED_TEST_NAME), '12.00']]
+        summary = TestHarnessResultsSummary(None)
+        no_change_build_summary = summary.build_summary(removed_table, None, None)
+
+        self.assertNotIn('Run time changes', no_change_build_summary)
+        self.assertIn('Removed tests', no_change_build_summary)
+        self.assertIn('No added tests', no_change_build_summary)
+
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     def testBuildSummaryHasTests(self, mock_init_reader):
@@ -802,7 +862,7 @@ class TestResultsSummary(TestHarnessTestCase):
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     def testWriteOutputFileValidPath(self, mock_init_reader):
         """
-        Tests output file write and read when output file path exit
+        Tests output file write and read when output file path exit.
         """
         mock_init_reader.return_value = None
         summary = TestHarnessResultsSummary(None)
@@ -854,9 +914,7 @@ class TestResultsSummary(TestHarnessTestCase):
             with open(out_file.name, 'r') as f:
                 output = f.read()
                 self.assertIn('Compared against', output)
-                self.assertIn('Removed tests', output)
-                self.assertIn('Added tests', output)
-                self.assertIn('Run time changes', output)
+                self.assertIn('No change', output)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
@@ -930,9 +988,6 @@ class TestResultsSummary(TestHarnessTestCase):
                     with open(out_file.name, 'r') as f:
                         output = f.read()
                         self.assertIn('Compared against', output)
-                        self.assertIn('Removed tests', output)
-                        self.assertIn('Added tests', output)
-                        self.assertIn('Run time changes', output)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
@@ -955,9 +1010,7 @@ class TestResultsSummary(TestHarnessTestCase):
                 self.assertIn('Compared against', output)
                 self.assertIn(base_result_with_tests.event_sha[:7], output)
                 self.assertIn(base_result_with_tests.civet_job_url, output)
-                self.assertIn('Removed tests', output)
-                self.assertIn('Added tests', output)
-                self.assertIn('Run time changes', output)
+                self.assertIn('No change', output)
 
     @patch.object(TestHarnessResultsSummary, 'init_reader')
     @patch.object(TestHarnessResultsSummary, 'get_event_results')
@@ -994,8 +1047,7 @@ class TestResultsSummary(TestHarnessTestCase):
                 self.assertIn('Compared against', output)
                 self.assertIn(base_result_with_tests.event_sha[:7], output)
                 self.assertIn(base_result_with_tests.civet_job_url, output)
-                self.assertIn('Removed tests', output)
-                self.assertIn('Added tests', output)
+                self.assertIn('No added tests', output)
                 self.assertIn('Run time changes', output)
                 self.assertIn('Test', output)
                 self.assertIn('Base (s)', output)
