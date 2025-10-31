@@ -23,27 +23,18 @@
   []
 []
 
-[AuxVariables]
-  [aux_var]
-    type = MFEMVariable
-    fespace = H1FESpace
-  []
-[]
-
-
 [ICs]
-  [diffused_ic]
+  [ic]
     type = MFEMScalarIC
+    variable = concentration
     coefficient = -100.0
-    variable = aux_var
   []
 []
 
 [BCs]
-  [bottom]
+  [bc]
     type = MFEMScalarDirichletBC
     variable = concentration
-    boundary = 1
     coefficient = 1
   []
 []
@@ -51,9 +42,9 @@
 [Functions]
   [force]
     type = MFEMParsedFunction
-    expression = v*sin(y*x)
+    expression = if(sqrt(x^2+y^2)<1,v*sin(y*x),0)
     symbol_names = v
-    symbol_values = aux_var
+    symbol_values = concentration
   []
 []
 
@@ -66,7 +57,6 @@
     type = MFEMDomainLFKernel
     variable = concentration
     coefficient = force
-    block = wire
   []
 []
 

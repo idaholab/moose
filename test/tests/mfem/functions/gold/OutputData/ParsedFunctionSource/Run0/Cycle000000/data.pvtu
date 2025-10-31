@@ -10,7 +10,6 @@
 	<PDataArray type="UInt8"  Name="types"        NumberOfComponents="1" format="ascii"/>
 </PCells>
 <PPointData>
-<PDataArray type="Float64" Name="aux_var" NumberOfComponents="1"  format="ascii" />
 <PDataArray type="Float64" Name="concentration" NumberOfComponents="1"  format="ascii" />
 </PPointData>
 <PCellData>
