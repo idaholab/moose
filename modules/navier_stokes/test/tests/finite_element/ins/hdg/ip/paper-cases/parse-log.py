@@ -152,7 +152,7 @@ def main():
     if args.times:
         times = [float(s) for s in args.times.split(",")]
     else:
-        times = [1, 10, 100, 1000, 5000, 10000]
+        times = [1, 10, 100, 1000, 10000]
 
     df = parse_moose_petsc_log(text, times=times)
 
