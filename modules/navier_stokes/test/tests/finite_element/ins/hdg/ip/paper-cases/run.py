@@ -7,11 +7,19 @@ import os
 import subprocess
 import sys
 from pathlib import Path
+import signal
 
-def run_case(exec_path, input_file, procs, refine, set_schur_pre, num_steps):
+def _preexec_detach():
+    # Start a new session (like setsid) and ignore SIGHUP so the process
+    # survives terminal logout/disconnects.
+    os.setsid()
+    signal.signal(signal.SIGHUP, signal.SIG_IGN)
+
+def run_case(exec_path, input_file, procs, refine, set_schur_pre, num_steps, detach):
     input_base = input_file[:-2]
     tag = f"{input_base}-{procs}proc-{refine}refine"
-    print(f"=== Running case: {procs} ranks, refine={refine} ===", flush=True)
+    if not detach:
+      print(f"=== Running case: {procs} ranks, refine={refine} ===\n", flush=True)
 
     # Build command (mirrors the bash command)
     cmd = [
@@ -31,29 +39,46 @@ def run_case(exec_path, input_file, procs, refine, set_schur_pre, num_steps):
     env["MOOSE_PROFILE_BASE"] = tag
 
     log_path = Path(f"{tag}.log")
-    # Stream stdout/stderr to console and log (like `tee`)
-    with log_path.open("w", encoding="utf-8") as logfile:
-        proc = subprocess.Popen(
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            env=env,
-            text=True,
-            bufsize=1,
-            universal_newlines=True,
-        )
-        # Real-time line-by-line tee
-        assert proc.stdout is not None
-        for line in proc.stdout:
-            sys.stdout.write(line)
-            logfile.write(line)
-        ret = proc.wait()
+    if detach:
+        with log_path.open("w", encoding="utf-8") as logfile:
+            logfile.write(f"## COMMAND: {' '.join(map(str, cmd))}\n\n")
+            logfile.flush()
+            proc = subprocess.Popen(
+                cmd,
+                stdout=logfile,
+                stderr=subprocess.STDOUT,
+                stdin=subprocess.DEVNULL,
+                env=env,
+                text=True,
+                close_fds=True,
+                preexec_fn=_preexec_detach,
+            )
+        print(f"=== Launched detached case with PID={proc.pid}: {tag} ===\n", flush=True)
+        return
+    else:
+        with log_path.open("w", encoding="utf-8") as logfile:
+            logfile.write(f"## COMMAND: {' '.join(map(str, cmd))}\n\n")
+            logfile.flush()
+            proc = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                env=env,
+                text=True,
+                bufsize=1,
+                universal_newlines=True,
+            )
+            assert proc.stdout is not None
+            for line in proc.stdout:
+                sys.stdout.write(line)
+                logfile.write(line)
+            ret = proc.wait()
 
-    if ret != 0:
-        print(f"Command failed for tag '{tag}' with exit code {ret}", file=sys.stderr)
-        sys.exit(ret)
+        if ret != 0:
+            print(f"\nCommand failed for tag '{tag}' with exit code {ret}", file=sys.stderr)
+            sys.exit(ret)
 
-    print(f"=== Finished case: {tag} ===\n", flush=True)
+        print(f"\n=== Finished case: {tag} ===\n", flush=True)
 
 def require_i_suffix(value: str) -> str:
     if not value.endswith(".i"):
@@ -85,7 +110,7 @@ def main():
         help="Starting uniform refine level (default: %(default)s)"
     )
     parser.add_argument(
-        "--proc-multiplier", required=True,
+        "--proc-multiplier", type=int, required=True,
         help="Multiplicative increase in ranks per case (required)."
     )
     parser.add_argument(
@@ -96,6 +121,10 @@ def main():
         "--num-steps", type=int,
         help="Number of executioner steps to run (default: %(default)s)"
     )
+    parser.add_argument(
+        "--detach", action="store_true",
+        help="Run each case detached (new session, ignores SIGHUP; logs only to <tag>.log)."
+    )
 
     args = parser.parse_args()
 
@@ -105,7 +134,14 @@ def main():
     refine = args.start_refine
 
     for _case in range(1, args.num_cases + 1):
-        run_case(exec_path, input_file, procs, refine, args.set_schur_pre, args.num_steps)
+        run_case(exec_path,
+                 input_file,
+                 procs,
+                 refine,
+                 args.set_schur_pre,
+                 args.num_steps,
+                 args.detach)
+
         procs *= args.proc_multiplier
         refine += 1
 
