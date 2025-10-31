@@ -141,7 +141,6 @@
 []
 
 [Postprocessors]
-  inactive = LorentzL2Sq
   [CoilPower]
     type = MFEMVectorFEInnerProductIntegralPostprocessor
     coefficient = conductivity

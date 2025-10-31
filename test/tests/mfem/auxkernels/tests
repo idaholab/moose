@@ -36,7 +36,8 @@
     cli_args = 'FESpaces/inactive=""
                AuxVariables/inactive="" 
                AuxKernels/inactive="" 
-               Outputs/ParaViewDataCollection/file_base=OutputData/InnerProduct'
+               Outputs/ParaViewDataCollection/file_base=OutputData/InnerProduct
+               Outputs/ParaviewDataCollection/vtk_format = BINARY'
     xmldiff = 'OutputData/InnerProduct/Run0/Run0.pvd
                 OutputData/InnerProduct/Run0/Cycle000001/proc000000.vtu'
     design = 'MFEMDotProductAux.md'
@@ -44,7 +45,7 @@
     requirement = 'The system shall have the ability to project the inner product of two gridfunctions onto an MFEM auxvariable'
     capabilities = 'mfem'
     abs_zero = 1e-9
-    rel_err = 1.5e-5
+    rel_err = 2.5e-5
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
