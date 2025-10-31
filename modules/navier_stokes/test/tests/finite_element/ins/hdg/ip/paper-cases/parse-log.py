@@ -6,6 +6,7 @@ import re
 import sys
 import argparse
 import pandas as pd
+from typing import Optional
 
 def parse_moose_petsc_log(text: str, times=None) -> pd.DataFrame:
     """
@@ -68,6 +69,63 @@ def parse_moose_petsc_log(text: str, times=None) -> pd.DataFrame:
 
     return pd.DataFrame(rows).sort_values("Re").reset_index(drop=True)
 
+def parse_header_for_key(key: str, text: str) -> Optional[int]:
+    """
+    Extract selected MOOSE header information
+    """
+    pattern = rf"^\s*{re.escape(key)}:\s*([0-9]+)\s*$"
+    m = re.search(pattern, text, re.MULTILINE)
+    return int(m.group(1)) if m else None
+
+def parse_num_dofs(text: str) -> Optional[int]:
+    return parse_header_for_key("Num DOFs", text)
+
+def parse_num_elems(text: str) -> Optional[int]:
+    return parse_header_for_key("Elems", text)
+
+def parse_perf_solve_avg(text: str) -> Optional[float]:
+    """
+    From the Performance Graph, find the line that starts with
+    '|   NavierStokesProblem::solve' and return the SECOND 'Avg(s)'
+    (the one in the Total/Avg/%/Mem group).
+    """
+    # Locate the performance graph section (optional, robust if the whole log is passed)
+    # Then capture the specific row; split by '|' and take the second Avg(s) = column index 8.
+    pat = re.compile(r"^\|\s*NavierStokesProblem::solve.*$", re.MULTILINE)
+    m = pat.search(text)
+    if not m:
+        return None
+    row = m.group(0)
+    parts = [p.strip() for p in row.split("|")]
+    # Expected layout:
+    # 0:'' 1:Section 2:Calls 3:Self(s) 4:Avg(s) 5:% 6:Mem(MB) 7:Total(s) 8:Avg(s) 9:% 10:Mem(MB) 11:''
+    if len(parts) >= 9 and parts[8]:
+        try:
+            return float(parts[8])
+        except ValueError:
+            return None
+    return None
+
+def parse_mat_aij_rows(mat_name: str, text: str) -> Optional[int]:
+    # Regex requirements:
+    # 1) Exact line:  Mat Object: (<name>) ...
+    # 2) Immediately following line:  type: .*aij
+    # 3) Later line (same block): rows=<N>
+    pattern = re.compile(
+        rf"^\s*Mat Object:\s*\(\s*{re.escape(mat_name)}\s*\).*\n"  # Mat Object line
+        rf"^\s*type:\s*\S*?aij\s*$"                             # next line: type ... aij
+        rf"(?P<body>[\s\S]*?)"                                  # capture rest of block segment
+        rf"^\s*rows\s*=\s*(?P<rows>[0-9]+)\b",                  # rows=NNN
+        re.IGNORECASE | re.MULTILINE
+    )
+    m = pattern.search(text)
+    if not m:
+        return None
+    try:
+        return int(m.group("rows"))
+    except ValueError:
+        return None
+
 def main():
     ap = argparse.ArgumentParser(description="Parse PETSc/MOOSE log for iteration stats by time.")
     ap.add_argument("-i", "--input", type=str, help="Path to log file (default: stdin).")
@@ -83,15 +141,38 @@ def main():
     else:
         text = sys.stdin.read()
 
-    times = None
     if args.times:
         times = [float(s) for s in args.times.split(",")]
+    else:
+        times = [1, 10, 100, 1000, 5000, 10000]
 
     df = parse_moose_petsc_log(text, times=times)
 
+    num_elems = parse_num_elems(text)
+    num_dofs = parse_num_dofs(text)
+    num_uncondensed_dofs = parse_mat_aij_rows("nl0_condensed_fieldsplit_u_", text)
+    solve_avg = parse_perf_solve_avg(text)
+
     if args.csv:
+        # Keep CSV clean; write summary to stderr so CSV parsers aren’t confused
+        if num_elems is not None:
+            sys.stderr.write(f"Num Elems: {num_elems}\n")
+        if num_dofs is not None:
+            sys.stderr.write(f"Num DOFs: {num_dofs}\n")
+        if num_uncondensed_dofs is not None:
+            sys.stderr.write(f"Num Uncondensed DOFs: {num_uncondensed_dofs}\n")
+        if solve_avg is not None:
+            sys.stderr.write(f"NavierStokesProblem::solve Avg(s): {solve_avg}\n")
         print(df.to_csv(index=False))
     else:
+        if num_elems is not None:
+            print(f"Num Elems: {num_elems}")
+        if num_dofs is not None:
+            print(f"Num DOFs: {num_dofs}")
+        if num_uncondensed_dofs is not None:
+            print(f"Num Uncondensed DOFs: {num_uncondensed_dofs}")
+        if solve_avg is not None:
+            print(f"NavierStokesProblem::solve Avg(s): {solve_avg}")
         # Pretty print
         try:
             from tabulate import tabulate
