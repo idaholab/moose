@@ -34,7 +34,12 @@ MFEMDotProductAux::MFEMDotProductAux(const InputParameters & parameters)
     _v_var_name(getParam<VariableName>("v")),
     _u_var(*getMFEMProblem().getProblemData().gridfunctions.Get(_u_var_name)),
     _v_var(*getMFEMProblem().getProblemData().gridfunctions.Get(_v_var_name)),
-    _scale_factor(getParam<mfem::real_t>("scale_factor"))
+    _scale_factor(getParam<mfem::real_t>("scale_factor")),
+    _u_coef(&_u_var),
+    _v_coef(&_v_var),
+    _dot_uv(_u_coef, _v_coef),
+    _scale_c(_scale_factor),
+    _final_coef(_scale_c, _dot_uv)
 {
   // Must be L2
   mfem::ParFiniteElementSpace * fes = _result_var.ParFESpace();
@@ -51,16 +56,16 @@ void
 MFEMDotProductAux::execute()
 {
   // Build coefficient s(x) * (U . V)
-  mfem::VectorGridFunctionCoefficient Ucoef(&_u_var);
-  mfem::VectorGridFunctionCoefficient Vcoef(&_v_var);
-  mfem::InnerProductCoefficient dot_uv(Ucoef, Vcoef);
+  // mfem::VectorGridFunctionCoefficient Ucoef(&_u_var);
+  // mfem::VectorGridFunctionCoefficient Vcoef(&_v_var);
+  // mfem::InnerProductCoefficient dot_uv(Ucoef, Vcoef);
 
-  mfem::ConstantCoefficient ccoef(_scale_factor);
-  mfem::ProductCoefficient final_coef(ccoef, dot_uv);
+  // mfem::ConstantCoefficient ccoef(_scale_factor);
+  // mfem::ProductCoefficient final_coef(ccoef, dot_uv);
 
   // Project into the scalar aux result variable per element projection for L2
   _result_var = 0.0;
-  _result_var.ProjectCoefficient(final_coef);
+  _result_var.ProjectCoefficient(_final_coef);
 }
 
 #endif // MOOSE_MFEM_ENABLED

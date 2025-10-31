@@ -36,13 +36,19 @@ protected:
   // Names of vector sources
   const VariableName _u_var_name;
   const VariableName _v_var_name;
+  
 
   // References to the vector ParGridFunctions
   const mfem::ParGridFunction & _u_var;
   const mfem::ParGridFunction & _v_var;
-
-  // Constant multiplier
   const mfem::real_t _scale_factor;
+
+  mfem::VectorGridFunctionCoefficient _u_coef;
+  mfem::VectorGridFunctionCoefficient _v_coef;
+  mfem::InnerProductCoefficient _dot_uv;
+  mfem::ConstantCoefficient _scale_c;
+
+  mfem::ProductCoefficient _final_coef;
 };
 
 #endif // MOOSE_MFEM_ENABLED
