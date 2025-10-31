@@ -17,7 +17,7 @@ def _preexec_detach():
 
 def run_case(exec_path, input_file, procs, refine, set_schur_pre, num_steps, detach):
     input_base = input_file[:-2]
-    tag = f"{input_base}-{procs}proc-{refine}refine"
+    tag = f"{input_base}-{procs}proc-{refine}refine-{set_schur_pre}-pre"
     if not detach:
       print(f"=== Running case: {procs} ranks, refine={refine} ===\n", flush=True)
 
