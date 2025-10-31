@@ -17,7 +17,7 @@ where $u$ and $v$ are the two vector fields and $s(x)$ is an optional scaling.
 
 ## Example Input File Syntax
 
-!listing mfem/submeshes/av_magnetostatic.i block=/AuxKernels
+!listing mfem/auxkernels/crossproduct.i block=/AuxKernels
 
 !syntax parameters /AuxKernels/MFEMCrossProductAux
 

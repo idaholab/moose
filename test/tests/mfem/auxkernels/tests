@@ -43,21 +43,18 @@
     issues = '#31613'
     requirement = 'The system shall have the ability to project the inner product of two gridfunctions onto an MFEM auxvariable'
     capabilities = 'mfem'
+    abs_zero = 1e-9
+    rel_err = 1.5e-5
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
     restep = false
   []
   [MFEMCrossProductAux.C]
-    type = CSVDiff
-    input = ../submeshes/av_magnetostatic.i
-    cli_args = 'FESpaces/inactive="" 
-                AuxVariables/inactive="" 
-                AuxKernels/inactive="" 
-                Postprocessors/inactive="CoilPower" 
-                Outputs/inactive="ParaViewDataCollection"
-                Outputs/ReportedPostprocessors/file_base=OutputData/CrossProductCSV'
-    csvdiff = 'OutputData/CrossProductCSV.csv'
+    type = XMLDiff
+    input =crossproduct.i
+    xmldiff = 'OutputData/CrossProduct/Run0/Run0.pvd
+                OutputData/CrossProduct/Run0/Cycle000001/proc000000.vtu'
     design = 'MFEMCrossProductAux.md'
     issues = '#31613'
     requirement = 'The system shall have the ability to project the cross product of two grid functions onto an MFEM vector auxvariable'
