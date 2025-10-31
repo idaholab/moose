@@ -124,11 +124,8 @@ ComputeIndicatorThread::onElement(const Elem * elem)
   }
 
   if (!_finalize) // During finalize the Indicators should be setting values in the vectors manually
-  {
-    Threads::spin_mutex::scoped_lock lock(Threads::spin_mtx);
     for (auto * var : _aux_sys._elem_vars[_tid])
       var->add(_aux_sys.solution());
-  }
 }
 
 void

@@ -126,6 +126,7 @@ addActionTypes(Syntax & syntax)
   appendMooseObjectTask  ("add_kernel",                   EigenKernel);
   appendMooseObjectTask  ("add_kernel",                   VectorKernel);
   appendMooseObjectTask  ("add_kernel",                   ArrayKernel);
+  appendMooseObjectTask  ("add_kernel",                   ADArrayKernel);
 #ifdef MOOSE_KOKKOS_ENABLED
   appendMooseObjectTask  ("add_kernel",                   KokkosKernel);
 #endif

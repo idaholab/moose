@@ -59,21 +59,26 @@ ADNodalBCTempl<T, Base>::ADNodalBCTempl(const InputParameters & parameters)
                               true,
                               "variable",
                               Moose::VarKindType::VAR_SOLVER,
-                              std::is_same<T, Real>::value ? Moose::VarFieldType::VAR_FIELD_STANDARD
-                                                           : Moose::VarFieldType::VAR_FIELD_VECTOR),
+                              std::is_same_v<T, Real> ? Moose::VarFieldType::VAR_FIELD_STANDARD
+                              : std::is_same_v<T, RealVectorValue>
+                                  ? Moose::VarFieldType::VAR_FIELD_VECTOR
+                                  : Moose::VarFieldType::VAR_FIELD_ARRAY),
     ADFunctorInterface(this),
     _var(*this->mooseVariable()),
     _current_node(_var.node()),
     _u(_var.adNodalValue()),
-    _set_components(
-        {std::is_same<T, RealVectorValue>::value ? this->template getParam<bool>("set_x_comp")
-                                                 : true,
-         std::is_same<T, RealVectorValue>::value ? this->template getParam<bool>("set_y_comp")
-                                                 : true,
-         std::is_same<T, RealVectorValue>::value ? this->template getParam<bool>("set_z_comp")
-                                                 : true}),
     _undisplaced_assembly(_fe_problem.assembly(_tid, _sys.number()))
 {
+  if constexpr (std::is_same_v<T, RealVectorValue>)
+  {
+    _set_components.resize(Moose::dim);
+    _set_components[0] = this->template getParam<bool>("set_x_comp");
+    _set_components[1] = this->template getParam<bool>("set_y_comp");
+    _set_components[2] = this->template getParam<bool>("set_z_comp");
+  }
+  else
+    _set_components.resize(_var.count(), true);
+
   _subproblem.haveADObjects(true);
 
   addMooseVariableDependency(this->mooseVariable());
@@ -81,23 +86,31 @@ ADNodalBCTempl<T, Base>::ADNodalBCTempl(const InputParameters & parameters)
 
 namespace
 {
-const ADReal &
-conversionHelper(const ADReal & value, const unsigned int)
+template <typename T>
+const T &
+conversionHelper(const T & value, const unsigned int)
 {
   return value;
 }
 
-const ADReal &
-conversionHelper(const libMesh::VectorValue<ADReal> & value, const unsigned int i)
+template <typename T>
+const T &
+conversionHelper(const VectorValue<T> & value, const unsigned int i)
+{
+  return value(i);
+}
+
+template <typename T>
+const T &
+conversionHelper(const Eigen::Matrix<T, Eigen::Dynamic, 1> & value, const unsigned int i)
 {
   return value(i);
 }
 }
 
 template <typename T, typename Base>
-template <typename ADResidual>
 void
-ADNodalBCTempl<T, Base>::addResidual(const ADResidual & residual,
+ADNodalBCTempl<T, Base>::addResidual(const T & residual,
                                      const std::vector<dof_id_type> & dof_indices)
 {
   mooseAssert(dof_indices.size() <= _set_components.size(),
@@ -105,7 +118,7 @@ ADNodalBCTempl<T, Base>::addResidual(const ADResidual & residual,
 
   for (const auto i : index_range(dof_indices))
     if (_set_components[i])
-      setResidual(_sys, raw_value(conversionHelper(residual, i)), dof_indices[i]);
+      setResidual(_sys, conversionHelper(residual, i), dof_indices[i]);
 }
 
 template <typename T, typename Base>
@@ -116,14 +129,17 @@ ADNodalBCTempl<T, Base>::addJacobian(const ADResidual & residual,
 {
   mooseAssert(dof_indices.size() <= _set_components.size(),
               "The number of dof indices must be less than the number of settable components");
+  if (!std::is_same_v<T, RealVectorValue>)
+    mooseAssert(dof_indices.size() == _var.count(),
+                "The number of dof indices should match the variable count");
 
   for (const auto i : index_range(dof_indices))
     if (_set_components[i])
       // If we store into the displaced assembly for nodal bc objects the data never actually makes
       // it into the global Jacobian
       addJacobian(_undisplaced_assembly,
-                  std::array<ADReal, 1>{{conversionHelper(residual, i)}},
-                  std::array<dof_id_type, 1>{{dof_indices[i]}},
+                  Moose::Span(&conversionHelper(residual, i), 1),
+                  Moose::Span(&dof_indices[i], 1),
                   /*scaling_factor=*/1);
 }
 
@@ -135,7 +151,7 @@ ADNodalBCTempl<T, Base>::computeResidual()
   if (dof_indices.empty())
     return;
 
-  const auto residual = computeQpResidual();
+  const auto residual = MetaPhysicL::raw_value(computeQpResidual());
 
   addResidual(residual, dof_indices);
 }
@@ -163,7 +179,7 @@ ADNodalBCTempl<T, Base>::computeResidualAndJacobian()
 
   const auto residual = computeQpResidual();
 
-  addResidual(residual, dof_indices);
+  addResidual(MetaPhysicL::raw_value(residual), dof_indices);
   addJacobian(residual, dof_indices);
 }
 
@@ -185,5 +201,6 @@ ADNodalBCTempl<T, Base>::computeOffDiagJacobianScalar(unsigned int)
 
 template class ADNodalBCTempl<Real, NodalBCBase>;
 template class ADNodalBCTempl<RealVectorValue, NodalBCBase>;
+template class ADNodalBCTempl<RealEigenVector, NodalBCBase>;
 template class ADNodalBCTempl<Real, ADDirichletBCBase>;
 template class ADNodalBCTempl<RealVectorValue, ADDirichletBCBase>;

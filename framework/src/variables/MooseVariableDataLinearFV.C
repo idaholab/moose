@@ -112,7 +112,7 @@ MooseVariableDataLinearFV<OutputType>::computeValues()
   unsigned int num_dofs = _dof_indices.size();
 
   if (num_dofs > 0)
-    fetchDoFValues();
+    fetchDofValues();
   else
     // We don't have any dofs. There's nothing to do
     return;
@@ -138,7 +138,7 @@ MooseVariableDataLinearFV<OutputType>::computeValues()
 
 template <typename OutputType>
 void
-MooseVariableDataLinearFV<OutputType>::setDofValue(const OutputData & value, unsigned int index)
+MooseVariableDataLinearFV<OutputType>::setDofValue(const DofValue & value, unsigned int index)
 {
   mooseAssert(index == 0, "We only ever have one dof value locally");
   _vector_tags_dof_u[_solution_tag][index] = value;
@@ -152,7 +152,7 @@ MooseVariableDataLinearFV<OutputType>::setDofValue(const OutputData & value, uns
 
 template <typename OutputType>
 void
-MooseVariableDataLinearFV<OutputType>::setDofValues(const DenseVector<OutputData> & values)
+MooseVariableDataLinearFV<OutputType>::setDofValues(const DenseVector<DofValue> & values)
 {
   auto & dof_values = _vector_tags_dof_u[_solution_tag];
   for (unsigned int i = 0; i < values.size(); i++)

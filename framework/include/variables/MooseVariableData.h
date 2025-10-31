@@ -50,13 +50,13 @@ class MooseVariableData : public MooseVariableDataBase<OutputType>
 {
 public:
   // type for gradient, second and divergence of template class OutputType
-  typedef typename libMesh::TensorTools::IncrementRank<OutputType>::type OutputGradient;
-  typedef typename libMesh::TensorTools::IncrementRank<OutputGradient>::type OutputSecond;
-  typedef typename libMesh::TensorTools::DecrementRank<OutputType>::type OutputDivergence;
+  using typename MooseVariableDataBase<OutputType>::OutputGradient;
+  using typename MooseVariableDataBase<OutputType>::OutputSecond;
+  using typename MooseVariableDataBase<OutputType>::OutputDivergence;
 
   // shortcut for types storing values on quadrature points
-  typedef MooseArray<OutputType> FieldVariableValue;
-  typedef MooseArray<OutputGradient> FieldVariableGradient;
+  using typename MooseVariableDataBase<OutputType>::FieldVariableValue;
+  using typename MooseVariableDataBase<OutputType>::FieldVariableGradient;
   typedef MooseArray<OutputSecond> FieldVariableSecond;
   typedef MooseArray<OutputType> FieldVariableCurl;
   typedef MooseArray<OutputDivergence> FieldVariableDivergence;
@@ -85,10 +85,12 @@ public:
   typedef MooseArray<std::vector<OutputShapeDivergence>> FieldVariableTestDivergence;
 
   // DoF value type for the template class OutputType
-  typedef typename Moose::DOFType<OutputType>::type OutputData;
-  typedef MooseArray<OutputData> DoFValue;
+  using typename MooseVariableDataBase<OutputType>::DofValue;
+  using typename MooseVariableDataBase<OutputType>::DofValues;
+  using typename MooseVariableDataBase<OutputType>::ADDofValue;
+  using typename MooseVariableDataBase<OutputType>::ADDofValues;
 
-  MooseVariableData(const MooseVariableField<OutputType> & var,
+  MooseVariableData(const MooseVariableFE<OutputType> & var,
                     SystemBase & sys,
                     THREAD_ID tid,
                     Moose::ElementType element_type,
@@ -118,11 +120,12 @@ public:
   /**
    * compute the values for const monomial variables
    */
-  void computeMonomialValues();
+  void computeConstantMonomialValues();
 
   /**
    * compute AD things
    */
+  template <bool constant_monomial>
   void computeAD(const unsigned int num_dofs, const unsigned int nqp);
 
   /**
@@ -372,21 +375,21 @@ public:
   /**
    * Set local DOF values and evaluate the values on quadrature points
    */
-  void setDofValues(const DenseVector<OutputData> & values);
+  void setDofValues(const DenseVector<DofValue> & values);
 
   ///@{
   /**
    * dof value setters
    */
-  void setDofValue(const OutputData & value, unsigned int index);
+  void setDofValue(const DofValue & value, unsigned int index);
   ///@}
 
   /**
    * Write a nodal value to the passed-in solution vector
    */
-  void insertNodalValue(libMesh::NumericVector<libMesh::Number> & residual, const OutputData & v);
-  OutputData getNodalValue(const Node & node, Moose::SolutionState state) const;
-  OutputData
+  void insertNodalValue(libMesh::NumericVector<libMesh::Number> & residual, const DofValue & v);
+  DofValue getNodalValue(const Node & node, Moose::SolutionState state) const;
+  DofValue
   getElementalValue(const Elem * elem, Moose::SolutionState state, unsigned int idx = 0) const;
 
   ///////////////////////////// dof indices ///////////////////////////////////////////////
@@ -425,22 +428,22 @@ public:
 
   /////////////////////////// DoF value getters /////////////////////////////////////
 
-  const DoFValue & dofValuesDot() const;
-  const DoFValue & dofValuesDotOld() const;
-  const DoFValue & dofValuesDotDot() const;
-  const DoFValue & dofValuesDotDotOld() const;
+  const DofValues & dofValuesDot() const;
+  const DofValues & dofValuesDotOld() const;
+  const DofValues & dofValuesDotDot() const;
+  const DofValues & dofValuesDotDotOld() const;
   const MooseArray<libMesh::Number> & dofValuesDuDotDu() const;
   const MooseArray<libMesh::Number> & dofValuesDuDotDotDu() const;
 
   /**
    * Return the AD dof values
    */
-  const MooseArray<ADReal> & adDofValues() const;
+  const ADDofValues & adDofValues() const;
 
   /**
    * Return the AD time derivative values of degrees of freedom
    */
-  const MooseArray<ADReal> & adDofValuesDot() const;
+  const ADDofValues & adDofValuesDot() const;
 
   /////////////////////////////// Increment stuff ///////////////////////////////////////
 
@@ -462,21 +465,38 @@ public:
 
 private:
   /**
-   * Helper methods for assigning nodal values from their corresponding solution values (dof
-   * values as they're referred to here in this class). These methods are only truly meaningful
-   * for nodal basis families
+   * Helper method for assigning the _ad_dof_* arrays
    */
-  void assignADNodalValue(const ADReal & value, const unsigned int & component);
-  void fetchADNodalValues();
+  void fetchADDofValues();
 
   /**
-   * Internal method for computeValues() and computeMonomialValues()
+   * Helper method for assigning nodal values from their corresponding solution values (dof
+   * values as they're referred to here in this class). This method is only truly meaningful
+   * for nodal basis families
+   */
+  void assignADNodalValue();
+
+  /**
+   * Internal method for computeValues() and computeConstantMonomialValues()
    *
    * Monomial is a template parameter so that we get compile time optimization
-   * for monomial vs non-monomial
+   * for constant monomial vs non-constant monomial
    */
-  template <bool monomial>
+  template <bool constant_monomial>
   void computeValuesInternal();
+
+  template <bool constant_monomial,
+            typename DestinationType,
+            typename ShapeType,
+            typename DofValuesType>
+  void fill(DestinationType & dest,
+            const ShapeType & phi,
+            const DofValuesType & dof_values,
+            unsigned int nqp,
+            std::size_t num_shapes);
+
+  /// A const reference to the owning MooseVariableFE object
+  const MooseVariableFE<OutputType> & _var;
 
   const libMesh::FEType & _fe_type;
 
@@ -505,33 +525,32 @@ private:
   /// A zero AD variable
   ADReal _ad_zero;
 
-  /// AD u dot flags
-  mutable bool _need_ad_u_dot;
-  mutable bool _need_ad_u_dotdot;
-
   /// SolutionState second_u flags
-  mutable bool _need_second;
-  mutable bool _need_second_old;
-  mutable bool _need_second_older;
-  mutable bool _need_second_previous_nl;
+  mutable bool _need_second = false;
+  mutable bool _need_second_old = false;
+  mutable bool _need_second_older = false;
+  mutable bool _need_second_previous_nl = false;
 
   /// curl flags
-  mutable bool _need_curl;
-  mutable bool _need_curl_old;
-  mutable bool _need_curl_older;
+  mutable bool _need_curl = false;
+  mutable bool _need_curl_old = false;
+  mutable bool _need_curl_older = false;
 
   /// divergence flags
-  mutable bool _need_div;
-  mutable bool _need_div_old;
-  mutable bool _need_div_older;
+  mutable bool _need_div = false;
+  mutable bool _need_div_old = false;
+  mutable bool _need_div_older = false;
 
   /// AD flags
-  mutable bool _need_ad;
-  mutable bool _need_ad_u;
-  mutable bool _need_ad_grad_u;
-  mutable bool _need_ad_grad_u_dot;
-  mutable bool _need_ad_second_u;
-  mutable bool _need_ad_curl_u;
+  mutable bool _need_ad = false;
+  mutable bool _need_ad_u = false;
+  mutable bool _need_ad_grad_u = false;
+  mutable bool _need_ad_grad_u_dot = false;
+  mutable bool _need_ad_second_u = false;
+  mutable bool _need_ad_curl_u = false;
+  mutable bool _need_ad_div_u = false;
+  mutable bool _need_ad_u_dot = false;
+  mutable bool _need_ad_u_dotdot = false;
 
   bool _has_dof_indices;
 
@@ -559,9 +578,11 @@ private:
   ADTemplateVariableValue<OutputType> _ad_u;
   ADTemplateVariableGradient<OutputType> _ad_grad_u;
   ADTemplateVariableSecond<OutputType> _ad_second_u;
-  MooseArray<ADReal> _ad_dof_values;
-  MooseArray<ADReal> _ad_dofs_dot;
-  MooseArray<ADReal> _ad_dofs_dotdot;
+  ADDofValues _ad_dof_values;
+  ADDofValues _ad_dofs_dot;
+  MooseArray<ADRealEigenVector> _ad_dofs_dot_eigen;
+  ADDofValues _ad_dofs_dotdot;
+  MooseArray<ADRealEigenVector> _ad_dofs_dotdot_eigen;
   ADTemplateVariableValue<OutputType> _ad_u_dot;
   ADTemplateVariableValue<OutputType> _ad_u_dotdot;
   ADTemplateVariableGradient<OutputType> _ad_grad_u_dot;
@@ -707,7 +728,7 @@ private:
   using MooseVariableDataBase<OutputType>::_need_matrix_tag_u;
   using MooseVariableDataBase<OutputType>::_dof_indices;
   using MooseVariableDataBase<OutputType>::_has_dof_values;
-  using MooseVariableDataBase<OutputType>::fetchDoFValues;
+  using MooseVariableDataBase<OutputType>::fetchDofValues;
   using MooseVariableDataBase<OutputType>::assignNodalValue;
   using MooseVariableDataBase<OutputType>::zeroSizeDofValues;
   using MooseVariableDataBase<OutputType>::_solution_tag;
@@ -741,12 +762,13 @@ private:
   using MooseVariableDataBase<OutputType>::_nodal_value_dot_old;
   using MooseVariableDataBase<OutputType>::_nodal_value_dotdot_old;
   using MooseVariableDataBase<OutputType>::_required_vector_tags;
+  using MooseVariableDataBase<OutputType>::_count;
 };
 
 /////////////////////// General template definitions //////////////////////////////////////
 
 template <typename OutputType>
-const MooseArray<ADReal> &
+const typename MooseVariableData<OutputType>::ADDofValues &
 MooseVariableData<OutputType>::adDofValues() const
 {
   _need_ad = true;
@@ -754,7 +776,7 @@ MooseVariableData<OutputType>::adDofValues() const
 }
 
 template <typename OutputType>
-const MooseArray<ADReal> &
+const typename MooseVariableData<OutputType>::ADDofValues &
 MooseVariableData<OutputType>::adDofValuesDot() const
 {
   _need_ad = _need_ad_u_dot = true;
