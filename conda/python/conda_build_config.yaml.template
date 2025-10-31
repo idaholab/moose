@@ -1,0 +1,11 @@
+moose_python:
+  - python 3.13
+  - python 3.12
+  - python 3.11
+  - python 3.10
+
+moose_pyhit:
+  - moose-pyhit __VERSIONER_WASP_VERSION__
+
+moose_tools:
+  - moose-tools __VERSIONER_TOOLS_VERSION__
