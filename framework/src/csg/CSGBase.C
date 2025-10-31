@@ -17,7 +17,77 @@ CSGBase::CSGBase()
 {
 }
 
+CSGBase::CSGBase(const CSGBase & other_base)
+  : _surface_list(other_base.getSurfaceList()),
+    _cell_list(CSGCellList()),
+    _universe_list(CSGUniverseList())
+{
+  // Iterate through all cell references from the other CSGBase instance and
+  // create new CSGCell pointers based on these references. This is done
+  // recursively to properly handle cells with universe fills
+  for (const auto & [name, cell] : other_base.getCellList().getCellListMap())
+    addCellToList(*cell);
+
+  // Link all cells in other_base root universe to current root universe
+  for (auto & root_cell : other_base.getRootUniverse().getAllCells())
+  {
+    const auto & list_cell = _cell_list.getCell(root_cell.get().getName());
+    addCellToUniverse(getRootUniverse(), list_cell);
+  }
+
+  // Iterate through all universe references from the other CSGBase instance and
+  // create new CSGUniverse pointers based on these references. This is done in case
+  // any universe exist in the universe list that are not connected to the cell list.
+  for (const auto & [name, univ] : other_base.getUniverseList().getUniverseListMap())
+    addUniverseToList(*univ);
+}
+
 CSGBase::~CSGBase() {}
+
+const CSGCell &
+CSGBase::addCellToList(const CSGCell & cell)
+{
+  // If cell has already been created, we just return a reference to it
+  const auto name = cell.getName();
+  if (_cell_list.hasCell(name))
+    return _cell_list.getCell(name);
+
+  // Otherwise if the cell has material or void cell, we can create it directly
+  const auto fill_type = cell.getFillType();
+  const auto region = cell.getRegion();
+  if (fill_type == "VOID")
+    return _cell_list.addVoidCell(name, region);
+  else if (fill_type == "CSG_MATERIAL")
+  {
+    const auto mat_name = cell.getFillMaterial();
+    return _cell_list.addMaterialCell(name, mat_name, region);
+  }
+  // Otherwise if the cell has a universe fill, we need to recursively define
+  // all linked universes and cells first before defining this cell
+  else
+  {
+    const auto & univ = addUniverseToList(cell.getFillUniverse());
+    return _cell_list.addUniverseCell(name, univ, region);
+  }
+}
+
+const CSGUniverse &
+CSGBase::addUniverseToList(const CSGUniverse & univ)
+{
+  // If universe has already been created, we just return a reference to it
+  const auto name = univ.getName();
+  if (_universe_list.hasUniverse(name))
+    return _universe_list.getUniverse(name);
+
+  // Otherwise we create a new universe based on its associated cells.
+  // addCellToList is called recursively in case associated cells have not
+  // been added to the cell list yet.
+  const auto univ_cells = univ.getAllCells();
+  std::vector<std::reference_wrapper<const CSGCell>> current_univ_cells;
+  for (const auto & univ_cell : univ_cells)
+    current_univ_cells.push_back(addCellToList(univ_cell));
+  return createUniverse(name, current_univ_cells);
+}
 
 const CSGCell &
 CSGBase::createCell(const std::string & name,

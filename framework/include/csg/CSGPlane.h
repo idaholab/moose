@@ -67,6 +67,16 @@ public:
   virtual Real evaluateSurfaceEquationAtPoint(const Point & p) const override;
 
 protected:
+  /**
+   * @brief create clone of CSGPlane object
+   *
+   * @return std::unordered_map<CSGSurface> unique_ptr to cloned plane
+   */
+  virtual std::unique_ptr<CSGSurface> clone() const override
+  {
+    return std::make_unique<CSGPlane>(_name, _a, _b, _c, _d);
+  }
+
   // calculate the equivalent coeffients (aX + bY + cZ = d) from 3 points on a plane
   void coeffsFromPoints(const Point & p1, const Point & p2, const Point & p3);
 

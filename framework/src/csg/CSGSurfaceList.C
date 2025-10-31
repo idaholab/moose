@@ -19,6 +19,12 @@ namespace CSG
 
 CSGSurfaceList::CSGSurfaceList() {}
 
+CSGSurfaceList::CSGSurfaceList(const CSGSurfaceList & other_surface_list)
+{
+  for (const auto & [name, surf] : other_surface_list.getSurfaceListMap())
+    _surfaces.emplace(name, surf->clone());
+}
+
 CSGSurface &
 CSGSurfaceList::getSurface(const std::string & name) const
 {

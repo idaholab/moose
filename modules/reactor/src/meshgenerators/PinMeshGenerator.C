@@ -587,7 +587,7 @@ std::unique_ptr<MeshBase>
 PinMeshGenerator::generate()
 {
   // Must be called to free the ReactorMeshParams mesh
-  freeReactorMeshParams();
+  freeReactorParamsMesh();
 
   // If bypass_mesh is true, return a null mesh. In this mode, an output mesh is not
   // generated and only metadata is defined on the generator, so logic related to
@@ -701,7 +701,9 @@ PinMeshGenerator::generate()
 std::unique_ptr<CSG::CSGBase>
 PinMeshGenerator::generateCSG()
 {
-  auto rmp_csg = std::move(getCSGBaseByName(_reactor_params));
+  // Must be called to free the ReactorMeshParams mesh
+  freeReactorParamsCSG();
+
   auto csg_obj = std::make_unique<CSG::CSGBase>();
 
   unsigned int radial_index = 0;

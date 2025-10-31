@@ -581,6 +581,11 @@ MeshGeneratorSystem::createMeshGenerator(const std::string & generator_name)
   _mesh_generators.emplace(generator_name, mg);
   mooseAssert(!_mesh_generator_outputs.count(generator_name), "Already exists");
   _mesh_generator_outputs[generator_name];
+  if (getCSGOnly())
+  {
+    mooseAssert(!_csg_base_outputs.count(generator_name), "CSG already exists");
+    _csg_base_outputs[generator_name];
+  }
   _mesh_generator_params.erase(find_params);
 
   return mg;
@@ -698,18 +703,32 @@ void
 MeshGeneratorSystem::saveOutputCSGBase(const MeshGeneratorName generator_name,
                                        std::unique_ptr<CSG::CSGBase> & csg_base)
 {
-  mooseAssert(_csg_base_output.find(generator_name) == _csg_base_output.end(),
-              "CSG mesh already exists");
-  _csg_base_output[generator_name] = std::move(csg_base);
+  auto & outputs = _csg_base_outputs[generator_name];
+
+  // Store CSGBase instance for any downstream MG's that request it, creating copies
+  // as needed
+  if (outputs.size())
+  {
+    // Set first output to csg_base
+    auto & first_output = *outputs.begin();
+    first_output = std::move(csg_base);
+    const auto & copy_from = *first_output;
+    auto output_it = ++outputs.begin();
+    // For all of the rest we create a clone of csg_base
+    for (; output_it != outputs.end(); ++output_it)
+      (*output_it) = copy_from.clone();
+  }
 }
 
 std::unique_ptr<CSG::CSGBase> &
 MeshGeneratorSystem::getCSGBaseGeneratorOutput(const MeshGeneratorName & name)
 {
-  mooseAssert(_app.actionWarehouse().getCurrentTaskName() == "execute_csg_generators",
+  mooseAssert(_app.constructingMeshGenerators() ||
+                  _app.actionWarehouse().getCurrentTaskName() == "execute_mesh_generators",
               "Incorrect call time");
 
-  auto it = _csg_base_output.find(name);
-  mooseAssert(it != _csg_base_output.end(), "CSG mesh not initialized");
-  return it->second;
+  auto it = _csg_base_outputs.find(name);
+  mooseAssert(it != _csg_base_outputs.end(), "CSG mesh not initialized");
+  it->second.push_back(nullptr);
+  return it->second.back();
 }

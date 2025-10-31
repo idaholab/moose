@@ -232,8 +232,6 @@ MeshGenerator::getCSGBaseByName(const MeshGeneratorName & mesh_generator_name)
   checkGetMesh(mesh_generator_name, "");
 
   auto & csg_base = _app.getMeshGeneratorSystem().getCSGBaseGeneratorOutput(mesh_generator_name);
-  if (!csg_base)
-    mooseError("Requested CSG object from " + mesh_generator_name + " returned a null object.");
   _requested_csg_bases.emplace_back(mesh_generator_name, &csg_base);
   return csg_base;
 }
