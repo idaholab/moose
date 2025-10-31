@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+
+# Courtesy of interaction with chatgpt-5
+
 import argparse
 import os
 import subprocess
@@ -18,9 +21,10 @@ def run_case(exec_path, input_file, procs, refine, set_schur_pre, num_steps):
         f"Mesh/uniform_refine={refine}",
         f"Outputs/file_base={tag}",
         f"Problem/set_schur_pre={set_schur_pre}",
-        f"Executioner/num_steps={num_steps}",
         "--color", "off",
     ]
+    if num_steps is not None:
+      cmd.append(f"Executioner/num_steps={num_steps}")
 
     # Prepare environment (set MOOSE_PROFILE_BASE per run)
     env = os.environ.copy()
@@ -89,7 +93,7 @@ def main():
         help="Value for Problem/set_schur_pre (required)."
     )
     parser.add_argument(
-        "--num-steps", type=int, default=57,
+        "--num-steps", type=int,
         help="Number of executioner steps to run (default: %(default)s)"
     )
 
