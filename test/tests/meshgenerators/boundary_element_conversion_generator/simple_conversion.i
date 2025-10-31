@@ -13,3 +13,31 @@
     boundary_names = 'left'
   []
 []
+
+[Executioner]
+  type = Steady
+[]
+
+[Postprocessors]
+  [v0]
+    type = VolumePostprocessor
+    block = 0
+  []
+  [v1]
+    type = VolumePostprocessor
+    block = 1
+  []
+  [v2]
+    type = VolumePostprocessor
+    block = 2
+  []
+[]
+
+[Problem]
+  solve = false
+[]
+
+[Outputs]
+  csv = true
+  execute_on = 'TIMESTEP_END'
+[]

@@ -29,11 +29,6 @@ public:
   void fillPositions();
 
 protected:
-  /**
-   * Helper funciton for copying one mesh into another
-   */
-  void copyIntoMesh(UnstructuredMesh & destination, const UnstructuredMesh & source);
-
   // Holds pointers to the mesh smart pointers (to be populated later).
   const std::vector<std::unique_ptr<MeshBase> *> _meshes;
 
