@@ -83,17 +83,18 @@
     inelastic_models = 'powerlawcrp'
   [../]
   [./powerlawcrp]
-    type = PowerLawCreepStressUpdate
+    type =PowerLawCreepTest #PowerLawCreepStressUpdate
     coefficient = 3.125e-21 # 7.04e-17 #
     n_exponent = 4.0
     m_exponent = 0.0
     activation_energy = 0.0
+    failure_step = 1000000000
     # max_inelastic_increment = 0.01
   [../]
   [./strain_energy_rate_density]
     type = StrainEnergyRateDensity
     inelastic_models = 'powerlawcrp'
- [../]
+  [../]
 []
 
 [Executioner]
