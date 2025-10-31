@@ -81,7 +81,15 @@ def parse_num_dofs(text: str) -> Optional[int]:
     return parse_header_for_key("Num DOFs", text)
 
 def parse_num_elems(text: str) -> Optional[int]:
-    return parse_header_for_key("Elems", text)
+    # Match either "Elems: <num>" or "Elems:" followed by "Total: <num>"
+    pattern = (
+        r"^\s*Elems:\s*(?:(?P<single>\d+)\s*$"              # single-process
+        r"|(?:\n\s*Total:\s*(?P<multi>\d+)\s*$))"           # multi-process
+    )
+    m = re.search(pattern, text, re.MULTILINE)
+    if not m:
+        return None
+    return int(m.group("single") or m.group("multi"))
 
 def parse_perf_solve_avg(text: str) -> Optional[float]:
     """
@@ -150,7 +158,7 @@ def main():
 
     num_elems = parse_num_elems(text)
     num_dofs = parse_num_dofs(text)
-    num_uncondensed_dofs = parse_mat_aij_rows("nl0_condensed_fieldsplit_u_", text)
+    num_condensed_dofs = parse_mat_aij_rows("nl0_condensed_fieldsplit_u_", text)
     solve_avg = parse_perf_solve_avg(text)
 
     if args.csv:
@@ -159,8 +167,8 @@ def main():
             sys.stderr.write(f"Num Elems: {num_elems}\n")
         if num_dofs is not None:
             sys.stderr.write(f"Num DOFs: {num_dofs}\n")
-        if num_uncondensed_dofs is not None:
-            sys.stderr.write(f"Num Uncondensed DOFs: {num_uncondensed_dofs}\n")
+        if num_condensed_dofs is not None:
+            sys.stderr.write(f"Num Condensed DOFs: {num_condensed_dofs}\n")
         if solve_avg is not None:
             sys.stderr.write(f"NavierStokesProblem::solve Avg(s): {solve_avg}\n")
         print(df.to_csv(index=False))
@@ -169,8 +177,8 @@ def main():
             print(f"Num Elems: {num_elems}")
         if num_dofs is not None:
             print(f"Num DOFs: {num_dofs}")
-        if num_uncondensed_dofs is not None:
-            print(f"Num Uncondensed DOFs: {num_uncondensed_dofs}")
+        if num_condensed_dofs is not None:
+            print(f"Num Condensed DOFs: {num_condensed_dofs}")
         if solve_avg is not None:
             print(f"NavierStokesProblem::solve Avg(s): {solve_avg}")
         # Pretty print
