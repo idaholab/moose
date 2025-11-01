@@ -49,6 +49,33 @@ protected:
 
   /// Returns friction factor
   virtual Real computeFrictionFactor(FrictionStruct friction_args) = 0;
+
+  struct NusseltStruct
+  {
+    Real Re, Pr;
+    unsigned int i_pin, iz, i_ch;
+    MooseEnum htc_correlation;
+    // parameterized constructor
+    NusseltStruct(Real Re_,
+                  Real Pr_,
+                  unsigned int i_pin_,
+                  unsigned int iz_,
+                  unsigned int i_ch_,
+                  const MooseEnum & htc_corr)
+      : Re(Re_), Pr(Pr_), i_pin(i_pin_), iz(iz_), i_ch(i_ch_), htc_correlation(htc_corr)
+    {
+    }
+  };
+
+  /// The correlation used for computing the heat transfer correlation near the pin
+  const MooseEnum _pin_htc_correlation;
+  /// The correlation used for computing the heat transfer correlation near the duct
+  const MooseEnum _duct_htc_correlation;
+  NusseltStruct _nusselt_args;
+
+  /// Function that computes the Nusselt number given a heat exchange correlation
+  Real computeNusseltNumber(const NusseltStruct & nusselt_args);
+
   /// Computes diversion crossflow per gap for block iblock
   void computeWijFromSolve(int iblock);
   /// Computes net diversion crossflow per channel for block iblock
