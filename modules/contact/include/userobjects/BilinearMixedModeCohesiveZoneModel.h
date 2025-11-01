@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "PenaltySimpleCohesiveZoneModel.h"
+#include "CohesiveZoneModelBase.h"
 #include "TwoVector.h"
 
 /**
@@ -17,18 +17,15 @@
  */
 class BilinearMixedModeCohesiveZoneModel : virtual public PenaltyWeightedGapUserObject,
                                            virtual public WeightedVelocitiesUserObject,
-                                           virtual public PenaltySimpleCohesiveZoneModel
+                                           virtual public CohesiveZoneModelBase
 {
 public:
   static InputParameters validParams();
 
   BilinearMixedModeCohesiveZoneModel(const InputParameters & parameters);
 
-  virtual const ADVariableValue & czmGlobalTraction(unsigned int i) const;
-
   virtual void initialize() override;
   virtual void finalize() override;
-  virtual void reinit() override;
   virtual void timestepSetup() override;
 
   // Getters for analysis output
@@ -43,63 +40,20 @@ protected:
 
   virtual bool constrainedByOwner() const override { return false; }
 
-  // Compute CZM kinematics.
-  virtual void prepareJumpKinematicQuantities() override;
-  virtual void computeFandR(const Node * const node) override;
-
   // @{
   // Compute CZM bilinear traction law.
   virtual void computeModeMixity(const Node * const node);
   virtual void computeCriticalDisplacementJump(const Node * const node);
   virtual void computeFinalDisplacementJump(const Node * const node);
   virtual void computeEffectiveDisplacementJump(const Node * const node);
-  virtual void computeDamage(const Node * const node);
+  virtual void computeDamage(const Node * const node) override;
   // @}
 
   /// Encapsulate the CZM constitutive behavior.
-  virtual void computeBilinearMixedModeTraction(const Node * const node) override;
+  virtual void computeCZMTraction(const Node * const node) override;
 
-  /// Compute global traction for mortar application
-  virtual void computeGlobalTraction(const Node * const node) override;
-
-  /// Normalize mortar quantities (remove mortar integral scaling)
-  template <class T>
-  T normalizeQuantity(const std::unordered_map<const DofObject *, T> & map,
-                      const Node * const node);
-
-  /// Number of displacement components
-  const unsigned int _ndisp;
-
-  /// Coupled displacement gradients
-  std::vector<const GenericVariableGradient<true> *> _grad_disp;
-
-  /// Coupled displacement and neighbor displacement gradient
-  std::vector<const GenericVariableGradient<true> *> _grad_disp_neighbor;
-
-  /// *** Kinematics/displacement jump quantities ***
-  /// Map from degree of freedom to rotation matrix
-  std::unordered_map<const DofObject *, ADRankTwoTensor> _dof_to_rotation_matrix;
-
-  /// Map from degree of freedom to local displacement jump
-  std::unordered_map<const DofObject *, ADRealVectorValue> _dof_to_interface_displacement_jump;
-
-  /// Deformation gradient for interpolation
-  ADRankTwoTensor _F_interpolation;
-
-  /// Deformation gradient for interpolation of the neighbor projection
-  ADRankTwoTensor _F_neighbor_interpolation;
-
-  /// Map from degree of freedom to secondary, interpolated deformation gradient tensor
-  std::unordered_map<const DofObject *, ADRankTwoTensor> _dof_to_F;
-
-  /// Map from degree of freedom to neighbor, interpolated deformation gradient tensor
-  std::unordered_map<const DofObject *, ADRankTwoTensor> _dof_to_F_neighbor;
-
-  /// Map from degree of freedom to interface deformation gradient tensor
-  std::unordered_map<const DofObject *, ADRankTwoTensor> _dof_to_interface_F;
-
-  /// Map from degree of freedom to interface rotation tensor
-  std::unordered_map<const DofObject *, ADRankTwoTensor> _dof_to_interface_R;
+  /// Zero compressive traction
+  const bool _zero_compressive_traction;
 
   /// Map from degree of freedom to mode mixity ratio (AD needed?)
   std::unordered_map<const DofObject *, ADReal> _dof_to_mode_mixity_ratio;
@@ -147,9 +101,6 @@ protected:
   /// Parameter for the regularization of the Macaulay bracket
   const Real _regularization_alpha;
 
-  /// The global traction
-  std::vector<ADVariableValue> _czm_interpolated_traction;
-
   // @{
   // Strength material properties at the nodes
   std::unordered_map<const DofObject *, ADReal> _dof_to_normal_strength;
@@ -167,11 +118,5 @@ protected:
   std::unordered_map<const DofObject *, ADReal> _dof_to_delta_initial;
   std::unordered_map<const DofObject *, ADReal> _dof_to_delta_final;
   std::unordered_map<const DofObject *, ADReal> _dof_to_delta_max;
-  std::unordered_map<const DofObject *, std::pair<ADReal, Real>> _dof_to_damage;
   // @}
-
-  /// Total Lagrangian stress to be applied on CZM interface
-  std::unordered_map<const DofObject *, ADRealVectorValue> _dof_to_czm_traction;
-
-  std::unordered_map<const DofObject *, ADRealVectorValue> _dof_to_displacement_jump;
 };
