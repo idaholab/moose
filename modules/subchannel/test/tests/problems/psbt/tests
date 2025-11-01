@@ -56,28 +56,4 @@
     max_threads = 1
     requirement = 'The system shall be able to solve a PSBT-type case with the subchannel solver using a monolithic algorithm.'
   []
-  [psbt_regression_test_full_monolithic]
-    type = CSVDiff
-    input = psbt_full_monolithic.i
-    csvdiff = psbt_full_monolithic_out.csv
-    capabilities = 'method!=dbg'
-    valgrind = NONE
-    recover = false
-    abs_zero = 1e-6
-    rel_err = 1e-4
-    max_threads = 1
-    requirement = 'The system shall be able to solve a PSBT-type case with the subchannel solver using a full-monolithic algorithm.'
-  []
-  [psbt_regression_test_full_monolithic_staggered]
-    type = CSVDiff
-    input = psbt_full_monolithic_staggered.i
-    csvdiff = psbt_full_monolithic_staggered_out.csv
-    capabilities = 'method!=dbg'
-    valgrind = NONE
-    recover = false
-    abs_zero = 1e-6
-    rel_err = 6e-5
-    max_threads = 1
-    requirement = 'The system shall be able to solve a PSBT-type case with the subchannel solver using a full-monolithic algorithm and a staggered pressure formulation.'
-  []
 []

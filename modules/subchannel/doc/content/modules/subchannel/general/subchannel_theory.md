@@ -118,7 +118,7 @@ h_{ij}' = \sum_{j} w_{ij}'\Delta h_{ij} = \sum_{j} w'_{ij}\big[ h_i - h_j  \big]
 w_{ij}' = \beta S_{ij} \bar{G}, ~\frac{dw_{ij}'}{dz} = \frac{w_{ij}'}{\Delta Z}=\beta g_{ij} \bar{G}.
 \end{equation}
 
-where $\beta$ is the turbulent mixing parameter or thermal transfer coefficient and $\bar{G}$ is the average mass flux of the adjacent subchannels. The $\beta$ term is the tuning parameter for the mixing model. Physically, it is a non-dimensional coefficient that represents the ratio of the lateral mass flux due to mixing to the axial mass flux. It is used to model the effect of the unresolved scales of motion that are produced through the averaging process. In single-phase flow no net mass exchange occurs, both momentum and energy are exchanged between subchannels, and their rates of exchange are characterized in terms of hypothetical turbulent interchange flow rates ($w_{ij}^{'H},w_{ij}^{'M}$) [!cite](TODREAS), for enthalpy and momentum respectively. The approximation that the rate of turbulent exchange for energy and momentum are equal is adopted: $w'_{ij} = w_{ij}^{'H} = w_{ij}^{'M}$.
+where $\beta$ is the turbulent mixing parameter or thermal transfer coefficient and $\bar{G}$ is the average mass flux of the adjacent subchannels. The $\beta$ term is the tuning parameter for the mixing model. Physically, it is a non-dimensional coefficient that represents the ratio of the lateral mass flux due to mixing to the axial mass flux. It is used to model the effect of the unresolved scales of motion that are produced through the averaging process. In single-phase flow no net mass exchange occurs, both momentum and energy are exchanged between subchannels, and their rates of exchange are characterized in terms of hypothetical turbulent interchange flow rates ($w_{ij}^{'H},w_{ij}^{'M}$) [!cite](TODREAS), for enthalpy and momentum respectively. The approximation that the rate of turbulent exchange for energy and momentum are related as follows is adopted: $w'_{ij} = w_{ij}^{'H} = w_{ij}^{'M} / C_T$.
 
  Additional turbulent mixing parameters are implemented as follows:
 
@@ -135,7 +135,6 @@ It is important to note that the mixing coefficient is simply a tuning parameter
 After calibrating the turbulent diffusion coefficient $\beta$ we turned our attention to the turbulent modeling parameter $C_{T}$. This is a tuning parameter that informs on how much momentum is transferred/diffused between subchannels, due to turbulence. The CNEN 4x4 test [!cite](Marinelli) performed at Studsvik laboratory for studying the flow mixing effect between adjacent subchannels was chosen to tune this parameter. This experiment consists in velocity and temperature measurements taken at the outlet of a 16-rod assembly test section. Analysis of the velocity distribution at the exit of the assembly can be used to calibrate the turbulent parameter $C_{T}$.
 
 For quadrilateral assemblies: $C_{T} = 2.6$, $\beta = 0.006$ [!cite](kyriakopoulos2022development).
-
 
 ## Discretization
 
@@ -269,11 +268,11 @@ This is the default algorithm, where the unknown flow variables are calculated i
 
 #### Implicit segregated
 
-In this case, the governing equations are recast in matrix form and the flow variables are calculated by solving the corresponding system. This means that variables are retrieved concurrently for the whole block. Otherwise, the solution algorithm is the same as in the default method.
+In this case, the governing mass, axial momentum and crossflow momentum, equations are recast in matrix form and the flow variables are calculated by solving the corresponding system. This means that variables are retrieved concurrently for the whole block. Otherwise, the solution algorithm is the same as in the default explicit method.
 
 #### Implicit
 
-In this case, the conservation equations are recast in matrix form and combined into a single system. The user can decide whether or not they will include the enthalpy calculation in the matrix formulation. The flow variables are calculated by solving that big system to retrieve all the unknows at the same time instead of one by one, and on all the nodes of the block: $\vec{\dot{m}}, \vec{P}, \vec{w_{ij}}, \vec{h}$. The solution algorithm is the same as in the default method, but the solver used in this version is a fixed point iteration instead of a Newton method. The system looks like this:
+In this case, the governing mass, axial momentum and crossflow momentum  conservation equations are recast in matrix form and combined into a single system. The system of all the subchannel equations looks like this:
 
 \begin{equation}
 \begin{bmatrix}
@@ -297,5 +296,93 @@ In this case, the conservation equations are recast in matrix form and combined 
 \end{bmatrix}
 \end{equation}
 
-As soon as the big matrix is constructed, the solver will calculate cross-flow resistances to achieve realizable solutions. This is done by an initial calculation of the axial mass flows, crossflows, and the sum of crossflows.
-The defined relaxation factor is the average crossflow divided by the maximum and added to 0.5. The added cross-flow resistance is a blending of a current value and the previous one using the relaxation factor calculated above. The current value is the maximum of the sum of cross-flows per subchannel over the minimum axial mass-flow rate. The added cross-flow resistance is added to the diagonal of $M_{ww}$ matrix.
+Since the enthalpy governing equations are uncoupled from the other equations in this otherwise monolithic system (enthalpy is coupled to the flow equations via the fluid properties update), it makes sense to lag the enthalpy solution and solve for it separately. The flow variables are calculated by solving that big system (without the enthalpy) to retrieve all the unknowns at the same time instead of one by one, and on all the nodes of the block: $\vec{\dot{m}}, \vec{P}, \vec{w_{ij}}$. The solution algorithm is the same as in the default method and the solver used is PETSc KSPSolve.
+
+As soon as the big matrix is constructed, the solver will calculate cross-flow resistances to maintain realizability. A distinctive feature of this method is the introduction of a *weak relaxation* logic that stabilizes and accelerates convergence of the coupled $mass flow: (\dot{\mathbf{m}})$, $pressure: (\mathbf{P})$, and $crossflow:(\mathbf{w}_{ij})$ fields in a $Q{=}3$ block-nested linear system with matrix blocks $M_{ij}$ and right-hand-side blocks $\mathbf{b}_i$ that represent the individual governing equations. Note that the solution is influenced by the stabilization method and its coefficients.
+
+#### 1. Fast scale estimates
+
+From the axial- and cross-momentum rows, the code forms quick, diagonally preconditioned estimates:
+\begin{equation}
+\begin{aligned}
+\hat{\mathbf m} &= M_{pm}\,\mathbf m, \\
+\hat{\mathbf p} &= \frac{\hat{\mathbf m}}{\operatorname{diag}(M_{pp}) + \varepsilon_p\mathbf 1},\\
+\hat{\mathbf W} &= \frac{M_{wp}\,\hat{\mathbf p} - \mathbf b_w}{\operatorname{diag}(M_{ww}) + \varepsilon_W\mathbf 1},
+\end{aligned}
+\end{equation}
+with small safeguards $\varepsilon_p,\varepsilon_W\sim 10^{-10}$ to avoid division by zero. Using $\hat{\mathbf W}$, the per-channel crossflow sum $\sum_{j} w_{ij}$ is assembled into a vector $\mathrm{sumw_{ij}}_{\mathrm{loc}}$.
+
+#### 2. Crossflow relaxation parameter
+
+Two guarded scalars are computed:
+
+\begin{equation}
+\begin{aligned}
+m_{\min} &= \max\big(\min |\mathbf m|,\; 10^{-10}\big),\\
+S_{\max} &= \max\Big(\max |\mathrm{sumw_{ijloc}}|,\; 10^{-10}\Big)
+\end{aligned}
+\end{equation}
+
+Additionally, a mean inter-iteration change for crossflow is formed
+\begin{equation}
+r_{\mathrm{base}} = \operatorname{mean}\big(\big|\mathbf W^{(k)}| - |\mathbf W^{(k-1)}\big|\big),
+\end{equation}
+leading to a relaxation factor
+\begin{equation}
+r = \frac{r_{\mathrm{base}}}{\max(S_{\max}, \varepsilon)} + 0.5,\qquad \varepsilon\sim10^{-10}.
+\end{equation}
+The +0.5 offset biases toward mild under-relaxation.
+
+#### 3. Crossflow resistance inflation
+
+A cross-coupling resistance is estimated and smoothed:
+\begin{equation}
+\begin{aligned}
+\tilde K   &= \frac{S_{\max}}{m_{\min}}, &
+K^\star &= 0.9\,\tilde K + 0.1\,K_{\text{old}}, &
+K       &= r\,K^\star.
+\end{aligned}
+\end{equation}
+After smoothing, the provisional crossflow resistance $K$ is mapped through a piecewise lower-bound function that enforces minimum safe damping levels in specific ranges.
+
+\begin{equation}
+K \rightarrow
+\begin{cases}
+K , & K >= 10, \\
+1.0, & 1 \leq K < 10, \\
+0.5, & 0.1 \leq K < 1, \\
+\frac{1}{3}, & 0.01 \leq K < 0.1, \\
+0.1, & 0.001 \leq K < 0.01, \\
+K, & K < 10^{-3}.
+\end{cases}
+\end{equation}
+
+This mapping acts as a {snap-up} rule for the crossflow resistance $K$ over the range $[10^{-3}, 10]$:
+it raises $K$ out of weak-damping intervals but leaves very small and very large
+values unchanged. The purpose is to maintain numerical stability and adequate
+diagonal dominance in the cross-momentum equations without introducing full quantization or "bucketing".
+
+Finally, $K$ is added to the diagonal of the cross-momentum block,
+\begin{equation}
+M_{ww} \;\leftarrow\; M_{ww} + K\,I,
+\end{equation}
+thereby increasing diagonal dominance and improving conditioning for the crossflow equations. Note that this treatment does influence the cross-flow distribution solution.
+
+#### 4. Per-equation under-relaxation
+
+Classical linear under-relaxation is applied automatically and separately to each equation $f\in\{\mathbf m,\mathbf p,\mathbf W\}$ using factors
+\begin{equation}
+\alpha_m=1.0,\qquad \alpha_p=1.0,\qquad \alpha_W=0.1.
+\end{equation}
+For each equation, with the corresponding diagonal $D_f=\operatorname{diag}(M_{ff})$, the system is modified as
+\begin{equation}
+\begin{aligned}
+M_{ff} &\leftarrow \frac{1}{\alpha_f} M_{ff}, \\
+\mathbf b_f &\leftarrow \mathbf b_f + (1-\alpha_f)\,D_f\,\mathbf x^{\text{old}}_f.
+\end{aligned}
+\end{equation}
+This standard construction ensures that solving the modified linear system yields the *under-relaxed* update for equation $f$. In practice, only $\mathbf W$ is strongly damped, while $\mathbf m$ and $\mathbf p$ can be solved without additional damping. This relaxation happens inside the temperature loop.
+
+#### 5. Net effect
+
+The combination of (i) safeguarded scale estimation, (ii) adaptive, time smoothed, and piecewise snapped added crossflow resistance, and (iii) selective under-relaxation produces a more diagonally dominant and robust nested solve that tolerates rapid changes in crossflow while preserving good convergence properties for mass flow and pressure.
