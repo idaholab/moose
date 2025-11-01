@@ -20,26 +20,17 @@ FunctionInterface::validParams()
 }
 
 FunctionInterface::FunctionInterface(const MooseObject * moose_object)
-  : _fni_params(moose_object->parameters()),
+  : _fni_object(*moose_object),
+    _fni_params(moose_object->parameters()),
     _fni_feproblem(*_fni_params.getCheckedPointerParam<FEProblemBase *>("_fe_problem_base")),
     _fni_tid(_fni_params.have_parameter<THREAD_ID>("_tid") ? _fni_params.get<THREAD_ID>("_tid") : 0)
 {
 }
 
-#ifdef MOOSE_KOKKOS_ENABLED
-FunctionInterface::FunctionInterface(const FunctionInterface & object,
-                                     const Moose::Kokkos::FunctorCopy &)
-  : _fni_params(object._fni_params),
-    _fni_feproblem(object._fni_feproblem),
-    _fni_tid(object._fni_tid)
-{
-}
-#endif
-
 const Function &
 FunctionInterface::getFunction(const std::string & name) const
 {
-  return _fni_feproblem.getFunction(_fni_params.get<FunctionName>(name), _fni_tid);
+  return getFunctionByName(_fni_params.get<FunctionName>(name));
 }
 
 const Function &
