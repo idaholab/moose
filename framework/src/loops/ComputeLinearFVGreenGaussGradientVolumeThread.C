@@ -93,9 +93,10 @@ ComputeLinearFVGreenGaussGradientVolumeThread::operator()(const ElemInfoRange & 
 
             if (coord_type == Moose::CoordinateSystemType::COORD_RZ)
             {
-              const auto radial_contrib = _current_var->getElemValue(*elem_info, state) /
-                                          elem_info->centroid()(rz_radial_coord);
-              new_values[rz_radial_coord][elem_i] += radial_contrib;
+              mooseAssert(elem_info->centroid()(rz_radial_coord) != 0,
+                          "Axisymmetric control volumes should not have a zero radial coordinate");
+              new_values[rz_radial_coord][elem_i] -= _current_var->getElemValue(*elem_info, state) /
+                                                     elem_info->centroid()(rz_radial_coord);
             }
           }
           elem_iterator++;

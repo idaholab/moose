@@ -35,4 +35,7 @@ public:
   virtual Real computeBoundaryGradientMatrixContribution() const override;
   virtual Real computeBoundaryGradientRHSContribution() const override;
   ///@}
+
+  virtual bool useBoundaryGradientExtrapolation() const override { return false; }
+  virtual bool includesMaterialPropertyMultiplier() const override { return true; }
 };

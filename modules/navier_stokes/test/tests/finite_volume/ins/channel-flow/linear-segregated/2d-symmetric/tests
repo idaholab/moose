@@ -1,0 +1,24 @@
+[Tests]
+  issues = '#27756'
+  design = 'SIMPLE.md LinearFVPressureSymmetryBC.md LinearFVVelocitySymmetryBC.md'
+  [symmetry]
+    requirement = "The system shall be able to solve the Navier-Stokes equations with the linear finite volume method using a symmetry boundary condition "
+    [cartesian]
+      type = 'CSVDiff'
+      input = channel.i
+      csvdiff = 'channel_out_outlet_velocity_profile_0001.csv'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+      detail = "in a Cartesian coordinate system,"
+    []
+    [rz]
+      type = 'CSVDiff'
+      input = channel.i
+      csvdiff = 'channel_rz_out_outlet_velocity_profile_0001.csv'
+      cli_args = 'Mesh/coord_type=RZ Mesh/rz_coord_axis=X Outputs/file_base=channel_rz_out AuxKernels/assign_vel_exact/function=u_parabolic_profile_rz'
+      recover = false # we don't support recovery for SIMPLE yet
+      max_threads = 1 # see libmesh issue #3808
+      detail = "in a cylindrical coordinate system."
+    []
+  []
+[]

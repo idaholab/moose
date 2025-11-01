@@ -107,7 +107,7 @@ class TestDiffusion2DNonorthogonalNeumann(unittest.TestCase):
             print("The current slope: ", value)
             self.assertTrue(fuzzyEqual(value, 2., .05))
 
-class TestDiffusion2DRZ(unittest.TestCase):
+class TestDiffusion2DRZOrthogonal(unittest.TestCase):
     def test(self):
         df1 = run_spatial('diffusion-2d-rz.i', 5, file_base="diffusion-2d-rz_csv")
 
@@ -116,13 +116,30 @@ class TestDiffusion2DRZ(unittest.TestCase):
                  label='l2error',
                  marker='o',
                  markersize=8,
-                 num_fitted_points=3,
+                 num_fitted_points=2,
                  slope_precision=1)
         fig.save('2d-linear-fv-diffusion-rz.png')
 
         for _,value in fig.label_to_slope.items():
             print("The current slope: ", value)
             self.assertTrue(fuzzyEqual(value, 2., .05))
+
+class TestDiffusion2DRZNonorthogonal(unittest.TestCase):
+    def test(self):
+        df1 = run_spatial('diffusion-2d-rz.i', 5, "Mesh/gmg/elem_type=TRI3 LinearFVKernels/diffusion/use_nonorthogonal_correction=true Convergence/linear/max_iterations=10", file_base="diffusion-2d-rz-nonorthogonal_csv")
+
+        fig = mms.ConvergencePlot(xlabel='Element Size ($h$)', ylabel='$L_2$ Error')
+        fig.plot(df1,
+                 label='l2error',
+                 marker='o',
+                 markersize=8,
+                 num_fitted_points=2,
+                 slope_precision=1)
+        fig.save('2d-linear-fv-diffusion-rz-nonorthogonal.png')
+
+        for _,value in fig.label_to_slope.items():
+            print("The current slope: ", value)
+            self.assertTrue(fuzzyEqual(value, 2., .15))
 
 if __name__ == '__main__':
     unittest.main(__name__, verbosity=2)
