@@ -170,10 +170,11 @@ public:
             const VectorValue<T> * grad_phi_downwind,
             const RealVectorValue & dCD) const
   {
+    using std::max;
     const auto grad_elem = (*grad_phi_upwind) * dCD;
     const auto grad_face = (*grad_phi_downwind) * dCD;
     const auto grad_ratio = grad_elem / (grad_face + 1e-10);
-    return std::max(2.0 * grad_ratio - 1.0, 0.0);
+    return max(2.0 * grad_ratio - 1.0, 0.0);
   };
 
   /**

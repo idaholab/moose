@@ -96,6 +96,8 @@ ADVolumeJunction1PhaseUserObject::ADVolumeJunction1PhaseUserObject(const InputPa
 void
 ADVolumeJunction1PhaseUserObject::computeFluxesAndResiduals(const unsigned int & c)
 {
+  using std::abs, std::max, std::min;
+
   const Real din = _normal[c];
   const RealVectorValue di = _dir[0];
   const RealVectorValue ni = di * din;
@@ -139,10 +141,10 @@ ADVolumeJunction1PhaseUserObject::computeFluxesAndResiduals(const unsigned int &
     const ADReal ei = _rhoEA[0] / _rhoA[0] - 0.5 * uni * uni;
     const ADReal ci = _fp.c_from_v_e(vi, ei);
     const ADReal cJ = _fp.c_from_v_e(vJ, eJ);
-    const ADReal cmax = std::max(ci, cJ);
+    const ADReal cmax = max(ci, cJ);
 
     const ADReal uni_sign = (uni > 0) - (uni < 0);
-    const ADReal factor = 0.5 * (1.0 - uni_sign) * std::min(std::abs(uni - unJ) / cmax, 1.0);
+    const ADReal factor = 0.5 * (1.0 - uni_sign) * min(abs(uni - unJ) / cmax, 1.0);
 
     const ADReal unJ_mod = uni - factor * (uni - unJ);
     const ADRealVectorValue uvecJ_mod = unJ_mod * nJi + ut1J * t1 + ut2J * t2;
@@ -170,7 +172,7 @@ ADVolumeJunction1PhaseUserObject::computeFluxesAndResiduals(const unsigned int &
   _flux[c][THMVACE1D::MOMENTUM] = flux_3d[THMVACE3D::MOM_NORM];
   _flux[c][THMVACE1D::ENERGY] = flux_3d[THMVACE3D::ENERGY] * nJi_dot_di;
 
-  if (c == 0 && std::abs(_K) > 1e-10)
+  if (c == 0 && abs(_K) > 1e-10)
   {
     const ADReal vel_in = _rhouA[0] / _rhoA[0];
     const ADReal v_in = THM::v_from_rhoA_A(_rhoA[0], _A[0]);
@@ -200,7 +202,7 @@ ADVolumeJunction1PhaseUserObject::computeFluxesAndResiduals(const unsigned int &
       _residual[VolumeJunction1Phase::RHOVV_INDEX] += ni(1) * S_loss;
       _residual[VolumeJunction1Phase::RHOWV_INDEX] += ni(2) * S_loss;
     }
-    _residual[VolumeJunction1Phase::RHOEV_INDEX] += S_loss * std::abs(vel_in);
+    _residual[VolumeJunction1Phase::RHOEV_INDEX] += S_loss * abs(vel_in);
   }
 
   const ADRealVectorValue flux_mom_n = flux_3d[THMVACE3D::MOM_NORM] * nJi +

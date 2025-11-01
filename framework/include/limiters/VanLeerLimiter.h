@@ -51,6 +51,7 @@ public:
           const bool & /* fi_elem_is_upwind */) const override final
   {
     mooseAssert(grad_phi_upwind, "Van Leer limiter requires the upwind gradient");
+    using std::abs;
 
     // Compute gradient ratio coefficient
     T r_f;
@@ -60,7 +61,7 @@ public:
       r_f = Moose::FV::rF(phi_upwind, phi_downwind, *grad_phi_upwind, dCD);
 
     // Return limiter value
-    return (r_f + std::abs(r_f)) / (1.0 + std::abs(r_f));
+    return (r_f + abs(r_f)) / (1.0 + abs(r_f));
   }
 
   bool constant() const override final { return false; }

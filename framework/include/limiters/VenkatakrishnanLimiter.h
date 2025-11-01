@@ -72,13 +72,13 @@ public:
   {
     const auto face_centroid = fi->faceCentroid();
     const auto cell_centroid = fi_elem_is_upwind ? fi->elemCentroid() : fi->neighborCentroid();
+    using std::abs;
 
     const auto delta_face = (*grad_phi_upwind) * (face_centroid - cell_centroid);
-    const auto delta_max = std::abs(max_value - phi_upwind) + 1e-10;
-    const auto delta_min = std::abs(min_value - phi_upwind) + 1e-10;
+    const auto delta_max = abs(max_value - phi_upwind) + 1e-10;
+    const auto delta_min = abs(min_value - phi_upwind) + 1e-10;
 
-    const auto rf =
-        delta_face >= 0 ? std::abs(delta_face) / delta_max : std::abs(delta_face) / delta_min;
+    const auto rf = delta_face >= 0 ? abs(delta_face) / delta_max : abs(delta_face) / delta_min;
 
     return (2 * rf + 1.0) / (rf * (2 * rf + 1.0) + 1.0);
   }

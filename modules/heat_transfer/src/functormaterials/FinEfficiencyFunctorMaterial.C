@@ -45,13 +45,14 @@ FinEfficiencyFunctorMaterialTempl<is_ad>::FinEfficiencyFunctorMaterialTempl(
       getParam<MooseFunctorName>("fin_efficiency_name"),
       [this](const auto & r, const auto & t) -> GenericReal<is_ad>
       {
+        using std::sqrt, std::tanh;
         const auto htc = _htc(r, t);
         const auto k = _k(r, t);
         const auto L = _L(r, t);
         const auto P_over_Ac = _P_over_Ac(r, t);
-        const auto m = std::sqrt(htc * P_over_Ac / k);
+        const auto m = sqrt(htc * P_over_Ac / k);
         const auto mL = m * L;
-        return std::tanh(mL) / mL;
+        return tanh(mL) / mL;
       });
 }
 

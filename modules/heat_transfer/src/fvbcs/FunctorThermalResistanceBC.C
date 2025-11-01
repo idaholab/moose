@@ -111,6 +111,8 @@ FunctorThermalResistanceBC::computeConductionResistance()
 ADReal
 FunctorThermalResistanceBC::computeQpResidual()
 {
+  using std::abs;
+
   // Evaluate material properties on the face
   const auto face_arg = singleSidedFaceArg();
 
@@ -147,7 +149,7 @@ FunctorThermalResistanceBC::computeQpResidual()
       // use the flux computed from the conduction half to update T_surface
       _T_surface = flux * _parallel_resistance + _T_ambient;
       _T_surface = _alpha * _T_surface + (1 - _alpha) * T_surface_previous;
-      norm = std::abs(_T_surface - T_surface_previous) / std::abs(T_surface_previous);
+      norm = abs(_T_surface - T_surface_previous) / abs(T_surface_previous);
 
       if (iteration == _max_iterations)
       {

@@ -146,6 +146,7 @@ namespace MathUtils
 {
 #define FactorizedRankTwoTensorOperatorMapBody(operator)                                           \
   {                                                                                                \
+    using std::log, std::exp, std::sqrt, std::cbrt, std::pow;                                      \
     std::vector<typename T::value_type> op_eigvals;                                                \
     for (const auto & eigval : A.eigvals())                                                        \
       op_eigvals.push_back(operator);                                                              \
@@ -174,6 +175,7 @@ namespace MathUtils
 
 #define FactorizedRankTwoTensorOperatorMapDerivativeBody(operator, derivative)                     \
   {                                                                                                \
+    using std::log, std::exp, std::sqrt, std::cbrt, std::pow;                                      \
     std::vector<typename T::value_type> op_eigvals, op_derivs;                                     \
     for (const auto & eigval : A.eigvals())                                                        \
     {                                                                                              \
@@ -235,26 +237,22 @@ namespace MathUtils
 // TODO: While the macros are here, in the future we could instantiate other operator maps like
 // trignometry functions.
 // @{
-FactorizedRankTwoTensorOperatorMapUnary(log, std::log(eigval));
-FactorizedRankTwoTensorOperatorMapDerivativeUnary(dlog, std::log(eigval), 1 / eigval);
+FactorizedRankTwoTensorOperatorMapUnary(log, log(eigval));
+FactorizedRankTwoTensorOperatorMapDerivativeUnary(dlog, log(eigval), 1 / eigval);
 
-FactorizedRankTwoTensorOperatorMapUnary(exp, std::exp(eigval));
-FactorizedRankTwoTensorOperatorMapDerivativeUnary(dexp, std::exp(eigval), std::exp(eigval));
+FactorizedRankTwoTensorOperatorMapUnary(exp, exp(eigval));
+FactorizedRankTwoTensorOperatorMapDerivativeUnary(dexp, exp(eigval), exp(eigval));
 
-FactorizedRankTwoTensorOperatorMapUnary(sqrt, std::sqrt(eigval));
-FactorizedRankTwoTensorOperatorMapDerivativeUnary(dsqrt,
-                                                  std::sqrt(eigval),
-                                                  std::pow(eigval, -1. / 2.) / 2.);
+FactorizedRankTwoTensorOperatorMapUnary(sqrt, sqrt(eigval));
+FactorizedRankTwoTensorOperatorMapDerivativeUnary(dsqrt, sqrt(eigval), pow(eigval, -1. / 2.) / 2.);
 
-FactorizedRankTwoTensorOperatorMapUnary(cbrt, std::cbrt(eigval));
-FactorizedRankTwoTensorOperatorMapDerivativeUnary(dcbrt,
-                                                  std::cbrt(eigval),
-                                                  std::pow(eigval, -2. / 3.) / 3.);
+FactorizedRankTwoTensorOperatorMapUnary(cbrt, cbrt(eigval));
+FactorizedRankTwoTensorOperatorMapDerivativeUnary(dcbrt, cbrt(eigval), pow(eigval, -2. / 3.) / 3.);
 
-FactorizedRankTwoTensorOperatorMapBinary(pow, std::pow(eigval, arg));
+FactorizedRankTwoTensorOperatorMapBinary(pow, pow(eigval, arg));
 FactorizedRankTwoTensorOperatorMapDerivativeBinary(dpow,
-                                                   std::pow(eigval, arg),
-                                                   arg * std::pow(eigval, arg - 1));
+                                                   pow(eigval, arg),
+                                                   arg * pow(eigval, arg - 1));
 // @}
 } // end namespace MathUtils
 

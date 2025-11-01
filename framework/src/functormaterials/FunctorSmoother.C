@@ -78,6 +78,7 @@ FunctorSmootherTempl<T>::FunctorSmootherTempl(const InputParameters & parameters
         {
           typename Moose::ADType<T>::type base_value = functor_in(r, t);
           typename Moose::ADType<T>::type average = 0;
+          using std::abs;
 
           const Elem * r_elem = nullptr;
           if constexpr (std::is_same_v<const Moose::ElemArg &, decltype(r)>)
@@ -161,11 +162,11 @@ FunctorSmootherTempl<T>::FunctorSmootherTempl(const InputParameters & parameters
                 {
                   num_neighbors++;
                   auto neighbor_value = functor_in(Moose::ElemArg{neighbor, false}, t);
-                  if (std::abs(neighbor_value - base_value) > delta)
+                  if (abs(neighbor_value - base_value) > delta)
                   {
                     furthest_one = side_index;
                     extreme_value = neighbor_value;
-                    delta = std::abs(neighbor_value - base_value);
+                    delta = abs(neighbor_value - base_value);
                   }
                 }
               }
@@ -204,10 +205,10 @@ FunctorSmootherTempl<T>::FunctorSmootherTempl(const InputParameters & parameters
                   auto neighbor = r_elem->neighbor_ptr(side_index);
                   auto neighbor_value =
                       neighbor ? functor_in(Moose::ElemArg{neighbor, false}, t) : base_value;
-                  if (std::abs(neighbor_value - base_value) > delta && side_index != furthest_one)
+                  if (abs(neighbor_value - base_value) > delta && side_index != furthest_one)
                   {
                     second_extreme_value = neighbor_value;
-                    delta = std::abs(neighbor_value - base_value);
+                    delta = abs(neighbor_value - base_value);
                   }
                 }
                 average += second_extreme_value / 4;

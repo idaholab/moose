@@ -58,5 +58,7 @@ GaussianEnergyFluxBC::beamFlux(const T & flux_obj, const PointType & flux_obj_lo
                                     flux_obj._z_beam_coord.value(flux_obj._t, origin)};
   const auto r = (flux_obj_location - beam_coords).norm();
   const auto R2 = flux_obj._R * flux_obj._R;
-  return -2 * flux_obj._P0 / (libMesh::pi * R2) * std::exp(-2 * r * r / R2);
+
+  using std::exp;
+  return -2 * flux_obj._P0 / (libMesh::pi * R2) * exp(-2 * r * r / R2);
 }

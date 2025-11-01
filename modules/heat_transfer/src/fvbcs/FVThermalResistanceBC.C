@@ -110,6 +110,8 @@ FVThermalResistanceBC::computeConductionResistance()
 ADReal
 FVThermalResistanceBC::computeQpResidual()
 {
+  using std::abs;
+
   // radiation resistance has to be solved iteratively, since we don't know the
   // surface temperature. We do know that the heat flux in the conduction layers
   // must match the heat flux in the parallel convection-radiation segment. For a
@@ -143,7 +145,7 @@ FVThermalResistanceBC::computeQpResidual()
       // use the flux computed from the conduction half to update T_surface
       _T_surface = flux * _parallel_resistance + _T_ambient;
       _T_surface = _alpha * _T_surface + (1 - _alpha) * T_surface_previous;
-      norm = std::abs(_T_surface - T_surface_previous) / std::abs(T_surface_previous);
+      norm = abs(_T_surface - T_surface_previous) / abs(T_surface_previous);
 
       if (iteration == _max_iterations)
       {

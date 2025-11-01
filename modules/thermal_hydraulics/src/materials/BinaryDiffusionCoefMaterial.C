@@ -56,8 +56,10 @@ BinaryDiffusionCoefMaterial::BinaryDiffusionCoefMaterial(const InputParameters &
 void
 BinaryDiffusionCoefMaterial::computeQpProperties()
 {
+  using std::sqrt, std::pow;
+
   const ADReal conc = _p[_qp] / (PhysicalConstants::boltzmann_constant * _T[_qp]);
   _diff_coef[_qp] =
-      1.0 / (libMesh::pi * std::pow(_collision_diam, 2) * conc) *
-      std::sqrt(2.0 * FluidProperties::_R * _T[_qp] / libMesh::pi * (1.0 / _M1 + 1.0 / _M2));
+      1.0 / (libMesh::pi * pow(_collision_diam, 2) * conc) *
+      sqrt(2.0 * FluidProperties::_R * _T[_qp] / libMesh::pi * (1.0 / _M1 + 1.0 / _M2));
 }

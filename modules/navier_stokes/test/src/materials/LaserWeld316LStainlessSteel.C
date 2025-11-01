@@ -54,13 +54,14 @@ LaserWeld316LStainlessSteel::validParams()
   params.addParam<MaterialPropertyName>("cp_name", "cp", "The name of the specific heat capacity");
   params.addParam<MaterialPropertyName>("rho_name", "rho", "The name of the density");
 
-  params.addParam<bool>("use_constant_density", true, "If a constant density should be used (would discard buoyancy effects)");
+  params.addParam<bool>("use_constant_density",
+                        true,
+                        "If a constant density should be used (would discard buoyancy effects)");
 
   return params;
 }
 
-LaserWeld316LStainlessSteel::LaserWeld316LStainlessSteel(
-    const InputParameters & parameters)
+LaserWeld316LStainlessSteel::LaserWeld316LStainlessSteel(const InputParameters & parameters)
   : Material(parameters),
     _c_mu0(getParam<Real>("c_mu0")),
     _c_mu1(getParam<Real>("c_mu1")),
@@ -96,15 +97,17 @@ LaserWeld316LStainlessSteel::LaserWeld316LStainlessSteel(
 void
 LaserWeld316LStainlessSteel::computeQpProperties()
 {
+  using std::exp, std::max;
+
   ADReal That = _temperature[_qp] > _Tmax ? _Tmax : _temperature[_qp];
   // First we check if it is enough to compute the solid properties only
   if (_temperature[_qp] < _Ts)
   {
     // We are using an enormous viscosity for the solid phase to prevent it from moving.
     // This approach was coined in:
-    // Noble, David R et al, Use of Aria to simulate laser weld pool dynamics for neutron generator production,
-    // 2007, Sandia National Laboratories (SNL), Albuquerque, NM, and Livermore, CA
-    _mu[_qp] = 1e11 * 1e-3 * std::exp(_c_mu0 / That - _c_mu1);
+    // Noble, David R et al, Use of Aria to simulate laser weld pool dynamics for neutron generator
+    // production, 2007, Sandia National Laboratories (SNL), Albuquerque, NM, and Livermore, CA
+    _mu[_qp] = 1e11 * 1e-3 * exp(_c_mu0 / That - _c_mu1);
     _k[_qp] =
         _c_k0_s + _c_k1_s * _temperature[_qp] + _c_k2_s * _temperature[_qp] * _temperature[_qp];
     _grad_k[_qp] = _c_k1_s * _grad_temperature[_qp];
@@ -116,9 +119,9 @@ LaserWeld316LStainlessSteel::computeQpProperties()
   {
     // This contains an artifically large lower viscosity at this point, to make sure
     // the fluid simulations are stable. This viscosity is still below the one used in:
-    // Noble, David R et al, Use of Aria to simulate laser weld pool dynamics for neutron generator production,
-    // 2007, Sandia National Laboratories (SNL), Albuquerque, NM, and Livermore, CA
-    const auto mu_l = std::max(0.030, 1e-3 * std::exp(_c_mu0 / That - _c_mu1));
+    // Noble, David R et al, Use of Aria to simulate laser weld pool dynamics for neutron generator
+    // production, 2007, Sandia National Laboratories (SNL), Albuquerque, NM, and Livermore, CA
+    const auto mu_l = max(0.030, 1e-3 * exp(_c_mu0 / That - _c_mu1));
     const auto k_l =
         _c_k0_l + _c_k1_l * _temperature[_qp] + _c_k2_l * _temperature[_qp] * _temperature[_qp];
     const auto grad_k_l = _c_k1_l * _grad_temperature[_qp];
@@ -132,7 +135,7 @@ LaserWeld316LStainlessSteel::computeQpProperties()
     {
       const auto liquid_fraction = (_temperature[_qp] - _Ts) / (_Tl - _Ts);
 
-      const auto mu_s = 1e11 * 1e-3 * std::exp(_c_mu0 / That - _c_mu1);
+      const auto mu_s = 1e11 * 1e-3 * exp(_c_mu0 / That - _c_mu1);
       const auto k_s =
           _c_k0_s + _c_k1_s * _temperature[_qp] + _c_k2_s * _temperature[_qp] * _temperature[_qp];
       const auto grad_k_s = _c_k1_s * _grad_temperature[_qp];
@@ -158,6 +161,5 @@ LaserWeld316LStainlessSteel::computeQpProperties()
 
   // If we use constant density we override it with the density at the liquidus line
   if (_use_constant_density)
-    _rho[_qp] = _c_rho0_l + _c_rho1_l * _Tl +
-                       _c_rho2_l * _Tl * _Tl;
+    _rho[_qp] = _c_rho0_l + _c_rho1_l * _Tl + _c_rho2_l * _Tl * _Tl;
 }

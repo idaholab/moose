@@ -75,10 +75,12 @@ template <bool is_ad>
 void
 PorousFlowThermalConductivityIdealTempl<is_ad>::computeQpProperties()
 {
+  using std::pow;
+
   _la_qp[_qp] = _la_dry;
   if (_aqueous_phase && _wet_and_dry_differ)
     _la_qp[_qp] +=
-        std::pow((*_saturation_qp)[_qp][_aqueous_phase_number], _exponent) * (_la_wet - _la_dry);
+        pow((*_saturation_qp)[_qp][_aqueous_phase_number], _exponent) * (_la_wet - _la_dry);
 
   if constexpr (!is_ad)
   {
@@ -86,7 +88,7 @@ PorousFlowThermalConductivityIdealTempl<is_ad>::computeQpProperties()
     if (_aqueous_phase && _wet_and_dry_differ)
       for (const auto v : make_range(_num_var))
         (*_dla_qp_dvar)[_qp][v] =
-            _exponent * std::pow((*_saturation_qp)[_qp][_aqueous_phase_number], _exponent - 1.0) *
+            _exponent * pow((*_saturation_qp)[_qp][_aqueous_phase_number], _exponent - 1.0) *
             (*_dsaturation_qp_dvar)[_qp][_aqueous_phase_number][v] * (_la_wet - _la_dry);
   }
 }

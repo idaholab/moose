@@ -58,12 +58,14 @@ public:
           const bool & /*fi_elem_is_upwind */) const override final
   {
     mooseAssert(grad_phi_upwind, "SOU limiter requires a gradient");
+    using std::abs;
+    using std::min;
 
-    T delta_face = std::abs((*grad_phi_upwind) * dCD);
-    T delta_max = std::abs(max_value - min_value);
+    T delta_face = abs((*grad_phi_upwind) * dCD);
+    T delta_max = abs(max_value - min_value);
 
     if (delta_face > 1e-10)
-      return std::min(1.0, delta_max / delta_face);
+      return min(1.0, delta_max / delta_face);
     else
       return T(1.0);
   }

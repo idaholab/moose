@@ -74,6 +74,7 @@ WCNSFV2PInterfaceAreaSourceSink::WCNSFV2PInterfaceAreaSourceSink(const InputPara
 ADReal
 WCNSFV2PInterfaceAreaSourceSink::computeQpResidual()
 {
+  using std::max, std::pow, std::exp, std::sqrt;
 
   // Useful Arguments
   const auto state = determineState();
@@ -89,7 +90,7 @@ WCNSFV2PInterfaceAreaSourceSink::computeQpResidual()
   const auto f_d = _f_d(elem_arg, state);
   const auto sigma = _sigma(elem_arg, state);
   const auto rho_l = (rho_m - f_d * rho_d) / (1.0 - f_d + libMesh::TOLERANCE);
-  const auto complement_fd = std::max(_f_d_max - f_d, libMesh::TOLERANCE);
+  const auto complement_fd = max(_f_d_max - f_d, libMesh::TOLERANCE);
   const auto f_d_o_xi = f_d / (_var(elem_arg, state) + libMesh::TOLERANCE) + libMesh::TOLERANCE;
   const auto f_d_o_xi_old =
       f_d / (raw_value(_var(elem_arg, state)) + libMesh::TOLERANCE) + libMesh::TOLERANCE;
@@ -133,21 +134,20 @@ WCNSFV2PInterfaceAreaSourceSink::computeQpResidual()
       MooseUtils::isZero(pressure_gradient) ? 1e-42 : pressure_gradient.norm();
 
   const auto u_eps =
-      std::pow(velocity_norm * _characheristic_length(elem_arg, state) * pressure_grad_norm / rho_m,
-               1. / 3.);
+      pow(velocity_norm * _characheristic_length(elem_arg, state) * pressure_grad_norm / rho_m,
+          1. / 3.);
 
   const auto interaction_prefactor =
-      Utility::pow<2>(f_d_o_xi) * u_eps / (std::pow(db, 11. / 3.) / complement_fd);
+      Utility::pow<2>(f_d_o_xi) * u_eps / (pow(db, 11. / 3.) / complement_fd);
 
   // Adding coalescence term
   const auto f_c = interaction_prefactor * _gamma_c * Utility::pow<2>(f_d);
-  const auto exp_c = std::exp(-_Kc * std::pow(db, 5. / 6.) * std::sqrt(rho_l / sigma) * u_eps);
+  const auto exp_c = exp(-_Kc * pow(db, 5. / 6.) * sqrt(rho_l / sigma) * u_eps);
   const auto s_rc = f_c * exp_c;
 
   // Adding breakage term
   const auto f_b = interaction_prefactor * _gamma_b * f_d * (1. - f_d);
-  const auto exp_b =
-      std::exp(-_Kb * sigma / (rho_l * std::pow(db, 5. / 3.) * Utility::pow<2>(u_eps)));
+  const auto exp_b = exp(-_Kb * sigma / (rho_l * pow(db, 5. / 3.) * Utility::pow<2>(u_eps)));
   const auto s_rb = f_b * exp_b;
 
   return -bubble_added_mass + bubble_compressibility + s_rc - s_rb;
