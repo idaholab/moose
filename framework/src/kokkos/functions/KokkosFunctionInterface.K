@@ -30,6 +30,11 @@ FunctionInterface::getKokkosFunction(const std::string & name) const
 Moose::Kokkos::Function
 FunctionInterface::getKokkosFunctionByName(const FunctionName & name) const
 {
+#ifdef MOOSE_ENABLE_KOKKOS_GPU
+  _fni_object.mooseError(
+      "Retrieving a Kokkos function as abstract type is currently not supported for GPU.");
+#endif
+
   if (!_fni_object.isKokkosObject())
     _fni_object.mooseError("Attempted to retrieve a Kokkos function from a non-Kokkos object.");
 

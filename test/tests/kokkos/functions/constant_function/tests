@@ -7,6 +7,6 @@
     exodiff = 'kokkos_constant_function_out.e'
     requirement = 'The Kokkos function system shall include a constant function.'
     capabilities = 'kokkos'
-    compute_devices = 'cpu cuda'
+    compute_devices = 'cpu'
   []
 []
