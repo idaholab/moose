@@ -162,6 +162,7 @@ GaussianProcess::tuneHyperParamsAdam(const RealEigenMatrix & training_params,
   Real b1 = opts.b1;
   Real b2 = opts.b2;
   Real eps = opts.eps;
+  static constexpr Real lambda = 1e-4;
 
   std::vector<Real> m0(_num_tunable, 0.0);
   std::vector<Real> v0(_num_tunable, 0.0);
@@ -211,7 +212,9 @@ GaussianProcess::tuneHyperParamsAdam(const RealEigenMatrix & training_params,
             b2 * v0[global_index] + (1 - b2) * grad1[global_index] * grad1[global_index];
         m_hat = m0[global_index] / (1 - std::pow(b1, (ss + 1)));
         v_hat = v0[global_index] / (1 - std::pow(b2, (ss + 1)));
-        new_val = theta[global_index] - opts.learning_rate * m_hat / (std::sqrt(v_hat) + eps);
+        new_val =
+            theta[global_index] - 1.0 * (opts.learning_rate * m_hat / (std::sqrt(v_hat) + eps) +
+                                         lambda * theta[global_index]);
 
         const auto min_value = std::get<2>(iter->second);
         const auto max_value = std::get<3>(iter->second);
@@ -227,6 +230,14 @@ GaussianProcess::tuneHyperParamsAdam(const RealEigenMatrix & training_params,
     Moose::out << "OPTIMIZED GP HYPER-PARAMETERS:" << std::endl;
     Moose::out << Moose::stringify(theta) << std::endl;
     Moose::out << "FINAL LOSS: " << store_loss << std::endl;
+  }
+
+  if (theta.size() > 0)
+  {
+    unsigned int count = 1;
+    _length_scales.resize(_num_tunable - count);
+    for (unsigned int i = 0; i < _num_tunable - count; ++i)
+      _length_scales[i] = theta[i + 1];
   }
 }
 

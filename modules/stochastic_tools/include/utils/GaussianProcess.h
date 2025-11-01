@@ -193,6 +193,7 @@ public:
   {
     return _hyperparam_vec_map;
   }
+  const std::vector<Real> & getLengthScales() const { return _length_scales; }
   ///@}
 
   /// @{
@@ -221,6 +222,7 @@ public:
   {
     return _hyperparam_vec_map;
   }
+  std::vector<Real> & lengthScales() { return _length_scales; }
   ///@}
 
 protected:
@@ -277,6 +279,9 @@ protected:
 
   /// The batch size for Adam optimization
   unsigned int _batch_size;
+
+  /// To return the GP length scales for active learning
+  std::vector<Real> _length_scales;
 };
 
 } // StochasticTools namespac
