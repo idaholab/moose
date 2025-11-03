@@ -21,6 +21,7 @@ from TestHarness.resultsstore.auth import (
     load_authentication,
 )
 from TestHarness.resultsstore.storedresults import StoredResult, StoredTestResult
+from TestHarness.resultsstore.utils import TestName
 
 NoneType = type(None)
 
@@ -143,8 +144,7 @@ class ResultsReader:
 
     def getTestResults(
         self,
-        folder_name: str,
-        test_name: str,
+        name: TestName,
         limit: int = 50,
         pr_num: Optional[int] = None,
     ) -> list[StoredTestResult]:
@@ -152,8 +152,7 @@ class ResultsReader:
         Get the StoredTestResults given a specific test.
 
         Args:
-            folder_name: The folder name for the test
-            test_name: The test name for the test
+            name: The combined name for the test
         Optional args:
             limit: The limit in the number of results to get
             pr_num: A pull request to also pull from
@@ -164,16 +163,18 @@ class ResultsReader:
         # Append the PR result at the top, if any
         if pr_num is not None:
             pr_result = self.getPRResults(pr_num)
-            if pr_result is not None and pr_result.has_test(folder_name, test_name):
-                test_results.append(pr_result.get_test(folder_name, test_name))
+            if (
+                pr_result is not None
+                and (test := pr_result.query_test(name)) is not None
+            ):
+                test_results.append(test)
 
         # Get the event results, limited to limit or
         # (limit - 1) if we have a PR
         num = limit - len(test_results)
         for result in self.iterateLatestPushResults(num):
-            if result.has_test(folder_name, test_name):
-                test_result = result.get_test(folder_name, test_name)
-                test_results.append(test_result)
+            if (test := result.query_test(name)) is not None:
+                test_results.append(test)
             if len(test_results) == limit:
                 break
 

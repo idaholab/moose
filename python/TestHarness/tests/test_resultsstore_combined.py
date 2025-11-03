@@ -138,9 +138,7 @@ class TestResultsStoreCombined(TestHarnessTestCase):
             # Get by test results with a PR option, from which the
             # first one should be the one from the PR
             test_reader = ResultsReader(TEST_DATABASE)
-            test_results = test_reader.getTestResults(
-                TEST_NAME.folder, TEST_NAME.name, limit=1, pr_num=pr_num
-            )
+            test_results = test_reader.getTestResults(TEST_NAME, limit=1, pr_num=pr_num)
             self.assertEqual(len(test_results), 1)
             test_result = test_results[0]
             self.assertEqual(test_result.name, TEST_NAME)
@@ -188,9 +186,7 @@ class TestResultsStoreCombined(TestHarnessTestCase):
             # Test getTestResults(); same issue with python
             # tests sharing a database here too
             test_reader = ResultsReader(TEST_DATABASE)
-            test_results = test_reader.getTestResults(
-                TEST_NAME.folder, TEST_NAME.name, limit=50
-            )
+            test_results = test_reader.getTestResults(TEST_NAME, limit=50)
             find_test_result = [r for r in test_results if r.result_id == result_id]
             self.assertEqual(len(find_test_result), 1)
             this_test_result = find_test_result[0]

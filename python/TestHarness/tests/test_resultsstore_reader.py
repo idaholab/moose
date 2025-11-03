@@ -183,9 +183,7 @@ class TestResultsReader(unittest.TestCase):
         self, reader: ResultsReader, **kwargs
     ) -> list[StoredTestResult]:
         """Runner for testing getTestResults()."""
-        results = reader.getTestResults(
-            PROD_TEST_NAME.folder, PROD_TEST_NAME.name, **kwargs
-        )
+        results = reader.getTestResults(PROD_TEST_NAME, **kwargs)
 
         last_id = None
         last_time = None
@@ -422,9 +420,7 @@ class TestResultsReader(unittest.TestCase):
 
         with ResultsReader(TEST_DATABASE_NAME) as ctx:
             reader = ctx.reader
-            results = reader.getTestResults(
-                TEST_TEST_NAME.folder, TEST_TEST_NAME.name, pr_num=pr_num
-            )
+            results = reader.getTestResults(TEST_TEST_NAME, pr_num=pr_num)
         self.assertGreater(len(results), 0)
 
         # Make sure we have the right test

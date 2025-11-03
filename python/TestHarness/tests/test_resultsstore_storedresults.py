@@ -339,24 +339,25 @@ class TestResultsStoredResults(TestHarnessTestCase):
         self.assertEqual(result.num_tests, len(test_data))
 
         for name, data in test_data.items():
-            self.assertTrue(result.has_test(name.folder, name.name))
+            self.assertTrue(result.has_test(name))
             self.assertIsInstance(results_test_entry(result.data, name), ObjectId)
 
             # Loads from cache
-            test_result = result.get_test(name.folder, name.name)
+            test_result = result.get_test(name)
             self.assertEqual(result._tests[name], test_result)
 
             # Exists in cache
-            self.assertEqual(test_result, result.get_test(name.folder, name.name))
+            self.assertEqual(test_result, result.get_test(name))
 
     def testGetTestNotStored(self):
         """Test TestHarnessResult.[have_test, get_test]() on a non-stored test."""
         built_result = self.buildResult()
         results = built_result.results
 
-        self.assertFalse(results.has_test("foo", "bar"))
-        with self.assertRaisesRegex(KeyError, 'Test "foo.bar" does not exist'):
-            results.get_test("foo", "bar")
+        name = TestName("foo", "bar")
+        self.assertFalse(results.has_test(name))
+        with self.assertRaisesRegex(KeyError, f'Test "{name}" does not exist'):
+            results.get_test(name)
 
     @patch.object(StoredResult, "_find_test_data")
     def testGetTestMissingDatabase(self, patch_find_test_data):
@@ -371,7 +372,7 @@ class TestResultsStoredResults(TestHarnessTestCase):
             with self.assertRaisesRegex(
                 DatabaseException, f"Database missing tests._id={id}"
             ):
-                results.get_test(name.folder, name.name)
+                results.get_test(name)
 
     @patch.object(StoredTestResult, "__init__")
     def testBuildTestException(self, patch_init):

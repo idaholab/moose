@@ -554,22 +554,20 @@ class StoredResult:
         """Get the combined names of all tests."""
         return [v.name for v in results_test_iterator(self.data)]
 
-    def has_test(self, folder_name: str, test_name: str) -> bool:
+    def has_test(self, name: TestName) -> bool:
         """
         Whether or not a test with the given folder and test name is stored.
 
         Parameters
         ----------
-        folder_name : str
-            The name of the folder for the test
-        test_name : str
-            The name of the test
+        name : TestName
+            The combined name of the test.
 
         """
-        assert isinstance(folder_name, str)
-        assert isinstance(test_name, str)
+        assert isinstance(name, TestName)
 
-        name = TestName(folder_name, test_name)
+        if name in self._tests:
+            return True
         return results_has_test(self.data, name)
 
     def _find_test_data(self, id: ObjectId) -> Optional[dict]:
@@ -605,21 +603,17 @@ class StoredResult:
             id = data.get("_id")
             raise ValueError(f"Failed to build test result id={id}") from e
 
-    def get_test(self, folder_name: str, test_name: str) -> StoredTestResult:
+    def query_test(self, name: TestName) -> Optional[StoredTestResult]:
         """
-        Get the test result associated with the given folder and name.
+        Query a test result with the given combined name.
 
         Parameters
         ----------
-        folder_name : str
-            The name of the folder for the test
-        test_name : str
-            The name of the test
+        name : str
+            The combined name of the test.
 
         """
-        assert isinstance(folder_name, str)
-        assert isinstance(test_name, str)
-        name = TestName(folder_name, test_name)
+        assert isinstance(name, TestName)
 
         # Search for the data in the cache
         value = self._tests.get(name)
@@ -632,8 +626,9 @@ class StoredResult:
         for entry in results_test_iterator(self.data):
             if entry.name == name:
                 test_entry = entry.value
+                break
         if test_entry is None:
-            raise KeyError(f'Test "{name}" does not exist')
+            return None
 
         # Pull from database
         if isinstance(test_entry, ObjectId):
@@ -649,6 +644,20 @@ class StoredResult:
         self._tests[name] = test_result
 
         return test_result
+
+    def get_test(self, name: TestName) -> StoredTestResult:
+        """
+        Get a test result with the given combined name.
+
+        Parameters
+        ----------
+        name : str
+            The combined name of the test.
+
+        """
+        if (test := self.query_test(name)) is not None:
+            return test
+        raise KeyError(f'Test "{name}" does not exist')
 
     def _find_tests_data(self, ids: list[ObjectId]) -> list[dict]:
         """
