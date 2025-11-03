@@ -742,6 +742,10 @@ class StoredResult:
         # Convert ObjectID to string id
         data["_id"] = str(data["_id"])
 
+        # Whether or not tests have time, which existed
+        # before civet version for
+        tests_have_time = self.civet_version < 4
+
         for folder in results_folder_iterator(data):
             for test in folder.test_iterator():
                 # Filter and not in the filter
@@ -767,8 +771,7 @@ class StoredResult:
                     for k, v in json_metadata.items():
                         json_metadata[k] = decompress_dict(v)
 
-                    # Time entry existed before civet version 4
-                    if self.civet_version < 4:
+                    if tests_have_time:
                         test_data["time"] = str(test_data["time"])
 
                     test.set_value(test_data)
