@@ -36,6 +36,7 @@
     cli_args = 'FESpaces/inactive=""
                AuxVariables/inactive="" 
                AuxKernels/inactive="" 
+               Solver/l_tol=1e-11
                Outputs/ParaViewDataCollection/file_base=OutputData/InnerProduct'
     xmldiff = 'OutputData/InnerProduct/Run0/Run0.pvd
                 OutputData/InnerProduct/Run0/Cycle000001/proc000000.vtu'
