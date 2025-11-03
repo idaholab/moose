@@ -77,8 +77,8 @@
     [cross]
         type = MFEMCrossProductAux
         variable = lorentz_force
-        u = e_field
-        v = b_field
+        first_source_vec = e_field
+        second_source_vec = b_field
         scale_factor = 1
         execute_on = TIMESTEP_END
     []

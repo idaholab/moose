@@ -62,8 +62,8 @@
   [joule_Q_aux]
     type = MFEMDotProductAux
     variable = joule_heating
-    u = e_field
-    v = e_field
+    first_source_vec = e_field
+    second_source_vec = e_field
     scale_factor = 1.0
     execute_on = TIMESTEP_END
   []

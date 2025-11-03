@@ -17,8 +17,8 @@
  * Project s(x) * (U . V) onto a scalar MFEM auxvariable.
  *
  * Parameters:
- *   - u (VariableName): vector MFEM variable U
- *   - v (VariableName): vector MFEM variable V
+ *   - first_source_vec (VariableName): vector MFEM variable U
+ *   - second_source_vec (VariableName): vector MFEM variable V
  *   - scale_factor (mfem::real_t, default=1.0): constant multiplier
  *   - scale_variable (VariableName, optional): scalar MFEM variable s(x)
  */

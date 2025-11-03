@@ -19,19 +19,17 @@ MFEMDotProductAux::validParams()
 {
   InputParameters params = MFEMAuxKernel::validParams();
   params.addClassDescription("Project s(x) * (U . V) onto a scalar MFEM auxvariable.");
-  params.addRequiredParam<VariableName>("u", "Vector MFEMVariable U");
-  params.addRequiredParam<VariableName>("v", "Vector MFEMVariable V");
+  params.addRequiredParam<VariableName>("first_source_vec", "Vector MFEMVariable U");
+  params.addRequiredParam<VariableName>("second_source_vec", "Vector MFEMVariable V");
   params.addParam<mfem::real_t>(
       "scale_factor", 1.0, "Constant multiplier applied to the dot product");
-  // params.addParam<VariableName>("scale_variable", "Optional scalar MFEMVariable s(x) to multiply
-  // the dot product.");
   return params;
 }
 
 MFEMDotProductAux::MFEMDotProductAux(const InputParameters & parameters)
   : MFEMAuxKernel(parameters),
-    _u_var_name(getParam<VariableName>("u")),
-    _v_var_name(getParam<VariableName>("v")),
+    _u_var_name(getParam<VariableName>("first_source_vec")),
+    _v_var_name(getParam<VariableName>("second_source_vec")),
     _u_var(*getMFEMProblem().getProblemData().gridfunctions.Get(_u_var_name)),
     _v_var(*getMFEMProblem().getProblemData().gridfunctions.Get(_v_var_name)),
     _scale_factor(getParam<mfem::real_t>("scale_factor")),
@@ -55,14 +53,6 @@ MFEMDotProductAux::MFEMDotProductAux(const InputParameters & parameters)
 void
 MFEMDotProductAux::execute()
 {
-  // Build coefficient s(x) * (U . V)
-  // mfem::VectorGridFunctionCoefficient Ucoef(&_u_var);
-  // mfem::VectorGridFunctionCoefficient Vcoef(&_v_var);
-  // mfem::InnerProductCoefficient dot_uv(Ucoef, Vcoef);
-
-  // mfem::ConstantCoefficient ccoef(_scale_factor);
-  // mfem::ProductCoefficient final_coef(ccoef, dot_uv);
-
   // Project into the scalar aux result variable per element projection for L2
   _result_var = 0.0;
   _result_var.ProjectCoefficient(_final_coef);

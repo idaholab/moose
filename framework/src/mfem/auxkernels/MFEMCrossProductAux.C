@@ -20,8 +20,8 @@ MFEMCrossProductAux::validParams()
 {
   InputParameters params = MFEMAuxKernel::validParams();
   params.addClassDescription("Projects s(x) * (U x V) onto a vector MFEM auxvariable");
-  params.addRequiredParam<VariableName>("u", "Vector MFEMVariable U (vdim=3)");
-  params.addRequiredParam<VariableName>("v", "Vector MFEMVariable V (vdim=3)");
+  params.addRequiredParam<VariableName>("first_source_vec", "Vector MFEMVariable U (vdim=3)");
+  params.addRequiredParam<VariableName>("second_source_vec", "Vector MFEMVariable V (vdim=3)");
   params.addParam<mfem::real_t>(
       "scale_factor", 1.0, "Constant multiplier applied to the cross product");
   return params;
@@ -29,8 +29,8 @@ MFEMCrossProductAux::validParams()
 
 MFEMCrossProductAux::MFEMCrossProductAux(const InputParameters & parameters)
   : MFEMAuxKernel(parameters),
-    _u_var_name(getParam<VariableName>("u")),
-    _v_var_name(getParam<VariableName>("v")),
+    _u_var_name(getParam<VariableName>("first_source_vec")),
+    _v_var_name(getParam<VariableName>("second_source_vec")),
     _u_var(*getMFEMProblem().getProblemData().gridfunctions.Get(_u_var_name)),
     _v_var(*getMFEMProblem().getProblemData().gridfunctions.Get(_v_var_name)),
     _scale_factor(getParam<mfem::real_t>("scale_factor")),
@@ -38,7 +38,7 @@ MFEMCrossProductAux::MFEMCrossProductAux(const InputParameters & parameters)
     _v_coef(&_v_var),
     _cross_uv(_u_coef, _v_coef),
     _scale_c(_scale_factor),
-    _final_vec(_scale_c, _cross_uv)
+    _final_coef(_scale_c, _cross_uv)
 {
   // // Must be vector L2 with interior DOFs
   mfem::ParFiniteElementSpace * fes = _result_var.ParFESpace();
@@ -75,7 +75,7 @@ MFEMCrossProductAux::execute()
 
   // MFEM element projection for L2
   _result_var = 0.0;
-  _result_var.ProjectCoefficient(_final_vec);
+  _result_var.ProjectCoefficient(_final_coef);
 }
 
 #endif // MOOSE_MFEM_ENABLED

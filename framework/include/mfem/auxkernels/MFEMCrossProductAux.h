@@ -18,8 +18,8 @@
  *
  * Parameters:
  *   - variable (AuxVariableName, required): AuxVariable name (inherited)
- *   - u (VariableName, required): vector MFEM variable U (vdim = 3)
- *   - v (VariableName, required): vector MFEM variable V (vdim = 3)
+ *   - first_source_vec (VariableName, required): vector MFEM variable U (vdim = 3)
+ *   - second_source_vec (VariableName, required): vector MFEM variable V (vdim = 3)
  *   - scale_factor (mfem::real_t, default=1.0): constant multiplier s(x)=scale_factor
  *
  * Notes:
@@ -51,7 +51,7 @@ protected:
   mfem::VectorGridFunctionCoefficient _v_coef;
   mfem::VectorCrossProductCoefficient _cross_uv;
   mfem::ConstantCoefficient _scale_c;
-  mfem::ScalarVectorProductCoefficient _final_vec; // coef suffix !!
+  mfem::ScalarVectorProductCoefficient _final_coef; // coef suffix !!
 
   // Constant multiplier
   // const mfem::real_t _scale_factor;

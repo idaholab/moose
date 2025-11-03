@@ -44,8 +44,6 @@
     issues = '#31613'
     requirement = 'The system shall have the ability to project the inner product of two gridfunctions onto an MFEM auxvariable'
     capabilities = 'mfem'
-    abs_zero = 3.5e-7
-    rel_err = 2.5e-3
     compute_devices = 'cpu cuda'
     max_parallel = 1 # schemadiff with multiple ranks
     recover = false
