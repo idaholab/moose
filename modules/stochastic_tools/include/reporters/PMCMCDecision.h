@@ -102,7 +102,7 @@ protected:
   const Distribution * _var_prior;
 
   /// Transfer the right outputs to the file
-  std::vector<Real> & _outputs_required;
+  std::vector<Real> * _outputs_required;
 
   /// Storage for the number of experimental configuration values
   dof_id_type _num_confg_values;

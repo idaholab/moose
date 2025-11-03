@@ -30,7 +30,7 @@ protected:
   virtual void setupGPData(const std::vector<Real> & data_out,
                            const DenseMatrix<Real> & data_in) override;
 
-  virtual void computeConvergenceValue() override;
+  virtual Real computeConvergenceValue() override;
 
   virtual void evaluateGPTest() override;
 
@@ -43,6 +43,9 @@ private:
    * @param data_out The data vector containing the outputs from subApp evaluations
    */
   void computeLogLikelihood(const std::vector<Real> & data_out);
+
+  /// The base sampler
+  Sampler & _sampler;
 
   /// Bayesian Active Learning Sampler
   const BayesianActiveLearningSampler * const _bayes_al_sampler;

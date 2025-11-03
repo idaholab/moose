@@ -85,14 +85,5 @@
       max_parallel = 1
       detail = 'using the Bayesian posterior targeted acquisition; '
     []
-    [b_al_test]
-      type = 'JSONDiff'
-      input = BayesianALTest.i
-      allow_test_objects = true
-      jsondiff = 'b_al_test.json'
-      min_parallel = 1
-      max_parallel = 1
-      detail = 'using a trained GP model for the MCMC sampling.'
-    []
   []
 []

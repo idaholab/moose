@@ -27,6 +27,7 @@ BayesianActiveLearner::validParams()
 BayesianActiveLearner::BayesianActiveLearner(const InputParameters & parameters)
   : GenericActiveLearner(parameters),
     LikelihoodInterface(parameters),
+    _sampler(getSampler("sampler")),
     _bayes_al_sampler(dynamic_cast<const BayesianActiveLearningSampler *>(&_sampler)),
     _new_var_samples(_bayes_al_sampler->getVarSamples()),
     _var_prior(_bayes_al_sampler->getVarPrior()),
@@ -53,15 +54,6 @@ BayesianActiveLearner::BayesianActiveLearner(const InputParameters & parameters)
 
   // Resize the log-likelihood vector to the number of parallel proposals
   _log_likelihood.resize(_props);
-
-  // Setting up the variable sizes to facilitate active learning
-  _inputs_test = _bayes_al_sampler->getSampleTries();
-  _gp_outputs_test.resize(_inputs_test.size());
-  _gp_std_test.resize(_inputs_test.size());
-  _acquisition_value.resize(_props);
-  _eval_outputs_current.resize(_props);
-  _generic.resize(1);
-  _sorted_indices.resize(_props);
 }
 
 void
@@ -70,6 +62,15 @@ BayesianActiveLearner::initialize()
   // Check whether the selected sampler is BayesianActiveLearningSampler or not
   if (!_bayes_al_sampler)
     paramError("sampler", "The selected sampler is not of type BayesianActiveLearningSampler.");
+
+  // Setting up the variable sizes to facilitate active learning
+  _gp_outputs_test.resize(_inputs_test.size());
+  _gp_std_test.resize(_inputs_test.size());
+  _acquisition_value.resize(_props);
+  _eval_outputs_current.resize(_props);
+  _generic.resize(1);
+  _sorted_indices.resize(_props);
+  _inputs_test = _bayes_al_sampler->getSampleTries();
 }
 
 void
@@ -88,7 +89,7 @@ BayesianActiveLearner::setupGPData(const std::vector<Real> & data_out,
       tmp[j] = data_in(i, j);
     if (_var_prior)
       tmp[_n_dim] = _new_var_samples[i];
-    if (_log_likelihood[i] == _log_likelihood[i])
+    if (!std::isnan(_log_likelihood[i]))
     {
       _gp_inputs.push_back(tmp);
       _gp_outputs.push_back(_log_likelihood[i]);
@@ -115,19 +116,21 @@ BayesianActiveLearner::computeLogLikelihood(const std::vector<Real> & data_out)
   }
 }
 
-void
+Real
 BayesianActiveLearner::computeConvergenceValue()
 {
+  Real convergence_value = 0.0;
   unsigned int num_valid = 0;
   for (unsigned int ii = 0; ii < _props; ++ii)
   {
-    if (_log_likelihood[ii] == _log_likelihood[ii])
+    if (!std::isnan(_log_likelihood[ii]))
     {
-      _convergence_value += Utility::pow<2>(_log_likelihood[ii] - _eval_outputs_current[ii]);
+      convergence_value += Utility::pow<2>(_log_likelihood[ii] - _eval_outputs_current[ii]);
       ++num_valid;
     }
   }
-  _convergence_value = std::sqrt(_convergence_value) / num_valid;
+  convergence_value = std::sqrt(convergence_value) / num_valid;
+  return convergence_value;
 }
 
 void

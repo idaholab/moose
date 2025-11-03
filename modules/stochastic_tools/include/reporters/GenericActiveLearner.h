@@ -52,7 +52,7 @@ protected:
   /**
    * Computes the convergence value during active learning
    */
-  virtual void computeConvergenceValue();
+  virtual Real computeConvergenceValue();
 
   /**
    * Evaluate the GP on all the test samples sent by the Sampler
@@ -123,9 +123,6 @@ protected:
 
   /// Ensure that the MCMC algorithm proceeds in a sequential fashion
   int _check_step;
-
-  /// Communicator that was split based on samples that have rows
-  libMesh::Parallel::Communicator & _local_comm;
 
   /// Storage for the GP re-training inputs
   std::vector<std::vector<Real>> _gp_inputs;

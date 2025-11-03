@@ -63,8 +63,7 @@ GenericActiveLearner::GenericActiveLearner(const InputParameters & parameters)
     _convergence_value(declareValue<Real>("convergence_value")),
     _inputs_required(declareValue<std::vector<std::vector<Real>>>("inputs")),
     _penalize_acquisition(getParam<bool>("penalize_acquisition")),
-    _check_step(std::numeric_limits<int>::max()),
-    _local_comm(_sampler.getLocalComm())
+    _check_step(std::numeric_limits<int>::max())
 {
 }
 
@@ -140,12 +139,14 @@ GenericActiveLearner::getAcquisition(std::vector<Real> & acq_new,
         acq_new, indices, acq, _length_scales, _inputs_test_modified);
 }
 
-void
+Real
 GenericActiveLearner::computeConvergenceValue()
 {
+  Real convergence_value = 0.0;
   for (unsigned int ii = 0; ii < _output_comm.size(); ++ii)
-    _convergence_value += Utility::pow<2>(_output_comm[ii] - _eval_outputs_current[ii]);
-  _convergence_value = std::sqrt(_convergence_value) / _output_comm.size();
+    convergence_value += Utility::pow<2>(_output_comm[ii] - _eval_outputs_current[ii]);
+  convergence_value = std::sqrt(convergence_value) / _output_comm.size();
+  return convergence_value;
 }
 
 void
@@ -171,9 +172,9 @@ GenericActiveLearner::execute()
     for (unsigned int j = 0; j < _sampler.getNumberOfCols(); ++j)
       data_in(ss, j) = data[j];
   }
-  _local_comm.sum(data_in.get_values());
+  _communicator.sum(data_in.get_values());
   _output_comm = _output_value;
-  _local_comm.allgather(_output_comm);
+  _communicator.allgather(_output_comm);
 
   if (_t_step > 1)
   {
@@ -181,11 +182,10 @@ GenericActiveLearner::execute()
     setupGPData(_output_comm, data_in);
 
     // Compute the convergence value before re-training the GP
-    _convergence_value = 0.0;
     if (_t_step > 2)
     {
       computeGPOutput(_eval_outputs_current);
-      computeConvergenceValue();
+      _convergence_value = computeConvergenceValue();
     }
 
     // Retrain the GP and get the length scales
@@ -210,8 +210,6 @@ GenericActiveLearner::execute()
     std::copy_n(acq_new.begin(), _props, _acquisition_value.begin());
   }
   else
-    // for (unsigned int i = 0; i < _props; ++i)
-    //   _sorted_indices[i] = i;
     std::iota(_sorted_indices.begin(), _sorted_indices.end(), 0);
 
   // Track the current step
