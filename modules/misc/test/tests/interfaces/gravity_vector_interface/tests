@@ -1,0 +1,28 @@
+[Tests]
+  design = 'GravityVectorInterface.md'
+  issues = '#31843'
+  [error_reporting]
+    requirement = 'The system shall report an error for the gravity vector interface if'
+    [supplied_dir_vec]
+      type = RunException
+      input = 'supplied_dir_vec.i'
+      expect_err = "The parameters 'gravity_vector' and 'gravity_direction' are mutually exclusive"
+      allow_test_objects = True
+      detail = 'the vector and direction are both supplied,'
+    []
+    [supplied_vec_mag]
+      type = RunException
+      input = 'supplied_vec_mag.i'
+      expect_err = "The parameters 'gravity_vector' and 'gravity_magnitude' are mutually exclusive"
+      allow_test_objects = True
+      detail = 'the vector and magnitude are both supplied, or'
+    []
+    [supplied_none]
+      type = RunException
+      input = 'supplied_none.i'
+      expect_err = "Either 'gravity_vector' or 'gravity_direction' must be specified"
+      allow_test_objects = True
+      detail = 'neither the vector nor direction are supplied.'
+    []
+  []
+[]
