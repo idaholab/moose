@@ -11,6 +11,7 @@
 #include "Moose.h"
 #include "AppFactory.h"
 #include "MooseSyntax.h"
+#include "MiscApp.h"
 
 #ifdef AIR_FP_ENABLED
 #include "AirApp.h"
@@ -60,6 +61,7 @@ FluidPropertiesApp::registerApps()
 #endif
 
   registerApp(FluidPropertiesApp);
+  MiscApp::registerApps();
 #ifdef AIR_FP_ENABLED
   registerApp(AirApp);
 #endif
@@ -101,6 +103,8 @@ FluidPropertiesApp::registerAll(Factory & f, ActionFactory & af, Syntax & syntax
 #ifdef SODIUM_FP_ENABLED
   SodiumApp::registerAll(f, af, syntax);
 #endif
+
+  MiscApp::registerAll(f, af, syntax);
 
   Registry::registerObjectsTo(f, {"FluidPropertiesApp"});
   Registry::registerActionsTo(af, {"FluidPropertiesApp"});
