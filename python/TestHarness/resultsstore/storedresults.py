@@ -587,7 +587,7 @@ class StoredResult:
 
     def _find_test_data(self, id: ObjectId) -> Optional[dict]:
         """
-        Get the data assocated with a test.
+        Get the data associated with a test.
 
         This is a separate function so that it can be mocked
         easily within unit tests.

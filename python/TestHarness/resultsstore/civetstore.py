@@ -72,7 +72,7 @@ class CIVETStore:
     """
     Handles the storage of TestHarnes results in a database.
 
-    TestHarness results areloaded from the TestHarness JSON
+    TestHarness results are loaded from the TestHarness JSON
     output to later be indexed and retrieved via the ResultsReader,
     which represents tests via StoredResult and StoredTestResult
     objects.
@@ -340,7 +340,7 @@ class CIVETStore:
         **kwargs,
     ) -> Tuple[dict, Optional[dict[TestName, dict]]]:
         """
-        Build an result entry for storage in the database.
+        Build a result entry for storage in the database.
 
         See the optional parameters for store() for information
         on the keyword arguments that are used here.
