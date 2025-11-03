@@ -14,6 +14,7 @@ from typing import Iterator, Optional
 
 import pymongo
 from bson.objectid import ObjectId
+from pymongo.database import Database
 
 from TestHarness.resultsstore.auth import (
     Authentication,
@@ -41,7 +42,7 @@ class ResultsReader:
 
     def __init__(
         self,
-        database: str,
+        database_name: str,
         client: Optional[pymongo.MongoClient | Authentication] = None,
         check: bool = True,
     ):
@@ -50,7 +51,7 @@ class ResultsReader:
 
         Parameters
         ----------
-        database : str
+        database_name : str
             The name of the database to connect to.
 
         Optional parameters
@@ -61,32 +62,38 @@ class ResultsReader:
             Whether or not to validate result data types (default = True).
 
         """
-        assert isinstance(database, str)
+        assert isinstance(database_name, str)
 
-        # No client; test the environment
+        # The name of the database
+        self._database_name: str = database_name
+        # Whether or not to validate result data types on build
+        self._check = check
+
+        # The mongo client, possibly setup on use
+        self._client: Optional[pymongo.MongoClient] = None
+        # The mongo database, setup first on use
+        self._database: Optional[Database] = None
+        # The authentication for when we don't have a client
+        self._authentication: Optional[Authentication] = None
+
+        # No client, load from the environment
         if client is None:
-            client = self.loadEnvironmentAuthentication()
-            if client is None:
+            auth = self.loadEnvironmentAuthentication()
+            if auth is None:
                 raise ValueError(
                     "Must specify either 'client' or set RESULTS_READER_AUTH_FILE "
                     "with credentials"
                 )
-        if isinstance(client, pymongo.MongoClient):
-            self._client = client
+            self._authentication = auth
+        # Passed an authentication, use it intead
         elif isinstance(client, Authentication):
-            self._client = pymongo.MongoClient(
-                client.host, username=client.username, password=client.password
-            )
+            self._authentication = client
+        # Passed a client directly
+        elif isinstance(client, pymongo.MongoClient):
+            self._client = client
+        # Unknown type
         else:
             raise TypeError("Invalid type for 'client'")
-
-        # Get the database
-        if database not in self._client.list_database_names():
-            raise ValueError(f"Database {database} not found")
-        self._db = self._client.get_database(database)
-
-        # Whether or not to validate result data types on build
-        self._check = check
 
         # Cached results, by ID
         self._results: dict[ObjectId, Optional[StoredResult]] = {}
@@ -136,6 +143,49 @@ class ResultsReader:
     def check(self) -> bool:
         """Whether or not to validate data types on build."""
         return self._check
+
+    @property
+    def client(self) -> pymongo.MongoClient:
+        """
+        Get the pymongo client.
+
+        On first call this will setup the client if not already.
+        """
+        if self._client is None:
+            auth = self._authentication
+            assert isinstance(auth, Authentication)
+            self._client = pymongo.MongoClient(
+                auth.host, username=auth.username, password=auth.password
+            )
+        assert isinstance(self._client, pymongo.MongoClient)
+        return self._client
+
+    def _databaseGetter(self) -> Database:
+        """
+        Get the pymongo database.
+
+        On the first call this will query the database from the client.
+
+        Passed to constructed StoredResult objects so that
+        they can also setup the database on first use if needed.
+        """
+        if self._database is None:
+            name = self._database_name
+            client = self.client
+            if name not in client.list_database_names():
+                raise ValueError(f"Database {name} not found")
+            self._database = client.get_database(name)
+        assert isinstance(self._database, Database)
+        return self._database
+
+    @property
+    def database(self) -> Database:
+        """
+        Get the pymongo database.
+
+        On first call this will query the database from the client.
+        """
+        return self._databaseGetter()
 
     def close(self):
         """Close the database connection if it exists."""
@@ -187,7 +237,7 @@ class ResultsReader:
         Used so that it can be easily mocked in unit tests.
         """
         kwargs["sort"] = self.mongo_sort_id
-        with self._db.results.find(*args, **kwargs) as cursor:
+        with self.database.results.find(*args, **kwargs) as cursor:
             return [d for d in cursor]
 
     def getLatestPushResults(self, num: int) -> list[StoredResult]:
@@ -278,7 +328,7 @@ class ResultsReader:
 
         # Search for the value
         filter = {index: {"$eq": value}}
-        data = self._db.results.find_one(filter, sort=self.mongo_sort_id)
+        data = self.database.results.find_one(filter, sort=self.mongo_sort_id)
 
         # No such thing
         if data is None:
@@ -317,7 +367,9 @@ class ResultsReader:
         result = self._results.get(id)
         if result is None:
             try:
-                result = StoredResult(data, self._db, check=self.check)
+                result = StoredResult(
+                    data, database_getter=self._databaseGetter, check=self.check
+                )
             except Exception as e:
                 raise ValueError(f"Failed to build result _id={id}") from e
             self._results[id] = result

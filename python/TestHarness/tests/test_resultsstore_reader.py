@@ -124,12 +124,11 @@ class TestResultsReader(unittest.TestCase):
                 results = None
                 if gold_test.event_sha:
                     results = reader.getCommitResults(gold_test.event_sha)
-                elif gold_test.event_id:
+                else:
+                    self.assertIsNotNone(gold_test.event_id)
                     results = reader.getEventResults(gold_test.event_id)
                 self.assertIsNotNone(results)
-                self.assertTrue(
-                    results.has_test(PROD_TEST_NAME.folder, PROD_TEST_NAME.name)
-                )
+                self.assertTrue(results.has_test(PROD_TEST_NAME))
 
                 # Serialize result so tha we can store it in a file
                 serialized = results.serialize(test_filter=[PROD_TEST_NAME])
@@ -371,17 +370,19 @@ class TestResultsReader(unittest.TestCase):
             def list_database_names(self):
                 return ["foo"]
 
+        reader = ResultsReader(PROD_DATABASE_NAME, BadDatabaseClient())
         with self.assertRaisesRegex(
             ValueError, f"Database {PROD_DATABASE_NAME} not found"
         ):
-            ResultsReader(PROD_DATABASE_NAME, BadDatabaseClient())
+            reader.database
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testMissingDatabaseLive(self):
         """Test creating the ResultsReader with a database that isn't found."""
         name = "foo1234"
+        reader = ResultsReader(name)
         with self.assertRaisesRegex(ValueError, f"Database {name} not found"):
-            ResultsReader(name)
+            reader.database
 
     @unittest.skipUnless(
         os.environ.get("TEST_RESULTSREADER_READER"),
@@ -481,7 +482,7 @@ class TestResultsReader(unittest.TestCase):
             self.assertEqual(results.event_id, event_id)
 
             self.assertEqual(len(results.test_names), 1)
-            test_results = results.get_test(TEST_TEST_NAME.folder, TEST_TEST_NAME.name)
+            test_results = results.get_test(TEST_TEST_NAME)
             self.assertIsNotNone(test_results)
             self.assertEqual(test_results.name, TEST_TEST_NAME)
 
@@ -508,7 +509,7 @@ class TestResultsReader(unittest.TestCase):
             self.assertEqual(results.event_sha, head_sha)
 
             self.assertEqual(len(results.test_names), 1)
-            test_results = results.get_test(TEST_TEST_NAME.folder, TEST_TEST_NAME.name)
+            test_results = results.get_test(TEST_TEST_NAME)
             self.assertIsNotNone(test_results)
             self.assertEqual(test_results.name, TEST_TEST_NAME)
 

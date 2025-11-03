@@ -12,7 +12,7 @@
 import importlib
 from copy import deepcopy
 from datetime import datetime
-from typing import Optional
+from typing import Callable, Optional
 
 from bson.objectid import ObjectId
 from pymongo.database import Database
@@ -386,7 +386,12 @@ class StoredResult:
     will automatically query the data as needed.
     """
 
-    def __init__(self, data: dict, db: Optional[Database] = None, check: bool = True):
+    def __init__(
+        self,
+        data: dict,
+        database_getter: Optional[Callable[[], Database]] = None,
+        check: bool = True,
+    ):
         """
         Initialize a result.
 
@@ -394,8 +399,8 @@ class StoredResult:
         ---------
         data : dict
             The underyling data.
-        db : Optional[Database]
-            The database to query additional data from.
+        database_getter : Optional[Callable[[], Database]]
+            Method that gets the database if it is needed.
 
         Optional arguments:
         ------------------
@@ -408,18 +413,22 @@ class StoredResult:
         # ".previous_test_results.json" file
         self._data: dict = data
 
-        # The database connection, used for querying test results
-        self._db: Optional[Database] = db
+        # The method for getting the database
+        self._database_getter: Optional[Callable[[], Database]] = database_getter
 
         # Whether or not to validate data types on load
         self._check: bool = check
+
+        # The loaded database, filled on first use
+        self._database: Optional[Database] = None
 
         # Loaded test objects
         self._tests: dict[TestName, StoredTestResult] = {}
 
         # Sanity check on all of our methods (in order of definition)
         if self.check:
-            assert isinstance(db, (Database, NoneType))
+            if self._database_getter is not None:
+                assert isinstance(self._database_getter, Callable)
             assert isinstance(self.check, bool)
             assert isinstance(self.data, dict)
             assert isinstance(self.id, ObjectId)
@@ -449,6 +458,19 @@ class StoredResult:
     def check(self) -> bool:
         """Whether or not to validate data types on load."""
         return self._check
+
+    @property
+    def database(self) -> Database:
+        """
+        Get the database on demand.
+
+        Will load the first time it is needed.
+        """
+        if self._database is None:
+            assert self._database_getter is not None
+            self._database = self._database_getter()
+        assert isinstance(self._database, Database)
+        return self._database
 
     @property
     def data(self) -> dict:
@@ -580,10 +602,9 @@ class StoredResult:
         It queries the test database for a test that matches
         the given ID.
         """
-        assert isinstance(self._db, Database)
         assert isinstance(id, ObjectId)
 
-        return self._db.tests.find_one({"_id": id})
+        return self.database.tests.find_one({"_id": id})
 
     def _build_test(self, data: dict, name: TestName) -> StoredTestResult:
         """
@@ -618,7 +639,6 @@ class StoredResult:
         # Search for the data in the cache
         value = self._tests.get(name)
         if value is not None:
-            assert isinstance(value, StoredTestResult)
             return value
 
         # Find it in the data to build
@@ -669,11 +689,9 @@ class StoredResult:
         It queries the tests database for all documents that match
         the given IDs.
         """
-        assert self._db is not None
-        assert isinstance(self._db, Database)
         assert isinstance(ids, list)
 
-        with self._db.tests.find({"_id": {"$in": ids}}) as cursor:
+        with self.database.tests.find({"_id": {"$in": ids}}) as cursor:
             return [doc for doc in cursor]
 
     def load_all_tests(self):
