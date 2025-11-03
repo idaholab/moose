@@ -57,13 +57,13 @@
     type = EqualValueBoundaryConstraint
     variable = disp_x
     secondary = 'x1'    # boundary
-    penalty = 1e6
+    penalty = 5e6
   []
   [y1]
     type = EqualValueBoundaryConstraint
     variable = disp_y
     secondary = 'y1'    # boundary
-    penalty = 1e6
+    penalty = 5e6
   []
 []
 

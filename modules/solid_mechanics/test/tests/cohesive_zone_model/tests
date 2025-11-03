@@ -43,38 +43,35 @@
       input = 'czm_patch_test_base.i'
       exodiff = czm_small_strain_incremental_out.e
       cli_args = "Materials/czm_mat/type=PureElasticTractionSeparationIncremental "
-                 "Materials/czm_mat/normal_stiffness=100e2 Materials/czm_mat/tangent_stiffness=70e2  "
+                 "Materials/czm_mat/normal_stiffness=1e2 Materials/czm_mat/tangent_stiffness=7e1  "
                  " Physics/SolidMechanics/CohesiveZone/czm_ik/strain=SMALL "
                  "Physics/SolidMechanics/CohesiveZone/czm_ik/generate_output='traction_x "
                  "traction_y traction_z normal_traction tangent_traction jump_x jump_y jump_z "
                  "normal_jump tangent_jump' Physics/SolidMechanics/QuasiStatic/all/strain=SMALL  "
                  "Physics/SolidMechanics/QuasiStatic/all/use_finite_deform_jacobian=false "
                  "Materials/stress/type=ADComputeLinearElasticStress "
-                 "Outputs/file_base=czm_small_strain_incremental_out Outputs/exodus=true "
-                 "Mesh/parallel_type=distributed"
+                 "Outputs/file_base=czm_small_strain_incremental_out Outputs/exodus=true"
       recover = false
       detail = "The small strain cohesive zone model shall return the same results of the total "
                "formulation when using an incremental material"
       allow_test_objects = true
-      mesh_mode = 'DISTRIBUTED'
     []
     [total_lagrangian_incremental]
       type = Exodiff
       input = 'czm_patch_test_base.i'
       exodiff = czm_total_lagrangian_incremental_out.e
       cli_args = "Materials/czm_mat/type=PureElasticTractionSeparationIncremental "
-                 "Materials/czm_mat/normal_stiffness=100e2 Materials/czm_mat/tangent_stiffness=70e2 "
+                 "Materials/czm_mat/normal_stiffness=1e2 Materials/czm_mat/tangent_stiffness=7e1 "
                  "Physics/SolidMechanics/CohesiveZone/czm_ik/strain=FINITE "
                  "Physics/SolidMechanics/CohesiveZone/czm_ik/generate_output='traction_x "
                  "traction_y traction_z normal_traction tangent_traction jump_x jump_y jump_z "
                  "normal_jump tangent_jump' Outputs/file_base=czm_total_lagrangian_incremental_out "
-                 "Outputs/exodus=true Mesh/parallel_type=distributed"
+                 "Outputs/exodus=true"
       recover = false
       detail = "The finite strain cohesive zone model shall return the same results of the total "
                "formulation when using an incremental material"
       allow_test_objects = true
       capabilities = 'method!=dbg'
-      mesh_mode = 'DISTRIBUTED'
     []
     [multiple_action_and_materials]
       type = Exodiff
@@ -402,23 +399,21 @@
     [AD_solution]
       type = Exodiff
       input = 'ad_czm.i'
-      cli_args = 'Outputs/file_base=ad_czm_small_strain Mesh/parallel_type=distributed'
+      cli_args = 'Outputs/file_base=ad_czm_small_strain'
       exodiff = 'ad_czm_small_strain.e'
       recover = false
       detail = "The solution obtained using AD CZM shall match"
       abs_zero = 1e-6
       capabilities = 'method!=dbg'
-      mesh_mode = 'DISTRIBUTED'
     []
     [non_AD_solution]
       type = Exodiff
       input = 'ad_czm.i'
-      cli_args = 'Outputs/file_base=ad_czm_small_strain Physics/SolidMechanics/CohesiveZone/interface/use_automatic_differentiation=false Materials/czm_mat/type=PureElasticTractionSeparation Mesh/parallel_type=distributed'
+      cli_args = 'Outputs/file_base=ad_czm_small_strain Physics/SolidMechanics/CohesiveZone/interface/use_automatic_differentiation=false Materials/czm_mat/type=PureElasticTractionSeparation'
       exodiff = 'ad_czm_small_strain.e'
       recover = false
       detail = "the non-AD solution"
       abs_zero = 1e-6
-      mesh_mode = 'DISTRIBUTED'
     []
   []
 
@@ -430,23 +425,21 @@
     [AD_solution]
       type = Exodiff
       input = 'ad_czm.i'
-      cli_args = 'Outputs/file_base=ad_czm_total_lagrangian Physics/SolidMechanics/CohesiveZone/interface/strain=FINITE Mesh/parallel_type=distributed'
+      cli_args = 'Outputs/file_base=ad_czm_total_lagrangian Physics/SolidMechanics/CohesiveZone/interface/strain=FINITE'
       exodiff = 'ad_czm_total_lagrangian.e'
       recover = false
       detail = "The solution obtained using AD CZM shall match"
       abs_zero = 1e-6
       capabilities = 'method!=dbg'
-      mesh_mode = 'DISTRIBUTED'
     []
     [non_AD_solution]
       type = Exodiff
       input = 'ad_czm.i'
-      cli_args = 'Outputs/file_base=ad_czm_total_lagrangian Physics/SolidMechanics/CohesiveZone/interface/strain=FINITE Physics/SolidMechanics/CohesiveZone/interface/use_automatic_differentiation=false Materials/czm_mat/type=PureElasticTractionSeparation Mesh/parallel_type=distributed'
+      cli_args = 'Outputs/file_base=ad_czm_total_lagrangian Physics/SolidMechanics/CohesiveZone/interface/strain=FINITE Physics/SolidMechanics/CohesiveZone/interface/use_automatic_differentiation=false Materials/czm_mat/type=PureElasticTractionSeparation'
       exodiff = 'ad_czm_total_lagrangian.e'
       recover = false
       detail = "the non-AD solution"
       abs_zero = 1e-6
-      mesh_mode = 'DISTRIBUTED'
     []
   []
 []
