@@ -30,6 +30,7 @@ from TestHarness.resultsstore.utils import (
     compress_dict,
     decompress_dict,
     results_set_test_value,
+    results_test_entry,
     results_test_iterator,
 )
 from TestHarness.tests.TestHarnessTestCase import TestHarnessTestCase
@@ -211,7 +212,7 @@ class TestResultsStoredResults(TestHarnessTestCase):
 
         results = StoredResult(captured_result.result_data)
         if not kwargs.get("no_tests", False):
-            self.assertEqual(len(results._tests), len(captured_result.test_data))
+            self.assertEqual(results.num_tests, len(captured_result.test_data))
 
         return self.BuiltResult(
             harness=captured_result.harness,
@@ -246,7 +247,9 @@ class TestResultsStoredResults(TestHarnessTestCase):
         self.assertEqual(results.time, STORE_HEADER["time"])
 
         # Has same number of tests
-        self.assertEqual(results.num_tests, len(results._tests))
+        self.assertEqual(
+            results.num_tests, len(list(results_test_iterator(results.data)))
+        )
         self.assertEqual(results.num_tests, len(results.get_tests()))
         for test_result in results.get_tests():
             data = built_result.test_data[test_result.name]
@@ -305,7 +308,7 @@ class TestResultsStoredResults(TestHarnessTestCase):
                 )
             # Test didn't run, so no metadata or perf_graph
             else:
-                self.assertIsNone(test_result.json_metadata)
+                self.assertEqual(len(test_result.json_metadata), 0)
                 self.assertIsNone(test_result.perf_graph)
 
             # Validation data
@@ -333,15 +336,11 @@ class TestResultsStoredResults(TestHarnessTestCase):
         )
 
         result = StoredResult(result_data)
-        self.assertEqual(len(result._tests), len(test_data))
+        self.assertEqual(result.num_tests, len(test_data))
 
         for name, data in test_data.items():
             self.assertTrue(result.has_test(name.folder, name.name))
-
-            # Not loaded from cache
-            id = data["_id"]
-            self.assertIn(name, result._tests)
-            self.assertEqual(result._tests[name], id)
+            self.assertIsInstance(results_test_entry(result.data, name), ObjectId)
 
             # Loads from cache
             test_result = result.get_test(name.folder, name.name)
@@ -368,7 +367,7 @@ class TestResultsStoredResults(TestHarnessTestCase):
         results = built_result.results
 
         for name in results.test_names:
-            id = results._tests[name]
+            id = results_test_entry(results.data, name)
             with self.assertRaisesRegex(
                 DatabaseException, f"Database missing tests._id={id}"
             ):
@@ -380,18 +379,8 @@ class TestResultsStoredResults(TestHarnessTestCase):
         patch_init.side_effect = Exception("foo")
 
         with self.assertRaisesRegex(ValueError, "Failed to build test result"):
-            self.buildResult()
-
-    def testInitTestsBadType(self):
-        """Test TestHarnessResult.init_tests() when a test entry has a bad type."""
-        captured_result = self.captureResult()
-        result_data = captured_result.result_data
-
-        for test in results_test_iterator(result_data):
-            test.set_value(1)
-
-        with self.assertRaisesRegex(TypeError, 'has unexpected type "int"'):
-            StoredResult(result_data)
+            built_result = self.buildResult()
+            built_result.results.load_all_tests()
 
     def testDeprecatedBaseSHA(self):
         """Test when base_sha didn't exist in the database (civet version < 2)."""
@@ -436,7 +425,7 @@ class TestResultsStoredResults(TestHarnessTestCase):
         built_result = self.buildResult(delete_test_key=["tester"])
         for test_result in built_result.results.get_tests():
             self.assertIsNone(test_result.tester)
-            self.assertIsNone(test_result.json_metadata)
+            self.assertEqual(len(test_result.json_metadata), 0)
 
     def testNoStatus(self):
         """Test status not being available in a test result."""
@@ -458,8 +447,8 @@ class TestResultsStoredResults(TestHarnessTestCase):
         # because they were loaded from the database and
         # were originally stored as IDs)
         self.assertEqual(result.data["tests"].keys(), new_result.data["tests"].keys())
-        self.assertEqual(result._tests.keys(), new_result._tests.keys())
         # And the underlying test objects should also be the same
+        new_result.load_all_tests()
         for test_name in result.test_names:
             test = result._tests[test_name]
 
@@ -497,8 +486,10 @@ class TestResultsStoredResults(TestHarnessTestCase):
         result = StoredResult(result_data)
 
         # Tests should not be loaded yet
-        for entry in result._tests.values():
-            self.assertIsInstance(entry, ObjectId)
+        test_names = result.test_names
+        self.assertTrue(test_names)
+        for name in test_names:
+            self.assertNotIn(name, result._tests)
 
         serialized = result.serialize()
 
@@ -516,9 +507,10 @@ class TestResultsStoredResults(TestHarnessTestCase):
         built_result = self.buildResult()
         results = built_result.results
 
-        # Tests should be loaded already
-        for entry in results._tests.values():
-            self.assertIsInstance(entry, StoredTestResult)
+        # Load tests
+        test_names = results.test_names
+        results.load_all_tests()
+        self.assertEqual(len(test_names), len(results._tests))
 
         serialized = results.serialize()
 

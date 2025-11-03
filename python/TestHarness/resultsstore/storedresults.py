@@ -12,7 +12,7 @@
 import importlib
 from copy import deepcopy
 from datetime import datetime
-from typing import Optional, Union
+from typing import Optional
 
 from bson.objectid import ObjectId
 from pymongo.database import Database
@@ -22,6 +22,7 @@ from TestHarness.resultsstore.utils import (
     compress_dict,
     decompress_dict,
     results_folder_iterator,
+    results_has_test,
     results_test_iterator,
 )
 from TestHarness.validation.dataclasses import (
@@ -69,6 +70,11 @@ class StoredTestResult:
         result : StoredResult
             The parent result.
 
+        Optional arguments:
+        ------------------
+        check : bool
+            Whether or not to perform data type checking (default = True).
+
         """
         # The underlying data for this test, which comes from
         # tests/<folder name>/tests/<test_name> in the TestHarness
@@ -78,49 +84,43 @@ class StoredTestResult:
         self._name: TestName = name
         # The combined results that this test comes from
         self._results: "StoredResult" = result
+        # Converted validation results (built on the fly)
+        self._validation_results: Optional[list[ValidationResult]] = None
+        # Converted validation data (built on the fly)
+        self._validation_data: Optional[dict[str, ValidationData]] = None
+        # Decompressed JSON metadata (built on the fly)
+        self._json_metadata: Optional[dict[str, dict]] = None
 
         # Sanity check on all of our data and methods
-        assert isinstance(self.data, dict)
-        assert isinstance(self.id, (ObjectId, NoneType))
-        assert isinstance(self.results, StoredResult)
-        assert isinstance(self.result_id, ObjectId)
-        assert isinstance(self.name, TestName)
-        assert isinstance(self.test_name, str)
-        assert isinstance(self.folder_name, str)
-        assert isinstance(self.status, (dict, NoneType))
-        assert isinstance(self.status_value, (str, NoneType))
-        assert isinstance(self.timing, (dict, NoneType))
-        assert isinstance(self.run_time, (float, NoneType))
-        assert isinstance(self.hpc_queued_time, (float, NoneType))
-        assert isinstance(self.event_sha, str)
-        assert len(self.event_sha) == 40
-        assert isinstance(self.event_cause, str)
-        assert isinstance(self.pr_num, (int, NoneType))
-        assert isinstance(self.base_sha, (str, NoneType))
-        if self.base_sha:
-            assert len(self.base_sha) == 40
-        assert isinstance(self.time, datetime)
-        assert isinstance(self.tester, (dict, NoneType))
-        assert isinstance(self.hpc, (dict, NoneType))
-        assert isinstance(self.hpc_id, (str, NoneType))
-        assert isinstance(self.validation, (dict, NoneType))
-
-        # Load the validation results and data
-        self._validation_results: Optional[list[ValidationResult]] = (
-            self._buildValidationResults()
-        )
-        self._validation_data: Optional[dict[str, ValidationData]] = (
-            self._buildValidationData()
-        )
-        assert isinstance(self.validation_results, (list, NoneType))
-        assert isinstance(self.validation_data, (dict, NoneType))
-
-        # Load JSON metadata; this needs to be done separately
-        # because metadata is stored in a compressed (with zlib)
-        # form as it can be large
-        self._json_metadata: Optional[dict[str, dict]] = self._buildJSONMetadata()
-        assert isinstance(self.json_metadata, (dict, NoneType))
-        assert isinstance(self.perf_graph, (dict, NoneType))
+        if self.results.check:
+            assert isinstance(self.data, dict)
+            assert isinstance(self.id, (ObjectId, NoneType))
+            assert isinstance(self.results, StoredResult)
+            assert isinstance(self.result_id, ObjectId)
+            assert isinstance(self.name, TestName)
+            assert isinstance(self.test_name, str)
+            assert isinstance(self.folder_name, str)
+            assert isinstance(self.status, (dict, NoneType))
+            assert isinstance(self.status_value, (str, NoneType))
+            assert isinstance(self.timing, (dict, NoneType))
+            assert isinstance(self.run_time, (float, NoneType))
+            assert isinstance(self.hpc_queued_time, (float, NoneType))
+            assert isinstance(self.event_sha, str)
+            assert len(self.event_sha) == 40
+            assert isinstance(self.event_cause, str)
+            assert isinstance(self.pr_num, (int, NoneType))
+            assert isinstance(self.base_sha, (str, NoneType))
+            if self.base_sha:
+                assert len(self.base_sha) == 40
+            assert isinstance(self.time, datetime)
+            assert isinstance(self.tester, (dict, NoneType))
+            assert isinstance(self.hpc, (dict, NoneType))
+            assert isinstance(self.hpc_id, (str, NoneType))
+            assert isinstance(self.validation, (dict, NoneType))
+            assert isinstance(self.validation_results, (list, NoneType))
+            assert isinstance(self.validation_data, (dict, NoneType))
+            assert isinstance(self.json_metadata, (dict, NoneType))
+            assert isinstance(self.perf_graph, (dict, NoneType))
 
     @property
     def data(self) -> dict:
@@ -250,36 +250,48 @@ class StoredTestResult:
         return self.data.get("validation")
 
     @property
-    def validation_data(self) -> Optional[dict[str, ValidationData]]:
-        """Get the 'data' entry in 'validation' for this test, if any."""
+    def validation_data(self) -> dict[str, ValidationData]:
+        """
+        Get the 'data' entry in 'validation' for this test, if any.
+
+        Will build the ValidationData representation on first call.
+        """
+        if self._validation_data is None:
+            self._validation_data = self._buildValidationData()
         return self._validation_data
 
     @property
-    def validation_results(self) -> Optional[list[ValidationResult]]:
-        """Get the 'data' entry in 'validation' for this test, if any."""
+    def validation_results(self) -> list[ValidationResult]:
+        """
+        Get the 'data' entry in 'validation' for this test, if any.
+
+        Will build the ValidationResult representation on first call.
+        """
+        if self._validation_results is None:
+            self._validation_results = self._buildValidationResults()
         return self._validation_results
 
-    def _buildValidationResults(self) -> Optional[list[ValidationResult]]:
+    def _buildValidationResults(self) -> list[ValidationResult]:
         """
         Convert validation results in JSON to the underlying objects.
 
-        Used on construction.
+        Used on-the-fly in validation_results if not built.
         """
         if self.validation is not None:
             return [
                 ValidationResult(**v)
                 for v in deepcopy(self.validation.get("results", []))
             ]
-        return None
+        return []
 
-    def _buildValidationData(self) -> Optional[dict[str, ValidationData]]:
+    def _buildValidationData(self) -> dict[str, ValidationData]:
         """
         Convert valiation data in JSON to the underlying objects.
 
-        Used on construction.
+        Used on-the-fly in validation_data if not built.
         """
         if self.validation is None:
-            return None
+            return {}
 
         input = deepcopy(self.validation.get("data", {}))
         data = {}
@@ -306,11 +318,17 @@ class StoredTestResult:
         return data
 
     @property
-    def json_metadata(self) -> Optional[dict[str, dict]]:
-        """Get the 'json_metadata' entry from the Tester entry, if any."""
+    def json_metadata(self) -> dict[str, dict]:
+        """
+        Get the 'json_metadata' entry from the Tester entry, if any.
+
+        Will trigger a decompression of the data on first call.
+        """
+        if self._json_metadata is None:
+            self._json_metadata = self._buildJSONMetadata()
         return self._json_metadata
 
-    def _buildJSONMetadata(self) -> Optional[dict[str, dict]]:
+    def _buildJSONMetadata(self) -> dict[str, dict]:
         """
         Build the tester.json_metadata entry.
 
@@ -319,15 +337,15 @@ class StoredTestResult:
         we will decompress the underlying data into its
         original dict.
 
-        Used on construction.
+        Used on-the-fly in json_metadata if not built.
         """
         # No metadata without a tester (stored in the tester)
         if self.tester is None:
-            return None
+            return {}
         # If no json_metadata key, there was none
         json_metadata = self.tester.get("json_metadata")
         if json_metadata is None:
-            return None
+            return {}
 
         assert isinstance(json_metadata, dict)
 
@@ -368,7 +386,7 @@ class StoredResult:
     will automatically query the data as needed.
     """
 
-    def __init__(self, data: dict, db: Optional[Database] = None):
+    def __init__(self, data: dict, db: Optional[Database] = None, check: bool = True):
         """
         Initialize a result.
 
@@ -379,89 +397,58 @@ class StoredResult:
         db : Optional[Database]
             The database to query additional data from.
 
+        Optional arguments:
+        ------------------
+        check : bool
+            Whether or not to perform data type checking (default = True).
+
         """
         # The underlying data from the JSON results, which
         # is the dictionary representation of the entire
         # ".previous_test_results.json" file
-        assert isinstance(data, dict)
         self._data: dict = data
 
         # The database connection, used for querying test results
-        assert isinstance(db, (Database, NoneType))
         self._db: Optional[Database] = db
 
-        # Initialize empty test objects
-        self._tests = self.init_tests(data)
+        # Whether or not to validate data types on load
+        self._check: bool = check
+
+        # Loaded test objects
+        self._tests: dict[TestName, StoredTestResult] = {}
 
         # Sanity check on all of our methods (in order of definition)
-        assert isinstance(self.data, dict)
-        assert isinstance(self.id, ObjectId)
-        assert isinstance(self.testharness, dict)
-        assert isinstance(self.version, int)
-        assert isinstance(self.validation_version, int)
-        assert isinstance(self.civet, dict)
-        assert isinstance(self.civet_version, int)
-        assert isinstance(self.civet_job_url, str)
-        assert isinstance(self.civet_job_id, int)
-        assert isinstance(self.hpc, dict)
-        assert isinstance(self.event_sha, str)
-        assert len(self.event_sha) == 40
-        assert isinstance(self.event_cause, str)
-        assert isinstance(self.event_id, (int, NoneType))
-        assert isinstance(self.pr_num, (int, NoneType))
-        assert isinstance(self.base_sha, (str, NoneType))
-        if self.base_sha:
-            assert len(self.base_sha) == 40
-        assert isinstance(self.time, datetime)
-        assert isinstance(self.num_tests, int)
-        assert isinstance(self.test_names, list)
-        for v in self.test_names:
-            assert isinstance(v, TestName)
+        if self.check:
+            assert isinstance(db, (Database, NoneType))
+            assert isinstance(self.check, bool)
+            assert isinstance(self.data, dict)
+            assert isinstance(self.id, ObjectId)
+            assert isinstance(self.testharness, dict)
+            assert isinstance(self.version, int)
+            assert isinstance(self.validation_version, int)
+            assert isinstance(self.civet, dict)
+            assert isinstance(self.civet_version, int)
+            assert isinstance(self.civet_job_url, str)
+            assert isinstance(self.civet_job_id, int)
+            assert isinstance(self.hpc, dict)
+            assert isinstance(self.event_sha, str)
+            assert len(self.event_sha) == 40
+            assert isinstance(self.event_cause, str)
+            assert isinstance(self.event_id, (int, NoneType))
+            assert isinstance(self.pr_num, (int, NoneType))
+            assert isinstance(self.base_sha, (str, NoneType))
+            if self.base_sha:
+                assert len(self.base_sha) == 40
+            assert isinstance(self.time, datetime)
+            assert isinstance(self.num_tests, int)
+            assert isinstance(self.test_names, list)
+            for v in self.test_names:
+                assert isinstance(v, TestName)
 
-    def init_tests(
-        self, results: dict
-    ) -> dict[TestName, Union[StoredTestResult, ObjectId]]:
-        """
-        Build the tests to be stored within the _tests member.
-
-        This is a dict from test (folder name, test name) to either:
-            - An ObjectID, if the test is stored in a separate collection
-            - A StoredTestResult, if the test is stored directly in the results
-
-        When an object is stored as an ObjectID (the ID to the test
-        in the "tests" mongo collection), it can be queried later
-        on demand as needed.
-        """
-        assert isinstance(results, dict)
-
-        values: dict[TestName, Union[StoredTestResult, ObjectId]] = {}
-
-        all_ids = set()
-        for test in results_test_iterator(results):
-            name = test.name
-            assert name not in values
-            test_entry = test.value
-
-            # References a test in a seprate collection
-            # Store the id to be pulled later if needed
-            if isinstance(test_entry, ObjectId):
-                assert test_entry not in all_ids
-                value = test_entry
-                all_ids.add(test_entry)
-            # Is direct test data
-            # Store the actual test object
-            elif isinstance(test_entry, dict):
-                value = self._build_test(test_entry, name)
-            # Unknown type
-            else:
-                raise TypeError(
-                    f'Test "{name}" entry in result._id={self.id} '
-                    f'has unexpected type "{type(test_entry).__name__}"'
-                )
-
-            values[name] = value
-
-        return values
+    @property
+    def check(self) -> bool:
+        """Whether or not to validate data types on load."""
+        return self._check
 
     @property
     def data(self) -> dict:
@@ -560,12 +547,12 @@ class StoredResult:
     @property
     def num_tests(self) -> int:
         """Get the number of stored tests."""
-        return len(self._tests)
+        return len(list(results_test_iterator(self.data)))
 
     @property
     def test_names(self) -> list[TestName]:
         """Get the combined names of all tests."""
-        return list(self._tests.keys())
+        return [v.name for v in results_test_iterator(self.data)]
 
     def has_test(self, folder_name: str, test_name: str) -> bool:
         """
@@ -582,8 +569,8 @@ class StoredResult:
         assert isinstance(folder_name, str)
         assert isinstance(test_name, str)
 
-        key = TestName(folder_name, test_name)
-        return key in self._tests
+        name = TestName(folder_name, test_name)
+        return results_has_test(self.data, name)
 
     def _find_test_data(self, id: ObjectId) -> Optional[dict]:
         """
@@ -632,27 +619,31 @@ class StoredResult:
         """
         assert isinstance(folder_name, str)
         assert isinstance(test_name, str)
+        name = TestName(folder_name, test_name)
 
         # Search for the data in the cache
-        name = TestName(folder_name, test_name)
         value = self._tests.get(name)
-
-        # Doesn't exist
-        if value is None:
-            raise KeyError(f'Test "{name}" does not exist')
-
-        # Is already built
-        if isinstance(value, StoredTestResult):
+        if value is not None:
+            assert isinstance(value, StoredTestResult)
             return value
 
-        # Not built, so pull from database
-        assert isinstance(value, ObjectId)
-        data = self._find_test_data(value)
-        if data is None:
-            raise DatabaseException(f"Database missing tests._id={value}")
+        # Find it in the data to build
+        test_entry = None
+        for entry in results_test_iterator(self.data):
+            if entry.name == name:
+                test_entry = entry.value
+        if test_entry is None:
+            raise KeyError(f'Test "{name}" does not exist')
+
+        # Pull from database
+        if isinstance(test_entry, ObjectId):
+            id = test_entry
+            test_entry = self._find_test_data(id)
+            if test_entry is None:
+                raise DatabaseException(f"Database missing tests._id={id}")
 
         # Build the true object from the data
-        test_result = self._build_test(data, name)
+        test_result = self._build_test(test_entry, name)
 
         # And store in the cache
         self._tests[name] = test_result
@@ -681,26 +672,30 @@ class StoredResult:
         # Get tests that need to be loaded; need a mapping
         # of id -> name so that we can go from a document
         # to a name when obtaining data from the database
-        tests = {
-            id: name for name, id in self._tests.items() if isinstance(id, ObjectId)
-        }
+        load_tests = {}
+        for entry in results_test_iterator(self.data):
+            if entry.name not in self._tests:
+                # Test is stored in data, load directly
+                if isinstance(entry.value, ObjectId):
+                    load_tests[entry.value] = entry.name
+                # Mark test to be pulled from database
+                else:
+                    self._tests[entry.name] = self._build_test(entry.value, entry.name)
 
-        # Nothing to load
-        if not tests:
-            return
+        # Load tests needed from the database
+        if load_tests:
+            loaded_docs = self._find_tests_data(list(load_tests.keys()))
+            for doc in loaded_docs:
+                id = doc["_id"]
+                name = load_tests[id]
+                self._tests[name] = self._build_test(doc, name)
 
-        # Load and build everything we need
-        for doc in self._find_tests_data(list(tests.keys())):
-            id = doc["_id"]
-            name = tests[id]
-            self._tests[name] = self._build_test(doc, name)
-
-        # Make sure we found every test
-        missing = [
-            str(entry) for entry in self._tests.values() if isinstance(entry, ObjectId)
-        ]
-        if missing:
-            raise KeyError(f"Failed to load test results for _id={missing}")
+            # Make sure we found every test
+            if len(loaded_docs) != len(load_tests):
+                missing = [
+                    str(name) for name in load_tests.values() if name not in self._tests
+                ]
+                raise KeyError(f"Failed to load test results for _id={missing}")
 
     def get_tests(self) -> list[StoredTestResult]:
         """
@@ -711,7 +706,12 @@ class StoredResult:
         self.load_all_tests()
         return list(self._tests.values())
 
-    def serialize(self, test_filter: Optional[list[TestName]] = None) -> dict:
+    def serialize(
+        self,
+        test_filter: Optional[list[TestName]] = None,
+        load_all_tests: bool = True,
+        in_place: bool = False,
+    ) -> dict:
         """
         Serialize this result.
 
@@ -724,12 +724,18 @@ class StoredResult:
         -------------------
         test_filter : Optional[list[TestName]]
             Only store these named tests, if provided.
+        load_all_tests : bool
+            Whether or not to load all tests before storing.
+        in_place : bool
+            Whether or not to do the serialization with in-place data
+            (faster, but invalidates data in this object).
         """
-        # Load all tests so that they can be stored
-        self.load_all_tests()
+        # Load all tests for storage if requested
+        if load_all_tests:
+            self.load_all_tests()
 
-        # Copy our data
-        data = deepcopy(self.data)
+        # Copy if not working in-place, otherwise use this data
+        data = self.data if in_place else deepcopy(self.data)
 
         # Convert datetime to str that can be converted back
         data["time"] = str(data["time"])
@@ -743,26 +749,29 @@ class StoredResult:
                     test.delete()
                     continue
 
-                # Duplicate test data for storage
-                test_data = deepcopy(
-                    self.get_test(test.folder_name, test.test_name).data
-                )
+                # Get test data directly if it exists
+                stored_test = self._tests.get(test.name)
+                if stored_test is not None:
+                    test.set_value(stored_test.data)
 
-                # Convert ObjectID to string ID
-                for key in ["_id", "result_id"]:
-                    if key in test_data:
-                        test_data[key] = str(test_data[key])
+                # Cleanup data if have an actual object
+                test_data = test.value
+                if isinstance(test_data, dict):
+                    # Convert ObjectID to string ID
+                    for key in ["_id", "result_id"]:
+                        if key in test_data:
+                            test_data[key] = str(test_data[key])
 
-                # Convert binary JSON metadata to dict
-                json_metadata = test_data.get("tester", {}).get("json_metadata", {})
-                for k, v in json_metadata.items():
-                    json_metadata[k] = decompress_dict(v)
+                    # Convert binary JSON metadata to dict
+                    json_metadata = test_data.get("tester", {}).get("json_metadata", {})
+                    for k, v in json_metadata.items():
+                        json_metadata[k] = decompress_dict(v)
 
-                # Time entry existed before civet version 4
-                if self.civet_version < 4:
-                    test_data["time"] = str(test_data["time"])
+                    # Time entry existed before civet version 4
+                    if self.civet_version < 4:
+                        test_data["time"] = str(test_data["time"])
 
-                test.set_value(test_data)
+                    test.set_value(test_data)
 
             folder.delete_if_empty()
 
@@ -788,28 +797,41 @@ class StoredResult:
         for test in results_test_iterator(data):
             test_entry = test.value
 
-            # Convert string id to ObjectID
-            for key in ["_id", "result_id"]:
-                if key in test_entry:
-                    test_entry[key] = ObjectId(test_entry[key])
+            # Cleanup data if have an actual object
+            if isinstance(test_entry, dict):
+                # Convert string id to ObjectID
+                for key in ["_id", "result_id"]:
+                    if key in test_entry:
+                        test_entry[key] = ObjectId(test_entry[key])
 
-            # Convert string JSON metadata to binary
-            json_metadata = test_entry.get("tester", {}).get("json_metadata", {})
-            for k, v in json_metadata.items():
-                json_metadata[k] = compress_dict(v)
+                # Convert string JSON metadata to binary
+                json_metadata = test_entry.get("tester", {}).get("json_metadata", {})
+                for k, v in json_metadata.items():
+                    json_metadata[k] = compress_dict(v)
 
-            # Convert time if it exists (removed after
-            # civet_version 3)
-            if "time" in test_entry:
-                test_entry["time"] = datetime.fromisoformat(test_entry["time"])
+                # Convert time if it exists (removed after
+                # civet_version 3)
+                if "time" in test_entry:
+                    test_entry["time"] = datetime.fromisoformat(test_entry["time"])
 
         return data
 
     @staticmethod
-    def deserialize_build(data: dict) -> "StoredResult":
+    def deserialize_build(data: dict, **kwargs) -> "StoredResult":
         """
         Build a StoredResult using data serialized with serialize().
 
         Used primarily in unit testing.
+
+        Arguments:
+        ---------
+        data : dict
+            The serialized data.
+
+        Optional Arguments:
+        -------------------
+        **kwargs :
+            Arguments to pass to StoredResult.
+
         """
-        return StoredResult(StoredResult.deserialize(data))
+        return StoredResult(StoredResult.deserialize(data), **kwargs)

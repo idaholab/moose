@@ -9,6 +9,7 @@
 
 """Implements ResultsReader for reading results from a database."""
 
+from dataclasses import dataclass
 from typing import Iterator, Optional
 
 import pymongo
@@ -24,6 +25,13 @@ from TestHarness.resultsstore.storedresults import StoredResult, StoredTestResul
 NoneType = type(None)
 
 
+@dataclass(frozen=True)
+class ResultsReaderContextManager:
+    """Storage for the ResultsReader context manager."""
+
+    reader: "ResultsReader"
+
+
 class ResultsReader:
     """Utility for reading test harness results stored in a mongodb database."""
 
@@ -34,6 +42,7 @@ class ResultsReader:
         self,
         database: str,
         client: Optional[pymongo.MongoClient | Authentication] = None,
+        check: bool = True,
     ):
         """
         Initialize the reader.
@@ -47,6 +56,8 @@ class ResultsReader:
         -------------------
         client : Optional[pymongo.MongoClient | Authentication]
             The client to use or authentication to connect with.
+        check : bool
+            Whether or not to validate result data types (default = True).
 
         """
         assert isinstance(database, str)
@@ -73,6 +84,9 @@ class ResultsReader:
             raise ValueError(f"Database {database} not found")
         self._db = self._client.get_database(database)
 
+        # Whether or not to validate result data types on build
+        self._check = check
+
         # Cached results, by ID
         self._results: dict[ObjectId, Optional[StoredResult]] = {}
         # Cached results by PR number
@@ -89,8 +103,23 @@ class ResultsReader:
 
     def __del__(self):
         """Clean up the client if it is loaded."""
-        if self._client is not None:
-            self._client.close()
+        self.close()
+
+    def __enter__(self) -> ResultsReaderContextManager:
+        """
+        Enter a context manager for the ResultsReader.
+
+        Will cleanup the client on exit.
+        """
+        return ResultsReaderContextManager(reader=self)
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        """
+        Exit for the context manager.
+
+        Will cleanup the client if it exists.
+        """
+        self.close()
 
     @staticmethod
     def loadEnvironmentAuthentication() -> Optional[Authentication]:
@@ -101,6 +130,16 @@ class ResultsReader:
     def hasEnvironmentAuthentication() -> bool:
         """Check whether or not environment authentication is available."""
         return has_authentication("RESULTS_READER")
+
+    @property
+    def check(self) -> bool:
+        """Whether or not to validate data types on build."""
+        return self._check
+
+    def close(self):
+        """Close the database connection if it exists."""
+        if self._client is not None:
+            self._client.close()
 
     def getTestResults(
         self,
@@ -277,7 +316,7 @@ class ResultsReader:
         result = self._results.get(id)
         if result is None:
             try:
-                result = StoredResult(data, self._db)
+                result = StoredResult(data, self._db, check=self.check)
             except Exception as e:
                 raise ValueError(f"Failed to build result _id={id}") from e
             self._results[id] = result

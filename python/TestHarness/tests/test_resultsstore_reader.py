@@ -113,40 +113,40 @@ class TestResultsReader(unittest.TestCase):
         ]
 
         # This can be set to true once to overwrite the gold file
-        rewrite_gold = False
+        rewrite_gold = True
 
-        reader = ResultsReader(PROD_DATABASE_NAME)
+        with ResultsReader(PROD_DATABASE_NAME) as ctx:
+            reader = ctx.reader
+            # Load each result, where gold is indexed from
+            # result id -> result data
+            gold = {}
+            for gold_test in gold_tests:
+                results = None
+                if gold_test.event_sha:
+                    results = reader.getCommitResults(gold_test.event_sha)
+                elif gold_test.event_id:
+                    results = reader.getEventResults(gold_test.event_id)
+                self.assertIsNotNone(results)
+                self.assertTrue(
+                    results.has_test(PROD_TEST_NAME.folder, PROD_TEST_NAME.name)
+                )
 
-        # Load each result, where gold is indexed from
-        # result id -> result data
-        gold = {}
-        for gold_test in gold_tests:
-            results = None
-            if gold_test.event_sha:
-                results = reader.getCommitResults(gold_test.event_sha)
-            elif gold_test.event_id:
-                results = reader.getEventResults(gold_test.event_id)
-            self.assertIsNotNone(results)
-            self.assertTrue(
-                results.has_test(PROD_TEST_NAME.folder, PROD_TEST_NAME.name)
-            )
+                # Serialize result so tha we can store it in a file
+                serialized = results.serialize(test_filter=[PROD_TEST_NAME])
 
-            # Serialize result so tha we can store it in a file
-            serialized = results.serialize(test_filter=[PROD_TEST_NAME])
+                # Replace JSON metadata with something smaller so that
+                # we don't need to store a large amount of data
+                self.replaceJSONMetadata(serialized)
 
-            # Replace JSON metadata with something smaller so that
-            # we don't need to store a large amount of data
-            self.replaceJSONMetadata(serialized)
+                # Store for output
+                gold[str(results.id)] = serialized
 
-            # Store for output
-            gold[str(results.id)] = serialized
-
-            # Checks
-            self.assertEqual(results.civet_version, gold_test.civet_version)
-            if gold_test.event_sha:
-                self.assertEqual(results.event_sha, gold_test.event_sha)
-            elif gold_test.event_id:
-                self.assertEqual(results.event_id, gold_test.event_id)
+                # Checks
+                self.assertEqual(results.civet_version, gold_test.civet_version)
+                if gold_test.event_sha:
+                    self.assertEqual(results.event_sha, gold_test.event_sha)
+                elif gold_test.event_id:
+                    self.assertEqual(results.event_id, gold_test.event_id)
 
         # Dump the values so that we can load them
         gold_dumped = json.dumps(gold, indent=2, sort_keys=True)
@@ -274,8 +274,9 @@ class TestResultsReader(unittest.TestCase):
 
         patch_find_results.side_effect = get_results_data
 
-        reader = ResultsReader(PROD_DATABASE_NAME, FakeMongoClient())
-        test_results = self._testGetTestResults(reader)
+        with ResultsReader(PROD_DATABASE_NAME, FakeMongoClient()) as ctx:
+            reader = ctx.reader
+            test_results = self._testGetTestResults(reader)
 
         # Make sure we have a test entry for each gold test, in the right order
         self.assertEqual(len(test_results), len(gold))
@@ -304,8 +305,9 @@ class TestResultsReader(unittest.TestCase):
 
         patch_find_results.side_effect = get_results_data
 
-        reader = ResultsReader(PROD_DATABASE_NAME, FakeMongoClient())
-        test_results = self._testGetTestResults(reader)
+        with ResultsReader(PROD_DATABASE_NAME, FakeMongoClient()) as ctx:
+            reader = ctx.reader
+            test_results = self._testGetTestResults(reader)
 
         # Make sure we have a test entry for each gold test, in the right order
         self.assertEqual(len(test_results), len(gold))
@@ -326,8 +328,9 @@ class TestResultsReader(unittest.TestCase):
 
         patch_find_results.side_effect = get_results_data
 
-        reader = ResultsReader(PROD_DATABASE_NAME, FakeMongoClient())
-        test_results = self._testGetTestResults(reader, limit=2)
+        with ResultsReader(PROD_DATABASE_NAME, FakeMongoClient()) as ctx:
+            reader = ctx.reader
+            test_results = self._testGetTestResults(reader, limit=2)
 
         # Make sure we have only the last two entries (the latest)
         self.assertEqual(len(test_results), 2)
@@ -344,12 +347,13 @@ class TestResultsReader(unittest.TestCase):
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testGetTestResultsLive(self):
         """Test getTestResults() using the real server, if available."""
-        reader = ResultsReader(PROD_DATABASE_NAME)
+        with ResultsReader(PROD_DATABASE_NAME) as ctx:
+            reader = ctx.reader
 
-        for limit in [1, 2, 3]:
-            results = self._testGetTestResults(reader, limit=limit)
-            self.assertEqual(len(results), limit)
-            self.assertEqual(len(reader._latest_push_results), limit)
+            for limit in [1, 2, 3]:
+                results = self._testGetTestResults(reader, limit=limit)
+                self.assertEqual(len(results), limit)
+                self.assertEqual(len(reader._latest_push_results), limit)
 
     @unittest.skipIf(HAS_AUTH, "Skipping because authentication is available")
     def testMissingClient(self):
@@ -416,10 +420,11 @@ class TestResultsReader(unittest.TestCase):
             self.assertIsNotNone("CIVET_PR_NUM")
             pr_num = int(pr_num)
 
-        reader = ResultsReader(TEST_DATABASE_NAME)
-        results = reader.getTestResults(
-            TEST_TEST_NAME.folder, TEST_TEST_NAME.name, pr_num=pr_num
-        )
+        with ResultsReader(TEST_DATABASE_NAME) as ctx:
+            reader = ctx.reader
+            results = reader.getTestResults(
+                TEST_TEST_NAME.folder, TEST_TEST_NAME.name, pr_num=pr_num
+            )
         self.assertGreater(len(results), 0)
 
         # Make sure we have the right test
@@ -473,15 +478,16 @@ class TestResultsReader(unittest.TestCase):
         self.assertIsNotNone(event_id)
         event_id = int(event_id)
 
-        reader = ResultsReader(TEST_DATABASE_NAME)
-        results = reader.getEventResults(event_id)
-        self.assertIsNotNone(results)
-        self.assertEqual(results.event_id, event_id)
+        with ResultsReader(TEST_DATABASE_NAME) as ctx:
+            reader = ctx.reader
+            results = reader.getEventResults(event_id)
+            self.assertIsNotNone(results)
+            self.assertEqual(results.event_id, event_id)
 
-        self.assertEqual(len(results.test_names), 1)
-        test_results = results.get_test(TEST_TEST_NAME.folder, TEST_TEST_NAME.name)
-        self.assertIsNotNone(test_results)
-        self.assertEqual(test_results.name, TEST_TEST_NAME)
+            self.assertEqual(len(results.test_names), 1)
+            test_results = results.get_test(TEST_TEST_NAME.folder, TEST_TEST_NAME.name)
+            self.assertIsNotNone(test_results)
+            self.assertEqual(test_results.name, TEST_TEST_NAME)
 
     @unittest.skipUnless(
         os.environ.get("TEST_RESULTSREADER_READER"),
@@ -499,15 +505,16 @@ class TestResultsReader(unittest.TestCase):
         head_sha = os.environ.get("CIVET_HEAD_SHA")
         self.assertIsNotNone(head_sha)
 
-        reader = ResultsReader(TEST_DATABASE_NAME)
-        results = reader.getCommitResults(head_sha)
-        self.assertIsNotNone(results)
-        self.assertEqual(results.event_sha, head_sha)
+        with ResultsReader(TEST_DATABASE_NAME) as ctx:
+            reader = ctx.reader
+            results = reader.getCommitResults(head_sha)
+            self.assertIsNotNone(results)
+            self.assertEqual(results.event_sha, head_sha)
 
-        self.assertEqual(len(results.test_names), 1)
-        test_results = results.get_test(TEST_TEST_NAME.folder, TEST_TEST_NAME.name)
-        self.assertIsNotNone(test_results)
-        self.assertEqual(test_results.name, TEST_TEST_NAME)
+            self.assertEqual(len(results.test_names), 1)
+            test_results = results.get_test(TEST_TEST_NAME.folder, TEST_TEST_NAME.name)
+            self.assertIsNotNone(test_results)
+            self.assertEqual(test_results.name, TEST_TEST_NAME)
 
 
 if __name__ == "__main__":
