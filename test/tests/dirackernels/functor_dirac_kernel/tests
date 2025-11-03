@@ -8,4 +8,11 @@
     csvdiff = 'functor_dirac_kernel_out.csv'
     requirement = "The system shall be able to specify a dirac kernel using a functor."
   []
+  [jacobian]
+    type = PetscJacobianTester
+    input = 'functor_dirac_kernel.i'
+    ratio_tol = 1e-6
+    requirement = "The system shall compute the correct Jacobian for the functor dirac kernel."
+    capabilities = 'method=opt'
+  []
 []
