@@ -425,6 +425,9 @@ class StoredResult:
         # Loaded test objects
         self._tests: dict[TestName, StoredTestResult] = {}
 
+        # Whether or not we have loaded all tests
+        self._all_tests_loaded: bool = False
+
         # Sanity check on all of our methods (in order of definition)
         if self.check:
             if self._database_getter is not None:
@@ -588,8 +591,13 @@ class StoredResult:
         """
         assert isinstance(name, TestName)
 
+        # Check the cache first (faster lookup)
         if name in self._tests:
             return True
+        # Not in the cache, but we've loaded all so nothing here
+        elif self._all_tests_loaded:
+            return False
+        # Slower linear lookup in the test data
         return results_has_test(self.data, name)
 
     def _find_test_data(self, id: ObjectId) -> Optional[dict]:
@@ -640,6 +648,10 @@ class StoredResult:
         value = self._tests.get(name)
         if value is not None:
             return value
+
+        # If all tests have been loaded, there's nothing left to check
+        if self._all_tests_loaded:
+            return None
 
         # Find it in the data to build
         test_entry = None
@@ -696,6 +708,10 @@ class StoredResult:
 
     def load_all_tests(self):
         """Load all tests that have not been loaded from the database."""
+        # Nothing to do if we've already loaded all
+        if self._all_tests_loaded:
+            return
+
         # Get tests that need to be loaded; need a mapping
         # of id -> name so that we can go from a document
         # to a name when obtaining data from the database
@@ -725,6 +741,9 @@ class StoredResult:
                     str(name) for name in load_tests.values() if name not in self._tests
                 ]
                 raise KeyError(f"Failed to load test results for _id={missing}")
+
+        # Mark that we've loaded everything
+        self._all_tests_loaded = True
 
     def get_tests(self) -> list[StoredTestResult]:
         """
