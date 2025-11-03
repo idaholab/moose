@@ -1,24 +1,25 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
+"""Test TestHarness.resultsstore.resultsreader.ResultsReader."""
+
+import json
+import os
 import unittest
-from mock import patch
-from dataclasses import dataclass
-from copy import deepcopy
 from collections import OrderedDict
+from copy import deepcopy
+from dataclasses import dataclass
 from typing import Optional
 
-import os
-import json
-
-from pymongo import MongoClient
 from bson.objectid import ObjectId
+from mock import patch
+from pymongo import MongoClient
 
 from TestHarness.resultsstore.reader import ResultsReader
 from TestHarness.resultsstore.storedresults import StoredResult, StoredTestResult
@@ -28,55 +29,54 @@ from TestHarness.resultsstore.utils import TestName, results_test_iterator
 HAS_AUTH = ResultsReader.hasEnvironmentAuthentication()
 
 # Production database file for testing get_test_results
-PROD_GET_TEST_RESULTS_GOLD_PATH = os.path.join(os.path.dirname(__file__), 'gold', 'resultsstore', 'prod_get_test_results.json')
+PROD_GET_TEST_RESULTS_GOLD_PATH = os.path.join(
+    os.path.dirname(__file__), "gold", "resultsstore", "prod_get_test_results.json"
+)
 # Production database name for testing real results
-PROD_DATABASE_NAME = 'civet_tests_moose_performance'
+PROD_DATABASE_NAME = "civet_tests_moose_performance"
 # The name of the test to load from the production database
-PROD_TEST_NAME = TestName('simple_transient_diffusion', 'test')
+PROD_TEST_NAME = TestName("simple_transient_diffusion", "test")
 
 # Test database name for testing pull request results
-TEST_DATABASE_NAME = 'civet_tests_moose_store_results_live'
+TEST_DATABASE_NAME = "civet_tests_moose_store_results_live"
 # The name of the test to load from the test database
-TEST_TEST_NAME = TestName('tests/test_harness', 'ok')
+TEST_TEST_NAME = TestName("tests/test_harness", "ok")
+
 
 class FakeMongoClient(MongoClient):
+    """Fake MongoClient for unit testing."""
+
     def __init__(self, *args, **kwargs):
+        """Empty initialize."""
         pass
 
     def list_database_names(self):
+        """Get mocked database names."""
         return [PROD_DATABASE_NAME]
 
     def get_database(self, name):
+        """Get a mocked database."""
         assert name == PROD_DATABASE_NAME
 
     def close(self):
+        """Close; don't do anything."""
         pass
 
+
 class TestResultsReader(unittest.TestCase):
-    """
-    Tests the ResultsReader object, which loads data
-    from the database stored by CIVETStore.
-    """
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    """Test TestHarness.resultsstore.resultsreader.ResultsReader."""
 
     @staticmethod
     def replaceJSONMetadata(results: dict):
-        """
-        Simplify the tester json_metadata for each test
-        so that we can avoid storing excessive content
-        that is meaningless for a test
-        """
+        """Simplify tester json_metadata to avoid storing excessive content."""
         for test in results_test_iterator(results):
-            json_metadata = test.value.get('tester', {}).get('json_metadata', {})
-            for key in json_metadata.keys():
-                json_metadata[key] = {'fake_metadata_for': key}
+            json_metadata = test.value.get("tester", {}).get("json_metadata", {})
+            for key in json_metadata:
+                json_metadata[key] = {"fake_metadata_for": key}
 
     def buildProdGetTestResultsGold(self):
-        """
-        Builds a gold file for testing getTestResults(), using data
-        from a live production database
-        """
+        """Build a gold file for for testing, using real data."""
+
         @dataclass
         class GoldTest:
             civet_version: int
@@ -85,11 +85,19 @@ class TestResultsReader(unittest.TestCase):
 
         # Static set of results from which to build the gold file
         gold_tests = [
-            GoldTest(civet_version=0, event_sha='968f537a3c89ffb556fb7da18da28da52b592ee0'),
-            GoldTest(civet_version=0, event_sha='3d48fa82c081e141fd86390dfb9edd1f11c984ca'),
-            GoldTest(civet_version=1, event_sha='45b8a536530388e7bb1ff563398b1e94f2d691fc'),
+            GoldTest(
+                civet_version=0, event_sha="968f537a3c89ffb556fb7da18da28da52b592ee0"
+            ),
+            GoldTest(
+                civet_version=0, event_sha="3d48fa82c081e141fd86390dfb9edd1f11c984ca"
+            ),
+            GoldTest(
+                civet_version=1, event_sha="45b8a536530388e7bb1ff563398b1e94f2d691fc"
+            ),
             # bump to civet_version=2
-            GoldTest(civet_version=2, event_sha='1134c7e383972783be2ea702f2738ece79fe6a59'),
+            GoldTest(
+                civet_version=2, event_sha="1134c7e383972783be2ea702f2738ece79fe6a59"
+            ),
             # bump to civet_version=3
             # - added event_id
             GoldTest(civet_version=3, event_id=258481),
@@ -101,7 +109,7 @@ class TestResultsReader(unittest.TestCase):
             # bump to civet_version=6
             # - tests can be stored with results
             # - store moved to CIVETStore object
-            GoldTest(civet_version=6, event_id=260206)
+            GoldTest(civet_version=6, event_id=260206),
         ]
 
         # This can be set to true once to overwrite the gold file
@@ -119,7 +127,9 @@ class TestResultsReader(unittest.TestCase):
             elif gold_test.event_id:
                 results = reader.getEventResults(gold_test.event_id)
             self.assertIsNotNone(results)
-            self.assertTrue(results.has_test(PROD_TEST_NAME.folder, PROD_TEST_NAME.name))
+            self.assertTrue(
+                results.has_test(PROD_TEST_NAME.folder, PROD_TEST_NAME.name)
+            )
 
             # Serialize result so tha we can store it in a file
             serialized = results.serialize(test_filter=[PROD_TEST_NAME])
@@ -143,32 +153,24 @@ class TestResultsReader(unittest.TestCase):
 
         # Rewrite the gold file if we set to do so
         if rewrite_gold:
-            with open(PROD_GET_TEST_RESULTS_GOLD_PATH, 'w') as f:
+            with open(PROD_GET_TEST_RESULTS_GOLD_PATH, "w") as f:
                 f.write(gold_dumped)
 
         return gold_dumped
 
     def testHasAuth(self):
-        """
-        Helper for checking if auth is available or not given an environment
-        variable. This lets us within CIVET tests assert whether or not
-        the authentication is available when we expect it to be so (or not).
-        """
-        if os.environ.get('TEST_RESULTSREADER_HAS_AUTH') is not None:
+        """Check if auth is available or not given environment variables."""
+        if os.environ.get("TEST_RESULTSREADER_HAS_AUTH") is not None:
             self.assertTrue(HAS_AUTH)
-        if os.environ.get('TEST_RESULTSREADER_MISSING_AUTH') is not None:
+        if os.environ.get("TEST_RESULTSREADER_MISSING_AUTH") is not None:
             self.assertFalse(HAS_AUTH)
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testGetTestResultsGold(self):
-        """
-        Tests that generating the gold file (using static test entries) using
-        the live server gets us the same gold file that we currently have,
-        which should not differ
-        """
+        """Generate the gold file using the live server and compare the result."""
         new_gold = self.buildProdGetTestResultsGold()
 
-        with open(PROD_GET_TEST_RESULTS_GOLD_PATH, 'r') as f:
+        with open(PROD_GET_TEST_RESULTS_GOLD_PATH, "r") as f:
             gold = json.load(f)
 
         # Augment JSON metadata that was changed in the gold store
@@ -177,12 +179,13 @@ class TestResultsReader(unittest.TestCase):
 
         self.assertEqual(gold, json.loads(new_gold))
 
-    def _testGetTestResults(self, reader: ResultsReader, **kwargs) -> list[StoredTestResult]:
-        """
-        Helper for testing getTestResults(), regardless of if
-        the data was produced from a gold file or live
-        """
-        results = reader.getTestResults(PROD_TEST_NAME.folder, PROD_TEST_NAME.name, **kwargs)
+    def _testGetTestResults(
+        self, reader: ResultsReader, **kwargs
+    ) -> list[StoredTestResult]:
+        """Runner for testing getTestResults()."""
+        results = reader.getTestResults(
+            PROD_TEST_NAME.folder, PROD_TEST_NAME.name, **kwargs
+        )
 
         last_id = None
         last_time = None
@@ -197,8 +200,10 @@ class TestResultsReader(unittest.TestCase):
             self.assertIsInstance(test_harness_results, StoredResult)
 
             # Test basic state for results header
-            self.assertRegex(test_harness_results.civet_job_url, r'civet.inl.gov/job/\d+')
-            self.assertEqual(test_harness_results.event_cause, 'push')
+            self.assertRegex(
+                test_harness_results.civet_job_url, r"civet.inl.gov/job/\d+"
+            )
+            self.assertEqual(test_harness_results.event_cause, "push")
 
             # Event ID as of civet version 3
             if result.results.civet_version > 2:
@@ -207,7 +212,7 @@ class TestResultsReader(unittest.TestCase):
                 self.assertIsNone(test_harness_results.event_id)
 
             # Should have CIVET state
-            self.assertEqual(result.event_cause, 'push')
+            self.assertEqual(result.event_cause, "push")
             self.assertIsNone(result.pr_num)
 
             # Test that basic entries have values
@@ -228,23 +233,21 @@ class TestResultsReader(unittest.TestCase):
     @staticmethod
     def deserializeGold() -> dict[ObjectId, dict]:
         """
-        Helper for deserializing the gold data into a dict
-        of result ID -> result data, sorted by ID
-        (latest event first)
+        Deserialize the gold data into a dict of result ID -> data.
+
+        Sorted by ID, thus latest event first.
         """
-        with open(PROD_GET_TEST_RESULTS_GOLD_PATH, 'r') as f:
+        with open(PROD_GET_TEST_RESULTS_GOLD_PATH, "r") as f:
             gold = json.load(f)
-        gold = {ObjectId(id): StoredResult.deserialize(entry) for id, entry in gold.items()}
+        gold = {
+            ObjectId(id): StoredResult.deserialize(entry) for id, entry in gold.items()
+        }
         return dict(OrderedDict(sorted(gold.items(), key=lambda x: x[0], reverse=True)))
 
-    @patch.object(ResultsReader, '_findResults')
-    @patch.object(StoredResult, '_find_test_data')
+    @patch.object(ResultsReader, "_findResults")
+    @patch.object(StoredResult, "_find_test_data")
     def testGetTestResultsTestsSeparate(self, patch_find_test_data, patch_find_results):
-        """
-        Tests calling getTestResults() using mocked returns from mongodb when
-        the tests are not stored within the result data entry, which requires
-        queries within StoredResult to get the test data
-        """
+        """Test getRestResults() with mocked database calls and separate tests."""
         gold = self.deserializeGold()
 
         tests: dict[ObjectId, dict] = {}
@@ -252,20 +255,23 @@ class TestResultsReader(unittest.TestCase):
         for result_entry in gold.values():
             for test in results_test_iterator(result_entry):
                 test_entry = test.value
-                if '_id' in test_entry:
-                    tests[test_entry['_id']] = deepcopy(test_entry)
-                    test.set_value(test_entry['_id'])
+                if "_id" in test_entry:
+                    tests[test_entry["_id"]] = deepcopy(test_entry)
+                    test.set_value(test_entry["_id"])
 
         # Mock getting a test from mongodb
         def find_test_data(id):
             return tests[id]
+
         patch_find_test_data.side_effect = find_test_data
+
         # Mock getting the results from mongodb
         def get_results_data(*args, **kwargs):
             filter = args[0]
-            if '_id' not in filter:
+            if "_id" not in filter:
                 return list(gold.values())
             return []
+
         patch_find_results.side_effect = get_results_data
 
         reader = ResultsReader(PROD_DATABASE_NAME, FakeMongoClient())
@@ -276,29 +282,26 @@ class TestResultsReader(unittest.TestCase):
         for i, entry in enumerate(gold):
             self.assertEqual(entry, test_results[i].result_id)
 
-    @patch.object(ResultsReader, '_findResults')
+    @patch.object(ResultsReader, "_findResults")
     def testGetTestResultsTestsIncluded(self, patch_find_results):
-        """
-        Tests calling getTestResults() using mocked returns from mongodb when
-        the tests are stored within the results entry, thus there are no
-        database calls from within the StoredResult
-        """
+        """Test getRestResults() with mocked database calls and combined tests."""
         gold = self.deserializeGold()
 
         # Delete the ID and result_id in the tests if they exist
         for result_entry in gold.values():
             for test in results_test_iterator(result_entry):
                 test_entry = test.value
-                for key in ['_id', 'result_id']:
+                for key in ["_id", "result_id"]:
                     if key in test_entry:
                         del test_entry[key]
 
         # Mock getting the results from mongodb
         def get_results_data(*args, **kwargs):
             filter = args[0]
-            if '_id' not in filter:
+            if "_id" not in filter:
                 return list(gold.values())
             return []
+
         patch_find_results.side_effect = get_results_data
 
         reader = ResultsReader(PROD_DATABASE_NAME, FakeMongoClient())
@@ -309,19 +312,18 @@ class TestResultsReader(unittest.TestCase):
         for i, entry in enumerate(gold):
             self.assertEqual(entry, test_results[i].result_id)
 
-    @patch.object(ResultsReader, '_findResults')
+    @patch.object(ResultsReader, "_findResults")
     def testGetTestResultsWithLimit(self, patch_find_results):
-        """
-        Tests calling getTestResults() with a limit
-        """
+        """Test getTestResults() with a limit."""
         gold = self.deserializeGold()
 
         # Mock getting the results from mongodb
         def get_results_data(*args, **kwargs):
             filter = args[0]
-            if '_id' not in filter:
+            if "_id" not in filter:
                 return list(gold.values())
             return []
+
         patch_find_results.side_effect = get_results_data
 
         reader = ResultsReader(PROD_DATABASE_NAME, FakeMongoClient())
@@ -341,9 +343,7 @@ class TestResultsReader(unittest.TestCase):
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testGetTestResultsLive(self):
-        """
-        Tests calling getTestResults() using the real server, if available
-        """
+        """Test getTestResults() using the real server, if available."""
         reader = ResultsReader(PROD_DATABASE_NAME)
 
         for limit in [1, 2, 3]:
@@ -351,43 +351,40 @@ class TestResultsReader(unittest.TestCase):
             self.assertEqual(len(results), limit)
             self.assertEqual(len(reader._latest_push_results), limit)
 
-    @unittest.skipIf(HAS_AUTH, f"Skipping because authentication is available")
+    @unittest.skipIf(HAS_AUTH, "Skipping because authentication is available")
     def testMissingClient(self):
-        """
-        Tests creating the ResultsReader without a client/auth
-        """
-        with self.assertRaisesRegex(ValueError, 'Must specify'):
-            ResultsReader('unused')
+        """Tests creating the ResultsReader without a client/auth."""
+        with self.assertRaisesRegex(ValueError, "Must specify"):
+            ResultsReader("unused")
 
     def testInvalidClient(self):
-        """
-        Tests creating the ResultsReader without a valid client/auth
-        """
+        """Test creating the ResultsReader without a valid client/auth."""
         with self.assertRaisesRegex(TypeError, "Invalid type for 'client'"):
-            ResultsReader('unused', 'bad_client')
+            ResultsReader("unused", "bad_client")
 
     def testMissingDatabase(self):
-        """
-        Tests creating the ResultsReader with a database that isn't found,
-        with a mocked database
-        """
+        """Tests creating the ResultsReader with an invalid database."""
+
         class BadDatabaseClient(FakeMongoClient):
             def list_database_names(self):
-                return ['foo']
+                return ["foo"]
 
-        with self.assertRaisesRegex(ValueError, f'Database {PROD_DATABASE_NAME} not found'):
+        with self.assertRaisesRegex(
+            ValueError, f"Database {PROD_DATABASE_NAME} not found"
+        ):
             ResultsReader(PROD_DATABASE_NAME, BadDatabaseClient())
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testMissingDatabaseLive(self):
-        """
-        Tests creating the ResultsReader with a database that isn't found
-        """
-        name = 'foo1234'
-        with self.assertRaisesRegex(ValueError, f'Database {name} not found'):
+        """Test creating the ResultsReader with a database that isn't found."""
+        name = "foo1234"
+        with self.assertRaisesRegex(ValueError, f"Database {name} not found"):
             ResultsReader(name)
 
-    @unittest.skipUnless(os.environ.get('TEST_RESULTSREADER_READER'), f"Skipping because TEST_RESULTSREADER_READER not set")
+    @unittest.skipUnless(
+        os.environ.get("TEST_RESULTSREADER_READER"),
+        "Skipping because TEST_RESULTSREADER_READER not set",
+    )
     def testGetTestsWithPRLive(self):
         """
         Tests getTestsResults when we have PR/event data in the test database.
@@ -397,30 +394,32 @@ class TestResultsReader(unittest.TestCase):
         """
         self.assertTrue(HAS_AUTH)
 
-        head_sha = os.environ.get('CIVET_HEAD_SHA')
+        head_sha = os.environ.get("CIVET_HEAD_SHA")
         self.assertIsNotNone(head_sha)
         self.assertEqual(len(head_sha), 40)
 
-        event_cause = os.environ.get('CIVET_EVENT_CAUSE')
+        event_cause = os.environ.get("CIVET_EVENT_CAUSE")
         self.assertIsNotNone(event_cause)
-        is_pr = event_cause.startswith('Pull')
+        is_pr = event_cause.startswith("Pull")
         pr_num = None
 
-        event_id = os.environ.get('CIVET_EVENT_ID')
+        event_id = os.environ.get("CIVET_EVENT_ID")
         self.assertIsNotNone(event_id)
         event_id = int(event_id)
 
-        job_id = os.environ.get('CIVET_JOB_ID')
+        job_id = os.environ.get("CIVET_JOB_ID")
         self.assertIsNotNone(job_id)
         job_id = int(job_id)
 
         if is_pr:
-            pr_num = os.environ.get('CIVET_PR_NUM')
-            self.assertIsNotNone('CIVET_PR_NUM')
+            pr_num = os.environ.get("CIVET_PR_NUM")
+            self.assertIsNotNone("CIVET_PR_NUM")
             pr_num = int(pr_num)
 
         reader = ResultsReader(TEST_DATABASE_NAME)
-        results = reader.getTestResults(TEST_TEST_NAME.folder, TEST_TEST_NAME.name, pr_num=pr_num)
+        results = reader.getTestResults(
+            TEST_TEST_NAME.folder, TEST_TEST_NAME.name, pr_num=pr_num
+        )
         self.assertGreater(len(results), 0)
 
         # Make sure we have the right test
@@ -435,12 +434,12 @@ class TestResultsReader(unittest.TestCase):
         if is_pr:
             self.assertEqual(result.pr_num, pr_num)
             self.assertEqual(result.event_sha, head_sha)
-            self.assertEqual(result.event_cause, 'pr')
+            self.assertEqual(result.event_cause, "pr")
         # If we're not on a PR, the latest data
         # should be a push event
         else:
             self.assertIsNone(result.pr_num)
-            self.assertEqual(result.event_cause, 'push')
+            self.assertEqual(result.event_cause, "push")
 
             event_results = [r for r in results if r.event_sha == head_sha]
             self.assertEqual(len(event_results), 1)
@@ -452,22 +451,25 @@ class TestResultsReader(unittest.TestCase):
         start_index = 1 if is_pr else 0
         last_id = None
         for result in results[start_index:]:
-            self.assertNotEqual(result.event_cause, 'pr')
+            self.assertNotEqual(result.event_cause, "pr")
             if last_id is not None:
                 self.assertGreater(last_id, result.id)
             last_id = result.id
 
-    @unittest.skipUnless(os.environ.get('TEST_RESULTSREADER_READER'), f"Skipping because TEST_RESULTSREADER_READER not set")
+    @unittest.skipUnless(
+        os.environ.get("TEST_RESULTSREADER_READER"),
+        "Skipping because TEST_RESULTSREADER_READER not set",
+    )
     def testGetEventResultsLive(self):
         """
-        Tests getEventResults when we have PR/event data in the test database.
+        Test getEventResults() when we have PR/event data in the test database.
 
         This is explicitly tested with CIVET, where a step before this
         or a dependency is able to contribute to TEST_DATABASE_NAME
         """
         self.assertTrue(HAS_AUTH)
 
-        event_id = os.environ.get('CIVET_EVENT_ID')
+        event_id = os.environ.get("CIVET_EVENT_ID")
         self.assertIsNotNone(event_id)
         event_id = int(event_id)
 
@@ -481,17 +483,20 @@ class TestResultsReader(unittest.TestCase):
         self.assertIsNotNone(test_results)
         self.assertEqual(test_results.name, TEST_TEST_NAME)
 
-    @unittest.skipUnless(os.environ.get('TEST_RESULTSREADER_READER'), f"Skipping because TEST_RESULTSREADER_READER not set")
+    @unittest.skipUnless(
+        os.environ.get("TEST_RESULTSREADER_READER"),
+        "Skipping because TEST_RESULTSREADER_READER not set",
+    )
     def testGetCommitResultsLive(self):
         """
-        Tests getCommitResults when we have PR/event data in the test database.
+        Test getCommitResults() when we have PR/event data in the test database.
 
         This is explicitly tested with CIVET, where a step before this
         or a dependency is able to contribute to TEST_DATABASE_NAME
         """
         self.assertTrue(HAS_AUTH)
 
-        head_sha = os.environ.get('CIVET_HEAD_SHA')
+        head_sha = os.environ.get("CIVET_HEAD_SHA")
         self.assertIsNotNone(head_sha)
 
         reader = ResultsReader(TEST_DATABASE_NAME)
@@ -504,5 +509,6 @@ class TestResultsReader(unittest.TestCase):
         self.assertIsNotNone(test_results)
         self.assertEqual(test_results.name, TEST_TEST_NAME)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

@@ -1,52 +1,76 @@
-#* This file is part of the MOOSE framework
-#* https://mooseframework.inl.gov
-#*
-#* All rights reserved, see COPYRIGHT for full restrictions
-#* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-#*
-#* Licensed under LGPL 2.1, please see LICENSE for details
-#* https://www.gnu.org/licenses/lgpl-2.1.html
+# This file is part of the MOOSE framework
+# https://mooseframework.inl.gov
+#
+# All rights reserved, see COPYRIGHT for full restrictions
+# https://github.com/idaholab/moose/blob/master/COPYRIGHT
+#
+# Licensed under LGPL 2.1, please see LICENSE for details
+# https://www.gnu.org/licenses/lgpl-2.1.html
 
-import os
-import yaml
-from dataclasses import dataclass
-from typing import Optional, Union, Iterator
+"""Implements ResultsReader for reading results from a database."""
+
+from typing import Iterator, Optional
 
 import pymongo
-from pymongo.cursor import Cursor
 from bson.objectid import ObjectId
 
+from TestHarness.resultsstore.auth import (
+    Authentication,
+    has_authentication,
+    load_authentication,
+)
 from TestHarness.resultsstore.storedresults import StoredResult, StoredTestResult
-from TestHarness.resultsstore.auth import Authentication, load_authentication, has_authentication
 
 NoneType = type(None)
 
-class ResultsReader:
-    """
-    Utility for reading test harness results stored in a mongodb database
-    """
-    # Default sort ID from mongo
-    mongo_sort_id = sort=[('_id', pymongo.DESCENDING)]
 
-    def __init__(self, database: str, client: Optional[pymongo.MongoClient | Authentication] = None):
-        self._client: pymongo.MongoClient = None
+class ResultsReader:
+    """Utility for reading test harness results stored in a mongodb database."""
+
+    # Default sort ID from mongo
+    mongo_sort_id = sort = [("_id", pymongo.DESCENDING)]
+
+    def __init__(
+        self,
+        database: str,
+        client: Optional[pymongo.MongoClient | Authentication] = None,
+    ):
+        """
+        Initialize the reader.
+
+        Parameters
+        ----------
+        database : str
+            The name of the database to connect to.
+
+        Optional parameters
+        -------------------
+        client : Optional[pymongo.MongoClient | Authentication]
+            The client to use or authentication to connect with.
+
+        """
         assert isinstance(database, str)
 
         # No client; test the environment
         if client is None:
             client = self.loadEnvironmentAuthentication()
             if client is None:
-                raise ValueError("Must specify either 'client' or set RESULTS_READER_AUTH_FILE with credentials")
+                raise ValueError(
+                    "Must specify either 'client' or set RESULTS_READER_AUTH_FILE "
+                    "with credentials"
+                )
         if isinstance(client, pymongo.MongoClient):
             self._client = client
         elif isinstance(client, Authentication):
-            self._client = pymongo.MongoClient(client.host, username=client.username, password=client.password)
+            self._client = pymongo.MongoClient(
+                client.host, username=client.username, password=client.password
+            )
         else:
-            raise TypeError(f"Invalid type for 'client'")
+            raise TypeError("Invalid type for 'client'")
 
         # Get the database
         if database not in self._client.list_database_names():
-            raise ValueError(f'Database {database} not found')
+            raise ValueError(f"Database {database} not found")
         self._db = self._client.get_database(database)
 
         # Cached results, by ID
@@ -64,30 +88,27 @@ class ResultsReader:
         self._last_latest_push_event_id: Optional[ObjectId] = None
 
     def __del__(self):
-        # Clean up the client if it is loaded
+        """Clean up the client if it is loaded."""
         if self._client is not None:
             self._client.close()
 
     @staticmethod
     def loadEnvironmentAuthentication() -> Optional[Authentication]:
-        """
-        Attempts to first load the authentication environment from
-        env vars RESULTS_READER_AUTH_[HOST,USERNAME,PASSWORD] if
-        available. Otherwise, tries to load the authentication
-        environment from the file set by env var
-        RESULTS_READER_AUTH_FILE if it is available.
-        """
-        return load_authentication('RESULTS_READER')
+        """Attempt to load the authentication environment."""
+        return load_authentication("RESULTS_READER")
 
     @staticmethod
     def hasEnvironmentAuthentication() -> bool:
-        """
-        Checks whether or not environment authentication is available
-        """
-        return has_authentication('RESULTS_READER')
+        """Check whether or not environment authentication is available."""
+        return has_authentication("RESULTS_READER")
 
-    def getTestResults(self, folder_name: str, test_name: str, limit: int = 50,
-                       pr_num: Optional[int] = None) -> list[StoredTestResult]:
+    def getTestResults(
+        self,
+        folder_name: str,
+        test_name: str,
+        limit: int = 50,
+        pr_num: Optional[int] = None,
+    ) -> list[StoredTestResult]:
         """
         Get the StoredTestResults given a specific test.
 
@@ -97,15 +118,15 @@ class ResultsReader:
         Optional args:
             limit: The limit in the number of results to get
             pr_num: A pull request to also pull from
+
         """
         test_results: list[StoredTestResult] = []
 
         # Append the PR result at the top, if any
         if pr_num is not None:
             pr_result = self.getPRResults(pr_num)
-            if pr_result is not None:
-                if pr_result.has_test(folder_name, test_name):
-                    test_results.append(pr_result.get_test(folder_name, test_name))
+            if pr_result is not None and pr_result.has_test(folder_name, test_name):
+                test_results.append(pr_result.get_test(folder_name, test_name))
 
         # Get the event results, limited to limit or
         # (limit - 1) if we have a PR
@@ -121,18 +142,16 @@ class ResultsReader:
 
     def _findResults(self, *args, **kwargs) -> list[dict]:
         """
-        Helper for querying the results database collection
+        Query the results database collection.
 
-        Used so that it can be easily movcked in unit tests
+        Used so that it can be easily mocked in unit tests.
         """
-        kwargs['sort'] = self.mongo_sort_id
+        kwargs["sort"] = self.mongo_sort_id
         with self._db.results.find(*args, **kwargs) as cursor:
-           return [d for d in cursor]
+            return [d for d in cursor]
 
     def getLatestPushResults(self, num: int) -> list[StoredResult]:
-        """
-        Get the latest results from push events, newest to oldest
-        """
+        """Get the latest results from push events, newest to oldest."""
         assert isinstance(num, int)
         assert num > 0
 
@@ -143,12 +162,14 @@ class ResultsReader:
                 break
         return results
 
-    def iterateLatestPushResults(self, num: Optional[int] = None) -> Iterator[StoredResult]:
+    def iterateLatestPushResults(
+        self, num: Optional[int] = None
+    ) -> Iterator[StoredResult]:
         """
-        Iterate through the latest unique push event results
+        Iterate through the latest unique push event results.
 
         The number of needed results can optionally be passed
-        in order to optimize the number of database queries
+        in order to optimize the number of database queries.
         """
         assert isinstance(num, (int, NoneType))
 
@@ -169,7 +190,7 @@ class ResultsReader:
                 filter = {"event_cause": {"$ne": "pr"}}
                 # Only search past what we've searched so far
                 if self._last_latest_push_event_id is not None:
-                    filter['_id'] = {"$lt": self._last_latest_push_event_id}
+                    filter["_id"] = {"$lt": self._last_latest_push_event_id}
 
                 cursor = self._findResults(filter, limit=batch_size)
 
@@ -181,7 +202,7 @@ class ResultsReader:
                     batch_size = 1
 
                 for data in cursor:
-                    id = data.get('_id')
+                    id = data.get("_id")
                     assert isinstance(id, ObjectId)
 
                     # So that we know where to search next time
@@ -190,9 +211,10 @@ class ResultsReader:
                     # Due to invalidation, we could have multiple results
                     # from the same event. If we already have this event
                     # (the latest version of it), skip this one
-                    event_id = data.get('event_id')
-                    if event_id is not None and \
-                        any(r.event_id == event_id for r in self._latest_push_results):
+                    event_id = data.get("event_id")
+                    if event_id is not None and any(
+                        r.event_id == event_id for r in self._latest_push_results
+                    ):
                         continue
 
                     # Build/get the result and store it for future use
@@ -205,12 +227,9 @@ class ResultsReader:
             else:
                 return
 
-    def _getCachedResults(self, index: str, value) -> StoredResult:
-        """
-        Internal helper for getting a result given a filter and storing
-        it in a cache given a key
-        """
-        cache = getattr(self, f'_{index}_results')
+    def _getCachedResults(self, index: str, value) -> Optional[StoredResult]:
+        """Get a result given a filter and store it in the cache."""
+        cache = getattr(self, f"_{index}_results")
 
         # Value exists in the cache
         cached_value = cache.get(value)
@@ -231,37 +250,28 @@ class ResultsReader:
         cache[value] = result
         return result
 
-    def getEventResults(self, event_id: int) -> Union[StoredResult, None]:
-        """
-        Get the StoredResult for a given event, if any
-        """
+    def getEventResults(self, event_id: int) -> Optional[StoredResult]:
+        """Get the StoredResult for a given event, if any."""
         assert isinstance(event_id, int)
-        return self._getCachedResults('event_id', event_id)
+        return self._getCachedResults("event_id", event_id)
 
-    def getPRResults(self, pr_num: int) -> Union[StoredResult, None]:
-        """
-        Get the StoredResult for a given PR, if any
-        """
+    def getPRResults(self, pr_num: int) -> Optional[StoredResult]:
+        """Get the StoredResult for a given PR, if any."""
         assert isinstance(pr_num, int)
-        return self._getCachedResults('pr_num', pr_num)
+        return self._getCachedResults("pr_num", pr_num)
 
-    def getCommitResults(self, commit_sha: str) -> Union[StoredResult, None]:
-        """
-        Get the StoredResult for a given commit, if any
-        """
+    def getCommitResults(self, commit_sha: str) -> Optional[StoredResult]:
+        """Get the StoredResult for a given commit, if any."""
         assert isinstance(commit_sha, str)
         assert len(commit_sha) == 40
-        return self._getCachedResults('event_sha', commit_sha)
+        return self._getCachedResults("event_sha", commit_sha)
 
-    def _buildResults(self, data: dict) -> StoredTestResult:
-        """
-        Internal helper for building a StoredTestResult given
-        the data from a results entry, also storing it in the cache
-        """
+    def _buildResults(self, data: dict) -> StoredResult:
+        """Build a StoredTestResult given its data and store in the cache."""
         assert isinstance(data, dict)
-        assert '_id' in data
+        assert "_id" in data
 
-        id = data['_id']
+        id = data["_id"]
         assert isinstance(id, ObjectId)
 
         result = self._results.get(id)
@@ -269,7 +279,7 @@ class ResultsReader:
             try:
                 result = StoredResult(data, self._db)
             except Exception as e:
-                raise ValueError(f'Failed to build result _id={id}') from e
+                raise ValueError(f"Failed to build result _id={id}") from e
             self._results[id] = result
 
         return result

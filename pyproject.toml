@@ -3,12 +3,18 @@ target-version = ['py310', 'py311', 'py312', 'py313']
 required-version = '25.1.0'
 include = '''
 (
-  ^\/python\/moosecontrol\/.*.py$
+  ^\/python\/moosecontrol\/.*.py$ |
+  ^\/python\/TestHarness\/resultsstore\/.*.py$ |
+  ^\/python\/TestHarness/tests/test_resultsstore.*.py$
 )
 '''
 
 [tool.ruff]
-include = ["python/moosecontrol/**/*.py"]
+include = [
+  "python/moosecontrol/**/*.py",
+  "python/TestHarness/resultsstore/**/*.py",
+  "python/TestHarness/tests/test_resultsstore*.py"
+]
 exclude = ["python/moosecontrol/requests_unixsocket/*.py"]
 
 [tool.ruff.lint]
