@@ -37,6 +37,6 @@ ADOneD3EqnMomentumFormLoss::ADOneD3EqnMomentumFormLoss(const InputParameters & p
 ADReal
 ADOneD3EqnMomentumFormLoss::computeQpResidual()
 {
-  return _K_prime[_qp] * 0.5 * _rho[_qp] * _vel[_qp] * std::abs(_vel[_qp]) * _A[_qp] *
-         _test[_i][_qp];
+  using std::abs;
+  return _K_prime[_qp] * 0.5 * _rho[_qp] * _vel[_qp] * abs(_vel[_qp]) * _A[_qp] * _test[_i][_qp];
 }

@@ -1,0 +1,19 @@
+[Tests]
+  issues = '#31498'
+  design = 'ArrayReactionNodalKernel.md ArrayTimeDerivativeNodalKernel.md'
+  [test]
+    requirement = 'The system shall be able to solve du/dt + u = 0 ODEs at every node in the domain for variables stored in an array format and'
+    [result_diff]
+      type = CSVDiff
+      input = test.i
+      csvdiff = test_out.csv
+      detail = 'produce expected results and'
+    []
+    [jac]
+      type = PetscJacobianTester
+      input = test.i
+      run_sim = true
+      detail = 'show the correct Jacobian.'
+    []
+  []
+[]

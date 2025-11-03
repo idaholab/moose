@@ -89,10 +89,11 @@ template <bool is_ad>
 void
 OutputTestMaterialTempl<is_ad>::computeQpProperties()
 {
+  using std::floor, std::ceil;
   Point p = _q_point[_qp];
-  GenericReal<is_ad> v = std::floor(_variable[_qp] + 0.5);
-  GenericReal<is_ad> x = std::ceil(p(0));
-  GenericReal<is_ad> y = std::ceil(p(1));
+  GenericReal<is_ad> v = floor(_variable[_qp] + 0.5);
+  GenericReal<is_ad> x = ceil(p(0));
+  GenericReal<is_ad> y = ceil(p(1));
 
   _real_property[_qp] = v + y + x + _factor;
 

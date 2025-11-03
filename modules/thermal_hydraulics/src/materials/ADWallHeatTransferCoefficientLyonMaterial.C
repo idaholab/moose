@@ -58,7 +58,8 @@ ADWallHeatTransferCoefficientLyonMaterial::ADWallHeatTransferCoefficientLyonMate
 void
 ADWallHeatTransferCoefficientLyonMaterial::computeQpProperties()
 {
-  ADReal Pe = std::max(1.0, THM::Peclet(1., _cp[_qp], _rho[_qp], _vel[_qp], _D_h[_qp], _k[_qp]));
-  ADReal Nu = 7 + 0.025 * std::pow(Pe, 0.8);
+  using std::max, std::pow;
+  ADReal Pe = max(1.0, THM::Peclet(1., _cp[_qp], _rho[_qp], _vel[_qp], _D_h[_qp], _k[_qp]));
+  ADReal Nu = 7 + 0.025 * pow(Pe, 0.8);
   _Hw[_qp] = THM::wallHeatTransferCoefficient(Nu, _k[_qp], _D_h[_qp]);
 }

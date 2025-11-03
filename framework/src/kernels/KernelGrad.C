@@ -89,15 +89,3 @@ KernelGrad::computeOffDiagJacobian(const unsigned int jvar_num)
     accumulateTaggedLocalMatrix();
   }
 }
-
-Real
-KernelGrad::computeQpResidual()
-{
-  return 0.0;
-}
-
-RealGradient
-KernelGrad::precomputeQpJacobian()
-{
-  return RealGradient(0.0);
-}

@@ -271,19 +271,20 @@ ModularGapConductanceConstraint::computeSurfaceIntegrationFactor() const
 ADReal
 ModularGapConductanceConstraint::computeGapLength() const
 {
+  using std::log, std::min;
 
   if (_gap_geometry_type == GapGeometry::CYLINDER)
   {
-    const auto denominator = _radius * std::log(_r2 / _r1);
-    return std::min(denominator, _max_gap);
+    const auto denominator = _radius * log(_r2 / _r1);
+    return min(denominator, _max_gap);
   }
   else if (_gap_geometry_type == GapGeometry::SPHERE)
   {
     const auto denominator = _radius * _radius * ((1.0 / _r1) - (1.0 / _r2));
-    return std::min(denominator, _max_gap);
+    return min(denominator, _max_gap);
   }
   else
-    return std::min(_r2 - _r1, _max_gap);
+    return min(_r2 - _r1, _max_gap);
 }
 
 void

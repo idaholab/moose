@@ -42,6 +42,8 @@ ADSimpleTurbine1PhaseUserObject::computeFluxesAndResiduals(const unsigned int & 
 {
   ADJunctionParallelChannels1PhaseUserObject::computeFluxesAndResiduals(c);
 
+  using std::pow;
+
   if ((c == 0) && _on)
   {
     const auto & rhouV = _cached_junction_var_values[VolumeJunction1Phase::RHOUV_INDEX];
@@ -66,8 +68,7 @@ ADSimpleTurbine1PhaseUserObject::computeFluxesAndResiduals(const unsigned int & 
     const ADReal p_in = _fp.p_from_v_e(v_in, e_in);
     const ADReal T_in = _fp.T_from_v_e(v_in, e_in);
     const ADReal h_in = _fp.h_from_p_T(p_in, T_in);
-    const ADReal delta_p =
-        p_in * (1 - std::pow((1 - _W_dot / _rhouA[0] / h_in), (gamma / (gamma - 1))));
+    const ADReal delta_p = p_in * (1 - pow((1 - _W_dot / _rhouA[0] / h_in), (gamma / (gamma - 1))));
 
     const ADRealVectorValue S_M = delta_p * _A[0] * di;
 

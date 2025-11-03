@@ -1,9 +1,6 @@
 [Tests]
-  issues = '#23359 #27909'
+  issues = '#23359 #27909 #31755'
   design = 'syntax/Controls/index.md source/controls/WebServerControl.md'
-
-  # Not really sure if all of these prereqs are required as I can't guarantee
-  # if we'll get unique ports if we call them all at once
 
   [control]
     requirement = 'The system shall support controlling a parameter via a REST API with a parameter type of a'
@@ -193,8 +190,6 @@
     valgrind = 'none' # http library is not completely valgrind clean
   []
 
-  # We cannot run these tests with valgrind because they come from the python script, which will terminate
-  # the MOOSE process early and therefore we won't receive and of the valgrind summary output
   [errors]
     requirement = 'The system shall report a reasonable error when interacting with the REST API when'
     [set_controllable_no_exist]
@@ -202,7 +197,7 @@
       input = 'wait_initial.i'
       command_proxy = 'errors.py set_controllable_no_exist'
       required_python_packages = requests
-      expect_err = "WebServerControl error: The controllable parameter 'no_exist' was not found"
+      expect_err = 'Request to (.*)set/controllable: Controllable parameter \'no_exist\' not found'
       detail = 'setting a controllable parameter that does not exist'
       valgrind = none
     []
@@ -211,7 +206,7 @@
       input = 'wait_initial.i'
       command_proxy = 'errors.py postprocessor_no_exist'
       required_python_packages = requests
-      expect_err = "WebServerControl error: The postprocessor 'no_exist' was not found"
+      expect_err = 'Request to (.*)get/postprocessor: Postprocessor \'no_exist\' not found'
       detail = 'getting a postprocessor that does not exist'
       valgrind = none
     []
@@ -220,7 +215,7 @@
       input = 'wait_initial.i'
       command_proxy = 'errors.py set_controllable_unregistered_type'
       required_python_packages = requests
-      expect_err = "WebServerControl error: The type 'BadType' is not registered for setting a controllable parameter"
+      expect_err = 'Request to (.*)set/controllable: Type \'BadType\' not registered for setting a controllable parameter'
       detail = 'setting a controllable parameter whose type is not supported'
       valgrind = none
     []
@@ -230,7 +225,7 @@
       command_proxy = 'errors.py set_controllable_bad_convert'
       required_python_packages = requests
       cli_args = 'Outputs/json/type=JSON'
-      expect_err = 'The value "foo" of JSON type string is not of the expected JSON type bool'
+      expect_err = 'Request to (.*)set/controllable: While parsing \'value\': (.*) type must be boolean, but is string'
       detail = 'setting a controllable parameter with an incompatible JSON type'
       valgrind = none
     []
@@ -241,37 +236,38 @@
       required_python_packages = requests
       cli_args = 'Reporters/test/type=WebServerControlTestReporter
                   Reporters/test/vec_real_value=0'
-      expect_err = 'The value \'1234\' of type number is not an array'
+      expect_err = 'Request to (.*)set/controllable: While parsing \'value\': (.*) type must be array, but is number'
       detail = 'setting a controllable parameter with a type that does not match'
       valgrind = none
     []
-    [set_controllable_matrix_bad_convert1]
+    [set_realeigenmatrix_bad_convert1]
       type = RunException
       input = 'control_reporter.i'
-      command_proxy = 'errors.py set_controllable_matrix_bad_convert1'
+      command_proxy = 'errors.py set_realeigenmatrix_bad_convert1'
       required_python_packages = requests
       cli_args = 'Reporters/test/matrix_value="0 1"'
-      expect_err = 'The value \'1234\' of type number is not an array'
+      expect_err = 'Request to (.*)set/controllable: While parsing \'value\': (.*) type must be array, but is number'
       detail = 'setting a matrix controllable parameter that is not an array'
+      valgrind = 'none' # http library is not completely valgrind clean
     []
-    [set_controllable_matrix_bad_convert2]
+    [set_realeigenmatrix_bad_convert2]
       type = RunException
       input = 'control_reporter.i'
-      command_proxy = 'errors.py set_controllable_matrix_bad_convert2'
+      command_proxy = 'errors.py set_realeigenmatrix_bad_convert2'
       required_python_packages = requests
       cli_args = 'Reporters/test/matrix_value="0 1"'
-      expect_err = 'Element 0 of \'[ 1234 ]\' of type number is not an array'
-      match_literal = true
+      expect_err = 'Request to (.*)set/controllable: While parsing \'value\': (.*) type must be array, but is number'
+      valgrind = 'none' # http library is not completely valgrind clean
       detail = 'setting a matrix controllable parameter that is not an array of arrays'
     []
-    [set_controllable_matrix_jagged]
+    [set_realeigenmatrix_jagged]
       type = RunException
       input = 'control_reporter.i'
-      command_proxy = 'errors.py set_controllable_matrix_jagged'
+      command_proxy = 'errors.py set_realeigenmatrix_jagged'
       required_python_packages = requests
       cli_args = 'Reporters/test/matrix_value="0 1"'
-      expect_err = 'The matrix \'[ [ 11, 12 ], [ 21 ] ]\' is jagged.'
-      match_literal = true
+      expect_err = 'Request to (.*)set/controllable: While parsing \'value\': Matrix is jagged'
+      valgrind = 'none' # http library is not completely valgrind clean
       detail = 'setting a matrix controllable parameter that is jagged'
     []
   []
@@ -293,5 +289,37 @@
       detail = 'both a port and a file were specified to listen on'
       valgrind = 'none' # http library is not completely valgrind clean
     []
+  []
+
+  [kill]
+    type = RunException
+    input = 'wait_initial.i'
+    command_proxy = 'kill.py'
+    required_python_packages = requests
+    expect_err = "Client sent kill command; exiting"
+    valgrind = 'none' # http library is not completely valgrind clean
+    requirement = 'The system shall support killing a running MOOSE simulation via a REST API'
+  []
+
+  [initial_timeout]
+    type = RunException
+    input = 'wait_initial.i'
+    command_proxy = 'initial_timeout.py'
+    required_python_packages = requests
+    cli_args = 'Controls/web_server/initial_client_timeout=0.01'
+    expect_err = "The client timed out during initialization(.*)The timeout is 0.01 seconds and is set by the 'initial_client_timeout' parameter"
+    valgrind = 'none' # http library is not completely valgrind clean
+    requirement = 'The system shall support timing out during initialization when running a MOOSE simulation via a REST API'
+  []
+
+  [timeout]
+    type = RunException
+    input = 'wait_initial.i'
+    command_proxy = 'timeout.py'
+    required_python_packages = requests
+    cli_args = 'Controls/web_server/client_timeout=0.01'
+    expect_err = "The client timed out(.*)The timeout is 0.01 seconds and is set by the 'client_timeout' parameter"
+    valgrind = 'none' # http library is not completely valgrind clean
+    requirement = 'The system shall support timing out during a solve when running a MOOSE simulation via a REST API'
   []
 []

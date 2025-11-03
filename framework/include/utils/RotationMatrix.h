@@ -24,8 +24,9 @@ GenericRealTensorValue<is_ad>
 rotVecToZ(GenericRealVectorValue<is_ad> vec)
 // provides a rotation matrix that will rotate the vector vec to the z axis (the "2" direction)
 {
+  using std::sqrt, std::abs;
   // ensure that vec is normalised
-  vec /= std::sqrt(vec * vec);
+  vec /= sqrt(vec * vec);
 
   // construct v0 and v1 to be orthonormal to vec
   // and form a RH basis, that is, so v1 x vec = v0
@@ -33,7 +34,7 @@ rotVecToZ(GenericRealVectorValue<is_ad> vec)
   // Use Gram-Schmidt method to find v1.
   GenericRealVectorValue<is_ad> v1;
   // Need a prototype for v1 first, and this is done by looking at the smallest component of vec
-  GenericRealVectorValue<is_ad> w(std::abs(vec(0)), std::abs(vec(1)), std::abs(vec(2)));
+  GenericRealVectorValue<is_ad> w(abs(vec(0)), abs(vec(1)), abs(vec(2)));
   if ((w(2) >= w(1) && w(1) >= w(0)) || (w(1) >= w(2) && w(2) >= w(0)))
     // vec(0) is the smallest component
     v1(0) = 1;
@@ -45,7 +46,7 @@ rotVecToZ(GenericRealVectorValue<is_ad> vec)
     v1(2) = 1;
   // now Gram-Schmidt
   v1 -= (v1 * vec) * vec;
-  v1 /= std::sqrt(v1 * v1);
+  v1 /= sqrt(v1 * v1);
 
   // now use v0 = v1 x vec
   GenericRealVectorValue<is_ad> v0;
@@ -76,9 +77,10 @@ GenericRealTensorValue<is_ad>
 rotVec2DToX(const GenericRealVectorValue<is_ad> & vec)
 // provides a rotation matrix that will rotate the vector `vec` to the [1,0,0], assuming vec[2]==0
 {
-  const GenericReal<is_ad> theta = std::atan2(vec(1), vec(0));
-  const GenericReal<is_ad> st = std::sin(theta);
-  const GenericReal<is_ad> ct = std::cos(theta);
+  using std::atan2, std::sin, std::cos;
+  const GenericReal<is_ad> theta = atan2(vec(1), vec(0));
+  const GenericReal<is_ad> st = sin(theta);
+  const GenericReal<is_ad> ct = cos(theta);
   return GenericRealTensorValue<is_ad>(ct, st, 0., -st, ct, 0., 0., 0., 1.);
 }
 }

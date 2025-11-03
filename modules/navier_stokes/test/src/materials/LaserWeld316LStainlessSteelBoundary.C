@@ -62,17 +62,18 @@ LaserWeld316LStainlessSteelBoundary::LaserWeld316LStainlessSteelBoundary(
 void
 LaserWeld316LStainlessSteelBoundary::computeQpProperties()
 {
+  using std::exp;
+
   // Below the vaporization temperature we don't have recoil pressure
   if (_temperature[_qp] < _T_v)
     _rc_pressure[_qp] = 0;
   else
     _rc_pressure[_qp] =
-        0.54 * _P0 *
-        std::exp(_L_v * _M / _R * (_temperature[_qp] - _T_v) / (_temperature[_qp] * _T_v));
+        0.54 * _P0 * exp(_L_v * _M / _R * (_temperature[_qp] - _T_v) / (_temperature[_qp] * _T_v));
 
   // The surface tension treatment methodology is from:
-  // Noble, David R et al, Use of Aria to simulate laser weld pool dynamics for neutron generator production,
-  // 2007, Sandia National Laboratories (SNL), Albuquerque, NM, and Livermore, CA
+  // Noble, David R et al, Use of Aria to simulate laser weld pool dynamics for neutron generator
+  // production, 2007, Sandia National Laboratories (SNL), Albuquerque, NM, and Livermore, CA
   //
   // with the surface tension from:
   //
@@ -82,9 +83,9 @@ LaserWeld316LStainlessSteelBoundary::computeQpProperties()
   _grad_surface_tension[_qp] = _c_gamma1 * _grad_temperature[_qp];
 
   // These terms are needed for the treatment in:
-  // Cairncross RA, Schunk PR, Baer TA, Rao RR, Sackinger PA. A finite element method for free surface
-  // flows of incompressible fluids in three dimensions. Part I. Boundary fitted mesh motion.
-  // International journal for numerical methods in fluids. 2000 Jun 15;33(3):375-403.
+  // Cairncross RA, Schunk PR, Baer TA, Rao RR, Sackinger PA. A finite element method for free
+  // surface flows of incompressible fluids in three dimensions. Part I. Boundary fitted mesh
+  // motion. International journal for numerical methods in fluids. 2000 Jun 15;33(3):375-403.
   _surface_term_curvature[_qp] =
       -2. * _ad_curvatures[_qp] * _surface_tension[_qp] * _ad_normals[_qp];
   _surface_term_gradient1[_qp] = -_grad_surface_tension[_qp];

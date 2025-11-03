@@ -9,8 +9,6 @@
 
 #include "ArrayConstantIC.h"
 
-#include "libmesh/point.h"
-
 registerMooseObject("MooseApp", ArrayConstantIC);
 
 InputParameters

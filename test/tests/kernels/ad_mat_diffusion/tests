@@ -1,5 +1,5 @@
 [Tests]
-  design = 'ADMatDiffusion.md'
+  design = 'MatDiffusion.md'
   [1D]
     requirement = "The system shall solve a one-dimensional Diffusion problem with a material "
                   "property diffusivity and match a known solution."

@@ -27,8 +27,6 @@ public:
   TimeNodalKernel(const InputParameters & parameters);
 
 protected:
-  virtual void computeResidual() override;
-
   /// Time derivative of u
   const VariableValue & _u_dot;
 

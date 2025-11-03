@@ -19,7 +19,9 @@ import pyhit
 import moosetree
 
 if importlib.util.find_spec("moose_stochastic_tools") is None:
-    _moose_dir = os.environ.get("MOOSE_DIR", os.path.join(os.path.dirname(__file__), *([".."] * 5)))
+    _moose_dir = os.environ.get(
+        "MOOSE_DIR", os.path.join(os.path.dirname(__file__), *([".."] * 5))
+    )
     _stm_python_path = os.path.abspath(
         os.path.join(_moose_dir, "modules", "stochastic_tools", "python")
     )
@@ -182,7 +184,7 @@ class TestStochasticControl(unittest.TestCase):
 
         self.checkWithBase(control._root)
         self.assertIn(
-            f"foo-opt -i {self.input_file_name}", " ".join(control._moose_command)
+            f"foo-opt -i {self.input_file_name}", " ".join(control.runner.command)
         )
 
     def testNormal(self):
@@ -301,7 +303,7 @@ class TestStochasticControl(unittest.TestCase):
         control = StochasticControl(
             "foo-opt", "bar.i", ["bar_param"], ["bar_qoi"], opts
         )
-        self.assertIn("mpifun -n 3", " ".join(control._moose_command))
+        self.assertIn("mpifun -n 3", " ".join(control.runner.command))
         self.checkParameter(
             control._root,
             f"/Samplers/{StochasticControl.sampler_name}/min_procs_per_row",
@@ -332,7 +334,7 @@ class TestStochasticControl(unittest.TestCase):
         # Moose command
         self.assertIn(
             "Outputs/json=true Executioner/num_steps=3 --error",
-            " ".join(control._moose_command),
+            " ".join(control.runner.command),
         )
 
         # Physics command-line
@@ -446,7 +448,7 @@ class TestStochasticControlRun(unittest.TestCase):
         )
 
         # Tests before initialization
-        self.assertFalse(control._initialized)
+        self.assertFalse(control.initialized)
         # Single number
         x = np.random.rand(1, 1)
         control.setInput(x)
@@ -472,13 +474,13 @@ class TestStochasticControlRun(unittest.TestCase):
         self.assertTrue(np.allclose(x, mat))
 
         # Test after initialization
-        control._initialized = True
+        control.runner._initialized = True
         control.wait = mock.MagicMock()
-        control.setControllableMatrix = mock.MagicMock()
+        control.set_realeigenmatrix = mock.MagicMock()
         x = np.random.rand(3, 4)
         control.setInput(x)
         self.assertEqual(control.wait.call_args.args[0].upper(), "TIMESTEP_END")
-        param, val = control.setControllableMatrix.call_args.args
+        param, val = control.set_realeigenmatrix.call_args.args
         self.assertEqual(param, f"Samplers/{StochasticControl.sampler_name}/matrix")
         self.assertTrue(np.allclose(x, val))
 
@@ -490,7 +492,7 @@ class TestStochasticControlRun(unittest.TestCase):
         )
 
         # Test before initialization
-        self.assertFalse(control._initialized)
+        self.assertFalse(control.initialized)
         x = np.random.rand(1, 1)
         control.setInput(x)
         # Mock initialize
@@ -502,21 +504,22 @@ class TestStochasticControlRun(unittest.TestCase):
         control.initialize.assert_called_once()
 
         # Test after initialization
-        control._initialized = True
-        control.setContinue = mock.MagicMock()
+        control.runner._initialized = True
+        control.set_continue = mock.MagicMock()
         control.run()
-        control.setContinue.assert_called_once()
+        control.set_continue.assert_called_once()
 
     def testGetOutput(self):
         """Test that outputs are retrieved properly."""
         qois = ["foo/bar", "bar/value"]
         opts = StochasticRunOptions(input_name=self.input_file_name)
         control = StochasticControl("foo-opt", "bar.i", ["bar_param"], qois, opts)
+        control.runner._initialized = True
 
         # Create a mock for getReporterValue
         y_expected = np.random.rand(3, 2)
 
-        def mockReporterValue(rep):
+        def mock_reporter_value(rep):
             self.assertTrue(rep.startswith(StochasticControl.qoi_storage_name + "/"))
             qoi = rep[len(StochasticControl.qoi_storage_name) + 1 :].replace(":", "/")
             self.assertIn(qoi, qois)
@@ -524,7 +527,7 @@ class TestStochasticControlRun(unittest.TestCase):
             return y_expected[:, ind]
 
         control.wait = mock.MagicMock()
-        control.getReporterValue = mock.MagicMock(side_effect=mockReporterValue)
+        control.get_reporter = mock.MagicMock(side_effect=mock_reporter_value)
 
         # Test we get what is expected
         y = control.getOutput()
@@ -615,7 +618,7 @@ class TestStochasticControlRun(unittest.TestCase):
             StochasticRunner(control)(np.zeros((1, 2)))
 
         # Exception bad output
-        with self.assertRaisesRegex(StochasticControl.ControlException, "3 vs. 1"):
+        with self.assertRaisesRegex(ValueError, "3 vs. 1"):
             control = mockStochasticControl(1, 1, 1)
             control.getOutput = mock.MagicMock(return_value=np.zeros((3, 1)))
             y = StochasticRunner(control)(x_base[0, 0])

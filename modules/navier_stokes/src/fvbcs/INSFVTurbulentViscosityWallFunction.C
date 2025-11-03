@@ -54,10 +54,12 @@ ADReal
 INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi,
                                                    const Moose::StateArg & /* state */) const
 {
+  using std::abs, std::max, std::sqrt, std::pow, std::log;
+
   // if on an internal face (internal to the mesh, but an external boundary of the flow area),
   // we have to select the element on which the flow variables / viscosity is defined
   const bool use_elem = (fi.faceType(_var_sys_numbers_pair) == FaceInfo::VarFaceNeighbors::ELEM);
-  const Real wall_dist = std::abs(
+  const Real wall_dist = abs(
       ((use_elem ? fi.elemCentroid() : fi.neighborCentroid()) - fi.faceCentroid()) * fi.normal());
   const Elem * const elem_ptr = use_elem ? fi.elemPtr() : fi.neighborPtr();
   const auto elem_arg = makeElemArg(elem_ptr);
@@ -95,20 +97,20 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi,
   else if (_wall_treatment == NS::WallTreatmentEnum::EQ_INCREMENTAL)
   {
     // Incremental solve on y_plus to get the near-wall quantities
-    y_plus = NS::findyPlus<ADReal>(mu, rho, std::max(parallel_speed, 1e-10), wall_dist);
-    mu_wall = mu * (NS::von_karman_constant * y_plus /
-                    std::log(std::max(NS::E_turb_constant * y_plus, 1 + 1e-4)));
+    y_plus = NS::findyPlus<ADReal>(mu, rho, max(parallel_speed, 1e-10), wall_dist);
+    mu_wall =
+        mu * (NS::von_karman_constant * y_plus / log(max(NS::E_turb_constant * y_plus, 1 + 1e-4)));
     mut_log = mu_wall - mu;
   }
   else if (_wall_treatment == NS::WallTreatmentEnum::EQ_LINEARIZED)
   {
     // Linearized approximation to the wall function to find the near-wall quantities faster
     const ADReal a_c = 1 / NS::von_karman_constant;
-    const ADReal b_c = 1 / NS::von_karman_constant *
-                       (std::log(NS::E_turb_constant * std::max(wall_dist, 1.0) / mu) + 1.0);
+    const ADReal b_c =
+        1 / NS::von_karman_constant * (log(NS::E_turb_constant * max(wall_dist, 1.0) / mu) + 1.0);
     const ADReal c_c = parallel_speed;
 
-    const auto u_tau = (-b_c + std::sqrt(std::pow(b_c, 2) + 4.0 * a_c * c_c)) / (2.0 * a_c);
+    const auto u_tau = (-b_c + sqrt(pow(b_c, 2) + 4.0 * a_c * c_c)) / (2.0 * a_c);
     y_plus = wall_dist * u_tau * rho / mu;
     mu_wall = rho * Utility::pow<2>(u_tau) * wall_dist / parallel_speed;
     mut_log = mu_wall - mu;
@@ -116,9 +118,9 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi,
   else if (_wall_treatment == NS::WallTreatmentEnum::NEQ)
   {
     // Assign non-equilibrium wall function value
-    y_plus = std::pow(_C_mu, 0.25) * wall_dist * std::sqrt(_k(elem_arg, old_state)) * rho / mu;
+    y_plus = pow(_C_mu, 0.25) * wall_dist * sqrt(_k(elem_arg, old_state)) * rho / mu;
     mu_wall = mu * (NS::von_karman_constant * y_plus /
-                    std::log(std::max(NS::E_turb_constant * y_plus, 1.0 + 1e-4)));
+                    log(max(NS::E_turb_constant * y_plus, 1.0 + 1e-4)));
     mut_log = mu_wall - mu;
   }
   else
@@ -135,14 +137,14 @@ INSFVTurbulentViscosityWallFunction::boundaryValue(const FaceInfo & fi,
     residual += 0.0;
   else if (y_plus >= 30.0)
     // log-layer
-    residual += std::max(mut_log, NS::mu_t_low_limit);
+    residual += max(mut_log, NS::mu_t_low_limit);
   else
   {
     // buffer layer
     const auto blending_function = (y_plus - 5.0) / 25.0;
     // the blending depends on the mut_log at y+=30
     const auto mut_log = mu * _mut_30;
-    residual += std::max(blending_function * mut_log, NS::mu_t_low_limit);
+    residual += max(blending_function * mut_log, NS::mu_t_low_limit);
   }
   return residual;
 }

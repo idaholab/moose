@@ -95,6 +95,8 @@ FunctionParserUtils<is_ad>::evaluate(SymFunctionPtr & parser,
                                      const std::vector<GenericReal<is_ad>> & func_params,
                                      const std::string & name)
 {
+  using std::isnan;
+
   // null pointer is a shortcut for vanishing derivatives, see functionsOptimize()
   if (parser == NULL)
     return 0.0;
@@ -110,7 +112,7 @@ FunctionParserUtils<is_ad>::evaluate(SymFunctionPtr & parser,
   parser->setEpsilon(tmp_eps);
 
   // fetch fparser evaluation error (set to unknown if the JIT result is nan)
-  int error_code = _enable_jit ? (std::isnan(result) ? -1 : 0) : parser->EvalError();
+  int error_code = _enable_jit ? (isnan(result) ? -1 : 0) : parser->EvalError();
 
   // no error
   if (error_code == 0)

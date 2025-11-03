@@ -521,9 +521,11 @@ NonlinearSystemBase::addNodalKernel(const std::string & kernel_name,
     postAddResidualObject(*kernel);
   }
 
-  if (parameters.get<std::vector<AuxVariableName>>("save_in").size() > 0)
+  if (parameters.have_parameter<std::vector<AuxVariableName>>("save_in") &&
+      parameters.get<std::vector<AuxVariableName>>("save_in").size() > 0)
     _has_save_in = true;
-  if (parameters.get<std::vector<AuxVariableName>>("diag_save_in").size() > 0)
+  if (parameters.have_parameter<std::vector<AuxVariableName>>("save_in") &&
+      parameters.get<std::vector<AuxVariableName>>("diag_save_in").size() > 0)
     _has_diag_save_in = true;
 }
 

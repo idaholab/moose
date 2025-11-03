@@ -26,7 +26,10 @@
   using Coupleable::_zero;                                                                         \
   using Coupleable::_grad_zero;                                                                    \
   using Coupleable::_ad_zero;                                                                      \
-  using Coupleable::_ad_grad_zero
+  using Coupleable::_ad_grad_zero;                                                                 \
+  using Coupleable::coupled;                                                                       \
+  using Coupleable::isCoupled;                                                                     \
+  using Coupleable::coupledComponents
 
 // Forward declarations
 class MooseVariableScalar;

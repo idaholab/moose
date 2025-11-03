@@ -42,6 +42,8 @@ WCNSFVMomentumFluxBC::WCNSFVMomentumFluxBC(const InputParameters & params)
 ADReal
 WCNSFVMomentumFluxBC::computeQpResidual()
 {
+  using std::abs;
+
   const auto state = determineState();
 
   if (!isInflow())
@@ -55,7 +57,7 @@ WCNSFVMomentumFluxBC::computeQpResidual()
       !_direction_specified_by_user ? Point(-_face_info->normal()) : _direction;
   ADReal a = 1;
   if (_velocity_pp)
-    a = 1.0 / std::abs(incoming_vector * _normal);
+    a = 1.0 / abs(incoming_vector * _normal);
   return -_scaling_factor * a * inflowMassFlux(state) * inflowSpeed(state) *
          incoming_vector(_index);
 }

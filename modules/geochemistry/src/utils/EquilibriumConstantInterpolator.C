@@ -170,6 +170,7 @@ EquilibriumConstantInterpolator::sampleDerivative(Real T)
 ADReal
 EquilibriumConstantInterpolator::sample(const ADReal & T)
 {
+  using std::log;
   switch (_fit_type)
   {
     case FitTypeEnum::FOURTHORDER:
@@ -177,7 +178,7 @@ EquilibriumConstantInterpolator::sample(const ADReal & T)
              _coeffs[3] * Utility::pow<3>(T) + _coeffs[4] * Utility::pow<4>(T);
 
     case FitTypeEnum::MAIERKELLY:
-      return _coeffs[0] * std::log(T) + _coeffs[1] + _coeffs[2] * T + _coeffs[3] / T +
+      return _coeffs[0] * log(T) + _coeffs[1] + _coeffs[2] * T + _coeffs[3] / T +
              _coeffs[4] / Utility::pow<2>(T);
 
     case FitTypeEnum::LINEAR:
