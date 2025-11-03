@@ -38,6 +38,7 @@ wall_treatment = 'eq_newton' # Options: eq_newton, eq_incremental, eq_linearized
     ny = 4
     bias_y = 0.7
   []
+  allow_renumbering = false
 []
 
 [Problem]

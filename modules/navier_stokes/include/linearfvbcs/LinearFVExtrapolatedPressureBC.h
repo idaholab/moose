@@ -40,5 +40,5 @@ public:
   virtual Real computeBoundaryGradientRHSContribution() const override;
   ///@}
 
-  virtual bool useBoundaryGradientExtrapolation() const { return true; }
+  virtual bool useBoundaryGradientExtrapolation() const override { return true; }
 };

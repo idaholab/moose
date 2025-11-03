@@ -14,6 +14,7 @@ half_width = 0.2
     iy = '15'
     subdomain_id = '0'
   []
+  allow_renumbering = false
 []
 
 [Problem]
