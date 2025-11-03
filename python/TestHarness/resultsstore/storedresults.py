@@ -674,13 +674,15 @@ class StoredResult:
         # to a name when obtaining data from the database
         load_tests = {}
         for entry in results_test_iterator(self.data):
-            if entry.name not in self._tests:
+            name = entry.name
+            if name not in self._tests:
+                value = entry.value
                 # Test is stored in data, load directly
-                if isinstance(entry.value, ObjectId):
-                    load_tests[entry.value] = entry.name
+                if isinstance(value, ObjectId):
+                    load_tests[value] = name
                 # Mark test to be pulled from database
                 else:
-                    self._tests[entry.name] = self._build_test(entry.value, entry.name)
+                    self._tests[name] = self._build_test(value, name)
 
         # Load tests needed from the database
         if load_tests:
