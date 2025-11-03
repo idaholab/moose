@@ -175,5 +175,8 @@ def results_test_iterator(results: dict) -> Iterator[ResultsTestIterator]:
 
     Enables modification while iterating.
     """
-    for folder in results_folder_iterator(results):
-        yield from folder.test_iterator()
+    tests_entry = results["tests"]
+    for folder_name, folder_entry in tests_entry.items():
+        folder_tests_entry = folder_entry["tests"]
+        for test_name in list(folder_tests_entry.keys()):
+            yield ResultsTestIterator(folder_name, test_name, folder_tests_entry)
