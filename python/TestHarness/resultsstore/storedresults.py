@@ -677,10 +677,10 @@ class StoredResult:
             name = entry.name
             if name not in self._tests:
                 value = entry.value
-                # Test is stored in data, load directly
+                # Stored separately, mark to be pulled from database
                 if isinstance(value, ObjectId):
                     load_tests[value] = name
-                # Mark test to be pulled from database
+                # Stored within, load now
                 else:
                     self._tests[name] = self._build_test(value, name)
 
