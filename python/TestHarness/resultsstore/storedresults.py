@@ -753,9 +753,11 @@ class StoredResult:
                     test.delete()
                     continue
 
-                # Get test data directly if it exists
-                stored_test = self._tests.get(test.name)
-                if stored_test is not None:
+                # Get test data directly if we loaded it
+                if (
+                    isinstance(test.value, ObjectId)
+                    and (stored_test := self._tests.get(test.name)) is not None
+                ):
                     test.set_value(stored_test.data)
 
                 # Cleanup data if have an actual object
