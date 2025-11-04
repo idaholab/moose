@@ -377,8 +377,14 @@ app_KOKKOS_DEPS      := $(patsubst %.$(KOKKOS_OBJ_SUFFIX), %.$(KOKKOS_OBJ_SUFFIX
 app_KOKKOS_LIB       :=
 
 ifneq ($(app_KOKKOS_OBJECTS),)
-  app_KOKKOS_LIB     := $(APPLICATION_DIR)/lib/lib$(APPLICATION_NAME)$(KOKKOS_LIB_SUFFIX)
-  app_KOKKOS_LIBS    += $(app_KOKKOS_LIB)
+  app_KOKKOS_LIB  := $(APPLICATION_DIR)/lib/lib$(APPLICATION_NAME)$(KOKKOS_LIB_SUFFIX)
+  app_KOKKOS_LIBS += $(app_KOKKOS_LIB)
+endif
+
+ifeq ($(KOKKOS_COMPILER),CPU)
+  app_KOKKOS_LIB_COMBINED := $(MOOSE_KOKKOS_LIB) $(app_KOKKOS_LIBS)
+else
+  app_KOKKOS_LIB_COMBINED := $(APPLICATION_DIR)/lib/lib$(APPLICATION_NAME)_combined$(KOKKOS_LIB_SUFFIX)
 endif
 
 KOKKOS_OBJECTS += $(app_KOKKOS_OBJECTS)
@@ -407,6 +413,7 @@ $(app_KOKKOS_LIB): $(app_KOKKOS_OBJECTS)
 else
 
 # libtool ignores nvcc and just uses mpicxx to link, so cannot be used
+
 $(app_KOKKOS_LIB): curr_dir  := $(APPLICATION_DIR)
 $(app_KOKKOS_LIB): curr_objs := $(app_KOKKOS_OBJECTS)
 $(app_KOKKOS_LIB): $(app_KOKKOS_OBJECTS)
@@ -415,6 +422,21 @@ $(app_KOKKOS_LIB): $(app_KOKKOS_OBJECTS)
 	@$(KOKKOS_CXX) --shared -o $@ $(curr_objs) $(KOKKOS_LDFLAGS) $(KOKKOS_LIBS)
 
 endif
+
+endif
+
+ifeq ($(KOKKOS_COMPILER),GPU)
+
+# Making a dummy object file for triggering device link is only required for NVCC
+
+$(app_KOKKOS_LIB_COMBINED): curr_dir := $(APPLICATION_DIR)
+$(app_KOKKOS_LIB_COMBINED): $(MOOSE_KOKKOS_LIB) $(app_KOKKOS_LIBS)
+	@mkdir -p $(curr_dir)/lib
+	@echo "Device Linking Kokkos Libraries "$@"..."
+	@echo > dlink.K
+	@$(KOKKOS_CXX) $(KOKKOS_CXXFLAGS) -c dlink.K -o dlink.o
+	@$(KOKKOS_CXX) --shared -o $@ dlink.o $(KOKKOS_LDFLAGS) $(KOKKOS_LIBS) $(MOOSE_KOKKOS_LIB) $(app_KOKKOS_LIBS)
+	@rm dlink.K dlink.o
 
 endif
 
@@ -516,10 +538,10 @@ ifneq (,$(findstring darwin,$(libmesh_HOST)))
   endif
 endif
 
-$(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object) $(app_test_LIB) $(depend_test_libs) $(app_resource) $(MOOSE_KOKKOS_LIB) $(app_KOKKOS_LIBS)
+$(app_EXEC): $(app_LIBS) $(mesh_library) $(main_object) $(app_test_LIB) $(depend_test_libs) $(app_resource) $(app_KOKKOS_LIB_COMBINED)
 	@echo "Linking Executable "$@"..."
 	@bash -c '$(libmesh_LIBTOOL) --tag=CXX $(LIBTOOLFLAGS) --mode=link --quiet \
-	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(main_object) $(depend_test_libs_flags) $(applibs) $(ADDITIONAL_LIBS) $(LDFLAGS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) $(MOOSE_KOKKOS_LIB) $(app_KOKKOS_LIBS) ${SILENCE_SOME_WARNINGS}'
+	  $(libmesh_CXX) $(libmesh_CXXFLAGS) -o $@ $(main_object) $(depend_test_libs_flags) $(applibs) $(ADDITIONAL_LIBS) $(LDFLAGS) $(libmesh_LDFLAGS) $(libmesh_LIBS) $(EXTERNAL_FLAGS) $(app_KOKKOS_LIB_COMBINED) ${SILENCE_SOME_WARNINGS}'
 	@$(codesign)
 
 ###### install stuff #############
