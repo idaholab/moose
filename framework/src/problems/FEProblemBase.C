@@ -1098,7 +1098,7 @@ FEProblemBase::initialSetup()
   for (THREAD_ID tid = 0; tid < n_threads; ++tid)
     checkUserObjectJacobianRequirement(tid);
 
-  // Check whether nonlocal couling is required or not
+  // Check whether nonlocal coupling is required or not
   checkNonlocalCoupling();
   if (_requires_nonlocal_coupling)
     setVariableAllDoFMap(_uo_jacobian_moose_vars[0]);
@@ -1494,6 +1494,7 @@ FEProblemBase::initialSetup()
   }
 
   // Control Logic
+  _control_warehouse.initialSetup();
   executeControls(EXEC_INITIAL);
 
   // Scalar variables need to reinited for the initial conditions to be available for output
@@ -5280,7 +5281,10 @@ FEProblemBase::executeControls(const ExecFlagType & exec_type)
 
     if (!ordered_controls.empty())
     {
-      _control_warehouse.setup(exec_type);
+      // already called by initialSetup when exec_type == EXEC_INITIAL
+      if (exec_type != EXEC_INITIAL)
+        _control_warehouse.setup(exec_type);
+
       // Run the controls in the proper order
       for (const auto & control : ordered_controls)
         control->execute();

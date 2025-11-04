@@ -36,6 +36,16 @@ RealFunctionControl::RealFunctionControl(const InputParameters & parameters)
 void
 RealFunctionControl::execute()
 {
-  Real value = _function.value(_t);
+  const Real value = _function.value(_t);
   setControllableValue<Real>("parameter", value);
+}
+
+void
+RealFunctionControl::initialSetup()
+{
+  if (_app.isRecovering())
+  {
+    const Real value = _function.value(_t);
+    setControllableValue<Real>("parameter", value);
+  }
 }

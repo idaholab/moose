@@ -210,7 +210,7 @@ public:
 
   /**
    * Is the current step at a sync point (sync times, time interval, target time, etc)?
-   * @return Bool indicataing whether we are at a sync point
+   * @return Bool indicating whether we are at a sync point
    */
   bool atSyncPoint() { return _at_sync_point; }
 

@@ -28,6 +28,12 @@ public:
 
   virtual void execute() override;
 
+  /**
+   * Called once at the beginning of the simulation, used to initialize
+   * recovered control values
+   */
+  virtual void initialSetup() override;
+
 private:
   /// The current value of the target postprocessor
   const PostprocessorValue & _current;

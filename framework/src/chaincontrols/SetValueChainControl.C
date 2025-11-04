@@ -39,3 +39,11 @@ SetValueChainControlTempl<T>::execute()
 {
   setControllableValue<T>("parameter", _value);
 }
+
+template <typename T>
+void
+SetValueChainControlTempl<T>::initialSetup()
+{
+  if (_app.isRecovering())
+    setControllableValue<T>("parameter", _value);
+}
