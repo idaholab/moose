@@ -63,6 +63,7 @@ class ResultsReader:
             Whether or not to validate result data types (default = True).
         timeout : Number
             Timeout time in seconds for interacting with the database.
+
         """
         assert isinstance(database_name, str)
 
