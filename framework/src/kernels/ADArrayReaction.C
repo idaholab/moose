@@ -26,7 +26,7 @@ ADArrayReaction::validParams()
 
 ADArrayReaction::ADArrayReaction(const InputParameters & parameters)
   : ADArrayKernel(parameters),
-    _r(hasMaterialProperty<Real>("reaction_coefficient")
+    _r(hasMaterialProperty<ADReal>("reaction_coefficient")
            ? &getMaterialProperty<Real>("reaction_coefficient")
            : nullptr),
     _r_array(hasMaterialProperty<RealEigenVector>("reaction_coefficient")

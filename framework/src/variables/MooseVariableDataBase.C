@@ -508,7 +508,6 @@ MooseVariableDataBase<OutputType>::nodalValueArray(Moose::SolutionState state) c
       default:
         mooseError("No current support for PreviousNL for nodal value array");
     }
-    Moose::out << "_nodal_value_array.size() : " << _nodal_value_array.size() << std::endl;
   }
   else
     mooseError("Nodal values can be requested only on nodal variables, variable '",
@@ -730,8 +729,6 @@ MooseVariableDataBase<OutputType>::assignNodalValue()
   _nodal_value = dof_values[0];
   _nodal_value_array[0] = _nodal_value;
 
-  // Moose::out<<"_nodal_value"<<_nodal_value <<std::endl;
-  // Moose::out<<"_nodal_value_aray"<<_nodal_value_array[0] <<std::endl;
   if (is_transient)
   {
     if (oldestSolutionStateRequested() >= 1)

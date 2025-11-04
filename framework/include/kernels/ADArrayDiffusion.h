@@ -11,6 +11,9 @@
 
 #include "ADArrayKernel.h"
 
+/**
+ * Diffusion term for an array variable
+ */
 class ADArrayDiffusion : public ADArrayKernel
 {
 public:

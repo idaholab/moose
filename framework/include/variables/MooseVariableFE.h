@@ -29,7 +29,6 @@ class MooseVariableFE;
 typedef MooseVariableFE<Real> MooseVariable;
 typedef MooseVariableFE<RealVectorValue> VectorMooseVariable;
 typedef MooseVariableFE<RealEigenVector> ArrayMooseVariable;
-// typedef MooseVariableFE<ADRealEigenVector> ADArrayMooseVariable;
 
 /**
  * Class for stuff related to variables

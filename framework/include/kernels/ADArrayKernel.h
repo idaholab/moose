@@ -13,6 +13,9 @@
 #include "MooseVariableInterface.h"
 #include "ADFunctorInterface.h"
 
+/**
+ * Base class for array variable (equation) kernels using automatic differentiation
+ */
 class ADArrayKernel : public KernelBase,
                       public MooseVariableInterface<RealEigenVector>,
                       public ADFunctorInterface
@@ -66,6 +69,7 @@ protected:
   /// Number of components of the array variable
   const unsigned int _count;
 
+  // Pre-allocated vector for storing the AD array residual of the kernel
   std::vector<ADReal> _local_ad_re;
 
 private:

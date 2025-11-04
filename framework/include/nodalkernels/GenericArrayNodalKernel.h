@@ -12,6 +12,9 @@
 #include "ArrayNodalKernel.h"
 #include "ADArrayNodalKernel.h"
 
+/**
+ * Template for array nodal kernels, using or not automatic differentiation
+ */
 template <bool is_ad>
 class GenericArrayNodalKernel : public ArrayNodalKernel
 {

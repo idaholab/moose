@@ -52,7 +52,7 @@ InitialConditionTempl<T>::compute()
   // The following code is a copy from libMesh project_vector.C plus it adds some features, so we
   // can couple variable values
   // and we also do not call any callbacks, but we use our initial condition system directly.
-  // Eventually we shold try to fix things so we're not duplicating code
+  // Eventually we should try to fix things so we're not duplicating code
   // ------------
 
   // The dimension of the current element

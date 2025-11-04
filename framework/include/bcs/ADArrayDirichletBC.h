@@ -14,7 +14,7 @@
 /**
  * Boundary condition of a Dirichlet type
  *
- * Sets the value in the node
+ * Sets the value at the node for each component of the array variable
  */
 class ADArrayDirichletBC : public ADArrayNodalBC
 {
