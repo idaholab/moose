@@ -43,7 +43,7 @@
       input = 'czm_patch_test_base.i'
       exodiff = czm_small_strain_incremental_out.e
       cli_args = "Materials/czm_mat/type=PureElasticTractionSeparationIncremental "
-                 "Materials/czm_mat/normal_stiffness=1e2 Materials/czm_mat/tangent_stiffness=7e1  "
+                 "Materials/czm_mat/normal_stiffness=100e2 Materials/czm_mat/tangent_stiffness=70e2 "
                  " Physics/SolidMechanics/CohesiveZone/czm_ik/strain=SMALL "
                  "Physics/SolidMechanics/CohesiveZone/czm_ik/generate_output='traction_x "
                  "traction_y traction_z normal_traction tangent_traction jump_x jump_y jump_z "
@@ -61,7 +61,7 @@
       input = 'czm_patch_test_base.i'
       exodiff = czm_total_lagrangian_incremental_out.e
       cli_args = "Materials/czm_mat/type=PureElasticTractionSeparationIncremental "
-                 "Materials/czm_mat/normal_stiffness=1e2 Materials/czm_mat/tangent_stiffness=7e1 "
+                 "Materials/czm_mat/normal_stiffness=100e2 Materials/czm_mat/tangent_stiffness=70e2 "
                  "Physics/SolidMechanics/CohesiveZone/czm_ik/strain=FINITE "
                  "Physics/SolidMechanics/CohesiveZone/czm_ik/generate_output='traction_x "
                  "traction_y traction_z normal_traction tangent_traction jump_x jump_y jump_z "
