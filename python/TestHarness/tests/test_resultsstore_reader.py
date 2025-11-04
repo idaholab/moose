@@ -164,6 +164,11 @@ class TestResultsReader(unittest.TestCase):
         if os.environ.get("TEST_RESULTSREADER_MISSING_AUTH") is not None:
             self.assertFalse(HAS_AUTH)
 
+    def testInitNoCheck(self):
+        """Test setting check=False in __init__()."""
+        reader = ResultsReader("unused", check=False)
+        self.assertFalse(reader.check)
+
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
     def testGetTestResultsGold(self):
         """Generate the gold file using the live server and compare the result."""
