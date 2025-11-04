@@ -29,8 +29,8 @@ TEST(CSGLatticeTest, testCreateCartLatticeValid)
     // initialize without universes: nx0=2, nx1=3, pitch=1.0
     auto cart_lattice = CSGCartesianLattice("cartlat", 1.0);
     // check dimensions
-    ASSERT_EQ(cart_lattice.getNRows(), 1);
-    ASSERT_EQ(cart_lattice.getNCols(), 1);
+    ASSERT_EQ(cart_lattice.getNRows(), 0);
+    ASSERT_EQ(cart_lattice.getNCols(), 0);
     ASSERT_EQ(cart_lattice.getPitch(), 1.0);
     // expect no universe map to be present yet
     ASSERT_EQ(cart_lattice.getUniverses().size(), 0);
@@ -64,10 +64,9 @@ TEST(CSGLatticeTest, testCreateCartLatticeInvalid)
 {
   {
     // try initialize with invalid dimension for pitch
-    std::string exp_msg = "Lattice cartlat of type CSG::CSGCartesianLattice must have pitch and "
-                          "number of elements in both dimensions greater than 0.";
-    Moose::UnitUtils::assertThrows([]() { CSGCartesianLattice("cartlat", -1.0); },
-                                   exp_msg); // invalid pitch
+    Moose::UnitUtils::assertThrows(
+        []() { CSGCartesianLattice("cartlat", -1.0); },
+        "Lattice cartlat must have pitch greater than 0."); // invalid pitch
   }
   {
     // try to initialize with universe array of invalid dimensions (second row is different length)
@@ -89,6 +88,8 @@ TEST(CSGLatticeTest, testCreateHexLatticeValid)
     // intiialize without universes: pitch=1.0
     auto hex_lat = CSGHexagonalLattice("hexlat", 1.0);
     // check dimensions and properties
+    ASSERT_EQ(hex_lat.getNRows(), 0);
+    ASSERT_EQ(hex_lat.getNRings(), 0);
     ASSERT_EQ(hex_lat.getPitch(), 1.0);
     ASSERT_EQ(hex_lat.getUniverses().size(), 0); // no universe map yet
     ASSERT_TRUE(hex_lat.getName() == "hexlat");
@@ -124,9 +125,9 @@ TEST(CSGLatticeTest, testCreateHexLatticeInvalid)
   const auto univ1 = CSGUniverse("univ1", false);
   {
     // try initialize empty by providing invalid dimensions
-    Moose::UnitUtils::assertThrows([]() { CSGHexagonalLattice("hexlat", -1.0); },
-                                   "Hex lattice hexlat has invalid dimensions. Must have number of "
-                                   "rings > 0 and pitch > 0."); // invalid pitch
+    Moose::UnitUtils::assertThrows(
+        []() { CSGHexagonalLattice("hexlat", -1.0); },
+        "Lattice hexlat must have pitch greater than 0."); // invalid pitch
   }
   {
     // create universe map with invalid dimensions (even number of rows)

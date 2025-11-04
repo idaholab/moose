@@ -80,12 +80,6 @@ public:
   bool hasUniverse(const std::string & name) const;
 
   /**
-   * @brief check if the speficied dimensions of the lattice are valid, raise error if not
-   *
-   */
-  void checkDimensions() const;
-
-  /**
    * @brief get the map of data that defines the geometric dimensions of the lattice
    *
    * @return map of string dimension name to value of that dimension
@@ -171,13 +165,6 @@ protected:
    */
   void setUniverseAtIndex(std::reference_wrapper<const CSGUniverse> universe,
                           const std::pair<int, int> index);
-
-  /**
-   * @brief For the lattice type, check that any values in the _dimensions variable are valid
-   *
-   * @return true if valid, otherwise false
-   */
-  virtual bool hasValidDimensions() const = 0; // pure virtual function
 
   // helper function for comparing dimensions maps of various data types (data depends on lattice
   // type)

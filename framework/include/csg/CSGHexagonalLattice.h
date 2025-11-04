@@ -166,9 +166,6 @@ public:
   Real getPitch() const { return _pitch; }
 
 protected:
-  /// check if the lattice has valid and consistent dimensions for _nrow and _pitch
-  virtual bool hasValidDimensions() const override;
-
   /// compare the dimensions _nrow and _pitch of this lattice to another lattice
   virtual bool compareDimensions(const CSGLattice & other) const override;
 

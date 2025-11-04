@@ -16,41 +16,27 @@ CSGHexagonalLattice::CSGHexagonalLattice(
     const std::string & name,
     Real pitch,
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes)
-  : CSGLattice(name, MooseUtils::prettyCppType<CSGHexagonalLattice>()),
-    _pitch(pitch),
-    _nrow(universes.size())
+  : CSGLattice(name, MooseUtils::prettyCppType<CSGHexagonalLattice>()), _pitch(pitch)
 {
-  setUniverses(universes);
-  if (!hasValidDimensions())
-    mooseError("Hex lattice " + name +
-               " has invalid dimensions. Must have odd number of rows > 0 and pitch > 0.");
+  setUniverses(universes); // this will set _nrow
+  if (_pitch < 0)
+    mooseError("Lattice " + getName() + " must have pitch greater than 0.");
 }
 
 CSGHexagonalLattice::CSGHexagonalLattice(const std::string & name, Real pitch)
-  : CSGLattice(name, MooseUtils::prettyCppType<CSGHexagonalLattice>()), _pitch(pitch)
+  : CSGLattice(name, MooseUtils::prettyCppType<CSGHexagonalLattice>()), _pitch(pitch), _nrow(0)
 {
-  _nrow = 1; // default to 1 row until universes are set
-  if (!hasValidDimensions())
-    mooseError("Hex lattice " + name +
-               " has invalid dimensions. Must have number of rings > 0 and pitch > 0.");
-}
-
-bool
-CSGHexagonalLattice::hasValidDimensions() const
-{
-  if (_nrow < 1) // must have at least 1 row
-    return false;
-  if (_nrow % 2 == 0) // must be odd number of rows
-    return false;
-  if (_pitch <= 0.0) // pitch must be positive
-    return false;
-  return true;
+  if (_pitch < 0)
+    mooseError("Lattice " + getName() + " must have pitch greater than 0.");
 }
 
 bool
 CSGHexagonalLattice::isValidUniverseMap(
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes) const
 {
+  if (universes.size() < 1) // need at least one row
+    return false;
+
   if (universes.size() % 2 == 0) // must be odd number of rows
     return false;
 
@@ -116,10 +102,6 @@ CSGHexagonalLattice::updateDimension(const std::string & dim_name, std::any dim_
   else
     mooseError("Dimension " + dim_name + " is not an allowable dimension for lattice type " +
                getType() + ". Allowable dimension types are: nrow, pitch.");
-
-  if (!hasValidDimensions())
-    mooseError("Lattice " + getName() + " does not have valid dimensions after updating " +
-               dim_name);
 }
 
 bool
@@ -303,21 +285,25 @@ CSGHexagonalLattice::getNRings() const
 int
 nRowToRing(int nrow)
 {
+  if (nrow == 0) // special case
+    return 0;
   std::string base_msg = "Cannot convert number of rows " + std::to_string(nrow) +
                          " to number of rings in hexagonal lattice. ";
   if (nrow % 2 == 0)
     mooseError(base_msg + "Number of rows must be odd.");
-  if (nrow < 1)
-    mooseError(base_msg + "Number of rows must be >= 1.");
+  if (nrow < 0)
+    mooseError(base_msg + "Number of rows must be >= 0.");
   return (nrow + 1) / 2;
 }
 
 int
 nRingToRow(int nring)
 {
-  if (nring < 1)
+  if (nring == 0) // special case
+    return 0;
+  if (nring < 0)
     mooseError("Cannot convert number of rings " + std::to_string(nring) +
-               " to number of rows in hexagonal lattice. Number of rings must be >= 1.");
+               " to number of rows in hexagonal lattice. Number of rings must be >= 0.");
   return 2 * nring - 1;
 }
 
