@@ -11,6 +11,10 @@
 
 #include "CSGLattice.h"
 
+#ifdef MOOSE_UNIT_TEST
+#include "gtest/gtest.h"
+#endif
+
 namespace CSG
 {
 
@@ -169,10 +173,20 @@ protected:
   /// compare the dimensions _nrow and _pitch of this lattice to another lattice
   virtual bool compareDimensions(const CSGLattice & other) const override;
 
+  virtual void setUniverses(
+      std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes) override;
+
   /// lattice pitch (flat-to-flat distance between adjacent hex elements)
   Real _pitch;
   /// number of rows in the hexagonal lattice (must be odd), should be consistent with the number of rings
   int _nrow;
+
+#ifdef MOOSE_UNIT_TEST
+  /// Friends for unit testing
+  ///@{
+  FRIEND_TEST(CSGLatticeTest, testHexSetUniverses);
+///@}
+#endif
 };
 
 /// methods to help convert between number of rows and rings

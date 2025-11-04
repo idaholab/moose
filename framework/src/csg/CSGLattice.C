@@ -18,16 +18,6 @@ CSGLattice::CSGLattice(const std::string & name, const std::string & lattice_typ
 }
 
 void
-CSGLattice::setUniverses(
-    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes)
-{
-  if (!isValidUniverseMap(universes))
-    mooseError("Cannot set lattice " + getName() +
-               " with universes. Does not have valid dimensions for lattice type " + getType());
-  _universe_map = universes;
-}
-
-void
 CSGLattice::setUniverseAtIndex(std::reference_wrapper<const CSGUniverse> universe,
                                const std::pair<int, int> index)
 {

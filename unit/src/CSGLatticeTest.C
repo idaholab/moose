@@ -170,6 +170,7 @@ TEST(CSGLatticeTest, testCreateHexLatticeInvalid)
   }
 }
 
+/// tests getDimensions function for both CSGCartesianLattice and CSGHexagonalLattice
 TEST(CSGLatticeTest, testGetDimensions)
 {
   {
@@ -192,13 +193,13 @@ TEST(CSGLatticeTest, testGetDimensions)
 /// tests CSGCartesianLattice::setUniverses function
 TEST(CSGLatticeTest, testCartSetUniverses)
 {
+  const auto univ1 = CSGUniverse("univ1", false);
+  const auto univ2 = CSGUniverse("univ2", false);
   {
-    // create a lattice w/out universe map and then set one w/ correct dimensions - valid
-    const auto univ1 = CSGUniverse("univ1", false);
-    const auto univ2 = CSGUniverse("univ2", false);
+    // create a lattice w/out universe map and then set one w/ same dimensions - valid
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
-        {std::cref(univ1), std::cref(univ2), std::cref(univ1)},
-        {std::cref(univ2), std::cref(univ1), std::cref(univ2)}};
+        {std::cref(univ1), std::cref(univ1), std::cref(univ1)},
+        {std::cref(univ1), std::cref(univ1), std::cref(univ1)}};
     auto cart_lattice = CSGCartesianLattice("cartlat", 2, 3, 1.0);
     // should not have any universe map initially
     ASSERT_EQ(cart_lattice.getUniverses().size(), 0);
@@ -207,24 +208,26 @@ TEST(CSGLatticeTest, testCartSetUniverses)
     ASSERT_EQ(cart_lattice.getUniverses().size(), 2);
     ASSERT_EQ(cart_lattice.getUniverses()[0].size(), 3);
     ASSERT_EQ(cart_lattice.getUniverses()[1].size(), 3);
+    // make sure dimensions were updated
+    ASSERT_EQ(cart_lattice.getNRows(), 2);
+    ASSERT_EQ(cart_lattice.getNCols(), 3);
   }
   {
-    // create a lattice w/out universe map and then set one w/ different dimensions - invalid
+    // create a lattice w/out universe map and then set one w/ different dimensions - valid
     auto cart_lattice = CSGCartesianLattice("cartlat", 2, 3, 1.0);
     // create universe map with dimensions that differ from the 2x3 as specified
-    const auto univ1 = CSGUniverse("univ1", false);
-    const auto univ2 = CSGUniverse("univ2", false);
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
-        {std::cref(univ1), std::cref(univ2)}, {std::cref(univ2), std::cref(univ1)}};
-    Moose::UnitUtils::assertThrows([&cart_lattice, &univ_map]()
-                                   { cart_lattice.setUniverses(univ_map); },
-                                   "Cannot set lattice cartlat with universes. Does not have valid "
-                                   "dimensions for lattice type");
+        {std::cref(univ1), std::cref(univ1), std::cref(univ1), std::cref(univ1)}};
+    ASSERT_NO_THROW(cart_lattice.setUniverses(univ_map));
+    // should have 1x4 map after being set
+    ASSERT_EQ(cart_lattice.getUniverses().size(), 1);
+    ASSERT_EQ(cart_lattice.getUniverses()[0].size(), 4);
+    // make sure dimensions were updated
+    ASSERT_EQ(cart_lattice.getNRows(), 1);
+    ASSERT_EQ(cart_lattice.getNCols(), 4);
   }
   {
-    // create lattice w/ universe map, overwrite w/ other valid universe map - valid
-    const auto univ1 = CSGUniverse("univ1", false);
-    const auto univ2 = CSGUniverse("univ2", false);
+    // create lattice w/ universe map, overwrite w/ new universe map of different dimensions - valid
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
         {std::cref(univ1), std::cref(univ1), std::cref(univ1)},
         {std::cref(univ1), std::cref(univ1), std::cref(univ1)}};
@@ -235,17 +238,101 @@ TEST(CSGLatticeTest, testCartSetUniverses)
       for (const CSGUniverse & univ : univ_list)
         ASSERT_EQ(univ, univ1);
     }
-    // create new map and update lattice
+    // create new map with new dimensions and update lattice
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> new_univ_map = {
-        {std::cref(univ2), std::cref(univ2), std::cref(univ2)},
-        {std::cref(univ2), std::cref(univ2), std::cref(univ2)}};
-    cart_lattice.setUniverses(new_univ_map);
+        {std::cref(univ2), std::cref(univ2), std::cref(univ2), std::cref(univ2)}};
+    ASSERT_NO_THROW(cart_lattice.setUniverses(new_univ_map));
     // expect map to contain all univ2
     for (auto univ_list : cart_lattice.getUniverses())
     {
       for (const CSGUniverse & univ : univ_list)
         ASSERT_EQ(univ, univ2);
     }
+    // should have 1x4 map after being set
+    ASSERT_EQ(cart_lattice.getUniverses().size(), 1);
+    ASSERT_EQ(cart_lattice.getUniverses()[0].size(), 4);
+    // make sure dimensions were updated
+    ASSERT_EQ(cart_lattice.getNRows(), 1);
+    ASSERT_EQ(cart_lattice.getNCols(), 4);
+  }
+}
+
+/// tests CSGHexagonalLattice::setUniverses function
+TEST(CSGLatticeTest, testHexSetUniverses)
+{
+  const auto univ1 = CSGUniverse("univ1", false);
+  const auto univ2 = CSGUniverse("univ2", false);
+  {
+    // create a lattice w/out universe map and then set one w/ same dimensions - valid
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
+        {std::cref(univ1), std::cref(univ1)},
+        {std::cref(univ1), std::cref(univ1), std::cref(univ1)},
+        {std::cref(univ1), std::cref(univ1)}};
+    auto lat = CSGHexagonalLattice("lat", 2, 1.0);
+    // should not have any universe map initially
+    ASSERT_EQ(lat.getUniverses().size(), 0);
+    ASSERT_NO_THROW(lat.setUniverses(univ_map););
+    // should have a 2-ring map (3 rows) after being set
+    ASSERT_EQ(lat.getUniverses().size(), 3);
+    ASSERT_EQ(lat.getUniverses()[0].size(), 2);
+    ASSERT_EQ(lat.getUniverses()[1].size(), 3);
+    ASSERT_EQ(lat.getUniverses()[2].size(), 2);
+    // make sure dimensions were set
+    ASSERT_EQ(lat.getNRows(), 3);
+  }
+  {
+    // create a lattice w/out universe map and then set one w/ different dimensions - valid
+    auto lat = CSGHexagonalLattice("lat", 3, 1.0);
+    // create universe map with dimensions that differ from the 3-ring as specified
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
+        {std::cref(univ1), std::cref(univ1)},
+        {std::cref(univ1), std::cref(univ1), std::cref(univ1)},
+        {std::cref(univ1), std::cref(univ1)}};
+    ASSERT_NO_THROW(lat.setUniverses(univ_map););
+    // should have a 2-ring map (3 rows) after being set
+    ASSERT_EQ(lat.getUniverses().size(), 3);
+    ASSERT_EQ(lat.getUniverses()[0].size(), 2);
+    ASSERT_EQ(lat.getUniverses()[1].size(), 3);
+    ASSERT_EQ(lat.getUniverses()[2].size(), 2);
+    // make sure dimensions were updated
+    ASSERT_EQ(lat.getNRows(), 3);
+  }
+  {
+    // create lattice w/ universe map, overwrite w/ new universe map of different dimensions - valid
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
+        {std::cref(univ1), std::cref(univ1)},
+        {std::cref(univ1), std::cref(univ1), std::cref(univ1)},
+        {std::cref(univ1), std::cref(univ1)}};
+    auto lat = CSGHexagonalLattice("lat", 1.0, univ_map);
+    // initial map should contain structure matching univ_map (all univ1)
+    for (auto univ_list : lat.getUniverses())
+    {
+      for (const CSGUniverse & univ : univ_list)
+        ASSERT_EQ(univ, univ1);
+    }
+    // create new map with new dimensions and update lattice
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> new_univ_map = {
+        {std::cref(univ2), std::cref(univ2), std::cref(univ2)},
+        {std::cref(univ2), std::cref(univ2), std::cref(univ2), std::cref(univ2)},
+        {std::cref(univ2), std::cref(univ2), std::cref(univ2), std::cref(univ2), std::cref(univ2)},
+        {std::cref(univ2), std::cref(univ2), std::cref(univ2), std::cref(univ2)},
+        {std::cref(univ2), std::cref(univ2), std::cref(univ2)}};
+    lat.setUniverses(new_univ_map);
+    // expect map to contain all univ2
+    for (auto univ_list : lat.getUniverses())
+    {
+      for (const CSGUniverse & univ : univ_list)
+        ASSERT_EQ(univ, univ2);
+    }
+    // should have 3-ring (5 row) map after being set
+    ASSERT_EQ(lat.getUniverses().size(), 5);
+    ASSERT_EQ(lat.getUniverses()[0].size(), 3);
+    ASSERT_EQ(lat.getUniverses()[1].size(), 4);
+    ASSERT_EQ(lat.getUniverses()[2].size(), 5);
+    ASSERT_EQ(lat.getUniverses()[3].size(), 4);
+    ASSERT_EQ(lat.getUniverses()[4].size(), 3);
+    // make sure dimensions were updated
+    ASSERT_EQ(lat.getNRows(), 5);
   }
 }
 
@@ -407,7 +494,7 @@ TEST(CSGLatticeTest, testCartUpdateDimension)
 {
   auto cart_lattice = CSGCartesianLattice("cartlat", 6, 4, 1.0);
   {
-    // update valid: pitch, nx0, and nx0
+    // update valid: pitch, nx0, and nx1
     cart_lattice.updateDimension("pitch", 1.5);
     cart_lattice.updateDimension("nx0", 2);
     cart_lattice.updateDimension("nx1", 3);
@@ -421,11 +508,11 @@ TEST(CSGLatticeTest, testCartUpdateDimension)
     // try update each value to something invalid (raise error)
     Moose::UnitUtils::assertThrows([&cart_lattice]()
                                    { cart_lattice.updateDimension("pitch", 0.0); },
-                                   "Updated pitch value for lattice cartlat is not valid.");
+                                   "Updated pitch value for lattice cartlat must be > 0.");
     Moose::UnitUtils::assertThrows([&cart_lattice]() { cart_lattice.updateDimension("nx0", -3); },
-                                   "Updated nx0 value for lattice cartlat is not valid.");
+                                   "Updated nx0 value for lattice cartlat must be >= 1.");
     Moose::UnitUtils::assertThrows([&cart_lattice]() { cart_lattice.updateDimension("nx1", -6); },
-                                   "Updated nx1 value for lattice cartlat is not valid.");
+                                   "Updated nx1 value for lattice cartlat must be >= 1.");
   }
   {
     // update invalid: nx0 or nx1 when universes are already set (raise error)
@@ -449,6 +536,53 @@ TEST(CSGLatticeTest, testCartUpdateDimension)
   {
     // try to update a dimension that does not exists
     Moose::UnitUtils::assertThrows([&cart_lattice]() { cart_lattice.updateDimension("elmo", 3); },
+                                   "Dimension elmo is not an allowable dimension for lattice type");
+  }
+}
+
+// test CSGHexagonalLattice::UpdateDimension
+TEST(CSGLatticeTest, testHexUpdateDimension)
+{
+  auto lat = CSGHexagonalLattice("lat", 1, 1.0); // 1 ring corresponds to 3 rows
+  {
+    // update valid: pitch and nrow
+    lat.updateDimension("pitch", 1.5);
+    lat.updateDimension("nrow", 5); // 5 rows, should correspond to 3 rings
+    // check new dimensions
+    auto dims_map = lat.getDimensions();
+    ASSERT_EQ(*std::any_cast<int>(&dims_map["nrow"]), 5);
+    ASSERT_EQ(*std::any_cast<Real>(&dims_map["pitch"]), 1.5);
+  }
+  {
+    // try update each value to something invalid (raise error)
+    Moose::UnitUtils::assertThrows([&lat]() { lat.updateDimension("pitch", 0.0); },
+                                   "Updated pitch value for lattice lat must be > 0.");
+    Moose::UnitUtils::assertThrows(
+        [&lat]() { lat.updateDimension("nrow", 2); },
+        "Updated number of rows nrow for lattice lat must be an odd number.");
+    Moose::UnitUtils::assertThrows([&lat]() { lat.updateDimension("nrow", -6); },
+                                   "Updated number of rows nrow for lattice lat must be >= 1.");
+  }
+  {
+    // update invalid: nrow when universes are already set (raise error)
+    // set the universe map first
+    const auto univ1 = CSGUniverse("univ1", false);
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> univ_map = {
+        {std::cref(univ1), std::cref(univ1)},
+        {std::cref(univ1), std::cref(univ1), std::cref(univ1)},
+        {std::cref(univ1), std::cref(univ1)}};
+    auto new_lat = CSGHexagonalLattice("hex_lat", 1.0, univ_map);
+    // try to update each dimension: pitch is valid, nrow not valid
+    new_lat.updateDimension("pitch", 2.0);
+    auto dims_map = new_lat.getDimensions();
+    ASSERT_EQ(*std::any_cast<Real>(&dims_map["pitch"]), 2.0);
+    Moose::UnitUtils::assertThrows([&new_lat]() { new_lat.updateDimension("nrow", 3); },
+                                   "Cannot update the dimension nrow of the lattice hex_lat. "
+                                   "Universe map is already defined.");
+  }
+  {
+    // try to update a dimension that does not exists
+    Moose::UnitUtils::assertThrows([&lat]() { lat.updateDimension("elmo", 3); },
                                    "Dimension elmo is not an allowable dimension for lattice type");
   }
 }

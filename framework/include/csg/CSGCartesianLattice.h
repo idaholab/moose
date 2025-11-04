@@ -11,6 +11,10 @@
 
 #include "CSGLattice.h"
 
+#ifdef MOOSE_UNIT_TEST
+#include "gtest/gtest.h"
+#endif
+
 namespace CSG
 {
 
@@ -120,6 +124,9 @@ protected:
   // type)
   virtual bool compareDimensions(const CSGLattice & other) const override;
 
+  virtual void setUniverses(
+      std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes) override;
+
   /// number of elements in the first dimension (rows)
   int _nx0;
 
@@ -133,5 +140,13 @@ protected:
 
   /// @brief string names of the dimension parameters that defined the geometry of the lattice
   // MooseEnum _dimension_names{"nx0 nx1 pitch"};
+
+#ifdef MOOSE_UNIT_TEST
+  /// Friends for unit testing
+  ///@{
+  FRIEND_TEST(CSGLatticeTest, testCartSetUniverses);
+  FRIEND_TEST(CSGLatticeTest, testCartSetUniverseAtIndex);
+  ///@}
+#endif
 };
 }
