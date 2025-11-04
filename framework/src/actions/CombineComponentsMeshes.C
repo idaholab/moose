@@ -45,6 +45,10 @@ CombineComponentsMeshes::act()
         mgs_to_combine.push_back(comp->meshGeneratorNames().back());
     }
 
+    // Do not create a CombinerGenerator if there are no mesh generators to combine
+    if (mgs_to_combine.size() == 0)
+      return;
+
     // TODO once we have junctions
     // - Get the list of disconnected components
     // - Find the disjoint groups

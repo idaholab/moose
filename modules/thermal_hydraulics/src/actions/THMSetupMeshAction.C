@@ -11,6 +11,7 @@
 #include "THMProblem.h"
 
 registerMooseAction("ThermalHydraulicsApp", THMSetupMeshAction, "THM:setup_mesh");
+registerMooseAction("ThermalHydraulicsApp", THMSetupMeshAction, "init_mesh");
 
 InputParameters
 THMSetupMeshAction::validParams()
@@ -24,7 +25,16 @@ THMSetupMeshAction::THMSetupMeshAction(const InputParameters & params) : Action(
 void
 THMSetupMeshAction::act()
 {
-  THMProblem * thm_problem = dynamic_cast<THMProblem *>(_problem.get());
-  if (thm_problem)
-    thm_problem->setupMesh();
+  if (_current_task == "THM:setup_mesh")
+  {
+    THMProblem * thm_problem = dynamic_cast<THMProblem *>(_problem.get());
+    if (thm_problem)
+      thm_problem->setupMesh();
+  }
+  else if (_current_task == "init_mesh")
+  {
+    // Do not do anything; it is necessary to register an action to 'init_mesh'
+    // to bypass CreateMeshSetupActionsForComponents; see the return condition
+    // in its act() method.
+  }
 }

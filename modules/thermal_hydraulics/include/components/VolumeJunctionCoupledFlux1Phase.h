@@ -75,8 +75,6 @@ protected:
   const RealVectorValue & _normal_from_junction_unnormalized;
   /// Normalized normal vector from junction
   const RealVectorValue _normal_from_junction;
-  /// Name of multi app to perform transfers with
-  const MultiAppName & _multi_app_name;
   /// Suffix to append to post-processor names
   const std::string & _pp_suffix;
 };
