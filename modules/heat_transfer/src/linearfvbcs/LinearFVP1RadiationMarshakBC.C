@@ -8,8 +8,9 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LinearFVP1RadiationMarshakBC.h"
+#include "HeatConductionNames.h"
 
-registerMooseObject("NavierStokesApp", LinearFVP1RadiationMarshakBC);
+registerMooseObject("HeatTransferApp", LinearFVP1RadiationMarshakBC);
 
 InputParameters
 LinearFVP1RadiationMarshakBC::validParams()

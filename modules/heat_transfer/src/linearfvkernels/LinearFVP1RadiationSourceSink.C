@@ -13,7 +13,7 @@
 #include "HeatConductionNames.h"
 #include "MathUtils.h"
 
-registerMooseObject("NavierStokesApp", LinearFVP1RadiationSourceSink);
+registerMooseObject("HeatTransferApp", LinearFVP1RadiationSourceSink);
 
 InputParameters
 LinearFVP1RadiationSourceSink::validParams()
