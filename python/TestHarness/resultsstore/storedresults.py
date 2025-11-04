@@ -891,7 +891,9 @@ class StoredResult:
         # because this is quite an expensive function and
         # it's worth the performance
         for folder_entry in data["tests"].values():
-            for test_entry in folder_entry["tests"].values():
+            folder_tests_entry = folder_entry["tests"]
+            for test_name in list(folder_tests_entry.keys()):
+                test_entry = folder_tests_entry[test_name]
                 if isinstance(test_entry, dict):
                     # Convert string id to ObjectID
                     if (id := test_entry.get("_id")) is not None:
@@ -910,6 +912,8 @@ class StoredResult:
                     # civet_version 3)
                     if tests_have_time:
                         test_entry["time"] = datetime.fromisoformat(test_entry["time"])
+                else:
+                    folder_tests_entry[test_name] = ObjectId(test_entry)
 
         return data
 
