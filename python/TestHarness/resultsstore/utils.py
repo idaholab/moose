@@ -88,8 +88,6 @@ class ResultsTestIterator:
     test_name: str
     # Internal storage of the parent folder tests entry for manipulation
     _folder_tests_entry: dict
-    # Whether or not delete() was called
-    _deleted: bool = False
 
     @property
     def name(self) -> TestName:
@@ -99,19 +97,15 @@ class ResultsTestIterator:
     @property
     def value(self) -> Any:
         """Get the value of the test entry in the dict."""
-        assert not self._deleted
         return self._folder_tests_entry[self.test_name]
 
     def set_value(self, value: Any):
         """Set the value of the test entry in the dict."""
-        assert not self._deleted
         self._folder_tests_entry[self.test_name] = value
 
     def delete(self):
         """Delete the test entry in the dict."""
-        assert not self._deleted
         del self._folder_tests_entry[self.test_name]
-        self._deleted = True
 
 
 @dataclass
@@ -126,13 +120,10 @@ class ResultsFolderIterator:
     name: str
     # Internal storage of the parent tests entry for manipulation
     _tests_entry: dict
-    # Whether or not delete() was called
-    _deleted: bool = False
 
     @property
     def value(self):
         """Get the value of the test entry in the dict."""
-        assert not self._deleted
         return self._tests_entry[self.name]
 
     @property
@@ -147,13 +138,11 @@ class ResultsFolderIterator:
 
     def delete(self):
         """Delete the folder entry in the tests dict."""
-        assert not self._deleted
         del self._tests_entry[self.name]
         self._deleted = True
 
     def delete_if_empty(self):
         """Delete the folder entry in the tests dict if it has no tests."""
-        assert not self._deleted
         if not self.tests:
             self.delete()
 
@@ -175,8 +164,14 @@ def results_test_iterator(results: dict) -> Iterator[ResultsTestIterator]:
 
     Enables modification while iterating.
     """
+    # Reuse the same iterator for optimization
+    it = ResultsTestIterator("", "", {})
+
     tests_entry = results["tests"]
     for folder_name, folder_entry in tests_entry.items():
         folder_tests_entry = folder_entry["tests"]
+        it._folder_tests_entry = folder_tests_entry
         for test_name in list(folder_tests_entry.keys()):
-            yield ResultsTestIterator(folder_name, test_name, folder_tests_entry)
+            it.folder_name = folder_name
+            it.test_name = test_name
+            yield it
