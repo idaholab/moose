@@ -11,31 +11,33 @@
 
 #pragma once
 
+#include "MooseParsedFunction.h"
 #include "FunctionParserUtils.h"
-#include "MFEMGeneralUserObject.h"
+#include "MFEMProblem.h"
 
 /**
- * Declares arbitrary parsed function of position, time, and any number of problem variables.
+ * Defines arbitrary parsed function of position, time, and any number of
+ * problem coefficients, including any problem variables.
  */
-class MFEMParsedFunction : public MFEMGeneralUserObject, public FunctionParserUtils<false>
+class MFEMParsedFunction : public MooseParsedFunction, public FunctionParserUtils<false>
 {
 public:
   static InputParameters validParams();
 
   MFEMParsedFunction(const InputParameters & parameters);
-  virtual ~MFEMParsedFunction();
+  virtual ~MFEMParsedFunction() = default;
+
+  void initialSetup() override;
 
 protected:
-  /// function expression
-  std::string _function;
-  /// function variables
-  const std::vector<VariableName> & _var_names;
-  /// import coordinates and time
-  const bool _use_xyzt;
+  /// reference to the MFEMProblem instance
+  MFEMProblem & _mfem_problem;
+  /// function parser object
+  SymFunctionPtr _sym_function;
   /// coordinate and time variable names
   const std::vector<std::string> _xyzt;
-  /// function parser object
-  SymFunctionPtr _func_F;
+  /// vector of references to the scalar coefficients used in the function
+  std::vector<std::reference_wrapper<mfem::Coefficient>> _coefficients;
 };
 
 #endif

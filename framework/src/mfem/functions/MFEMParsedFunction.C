@@ -11,51 +11,43 @@
 
 #include "MFEMParsedFunction.h"
 #include "MFEMParsedCoefficient.h"
-#include "MFEMProblem.h"
 
 registerMooseObject("MooseApp", MFEMParsedFunction);
 
 InputParameters
 MFEMParsedFunction::validParams()
 {
-  InputParameters params = MFEMGeneralUserObject::validParams();
+  InputParameters params = MooseParsedFunction::validParams();
   params += FunctionParserUtils<false>::validParams();
-  params.registerBase("Function");
-  params.addClassDescription("Parses function expression of position, time and problem variables.");
-  params.addRequiredCustomTypeParam<std::string>(
-      "expression", "FunctionExpression", "Parsed function expression to compute");
-  params.addRequiredParam<std::vector<VariableName>>("var_names",
-                                                     "The names of the function variables");
-  params.addParam<bool>(
-      "use_xyzt",
-      false,
-      "Make coordinate (x,y,z) and time (t) variables available in the function expression.");
+  params.addClassDescription("Parses scalar function of position, time and scalar "
+                             "problem coefficients (including scalar variables).");
   return params;
 }
 
 MFEMParsedFunction::MFEMParsedFunction(const InputParameters & parameters)
-  : MFEMGeneralUserObject(parameters),
+  : MooseParsedFunction(parameters),
     FunctionParserUtils(parameters),
-    _function(getParam<std::string>("expression")),
-    _var_names(getParam<std::vector<VariableName>>("var_names")),
-    _use_xyzt(getParam<bool>("use_xyzt")),
+    _mfem_problem(static_cast<MFEMProblem &>(_pfb_feproblem)),
+    _sym_function(std::make_shared<SymFunction>()),
     _xyzt({"x", "y", "z", "t"})
 {
-  // coupled field variables
-  std::string variables = MooseUtils::stringJoin({_var_names.begin(), _var_names.end()}, ",");
+  // variable symbols the function depends on (including position and time)
+  std::string symbols = MooseUtils::stringJoin({_vars.begin(), _vars.end()}, ",");
+  symbols += (symbols.empty() ? "" : ",") + MooseUtils::stringJoin(_xyzt, ",");
 
-  // positions and time
-  if (_use_xyzt)
-    variables += (variables.empty() ? "" : ",") + MooseUtils::stringJoin(_xyzt, ",");
+  // setup parsed function
+  parsedFunctionSetup(_sym_function, _value, symbols, {}, {}, comm());
 
-  // base function object
-  _func_F = std::make_shared<SymFunction>();
-  parsedFunctionSetup(_func_F, _function, variables, {}, {}, comm());
-  // declares MFEMParsedCoefficient
-  getMFEMProblem().getCoefficients().declareScalar<MFEMParsedCoefficient>(
-      name(), getMFEMProblem().getProblemData().gridfunctions, _var_names, _use_xyzt, _func_F);
+  // create MFEMParsedCoefficient
+  _mfem_problem.getCoefficients().declareScalar<MFEMParsedCoefficient>(
+      name(), _vars.size() + _xyzt.size(), _coefficients, _sym_function);
 }
 
-MFEMParsedFunction::~MFEMParsedFunction() {}
+void
+MFEMParsedFunction::initialSetup()
+{
+  for (const auto i : index_range(_vars))
+    _coefficients.push_back(_mfem_problem.getCoefficients().getScalarCoefficient(_vals[i]));
+}
 
 #endif

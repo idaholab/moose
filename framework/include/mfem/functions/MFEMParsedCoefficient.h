@@ -11,26 +11,24 @@
 
 #pragma once
 
-#include "MFEMContainers.h"
 #include "FunctionParserUtils.h"
 
 /**
- * Define a coefficient that, given a set of grid functions u, v, w, ...,
- * and a function func, returns func(x, y, z, t, u, v, w, ...)
+ * Define a coefficient that, given a set of (possibly gridfunction) coefficients
+ * u, v, w, ..., and a function func, returns func(x, y, z, t, u, v, w, ...)
  */
 class MFEMParsedCoefficient : public mfem::Coefficient
 {
 private:
-  const Moose::MFEM::GridFunctions & _gridfunctions;
-  const std::vector<VariableName> & _var_names;
-  bool _use_xyzt;
-  const FunctionParserUtils<false>::SymFunctionPtr & _func;
+  const std::vector<std::reference_wrapper<mfem::Coefficient>> & _coefficients;
+  const FunctionParserUtils<false>::SymFunctionPtr & _sym_function;
+  mfem::Array<mfem::real_t> _vals;
+  mfem::Vector _transip;
 
 public:
-  MFEMParsedCoefficient(const Moose::MFEM::GridFunctions & gridfunctions,
-                              const std::vector<VariableName> & var_names,
-                              bool use_xyzt,
-                              const FunctionParserUtils<false>::SymFunctionPtr & func);
+  MFEMParsedCoefficient(const unsigned & arity,
+                        const std::vector<std::reference_wrapper<mfem::Coefficient>> & coefs,
+                        const FunctionParserUtils<false>::SymFunctionPtr & sym_function);
 
   mfem::real_t Eval(mfem::ElementTransformation & T, const mfem::IntegrationPoint & ip) override;
 };

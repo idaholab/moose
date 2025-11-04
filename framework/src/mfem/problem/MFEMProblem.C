@@ -334,12 +334,6 @@ MFEMProblem::addFunction(const std::string & type,
                          const std::string & name,
                          InputParameters & parameters)
 {
-  if (type == "MFEMParsedFunction")
-  {
-    FEProblemBase::addUserObject(type, name, parameters);
-    return;
-  }
-
   ExternalProblem::addFunction(type, name, parameters);
   auto & func = getFunction(name);
   // FIXME: Do we want to have optimised versions for when functions
@@ -366,7 +360,7 @@ MFEMProblem::addFunction(const std::string & type,
           }
         });
   }
-  else
+  else if ("MFEMParsedFunction" != type)
   {
     mooseWarning("Could not identify whether function ",
                  type,

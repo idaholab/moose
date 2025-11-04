@@ -12,37 +12,27 @@
 #include "MFEMParsedCoefficient.h"
 
 MFEMParsedCoefficient::MFEMParsedCoefficient(
-    const Moose::MFEM::GridFunctions & gridfunctions,
-    const std::vector<VariableName> & var_names,
-    bool use_xyzt,
-    const FunctionParserUtils<false>::SymFunctionPtr & func)
-  : _gridfunctions(gridfunctions), _var_names(var_names), _use_xyzt(use_xyzt), _func(func)
+    const unsigned & arity,
+    const std::vector<std::reference_wrapper<mfem::Coefficient>> & coefficients,
+    const FunctionParserUtils<false>::SymFunctionPtr & sym_function)
+  : _coefficients(coefficients), _sym_function(sym_function), _vals(arity), _transip(3)
 {
 }
 
 mfem::real_t
 MFEMParsedCoefficient::Eval(mfem::ElementTransformation & T, const mfem::IntegrationPoint & ip)
 {
-  std::vector<mfem::real_t> vals(_var_names.size() + (_use_xyzt ? 4 : 0));
+  for (unsigned i = 0; i < _coefficients.size(); i++)
+    _vals[i] = _coefficients[i].get().Eval(T, ip);
 
-  for (unsigned i = 0; i < _var_names.size(); i++)
-    vals[i] = _gridfunctions.GetRef(_var_names[i]).GetValue(T, ip);
+  T.Transform(ip, _transip);
 
-  if (_use_xyzt)
-  {
-    mfem::Vector transip;
-    T.Transform(ip, transip);
+  for (int i = 0; i < 3; i++)
+    _vals[_coefficients.size() + i] = i < _transip.Size() ? _transip(i) : 0.;
 
-    for (int i = 0; i < transip.Size(); i++)
-      vals[_var_names.size() + i] = transip(i);
+  _vals[_coefficients.size() + 3] = GetTime();
 
-    for (int i = transip.Size(); i < 3; i++)
-      vals[_var_names.size() + i] = 0;
-
-    vals[_var_names.size() + 3] = GetTime();
-  }
-
-  return _func->Eval(vals.data());
+  return _sym_function->Eval(_vals.GetData());
 }
 
 #endif
