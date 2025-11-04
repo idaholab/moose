@@ -533,6 +533,34 @@ class TestResultsStoredResults(TestHarnessTestCase):
         self.assertEqual(len(serialized_tests), 1)
         self.assertEqual(serialized_tests[0].name, keep_test)
 
+    def testSerializeLoadAllTests(self):
+        """Test serialize() with load_all_tests = True (default)."""
+        built_result = self.buildResult()
+        results = built_result.results
+        results.serialize()
+        self.assertTrue(results._all_tests_loaded)
+
+    def testSerializeNoLoadAllTests(self):
+        """Test serialize() with load_all_tests = False."""
+        built_result = self.buildResult()
+        results = built_result.results
+        results.serialize(load_all_tests=False)
+        self.assertFalse(results._all_tests_loaded)
+
+    def testSerializeNotInPlace(self):
+        """Test serialize() with in_place = False (default)."""
+        built_result = self.buildResult()
+        results = built_result.results
+        serialized = results.serialize()
+        self.assertNotEqual(id(serialized), id(results.data))
+
+    def testSerializeInPlace(self):
+        """Test serialize() with in_place = True."""
+        built_result = self.buildResult()
+        results = built_result.results
+        serialized = results.serialize(in_place=True)
+        self.assertEqual(id(serialized), id(results.data))
+
     @patch.object(StoredResult, "_find_tests_data")
     def testLoadAllTestsMissing(self, patch_find_tests_data):
         """Test StoredResult.load_all_data when test(s) are not found."""
