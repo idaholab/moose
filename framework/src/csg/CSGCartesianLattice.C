@@ -24,15 +24,11 @@ CSGCartesianLattice::CSGCartesianLattice(
                " must have pitch and number of elements in both dimensions greater than 0.");
 }
 
-CSGCartesianLattice::CSGCartesianLattice(const std::string & name,
-                                         const int nx0,
-                                         const int nx1,
-                                         const Real pitch)
-  : CSGLattice(name, MooseUtils::prettyCppType<CSGCartesianLattice>()),
-    _nx0(nx0),
-    _nx1(nx1),
-    _pitch(pitch)
+CSGCartesianLattice::CSGCartesianLattice(const std::string & name, const Real pitch)
+  : CSGLattice(name, MooseUtils::prettyCppType<CSGCartesianLattice>()), _pitch(pitch)
 {
+  _nx0 = 1; // default to 1 row until universes are set
+  _nx1 = 1; // default to 1 col until universes are set
   if (!hasValidDimensions())
     mooseError("Lattice " + getName() + " of type " + getType() +
                " must have pitch and number of elements in both dimensions greater than 0.");

@@ -25,18 +25,15 @@ CSGLatticeList::addCartesianLattice(
 }
 
 CSGLattice &
-CSGLatticeList::addCartesianLattice(const std::string & name,
-                                    const int nx0,
-                                    const int nx1,
-                                    const Real pitch)
+CSGLatticeList::addCartesianLattice(const std::string & name, const Real pitch)
 {
-  return addLattice(std::make_unique<CSGCartesianLattice>(name, nx0, nx1, pitch));
+  return addLattice(std::make_unique<CSGCartesianLattice>(name, pitch));
 }
 
 CSGLattice &
-CSGLatticeList::addHexagonalLattice(const std::string & name, int num_rings, Real pitch)
+CSGLatticeList::addHexagonalLattice(const std::string & name, Real pitch)
 {
-  return addLattice(std::make_unique<CSGHexagonalLattice>(name, num_rings, pitch));
+  return addLattice(std::make_unique<CSGHexagonalLattice>(name, pitch));
 }
 
 CSGLattice &

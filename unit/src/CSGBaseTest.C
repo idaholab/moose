@@ -544,11 +544,7 @@ TEST(CSGBaseTest, testCreateLattice)
   auto csg_obj = std::make_unique<CSG::CSGBase>();
   // create cartesian lattice w/out universes
   {
-    const CSGLattice & lat = csg_obj->createCartesianLattice("hermione", 2, 3, 1.0);
-    auto dims_map = lat.getDimensions();
-    ASSERT_EQ(*std::any_cast<int>(&dims_map["nx0"]), 2);
-    ASSERT_EQ(*std::any_cast<int>(&dims_map["nx1"]), 3);
-    ASSERT_EQ(*std::any_cast<Real>(&dims_map["pitch"]), 1.0);
+    const CSGLattice & lat = csg_obj->createCartesianLattice("hermione", 1.0);
     // expect no universe map to be present yet
     ASSERT_EQ(lat.getUniverses().size(), 0);
     // check other attributes
@@ -645,7 +641,7 @@ TEST(CSGBaseTest, testSetLatticeUniverses)
   }
   {
     // set universes to lattice without universes already specified
-    const CSGLattice & lat2 = csg_obj->createCartesianLattice("batmobile", 2, 1, 1.0);
+    const CSGLattice & lat2 = csg_obj->createCartesianLattice("batmobile", 1.0);
     std::vector<std::vector<std::reference_wrapper<const CSG::CSGUniverse>>> new_univs = {{univ1},
                                                                                           {univ1}};
     csg_obj->setLatticeUniverses(lat2, new_univs);
@@ -659,7 +655,7 @@ TEST(CSGBaseTest, testSetLatticeUniverses)
 TEST(CSGBaseTest, testRenameLattice)
 {
   auto csg_obj = std::make_unique<CSG::CSGBase>();
-  const CSGLattice & lat = csg_obj->createCartesianLattice("original_name", 2, 2, 1.0);
+  const CSGLattice & lat = csg_obj->createCartesianLattice("original_name", 1.0);
   {
     // successful rename
     csg_obj->renameLattice(lat, "new_name");
@@ -667,7 +663,7 @@ TEST(CSGBaseTest, testRenameLattice)
   }
   {
     // try to rename to existing name
-    const CSGLattice & lat2 = csg_obj->createCartesianLattice("another_lattice", 2, 2, 1.0);
+    const CSGLattice & lat2 = csg_obj->createCartesianLattice("another_lattice", 1.0);
     Moose::UnitUtils::assertThrows(
         [&csg_obj, &lat2]() { csg_obj->renameLattice(lat2, "new_name"); },
         "Lattice with name new_name already exists in geometry.");
@@ -675,7 +671,7 @@ TEST(CSGBaseTest, testRenameLattice)
   {
     // try to rename lattice that does not exist in this base
     auto csg_obj2 = std::make_unique<CSG::CSGBase>();
-    const CSGLattice & lat3 = csg_obj2->createCartesianLattice("another_lattice", 2, 2, 1.0);
+    const CSGLattice & lat3 = csg_obj2->createCartesianLattice("another_lattice", 1.0);
     Moose::UnitUtils::assertThrows([&csg_obj, &lat3]()
                                    { csg_obj->renameLattice(lat3, "some_name"); },
                                    "another_lattice cannot be renamed to some_name as it does not "
@@ -687,7 +683,7 @@ TEST(CSGBaseTest, testRenameLattice)
 TEST(CSGBaseTest, testGetLatticeMethods)
 {
   auto csg_obj = std::make_unique<CSG::CSGBase>();
-  const CSGLattice & lat = csg_obj->createCartesianLattice("lattice1", 2, 2, 1.0);
+  const CSGLattice & lat = csg_obj->createCartesianLattice("lattice1", 1.0);
   {
     // get lattice by name successfully
     const CSGLattice & lat_get = csg_obj->getLatticeByName("lattice1");
@@ -700,7 +696,7 @@ TEST(CSGBaseTest, testGetLatticeMethods)
   }
   {
     // get all lattices
-    const CSGLattice & lat2 = csg_obj->createCartesianLattice("lattice2", 3, 3, 1.0);
+    const CSGLattice & lat2 = csg_obj->createCartesianLattice("lattice2", 1.0);
     auto all_lats = csg_obj->getAllLattices();
     ASSERT_EQ(2, all_lats.size());
     ASSERT_TRUE(((all_lats[0].get() == lat) && (all_lats[1].get() == lat2)) ||
