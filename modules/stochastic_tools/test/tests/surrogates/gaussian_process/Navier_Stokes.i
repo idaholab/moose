@@ -4,14 +4,12 @@ param3 = 1.0
 param4 = 1.0
 rho1 = 1.0
 mu1 = 1.0
-param1_mod = ${exp(param1)}
-param2_mod = ${exp(param2)}
-param3_mod = ${exp(param3)}
-param4_mod = ${exp(param4)}
-rho1_mod = ${rho1}
-mu1_mod = ${exp(mu1)}
-
-
+param1_mod = ${fparse exp(param1)}
+param2_mod = ${fparse exp(param2)}
+param3_mod = ${fparse exp(param3)}
+param4_mod = ${fparse exp(param4)}
+rho1_mod = ${fparse exp(rho1)}
+mu1_mod = ${fparse exp(mu1)}
 [Mesh]
   [gen]
     type = GeneratedMeshGenerator
@@ -32,7 +30,6 @@ mu1_mod = ${exp(mu1)}
   [../]
   second_order = true
 []
-
 [AuxVariables]
   [vel_x]
     order = SECOND
@@ -41,7 +38,6 @@ mu1_mod = ${exp(mu1)}
     order = SECOND
   []
 []
-
 [AuxKernels]
   [vel_x]
     type = VectorVariableComponentAux
@@ -56,7 +52,6 @@ mu1_mod = ${exp(mu1)}
     component = 'y'
   []
 []
-
 [Variables]
   [./velocity]
     order = SECOND
@@ -65,7 +60,14 @@ mu1_mod = ${exp(mu1)}
   [./p]
   [../]
 []
-
+[Functions]
+    [res_vel]
+        type = ParsedFunction
+        expression = 'sqrt(a^2 + b^2)'
+        symbol_names = 'a b'
+        symbol_values = 'vel_x vel_y'
+    []
+[]
 [Kernels]
   [./mass]
     type = INSADMass
@@ -86,33 +88,31 @@ mu1_mod = ${exp(mu1)}
     integrate_p_by_parts = true
   [../]
 []
-
 [BCs]
   [./lid]
     type = VectorDirichletBC
     variable = velocity
     boundary = 'top'
-    values = '${param1} 0.0 0.0'
+    values = '${param1_mod} 0.0 0.0'
   [../]
   [./lid1]
     type = VectorDirichletBC
     variable = velocity
     boundary = 'bottom'
-    values = '${param2} 0.0 0.0'
+    values = '${param2_mod} 0.0 0.0'
   [../]
   [./lid2]
     type = VectorDirichletBC
     variable = velocity
     boundary = 'left'
-    values = '0.0 ${param3} 0.0'
+    values = '0.0 ${param3_mod} 0.0'
   [../]
   [./lid3]
     type = VectorDirichletBC
     variable = velocity
     boundary = 'right'
-    values = '0.0 ${param4} 0.0'
+    values = '0.0 ${param4_mod} 0.0'
   [../]
-
   [./pressure_pin]
     type = DirichletBC
     variable = p
@@ -120,12 +120,11 @@ mu1_mod = ${exp(mu1)}
     value = 0.0
   [../]
 []
-
 [Materials]
   [./const]
     type = ADGenericConstantMaterial
     prop_names = 'rho mu'
-    prop_values = '${rho1} ${mu1}'
+    prop_values = '${rho1_mod} ${mu1_mod}'
   [../]
   [ins_mat]
     type = INSADMaterial
@@ -133,7 +132,6 @@ mu1_mod = ${exp(mu1)}
     pressure = p
   []
 []
-
 [Preconditioning]
   [./SMP]
     type = SMP
@@ -141,7 +139,6 @@ mu1_mod = ${exp(mu1)}
     solve_type = 'NEWTON'
   [../]
 []
-
 [Executioner]
   type = Steady
   solve_type = 'NEWTON'
@@ -152,7 +149,6 @@ mu1_mod = ${exp(mu1)}
   l_max_its = 20
   automatic_scaling = true
 []
-
 [Postprocessors]
   [./vel_x]
     type = PointValue
@@ -164,9 +160,11 @@ mu1_mod = ${exp(mu1)}
     point = '0.5 0.5 0.0'
     variable = vel_y
   [../]
+  [resultant_velocity]
+    type = FunctionValuePostprocessor
+    function = 'res_vel'
+  []  
 []
-
-
 [Outputs]
   exodus = false
   perf_graph = false

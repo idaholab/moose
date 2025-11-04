@@ -86,7 +86,7 @@ Standardizer::getStandardized(RealEigenMatrix & input) const
   // std::cout << "mean: " << mean << std::endl;
   // std::cout << "stdev: " << stdev << std::endl;
   // std::cout << "input: " << input << std::endl;
-  std::cout << "input array1: " << input.array() << "," << std::endl;
+  // std::cout << "input array1: " << input.array() << "," << std::endl;
   input = (input.rowwise() - mean.transpose()).array().rowwise() / stdev.transpose().array();
   // std::cout << "input array2: " << input.array() <<  "," << std::endl;
 }

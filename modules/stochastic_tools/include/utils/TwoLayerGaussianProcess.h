@@ -186,7 +186,7 @@ public:
    * @param scale If scale is needed to be computed.
    */
   void logl(const RealEigenMatrix & out_vec, const RealEigenMatrix & x1, const RealEigenMatrix & x2, Real noise, const RealEigenMatrix & lengthscale, 
-          LogLResult & result, bool outer=true, bool scale=false);
+          LogLResult & result, bool outer=true, bool cal_scale=false, Real outerscale=1);
 
   /**
    * Samples noise level noise using MH algorithm.
@@ -277,7 +277,7 @@ public:
    * @param krig_sigma Return covariance.
    */
   void krig(const RealEigenMatrix & y, const RealEigenMatrix & x, const RealEigenMatrix & x_new,
-                                   const RealEigenMatrix & lengthscale, Real noise, Real scale, bool cal_sigma,
+                                   const RealEigenMatrix & lengthscale, Real noise, Real outerscale, bool cal_sigma,
                                    const RealEigenMatrix & prior_mean, const RealEigenMatrix & prior_mean_new, 
                                    RealEigenMatrix & krig_mean, RealEigenMatrix & krig_sigma);
 
