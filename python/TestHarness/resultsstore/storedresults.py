@@ -812,13 +812,15 @@ class StoredResult:
             if isinstance(test_data, dict):
                 # Convert ObjectID to string ID
                 for key in ["_id", "result_id"]:
-                    if key in test_data:
-                        test_data[key] = str(test_data[key])
+                    if (value := test_data.get(key)) is not None:
+                        test_data[key] = str(value)
 
                 # Convert binary JSON metadata to dict
-                json_metadata = test_data.get("tester", {}).get("json_metadata", {})
-                for k, v in json_metadata.items():
-                    json_metadata[k] = decompress_dict(v)
+                if (tester := test_data.get("tester")) is not None and (
+                    json_metadata := tester.get("json_metadata")
+                ) is not None:
+                    for k, v in json_metadata.items():
+                        json_metadata[k] = decompress_dict(v)
 
                 if tests_have_time:
                     test_data["time"] = str(test_data["time"])
