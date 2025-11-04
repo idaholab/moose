@@ -509,14 +509,29 @@ class StoredResult:
         """
         return self.data["civet"]
 
+    @staticmethod
+    def _get_civet_version(data: dict):
+        """
+        Statically get the civet version.
+
+        Used in civet_version property and also
+        deserialize(), where no object is available.
+        """
+        # Latest branch; civet_version in the data root
+        if (civet_version := data.get("civet_version")) is not None:
+            return civet_version
+        # Used to exist in ['civet']['version']
+        if (civet := data.get("civet")) is not None and (
+            version := civet.get("version")
+        ) is not None:
+            return version
+        # Before tracking, consider version 0
+        return 0
+
     @property
     def civet_version(self) -> int:
         """Get the CIVET schema version."""
-        # Version was first added to ['civet']['version'], and
-        # was then moved to ['civet_version']
-        version = self.civet.get("version", self.data.get("civet_version", 0))
-        assert isinstance(version, int)
-        return version
+        return self._get_civet_version(self.data)
 
     @property
     def civet_job_url(self) -> str:
@@ -791,44 +806,64 @@ class StoredResult:
         data["_id"] = str(data["_id"])
 
         # Whether or not tests have time, which existed
-        # before civet version for
+        # before civet version 4
         tests_have_time = self.civet_version < 4
 
-        for test in results_test_iterator(data):
-            # Filter and not in the filter
-            if test_filter and test.name not in test_filter:
-                test.delete()
-                continue
+        # Delete tests ahead of time that we don't need;
+        # don't worry about optimizing this so just
+        # use the standard iterator
+        if test_filter:
+            for folder in results_folder_iterator(data):
+                for test in folder.test_iterator():
+                    if test.name not in test_filter:
+                        test.delete()
+                folder.delete_if_empty()
 
-            # Get test data directly if we loaded it
-            if (
-                isinstance(test.value, ObjectId)
-                and (stored_test := self._tests.get(test.name)) is not None
-            ):
-                test.set_value(stored_test.data)
+        # Don't use the iterator here; it adds significant overhead
+        # and we want serialization to be quick
+        for folder_name, folder_entry in data["tests"].items():
+            folder_tests_entry = folder_entry["tests"]
+            for test_name in list(folder_tests_entry.keys()):
+                # Get the data at the moment; this could be different
+                # if it was stored as an ObjectId and loaded later
+                test_data = folder_tests_entry[test_name]
 
-            # Cleanup data if have an actual object
-            test_data = test.value
-            if isinstance(test_data, dict):
-                # Convert ObjectID to string ID
-                for key in ["_id", "result_id"]:
-                    if (value := test_data.get(key)) is not None:
-                        test_data[key] = str(value)
+                if isinstance(test_data, ObjectId):
+                    # Is an ObjectID and we have loaded it
+                    if (
+                        self._tests
+                        and (
+                            stored_test := self._tests.get(
+                                TestName(folder_name, test_name)
+                            )
+                        )
+                        is not None
+                    ):
+                        test_data = (
+                            stored_test.data if in_place else deepcopy(stored_test.data)
+                        )
+                        folder_tests_entry[test_name] = test_data
+                    # Is an ObjectId and we didn't load it
+                    else:
+                        folder_tests_entry[test_name] = str(test_data)
+                        # Nothing else to do
+                        continue
+
+                # Convert IDs to string
+                if (id := test_data.get("_id")) is not None:
+                    test_data["_id"] = str(id)
+                    test_data["result_id"] = str(test_data["result_id"])
 
                 # Convert binary JSON metadata to dict
                 if (tester := test_data.get("tester")) is not None and (
                     json_metadata := tester.get("json_metadata")
                 ) is not None:
-                    for k, v in json_metadata.items():
-                        json_metadata[k] = decompress_dict(v)
+                    tester["json_metadata"] = {
+                        k: decompress_dict(v) for k, v in json_metadata.items()
+                    }
 
                 if tests_have_time:
                     test_data["time"] = str(test_data["time"])
-
-        # If filtering, delete empty folders
-        if test_filter:
-            for folder in results_folder_iterator(data):
-                folder.delete_if_empty()
 
         return data
 
@@ -848,28 +883,33 @@ class StoredResult:
         # Convert string id to ObjectID
         data["_id"] = ObjectId(data["_id"])
 
-        # Convert each test
-        for test in results_test_iterator(data):
-            test_entry = test.value
+        # Whether or not tests have time, which existed
+        # before civet version 4
+        tests_have_time = StoredResult._get_civet_version(data) < 4
 
-            # Cleanup data if have an actual object
-            if isinstance(test_entry, dict):
-                # Convert string id to ObjectID
-                for key in ["_id", "result_id"]:
-                    if (value := test_entry.get(key)) is not None:
-                        test_entry[key] = ObjectId(value)
+        # Convert each test; we don't use the iterator here
+        # because this is quite an expensive function and
+        # it's worth the performance
+        for folder_entry in data["tests"].values():
+            for test_entry in folder_entry["tests"].values():
+                if isinstance(test_entry, dict):
+                    # Convert string id to ObjectID
+                    if (id := test_entry.get("_id")) is not None:
+                        test_entry["_id"] = ObjectId(id)
+                        test_entry["result_id"] = ObjectId(test_entry["result_id"])
 
-                # Convert string JSON metadata to binary
-                if (tester := test_entry.get("tester")) is not None and (
-                    json_metadata := tester.get("json_metadata")
-                ) is not None:
-                    for k, v in json_metadata.items():
-                        json_metadata[k] = compress_dict(v)
+                    # Convert string JSON metadata to binary
+                    if (tester := test_entry.get("tester")) is not None and (
+                        json_metadata := tester.get("json_metadata")
+                    ) is not None:
+                        tester["json_metadata"] = {
+                            k: compress_dict(v) for k, v in json_metadata.items()
+                        }
 
-                # Convert time if it exists (removed after
-                # civet_version 3)
-                if (time := test_entry.get("time")) is not None:
-                    test_entry["time"] = datetime.fromisoformat(time)
+                    # Convert time if it exists (removed after
+                    # civet_version 3)
+                    if tests_have_time:
+                        test_entry["time"] = datetime.fromisoformat(test_entry["time"])
 
         return data
 
