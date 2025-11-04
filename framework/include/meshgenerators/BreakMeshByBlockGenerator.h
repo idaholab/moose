@@ -11,7 +11,6 @@
 
 #include "BreakMeshByBlockGeneratorBase.h"
 #include <unordered_set>
-#include "FakeNeighborRM.h"
 
 /*
  * A mesh generator to split a mesh by a set of blocks
@@ -66,17 +65,14 @@ private:
   /// @brief a set of pairs of block ids between which new boundary sides are created
   std::set<std::pair<subdomain_id_type, subdomain_id_type>> _neighboring_block_list;
 
-  /// @brief a map from a pair of block ids to a set of element and side pairs
+  /// @brief a map from a pair of block ids to a set of pairs of an element and a side
   std::map<std::pair<subdomain_id_type, subdomain_id_type>,
            std::set<std::pair<const Elem *, unsigned int>>>
       _new_boundary_sides_map;
 
-  /// @brief Maps an element pointer and side pair to its corresponding fake neighbor element pointer and side pair.
-  std::unordered_map<std::pair<const Elem *, unsigned int>, std::pair<const Elem *, unsigned int>>
-      _elem_side_to_fake_neighbor_elem_side;
-
   /// @brief Maps a pair of subdomain ids to the corresponding boundary id.
-  std::unordered_map<std::pair<subdomain_id_type, subdomain_id_type>, boundary_id_type> _subid_pairs_to_boundary_id;
+  std::unordered_map<std::pair<subdomain_id_type, subdomain_id_type>, boundary_id_type>
+      _subid_pairs_to_boundary_id;
 
   /// generate the new boundary interface
   void addInterface(MeshBase & mesh);
