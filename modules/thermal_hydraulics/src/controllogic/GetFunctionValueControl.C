@@ -19,12 +19,14 @@ GetFunctionValueControl::validParams()
   params.addClassDescription("Sets a ControlData named 'value' with the value of a function");
   params.addRequiredParam<FunctionName>("function",
                                         "The name of the function prescribing a value.");
+  params.addParam<Point>("point", Point(), "Point at which to evaluate function");
   return params;
 }
 
 GetFunctionValueControl::GetFunctionValueControl(const InputParameters & parameters)
   : THMControl(parameters),
     _value(declareComponentControlData<Real>("value")),
+    _point(getParam<Point>("point")),
     _function(getFunction("function"))
 {
 }
@@ -32,5 +34,5 @@ GetFunctionValueControl::GetFunctionValueControl(const InputParameters & paramet
 void
 GetFunctionValueControl::execute()
 {
-  _value = _function.value(_t, Point());
+  _value = _function.value(_t, _point);
 }
