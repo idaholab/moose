@@ -44,14 +44,6 @@ CSGLattice::hasUniverse(const std::string & name) const
   return false; // no universe with matching name was found
 }
 
-void
-CSGLattice::checkDimensions() const
-{
-  if (!hasValidDimensions())
-    mooseError("Lattice " + getName() + " does not have valid dimensions for lattice type " +
-               getType());
-}
-
 const std::vector<std::vector<const std::string>>
 CSGLattice::getUniverseNames() const
 {

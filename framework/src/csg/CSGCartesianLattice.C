@@ -18,26 +18,19 @@ CSGCartesianLattice::CSGCartesianLattice(
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes)
   : CSGLattice(name, MooseUtils::prettyCppType<CSGCartesianLattice>()), _pitch(pitch)
 {
-  setUniverses(universes);
-  if (!hasValidDimensions())
-    mooseError("Lattice " + getName() + " of type " + getType() +
-               " must have pitch and number of elements in both dimensions greater than 0.");
+  setUniverses(universes); // this will set _nx0 and _nx1
+  if (_pitch < 0)
+    mooseError("Lattice " + getName() + " must have pitch greater than 0.");
 }
 
 CSGCartesianLattice::CSGCartesianLattice(const std::string & name, const Real pitch)
-  : CSGLattice(name, MooseUtils::prettyCppType<CSGCartesianLattice>()), _pitch(pitch)
+  : CSGLattice(name, MooseUtils::prettyCppType<CSGCartesianLattice>()),
+    _pitch(pitch),
+    _nx0(0),
+    _nx1(0)
 {
-  _nx0 = 1; // default to 1 row until universes are set
-  _nx1 = 1; // default to 1 col until universes are set
-  if (!hasValidDimensions())
-    mooseError("Lattice " + getName() + " of type " + getType() +
-               " must have pitch and number of elements in both dimensions greater than 0.");
-}
-
-bool
-CSGCartesianLattice::hasValidDimensions() const
-{
-  return (_nx0 > 0 && _nx1 > 0 && _pitch > 0);
+  if (_pitch < 0)
+    mooseError("Lattice " + getName() + " must have pitch greater than 0.");
 }
 
 bool
@@ -99,9 +92,6 @@ CSGCartesianLattice::updateDimension(const std::string & dim_name, std::any dim_
   else
     mooseError("Dimension " + dim_name + " is not an allowable dimension for lattice type " +
                getType() + " allowable dimension types are: nx0, nx1, pitch.");
-  if (!hasValidDimensions())
-    mooseError("Lattice " + getName() + " does not have valid dimensions after updating " +
-               dim_name);
 }
 
 std::unordered_map<std::string, std::any>

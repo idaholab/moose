@@ -111,13 +111,6 @@ public:
   Real getPitch() const { return _pitch; }
 
 protected:
-  /**
-   * @brief For the lattice type, check that the dimension of _universe_map are valid
-   *
-   * @return true if valid, otherwise false
-   */
-  virtual bool hasValidDimensions() const override;
-
   // helper function for comparing dimensions maps of various data types (data depends on lattice
   // type)
   virtual bool compareDimensions(const CSGLattice & other) const override;
