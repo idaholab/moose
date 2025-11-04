@@ -8,8 +8,15 @@
 
 ## Overview
 
-`MFEMParsedFunction` is responsible for parsing expressions that, in addition to being
-functions of position and time, can also depend on problem variables specified by the user.
+`MFEMParsedFunction` is responsible for parsing expressions that, in addition
+to being scalar functions of position and time, can also depend on scalar
+coefficients, including any scalar variables, postprocessors, material
+properties or functions specified by the user.
+
+The input parameters are those of [ParsedFunction](/MooseParsedFunction.md)
+and provide the same flexibility. Note that, in the context of MFEM problems,
+a scalar variable is a real-valued scalar field, not (necessarily) a constant
+over the entire domain as elsewhere in MOOSE.
 
 ## Example Input File Syntax
 

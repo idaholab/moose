@@ -14,8 +14,8 @@
 #include "FunctionParserUtils.h"
 
 /**
- * Define a coefficient that, given a set of (possibly gridfunction) coefficients
- * u, v, w, ..., and a function func, returns func(x, y, z, t, u, v, w, ...)
+ * Scalar coefficient that, given a set of scalar (possibly, but not necessarily, gridfunction)
+ * coefficients u, v, w, ..., and a scalar, parsed function f, returns f(u, v, w, ..., x, y, z, t)
  */
 class MFEMParsedCoefficient : public mfem::Coefficient
 {

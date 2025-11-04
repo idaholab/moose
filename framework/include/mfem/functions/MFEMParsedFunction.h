@@ -16,8 +16,8 @@
 #include "MFEMProblem.h"
 
 /**
- * Defines arbitrary parsed function of position, time, and any number of
- * problem coefficients, including any problem variables.
+ * Scalar, parsed function of position, time, and any number of scalar problem coefficients,
+ * including any scalar variables, postprocessors, material properties or functions
  */
 class MFEMParsedFunction : public MooseParsedFunction, public FunctionParserUtils<false>
 {
