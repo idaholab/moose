@@ -166,7 +166,7 @@ class TestResultsReader(unittest.TestCase):
 
     def testInitNoCheck(self):
         """Test setting check=False in __init__()."""
-        reader = ResultsReader("unused", check=False)
+        reader = ResultsReader("unused", client=FakeMongoClient(), check=False)
         self.assertFalse(reader.check)
 
     @unittest.skipUnless(HAS_AUTH, "Skipping because authentication is not available")
