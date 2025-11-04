@@ -19,7 +19,8 @@ from pymongo.database import Database
 
 from TestHarness.resultsstore.utils import (
     TestName,
-    compress_dict,
+    compress,
+    decompress,
     decompress_dict,
     results_folder_iterator,
     results_has_test,
@@ -859,7 +860,7 @@ class StoredResult:
                     json_metadata := tester.get("json_metadata")
                 ) is not None:
                     tester["json_metadata"] = {
-                        k: decompress_dict(v) for k, v in json_metadata.items()
+                        k: decompress(v) for k, v in json_metadata.items()
                     }
 
                 if tests_have_time:
@@ -905,7 +906,7 @@ class StoredResult:
                         json_metadata := tester.get("json_metadata")
                     ) is not None:
                         tester["json_metadata"] = {
-                            k: compress_dict(v) for k, v in json_metadata.items()
+                            k: compress(v) for k, v in json_metadata.items()
                         }
 
                     # Convert time if it exists (removed after

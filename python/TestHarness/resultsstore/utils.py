@@ -28,16 +28,28 @@ class TestName:
         return f"{self.folder}.{self.name}"
 
 
-def decompress_dict(compressed: bytes) -> dict:
-    """Decompress a dict that was compressed with compress_dict()."""
-    assert isinstance(compressed, bytes)
-    return json.loads(zlib.decompress(compressed).decode("utf-8"))
+def compress(value: str) -> bytes:
+    """Compress a string into binary."""
+    assert isinstance(value, str)
+    return zlib.compress(value.encode("utf-8"))
 
 
 def compress_dict(value: dict) -> bytes:
     """Compress a dict into binary."""
     assert isinstance(value, dict)
-    return zlib.compress(json.dumps(value).encode("utf-8"))
+    return compress(json.dumps(value))
+
+
+def decompress(compressed: bytes) -> str:
+    """Decompress a string that was compressed with compress()."""
+    assert isinstance(compressed, bytes)
+    return zlib.decompress(compressed).decode("utf-8")
+
+
+def decompress_dict(compressed: bytes) -> dict:
+    """Decompress a dict that was compressed with compress_dict()."""
+    assert isinstance(compressed, bytes)
+    return json.loads(decompress(compressed))
 
 
 def results_folder_entry(results: dict, folder_name: str) -> dict:

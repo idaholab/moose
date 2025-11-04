@@ -97,9 +97,7 @@
               "command": "mpiexec -n 28 /opt/moose/share/moose/python/TestHarness/../../../../bin/combined-opt -i simple_transient_diffusion.i --error --error-override --timing Outputs/perf_graph=true Outputs/perf_graph_json_file=/scratch/romebuild13-service/build/copied_tests/moose/performance/simple_transient_diffusion/metadata_perf_graph_test.json --libtorch-device cpu",
               "input_file": "/scratch/romebuild13-service/build/copied_tests/moose/performance/simple_transient_diffusion/simple_transient_diffusion.i",
               "json_metadata": {
-                "perf_graph": {
-                  "fake_metadata_for": "perf_graph"
-                }
+                "perf_graph": "{\"fake_metadata_for\": \"perf_graph\"}"
               },
               "name": "CSVDiff",
               "output_files": [
@@ -226,9 +224,7 @@
               "command": "mpiexec -n 28 /opt/moose/share/moose/python/TestHarness/../../../../bin/combined-opt -i simple_transient_diffusion.i --error --error-override --timing Outputs/perf_graph=true Outputs/perf_graph_json_file=/scratch/romebuild8-service/build/copied_tests/moose/performance/simple_transient_diffusion/metadata_perf_graph_test.json --libtorch-device cpu",
               "input_file": "/scratch/romebuild8-service/build/copied_tests/moose/performance/simple_transient_diffusion/simple_transient_diffusion.i",
               "json_metadata": {
-                "perf_graph": {
-                  "fake_metadata_for": "perf_graph"
-                }
+                "perf_graph": "{\"fake_metadata_for\": \"perf_graph\"}"
               },
               "name": "CSVDiff",
               "output_files": [
@@ -356,9 +352,7 @@
               "command": "mpiexec -n 28 /opt/moose/share/moose/python/TestHarness/../../../../bin/combined-opt -i simple_transient_diffusion.i --error --error-override --timing Outputs/perf_graph=true Outputs/perf_graph_json_file=/scratch/romebuild11-service/build/copied_tests/moose/performance/simple_transient_diffusion/metadata_perf_graph_test.json --libtorch-device cpu",
               "input_file": "/scratch/romebuild11-service/build/copied_tests/moose/performance/simple_transient_diffusion/simple_transient_diffusion.i",
               "json_metadata": {
-                "perf_graph": {
-                  "fake_metadata_for": "perf_graph"
-                }
+                "perf_graph": "{\"fake_metadata_for\": \"perf_graph\"}"
               },
               "name": "CSVDiff",
               "output_files": [
@@ -489,9 +483,7 @@
               "command": "mpiexec -n 28 /opt/moose/share/moose/python/TestHarness/../../../../bin/combined-opt -i simple_transient_diffusion.i --error --error-override --timing Outputs/perf_graph=true Outputs/perf_graph_json_file=/scratch/romebuild12-service/build/copied_tests/moose/performance/simple_transient_diffusion/metadata_perf_graph_test.json --libtorch-device cpu",
               "input_file": "/scratch/romebuild12-service/build/copied_tests/moose/performance/simple_transient_diffusion/simple_transient_diffusion.i",
               "json_metadata": {
-                "perf_graph": {
-                  "fake_metadata_for": "perf_graph"
-                }
+                "perf_graph": "{\"fake_metadata_for\": \"perf_graph\"}"
               },
               "name": "CSVDiff",
               "output_files": [
@@ -624,9 +616,7 @@
               "command": "mpiexec -n 28 /opt/moose/share/moose/python/TestHarness/../../../../bin/combined-opt -i simple_transient_diffusion.i --disable-perf-graph-live --error --error-override --timing Outputs/perf_graph=true Outputs/perf_graph_json_file=/scratch/romebuild8-service/build/copied_tests/moose/performance/simple_transient_diffusion/metadata_perf_graph_test.json --compute-device=cpu",
               "input_file": "/scratch/romebuild8-service/build/copied_tests/moose/performance/simple_transient_diffusion/simple_transient_diffusion.i",
               "json_metadata": {
-                "perf_graph": {
-                  "fake_metadata_for": "perf_graph"
-                }
+                "perf_graph": "{\"fake_metadata_for\": \"perf_graph\"}"
               },
               "name": "CSVDiff"
             },
@@ -749,9 +739,7 @@
               "command": "mpiexec -n 28 /opt/moose/share/moose/python/TestHarness/../../../../bin/combined-opt -i simple_transient_diffusion.i --disable-perf-graph-live --error --error-override --timing Outputs/perf_graph=true Outputs/perf_graph_json_file=/scratch/romebuild14-service/build/copied_tests/moose/performance/simple_transient_diffusion/metadata_perf_graph_test.json --compute-device=cpu",
               "input_file": "/scratch/romebuild14-service/build/copied_tests/moose/performance/simple_transient_diffusion/simple_transient_diffusion.i",
               "json_metadata": {
-                "perf_graph": {
-                  "fake_metadata_for": "perf_graph"
-                }
+                "perf_graph": "{\"fake_metadata_for\": \"perf_graph\"}"
               },
               "name": "CSVDiff"
             },
@@ -871,9 +859,7 @@
               "command": "mpiexec -n 28 /opt/moose/share/moose/python/TestHarness/../../../../bin/combined-opt -i simple_transient_diffusion.i --disable-perf-graph-live --error --error-override --timing Outputs/perf_graph=true Outputs/perf_graph_json_file=/scratch/romebuild6-service/build/copied_tests/moose/performance/simple_transient_diffusion/metadata_perf_graph_test.json --compute-device=cpu",
               "input_file": "/scratch/romebuild6-service/build/copied_tests/moose/performance/simple_transient_diffusion/simple_transient_diffusion.i",
               "json_metadata": {
-                "perf_graph": {
-                  "fake_metadata_for": "perf_graph"
-                }
+                "perf_graph": "{\"fake_metadata_for\": \"perf_graph\"}"
               },
               "name": "CSVDiff"
             },
@@ -990,9 +976,7 @@
               "command": "mpiexec -n 28 /opt/moose/share/moose/python/TestHarness/../../../../bin/combined-opt -i simple_transient_diffusion.i --disable-perf-graph-live --error --error-override --timing Outputs/perf_graph=true Outputs/perf_graph_json_file=/scratch/romebuild10-service/build/copied_tests/moose/performance/simple_transient_diffusion/metadata_perf_graph_test.json --compute-device=cpu",
               "input_file": "/scratch/romebuild10-service/build/copied_tests/moose/performance/simple_transient_diffusion/simple_transient_diffusion.i",
               "json_metadata": {
-                "perf_graph": {
-                  "fake_metadata_for": "perf_graph"
-                }
+                "perf_graph": "{\"fake_metadata_for\": \"perf_graph\"}"
               },
               "name": "CSVDiff"
             },

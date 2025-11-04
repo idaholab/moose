@@ -23,7 +23,12 @@ from pymongo import MongoClient
 
 from TestHarness.resultsstore.reader import ResultsReader
 from TestHarness.resultsstore.storedresults import StoredResult, StoredTestResult
-from TestHarness.resultsstore.utils import TestName, results_test_iterator
+from TestHarness.resultsstore.utils import (
+    TestName,
+    compress_dict,
+    decompress,
+    results_test_iterator,
+)
 
 # Whether or not authentication is available from env var RESULTS_READER_AUTH_FILE
 HAS_AUTH = ResultsReader.hasEnvironmentAuthentication()
@@ -70,9 +75,13 @@ class TestResultsReader(unittest.TestCase):
     def replaceJSONMetadata(results: dict):
         """Simplify tester json_metadata to avoid storing excessive content."""
         for test in results_test_iterator(results):
-            json_metadata = test.value.get("tester", {}).get("json_metadata", {})
-            for key in json_metadata:
-                json_metadata[key] = {"fake_metadata_for": key}
+            if (tester := test.value.get("tester")) is not None and (
+                json_metadata := tester.get("json_metadata")
+            ) is not None:
+                tester["json_metadata"] = {
+                    key: decompress(compress_dict({"fake_metadata_for": key}))
+                    for key in json_metadata
+                }
 
     def buildProdGetTestResultsGold(self):
         """Build a gold file for for testing, using real data."""
