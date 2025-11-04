@@ -794,39 +794,39 @@ class StoredResult:
         # before civet version for
         tests_have_time = self.civet_version < 4
 
-        for folder in results_folder_iterator(data):
-            for test in folder.test_iterator():
-                # Filter and not in the filter
-                if test_filter and test.name not in test_filter:
-                    test.delete()
-                    continue
+        for test in results_test_iterator(data):
+            # Filter and not in the filter
+            if test_filter and test.name not in test_filter:
+                test.delete()
+                continue
 
-                # Get test data directly if we loaded it
-                if (
-                    isinstance(test.value, ObjectId)
-                    and (stored_test := self._tests.get(test.name)) is not None
-                ):
-                    test.set_value(stored_test.data)
+            # Get test data directly if we loaded it
+            if (
+                isinstance(test.value, ObjectId)
+                and (stored_test := self._tests.get(test.name)) is not None
+            ):
+                test.set_value(stored_test.data)
 
-                # Cleanup data if have an actual object
-                test_data = test.value
-                if isinstance(test_data, dict):
-                    # Convert ObjectID to string ID
-                    for key in ["_id", "result_id"]:
-                        if key in test_data:
-                            test_data[key] = str(test_data[key])
+            # Cleanup data if have an actual object
+            test_data = test.value
+            if isinstance(test_data, dict):
+                # Convert ObjectID to string ID
+                for key in ["_id", "result_id"]:
+                    if key in test_data:
+                        test_data[key] = str(test_data[key])
 
-                    # Convert binary JSON metadata to dict
-                    json_metadata = test_data.get("tester", {}).get("json_metadata", {})
-                    for k, v in json_metadata.items():
-                        json_metadata[k] = decompress_dict(v)
+                # Convert binary JSON metadata to dict
+                json_metadata = test_data.get("tester", {}).get("json_metadata", {})
+                for k, v in json_metadata.items():
+                    json_metadata[k] = decompress_dict(v)
 
-                    if tests_have_time:
-                        test_data["time"] = str(test_data["time"])
+                if tests_have_time:
+                    test_data["time"] = str(test_data["time"])
 
-                    test.set_value(test_data)
-
-            folder.delete_if_empty()
+        # If filtering, delete empty folders
+        if test_filter:
+            for folder in results_folder_iterator(data):
+                folder.delete_if_empty()
 
         return data
 
