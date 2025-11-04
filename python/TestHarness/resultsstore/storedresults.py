@@ -854,18 +854,20 @@ class StoredResult:
             if isinstance(test_entry, dict):
                 # Convert string id to ObjectID
                 for key in ["_id", "result_id"]:
-                    if key in test_entry:
-                        test_entry[key] = ObjectId(test_entry[key])
+                    if (value := test_entry.get(key)) is not None:
+                        test_entry[key] = ObjectId(value)
 
                 # Convert string JSON metadata to binary
-                json_metadata = test_entry.get("tester", {}).get("json_metadata", {})
-                for k, v in json_metadata.items():
-                    json_metadata[k] = compress_dict(v)
+                if (tester := test_entry.get("tester")) is not None and (
+                    json_metadata := tester.get("json_metadata")
+                ) is not None:
+                    for k, v in json_metadata.items():
+                        json_metadata[k] = compress_dict(v)
 
                 # Convert time if it exists (removed after
                 # civet_version 3)
-                if "time" in test_entry:
-                    test_entry["time"] = datetime.fromisoformat(test_entry["time"])
+                if (time := test_entry.get("time")) is not None:
+                    test_entry["time"] = datetime.fromisoformat(time)
 
         return data
 
