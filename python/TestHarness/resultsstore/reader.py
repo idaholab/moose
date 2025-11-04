@@ -45,6 +45,7 @@ class ResultsReader:
         database_name: str,
         client: Optional[pymongo.MongoClient | Authentication] = None,
         check: bool = True,
+        timeout: float = 5.0,
     ):
         """
         Initialize the reader.
@@ -60,7 +61,8 @@ class ResultsReader:
             The client to use or authentication to connect with.
         check : bool
             Whether or not to validate result data types (default = True).
-
+        timeout : Number
+            Timeout time in seconds for interacting with the database.
         """
         assert isinstance(database_name, str)
 
@@ -68,6 +70,8 @@ class ResultsReader:
         self._database_name: str = database_name
         # Whether or not to validate result data types on build
         self._check = check
+        # Timeout time in seconds for database calls
+        self._timeout = float(timeout)
 
         # The mongo client, possibly setup on use
         self._client: Optional[pymongo.MongoClient] = None
@@ -155,7 +159,10 @@ class ResultsReader:
             auth = self._authentication
             assert isinstance(auth, Authentication)
             self._client = pymongo.MongoClient(
-                auth.host, username=auth.username, password=auth.password
+                auth.host,
+                username=auth.username,
+                password=auth.password,
+                timeoutMS=self._timeout * 1000,
             )
         assert isinstance(self._client, pymongo.MongoClient)
         return self._client
