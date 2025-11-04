@@ -20,7 +20,7 @@ over the entire domain as elsewhere in MOOSE.
 
 ## Example Input File Syntax
 
-!listing test/tests/mfem/functions/parsed_function_source.i block=Functions AuxVariables
+!listing test/tests/mfem/functions/parsed_function_source.i block=Functions
 
 !syntax parameters /Functions/MFEMParsedFunction
 

@@ -1,7 +1,6 @@
 [Mesh]
   type = MFEMMesh
   file = ../mesh/hinomaru.e
-  dim = 2
 []
 
 [Problem]
@@ -17,55 +16,68 @@
 []
 
 [Variables]
-  [concentration]
+  [variable]
     type = MFEMVariable
     fespace = H1FESpace
   []
 []
-
-[AuxVariables]
-  [aux_var]
-    type = MFEMVariable
-    fespace = H1FESpace
-  []
-[]
-
 
 [ICs]
-  [diffused_ic]
+  [ic]
     type = MFEMScalarIC
-    coefficient = -100.0
-    variable = aux_var
+    variable = variable
+    coefficient = material
   []
 []
 
 [BCs]
-  [bottom]
+  [bc]
     type = MFEMScalarDirichletBC
-    variable = concentration
-    boundary = 1
-    coefficient = 1
+    variable = variable
+    boundary = skin
+  []
+[]
+
+[FunctorMaterials]
+  [material]
+    type = MFEMGenericFunctorMaterial
+    prop_names = material
+    prop_values = -100
   []
 []
 
 [Functions]
-  [force]
+  [r]
+    type = ParsedFunction
+    expression = hypot(x,y)
+  []
+  [p]
+    type = ParsedFunction
+    expression = atan2(y,x)
+  []
+  [source]
     type = MFEMParsedFunction
-    expression = 'aux_var*sin(y*x)'
-    use_xyzt = true
-    var_names = 'aux_var'
+    expression = v*sin(w*p)
+    symbol_names = 'p w v'
+    symbol_values = 'p 4 variable'
+  []
+  [solution]
+    type = MFEMParsedFunction
+    expression = if(r<=1,-c*sin(w*p)*(r^w-r^2)/(w^2-4),0)
+    symbol_names = 'r p w c'
+    symbol_values = 'r p 4 material'
   []
 []
 
 [Kernels]
   [diff]
     type = MFEMDiffusionKernel
-    variable = concentration
+    variable = variable
   []
   [source]
     type = MFEMDomainLFKernel
-    variable = concentration
-    coefficient = force
+    variable = variable
+    coefficient = source
     block = wire
   []
 []
@@ -77,7 +89,7 @@
 []
 
 [Solver]
-  type = MFEMHypreGMRES
+  type = MFEMHyprePCG
   preconditioner = boomeramg
   l_tol = 1e-16
 []
@@ -87,10 +99,15 @@
   device = cpu
 []
 
-[Outputs]
-  [ParaViewDataCollection]
-    type = MFEMParaViewDataCollection
-    file_base = OutputData/ParsedFunctionSource
-    vtk_format = ASCII
+[Postprocessors]
+  [error]
+    type = MFEML2Error
+    variable = variable
+    function = solution
   []
+[]
+
+[Outputs]
+  csv = true
+  file_base = OutputData/ParsedFunctionSource
 []
