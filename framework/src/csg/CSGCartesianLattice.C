@@ -16,10 +16,7 @@ CSGCartesianLattice::CSGCartesianLattice(
     const std::string & name,
     const Real pitch,
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes)
-  : CSGLattice(name, MooseUtils::prettyCppType<CSGCartesianLattice>()),
-    _nx0(universes.size()),    // number of rows
-    _nx1(universes[0].size()), // number of columns
-    _pitch(pitch)
+  : CSGLattice(name, MooseUtils::prettyCppType<CSGCartesianLattice>()), _pitch(pitch)
 {
   setUniverses(universes);
   if (!hasValidDimensions())
@@ -51,18 +48,32 @@ bool
 CSGCartesianLattice::isValidUniverseMap(
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes) const
 {
-  // make sure universes exist at all and the right number of sublists are present (_nx0)
-  if (universes.size() != static_cast<size_t>(_nx0))
+  // need at least one row
+  if (universes.size() < 1)
     return false;
 
-  // check that each sublist is same size and equal to _nx1
+  // check that each row is same size
+  int row_size = universes[0].size();
   for (auto univ_list : universes)
   {
-    if (univ_list.size() != static_cast<size_t>(_nx1))
+    if (univ_list.size() != static_cast<size_t>(row_size))
       return false;
   }
-
   return true;
+}
+
+void
+CSGCartesianLattice::setUniverses(
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes)
+{
+  // check for valid map arrangment
+  if (!isValidUniverseMap(universes))
+    mooseError("Cannot set lattice " + getName() +
+               " with universes. Does not have valid dimensions for lattice type " + getType());
+  // set dimensions attributes based on universe map
+  _nx0 = universes.size();
+  _nx1 = universes[0].size();
+  _universe_map = universes;
 }
 
 void
@@ -72,7 +83,7 @@ CSGCartesianLattice::updateDimension(const std::string & dim_name, std::any dim_
   {
     auto val = *std::any_cast<Real>(&dim_value);
     if (val <= 0.0)
-      mooseError("Updated pitch value for lattice " + getName() + " is not valid.");
+      mooseError("Updated pitch value for lattice " + getName() + " must be > 0.");
     _pitch = val;
   }
   else if (dim_name == "nx0" || dim_name == "nx1")
@@ -85,7 +96,7 @@ CSGCartesianLattice::updateDimension(const std::string & dim_name, std::any dim_
     {
       auto val = *std::any_cast<int>(&dim_value);
       if (val < 1)
-        mooseError("Updated " + dim_name + " value for lattice " + getName() + " is not valid.");
+        mooseError("Updated " + dim_name + " value for lattice " + getName() + " must be >= 1.");
       dim_name == "nx0" ? _nx0 = val : _nx1 = val;
     }
   }

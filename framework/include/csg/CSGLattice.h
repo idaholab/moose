@@ -159,7 +159,8 @@ protected:
 
   /// @brief assign the vectors of universes as the lattice elements
   /// @param universes
-  void setUniverses(std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes);
+  virtual void
+  setUniverses(std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes) = 0;
 
   /**
    * @brief replace the element at specified index in the lattice with the provided CSGUniverse.
@@ -199,8 +200,6 @@ protected:
 #ifdef MOOSE_UNIT_TEST
   /// Friends for unit testing
   ///@{
-  FRIEND_TEST(CSGLatticeTest, testCartSetUniverses);
-  FRIEND_TEST(CSGLatticeTest, testCartSetUniverseAtIndex);
   FRIEND_TEST(CSGLatticeTest, testSetName);
   ///@}
 #endif

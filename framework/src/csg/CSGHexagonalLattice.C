@@ -51,21 +51,33 @@ bool
 CSGHexagonalLattice::isValidUniverseMap(
     std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes) const
 {
-  if (universes.size() != static_cast<size_t>(_nrow))
-    return false;
   if (universes.size() % 2 == 0) // must be odd number of rows
     return false;
 
   // each row differs in how many elements are required depending on size of lattice
-  int center_row = (_nrow - 1) / 2;
+  int num_row = universes.size();
+  int center_row = (num_row - 1) / 2;
   for (int row_i : index_range(universes))
   {
-    int n_ele = _nrow - std::abs(static_cast<int>(row_i - center_row));
+    int n_ele = num_row - std::abs(static_cast<int>(row_i - center_row));
     if (universes[row_i].size() != static_cast<size_t>(n_ele))
       return false;
   }
 
   return true;
+}
+
+void
+CSGHexagonalLattice::setUniverses(
+    std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes)
+{
+  // check for valid map arrangment
+  if (!isValidUniverseMap(universes))
+    mooseError("Cannot set lattice " + getName() +
+               " with universes. Does not have valid dimensions for lattice type " + getType());
+  // set dimensions attributes based on universe map (in case it differs from original dimensions)
+  _nrow = universes.size();
+  _universe_map = universes;
 }
 
 std::unordered_map<std::string, std::any>
@@ -87,7 +99,10 @@ CSGHexagonalLattice::updateDimension(const std::string & dim_name, std::any dim_
     {
       auto v = std::any_cast<int>(dim_value);
       if (v < 1)
-        mooseError("Updated " + dim_name + " for lattice " + getName() + " must be >= 1.");
+        mooseError("Updated number of rows nrow for lattice " + getName() + " must be >= 1.");
+      if (v % 2 == 0)
+        mooseError("Updated number of rows nrow for lattice " + getName() +
+                   " must be an odd number.");
       _nrow = v;
     }
   }
@@ -95,7 +110,7 @@ CSGHexagonalLattice::updateDimension(const std::string & dim_name, std::any dim_
   {
     auto v = std::any_cast<Real>(dim_value);
     if (v <= 0.0)
-      mooseError("Updated pitch for lattice " + getName() + " must be > 0.");
+      mooseError("Updated pitch value for lattice " + getName() + " must be > 0.");
     _pitch = v;
   }
   else
