@@ -305,34 +305,30 @@ public:
       std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes);
 
   /**
-   * @brief Create an empty Cartesian lattice. NOTE: this will not create an empty universe mapping;
+   * @brief Create an empty Cartesian lattice. NOTE: this will not create any universe mapping;
    * this must be done by using setLatticeUniverses.
    *
    * @param name unique name identifier for the lattice
-   * @param nx0 number of lattice elements in the first dimension (rows)
-   * @param nx1 number of lattice elements in the second dimension (columns)
    * @param pitch flat-to-flat size of the lattice elements
    * @return reference to new Cartesian lattice
    */
-  const CSGLattice &
-  createCartesianLattice(const std::string & name, const int nx0, const int nx1, const Real pitch)
+  const CSGLattice & createCartesianLattice(const std::string & name, const Real pitch)
   {
-    return _lattice_list.addCartesianLattice(name, nx0, nx1, pitch);
+    return _lattice_list.addCartesianLattice(name, pitch);
   }
 
   /**
    * @brief Create an empty hexagonal lattice with x orientation.
-   * NOTE: this will not create an empty universe mapping; this must be done by using
+   * NOTE: this will not create any universe mapping; this must be done by using
    * setLatticeUniverses.
    *
    * @param name unique name identifier for the lattice
-   * @param num_rings number of rings in the lattice
    * @param pitch flat-to-flat size of the lattice elements
    * @return reference to new hexagonal lattice
    */
-  const CSGLattice & createHexagonalLattice(const std::string & name, int num_rings, Real pitch)
+  const CSGLattice & createHexagonalLattice(const std::string & name, Real pitch)
   {
-    return _lattice_list.addHexagonalLattice(name, num_rings, pitch);
+    return _lattice_list.addHexagonalLattice(name, pitch);
   }
 
   /**

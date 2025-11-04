@@ -39,14 +39,13 @@ public:
       std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes);
 
   /**
-   * Construct a new empty CSGHexagonalLattice with given number of rings and pitch.
+   * Construct a new empty CSGHexagonalLattice with the specified pitch.
    * NOTE: must call setLatticeUniverses or addUniverseToLattice to populate.
    *
    * @param name unique identifying name of lattice
-   * @param nring number of concentric rings around the center (>=1)
    * @param pitch flat-to-flat distance for one hexagonal lattice element
    */
-  CSGHexagonalLattice(const std::string & name, int nring, Real pitch);
+  CSGHexagonalLattice(const std::string & name, Real pitch);
 
   /**
    * Destructor
@@ -178,6 +177,7 @@ protected:
 
   /// lattice pitch (flat-to-flat distance between adjacent hex elements)
   Real _pitch;
+
   /// number of rows in the hexagonal lattice (must be odd), should be consistent with the number of rings
   int _nrow;
 

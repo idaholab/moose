@@ -57,23 +57,19 @@ protected:
    * universe layout yet.
    *
    * @param name unique name identifier of the lattice
-   * @param nx0 number of elements in the first dimension
-   * @param nx1 number of elements in the second dimension
    * @param pitch flat-to-flat size of the lattice elements
    * @return reference to new Cartesian lattice
    */
-  CSGLattice &
-  addCartesianLattice(const std::string & name, const int nx0, const int nx1, const Real pitch);
+  CSGLattice & addCartesianLattice(const std::string & name, const Real pitch);
 
   /**
-   * @brief Add a hexagonal lattice of concentric rings
+   * @brief Add an empty hexagonal lattice
    *
    * @param name unique lattice name
-   * @param num_rings number of concentric rings around the center (>=1)
    * @param pitch  flat‐to‐flat distance between adjacent centers
    * @return reference to new hexagonal lattice
    */
-  CSGLattice & addHexagonalLattice(const std::string & name, int num_rings, Real pitch);
+  CSGLattice & addHexagonalLattice(const std::string & name, Real pitch);
 
   /**
    * @brief add a hexagonal lattice whose layout is defined by the set of universes. Universes

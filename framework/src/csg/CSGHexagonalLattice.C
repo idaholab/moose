@@ -26,10 +26,10 @@ CSGHexagonalLattice::CSGHexagonalLattice(
                " has invalid dimensions. Must have odd number of rows > 0 and pitch > 0.");
 }
 
-CSGHexagonalLattice::CSGHexagonalLattice(const std::string & name, int nring, Real pitch)
+CSGHexagonalLattice::CSGHexagonalLattice(const std::string & name, Real pitch)
   : CSGLattice(name, MooseUtils::prettyCppType<CSGHexagonalLattice>()), _pitch(pitch)
 {
-  _nrow = nRingToRow(nring);
+  _nrow = 1; // default to 1 row until universes are set
   if (!hasValidDimensions())
     mooseError("Hex lattice " + name +
                " has invalid dimensions. Must have number of rings > 0 and pitch > 0.");

@@ -41,11 +41,9 @@ public:
    * NOT initialize a _universe_map of the specified size. That must be provided using setUniverses.
    *
    * @param name unique identifying name of lattice
-   * @param nx0 number of elements in the first dimension of the lattice (rows)
-   * @param nx1 number of elements in the second dimension of the lattice (columns)
    * @param pitch pitch of lattice elements
    */
-  CSGCartesianLattice(const std::string & name, const int nx0, const int nx1, const Real pitch);
+  CSGCartesianLattice(const std::string & name, const Real pitch);
 
   /**
    * Destructor
@@ -127,14 +125,14 @@ protected:
   virtual void setUniverses(
       std::vector<std::vector<std::reference_wrapper<const CSGUniverse>>> universes) override;
 
+  /// pitch
+  Real _pitch;
+
   /// number of elements in the first dimension (rows)
   int _nx0;
 
   /// number of elements in the second direction (columns)
   int _nx1;
-
-  /// pitch
-  Real _pitch;
 
   friend class CSGBase;
 
